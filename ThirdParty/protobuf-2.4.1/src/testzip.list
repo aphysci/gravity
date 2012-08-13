@@ -1,0 +1,5 @@
+Archive:  ./testzip.zip
+    testing: testzip.pb.cc            OK
+    testing: testzip.pb.h             OK
+    testing: testzip_pb2.py           OK
+No errors detected in compressed data of ./testzip.zip.
