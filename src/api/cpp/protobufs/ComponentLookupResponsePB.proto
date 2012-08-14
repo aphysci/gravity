@@ -1,0 +1,8 @@
+option optimize_for = SPEED;
+
+package esmf;
+
+message ComponentLookupResponsePB
+{
+	required string url = 1;
+}

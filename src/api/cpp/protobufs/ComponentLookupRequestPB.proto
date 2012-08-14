@@ -1,0 +1,8 @@
+option optimize_for = SPEED;
+
+package esmf;
+
+message ComponentLookupRequestPB
+{
+	required string dataProductID = 1;
+}
