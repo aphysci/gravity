@@ -2,24 +2,23 @@
  * ServiceDirectory.h
  *
  *  Created on: Jun 28, 2012
- *      Author: esmf
+ *      Author: Mark Barger
  */
 
 #ifndef SERVICEDIRECTORY_H_
 #define SERVICEDIRECTORY_H_
 
 #include <map>
-#include <vector>
 
 using namespace std;
 
-namespace esmf
+namespace gravity
 {
 
 class ServiceDirectory
 {
 private:
-	map<string, string> registrationMap;
+	map<string,string> registrationMap;
 public:
 	ServiceDirectory();
 	virtual ~ServiceDirectory();

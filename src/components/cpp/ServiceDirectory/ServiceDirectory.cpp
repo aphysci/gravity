@@ -2,10 +2,11 @@
  * ServiceDirectory.cpp
  *
  *  Created on: Jun 28, 2012
- *      Author: esmf
+ *      Author: Mark Barger
  */
 
 #include "ServiceDirectory.h"
+#include "DataProductDescriptionPB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
 #include "zmq.h"
@@ -18,11 +19,11 @@ using namespace std;
 
 int main(void)
 {
-	esmf::ServiceDirectory* serviceDirectory = new esmf::ServiceDirectory();
+	gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory();
 	serviceDirectory->start();
 }
 
-namespace esmf
+namespace gravity
 {
 
 ServiceDirectory::ServiceDirectory()
@@ -49,7 +50,7 @@ void ServiceDirectory::start()
 		cout << "Waiting for lookup request..." << flush;
 		zmq_recvmsg(socket, &envelope, 0);
 		int size = zmq_msg_size(&envelope);
-		std::string* requestType = new std::string((char*)zmq_msg_data(&envelope), size);
+		string* requestType = new string((char*)zmq_msg_data(&envelope), size);
 		zmq_msg_close(&envelope);
 		cout << "got a " << requestType << " request" << endl;
 
