@@ -2,7 +2,7 @@
  * GravityNode.cpp
  *
  *  Created on: Aug 14, 2012
- *      Author: esmf
+ *      Author: Chris Brundick
  */
 
 #include "GravityNode.h"

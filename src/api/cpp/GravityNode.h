@@ -2,7 +2,7 @@
  * GravityNode.h
  *
  *  Created on: Aug 14, 2012
- *      Author: esmf
+ *      Author: Chris Brundick
  */
 
 #ifndef GRAVITYNODE_H_

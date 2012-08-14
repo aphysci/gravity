@@ -2,7 +2,7 @@
  * GravityRequestor.h
  *
  *  Created on: Aug 14, 2012
- *      Author: esmf
+ *      Author: Chris Brundick
  */
 
 #ifndef GRAVITYREQUESTOR_H_
