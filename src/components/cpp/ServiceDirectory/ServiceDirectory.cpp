@@ -6,17 +6,13 @@
  */
 
 #include "ServiceDirectory.h"
+#include "ComponentLookupRequestPB.pb.h"
+#include "ComponentLookupResponsePB.pb.h"
 #include "zmq.h"
 #include <stdlib.h>
 #include <string>
 #include <cstring>
 #include <iostream>
-
-#include <ComponentLookupRequest.h>
-#include <ComponentLookupResponse.h>
-#include <DataProductDescription.h>
-#include <RadarData.h>
-#include <ShipMotionData.h>
 
 using namespace std;
 
@@ -69,33 +65,34 @@ void ServiceDirectory::start()
 		if (strcmp(requestType->c_str(), "lookup"))
 		{
 			std::string connectionString = "";
-			ComponentLookupRequest* lookupRequest = new ComponentLookupRequest(data, size);
-			vector<DataProductDescription> dataProducts = this->registrationMap[lookupRequest->getDataProductID()];
+			ComponentLookupRequestPB lookupRequest;
+			lookupRequest.ParseFromArray(data, size);
+			string url = registrationMap[lookupRequest.dataproductid()];
 
-			ComponentLookupResponse* lookupResponse = new ComponentLookupResponse();
-			for (unsigned int i = 0; i < dataProducts.size(); i++)
-			{
-				DataProductDescription desc = dataProducts[i];
-				if (lookupRequest->getMinDataRate() <= desc.getDataRate() && lookupRequest->getMaxDataRate() >= desc.getDataRate())
-				{
-					lookupResponse->addDataProductDescription(desc);
-				}
-			}
+			ComponentLookupResponsePB lookupResponse;
+			lookupResponse.set_url(url);
 
 			// Send reply back to client
-			zmq_msg_init_size(&response, lookupResponse->getSize());
-			lookupResponse->serializeToArray(zmq_msg_data(&response));
+			zmq_msg_init_size(&response, lookupResponse.ByteSize());
+			lookupResponse.SerializeToArray(zmq_msg_data(&response), lookupResponse.ByteSize());
 			zmq_sendmsg(socket, &response, 0);
 			zmq_msg_close(&response);
 		}
 		else if (strcmp(requestType->c_str(), "register"))
 		{
-			DataProductDescription* dpDescription = new DataProductDescription(data, size);
-			vector<DataProductDescription> dataProducts = this->registrationMap[dpDescription->getDataProductID()];
-			dataProducts.push_back(*dpDescription);
+			DataProductDescriptionPB dpDescription;
+			dpDescription.ParseFromArray(data, size);
+			string url = registrationMap[dpDescription.dataproductid()];
+			string ack = "ack";
+			if (url == "")
+				registrationMap[dpDescription.dataproductid()] = dpDescription.url();
+			else
+			{
+				ack = "error";
+				cout << "DataProductID " << dpDescription.dataproductid() << " is already registered." << endl;
+			}
 
 			// Send reply back to client
-			string ack = "ack";
 			zmq_msg_init_size(&response, ack.length());
 			memcpy(zmq_msg_data(&response), ack.c_str(), ack.length());
 			zmq_sendmsg(socket, &response, 0);

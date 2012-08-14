@@ -11,8 +11,6 @@
 #include <map>
 #include <vector>
 
-#include <DataProductDescription.h>
-
 using namespace std;
 
 namespace esmf
@@ -21,7 +19,7 @@ namespace esmf
 class ServiceDirectory
 {
 private:
-	map<int, vector<DataProductDescription> > registrationMap;
+	map<string, string> registrationMap;
 public:
 	ServiceDirectory();
 	virtual ~ServiceDirectory();
