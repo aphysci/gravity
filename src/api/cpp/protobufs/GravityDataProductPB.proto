@@ -1,0 +1,11 @@
+option optimize_for = SPEED;
+
+package gravity;
+
+message GravityDataProductPB
+{
+	optional uint64 timestamp = 1;
+	optional string dataProductID = 2;
+	optional string softwareVersion = 3;
+	repeated bytes data = 4;
+}
