@@ -8,6 +8,8 @@
 #ifndef GRAVITYDATAPRODUCT_H_
 #define GRAVITYDATAPRODUCT_H_
 
+#include "GravityDataProductPB.pb.h"
+
 namespace gravity
 {
 

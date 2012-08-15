@@ -8,6 +8,8 @@
 #ifndef GRAVITYREQUESTOR_H_
 #define GRAVITYREQUESTOR_H_
 
+#include "GravityDataProduct.h"
+
 using namespace std;
 
 namespace gravity

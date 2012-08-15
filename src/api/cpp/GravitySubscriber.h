@@ -8,7 +8,7 @@
 #ifndef GRAVITYSUBSCRIBER_H_
 #define GRAVITYSUBSCRIBER_H_
 
-#include <vector>;
+#include "GravityDataProduct.h"
 
 using namespace std;
 

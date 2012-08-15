@@ -8,9 +8,9 @@
 #ifndef GRAVITYNODE_H_
 #define GRAVITYNODE_H_
 
-#include <GravitySubscriber.h>
-#include <GravityRequestor.h>
-#include <GravityServiceProvider.h>
+#include "GravitySubscriber.h"
+#include "GravityRequestor.h"
+#include "GravityServiceProvider.h"
 
 namespace gravity
 {

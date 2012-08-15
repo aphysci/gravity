@@ -59,7 +59,7 @@ void GravityDataProduct::setData(void* data, int len)
 
 void GravityDataProduct::setData(google::protobuf::Message& data)
 {
-	void vdata[data.ByteSize()];
+	char* vdata = (char*)malloc(data.ByteSize());
 	data.SerializeToArray(vdata, data.ByteSize());
 	gravityDataProductPB->add_data(vdata, data.ByteSize());
 	delete vdata;

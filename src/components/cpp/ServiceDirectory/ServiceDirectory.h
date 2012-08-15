@@ -8,6 +8,7 @@
 #ifndef SERVICEDIRECTORY_H_
 #define SERVICEDIRECTORY_H_
 
+#include <string>
 #include <map>
 
 using namespace std;
@@ -18,7 +19,7 @@ namespace gravity
 class ServiceDirectory
 {
 private:
-	map<string,string> registrationMap;
+	map<std::string,std::string> registrationMap;
 public:
 	ServiceDirectory();
 	virtual ~ServiceDirectory();

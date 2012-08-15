@@ -29,13 +29,13 @@ bool GravityNode::unregisterDataProduct(string dataProductID)
 	return false;
 }
 
-bool GravityNode::subscribe(string dataProductID, GravitySubscriber& subscriber, string filter = "")
+bool GravityNode::subscribe(string dataProductID, GravitySubscriber& subscriber, string filter)
 {
 	return false;
 }
 
 bool GravityNode::subscribe(string connectionURL, string dataProductID,
-		   	   	   	        GravitySubscriber& subscriber, string filter = "")
+		   	   	   	        GravitySubscriber& subscriber, string filter)
 {
 	return false;
 }
@@ -51,13 +51,13 @@ bool GravityNode::publish(GravityDataProduct dataProduct)
 }
 
 bool GravityNode::request(string serviceID, GravityDataProduct dataProduct,
-						  GravityRequestor& requestor, string requestID = "")
+						  GravityRequestor& requestor, string requestID)
 {
 	return false;
 }
 
 bool GravityNode::request(string connectionURL, string serviceID, GravityDataProduct dataProduct,
-						  GravityRequestor& requestor, string requestID = "")
+						  GravityRequestor& requestor, string requestID)
 {
 	return false;
 }
