@@ -19,7 +19,7 @@ GravityNode::GravityNode() {}
 
 GravityNode::~GravityNode() {}
 
-bool GravityNode::registerDataProduct(string dataProductID, int networkPort, string transportType)
+bool GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType)
 {
 	return false;
 }
@@ -29,41 +29,46 @@ bool GravityNode::unregisterDataProduct(string dataProductID)
 	return false;
 }
 
-bool GravityNode::subscribe(string dataProductID, GravitySubscriber& subscriber, string filter)
+bool GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
 	return false;
 }
 
 bool GravityNode::subscribe(string connectionURL, string dataProductID,
-		   	   	   	        GravitySubscriber& subscriber, string filter)
+						    const GravitySubscriber& subscriber, string filter)
 {
 	return false;
 }
 
-bool GravityNode::unsubscribe(string dataProductID)
+bool GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber)
 {
 	return false;
 }
 
-bool GravityNode::publish(GravityDataProduct dataProduct)
+bool GravityNode::publish(const GravityDataProduct& dataProduct)
 {
 	return false;
 }
 
-bool GravityNode::request(string serviceID, GravityDataProduct dataProduct,
-						  GravityRequestor& requestor, string requestID)
+bool GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
+						  const GravityRequestor& requestor, string requestID)
 {
 	return false;
 }
 
-bool GravityNode::request(string connectionURL, string serviceID, GravityDataProduct dataProduct,
-						  GravityRequestor& requestor, string requestID)
+bool GravityNode::request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
+						  const GravityRequestor& requestor, string requestID)
 {
 	return false;
 }
 
-bool GravityNode::registerService(string serviceID, int networkPort,
-								  string transportType, GravityServiceProvider& server)
+bool GravityNode::registerService(string serviceID, unsigned short networkPort,
+								  string transportType, const GravityServiceProvider& server)
+{
+	return false;
+}
+
+bool GravityNode::unregisterService(string serviceID, const GravityServiceProvider& server)
 {
 	return false;
 }

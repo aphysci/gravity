@@ -47,17 +47,17 @@ string GravityDataProduct::getSoftwareVersion()
 	return gravityDataProductPB->softwareversion();
 }
 
-uint64_t GravityDataProduct::getTimestamp()
+uint64_t GravityDataProduct::getGravityTimestamp()
 {
 	return gravityDataProductPB->timestamp();
 }
 
-void GravityDataProduct::setData(void* data, int len)
+void GravityDataProduct::setData(void* data, int size)
 {
-	gravityDataProductPB->add_data(data, len);
+	gravityDataProductPB->add_data(data, size);
 }
 
-void GravityDataProduct::setData(google::protobuf::Message& data)
+void GravityDataProduct::setData(const google::protobuf::Message& data)
 {
 	char* vdata = (char*)malloc(data.ByteSize());
 	data.SerializeToArray(vdata, data.ByteSize());
@@ -65,9 +65,11 @@ void GravityDataProduct::setData(google::protobuf::Message& data)
 	delete vdata;
 }
 
-void* GravityDataProduct::getData()
+bool GravityDataProduct::getData(void* data, int size)
 {
-	return gravityDataProductPB->mutable_data()->mutable_data();
+	memcpy(data, gravityDataProductPB->mutable_data()->mutable_data(), size);
+
+	return true;
 }
 
 int GravityDataProduct::getDataSize()
@@ -75,9 +77,11 @@ int GravityDataProduct::getDataSize()
 	return gravityDataProductPB->data_size();
 }
 
-void GravityDataProduct::populateMessage(google::protobuf::Message& data)
+bool GravityDataProduct::populateMessage(google::protobuf::Message& data)
 {
-	data.ParseFromArray(getData(), getDataSize());
+	data.ParseFromArray(gravityDataProductPB->mutable_data()->mutable_data(), getDataSize());
+
+	return true;
 }
 
 } /* namespace gravity */

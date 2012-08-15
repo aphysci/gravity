@@ -29,7 +29,7 @@ public:
 	/**
 	 * Called when a response to a request is received through the Gravity infrastructure
 	 */
-	virtual void requestFilled(string serviceID, string requestorID, GravityDataProduct response) = 0;
+	virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response) = 0;
 };
 
 } /* namespace gravity */

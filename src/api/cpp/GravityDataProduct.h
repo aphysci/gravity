@@ -39,7 +39,7 @@ public:
 	 * Method to return the timestamp associated with this data product
 	 * \return timestamp for data
 	 */
-	uint64_t getTimestamp();
+	uint64_t getGravityTimestamp();
 
 	/**
 	 * Method to return the data product ID for this data
@@ -74,21 +74,23 @@ public:
 	/**
 	 * Set the application-specific data for this data product
 	 * \param data pointer to arbitrary data
-	 * \param len length of data
+	 * \param size length of data
 	 */
-	void setData(void* data, int len);
+	void setData(void* data, int size);
 
 	/**
 	 * Set the application-specific data for this data product
 	 * \param data A Google Protocol Buffer Message object containing the data
 	 */
-	void setData(google::protobuf::Message& data);
+	void setData(const google::protobuf::Message& data);
 
 	/**
 	 * Getter for the application-specific data contained within this data product
-	 * \return pointer to the data
+	 * \param data pointer to array to populate with message data content
+	 * \param size size of data array to populate
+	 * \return success flag
 	 */
-	void* getData();
+	bool getData(void* data, int size);
 
 	/**
 	 * Get the size of the data contained within this data product
@@ -99,8 +101,9 @@ public:
 	/**
 	 * Populate a protobuf object with the data contained in this data product
 	 * \param data Google Protocol Buffer Message object to populate
+	 * \return success flag
 	 */
-	void populateMessage(google::protobuf::Message& data);
+	bool populateMessage(google::protobuf::Message& data);
 };
 
 } /* namespace gravity */
