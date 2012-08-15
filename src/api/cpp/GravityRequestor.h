@@ -15,10 +15,20 @@ using namespace std;
 namespace gravity
 {
 
+/**
+ * Interface specification for an object that will function as the "client" side of a request-response interaction
+ */
 class GravityRequestor
 {
 public:
+	/**
+	 * Default destructor
+	 */
 	virtual ~GravityRequestor();
+
+	/**
+	 * Called when a response to a request is received through the Gravity infrastructure
+	 */
 	virtual void requestFilled(string serviceID, string requestorID, GravityDataProduct response) = 0;
 };
 
