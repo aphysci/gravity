@@ -26,5 +26,5 @@ public:
 	void start();
 };
 
-} /* namespace esmf */
+} /* namespace gravity */
 #endif /* SERVICEDIRECTORY_H_ */
