@@ -102,4 +102,4 @@ void ServiceDirectory::start()
 	}
 }
 
-} /* namespace esmf */
+} /* namespace gravity */
