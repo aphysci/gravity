@@ -29,7 +29,7 @@ public:
 	/**
 	 * Called on implementing object when a registered subscription is filled with 1 or more GravityDataProducts
 	 */
-	virtual void subscriptionFilled(string dataProductID, vector<GravityDataProduct> dataProducts) = 0;
+	virtual void subscriptionFilled(string dataProductID, const vector<GravityDataProduct&> dataProducts) = 0;
 };
 
 } /* namespace gravity */
