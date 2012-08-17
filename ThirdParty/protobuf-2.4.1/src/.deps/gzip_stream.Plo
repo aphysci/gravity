@@ -1,3 +1,0 @@
-gzip_stream.lo: google/protobuf/io/gzip_stream.cc ../config.h
-
-../config.h:

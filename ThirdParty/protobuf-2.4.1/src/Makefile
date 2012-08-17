@@ -35,9 +35,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-unknown-linux-gnu
-host_triplet = x86_64-unknown-linux-gnu
-target_triplet = x86_64-unknown-linux-gnu
+build_triplet = i686-pc-linux-gnu
+host_triplet = i686-pc-linux-gnu
+target_triplet = i686-pc-linux-gnu
 bin_PROGRAMS = protoc$(EXEEXT)
 check_PROGRAMS = protoc$(EXEEXT) protobuf-test$(EXEEXT) \
 	protobuf-lazy-descriptor-test$(EXEEXT) \
@@ -129,7 +129,7 @@ libprotoc_la_OBJECTS = $(am_libprotoc_la_OBJECTS)
 libprotoc_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libprotoc_la_LDFLAGS) $(LDFLAGS) -o $@
-#am__EXEEXT_1 = zcgzip$(EXEEXT) zcgunzip$(EXEEXT)
+am__EXEEXT_1 = zcgzip$(EXEEXT) zcgunzip$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_2 = protobuf_lazy_descriptor_test-test_util.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-googletest.$(OBJEXT) \
@@ -239,15 +239,15 @@ test_plugin_OBJECTS = $(am_test_plugin_OBJECTS)
 test_plugin_DEPENDENCIES = $(am__DEPENDENCIES_1) libprotobuf.la \
 	libprotoc.la $(top_builddir)/gtest/lib/libgtest.la
 am__zcgunzip_SOURCES_DIST = google/protobuf/testing/zcgunzip.cc
-#am_zcgunzip_OBJECTS = zcgunzip.$(OBJEXT)
+am_zcgunzip_OBJECTS = zcgunzip.$(OBJEXT)
 zcgunzip_OBJECTS = $(am_zcgunzip_OBJECTS)
-#zcgunzip_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-#	libprotobuf.la
+zcgunzip_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	libprotobuf.la
 am__zcgzip_SOURCES_DIST = google/protobuf/testing/zcgzip.cc
-#am_zcgzip_OBJECTS = zcgzip.$(OBJEXT)
+am_zcgzip_OBJECTS = zcgzip.$(OBJEXT)
 zcgzip_OBJECTS = $(am_zcgzip_OBJECTS)
-#zcgzip_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-#	libprotobuf.la
+zcgzip_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	libprotobuf.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -321,15 +321,15 @@ ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
-#am__EXEEXT_2 =  \
-#	google/protobuf/io/gzip_stream_unittest.sh
+am__EXEEXT_2 =  \
+	google/protobuf/io/gzip_stream_unittest.sh
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run tar
+ACLOCAL = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run aclocal-1.11
+AMTAR = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run automake-1.11
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -357,15 +357,15 @@ INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 ISAINFO = 
-LD = /usr/bin/ld -m elf_x86_64
+LD = /usr/bin/ld
 LDFLAGS = 
 LIBOBJS = 
-LIBS = 
+LIBS = -lz 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/esmf/protobuf-2.4.1/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -393,10 +393,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 2.4.1
-abs_builddir = /home/esmf/protobuf-2.4.1/src
-abs_srcdir = /home/esmf/protobuf-2.4.1/src
-abs_top_builddir = /home/esmf/protobuf-2.4.1
-abs_top_srcdir = /home/esmf/protobuf-2.4.1
+abs_builddir = /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/src
+abs_srcdir = /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/src
+abs_top_builddir = /home/mbarger/gravity/ThirdParty/protobuf-2.4.1
+abs_top_srcdir = /home/mbarger/gravity/ThirdParty/protobuf-2.4.1
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -407,26 +407,26 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = x86_64-unknown-linux-gnu
+build = i686-pc-linux-gnu
 build_alias = 
-build_cpu = x86_64
+build_cpu = i686
 build_os = linux-gnu
-build_vendor = unknown
+build_vendor = pc
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = x86_64-unknown-linux-gnu
+host = i686-pc-linux-gnu
 host_alias = 
-host_cpu = x86_64
+host_cpu = i686
 host_os = linux-gnu
-host_vendor = unknown
+host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/esmf/protobuf-2.4.1/install-sh
+install_sh = ${SHELL} /home/mbarger/gravity/ThirdParty/protobuf-2.4.1/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -444,20 +444,20 @@ sharedstatedir = ${prefix}/com
 srcdir = .
 subdirs =  gtest
 sysconfdir = ${prefix}/etc
-target = x86_64-unknown-linux-gnu
+target = i686-pc-linux-gnu
 target_alias = 
-target_cpu = x86_64
+target_cpu = i686
 target_os = linux-gnu
-target_vendor = unknown
+target_vendor = pc
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-GZCHECKPROGRAMS = 
-#GZCHECKPROGRAMS = zcgzip zcgunzip
-GZHEADERS = 
-#GZHEADERS = google/protobuf/io/gzip_stream.h
-GZTESTS = 
-#GZTESTS = google/protobuf/io/gzip_stream_unittest.sh
+#GZCHECKPROGRAMS = 
+GZCHECKPROGRAMS = zcgzip zcgunzip
+#GZHEADERS = 
+GZHEADERS = google/protobuf/io/gzip_stream.h
+#GZTESTS = 
+GZTESTS = google/protobuf/io/gzip_stream_unittest.sh
 #NO_OPT_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 # These are good warnings to turn on by default
@@ -775,10 +775,10 @@ test_plugin_SOURCES = \
   google/protobuf/testing/file.h                               \
   google/protobuf/compiler/test_plugin.cc
 
-#zcgzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
-#zcgzip_SOURCES = google/protobuf/testing/zcgzip.cc
-#zcgunzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
-#zcgunzip_SOURCES = google/protobuf/testing/zcgunzip.cc
+zcgzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
+zcgzip_SOURCES = google/protobuf/testing/zcgzip.cc
+zcgunzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
+zcgunzip_SOURCES = google/protobuf/testing/zcgunzip.cc
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
