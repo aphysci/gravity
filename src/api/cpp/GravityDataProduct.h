@@ -8,12 +8,14 @@
 #ifndef GRAVITYDATAPRODUCT_H_
 #define GRAVITYDATAPRODUCT_H_
 
+#include <tr1/memory>
 #include "GravityDataProductPB.pb.h"
 
 namespace gravity
 {
 
 using namespace std;
+using namespace std::tr1;
 
 /**
  * Generic Data Product for the Gravity Infrastructure
@@ -21,7 +23,7 @@ using namespace std;
 class GravityDataProduct
 {
 private:
-	GravityDataProductPB* gravityDataProductPB; ///< internal protobuf representation of data product
+	shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
 	string filterText; ///< text string on which subscribers of this data product can apply a filter
 public:
 	/**

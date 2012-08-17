@@ -5,22 +5,20 @@
  *      Author: Chris Brundick
  */
 
+
 #include "GravityDataProduct.h"
 
 namespace gravity {
 
 GravityDataProduct::GravityDataProduct(string dataProductID)
 {
-	gravityDataProductPB = new GravityDataProductPB();
+	shared_ptr<GravityDataProductPB> gravityDataProductPB(new GravityDataProductPB());
 	gravityDataProductPB->set_dataproductid(dataProductID);
 
 	filterText = "";
 }
 
-GravityDataProduct::~GravityDataProduct()
-{
-	delete gravityDataProductPB;
-}
+GravityDataProduct::~GravityDataProduct() {}
 
 string GravityDataProduct::getDataProductID() const
 {
