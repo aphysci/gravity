@@ -95,8 +95,7 @@ GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirecto
 	gdp->setFilterText("register");
 	gdp->setData(registration);
 
-	int retriesLeft = 3;
-	int	requestTimeout = 3000; // msec
+	int retriesLeft = NETWORK_RETRIES;
 	while (retriesLeft && !s_interrupted)
 	{
 		// Connect to service directory component
@@ -109,7 +108,7 @@ GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirecto
 
 		// Poll socket for reply with a timeout
 		zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
-		int rc = zmq_poll(items, 1, requestTimeout);
+		int rc = zmq_poll(items, 1, NETWORK_TIMEOUT);
 		if (rc == -1)
 		{
 			// Interrupted

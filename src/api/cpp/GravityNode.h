@@ -52,6 +52,9 @@ typedef struct NetworkNode
 class GravityNode
 {
 private:
+	static const int NETWORK_TIMEOUT = 3000; // msec
+	static const int NETWORK_RETRIES = 3; // attempts to connect
+
 	void* context;
 	uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 	string getIP(); ///< Utility method to get the host machine's IP address
