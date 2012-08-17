@@ -6,7 +6,7 @@
  */
 
 #include "ServiceDirectory.h"
-#include "DataProductDescriptionPB.pb.h"
+#include "ServiceDirectoryRegistrationPB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
 #include "zmq.h"
@@ -81,16 +81,16 @@ void ServiceDirectory::start()
 		}
 		else if (strcmp(requestType->c_str(), "register"))
 		{
-			DataProductDescriptionPB dpDescription;
-			dpDescription.ParseFromArray(data, size);
-			string url = registrationMap[dpDescription.dataproductid()];
+			ServiceDirectoryRegistrationPB registration;
+			registration.ParseFromArray(data, size);
+			string url = registrationMap[registration.id()];
 			string ack = "ack";
 			if (url == "")
-				registrationMap[dpDescription.dataproductid()] = dpDescription.url();
+				registrationMap[registration.id()] = registration.url();
 			else
 			{
 				ack = "error";
-				cout << "DataProductID " << dpDescription.dataproductid() << " is already registered." << endl;
+				cout << "DataProductID " << registration.id() << " is already registered." << endl;
 			}
 
 			// Send reply back to client

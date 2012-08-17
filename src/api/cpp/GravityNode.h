@@ -8,6 +8,7 @@
 #ifndef GRAVITYNODE_H_
 #define GRAVITYNODE_H_
 
+#include "ServiceDirectoryRegistrationPB.pb.h"
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
 #include "GravityServiceProvider.h"
@@ -18,14 +19,42 @@ namespace gravity
 using namespace std;
 
 /**
+ * Enumerated Type for Gravity Return Codes
+ */
+namespace GravityReturnCodes
+{
+	enum Codes
+	{
+		SUCCESS = 0,
+		FAILURE = -1,
+		NO_SERVICE_DIRECTORY = -2,
+		REQUEST_TIMEOUT = -3,
+		DUPLICATE = -4,
+		REGISTRATION_CONFLICT = -5,
+		NO_SUCH_SERVICE = -6,
+		NO_SUCH_DATA_PRODUCT = -7,
+		LINK_ERROR = -8,
+		INTERRUPTED = -9
+	};
+}
+typedef GravityReturnCodes::Codes GravityReturnCode;
+
+/**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
  */
 class GravityNode
 {
 private:
+	void* context;
 	uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 	string getIP(); ///< Utility method to get the host machine's IP address
+	GravityReturnCode sendGravityDataProduct(void* socket, GravityDataProduct& dataProduct);
+	GravityReturnCode registerWithServiceDirectory(const ServiceDirectoryRegistrationPB& registration);
+	string serviceDirectoryURL;
+	map<string,void*> publishMap;
+	map<string,void*> serviceMap;
 public:
+
 	/**
 	 * Default Constructor
 	 */
@@ -37,6 +66,12 @@ public:
 	virtual ~GravityNode();
 
 	/**
+	 * Initialize the Gravity infrastructure.
+	 * \return GravityReturnCode code to identify any errors that occur during initialization
+	 */
+	GravityReturnCode init();
+
+	/**
 	 * Register a data product with the Gravity Directory Service, making it available to the
 	 * rest of the Gravity-enabled system.
 	 * \param dataProductID string ID used to uniquely identify this published data product
@@ -44,12 +79,12 @@ public:
 	 * \param transport type (e.g. 'tcp', 'ipc')
 	 * \return success flag
 	 */
-	bool registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
+	GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
 
 	/**
 	 * Un-register a data product, resulting in its removal from the Gravity Service Directory
 	 */
-	bool unregisterDataProduct(string dataProductID);
+	GravityReturnCode unregisterDataProduct(string dataProductID);
 
 	/**
 	 * Setup a subscription to a data product through the Gravity Service Directory.
@@ -58,7 +93,7 @@ public:
 	 * \param filter text filter to apply to subscription
 	 * \return success flag
 	 */
-	bool subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = "");
+	GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = "");
 
 	/**
 	 * Setup a subscription to a data product through direct connection to known producer
@@ -68,7 +103,7 @@ public:
 	 * \param filter text filter to apply to subscription
 	 * \return success flag
 	 */
-	bool subscribe(string connectionURL, string dataProductID,
+	GravityReturnCode subscribe(string connectionURL, string dataProductID,
 				   const GravitySubscriber& subscriber, string filter = "");
 
 	/**
@@ -77,14 +112,14 @@ public:
 	 * \param subscriber the subscriber that will be removed from the notification list for this subscription
 	 * \return success flag
 	 */
-	bool unsubscribe(string dataProductID, const GravitySubscriber& subscriber);
+	GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber);
 
 	/**
 	 * Publish a data product
 	 * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
 	 * \return success flag
 	 */
-	bool publish(const GravityDataProduct& dataProduct);
+	GravityReturnCode publish(const GravityDataProduct& dataProduct);
 
 	/**
 	 * Make a request against a service provider through the Gravity Service Directory
@@ -94,7 +129,7 @@ public:
 	 * \param requestID identifier for this request
 	 * \return success flag
 	 */
-	bool request(string serviceID, const GravityDataProduct& dataProduct,
+	GravityReturnCode request(string serviceID, const GravityDataProduct& dataProduct,
 				 const GravityRequestor& requestor, string requestID = "");
 
 	/**
@@ -106,7 +141,7 @@ public:
 	 * \param requestID identifier for this request
 	 * \return success flag
 	 */
-	bool request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
+	GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
 				 const GravityRequestor& requestor, string requestID = "");
 
 	/**
@@ -117,7 +152,7 @@ public:
 	 * \param server object implementing the GravityServiceProvider interface that will be notified of requests
 	 * \return success flag
 	 */
-	bool registerService(string serviceID, unsigned short networkPort,
+	GravityReturnCode registerService(string serviceID, unsigned short networkPort,
 						 string transportType, const GravityServiceProvider& server);
 
 	/**
@@ -125,7 +160,7 @@ public:
 	 * \param serviceID Unique ID with which the service was originially registered
 	 * \param server the GravityServiceProvider object that will no longer receive requests
 	 */
-	bool unregisterService(string serviceID, const GravityServiceProvider& server);
+	GravityReturnCode unregisterService(string serviceID, const GravityServiceProvider& server);
 };
 
 } /* namespace gravity */

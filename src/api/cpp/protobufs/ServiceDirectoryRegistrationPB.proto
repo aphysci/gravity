@@ -1,0 +1,16 @@
+option optimize_for = SPEED;
+
+package gravity;
+
+message ServiceDirectoryRegistrationPB
+{
+	optional string id = 1;
+	optional string url = 2;
+	
+	enum RegistrationType
+	{
+		DATA = 0;
+		SERVICE = 1;
+	} 
+	optional RegistrationType type = 3;
+}

@@ -39,13 +39,13 @@ public:
 	 * Method to return the timestamp associated with this data product
 	 * \return timestamp for data
 	 */
-	uint64_t getGravityTimestamp();
+	uint64_t getGravityTimestamp() const;
 
 	/**
 	 * Method to return the data product ID for this data
 	 * \return data product ID
 	 */
-	string getDataProductID();
+	string getDataProductID() const;
 
 	/**
 	 * Setter for the specification of software version information
@@ -57,7 +57,7 @@ public:
 	 * Getter for the software version specified on this data product
 	 * \return the software version number associated with this data product
 	 */
-	string getSoftwareVersion();
+	string getSoftwareVersion() const;
 
 	/**
 	 * Setter for the filter-able text associated with this data product
@@ -69,7 +69,7 @@ public:
 	 * Getter for the filter-able text associated with this data product
 	 * \return filterText text string that can be filtered against by subscribers
 	 */
-	string getFilterText();
+	string getFilterText() const;
 
 	/**
 	 * Set the application-specific data for this data product
@@ -90,13 +90,13 @@ public:
 	 * \param size size of data array to populate
 	 * \return success flag
 	 */
-	bool getData(void* data, int size);
+	bool getData(void* data, int size) const;
 
 	/**
 	 * Get the size of the data contained within this data product
 	 * \return size in bytes of contained data
 	 */
-	int getDataSize();
+	int getDataSize() const;
 
 	/**
 	 * Populate a protobuf object with the data contained in this data product
@@ -104,6 +104,26 @@ public:
 	 * \return success flag
 	 */
 	bool populateMessage(google::protobuf::Message& data);
+
+	/**
+	 * Get the size for this message
+	 * \return size in bytes for this data product
+	 */
+	int getSize() const;
+
+	/**
+	 * Deserialize this GravityDataProduct from array of bytes
+	 * \param arrayPtr pointer to array of bytes containing serialized GravityDataProduct
+	 * \param size size of serialized data
+	 */
+	void parseFromArray(void* arrayPtr, int size);
+
+	/**
+	 * Serialize this GravityDataProduct
+	 * \arrayPtr pointer to array into which to serialize this GravityDataProduct
+	 * \return success flag
+	 */
+	bool serializeToArray(void* arrayPtr) const;
 };
 
 } /* namespace gravity */
