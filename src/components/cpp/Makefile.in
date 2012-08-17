@@ -30,7 +30,7 @@ all: $(PROG_NAME)
 
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
-	
+
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
