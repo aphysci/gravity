@@ -1,4 +1,3 @@
-
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
@@ -7,7 +6,7 @@ MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=libgravity.a
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src
 CFLAGS=$(INCLUDES)
 
 SRC=$(wildcard *.cpp)
