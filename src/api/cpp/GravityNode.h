@@ -39,6 +39,13 @@ namespace GravityReturnCodes
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
 
+typedef struct NetworkNode
+{
+	string ipAddress;
+	unsigned short port;
+	string transport;
+} NetworkNode;
+
 /**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
  */
@@ -50,7 +57,7 @@ private:
 	string getIP(); ///< Utility method to get the host machine's IP address
 	GravityReturnCode sendGravityDataProduct(void* socket, GravityDataProduct& dataProduct);
 	GravityReturnCode registerWithServiceDirectory(const ServiceDirectoryRegistrationPB& registration);
-	string serviceDirectoryURL;
+	NetworkNode serviceDirectoryNode;
 	map<string,void*> publishMap;
 	map<string,void*> serviceMap;
 public:

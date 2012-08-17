@@ -205,7 +205,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 		publishMap[dataProductID] = pubSocket;
 	}
 
-	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryURL.empty())
+	if (ret == GravityReturnCodes::SUCCESS && serviceDirectoryNode.ipAddress.empty())
 	{
 		// Create the object describing the data product to register
 		shared_ptr<ServiceDirectoryRegistrationPB> registration(new ServiceDirectoryRegistrationPB());
@@ -306,7 +306,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 		serviceMap[serviceID] = serverSocket;
 	}
 
-	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryURL.empty())
+	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
 	{
 		// Create the object describing the data product to register
 		shared_ptr<ServiceDirectoryRegistrationPB> registration(new ServiceDirectoryRegistrationPB());
@@ -335,37 +335,40 @@ uint64_t GravityNode::getCurrentTime()
 
 string GravityNode::getIP()
 {
-	string ip;
+	string ip = "localhost";
 
-	int buflen = 16;
-	char* buffer = (char*)malloc(buflen);
+	if (!serviceDirectoryNode.ipAddress.empty())
+	{
+		int buflen = 16;
+		char* buffer = (char*)malloc(buflen);
 
-	int sock = socket(AF_INET, SOCK_DGRAM, 0);
-	assert(sock != -1);
+		int sock = socket(AF_INET, SOCK_DGRAM, 0);
+		assert(sock != -1);
 
-	const char* otherIP = "192.168.2.44";
-	uint16_t otherPort = 5555;
+		const char* otherIP = serviceDirectoryNode.ipAddress.c_str();
+		uint16_t otherPort = serviceDirectoryNode.port;
 
-	struct sockaddr_in serv;
-	memset(&serv, 0, sizeof(serv));
-	serv.sin_family = AF_INET;
-	serv.sin_addr.s_addr = inet_addr(otherIP);
-	serv.sin_port = htons(otherPort);
+		struct sockaddr_in serv;
+		memset(&serv, 0, sizeof(serv));
+		serv.sin_family = AF_INET;
+		serv.sin_addr.s_addr = inet_addr(otherIP);
+		serv.sin_port = htons(otherPort);
 
-	int err = connect(sock, (const sockaddr*)&serv, sizeof(serv));
-	assert(err != -1);
+		int err = connect(sock, (const sockaddr*)&serv, sizeof(serv));
+		assert(err != -1);
 
-	sockaddr_in name;
-	socklen_t namelen = sizeof(name);
-	err = getsockname(sock, (sockaddr*)&name, &namelen);
-	assert(err != -1);
+		sockaddr_in name;
+		socklen_t namelen = sizeof(name);
+		err = getsockname(sock, (sockaddr*)&name, &namelen);
+		assert(err != -1);
 
-	const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
-	assert(p);
+		const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
+		assert(p);
 
-	close(sock);
+		close(sock);
 
-	ip.assign(buffer);
+		ip.assign(buffer);
+	}
 	return ip;
 }
 
