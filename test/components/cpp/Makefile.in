@@ -29,7 +29,7 @@ $(TEST_NAME): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(CFLAGS) $(LIBS)
 
 test: $(TEST_NAME)
-	PATH=$(PATH):../../../../src/components/cpp/$(PROG_NAME) $^
+	PATH=$(PATH):../../../../src/components/cpp/$(PROG_NAME) ./$^
 
 clean:
 	@rm -rf $(TEST_NAME) *.o runner.cpp
