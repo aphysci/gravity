@@ -12,7 +12,6 @@
 #include <map>
 #include "GravityDataProduct.h"
 
-
 using namespace std;
 
 namespace gravity
@@ -21,15 +20,15 @@ namespace gravity
 class ServiceDirectory
 {
 private:
-	map<std::string,std::string> dataProductMap;
-	map<std::string,std::string> serviceMap;
+    map<std::string, std::string> dataProductMap;
+    map<std::string, std::string> serviceMap;
 public:
-	ServiceDirectory();
-	virtual ~ServiceDirectory();
+    ServiceDirectory();
+    virtual ~ServiceDirectory();
     void start();
 
 private:
-	void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
+    void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
 };

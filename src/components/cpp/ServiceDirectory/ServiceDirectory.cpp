@@ -20,8 +20,7 @@ using namespace std;
 
 int main(void)
 {
-    gravity::ServiceDirectory* serviceDirectory =
-            new gravity::ServiceDirectory();
+    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory();
     serviceDirectory->start();
 }
 
@@ -106,8 +105,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     ServiceDirectoryRegistrationPB registration;
     request.populateMessage(registration);
     string currentUrl;
-    if (registration.type()
-            == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
+    if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
     {
         currentUrl = dataProductMap[registration.id()];
         if (currentUrl == "")
@@ -128,12 +126,13 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
         if (currentUrl == registration.url())
         {
             sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_DUPLICATE_REGISTRATION);
-            error = "Attempt to register duplicate url ("+registration.url()+") for " + registration.id();
+            error = "Attempt to register duplicate url (" + registration.url() + ") for " + registration.id();
         }
         else
         {
             sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_REGISTRATION_CONFLICT);
-            error = "Attempt to register different url ("+registration.url()+", currently is "+currentUrl+" for " + registration.id();
+            error = "Attempt to register different url (" + registration.url() + ", currently is " + currentUrl
+                    + " for " + registration.id();
         }
         cout << error << endl;
     }
