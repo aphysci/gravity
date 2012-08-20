@@ -11,7 +11,7 @@ TEST_NAME=$(PROG_NAME)Test
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR)
 CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs
-LIBS=-lgravity -lzmq -lprotobuf -lrt
+LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)
 SRC=runner.cpp $(wildcard *.cpp)
