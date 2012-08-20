@@ -15,6 +15,11 @@ GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProduc
 	filterText = "";
 }
 
+GravityDataProduct::GravityDataProduct(void* arrayPtr, int size)
+{
+    gravityDataProductPB->ParseFromArray(arrayPtr, size);
+}
+
 GravityDataProduct::~GravityDataProduct() {}
 
 string GravityDataProduct::getDataProductID() const

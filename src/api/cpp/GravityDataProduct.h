@@ -32,6 +32,13 @@ public:
 	 */
 	GravityDataProduct(string dataProductID);
 
+    /**
+     * Constructor that deserializes this GravityDataProduct from array of bytes
+     * \param arrayPtr pointer to array of bytes containing serialized GravityDataProduct
+     * \param size size of serialized data
+     */
+    GravityDataProduct(void* arrayPtr, int size);
+
 	/**
 	 * Default Destructor
 	 */

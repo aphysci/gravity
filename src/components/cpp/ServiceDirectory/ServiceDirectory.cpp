@@ -66,9 +66,8 @@ void ServiceDirectory::start()
         zmq_msg_close(&request);
         cout << "received" << endl;
 
-        GravityDataProduct gdp;
-        gdp.parseFromArray(data, size);
-        GravityDataProduct gdpRet;
+        GravityDataProduct gdp(data, size);
+        GravityDataProduct gdpRet("DataProductRegistrationResponse");
 
         if (strcmp(requestType->c_str(), "lookup"))
         {
