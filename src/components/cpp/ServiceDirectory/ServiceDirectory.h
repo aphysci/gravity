@@ -19,7 +19,8 @@ namespace gravity
 class ServiceDirectory
 {
 private:
-	map<std::string,std::string> registrationMap;
+	map<std::string,std::string> dataProductMap;
+	map<std::string,std::string> serviceMap;
 public:
 	ServiceDirectory();
 	virtual ~ServiceDirectory();

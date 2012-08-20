@@ -6,7 +6,9 @@
  */
 
 #include "ServiceDirectory.h"
+#include "GravityDataProduct.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
+#include "ServiceDirectoryResponsePB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
 #include "zmq.h"
@@ -19,8 +21,9 @@ using namespace std;
 
 int main(void)
 {
-	gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory();
-	serviceDirectory->start();
+    gravity::ServiceDirectory* serviceDirectory =
+            new gravity::ServiceDirectory();
+    serviceDirectory->start();
 }
 
 namespace gravity
@@ -36,70 +39,102 @@ ServiceDirectory::~ServiceDirectory()
 
 void ServiceDirectory::start()
 {
-	void *context = zmq_init(1);
+    void *context = zmq_init(1);
 
-	//   Socket to talk to clients
-	void *socket = zmq_socket(context, ZMQ_REP);
-	zmq_bind(socket, "tcp://*:5555");
+    //   Socket to talk to clients
+    void *socket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(socket, "tcp://*:5555");
 
-	zmq_msg_t request, response, envelope;
-	while (1)
-	{
-		//   Wait for next request
-		zmq_msg_init(&envelope);
-		cout << "Waiting for lookup request..." << flush;
-		zmq_recvmsg(socket, &envelope, 0);
-		int size = zmq_msg_size(&envelope);
-		string* requestType = new string((char*)zmq_msg_data(&envelope), size);
-		zmq_msg_close(&envelope);
-		cout << "got a " << requestType << " request" << endl;
+    zmq_msg_t request, response, envelope;
+    while (1)
+    {
+        //   Wait for next request
+        zmq_msg_init(&envelope);
+        cout << "Waiting for lookup request..." << flush;
+        zmq_recvmsg(socket, &envelope, 0);
+        int size = zmq_msg_size(&envelope);
+        string* requestType = new string((char*) zmq_msg_data(&envelope), size);
+        zmq_msg_close(&envelope);
+        cout << "got a " << requestType << " request" << endl;
 
-		zmq_msg_init(&request);
-		cout << "Waiting for data..." << flush;
-		zmq_recvmsg(socket, &request, 0);
-		size = zmq_msg_size(&request);
-		void* data = (char*)malloc(size + 1);
-		memcpy(data, zmq_msg_data(&request), size);
-		zmq_msg_close(&request);
-		cout << "received" << endl;
+        zmq_msg_init(&request);
+        cout << "Waiting for data..." << flush;
+        zmq_recvmsg(socket, &request, 0);
+        size = zmq_msg_size(&request);
+        void* data = (char*) malloc(size + 1);
+        memcpy(data, zmq_msg_data(&request), size);
+        zmq_msg_close(&request);
+        cout << "received" << endl;
 
-		if (strcmp(requestType->c_str(), "lookup"))
-		{
-			std::string connectionString = "";
-			ComponentLookupRequestPB lookupRequest;
-			lookupRequest.ParseFromArray(data, size);
-			string url = registrationMap[lookupRequest.dataproductid()];
+        GravityDataProduct gdp;
+        gdp.parseFromArray(data, size);
+        GravityDataProduct gdpRet;
 
-			ComponentLookupResponsePB lookupResponse;
-			lookupResponse.set_url(url);
+        if (strcmp(requestType->c_str(), "lookup"))
+        {
+            ComponentLookupRequestPB lookupRequest;
+            gdp.populateMessage(lookupRequest);
+            string url;
+            if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
+                url = dataProductMap[lookupRequest.lookupid()];
+            else
+                url = serviceMap[lookupRequest.lookupid()];
 
-			// Send reply back to client
-			zmq_msg_init_size(&response, lookupResponse.ByteSize());
-			lookupResponse.SerializeToArray(zmq_msg_data(&response), lookupResponse.ByteSize());
-			zmq_sendmsg(socket, &response, 0);
-			zmq_msg_close(&response);
-		}
-		else if (strcmp(requestType->c_str(), "register"))
-		{
-			ServiceDirectoryRegistrationPB registration;
-			registration.ParseFromArray(data, size);
-			string url = registrationMap[registration.id()];
-			string ack = "ack";
-			if (url == "")
-				registrationMap[registration.id()] = registration.url();
-			else
-			{
-				ack = "error";
-				cout << "DataProductID " << registration.id() << " is already registered." << endl;
-			}
+            ComponentLookupResponsePB lookupResponse;
+            lookupResponse.set_lookupid(lookupRequest.lookupid());
+            lookupResponse.set_url(url);
+            gdpRet.setData(lookupResponse);
+        }
+        else if (strcmp(requestType->c_str(), "register"))
+        {
+            ServiceDirectoryRegistrationPB registration;
+            gdp.populateMessage(registration);
+            string currentUrl;
+            if (registration.type()
+                    == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
+            {
+                currentUrl = dataProductMap[registration.id()];
+                if (currentUrl == "")
+                    dataProductMap[registration.id()] = registration.url();
+            }
+            else
+            {
+                currentUrl = serviceMap[registration.id()];
+                if (currentUrl == "")
+                    serviceMap[registration.id()] = registration.url();
+            }
 
-			// Send reply back to client
-			zmq_msg_init_size(&response, ack.length());
-			memcpy(zmq_msg_data(&response), ack.c_str(), ack.length());
-			zmq_sendmsg(socket, &response, 0);
-			zmq_msg_close(&response);
-		}
-	}
+            ServiceDirectoryResponsePB sdr;
+            sdr.set_id(registration.id());
+            if (currentUrl != "")
+            {
+                string error;
+                if (currentUrl == registration.url())
+                {
+                    sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_DUPLICATE_REGISTRATION);
+                    error = "Attempt to register duplicate url ("+registration.url()+") for " + registration.id();
+                }
+                else
+                {
+                    sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_REGISTRATION_CONFLICT);
+                    error = "Attempt to register different url ("+registration.url()+", currently is "+currentUrl+" for " + registration.id();
+                }
+                cout << error << endl;
+            }
+            else
+            {
+                sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
+            }
+
+            gdpRet.setData(sdr);
+        }
+
+        // Send reply back to client
+        zmq_msg_init_size(&response, gdpRet.getSize());
+        gdpRet.serializeToArray(zmq_msg_data(&response));
+        zmq_sendmsg(socket, &response, 0);
+        zmq_msg_close(&response);
+    }
 }
 
 } /* namespace gravity */

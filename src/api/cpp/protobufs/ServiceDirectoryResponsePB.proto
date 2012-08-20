@@ -4,7 +4,7 @@ package gravity;
 
 message ServiceDirectoryResponsePB
 {
-	required string lookupID = 1;
+	required string id = 1;
 	
 	enum ReturnCodes
 	{

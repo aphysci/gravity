@@ -4,5 +4,6 @@ package gravity;
 
 message ComponentLookupResponsePB
 {
-	required string url = 1;
+	required string lookupID = 1;
+	required string url = 2;
 }
