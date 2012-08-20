@@ -78,7 +78,7 @@ int GravityDataProduct::getDataSize() const
 	return gravityDataProductPB->data_size();
 }
 
-bool GravityDataProduct::populateMessage(google::protobuf::Message& data)
+bool GravityDataProduct::populateMessage(google::protobuf::Message& data) const
 {
 	data.ParseFromArray(gravityDataProductPB->mutable_data()->mutable_data(), getDataSize());
 

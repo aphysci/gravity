@@ -112,7 +112,7 @@ public:
 	 * \param data Google Protocol Buffer Message object to populate
 	 * \return success flag
 	 */
-	bool populateMessage(google::protobuf::Message& data);
+	bool populateMessage(google::protobuf::Message& data) const;
 
 	/**
 	 * Get the size for this message
