@@ -58,8 +58,8 @@ private:
 	void* context;
 	uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 	string getIP(); ///< Utility method to get the host machine's IP address
-	GravityReturnCode sendGravityDataProduct(void* socket, GravityDataProduct& dataProduct);
-	GravityReturnCode registerWithServiceDirectory(const ServiceDirectoryRegistrationPB& registration);
+	void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
+	GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
 	NetworkNode serviceDirectoryNode;
 	map<string,void*> publishMap;
 	map<string,void*> serviceMap;

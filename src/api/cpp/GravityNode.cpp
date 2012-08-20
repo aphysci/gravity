@@ -38,7 +38,13 @@ namespace gravity
 
 using namespace std::tr1;
 
-GravityNode::GravityNode() {}
+GravityNode::GravityNode()
+{
+	// Eventually to be read from a config/properties file
+	serviceDirectoryNode.ipAddress = "localhost";
+	serviceDirectoryNode.port = 5555;
+	serviceDirectoryNode.transport = "tcp";
+}
 
 GravityNode::~GravityNode()
 {
@@ -63,7 +69,7 @@ GravityReturnCode GravityNode::init()
 	return ret;
 }
 
-GravityReturnCode GravityNode::sendGravityDataProduct(void* socket, GravityDataProduct& dataProduct)
+void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
 {
 	// Send raw filter text as first part of message
 	string filterText = dataProduct.getFilterText();
@@ -75,34 +81,34 @@ GravityReturnCode GravityNode::sendGravityDataProduct(void* socket, GravityDataP
 
 	// Send data product
 	zmq_msg_t data;
-	zmq_msg_init_size(&data, dataProduct.getDataSize());
-	dataProduct.getData(zmq_msg_data(&data), dataProduct.getDataSize());
+	zmq_msg_init_size(&data, dataProduct.getSize());
+	dataProduct.serializeToArray(zmq_msg_data(&data));
 	zmq_sendmsg(socket, &data, ZMQ_DONTWAIT);
 	zmq_msg_close(&data);
-
-	return GravityReturnCodes::FAILURE;
 }
 
-GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirectoryRegistrationPB& registration)
+GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataProduct& request,
+																GravityDataProduct& response)
 {
 	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
 	// Socket to connect to service directory component
 	void* socket = NULL;
 
-	shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("DataProductRegistrationRequest"));
-	gdp->setFilterText("register");
-	gdp->setData(registration);
-
 	int retriesLeft = NETWORK_RETRIES;
 	while (retriesLeft && !s_interrupted)
 	{
 		// Connect to service directory component
 		socket = zmq_socket(context, ZMQ_REQ);
-		zmq_connect(socket, registration.url().c_str());
+
+		stringstream ss;
+		ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
+				":" << serviceDirectoryNode.port;
+		string serviceDirectoryURL = ss.str();
+		zmq_connect(socket, serviceDirectoryURL.c_str());
 
 		// Send registration message to service directory
-		sendGravityDataProduct(socket, *gdp);
+		sendGravityDataProduct(socket, request);
 		retriesLeft--;
 
 		// Poll socket for reply with a timeout
@@ -122,14 +128,11 @@ GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirecto
 			zmq_msg_t resp;
 			zmq_msg_init(&resp);
 			zmq_recvmsg(socket, &resp, 0);
-			//string responseString((char*)zmq_msg_data(&resp), zmq_msg_size(&resp));
 
-			// Parse response
 			bool parserSuccess = true;
-			shared_ptr<ServiceDirectoryResponsePB> sdResponse(new ServiceDirectoryResponsePB());
 			try
 			{
-				sdResponse->ParseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
+				response.parseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
 			}
 			catch (char* s)
 			{
@@ -141,19 +144,7 @@ GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirecto
 
 			if (parserSuccess)
 			{
-				if (sdResponse->returncode() == sdResponse->SUCCESS)
-				{
-					// Successfully registered data product
-					ret = GravityReturnCodes::SUCCESS;
-				}
-				else if (sdResponse->returncode() == sdResponse->REGISTRATION_CONFLICT)
-				{
-					ret = GravityReturnCodes::REGISTRATION_CONFLICT;
-				}
-				else if (sdResponse->returncode() == sdResponse->DUPLICATE_REGISTRATION)
-				{
-					ret = GravityReturnCodes::DUPLICATE;
-				}
+				ret = GravityReturnCodes::SUCCESS;
 				retriesLeft = 0;
 				break;
 			}
@@ -172,9 +163,6 @@ GravityReturnCode GravityNode::registerWithServiceDirectory(const ServiceDirecto
 		zmq_close(socket);
 	}
 
-	// clean up the connection
-	zmq_close(socket);
-
 	return ret;
 }
 
@@ -189,11 +177,13 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
 	// Create the publish socket
 	void* pubSocket = zmq_socket(context, ZMQ_PUB);
+	assert(pubSocket);
 
 	// Bind socket to url
 	int rc = zmq_bind(pubSocket, connectionString.c_str());
+	assert(rc == 0);
 
-	if (!pubSocket || rc == 0)
+	if (!pubSocket || rc != 0)
 	{
 		ret = GravityReturnCodes::FAILURE;
 	}
@@ -211,8 +201,52 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 		registration->set_url(connectionString);
 		registration->set_type(ServiceDirectoryRegistrationPB::DATA);
 
-		// Send registration request
-		ret = registerWithServiceDirectory(*registration);
+		// Wrap request in GravityDataProduct
+		shared_ptr<GravityDataProduct> request(new GravityDataProduct("DataProductRegistrationRequest"));
+		request->setFilterText("register");
+		request->setData(*registration);
+
+		// GravityDataProduct for response
+		shared_ptr<GravityDataProduct> response(new GravityDataProduct("DataProductRegistrationResponse"));
+
+		// Send request to service directory
+		ret = sendRequestToServiceDirectory(*request, *response);
+		if (ret == GravityReturnCodes::SUCCESS)
+		{
+			ServiceDirectoryResponsePB* pb = new ServiceDirectoryResponsePB();
+			bool parserSuccess = true;
+			try
+			{
+				response->populateMessage(*pb);
+			}
+			catch (char* s)
+			{
+				parserSuccess = false;
+			}
+
+			if (parserSuccess)
+			{
+				switch (pb->returncode())
+				{
+					case ServiceDirectoryResponsePB::SUCCESS:
+						ret = GravityReturnCodes::SUCCESS;
+						break;
+					case ServiceDirectoryResponsePB::REGISTRATION_CONFLICT:
+						ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+						break;
+					case ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION:
+						ret = GravityReturnCodes::DUPLICATE;
+						break;
+					case ServiceDirectoryResponsePB::NOT_REGISTERED:
+						ret = GravityReturnCodes::LINK_ERROR;
+						break;
+				}
+			}
+			else
+			{
+				ret = GravityReturnCodes::LINK_ERROR;
+			}
+		}
 	}
 
 	return ret;
@@ -225,6 +259,12 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
+	// Lookup data producer from service directory
+	// TODO
+
+	// Subscribe to published data product
+	// TODO
+
 	return GravityReturnCodes::FAILURE;
 }
 
@@ -312,8 +352,53 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 		registration->set_url(connectionString);
 		registration->set_type(ServiceDirectoryRegistrationPB::SERVICE);
 
-		// Send registration request
-		ret = registerWithServiceDirectory(*registration);
+		// Wrap request in GravityDataProduct
+		shared_ptr<GravityDataProduct> request(new GravityDataProduct("ServiceRegistrationRequest"));
+		request->setFilterText("register");
+		request->setData(*registration);
+
+		// GravityDataProduct for response
+		shared_ptr<GravityDataProduct> response(new GravityDataProduct("ServiceRegistrationResponse"));
+
+		// Send request to service directory
+		ret = sendRequestToServiceDirectory(*request, *response);
+
+		if (ret == GravityReturnCodes::SUCCESS)
+		{
+			ServiceDirectoryResponsePB* pb = new ServiceDirectoryResponsePB();
+			bool parserSuccess = true;
+			try
+			{
+				response->populateMessage(*pb);
+			}
+			catch (char* s)
+			{
+				parserSuccess = false;
+			}
+
+			if (parserSuccess)
+			{
+				switch (pb->returncode())
+				{
+				case ServiceDirectoryResponsePB::SUCCESS:
+					ret = GravityReturnCodes::SUCCESS;
+					break;
+				case ServiceDirectoryResponsePB::REGISTRATION_CONFLICT:
+					ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+					break;
+				case ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION:
+					ret = GravityReturnCodes::DUPLICATE;
+					break;
+				case ServiceDirectoryResponsePB::NOT_REGISTERED:
+					ret = GravityReturnCodes::LINK_ERROR;
+					break;
+				}
+			}
+			else
+			{
+				ret = GravityReturnCodes::LINK_ERROR;
+			}
+		}
 	}
 
 	return ret;
@@ -333,9 +418,9 @@ uint64_t GravityNode::getCurrentTime()
 
 string GravityNode::getIP()
 {
-	string ip = "localhost";
+	string ip = "127.0.0.1";
 
-	if (!serviceDirectoryNode.ipAddress.empty())
+	if (!serviceDirectoryNode.ipAddress.empty() && serviceDirectoryNode.ipAddress != "localhost")
 	{
 		int buflen = 16;
 		char* buffer = (char*)malloc(buflen);
@@ -367,6 +452,7 @@ string GravityNode::getIP()
 
 		ip.assign(buffer);
 	}
+
 	return ip;
 }
 

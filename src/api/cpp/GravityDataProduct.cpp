@@ -5,16 +5,13 @@
  *      Author: Chris Brundick
  */
 
-
 #include "GravityDataProduct.h"
 
 namespace gravity {
 
-GravityDataProduct::GravityDataProduct(string dataProductID)
+GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProductPB(new GravityDataProductPB())
 {
-	shared_ptr<GravityDataProductPB> gravityDataProductPB(new GravityDataProductPB());
 	gravityDataProductPB->set_dataproductid(dataProductID);
-
 	filterText = "";
 }
 
@@ -58,6 +55,7 @@ void GravityDataProduct::setData(void* data, int size)
 void GravityDataProduct::setData(const google::protobuf::Message& data)
 {
 	char* vdata = (char*)malloc(data.ByteSize());
+	assert(vdata);
 	data.SerializeToArray(vdata, data.ByteSize());
 	gravityDataProductPB->add_data(vdata, data.ByteSize());
 	delete vdata;
