@@ -6,7 +6,6 @@
  */
 
 #include "ServiceDirectory.h"
-#include "GravityDataProduct.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
@@ -66,74 +65,84 @@ void ServiceDirectory::start()
         zmq_msg_close(&request);
         cout << "received" << endl;
 
-        GravityDataProduct gdp(data, size);
-        GravityDataProduct gdpRet("DataProductRegistrationResponse");
+        GravityDataProduct gdpRequest(data, size);
+        GravityDataProduct gdpResponse("DataProductRegistrationResponse");
 
         if (strcmp(requestType->c_str(), "lookup"))
         {
-            ComponentLookupRequestPB lookupRequest;
-            gdp.populateMessage(lookupRequest);
-            string url;
-            if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
-                url = dataProductMap[lookupRequest.lookupid()];
-            else
-                url = serviceMap[lookupRequest.lookupid()];
-
-            ComponentLookupResponsePB lookupResponse;
-            lookupResponse.set_lookupid(lookupRequest.lookupid());
-            lookupResponse.set_url(url);
-            gdpRet.setData(lookupResponse);
+            handleLookup(gdpRequest, gdpResponse);
         }
         else if (strcmp(requestType->c_str(), "register"))
         {
-            ServiceDirectoryRegistrationPB registration;
-            gdp.populateMessage(registration);
-            string currentUrl;
-            if (registration.type()
-                    == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
-            {
-                currentUrl = dataProductMap[registration.id()];
-                if (currentUrl == "")
-                    dataProductMap[registration.id()] = registration.url();
-            }
-            else
-            {
-                currentUrl = serviceMap[registration.id()];
-                if (currentUrl == "")
-                    serviceMap[registration.id()] = registration.url();
-            }
-
-            ServiceDirectoryResponsePB sdr;
-            sdr.set_id(registration.id());
-            if (currentUrl != "")
-            {
-                string error;
-                if (currentUrl == registration.url())
-                {
-                    sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_DUPLICATE_REGISTRATION);
-                    error = "Attempt to register duplicate url ("+registration.url()+") for " + registration.id();
-                }
-                else
-                {
-                    sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_REGISTRATION_CONFLICT);
-                    error = "Attempt to register different url ("+registration.url()+", currently is "+currentUrl+" for " + registration.id();
-                }
-                cout << error << endl;
-            }
-            else
-            {
-                sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
-            }
-
-            gdpRet.setData(sdr);
+            handleRegister(gdpRequest, gdpResponse);
         }
 
         // Send reply back to client
-        zmq_msg_init_size(&response, gdpRet.getSize());
-        gdpRet.serializeToArray(zmq_msg_data(&response));
+        zmq_msg_init_size(&response, gdpResponse.getSize());
+        gdpResponse.serializeToArray(zmq_msg_data(&response));
         zmq_sendmsg(socket, &response, 0);
         zmq_msg_close(&response);
     }
+}
+
+void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDataProduct& response)
+{
+    ComponentLookupRequestPB lookupRequest;
+    request.populateMessage(lookupRequest);
+    string url;
+    if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
+        url = dataProductMap[lookupRequest.lookupid()];
+    else
+        url = serviceMap[lookupRequest.lookupid()];
+
+    ComponentLookupResponsePB lookupResponse;
+    lookupResponse.set_lookupid(lookupRequest.lookupid());
+    lookupResponse.set_url(url);
+    response.setData(lookupResponse);
+}
+
+void ServiceDirectory::handleRegister(const GravityDataProduct& request, GravityDataProduct& response)
+{
+    ServiceDirectoryRegistrationPB registration;
+    request.populateMessage(registration);
+    string currentUrl;
+    if (registration.type()
+            == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
+    {
+        currentUrl = dataProductMap[registration.id()];
+        if (currentUrl == "")
+            dataProductMap[registration.id()] = registration.url();
+    }
+    else
+    {
+        currentUrl = serviceMap[registration.id()];
+        if (currentUrl == "")
+            serviceMap[registration.id()] = registration.url();
+    }
+
+    ServiceDirectoryResponsePB sdr;
+    sdr.set_id(registration.id());
+    if (currentUrl != "")
+    {
+        string error;
+        if (currentUrl == registration.url())
+        {
+            sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_DUPLICATE_REGISTRATION);
+            error = "Attempt to register duplicate url ("+registration.url()+") for " + registration.id();
+        }
+        else
+        {
+            sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_REGISTRATION_CONFLICT);
+            error = "Attempt to register different url ("+registration.url()+", currently is "+currentUrl+" for " + registration.id();
+        }
+        cout << error << endl;
+    }
+    else
+    {
+        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
+    }
+
+    response.setData(sdr);
 }
 
 } /* namespace gravity */

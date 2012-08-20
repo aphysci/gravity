@@ -10,6 +10,8 @@
 
 #include <string>
 #include <map>
+#include "GravityDataProduct.h"
+
 
 using namespace std;
 
@@ -24,7 +26,12 @@ private:
 public:
 	ServiceDirectory();
 	virtual ~ServiceDirectory();
-	void start();
+    void start();
+
+private:
+	void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
+    void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
+    void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
 };
 
 } /* namespace gravity */
