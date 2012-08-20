@@ -7,6 +7,7 @@
 
 #include "ServiceDirectory.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
+#include "ServiceDirectoryUnregistrationPB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
@@ -89,7 +90,7 @@ void ServiceDirectory::start()
         zmq_recvmsg(socket, &envelope, 0);
         g_debug("received message");
         int size = zmq_msg_size(&envelope);
-        string* requestType = new string((char*) zmq_msg_data(&envelope), size);
+        string requestType((char*) zmq_msg_data(&envelope), size);
         zmq_msg_close(&envelope);
   		g_message("got a %s request", requestType);
 
@@ -97,7 +98,7 @@ void ServiceDirectory::start()
         g_message("Waiting for data...");
         zmq_recvmsg(socket, &request, 0);
         size = zmq_msg_size(&request);
-        void* data = (char*) malloc(size + 1);
+        char data [size + 1];
         memcpy(data, zmq_msg_data(&request), size);
         zmq_msg_close(&request);
         g_message("received");
@@ -105,13 +106,17 @@ void ServiceDirectory::start()
         GravityDataProduct gdpRequest(data, size);
         GravityDataProduct gdpResponse("DataProductRegistrationResponse");
 
-        if (strcmp(requestType->c_str(), "lookup"))
+        if (strcmp(requestType.c_str(), "lookup"))
         {
             handleLookup(gdpRequest, gdpResponse);
         }
-        else if (strcmp(requestType->c_str(), "register"))
+        else if (strcmp(requestType.c_str(), "register"))
         {
             handleRegister(gdpRequest, gdpResponse);
+        }
+        else if (strcmp(requestType.c_str(), "unregister"))
+        {
+            handleUnregister(gdpRequest, gdpResponse);
         }
 
         // Send reply back to client
@@ -175,9 +180,39 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
         cout << error << endl;
     }
     else
-    {
         sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
+
+    response.setData(sdr);
+}
+
+void ServiceDirectory::handleUnregister(const GravityDataProduct& request, GravityDataProduct& response)
+{
+    ServiceDirectoryUnregistrationPB unregistration;
+    request.populateMessage(unregistration);
+
+    string currentUrl;
+    if (unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA)
+    {
+        currentUrl = dataProductMap[unregistration.id()];
+        if (currentUrl != "")
+            dataProductMap[unregistration.id()] = "";
     }
+    else
+    {
+        currentUrl = serviceMap[unregistration.id()];
+        if (currentUrl != "")
+            serviceMap[unregistration.id()] = "";
+    }
+
+    ServiceDirectoryResponsePB sdr;
+    sdr.set_id(unregistration.id());
+    if (currentUrl == "")
+    {
+        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_NOT_REGISTERED);
+        cout << "Attempt to unregister unregistered " + unregistration.id() << endl;
+    }
+    else
+        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
 
     response.setData(sdr);
 }
