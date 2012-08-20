@@ -15,7 +15,7 @@ GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProduc
 	filterText = "";
 }
 
-GravityDataProduct::GravityDataProduct(void* arrayPtr, int size)
+GravityDataProduct::GravityDataProduct(void* arrayPtr, int size) : gravityDataProductPB(new GravityDataProductPB())
 {
     gravityDataProductPB->ParseFromArray(arrayPtr, size);
 }
