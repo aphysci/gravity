@@ -11,10 +11,14 @@
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
 #include "zmq.h"
+
+#include <glib.h>
+
 #include <stdlib.h>
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -37,32 +41,66 @@ ServiceDirectory::~ServiceDirectory()
 
 void ServiceDirectory::start()
 {
-    void *context = zmq_init(1);
+	g_message("Starting Service Directory");
 
+	g_message("Initializing ZeroMQ");
+    void *context = zmq_init(1);
     //   Socket to talk to clients
     void *socket = zmq_socket(context, ZMQ_REP);
-    zmq_bind(socket, "tcp://*:5555");
+
+    g_message("Parsing Config File");
+
+    GKeyFile* keyFile = g_key_file_new();
+
+    if(!g_key_file_load_from_file(keyFile, "ServiceDirectory.ini", G_KEY_FILE_NONE, NULL))
+		g_error("Couldn't Load ServiceDirectory.ini.  I don't know where to bind!!!");
+
+	gchar* sdprotocol = g_key_file_get_string(keyFile, "ServiceDirectory", "protocol", NULL);
+
+	if(!sdprotocol)
+	{
+		g_warning("No protocol specified.  Assuming tcp.");
+		sdprotocol = g_strdup("tcp");
+	}
+
+	gchar* sdinterface = g_key_file_get_string(keyFile, "ServiceDirectory", "interface", NULL);
+
+	if(!sdinterface)
+		sdinterface = g_strdup("*");
+
+	gchar* sdport = g_key_file_get_string(keyFile, "ServiceDirectory", "port", NULL);
+
+	if(!sdport)
+		g_error("No port specified in config file.");
+
+
+	stringstream url;
+	url << sdprotocol << "//" << sdinterface << ":" << sdport << "\0";
+
+    g_message("Binding to %s", url.str().c_str());
+    zmq_bind(socket, url.str().c_str());
 
     zmq_msg_t request, response, envelope;
     while (1)
     {
         //   Wait for next request
         zmq_msg_init(&envelope);
-        cout << "Waiting for lookup request..." << flush;
+        g_message("Waiting for lookup request...");
         zmq_recvmsg(socket, &envelope, 0);
+        g_debug("received message");
         int size = zmq_msg_size(&envelope);
         string* requestType = new string((char*) zmq_msg_data(&envelope), size);
         zmq_msg_close(&envelope);
-        cout << "got a " << requestType << " request" << endl;
+  		g_message("got a %s request", requestType);
 
         zmq_msg_init(&request);
-        cout << "Waiting for data..." << flush;
+        g_message("Waiting for data...");
         zmq_recvmsg(socket, &request, 0);
         size = zmq_msg_size(&request);
         void* data = (char*) malloc(size + 1);
         memcpy(data, zmq_msg_data(&request), size);
         zmq_msg_close(&request);
-        cout << "received" << endl;
+        g_message("received");
 
         GravityDataProduct gdpRequest(data, size);
         GravityDataProduct gdpResponse("DataProductRegistrationResponse");
