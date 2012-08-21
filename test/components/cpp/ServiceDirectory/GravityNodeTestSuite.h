@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "GravityNode.h"
+#include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
 #include "TestUtil.h"
 
@@ -18,63 +19,32 @@
 using namespace std;
 using namespace gravity;
 
-class GravityNodeTestSuite: public CxxTest::TestSuite {
+class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
 
 public:
 	void setUp() {
-		cout << endl << "GravityNodeTestSuite.setUp()" << endl;
-
-		memset(buffer, 0, BUFFER_SIZE);
+		//memset(buffer, 0, BUFFER_SIZE);
 		pid = popen2("ServiceDirectory", NULL, &sdFd);
-		int nbytes = read(sdFd, buffer, BUFFER_SIZE);
-		cout << endl << "output: " << buffer << endl;
+		//int nbytes = read(sdFd, buffer, BUFFER_SIZE);
+		//cout << endl << "output: " << buffer << endl;
 	}
 
 	void tearDown() {
-		cout << "GravityNodeTestSuite.tearDown()" << endl;
 		popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
 	}
 
 	void testRegister(void) {
-		cout << "GravityNodeTestSuite.testRegister()" << endl;
-
 		GravityNode* node = new GravityNode();
 		GravityReturnCode ret = node->init();
+		
 		ret = node->registerDataProduct("TEST", 5656, "tcp");
-		switch(ret)
-		{
-			case GravityReturnCodes::SUCCESS:
-				cout << "test result = SUCCESS" << endl;
-				break;
-			case GravityReturnCodes::FAILURE:
-				cout << "test result = FAILURE" << endl;
-				break;
-			case GravityReturnCodes::NO_SERVICE_DIRECTORY:
-				cout << "test result = NO_SERVICE_DIRECTORY" << endl;
-				break;
-			case GravityReturnCodes::REQUEST_TIMEOUT:
-				cout << "test result = REQUEST_TIMEOUT" << endl;
-				break;
-			case GravityReturnCodes::DUPLICATE:
-				cout << "test result = DUPLICATE" << endl;
-				break;
-			case GravityReturnCodes::REGISTRATION_CONFLICT:
-				cout << "test result = REGISTRATION_CONFLICT" << endl;
-				break;
-			case GravityReturnCodes::NO_SUCH_SERVICE:
-				cout << "test result = NO_SUCH_SERVICE" << endl;
-				break;
-			case GravityReturnCodes::NO_SUCH_DATA_PRODUCT:
-				cout << "test result = NO_SUCH_DATA_PRODUCT" << endl;
-				break;
-			case GravityReturnCodes::LINK_ERROR:
-				cout << "test result = LINK_ERROR" << endl;
-				break;
-			case GravityReturnCodes::INTERRUPTED:
-				cout << "test result = INTERRUPTED" << endl;
-				break;
-		}
+		TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+		ret = node->subscribe("TEST", *this, "");
+		TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 	}
+
+	void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
 
 private:
 	pid_t pid;
