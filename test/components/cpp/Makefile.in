@@ -9,7 +9,7 @@ CXXTESTGEN=$(CXXTEST_DIR)/bin/cxxtestgen
 PROG_NAME=$(notdir $(shell pwd) )
 TEST_NAME=$(PROG_NAME)Test
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(PROTOBUF_DIR)/src
 CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs
 LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -Wl,-Bdynamic -lrt
 
