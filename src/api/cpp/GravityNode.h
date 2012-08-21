@@ -31,10 +31,11 @@ namespace GravityReturnCodes
 		REQUEST_TIMEOUT = -3,
 		DUPLICATE = -4,
 		REGISTRATION_CONFLICT = -5,
-		NO_SUCH_SERVICE = -6,
-		NO_SUCH_DATA_PRODUCT = -7,
-		LINK_ERROR = -8,
-		INTERRUPTED = -9
+        NOT_REGISTERED = -6,
+		NO_SUCH_SERVICE = -7,
+		NO_SUCH_DATA_PRODUCT = -8,
+		LINK_ERROR = -9,
+		INTERRUPTED = -10
 	};
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
@@ -44,6 +45,7 @@ typedef struct NetworkNode
 	string ipAddress;
 	unsigned short port;
 	string transport;
+	void* socket;
 } NetworkNode;
 
 /**
@@ -61,8 +63,8 @@ private:
 	void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
 	GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
 	NetworkNode serviceDirectoryNode;
-	map<string,void*> publishMap;
-	map<string,void*> serviceMap;
+	map<string,NetworkNode*> publishMap;
+	map<string,NetworkNode*> serviceMap;
 public:
 
 	/**

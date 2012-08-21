@@ -42,6 +42,34 @@ public:
 
 		ret = node->subscribe("TEST", *this, "");
 		TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterDataProduct("TEST");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterDataProduct("TEST");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+
+        ret = node->subscribe("TEST", *this, "");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
+
+
+        /*
+         *  try again after unregistering
+         */
+        ret = node->registerDataProduct("TEST", 5656, "tcp");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->subscribe("TEST", *this, "");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterDataProduct("TEST");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterDataProduct("TEST");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+
+        ret = node->subscribe("TEST", *this, "");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
 	}
 
 	void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
