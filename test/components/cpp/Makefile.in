@@ -14,7 +14,10 @@ CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src
 LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)
-SRC=runner.cpp $(wildcard *.cpp)
+SRC=$(wildcard *.cpp)
+ifeq (,$(findstring runner.cpp,$(SRC)))
+    SRC := runner.cpp $(SRC)
+endif
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
 
 all: $(TEST_NAME) 
