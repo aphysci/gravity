@@ -15,6 +15,8 @@
 #include <signal.h>
 #include <tr1/memory>
 
+#include "ComponentLookupRequestPB.pb.h"
+#include "ComponentLookupResponsePB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
 
@@ -100,6 +102,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	{
 		// Connect to service directory component
 		socket = zmq_socket(context, ZMQ_REQ);
+		assert(socket);
 
 		stringstream ss;
 		ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
@@ -193,31 +196,31 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 		publishMap[dataProductID] = pubSocket;
 	}
 
-	if (ret == GravityReturnCodes::SUCCESS && serviceDirectoryNode.ipAddress.empty())
+	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
 	{
 		// Create the object describing the data product to register
-		shared_ptr<ServiceDirectoryRegistrationPB> registration(new ServiceDirectoryRegistrationPB());
-		registration->set_id(dataProductID);
-		registration->set_url(connectionString);
-		registration->set_type(ServiceDirectoryRegistrationPB::DATA);
+		ServiceDirectoryRegistrationPB registration;
+		registration.set_id(dataProductID);
+		registration.set_url(connectionString);
+		registration.set_type(ServiceDirectoryRegistrationPB::DATA);
 
 		// Wrap request in GravityDataProduct
-		shared_ptr<GravityDataProduct> request(new GravityDataProduct("DataProductRegistrationRequest"));
-		request->setFilterText("register");
-		request->setData(*registration);
+		GravityDataProduct request("DataProductRegistrationRequest");
+		request.setFilterText("register");
+		request.setData(registration);
 
 		// GravityDataProduct for response
-		shared_ptr<GravityDataProduct> response(new GravityDataProduct("DataProductRegistrationResponse"));
+		GravityDataProduct response("DataProductRegistrationResponse");
 
 		// Send request to service directory
-		ret = sendRequestToServiceDirectory(*request, *response);
+		ret = sendRequestToServiceDirectory(request, response);
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
-			ServiceDirectoryResponsePB* pb = new ServiceDirectoryResponsePB();
+			ServiceDirectoryResponsePB pb;
 			bool parserSuccess = true;
 			try
 			{
-				response->populateMessage(*pb);
+				response.populateMessage(pb);
 			}
 			catch (char* s)
 			{
@@ -226,7 +229,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
 			if (parserSuccess)
 			{
-				switch (pb->returncode())
+				switch (pb.returncode())
 				{
 					case ServiceDirectoryResponsePB::SUCCESS:
 						ret = GravityReturnCodes::SUCCESS;
@@ -259,19 +262,89 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
-	// Lookup data producer from service directory
-	// TODO
+	// Create the object describing the data product to lookup
+	ComponentLookupRequestPB lookup;
+	lookup.set_lookupid(dataProductID);
+	lookup.set_type(ComponentLookupRequestPB::DATA);
 
-	// Subscribe to published data product
-	// TODO
+	// Wrap request in GravityDataProduct
+	GravityDataProduct request("ComponentLookupRequest");
+	request.setFilterText("lookup");
+	request.setData(lookup);
 
-	return GravityReturnCodes::FAILURE;
+	// GravityDataProduct for response
+	GravityDataProduct response("ComponentLookupResponse");
+
+	// Send request to service directory
+	GravityReturnCode ret = sendRequestToServiceDirectory(request, response);
+
+	if (ret == GravityReturnCodes::SUCCESS)
+	{
+		ComponentLookupResponsePB pb;
+		bool parserSuccess = true;
+		try
+		{
+			response.populateMessage(pb);
+		}
+		catch (char* s)
+		{
+			parserSuccess = false;
+		}
+
+		if (parserSuccess)
+		{
+			if (!pb.url().empty())
+			{
+				// Subscribe to published data product
+			}
+			else
+			{
+				ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
+			}
+		}
+		else
+		{
+			ret = GravityReturnCodes::LINK_ERROR;
+		}
+	}
+	else
+	{
+		ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
+	}
+
+	return ret;
 }
 
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
 						    const GravitySubscriber& subscriber, string filter)
 {
-	return GravityReturnCodes::FAILURE;
+	// Create the socket
+	void* socket = zmq_socket(context, ZMQ_SUB);
+	assert(socket);
+
+	// Connect to publisher
+	int ret = zmq_connect(socket, connectionURL.c_str());
+	assert(ret == 0);
+
+	// Configure filter
+	ret = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
+	assert(ret == 0);
+
+	/*
+	zmq_pollitem_t pollItem;
+	pollItem.socket = socket;
+	pollItem.events = 0;
+	pollItem.fd = 0;
+	pollItem.revents = ZMQ_POLLIN;
+
+	SubscriptionData subscription;
+	subscription.name = subscriptionName;
+	subscription.filter = filter;
+	subscription.pollItem = pollItem;
+	subscriptionMap[subscriptionName] = subscription;
+	*/
+
+	return GravityReturnCodes::SUCCESS;
 }
 
 GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber)
@@ -347,29 +420,29 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
 	{
 		// Create the object describing the data product to register
-		shared_ptr<ServiceDirectoryRegistrationPB> registration(new ServiceDirectoryRegistrationPB());
-		registration->set_id(serviceID);
-		registration->set_url(connectionString);
-		registration->set_type(ServiceDirectoryRegistrationPB::SERVICE);
+		ServiceDirectoryRegistrationPB registration;
+		registration.set_id(serviceID);
+		registration.set_url(connectionString);
+		registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
 
 		// Wrap request in GravityDataProduct
-		shared_ptr<GravityDataProduct> request(new GravityDataProduct("ServiceRegistrationRequest"));
-		request->setFilterText("register");
-		request->setData(*registration);
+		GravityDataProduct request("ServiceRegistrationRequest");
+		request.setFilterText("register");
+		request.setData(registration);
 
 		// GravityDataProduct for response
-		shared_ptr<GravityDataProduct> response(new GravityDataProduct("ServiceRegistrationResponse"));
+		GravityDataProduct response("ServiceRegistrationResponse");
 
 		// Send request to service directory
-		ret = sendRequestToServiceDirectory(*request, *response);
+		ret = sendRequestToServiceDirectory(request, response);
 
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
-			ServiceDirectoryResponsePB* pb = new ServiceDirectoryResponsePB();
+			ServiceDirectoryResponsePB pb;
 			bool parserSuccess = true;
 			try
 			{
-				response->populateMessage(*pb);
+				response.populateMessage(pb);
 			}
 			catch (char* s)
 			{
@@ -378,7 +451,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 
 			if (parserSuccess)
 			{
-				switch (pb->returncode())
+				switch (pb.returncode())
 				{
 				case ServiceDirectoryResponsePB::SUCCESS:
 					ret = GravityReturnCodes::SUCCESS;
