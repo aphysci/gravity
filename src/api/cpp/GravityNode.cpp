@@ -19,6 +19,7 @@
 #include "ComponentLookupResponsePB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
+#include "ServiceDirectoryUnregistrationPB.pb.h"
 
 static int s_interrupted = 0;
 static void s_signal_handler(int signal_value)
@@ -46,6 +47,7 @@ GravityNode::GravityNode()
 	serviceDirectoryNode.ipAddress = "localhost";
 	serviceDirectoryNode.port = 5555;
 	serviceDirectoryNode.transport = "tcp";
+	serviceDirectoryNode.socket = NULL;
 }
 
 GravityNode::~GravityNode()
@@ -175,7 +177,8 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
 	// Build the connection string
 	stringstream ss;
-	ss << transportType << "://" << getIP() << ":" << networkPort;
+	string ipAddr = getIP();
+	ss << transportType << "://" << ipAddr << ":" << networkPort;
 	string connectionString = ss.str();
 
 	// Create the publish socket
@@ -193,7 +196,12 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 	else
 	{
 		// Track dataProductID->socket mapping
-		publishMap[dataProductID] = pubSocket;
+	    NetworkNode* node = new NetworkNode;
+	    node->ipAddress = ipAddr;
+	    node->port = networkPort;
+	    node->transport = transportType;
+	    node->socket = pubSocket;
+		publishMap[dataProductID] = node;
 	}
 
 	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
@@ -257,7 +265,71 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
 GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 {
-	return GravityReturnCodes::FAILURE;
+    GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
+    // Track dataProductID->socket mapping
+    NetworkNode* node = publishMap[dataProductID];
+    if (!node || !node->socket)
+    {
+        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+    }
+    else
+    {
+        stringstream ss;
+        ss << node->transport << "://" << node->ipAddress << ":" << node->port;
+        zmq_unbind(node->socket, ss.str().c_str());
+        zmq_close(node->socket);
+        publishMap[dataProductID] = NULL;
+        free(node);
+
+        ServiceDirectoryUnregistrationPB unregistration;
+        unregistration.set_id(dataProductID);
+        unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
+
+        GravityDataProduct request("DataProductUnregistrationRequest");
+        request.setFilterText("unregister");
+        request.setData(unregistration);
+
+        // GravityDataProduct for response
+        GravityDataProduct response("DataProductUnregistrationResponse");
+
+        // Send request to service directory
+        ret = sendRequestToServiceDirectory(request, response);
+
+        if (ret == GravityReturnCodes::SUCCESS)
+        {
+            ServiceDirectoryResponsePB pb;
+            bool parserSuccess = true;
+            try
+            {
+                response.populateMessage(pb);
+            }
+            catch (char* s)
+            {
+                parserSuccess = false;
+            }
+
+            if (parserSuccess)
+            {
+                switch (pb.returncode())
+                {
+                    case ServiceDirectoryResponsePB::SUCCESS:
+                        ret = GravityReturnCodes::SUCCESS;
+                        break;
+                    case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+                        break;
+                }
+            }
+            else
+            {
+                ret = GravityReturnCodes::LINK_ERROR;
+            }
+        }
+
+    }
+
+    return ret;
 }
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
@@ -355,7 +427,11 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
 {
 	string dataProductID = dataProduct.getDataProductID();
-	void* socket = this->publishMap[dataProductID];
+	NetworkNode* node = this->publishMap[dataProductID];
+	if (!node)
+	    return GravityReturnCodes::FAILURE;
+
+	void* socket = node->socket;
 
 	// Create message & send filter text
 	zmq_msg_t filt;
@@ -398,7 +474,8 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 
 	// Build the connection string
 	stringstream ss;
-	ss << transportType << "://" << getIP() << ":" << networkPort;
+	string ipAddr = getIP();
+	ss << transportType << "://" << ipAddr << ":" << networkPort;
 	string connectionString = ss.str();
 
 	// Create the server socket
@@ -414,7 +491,12 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 	else
 	{
 		// Track serviceID->socket mapping
-		serviceMap[serviceID] = serverSocket;
+	    NetworkNode* node = new NetworkNode;
+        node->ipAddress = ipAddr;
+        node->port = networkPort;
+        node->transport = transportType;
+	    node->socket = serverSocket;
+		serviceMap[serviceID] = node;
 	}
 
 	if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
