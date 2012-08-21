@@ -68,15 +68,15 @@ void ServiceDirectory::start()
         GravityDataProduct gdpRequest(data, size);
         GravityDataProduct gdpResponse("DataProductRegistrationResponse");
 
-        if (strcmp(requestType.c_str(), "lookup"))
+        if (requestType == "lookup")
         {
             handleLookup(gdpRequest, gdpResponse);
         }
-        else if (strcmp(requestType.c_str(), "register"))
+        else if (requestType == "register")
         {
             handleRegister(gdpRequest, gdpResponse);
         }
-        else if (strcmp(requestType.c_str(), "unregister"))
+        else if (requestType == "unregister")
         {
             handleUnregister(gdpRequest, gdpResponse);
         }
