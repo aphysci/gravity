@@ -183,26 +183,26 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
     // Create the publish socket
     void* pubSocket = zmq_socket(context, ZMQ_PUB);
-    assert(pubSocket);
+    if (!pubSocket)
+    {
+        return GravityReturnCodes::FAILURE;
+    }
 
     // Bind socket to url
     int rc = zmq_bind(pubSocket, connectionString.c_str());
-    assert(rc == 0);
+    if (rc != 0)
+    {
+        zmq_close(pubSocket);
+        return GravityReturnCodes::REGISTRATION_CONFLICT;
+    }
 
-    if (!pubSocket || rc != 0)
-    {
-        ret = GravityReturnCodes::FAILURE;
-    }
-    else
-    {
-        // Track dataProductID->socket mapping
-        NetworkNode* node = new NetworkNode;
-        node->ipAddress = ipAddr;
-        node->port = networkPort;
-        node->transport = transportType;
-        node->socket = pubSocket;
-        publishMap[dataProductID] = node;
-    }
+    // Track dataProductID->socket mapping
+    NetworkNode* node = new NetworkNode;
+    node->ipAddress = ipAddr;
+    node->port = networkPort;
+    node->transport = transportType;
+    node->socket = pubSocket;
+    publishMap[dataProductID] = node;
 
     if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
     {
