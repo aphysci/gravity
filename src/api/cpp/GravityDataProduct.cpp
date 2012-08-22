@@ -11,8 +11,8 @@ namespace gravity {
 
 GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProductPB(new GravityDataProductPB())
 {
-	gravityDataProductPB->set_dataproductid(dataProductID);
-	filterText = "";
+    gravityDataProductPB->set_dataproductid(dataProductID);
+    filterText = "";
 }
 
 GravityDataProduct::GravityDataProduct(void* arrayPtr, int size) : gravityDataProductPB(new GravityDataProductPB())
@@ -24,84 +24,84 @@ GravityDataProduct::~GravityDataProduct() {}
 
 string GravityDataProduct::getDataProductID() const
 {
-	return gravityDataProductPB->dataproductid();
+    return gravityDataProductPB->dataproductid();
 }
 
 void GravityDataProduct::setFilterText(string filterText)
 {
-	this->filterText = filterText;
+    this->filterText = filterText;
 }
 
 string GravityDataProduct::getFilterText() const
 {
-	return filterText;
+    return filterText;
 }
 
 void GravityDataProduct::setSoftwareVersion(string softwareVersion)
 {
-	gravityDataProductPB->set_softwareversion(softwareVersion);
+    gravityDataProductPB->set_softwareversion(softwareVersion);
 }
 
 string GravityDataProduct::getSoftwareVersion() const
 {
-	return gravityDataProductPB->softwareversion();
+    return gravityDataProductPB->softwareversion();
 }
 
 uint64_t GravityDataProduct::getGravityTimestamp() const
 {
-	return gravityDataProductPB->timestamp();
+    return gravityDataProductPB->timestamp();
 }
 
 void GravityDataProduct::setData(void* data, int size)
 {
-	for (int i=0; i<size; i++)
-	{
-		gravityDataProductPB->add_data((char*)data+i);
-	}
+    for (int i=0; i<size; i++)
+    {
+        gravityDataProductPB->add_data((char*)data+i);
+    }
 }
 
 void GravityDataProduct::setData(const google::protobuf::Message& data)
 {
-	char* vdata = (char*)malloc(data.ByteSize());
-	assert(vdata);
-	data.SerializeToArray(vdata, data.ByteSize());
-	for (int i=0; i<data.ByteSize(); i++)
-	{
-		gravityDataProductPB->add_data(vdata+i);
-	}
-	delete vdata;
+    char* vdata = (char*)malloc(data.ByteSize());
+    assert(vdata);
+    data.SerializeToArray(vdata, data.ByteSize());
+    for (int i=0; i<data.ByteSize(); i++)
+    {
+        gravityDataProductPB->add_data(vdata+i);
+    }
+    delete vdata;
 }
 
 bool GravityDataProduct::getData(void* data, int size) const
 {
-	memcpy(data, gravityDataProductPB->mutable_data()->mutable_data(), size);
+    memcpy(data, gravityDataProductPB->mutable_data()->mutable_data(), size);
 
-	return true;
+    return true;
 }
 
 int GravityDataProduct::getDataSize() const
 {
-	return gravityDataProductPB->data_size();
+    return gravityDataProductPB->data_size();
 }
 
 bool GravityDataProduct::populateMessage(google::protobuf::Message& data) const
 {
-	return data.ParseFromArray((void*)gravityDataProductPB->data(0).c_str(), getDataSize());
+    return data.ParseFromArray((void*)gravityDataProductPB->data(0).c_str(), getDataSize());
 }
 
 int GravityDataProduct::getSize() const
 {
-	return gravityDataProductPB->ByteSize();
+    return gravityDataProductPB->ByteSize();
 }
 
 void GravityDataProduct::parseFromArray(void* arrayPtr, int size)
 {
-	gravityDataProductPB->ParseFromArray(arrayPtr, size);
+    gravityDataProductPB->ParseFromArray(arrayPtr, size);
 }
 
 bool GravityDataProduct::serializeToArray(void* arrayPtr) const
 {
-	return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSize());
+    return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSize());
 }
 
 } /* namespace gravity */

@@ -19,15 +19,15 @@ namespace gravity
 class GravityServiceProvider
 {
 public:
-	/**
-	 * Default destructor
-	 */
-	virtual ~GravityServiceProvider();
+    /**
+     * Default destructor
+     */
+    virtual ~GravityServiceProvider();
 
-	/**
-	 * Called when a request is made through the Gravity infrastructure
-	 */
-	virtual void request(const GravityDataProduct& dataProducts) = 0;
+    /**
+     * Called when a request is made through the Gravity infrastructure
+     */
+    virtual void request(const GravityDataProduct& dataProducts) = 0;
 };
 
 } /* namespace gravity */
