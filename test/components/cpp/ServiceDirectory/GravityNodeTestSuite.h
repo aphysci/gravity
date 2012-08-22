@@ -19,6 +19,20 @@
 using namespace std;
 using namespace gravity;
 
+CXXTEST_ENUM_TRAITS( GravityReturnCode,
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::SUCCESS )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::FAILURE )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::NO_SERVICE_DIRECTORY )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::REQUEST_TIMEOUT )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::DUPLICATE )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::REGISTRATION_CONFLICT )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::NOT_REGISTERED )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::NO_SUCH_SERVICE )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::NO_SUCH_DATA_PRODUCT )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::LINK_ERROR )
+                     CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
+                     );
+
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
 
 public:
