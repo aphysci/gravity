@@ -22,26 +22,26 @@ using namespace gravity;
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
 
 public:
-	void setUp() {
-		//memset(buffer, 0, BUFFER_SIZE);
-		pid = popen2("ServiceDirectory", NULL, &sdFd);
-		//int nbytes = read(sdFd, buffer, BUFFER_SIZE);
-		//cout << endl << "output: " << buffer << endl;
-	}
+    void setUp() {
+        //memset(buffer, 0, BUFFER_SIZE);
+        pid = popen2("ServiceDirectory", NULL, &sdFd);
+        //int nbytes = read(sdFd, buffer, BUFFER_SIZE);
+        //cout << endl << "output: " << buffer << endl;
+    }
 
-	void tearDown() {
-		popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
-	}
+    void tearDown() {
+        popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
+    }
 
-	void testRegister(void) {
-		GravityNode* node = new GravityNode();
-		GravityReturnCode ret = node->init();
-		
-		ret = node->registerDataProduct("TEST", 5656, "tcp");
-		TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+    void testRegister(void) {
+        GravityNode* node = new GravityNode();
+        GravityReturnCode ret = node->init();
 
-		ret = node->subscribe("TEST", *this, "");
-		TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+        ret = node->registerDataProduct("TEST", 5656, "tcp");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->subscribe("TEST", *this, "");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node->unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -70,14 +70,14 @@ public:
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
-	}
+    }
 
-	void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
+    void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
 
 private:
-	pid_t pid;
-	int sdFd;
-	char buffer[BUFFER_SIZE];
+    pid_t pid;
+    int sdFd;
+    char buffer[BUFFER_SIZE];
 };
 
 #endif /* GRAVITYNODETESTSUITE_H_ */

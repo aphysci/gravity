@@ -21,15 +21,15 @@ namespace gravity
 class GravityRequestor
 {
 public:
-	/**
-	 * Default destructor
-	 */
-	virtual ~GravityRequestor();
+    /**
+     * Default destructor
+     */
+    virtual ~GravityRequestor();
 
-	/**
-	 * Called when a response to a request is received through the Gravity infrastructure
-	 */
-	virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response) = 0;
+    /**
+     * Called when a response to a request is received through the Gravity infrastructure
+     */
+    virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response) = 0;
 };
 
 } /* namespace gravity */
