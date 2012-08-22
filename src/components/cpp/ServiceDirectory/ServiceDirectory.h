@@ -9,6 +9,7 @@
 #define SERVICEDIRECTORY_H_
 
 #include <string>
+#include <list>
 #include <map>
 #include "GravityDataProduct.h"
 
@@ -20,8 +21,8 @@ namespace gravity
 class ServiceDirectory
 {
 private:
-    map<std::string, std::string> dataProductMap;
-    map<std::string, std::string> serviceMap;
+    map<string, list<string> > dataProductMap;
+    map<string, list<string> > serviceMap;
 public:
     ServiceDirectory();
     virtual ~ServiceDirectory();

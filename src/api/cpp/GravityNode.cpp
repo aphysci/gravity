@@ -284,6 +284,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 
         ServiceDirectoryUnregistrationPB unregistration;
         unregistration.set_id(dataProductID);
+        unregistration.set_url(ss.str());
         unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
 
         GravityDataProduct request("DataProductUnregistrationRequest");
@@ -365,7 +366,7 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
 		if (parserSuccess)
 		{
-			if (!pb.url().empty())
+			if (pb.url().size() > 0)
 			{
 				// Subscribe to published data product
 			}
