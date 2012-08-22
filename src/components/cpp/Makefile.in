@@ -31,8 +31,8 @@ all: $(PROG_NAME)
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
+	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
 
 clean:
 	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc
