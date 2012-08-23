@@ -17,6 +17,8 @@ PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
 
+.PRECIOUS: %.pb.cc
+
 all: $(LIB_NAME) 
 
 %.pb.cc:%.proto
