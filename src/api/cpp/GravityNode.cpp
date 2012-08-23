@@ -320,6 +320,9 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
                 case ServiceDirectoryResponsePB::NOT_REGISTERED:
                     ret = GravityReturnCodes::REGISTRATION_CONFLICT;
                     break;
+                default:
+                	ret = GravityReturnCodes::FAILURE;
+                	break;
                 }
             }
             else
