@@ -2,8 +2,10 @@
 #include <string>
 #include <map>
 
-namespace gravity {
+struct _dictionary_;
+typedef struct _dictionary_ dictionary ;
 
+namespace gravity {
 
 class GravityConfigParser
 {

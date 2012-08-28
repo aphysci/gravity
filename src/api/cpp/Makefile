@@ -9,7 +9,7 @@ PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=libgravity.a
 
 INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
-CFLAGS=$(INCLUDES) -L$(INIPARSE_DIR) -liniparser -L$(SQLLIB_DIR) -lcppdb
+CFLAGS=$(INCLUDES) -L$(INIPARSE_DIR) -liniparser -L$(SQLLIB_DIR) -lcppdb -Wno-write-strings
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))

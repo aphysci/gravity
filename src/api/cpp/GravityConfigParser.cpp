@@ -36,7 +36,7 @@ void GravityConfigParser::ParseConfigFile(const char* filename, const char** add
     iniparser_freedict(myconfig);
 }
 
-virtual void GravityConfigParser::GetOtherConfigOptions(dictionary* myconfig)
+void GravityConfigParser::GetOtherConfigOptions(dictionary* myconfig)
 {
 
 }
