@@ -22,7 +22,7 @@ class ServiceDirectory
 {
 private:
     map<string, list<string> > dataProductMap;
-    map<string, list<string> > serviceMap;
+    map<string, string> serviceMap;
 public:
     ServiceDirectory();
     virtual ~ServiceDirectory();

@@ -19,7 +19,8 @@
 
 #include "GravitySubscriptionManager.h"
 #include "ComponentLookupRequestPB.pb.h"
-#include "ComponentLookupResponsePB.pb.h"
+#include "ComponentDataLookupResponsePB.pb.h"
+#include "ComponentServiceLookupResponsePB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
 #include "ServiceDirectoryUnregistrationPB.pb.h"
@@ -393,7 +394,7 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
     if (ret == GravityReturnCodes::SUCCESS)
     {
-        ComponentLookupResponsePB pb;
+        ComponentDataLookupResponsePB pb;
         bool parserSuccess = true;
         try
         {

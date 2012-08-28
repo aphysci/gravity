@@ -10,7 +10,8 @@
 #include "ServiceDirectoryUnregistrationPB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ComponentLookupRequestPB.pb.h"
-#include "ComponentLookupResponsePB.pb.h"
+#include "ComponentDataLookupResponsePB.pb.h"
+#include "ComponentServiceLookupResponsePB.pb.h"
 #include "zmq.h"
 #include <stdlib.h>
 #include <string>
@@ -98,28 +99,35 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 {
     ComponentLookupRequestPB lookupRequest;
     request.populateMessage(lookupRequest);
-    list<string>* urls;
     if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
-        urls = &dataProductMap[lookupRequest.lookupid()];
-    else
-        urls = &serviceMap[lookupRequest.lookupid()];
-
-    ComponentLookupResponsePB lookupResponse;
-    lookupResponse.set_lookupid(lookupRequest.lookupid());
-    cout << "DEBUG: lookup request: " << lookupRequest.lookupid() << endl;
-    for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
     {
-        lookupResponse.add_url(*iter);
-        cout << "DEBUG: found url: " << *iter << endl;
+        list<string>* urls = &dataProductMap[lookupRequest.lookupid()];
+        ComponentDataLookupResponsePB lookupResponse;
+        lookupResponse.set_lookupid(lookupRequest.lookupid());
+        cout << "DEBUG: lookup request: " << lookupRequest.lookupid() << endl;
+        for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
+        {
+            lookupResponse.add_url(*iter);
+            cout << "DEBUG: found url: " << *iter << endl;
+        }
+        response.setData(lookupResponse);
     }
-    response.setData(lookupResponse);
+    else
+    {
+        ComponentServiceLookupResponsePB lookupResponse;
+        lookupResponse.set_lookupid(lookupRequest.lookupid());
+        lookupResponse.set_url(serviceMap[lookupRequest.lookupid()]);
+        response.setData(lookupResponse);
+    }
+
 }
 
 void ServiceDirectory::handleRegister(const GravityDataProduct& request, GravityDataProduct& response)
 {
     ServiceDirectoryRegistrationPB registration;
     request.populateMessage(registration);
-    bool foundDup = false;
+    bool foundDup = false, foundConflict = false;;
+    string origUrl;
     if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
     {
         list<string>* urls = &dataProductMap[registration.id()];
@@ -131,10 +139,11 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     }
     else
     {
-        list<string>* urls = &serviceMap[registration.id()];
-        list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
-        if (iter == urls->end())
-            serviceMap[registration.id()].push_back(registration.url());
+        origUrl = serviceMap[registration.id()];
+        if (origUrl == "")
+            serviceMap[registration.id()] = registration.url();
+        else if (origUrl == registration.url())
+            foundConflict = true;
         else
             foundDup = true;
     }
@@ -143,11 +152,16 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     sdr.set_id(registration.id());
     if (foundDup)
     {
-        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_DUPLICATE_REGISTRATION);
+        sdr.set_returncode(ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION);
         cout << "Attempt to register duplicate url (" << registration.url() << ") for " << registration.id() << endl;
     }
+    else if (foundConflict)
+    {
+        sdr.set_returncode(ServiceDirectoryResponsePB::REGISTRATION_CONFLICT);
+        cout << "Attempt to register conflicting url (" << registration.url() << ", was " << origUrl << ") for " << registration.id() << endl;
+    }
     else
-        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
+        sdr.set_returncode(ServiceDirectoryResponsePB::SUCCESS);
 
     response.setData(sdr);
 }
@@ -169,10 +183,9 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     }
     else
     {
-        list<string>* urls = &serviceMap[unregistration.id()];
-        list<string>::iterator iter = find(urls->begin(), urls->end(), unregistration.url());
-        if (iter != urls->end())
-            serviceMap[unregistration.id()].erase(iter);
+        string origUrl = serviceMap[unregistration.id()];
+        if (origUrl != "")
+            serviceMap[unregistration.id()] = "";
         else
             foundUrl = false;
     }
@@ -181,11 +194,11 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     sdr.set_id(unregistration.id());
     if (!foundUrl)
     {
-        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_NOT_REGISTERED);
-        cout << "Attempt to unregister unregistered " + unregistration.id() << "(" << unregistration.url() << ")" << endl;
+        sdr.set_returncode(ServiceDirectoryResponsePB::NOT_REGISTERED);
+        cout << "Attempt to unregister unregistered id: " + unregistration.id() << "(" << unregistration.url() << ")" << endl;
     }
     else
-        sdr.set_returncode(ServiceDirectoryResponsePB_ReturnCodes_SUCCESS);
+        sdr.set_returncode(ServiceDirectoryResponsePB::SUCCESS);
 
     response.setData(sdr);
 }
