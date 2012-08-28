@@ -617,7 +617,75 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 
 GravityReturnCode GravityNode::unregisterService(string serviceID, const GravityServiceProvider& server)
 {
-    return GravityReturnCodes::FAILURE;
+    GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
+    // Track serviceID->socket mapping
+    NetworkNode* node = serviceMap[serviceID];
+    if (!node || !node->socket)
+    {
+        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+        cout << "could not find serviceID " << serviceID << " in service map, node = " << node << endl;
+    }
+    else
+    {
+        stringstream ss;
+        ss << node->transport << "://" << node->ipAddress << ":" << node->port;
+        zmq_unbind(node->socket, ss.str().c_str());
+        zmq_close(node->socket);
+        serviceMap[serviceID] = NULL;
+        free(node);
+
+        ServiceDirectoryUnregistrationPB unregistration;
+        unregistration.set_id(serviceID);
+        unregistration.set_url(ss.str());
+        unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
+
+        GravityDataProduct request("ServiceUnregistrationRequest");
+        request.setFilterText("unregister");
+        request.setData(unregistration);
+
+        // GravityDataProduct for response
+        GravityDataProduct response("ServiceUnregistrationResponse");
+
+        // Send request to service directory
+        ret = sendRequestToServiceDirectory(request, response);
+
+        if (ret == GravityReturnCodes::SUCCESS)
+        {
+            ServiceDirectoryResponsePB pb;
+            bool parserSuccess = true;
+            try
+            {
+                response.populateMessage(pb);
+            }
+            catch (char* s)
+            {
+                parserSuccess = false;
+            }
+
+            if (parserSuccess)
+            {
+                switch (pb.returncode())
+                {
+                case ServiceDirectoryResponsePB::SUCCESS:
+                    ret = GravityReturnCodes::SUCCESS;
+                    break;
+                case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                    ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+                    break;
+                default:
+                    ret = GravityReturnCodes::FAILURE;
+                    break;
+                }
+            }
+            else
+            {
+                ret = GravityReturnCodes::LINK_ERROR;
+            }
+        }
+    }
+
+    return ret;
 }
 
 uint64_t GravityNode::getCurrentTime()

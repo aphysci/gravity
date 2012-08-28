@@ -135,8 +135,14 @@ public:
         ret = node->registerService("TEST2", 5657, "tcp", *this);
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
+        ret = node->registerService("TEST2", 5657, "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+
         ret = node->unregisterService("TEST2", *this);
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::FAILURE);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterService("TEST2", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
         delete node;
     }
