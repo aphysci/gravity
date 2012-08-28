@@ -126,13 +126,6 @@ public:
         delete node;
     }
 
-    void subscriptionFilled(const GravityDataProduct& dataProduct)
-    {
-    	pthread_mutex_lock(&mutex);
-    	subFilledFlag = true;
-    	pthread_mutex_unlock(&mutex);
-    }
-
     void testRegisterService(void)
     {
         GravityNode* node = new GravityNode();
@@ -142,9 +135,23 @@ public:
         ret = node->registerService("TEST2", 5657, "tcp", *this);
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->unregisterService("TEST2", *this);
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::FAILURE);
+        ret = node->registerService("TEST2", 5657, "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
+        ret = node->unregisterService("TEST2", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterService("TEST2", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+
+        delete node;
+    }
+
+    void subscriptionFilled(const GravityDataProduct& dataProduct)
+    {
+        pthread_mutex_lock(&mutex);
+        subFilledFlag = true;
+        pthread_mutex_unlock(&mutex);
     }
 
     bool subFilled()

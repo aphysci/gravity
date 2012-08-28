@@ -1,9 +1,12 @@
+
+#ifndef GRAVITYCONFIGPARSER_H_
+#define GRAVITYCONFIGPARSER_H_
+
+
 #include "GravityLogger.h"
 #include <string>
 #include <map>
-
-struct _dictionary_;
-typedef struct _dictionary_ dictionary ;
+#include "dictionary.h"
 
 namespace gravity {
 
@@ -38,3 +41,5 @@ private:
 };
 
 }
+
+#endif // GRAVITYCONFIGPARSER_H_

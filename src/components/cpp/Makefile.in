@@ -9,7 +9,7 @@ PROTOC=$(PROTOBUF_DIR)/src/protoc
 PROG_NAME=$(notdir $(shell pwd) )
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
+CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
 LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 SRC=$(wildcard *.cpp)
@@ -26,10 +26,10 @@ all: $(PROG_NAME)
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(INCLUDES)
 
 %.o:%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(INCLUDES)
 
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
