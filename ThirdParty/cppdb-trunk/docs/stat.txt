@@ -1,0 +1,89 @@
+/*! \page stat Preparing and Executing Statements
+
+\section stat_prep Creating a Statement
+
+The cppdb::statement objects are usually created by calling cppdb::session::prepare() function or by using
+cppdb::session::operator<<(). Prepare statements are usually cached for future reuse. Non-prepared statements
+can be also created by calling cppdb::session::create_statement() and prepared statements can be created without
+caching by calling cppdb::session::create_prepared_uncached_statement(). It is useful when
+such statements are rarely executed or executed only once.
+
+For example:
+
+\code
+cppdb::statement st=sql.prepare("DELETE FROM users");
+\endcode
+
+\section stat_bind Binding Parameters
+
+The statement may contain placeholders marked with "?" for parameters that should be binded. The
+values for placeholders can be binded by their order using cppdb::statement::operator<<()  or \ref cppdb::statement "bind()"
+functions. The placeholder order can be also specified explicitly starting from 1.
+
+For example:
+\code
+cppdb::statement st=sql.prepare("DELETE FROM users WHERE age<? AND role<>?");
+st.bind(1,13);
+st.bind(2,"moderator");
+\endcode
+
+Of course syntactic sugar may be used as well:
+\code
+cppdb::statement st=sql << "DELETE FROM users WHERE age<? AND role<>?" << 13 << "moderator";
+\endcode
+
+
+\section stat_null Binding NULL values.
+
+- You can use cppdb::statement::bind_null() functions.
+\n
+\code
+cppdb::statement st=sql << "INSERT into f(x) values(?)";
+st.bind_null(1);
+\endcode
+- You can use manipulator cppdb::null
+\n
+\code
+sql << "INSERT into f(x) values(?)" << cppdb::null << cppdb::exec;
+\endcode
+- If you have an information about wether the value is null or not only at run time you can use a cppdb::use() manipulator
+which receives a value and a parameter of cppdb::null_tag_type.
+\n
+\code
+cppdb::null_tag_type tag = value_is_null ? cppdb::null_value : cppdb::not_null_value;
+sql << "INSERT into f(x) values(?)" << cppdb::use(value,tag) << cppdb::exec;
+\endcode
+
+
+\section stat_exec Executing Statements
+
+Statements are executed by calling cppdb::statement::exec(). Also manipulator cppdb::exec provided
+for execution of a statement that allows writing complex queries in one line.
+\code
+sql << "DELETE FROM users WHERE age<? AND role<>?" << 13 << "moderator" <<cppdb::exec;
+\endcode
+
+\section stat_meta Fetching Meta-data
+
+Meta-data about recently executed statement can fetched using following functions:
+
+- cppdb::statement::affected() - the number of rows affected by the statement
+- cppdb::statement::last_insert_id() - the last generated row id.
+- cppdb::statement::sequence_last() - the last generated sequence number (using named sequences).
+
+\section stat_reset Reusing Statement
+
+The same prepared statement can be reused multiple times. For this purpose after each call of ppdb::statement::exec() or ppdb::statement::query(), ppdb::statement::reset() should be called that would clear all bindings and allow executing it once again:
+
+\code
+cppdb::statement st = sql << "INSERT INTO students(id,name) values(?,?)";
+for(i=0;i<students.size();i++) {
+  st.bind(students[i].id);
+  st.bind(students[i].name);
+  st.exec();
+  st.reset();
+}
+\endcode
+
+*/
+

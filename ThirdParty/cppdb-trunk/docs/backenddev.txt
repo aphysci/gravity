@@ -1,0 +1,105 @@
+/*! \page backenddev Developing Your Own Backends
+
+Even if your database is not supported directly by one of the backends, take a look on \ref odbc "ODBC" backend, 
+and see how well your database driver behaves with it. It may solve the problem for you.
+
+Before you begin make sure you are familiar with CppDB library and know how to use it. Take a look to the
+source code of existing backends, it is good to take a look on \ref postgresql "PostgreSQL" and \ref sqlite3 "Sqlite3" backends
+implementations.
+
+\section backenddev_what_needed What Need to Implement
+
+You need to implement following 3 classes:
+
+-# cppdb::backend::connection - the object that holds connection to the database - similar to cppdb::session.
+-# cppdb::backend::statement - the object that holds prepared (or unprepared) statement - similar to cppdb::statement
+-# cppdb::backend::result - the object that holds the result of query - similar to cppdb::result
+
+You may safely assume that:
+
+- As long as \ref cppdb::backend::result "result" exists, the \ref cppdb::backend::statement "statement" that created it would exist.
+- As long as \ref cppdb::backend::statement "statement" exists, the \ref cppdb::backend::connection "connection" that created it would exist.
+
+The frontend classes make sure that this happens. 
+
+
+\section backend_ref_dynamic Making Loadable Module
+
+You need to implement a single entry point in your library with the \ref cppdb::backend::cppdb_backend_connect_function "following prototype".
+It is very important to make the entry point function \c extern \c "C" so it would be resolved using dlsym or GetProcAddress functions 
+and it should be marked as "__declspec(dllexport)" if it is compiled as Windows DLL.
+
+It should be named it as \c cppdb_xyz_get_connection where \c xyz is the name of your backend.
+
+It should receive as a parameter a const reference to cppdb::connection_info returning newly created \ref cppdb::backend::connection "connection".
+
+For example, in sqlite3 backend this function looks like this:
+
+\code
+extern "C" {
+	CPPDB_DRIVER_API cppdb::backend::connection *cppdb_sqlite3_get_connection(cppdb::connection_info const &cs)
+	{
+		return new cppdb::sqlite3_backend::connection(cs);
+	}
+}
+\endcode
+
+The shared object or DLL themselves should be named as cppdb_xyz - so under Linux it would be libcppdb_xyz.so and under Windows MSVC it would
+be "cppdb_xyz.dll". It is also good idea to give it same soname as the libcppdb.so itself as it would allow keeping several backend
+versions for several versions of libcppdb in future as CppDB always tries to load a module as "libcppdb_xyz.so.V" and only
+then "libcppdb_xyz.so" where V is the current CppDB library soname.
+
+\section backend_ref_static Making Statically Linked only Module
+
+Of course if you want to link your module statically only, you do not have to create this single entry point
+function, you may derive from  cppdb::backend::driver class such as its \ref cppdb::backend::driver::open() "open()" function
+would return a new connection object and \ref cppdb::backend::driver::in_use() "in_use()" function would always return
+true so the module would not be "unloaded".
+
+Such module can be installed using \ref cppdb::driver_manager driver_manager singleton class using its \ref cppdb::driver_manager::install_driver() "install_driver()" member function. For example:
+
+\code
+ class my_cool_sql_driver {
+ public:
+    cppdb::backend::connection *open(cppdb::connection_info const &ci) {
+       return new my_cool_sql::connection(ci);
+    }
+    bool in_use() { return true; }
+ };
+ ...
+ cppdb::driver_manager::instance().install_driver("mycoolsql",new my_cool_sql_driver());
+
+\endcode
+
+Of course if you have the \c extern \c "C" function as shown above you can do the same trick using cppdb::backend::static_driver.
+
+\code
+ extern "C" {
+    cppdb::backend::connection *my_cool_sql_open(cppdb::connection_info const &ci) {
+       return new my_cool_sql::connection(ci);
+    }
+ }
+ ...
+ cppdb::driver_manager::instance().install_driver("mycoolsql",new cppdb::backend::static_driver(my_cool_sql_open));
+
+\endcode
+
+\section backend_tips Tips
+
+- Use functions from utils.h and numeric_util.h they are very helpful especially in converting data to and from textual representation.
+- When converting numbers to strings and backwards make sure you are using std::locale::classic(), otherwise when inserting
+  12345.678 you may accidentally get "12.345,678" which is probably not what you want. Do it as following:
+  \code
+  std::ostringstream ss;
+  ss.imbue(std::locale::classic());
+  ss << number;
+  std::string text_value = ss.str();
+  \endcode
+  And do the same for parsing.
+- Try to reduce memory coping as much as possible when handing large texts and objects, remember that when std::string is binded
+  it remains valid till actual statement execution so it is likely that you can just keep a reference on it rather then
+  copying the string itself.
+- Don't bother too much about statements caching or connection pooling. Front-end classes do this for you.
+
+*/
+

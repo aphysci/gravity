@@ -1,0 +1,35 @@
+/*! \page support Tested Compilers and Platforms
+
+CppDB was tested on following platforms:
+
+- Linux x86_64 with mysql, sqlite3, postgresql and odbc backends.
+- Windows XP Pro with sqlite3 and odbc backends.
+- Cygwin with sqlite3 backend.
+- Darwin 8, x86 with sqlite3 backend
+- OpenSolaris 2009.06 with sqlite3 backend
+- FreeBSD 8.0 with sqlite3 backend
+
+CppDB was tested with following compilers:
+
+- GCC-4.3, GCC-4.4, GCC-4.5, GCC-4.5/C++0x
+- MSVC 2008
+- Intel Compiler 11.0
+- SunStudio 5.11 with and without stlport
+
+CppDB was tested with following databases:
+
+- MySQL 5.0
+- PostgreSQL 8.3
+- Sqlite3 3.5.9
+- MS SQL Server Express 2008 R2
+
+CppDB-ODBC bridge was tested:
+
+- Under Windows, using MSVC and MinGW  with MS SQL Server with both narrow (ANSI) and wide (UNICODE) api
+- Under Linux using unixodbc library:
+  - MySQL - 100% tests passed
+  - Sqlite3 - faults to handle transactions - odbc driver issue.
+  - PostgreSQL - faults to handle BLOB - odbc driver issue.
+  - MS SQL - 100% tests passed using ANSI API, wide API is not supported by FreeTDS ODBC Driver.
+
+*/

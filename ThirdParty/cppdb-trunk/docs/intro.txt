@@ -1,0 +1,53 @@
+//-----------------------------------------------------------
+
+/*! \page intro Quick Start Guide
+
+\section codesmaple The Code
+
+The best is to start from this example
+
+\include example1.cpp
+
+
+First we connect to the database using \ref connstr "cppdb connection string". Then
+we execute a simple sql query.
+
+When you write
+
+\code
+	sql << "DROP TABLE IF EXISTS test" << cppdb::exec;
+\endcode
+
+\section codedesc Description
+
+
+You actually first prepare a statement (using first operator "<<") and then execute it using a cppdb::exec manipulator.
+In the same way we create the table we need.
+
+Then we create a statement that we will use multiple times. At first we prepare a statement using
+operator "<<" and then we bind parameters to it. Note, the string is passed as is without escaping
+it in any way. Then we execute a statement calling stat.exec(). Note it could be done using
+manipulator as well in previous line, but this is just a more verbose way and probably more clean way
+to do it.
+
+Then calling stat.last_insert_id() and stat.affected() we fetch the data about last executed statement.
+
+We can use our statement again after calling cppdb::statement::reset() function. In the next
+statement execution we would use more "verbose" variant of binding parameters - using bind()
+functions of statement, and then executing it.
+
+
+Then fetch the results we created. We prepare a query and assign it into \a res variable
+efficiently fetching the query result.
+
+Then we iterate over result's rows using res.next(), for each row we fetch the data using
+operator ">>".
+
+In the next query we select several values into a single row.  We prepare a statement,
+bind a key 1 for the placeholder "?" and then we check if the row was actually fetched
+and we fetch values. We can fetch values using operator ">>" as above, however we can
+also fetch them using column names or indexes.
+
+
+*/
+

@@ -1,0 +1,146 @@
+/*! \page query Fetching Query Results
+
+First read about \ref stat "how to prepare" statements
+
+\section query_fetch Fetching a Results
+
+The result is represented by cppdb::result class. It stores the query result. The prepared statement result can be fetched
+using \ref cppdb::statement::query() "statement::query()" function.
+
+\code
+cppdb::statement st = sql << "SELECT name,age FROM students";
+cppdb::result r = st.query();
+\endcode
+
+\note \ref cppdb::statement "statement" can be converted to \ref cppdb::result "result" automatically that actually causes calling \ref cppdb::statement::query() "query()" function.
+
+So the same code above can be written using syntactic sugar as following:
+
+\code
+cppdb::result r = sql << "SELECT name,age FROM students";
+\endcode
+
+\section query_meta Fetching Meta-data on the Result:
+
+Following meta-data can be fetched about the result:
+
+- Number of columns using \ref cppdb::result::cols() "cols()" member function.
+- The name of columns using \ref cppdb::result::name() "name()" member function. These names can be used
+  for retrieval of the data using \ref cppdb::result "fetch()" member functions.
+
+\section query_iter Getting the Result Data
+
+In order to iterate over rows of the result you should use  \ref cppdb::result::next() "next()" function that
+returns true if the next row exits and false otherwise. Once \ref cppdb::result::next() "next()" returned true
+you can fetch the values using \ref cppdb::result "fetch()" family of functions.
+
+There are 3 kinds of prototypes for \c fetch() functions.
+
+-# <tt>bool fetch(int column,type &value)</tt> - fetch the value from column (index starts from 0) returning false if the value in NULL.
+-# <tt>bool fetch(std::string const &column_name,type &value)</tt> - fetch the value from column using its name returning false if the value in NULL.
+-# <tt>bool fetch(type &value)</tt> - fetch the value from the next column in current row (starting from 0) returning false if the value in NULL.
+
+Where type is one of C++ numeric types, \c std::string for text, \c std::tm for date-time types and \c std::ostream for Blob types. Fetching
+a value would try to do the best in casting between result type and the type you provide, for example fetching numeric or date-time types
+would convert them to string representation, it would try to do the casting between string and std::tm and numeric types if possible.
+
+If conversion fails, cppdb::bad_value_cast is thrown.
+
+For example:
+
+\code
+cppdb::result r = sql << "SELECT name,age FROM users WHERE age > ?" << 18.0;
+while(r.next()) {
+  std::string name;
+  double age;
+  r.fetch(0,name);
+  r.fetch(1,age);
+  std::cout << name << " is " << age << " years old" << std::endl;
+}
+\endcode
+
+Another way to get values directly is by using cppdb::result::get(int) or cppdb::result::get(std::string const &) template member functions
+that allow to fetch values from columns directly using column index or column name:
+
+\code
+cppdb::result r = sql << "SELECT name,age FROM users WHERE age > ?" << 18.0;
+while(r.next()) {
+  std::cout << r.get<std::string>("name") << " is " << r.get<double>("age") << " years old" << std::endl;
+}
+\endcode
+
+Unlike \c fetch() function, \c get() functions throw cppdb::null_value_fetch if the value was null.
+
+
+\section query_syntacx Syntactic Sugar
+
+There is also overloaded operator ">>" that provide syntactic sugar for fetching data and the example above an be written as:
+
+\code
+cppdb::result r = sql << "SELECT name,age FROM users WHERE age > ?" << 18.0;
+while(r.next()) {
+  std::string name;
+  double age;
+  r >> name >> age;
+  std::cout << name << " is " << age << " years old" << std::endl;
+}
+\endcode
+
+\note Operators \c >> function remain variable unchanged when the result is NULL value.
+
+In order to fetch both meta-data and the value you can use \ref cppdb::into "into()" manipulator
+that passes both reference to the value and a tag. For example
+
+\code
+cppdb::null_tag_type age_tag,name_tag;
+std::string name;
+double age;
+r >> cppdb::into(name,name_tag) >> cppdb::into(age,age_tag);
+\endcode
+
+\section query_row Fetching a Single Row
+
+Sometimes it is useful to fetch a single row of data and not iterate over it. This can be done using cppdb::statement::row()
+function that works like  \ref cppdb::statement::query() "query()" but also calls \ref cppdb::result::next() "next()" first time
+and checks if more then one rows had been fetched (in which case it throws \ref cppdb::multiple_rows_query "multiple_rows_query" exception).
+
+For example:
+
+\code
+cppdb::statement st = sql<<"SELECT password WHERE username=?" << user
+cppdb::result r = st.row();
+
+if(!r.empty()) {
+	if(pass == r.get<std::string>(0)) {
+		// ok
+	}
+	else {
+		// wrong password
+	}
+}
+else {
+	// no such user
+}
+\endcode
+
+You can also use cppdb::row manipulator to make it shorter:
+
+\code
+cppdb::result r = sql<<"SELECT password WHERE username=?" << user << cppdb::row
+if(!r.empty()) 
+	...
+else 
+	...
+\endcode
+
+You can also use operator \c >> right after \ref cppdb::row "row" manipulator, but in case
+the empty result was fetched a \ref cppdb::empty_row_access "empty_row_access" exception would be thrown.
+
+\code
+double age;
+sql<<"SELECT age WHERE username=?" << user << cppdb::row >> age;
+\endcode
+
+
+*/
+

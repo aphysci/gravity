@@ -1,12 +1,14 @@
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
+INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
+SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
 MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=libgravity.a
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
 CFLAGS=$(INCLUDES)
 
 SRC=$(wildcard *.cpp)
@@ -22,16 +24,20 @@ PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
 all: $(LIB_NAME) 
 
 %.pb.cc:%.proto
-	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
+	@echo proto build $<
+	@$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) -c -o $@ $< $(CFLAGS)
+	@echo $(CC) proto build $<
+	@$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o:%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-	
+	@echo $(CC) $<
+	@$(CC) -c -o $@ $< $(CFLAGS)
+
 $(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
-	ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
+	@echo building $(LIB_NAME)  
+	@ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
 
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc
+	rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc

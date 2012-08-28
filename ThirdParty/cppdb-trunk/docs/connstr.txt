@@ -1,0 +1,123 @@
+/*! \page connstr Connecting to Database
+
+\section cs Connection Strings
+\subsection fmt Connection String Format
+
+CppDB connection string consists of the following parts:
+
+-# Driver Name separated from rest of the string with ":"
+-# Set of key = value pairs separated with ";" symbol. Where value can be put in single quotation marks ' and double quotation mark represents a single one (like in SQL syntax).
+
+For example
+\verbatim
+mysql:database=test;user=joe;password='d''eep secret'
+\endverbatim
+
+Represent a driver "mysql", user "joe" and password "d'eep secret".
+
+There are special keys that used as internal cppdb options rather then connection options. Such 
+keys are always start with \@ symbol. For example "@use_prepared=off".
+
+\subsection speckeys Special Options
+
+These are CppDB special key values that are used as meta data for the connection:
+
+- \@stmt_cache_size - integer - the maximal number of cached statements. Default is 64.
+\n
+Each time new statement is created it is stored back in
+cache for future reuse and thus next time when the statement
+is created it would be fetched from cache rather then
+being prepared again. It gives significant performance
+boost for query and statements execution. The cache is handled using LRU queue.
+- \@use_prepared - "on" or "off" by default create prepared statements or ordinary statements. Default is "on".
+- \@pool_size - integer - the size of connection pool. Default is 0 - no connection pooling.
+\n
+This provides connection pool for efficient
+connection reuse that significantly improves the performance.
+- \@pool_max_idle - integer - the number if seconds to keep idle connection in pool. Default 600 - 10 minutes.
+\n
+This is useful for keeping maximal amount of time for holding an idle connection in pool.
+- \@modules_path - string - the path to search cppdb modules (drivers) in.
+\n
+Several paths can be given, under POSIX platform they should be separated 
+using ':' symbol and under Windows (not Cygwin) it should be ';' symbol. For example:
+\n
+\verbatim
+mydriver:@modules_path=/opt/cppd/lib:/usr/local/lib;database=foo
+mydriver:@modules_path='c:/cppdb/lib;c:/mydrv';database=foo
+\endverbatim
+- \@module - string - the path to loadable cppdb module (shared object or dll).
+\n
+The explicit path to cppdb driver, for example "mydriver:@module=/opt/lib/libmy.so"
+
+\section Establishing Connection
+
+Connecting to the database can be done using either by creating a session object with connection string parameter cppdb::session::session(std::string const &) or
+by calling cppdb::session::open() function.
+
+When the connection established first time for specific driver, it loads its shared object or dll and makes it available for you.
+If you want to unload the drivers that are not used any more you should call cppdb::driver_manager::collect_unused(). And if all
+drivers that do not have opened connections will be closed.
+
+\note If you use connection pooling you would also want to call cppdb::connections_manager::gc() to remove all sessions that were idle
+for long period of time.
+
+Both classes cppdb::connections_manager and cppdb::driver_manager are singleton classes that used for connection management and pooling
+and in fact, cppdb::session::open() just calls cppdb::connections_manager::open() to get the underlying cppdb::backend::connection object.
+
+*/
+
+
+//--------------------------
+/*! \page advanced_drivers Linking Existing Drivers Statically
+
+\section advanced_drivers_before_you_begin Before You Begin
+
+In some cases you want to have drivers statically linked into your application. The simplest way is
+to \ref build "build" it with internal option for specific backend you need. This is the best
+and less error prone way.
+
+However you may also to use it directly without rebuilding cppdb library.
+
+\section advanced_drivers_linking Linking the Module
+
+CppDB comes with following libraries (the names below are for Linux, under other OS they may be slightly different):
+
+- libcppdb.so and libcppdb.a - shared and static version of cppdb without modules
+- libcppdb_XXX.so and libcppdb_XXX.a - shared and static version of modules, where XXX is the name of the module.
+
+By default, cppdb tries to load the module's shared object on the run time. However, if you want to link the
+module statically into the library you may do following.
+
+-# During linking use static library for the cppdb and for the module you need.
+-# Link with the appropriate native client library for the module. 
+
+For example:
+
+\verbatim
+g++ my_program.o /usr/lib/libcppdb.a /usr/lib/libcppdb_sqlite3.a -lpthread -ldl -lsqlite3
+\endverbatim
+
+Where libcppdb.a and libcppdb_sqlite3.a are the static version of the library and the module, "-lpthread -ldl" are
+dependencies of libcppdb and "-lsqlite3" is the dependency of sqlite3 module.
+
+\section advanced_drivers_installing Adding Backend to Driver
+
+Linking only with the backend is not enough, you need also install the driver to cppdb::driver_manager so it would
+know to use it directly rather then try to load it dynamically.
+
+Every backend as a single entry point called "cppdb_XXX_get_connection" where XXX is the backend name, so together
+with cppdb::backend::static_driver you can install it to the \ref cppdb::driver_manager driver_manger as shown in the example below:
+
+\code
+extern "C" {
+	cppdb::backend::connection *cppdb_sqlite3_get_connection(cppdb::connection_info const &);
+}
+void add_driver()
+{
+  cppdb::driver_manager::instance().install_driver("sqlite3",new cppdb::backend::static_driver(cppdb_sqlite3_get_connection));
+}
+\endcode
+
+*/
+
