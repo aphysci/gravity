@@ -33,29 +33,68 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
-class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
-
+class TestFixture : public CxxTest::GlobalFixture
+{
 public:
-    void setUp() {
+    bool setUpWorld()
+    {
         //memset(buffer, 0, BUFFER_SIZE);
-        pid = popen2("ServiceDirectory", NULL, &sdFd);
+        cout << "starting SD" << endl;
+        pid = popen2("ServiceDirectory > sd.out", NULL, &sdFd);
         //int nbytes = read(sdFd, buffer, BUFFER_SIZE);
         //cout << endl << "output: " << buffer << endl;
+        return true;
     }
-
-    void tearDown() {
+    bool tearDownWorld()
+    {
         popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
+        return true;
     }
+private:
+    pid_t pid;
+    int sdFd;
+};
+static TestFixture testFixture;
 
-    void testRegister(void) {
+class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber, GravityServiceProvider {
+
+public:
+    void testRegisterData(void) {
+    	pthread_mutex_init(&mutex, NULL);
+
         GravityNode* node = new GravityNode();
         GravityReturnCode ret = node->init();
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node->registerDataProduct("TEST", 5656, "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        // Set the subscribe & unsubscribe functionality
+        // Give the consumer thread time to start up
+        sleep(2);
+        // Clear out subscription filled flag
+        clearSubFlag();
+        // Create and publish a message
+        GravityDataProduct gdp("TEST");
+        gdp.setFilterText("FILT");
+        ret = node->publish(gdp);
+        // Give it a couple secs
+        sleep(2);
+        // Check for subscription filled
+        TS_ASSERT(subFilled());
+
+        // Clear flag
+        clearSubFlag();
+        // Unsubscribe & wait a couple secs
+        ret = node->unsubscribe("TEST", *this, "");
+        sleep(2);
+        // Resend message
+        ret = node->publish(gdp);
+        sleep(2);
+        TS_ASSERT(!subFilled());
 
         ret = node->unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -65,7 +104,6 @@ public:
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
-
 
         /*
          *  try again after unregistering
@@ -84,14 +122,54 @@ public:
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
+
+        delete node;
     }
 
-    void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
+    void subscriptionFilled(const GravityDataProduct& dataProduct)
+    {
+    	pthread_mutex_lock(&mutex);
+    	subFilledFlag = true;
+    	pthread_mutex_unlock(&mutex);
+    }
+
+    void testRegisterService(void)
+    {
+        GravityNode* node = new GravityNode();
+        GravityReturnCode ret = node->init();
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->registerService("TEST2", 5657, "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterService("TEST2", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::FAILURE);
+
+    }
+
+    bool subFilled()
+    {
+    	bool ret;
+    	pthread_mutex_lock(&mutex);
+    	ret = subFilledFlag;
+    	pthread_mutex_unlock(&mutex);
+    	return ret;
+    }
+
+    void clearSubFlag()
+    {
+       	pthread_mutex_lock(&mutex);
+       	subFilledFlag = false;
+       	pthread_mutex_unlock(&mutex);
+    }
+
+    void request(const GravityDataProduct& dataProducts) {}
 
 private:
-    pid_t pid;
-    int sdFd;
     char buffer[BUFFER_SIZE];
+
+    pthread_mutex_t mutex;
+    bool subFilledFlag;
 };
 
 #endif /* GRAVITYNODETESTSUITE_H_ */

@@ -8,6 +8,8 @@
 #ifndef GRAVITYSERVICEPROVIDER_H_
 #define GRAVITYSERVICEPROVIDER_H_
 
+#include "GravityDataProduct.h"
+
 using namespace std;
 
 namespace gravity
