@@ -1,13 +1,15 @@
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
+INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
+SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
 MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=libgravity.a
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src
-CFLAGS=$(INCLUDES)
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
+CFLAGS=$(INCLUDES) -L$(INIPARSE_DIR) -liniparser -L$(SQLLIB_DIR) -lcppdb
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
@@ -27,7 +29,7 @@ all: $(LIB_NAME)
 
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
-	
+
 $(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
 	ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
 

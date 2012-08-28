@@ -1,0 +1,10 @@
+option optimize_for = SPEED;
+
+package gravity;
+
+message GravityLogMessagePB
+{
+	required string domain = 1;
+	required string level = 2;
+	required string message = 3;
+}
