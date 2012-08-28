@@ -24,7 +24,7 @@ private:
     map<string, list<string> > dataProductMap;
     map<string, list<string> > serviceMap;
 public:
-    ServiceDirectory();
+    ServiceDirectory(const char* bind_address = "tcp://*:5555");
     virtual ~ServiceDirectory();
     void start();
 
@@ -32,6 +32,8 @@ private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
+
+    char* bind_address;
 };
 
 } /* namespace gravity */
