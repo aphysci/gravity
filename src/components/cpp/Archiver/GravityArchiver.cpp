@@ -16,7 +16,7 @@ namespace gravity {
  * Assuming table_name, and other paramters are safe from attacks!!!
  * Throws: cppdb::cppdb_error
  */
-Archiver::Archiver(GravityNode* gn, const string db_url, const string db_name, const string table_name, const string db_user, const string db_pass)
+Archiver::Archiver(GravityNode* gn, const string db_name, const string table_name, const string db_user, const string db_pass)
 {
     grav_node = gn;
 
@@ -66,25 +66,26 @@ void Archiver::start()
     }
 }
 
-void Archiver::subscriptionFilled(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts)
+void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
+//(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts)
 {
     try
     {
-        for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
-        {
-            shared_ptr<GravityDataProduct> dataProduct = *i;
+//        for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+//        {
+//            shared_ptr<GravityDataProduct> dataProduct = *i;
 
             char messageData[1024];
             int msg_size = 1024;
-            dataProduct->getData(messageData, msg_size); //Warning: This copies the data!!!
+            dataProduct.getData(messageData, msg_size); //Warning: This copies the data!!!
 
             insert_stmt.reset();
-            insert_stmt.bind(1, dataProduct->getGravityTimestamp());
-            insert_stmt.bind(2, dataProductID);
+            insert_stmt.bind(1, dataProduct.getGravityTimestamp());
+            insert_stmt.bind(2, dataProduct.getDataProductID());
             insert_stmt.bind(3, messageData, messageData + msg_size);
 
             insert_stmt.exec();
-        }
+//        }
     }
     catch(cppdb::cppdb_error const &e)
     {

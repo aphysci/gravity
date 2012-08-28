@@ -10,6 +10,7 @@ namespace gravity {
 class GravityConfigParser
 {
 public:
+    GravityConfigParser();
     void ParseCmdLine(int argc, const char* argv);
     void ParseConfigFile(const char* filename, const char** additional_keys_to_extract = NULL);
 

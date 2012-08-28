@@ -25,7 +25,7 @@ using namespace std;
 int main(void)
 {
     gravity::GravityConfigParser parser;
-    parser.ParseConfigFile("config.ini");
+    parser.ParseConfigFile("ServiceDirectory.ini");
 
     gravity::Log::init(NULL, "ServiceDirectory.log", 0, parser.getLocalLogLevel(), parser.getNetLogLevel());
 

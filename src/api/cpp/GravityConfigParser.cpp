@@ -2,12 +2,36 @@
 #include "GravityLogger.h"
 #include <iniparser.h>
 #include <map>
+#include <iostream>
 
 namespace gravity {
+
+GravityConfigParser::GravityConfigParser()
+{
+    serviceDirectoryUrl = NULL;
+}
+
+GravityConfigParser::~GravityConfigParser()
+{
+    free(serviceDirectoryUrl);
+}
+
 
 void GravityConfigParser::ParseConfigFile(const char* filename, const char** additional_keys_to_extract)
 {
     dictionary* myconfig = iniparser_load(filename);
+
+    if(!myconfig)
+    {
+        std::cout << "Could not open config file.  Using defaults.  " << std::endl;
+        log_local_level = Log::WARNING;
+        log_net_level = Log::WARNING;
+
+        if(!serviceDirectoryUrl)
+            serviceDirectoryUrl = strdup("tcp://*:5555");
+
+        return;
+    }
 
     //Ini parser causes warnings!!!
     const char* protocol = iniparser_getstring(myconfig, "ServiceDirectory:protocol", "tcp");

@@ -25,7 +25,7 @@ public:
     /**
      * Writes to the Database
      */
-    virtual void subscriptionFilled(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts);
+    virtual void subscriptionFilled(const GravityDataProduct &dataProducts);
 
     /**
      * Destructor: Unsubscribe from streams and close the DB connection.
