@@ -102,7 +102,7 @@ void ServiceDirectory::start()
         }
         else
         {
-            cout << "unknown request type: " << requestType << endl;
+            Log::warning("unknown request type: %s", requestType.c_str());
         }
 
         // Send reply back to client
