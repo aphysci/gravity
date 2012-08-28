@@ -1,0 +1,29 @@
+/*! \page escaping Escaping Strings 
+
+\note Before you read this, remember escaping strings directly and including them in SQL statements is \a bad idea, you should
+use \ref stat "prepared statements" instead. However if you really know what you are doing, continue reading.
+
+
+You can escape strings from unknown source using session's \ref cppdb::session::escape() "escape()" functions. Also
+note that they do not add first and last quotation marks and you are expected to do this on your own.
+
+For example:
+
+\code
+std::string safe_data = sql.escape(data);
+sql << "INSERT INTO names(name) values('" + safe_data + "')" << cppdb::exec;
+\endcode
+
+Please notice the quotes inserted in the query.
+
+But still it is better to do following:
+
+\code
+sql << "INSERT INTO names(name) values(?)" << data << cppdb::exec;
+\endcode
+
+\note \ref odbc "ODBC" backend does not support escaping strings and would throw \ref cppdb::not_supported_by_backend "not_supported_by_backend" exception.
+
+*/
+
+

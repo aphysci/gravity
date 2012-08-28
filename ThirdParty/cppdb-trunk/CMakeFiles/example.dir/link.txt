@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -Wextra -O2 -g    CMakeFiles/example.dir/examples/example1.cpp.o  -o example -rdynamic libcppdb.so.0.3.1 -ldl -lpthread -lodbc -Wl,-rpath,/home/tim/gravity/gravity/ThirdParty/cppdb-trunk 

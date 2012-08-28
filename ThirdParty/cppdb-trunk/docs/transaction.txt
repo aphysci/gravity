@@ -1,0 +1,25 @@
+/*! \page transaction Handling Transactions
+
+\ref cppdb::session class has \ref cppdb::session::begin() "begin()", \ref cppdb::session::commit() "commit()", \ref cppdb::session::rollback() "rollback()" member functions that allow you to handle transactions. However you are not expected to use them directly for RAII reasons.
+
+There is a transaction scope guard \ref cppdb::transaction that allows to wrap transactions in exception safe way.
+In the \ref cppdb::transaction::transaction(cppdb::session&) "transaction guard's constructor" you specify the SQL \ref cppdb::session "session" you want to 
+run transaction on and when operations is completed you call its \ref cppdb::transaction::commit() "commit()" function to complete
+the transaction or \ref cppdb::transaction::rollback() "rollback()"
+
+If the transaction wasn't either committed or rolled back, it would be automatically rolled back during stack unwind.
+
+For example:
+
+\code
+cppdb::transaction guard(sql);
+sql << "UPDATE accounts SET amount=amount+? WHERE user=?" << amount << receiver << cppdb::exec;
+sql << "UPDATE accounts SET amount=amount-? WHERE user=?" << amount << sender << cppdb::exec;
+guard.commit();
+\endcode
+
+This would execute a transaction in exception safe way.
+
+
+*/
+
