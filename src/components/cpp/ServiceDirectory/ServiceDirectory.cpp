@@ -25,13 +25,12 @@ using namespace std;
 
 int main(void)
 {
-//    gravity::GravityConfigParser parser;
-//    parser.ParseConfigFile("config.ini");
-//
-//    gravity::Log::init(NULL, "ServiceDirectory.log", 0, parser.getLocalLogLevel(), parser.getNetLogLevel());
-//
-//    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
-    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory("tcp://*:5555");
+    gravity::GravityConfigParser parser;
+    parser.ParseConfigFile("config.ini");
+
+    gravity::Log::init(NULL, "ServiceDirectory.log", 0, parser.getLocalLogLevel(), parser.getNetLogLevel());
+
+    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
     serviceDirectory->start();
 }
 
