@@ -484,13 +484,17 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 
     // Create the server socket
     void* serverSocket = zmq_socket(context, ZMQ_REP);
+    if (!serverSocket)
+    {
+        return GravityReturnCodes::FAILURE;
+    }
 
     // Bind socket to url
     int rc = zmq_bind(serverSocket, connectionString.c_str());
-
-    if (!serverSocket || rc == 0)
+    if (rc != 0)
     {
-        ret = GravityReturnCodes::FAILURE;
+        zmq_close(serverSocket);
+        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
     }
     else
     {

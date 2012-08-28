@@ -81,6 +81,10 @@ void ServiceDirectory::start()
         {
             handleUnregister(gdpRequest, gdpResponse);
         }
+        else
+        {
+            cout << "unknown request type: " << requestType << endl;
+        }
 
         // Send reply back to client
         zmq_msg_init_size(&response, gdpResponse.getSize());
@@ -129,7 +133,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     {
         list<string>* urls = &serviceMap[registration.id()];
         list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
-        if (iter != urls->end())
+        if (iter == urls->end())
             serviceMap[registration.id()].push_back(registration.url());
         else
             foundDup = true;

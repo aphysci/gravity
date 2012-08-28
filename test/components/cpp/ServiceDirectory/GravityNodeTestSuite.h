@@ -33,23 +33,36 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
-class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
-
+class TestFixture : public CxxTest::GlobalFixture
+{
 public:
-    void setUp() {
+    bool setUpWorld()
+    {
         //memset(buffer, 0, BUFFER_SIZE);
-        pid = popen2("ServiceDirectory", NULL, &sdFd);
+        cout << "starting SD" << endl;
+        pid = popen2("ServiceDirectory > sd.out", NULL, &sdFd);
         //int nbytes = read(sdFd, buffer, BUFFER_SIZE);
         //cout << endl << "output: " << buffer << endl;
+        return true;
     }
-
-    void tearDown() {
+    bool tearDownWorld()
+    {
         popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
+        return true;
     }
+private:
+    pid_t pid;
+    int sdFd;
+};
+static TestFixture testFixture;
 
-    void testRegister(void) {
+class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber, GravityServiceProvider {
+
+public:
+    void testRegisterData(void) {
         GravityNode* node = new GravityNode();
         GravityReturnCode ret = node->init();
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node->registerDataProduct("TEST", 5656, "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -86,11 +99,25 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
     }
 
+    void testRegisterService(void)
+    {
+        GravityNode* node = new GravityNode();
+        GravityReturnCode ret = node->init();
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->registerService("TEST2", 5657, "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node->unregisterService("TEST2", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::FAILURE);
+
+    }
+
     void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
 
+    void request(const GravityDataProduct& dataProducts) {}
+
 private:
-    pid_t pid;
-    int sdFd;
     char buffer[BUFFER_SIZE];
 };
 
