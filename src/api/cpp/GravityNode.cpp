@@ -8,6 +8,8 @@
 #include "GravityNode.h"
 
 #include <zmq.h>
+#include <iostream>
+#include <pthread.h>
 #include <assert.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -15,11 +17,24 @@
 #include <signal.h>
 #include <tr1/memory>
 
+#include "GravitySubscriptionManager.h"
 #include "ComponentLookupRequestPB.pb.h"
 #include "ComponentLookupResponsePB.pb.h"
 #include "ServiceDirectoryResponsePB.pb.h"
 #include "ServiceDirectoryRegistrationPB.pb.h"
 #include "ServiceDirectoryUnregistrationPB.pb.h"
+#include "GravitySubscriptionManager.h"
+
+static void* startSubscriptionManager(void* context)
+{
+	// Create and start the GravitySubscriptionManager
+	gravity::GravitySubscriptionManager subManager(context);
+	subManager.start();
+
+	//while (1);
+
+	return NULL;
+}
 
 static int s_interrupted = 0;
 static void s_signal_handler(int signal_value)
@@ -39,6 +54,7 @@ void s_catch_signals()
 namespace gravity
 {
 
+using namespace std;
 using namespace std::tr1;
 
 GravityNode::GravityNode()
@@ -52,6 +68,17 @@ GravityNode::GravityNode()
 
 GravityNode::~GravityNode()
 {
+	// Close the inproc socket
+	sendStringMessage(subscriptionManagerSocket, "kill", ZMQ_DONTWAIT);
+	zmq_close(subscriptionManagerSocket);
+
+	// Clean up any pub sockets
+	for (map<string,NetworkNode*>::iterator iter = publishMap.begin(); iter != publishMap.end(); iter++)
+	{
+		string dataProductID = iter->first;
+		unregisterDataProduct(dataProductID);
+	}
+
     // Clean up the zmq context object
     zmq_term(context);
 }
@@ -67,6 +94,14 @@ GravityReturnCode GravityNode::init()
         ret = GravityReturnCodes::FAILURE;
     }
 
+    // Setup up communication channel to subscription manager
+    subscriptionManagerSocket = zmq_socket(context, ZMQ_PUB);
+    zmq_bind(subscriptionManagerSocket, "inproc://gravity_subscription_manager");
+
+    // Setup the subscription manager
+    pthread_t subscriptionManager;
+    pthread_create(&subscriptionManager, NULL, startSubscriptionManager, context);
+
     // Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
     s_catch_signals();
 
@@ -76,12 +111,7 @@ GravityReturnCode GravityNode::init()
 void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
 {
     // Send raw filter text as first part of message
-    string filterText = dataProduct.getFilterText();
-    zmq_msg_t filt;
-    zmq_msg_init_size(&filt, filterText.length());
-    memcpy(zmq_msg_data(&filt), filterText.c_str(), filterText.length());
-    zmq_sendmsg(socket, &filt, ZMQ_SNDMORE);
-    zmq_msg_close(&filt);
+	sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
 
     // Send data product
     zmq_msg_t data;
@@ -123,6 +153,10 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
         {
             // Interrupted
             ret = GravityReturnCodes::INTERRUPTED;
+
+            // Close socket
+            zmq_close(socket);
+
             break;
         }
 
@@ -151,6 +185,9 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
             {
                 ret = GravityReturnCodes::SUCCESS;
                 retriesLeft = 0;
+
+                // Close socket
+                zmq_close(socket);
                 break;
             }
             else
@@ -369,9 +406,13 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
         if (parserSuccess)
         {
-            if (pb.url().size() > 0)
+            if (pb.url_size() > 0)
             {
-                // Subscribe to published data product
+                // Subscribe to all published data products
+            	for (int i = 0; i < pb.url_size(); i++)
+            	{
+            		subscribe(pb.url(i), dataProductID, subscriber, filter);
+            	}
             }
             else
             {
@@ -391,41 +432,50 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
     return ret;
 }
 
+void GravityNode::sendStringMessage(void* socket, string str, int flags)
+{
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, str.length());
+	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
+	zmq_sendmsg(socket, &msg, flags);
+	zmq_msg_close(&msg);
+}
+
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
         const GravitySubscriber& subscriber, string filter)
 {
-    // Create the socket
-    void* socket = zmq_socket(context, ZMQ_SUB);
-    assert(socket);
+	// Send subscription details
+	sendStringMessage(subscriptionManagerSocket, "subscribe", ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSocket, dataProductID, ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSocket, connectionURL, ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSocket, filter, ZMQ_SNDMORE);
 
-    // Connect to publisher
-    int ret = zmq_connect(socket, connectionURL.c_str());
-    assert(ret == 0);
-
-    // Configure filter
-    ret = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
-    assert(ret == 0);
-
-    /*
-	zmq_pollitem_t pollItem;
-	pollItem.socket = socket;
-	pollItem.events = 0;
-	pollItem.fd = 0;
-	pollItem.revents = ZMQ_POLLIN;
-
-	SubscriptionData subscription;
-	subscription.name = subscriptionName;
-	subscription.filter = filter;
-	subscription.pollItem = pollItem;
-	subscriptionMap[subscriptionName] = subscription;
-     */
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, sizeof(&subscriber));
+	void* v = (void*)&subscriber;
+	memcpy(zmq_msg_data(&msg), &v, sizeof(&subscriber));
+	zmq_sendmsg(subscriptionManagerSocket, &msg, ZMQ_DONTWAIT);
+	zmq_msg_close(&msg);
 
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber)
+GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
-    return GravityReturnCodes::FAILURE;
+	// Send unsubscribe details
+	sendStringMessage(subscriptionManagerSocket, "unsubscribe", ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSocket, dataProductID, ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSocket, filter, ZMQ_SNDMORE);
+
+	// Send subscriber
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, sizeof(&subscriber));
+	void* v = (void*)&subscriber;
+	memcpy(zmq_msg_data(&msg), &v, sizeof(&subscriber));
+	zmq_sendmsg(subscriptionManagerSocket, &msg, ZMQ_DONTWAIT);
+	zmq_msg_close(&msg);
+
+    return GravityReturnCodes::SUCCESS;
 }
 
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
@@ -438,11 +488,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
     void* socket = node->socket;
 
     // Create message & send filter text
-    zmq_msg_t filt;
-    string filterText = dataProduct.getFilterText();
-    zmq_msg_init_size(&filt, filterText.length());
-    memcpy(zmq_msg_data(&filt), filterText.c_str(), filterText.length());
-    zmq_sendmsg(socket, &filt, ZMQ_SNDMORE);
+    sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
 
     // Serialize data
     zmq_msg_t data;
@@ -454,7 +500,6 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
 
     // Clean up
     zmq_msg_close(&data);
-    zmq_msg_close(&filt);
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -563,6 +608,8 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
             }
         }
     }
+
+    zmq_close(serverSocket);
 
     return ret;
 }

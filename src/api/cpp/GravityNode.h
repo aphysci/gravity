@@ -58,6 +58,8 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
 
     void* context;
+    void* subscriptionManagerSocket;
+    void sendStringMessage(void* socket, string str, int flags);
     uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
@@ -122,9 +124,10 @@ public:
      * Un-subscribe to a data product
      * \param dataProductID ID of data product for which subscription is to be removed
      * \param subscriber the subscriber that will be removed from the notification list for this subscription
+     * \param filter text filter associated with the subscription to cancel
      * \return success flag
      */
-    GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber);
+    GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter="");
 
     /**
      * Publish a data product

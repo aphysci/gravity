@@ -60,6 +60,8 @@ class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
 
 public:
     void testRegisterData(void) {
+    	pthread_mutex_init(&mutex, NULL);
+
         GravityNode* node = new GravityNode();
         GravityReturnCode ret = node->init();
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -70,6 +72,30 @@ public:
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
+        // Set the subscribe & unsubscribe functionality
+        // Give the consumer thread time to start up
+        sleep(2);
+        // Clear out subscription filled flag
+        clearSubFlag();
+        // Create and publish a message
+        GravityDataProduct gdp("TEST");
+        gdp.setFilterText("FILT");
+        ret = node->publish(gdp);
+        // Give it a couple secs
+        sleep(2);
+        // Check for subscription filled
+        TS_ASSERT(subFilled());
+
+        // Clear flag
+        clearSubFlag();
+        // Unsubscribe & wait a couple secs
+        ret = node->unsubscribe("TEST", *this, "");
+        sleep(2);
+        // Resend message
+        ret = node->publish(gdp);
+        sleep(2);
+        TS_ASSERT(!subFilled());
+
         ret = node->unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
@@ -78,7 +104,6 @@ public:
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
-
 
         /*
          *  try again after unregistering
@@ -97,6 +122,15 @@ public:
 
         ret = node->subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
+
+        delete node;
+    }
+
+    void subscriptionFilled(const GravityDataProduct& dataProduct)
+    {
+    	pthread_mutex_lock(&mutex);
+    	subFilledFlag = true;
+    	pthread_mutex_unlock(&mutex);
     }
 
     void testRegisterService(void)
@@ -113,12 +147,29 @@ public:
 
     }
 
-    void subscriptionFilled(string dataProductID, vector<shared_ptr<GravityDataProduct> >) {}
+    bool subFilled()
+    {
+    	bool ret;
+    	pthread_mutex_lock(&mutex);
+    	ret = subFilledFlag;
+    	pthread_mutex_unlock(&mutex);
+    	return ret;
+    }
+
+    void clearSubFlag()
+    {
+       	pthread_mutex_lock(&mutex);
+       	subFilledFlag = false;
+       	pthread_mutex_unlock(&mutex);
+    }
 
     void request(const GravityDataProduct& dataProducts) {}
 
 private:
     char buffer[BUFFER_SIZE];
+
+    pthread_mutex_t mutex;
+    bool subFilledFlag;
 };
 
 #endif /* GRAVITYNODETESTSUITE_H_ */
