@@ -1,4 +1,3 @@
-
 #ifndef GRAVITYCONFIGPARSER_H_
 #define GRAVITYCONFIGPARSER_H_
 
@@ -26,7 +25,7 @@ public:
     /*
      * Virtual Destructor: for overriding.
      */
-    virtual ~GravityConfigParser() { }
+    virtual ~GravityConfigParser();
 protected:
     /*
      * Override this function to handle custom processing of the ini file.
