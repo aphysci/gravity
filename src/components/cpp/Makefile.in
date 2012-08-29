@@ -3,13 +3,13 @@ THIRDPARTY_DIR=../../../../ThirdParty
 INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
-GRAVLIB_DIR=../../../api
+GRAVLIB_DIR=../../../api/cpp
 MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR)/cpp -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR)/cpp -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
+CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
 LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 SRC=$(wildcard *.cpp)
@@ -31,7 +31,7 @@ all: $(PROG_NAME)
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(INCLUDES)
 
-$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/cpp/libgravity.a
+$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
 
 clean:

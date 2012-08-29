@@ -16,16 +16,15 @@ OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
 DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
-PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
-PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
+PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,%.pb.cc,$(PROTO_SRC))
+PROTO_OBJ=$(patsubst %.cc,%.o,$(PROTO_CODE))
 
 .PRECIOUS: %.pb.cc
 
 all: $(LIB_NAME) 
 
-%.pb.cc:%.proto
-	@echo proto build $<
-	@$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
+%.pb.cc:$(MYPROTO_DIR)/%.proto
+	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=. $<
 
 %.pb.o:%.pb.cc
 	@echo $(CC) proto build $<
@@ -40,4 +39,4 @@ $(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
 	@ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
 
 clean:
-	rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc
+	rm -rf *.o *pb.h *.pb.cc
