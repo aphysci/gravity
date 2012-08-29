@@ -4,7 +4,7 @@ INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
-MYPROTO_DIR=protobufs
+MYPROTO_DIR=../protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=libgravity.a
 
