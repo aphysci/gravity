@@ -9,38 +9,120 @@
 using namespace std;
 using namespace gravity;
 
-//Initialize static data
-FILE* Log::log_file = NULL;
-int Log::current_local_levels = FATAL | CRITICAL | WARNING;
-int Log::current_network_levels = FATAL | CRITICAL | WARNING;
-string Log::log_dataProductID = "GRAVITY_LOGGER";
-GravityNode* Log::gravity_node = NULL;
+////////////////////////////////////
+// Logger Classes
+//
 
+/*
+ * Logs to a file
+ */
+class FileLogger : public Logger {
+public:
+    FileLogger(const char* filename);
+    /*
+     * NOTE: no need to filter on level!  This has already been done.
+     */
+    virtual void Log(int level, const char* messagestr);
+    virtual ~FileLogger();
+private:
+    FILE* log_file;
+};
 
-void Log::init(GravityNode *gn, const char* filename, unsigned short port, LogLevel local_log_level, LogLevel net_log_level)
+FileLogger::FileLogger(const char* filename)
 {
-    setLocalLevel(local_log_level);
-    setNetworkLevel(net_log_level);
-
-    gravity_node = gn;
-
     log_file = fopen(filename, "a");
     if(log_file == NULL)
     {
         log_file = fopen("/dev/null", "a");
         cerr << "[Log::init] Could not open log file: " << filename << endl;
     }
+}
 
-//    if(gn != NULL)
-//    {
-//        if(gravity_node.registerDataProduct(string(log_dataProductID), port, string("tcp")) != GravityReturnCodes::SUCCESS)
-//        {
-//            cerr << "[Log::init] Could not register Logger" << endl;
-//            fprintf(log_file, "[Log::init] Could not register Logger\n");
-//        }
-//    }
-//    else
-//        current_network_levels = 0;
+void FileLogger::Log(int level, const char* messagestr)
+{
+    //Format the Logs nicely.
+    char timestr[100];
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time ( &rawtime );
+    timeinfo = localtime( &rawtime );
+
+    strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
+
+    fprintf(log_file, "[%s %s] ", Log::LogLevelToString((Log::LogLevel)level), timestr);
+
+    fputs(messagestr, log_file);
+    fputs("\n", log_file);
+}
+
+FileLogger::~FileLogger()
+{
+    fclose(log_file);
+}
+
+
+void Log::initAndAddFileLogger(const char* filename, LogLevel local_log_level)
+{
+    Log::initAndAddLogger(new FileLogger(filename), local_log_level);
+}
+
+/*
+ * Logs to a GravityLogRecorder on the Network.
+ */
+class GravityLogger : public Logger
+{
+public:
+    GravityLogger(GravityNode* gn, unsigned short port);
+    virtual void Log(int level, const char* messagestr);
+    virtual ~GravityLogger();
+private:
+    GravityNode* gravity_node;
+    static std::string log_dataProductID;
+};
+
+std::string GravityLogger::log_dataProductID = "GRAVITY_LOGGER";
+
+GravityLogger::GravityLogger(GravityNode* gn, unsigned short port)
+{
+    gravity_node = gn;
+    if(gravity_node->registerDataProduct(string(log_dataProductID), port, string("tcp")) != GravityReturnCodes::SUCCESS)
+        cerr << "[Log::init] Could not register Logger" << endl;
+}
+
+void GravityLogger::Log(int level, const char* messagestr)
+{
+    //TODO: how is this supposed to work???
+    gravity::GravityLogMessagePB log_message;
+    //log_message.set_domain(domain);
+    log_message.set_level(Log::LogLevelToString((Log::LogLevel)level));
+    log_message.set_message(messagestr);
+
+    GravityDataProduct dp(log_dataProductID);
+    dp.setData(log_message);
+
+    gravity_node->publish(dp);
+}
+
+GravityLogger::~GravityLogger()
+{
+}
+
+
+void Log::initAndAddGravityLogger(GravityNode *gn, unsigned short port, LogLevel net_log_level)
+{
+    Log::initAndAddLogger(new GravityLogger(gn, port), net_log_level);
+}
+
+////////////////////////////////////////////////////////////////
+// Main Log Functions
+//
+
+std::list< std::pair<Logger*, int> > Log::loggers; //Initialize
+
+void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
+{
+    loggers.push_back(make_pair(logger, log_level));
 }
 
 const char* Log::LogLevelToString(LogLevel level)
@@ -76,96 +158,55 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
         return Log::DEBUG;
     else if(strcmp(llevel, "trace") == 0)
         return Log::TRACE;
+    return Log::NONE;
 }
 
 void Log::vLog(int level, const char* format, va_list args)
 {
-    if(current_local_levels & level)
+    std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
+    std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
+    if(i != l_end)
     {
-        //Format the Logs nicely.
-        char timestr[100];
-        time_t rawtime;
-        struct tm * timeinfo;
-
-        time ( &rawtime );
-        timeinfo = localtime( &rawtime );
-
-        strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
-
-        fprintf(log_file, "[%s %s] ", LogLevelToString((LogLevel)level), timestr); //NOTE: time is only needed for logging to a network file.
-
-        char messagestr[500];
+        char messagestr[512];
         vsprintf(messagestr, format, args);
-        fputs(messagestr, log_file);
-        fputs("\n", log_file);
 
-        if(current_network_levels & level)
+        do
         {
-            //TODO: how is this supposed to work???
-//            gravity::GravityLogMessagePB log_message;
-//            log_message.set_domain(domain);
-//            log_message.set_level(LogLevelToString(level));
-//            log_message.set_message(messagestr);
-//
-//            GravityDataProduct dp(log_dataProductID);
-//            dp.setData(log_message);
-//
-//            gravity_node.publish(dp);
-        }
+            if(i->second & level)
+                i->first->Log(level, messagestr);
+            i++;
+        } while(i != l_end);
     }
 
     return;
 }
 
-
-void Log::setLocalLevel(LogLevel level)
+int Log::LevelToInt(LogLevel level)
 {
+    int int_level;
     switch(level)
     {
         case FATAL:
-            current_local_levels = FATAL;
+            int_level = FATAL;
             break;
         case CRITICAL:
-            current_local_levels = FATAL | CRITICAL;
+            int_level = FATAL | CRITICAL;
             break;
         case WARNING:
-            current_local_levels = FATAL | CRITICAL | WARNING;
+            int_level = FATAL | CRITICAL | WARNING;
             break;
         case MESSAGE:
-            current_local_levels = FATAL | CRITICAL | WARNING | MESSAGE;
+            int_level = FATAL | CRITICAL | WARNING | MESSAGE;
             break;
         case DEBUG:
-            current_local_levels = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG;
+            int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG;
             break;
         case TRACE:
-            current_local_levels = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
+            int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
             break;
     }
-}
 
-void Log::setNetworkLevel(LogLevel level)
-{
-    switch(level)
-    {
-        case FATAL:
-            current_network_levels = FATAL;
-            break;
-        case CRITICAL:
-            current_network_levels = FATAL | CRITICAL;
-            break;
-        case WARNING:
-            current_network_levels = FATAL | CRITICAL | WARNING;
-            break;
-        case MESSAGE:
-            current_network_levels = FATAL | CRITICAL | WARNING | MESSAGE;
-            break;
-        case DEBUG:
-            current_network_levels = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG;
-            break;
-        case TRACE:
-            current_network_levels = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
-            break;
-    }
+    return int_level;
 }
 
 //Using functions instead of macros so we can use namespaces.
