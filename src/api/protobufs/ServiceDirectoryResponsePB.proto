@@ -1,0 +1,18 @@
+option optimize_for = SPEED;
+option java_outer_classname = "ServiceDirectoryResponse";
+
+package gravity;
+
+message ServiceDirectoryResponsePB
+{
+	required string id = 1;
+	
+	enum ReturnCodes
+	{
+		SUCCESS = 0;
+		DUPLICATE_REGISTRATION = -1;
+		REGISTRATION_CONFLICT = -2;
+		NOT_REGISTERED = -3;
+	} 
+	optional ReturnCodes returnCode = 2 [default = SUCCESS];
+}

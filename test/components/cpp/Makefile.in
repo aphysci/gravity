@@ -1,6 +1,7 @@
 
 CC=g++
 THIRDPARTY_DIR=../../../../ThirdParty
+INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 CXXTEST_DIR=$(THIRDPARTY_DIR)/cxxtest
@@ -9,9 +10,9 @@ CXXTESTGEN=$(CXXTEST_DIR)/bin/cxxtestgen
 PROG_NAME=$(notdir $(shell pwd) )
 TEST_NAME=$(PROG_NAME)Test
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs
-LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -Wl,-Bdynamic -lrt
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(PROTOBUF_DIR)/src
+CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
+LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)
 SRC=$(wildcard *.cpp)

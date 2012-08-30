@@ -1,0 +1,16 @@
+option optimize_for = SPEED;
+option java_outer_classname = "ComponentLookupRequest";
+
+package gravity;
+
+message ComponentLookupRequestPB
+{
+	required string lookupID = 1;
+	enum RegistrationType
+	{
+		DATA = 0;
+		SERVICE = 1;
+	} 
+	optional RegistrationType type = 3;
+	
+}

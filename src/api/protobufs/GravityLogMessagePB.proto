@@ -1,0 +1,11 @@
+option optimize_for = SPEED;
+option java_outer_classname = "GravityLogMessage";
+
+package gravity;
+
+message GravityLogMessagePB
+{
+	required string domain = 1;
+	required string level = 2;
+	required string message = 3;
+}

@@ -8,7 +8,7 @@ MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVLIB_DIR)/protobufs -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
 CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
 LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 

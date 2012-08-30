@@ -1,0 +1,10 @@
+option optimize_for = SPEED;
+option java_outer_classname = "ComponentDataLookupResponse";
+
+package gravity;
+
+message ComponentDataLookupResponsePB
+{
+	required string lookupID = 1;
+	repeated string url = 2;
+}
