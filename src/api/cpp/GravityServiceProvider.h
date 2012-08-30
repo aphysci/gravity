@@ -27,7 +27,7 @@ public:
     /**
      * Called when a request is made through the Gravity infrastructure
      */
-    virtual void request(const GravityDataProduct& dataProducts) = 0;
+    virtual void request(const GravityDataProduct& dataProduct) = 0;
 };
 
 } /* namespace gravity */

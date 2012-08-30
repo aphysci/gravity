@@ -24,6 +24,7 @@
 #include "ServiceDirectoryRegistrationPB.pb.h"
 #include "ServiceDirectoryUnregistrationPB.pb.h"
 #include "GravitySubscriptionManager.h"
+#include "GravityRequestManager.h"
 
 static void* startSubscriptionManager(void* context)
 {
@@ -31,7 +32,14 @@ static void* startSubscriptionManager(void* context)
 	gravity::GravitySubscriptionManager subManager(context);
 	subManager.start();
 
-	//while (1);
+	return NULL;
+}
+
+static void* startRequestManager(void* context)
+{
+	// Create and start the GravitySubscriptionManager
+	gravity::GravityRequestManager reqManager(context);
+	reqManager.start();
 
 	return NULL;
 }
@@ -68,9 +76,12 @@ GravityNode::GravityNode()
 
 GravityNode::~GravityNode()
 {
-	// Close the inproc socket
+	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSocket, "kill", ZMQ_DONTWAIT);
 	zmq_close(subscriptionManagerSocket);
+
+	sendStringMessage(requestManagerSocket, "kill", ZMQ_DONTWAIT);
+	zmq_close(requestManagerSocket);
 
 	// Clean up any pub sockets
 	for (map<string,NetworkNode*>::iterator iter = publishMap.begin(); iter != publishMap.end(); iter++)
@@ -102,6 +113,14 @@ GravityReturnCode GravityNode::init()
     pthread_t subscriptionManager;
     pthread_create(&subscriptionManager, NULL, startSubscriptionManager, context);
 
+    // Setup up communication channel to subscription manager
+    requestManagerSocket = zmq_socket(context, ZMQ_PUB);
+    zmq_bind(requestManagerSocket, "inproc://gravity_request_manager");
+
+    // Setup the subscription manager
+    pthread_t requestManager;
+    pthread_create(&requestManager, NULL, startRequestManager, context);
+
     // Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
     s_catch_signals();
 
@@ -121,12 +140,12 @@ void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct&
     zmq_msg_close(&data);
 }
 
-GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataProduct& request,
+GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const GravityDataProduct& request,
         GravityDataProduct& response)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
-    // Socket to connect to service directory component
+    // Socket to connect to service provider
     void* socket = NULL;
 
     int retriesLeft = NETWORK_RETRIES;
@@ -134,13 +153,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
     {
         // Connect to service directory component
         socket = zmq_socket(context, ZMQ_REQ);
-        assert(socket);
-
-        stringstream ss;
-        ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
-                ":" << serviceDirectoryNode.port;
-        string serviceDirectoryURL = ss.str();
-        zmq_connect(socket, serviceDirectoryURL.c_str());
+        zmq_connect(socket, url.c_str());
 
         // Send registration message to service directory
         sendGravityDataProduct(socket, request);
@@ -198,7 +211,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
         }
         else
         {
-            ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
+            ret = GravityReturnCodes::NO_SERVICE_PROVIDER;
         }
 
         // Close socket
@@ -206,6 +219,17 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
     }
 
     return ret;
+}
+
+GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataProduct& request,
+        GravityDataProduct& response)
+{
+	stringstream ss;
+	ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
+	                ":" << serviceDirectoryNode.port;
+	string serviceDirectoryURL = ss.str();
+
+	return sendRequestToServiceProvider(serviceDirectoryURL, request, response);
 }
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType)
@@ -507,13 +531,86 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
 GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
         const GravityRequestor& requestor, string requestID)
 {
-    return GravityReturnCodes::FAILURE;
+	// Create the object describing the data product to lookup
+	ComponentLookupRequestPB lookup;
+	lookup.set_lookupid(serviceID);
+	lookup.set_type(ComponentLookupRequestPB::SERVICE);
+
+	// Wrap request in GravityDataProduct
+	GravityDataProduct request("ComponentLookupRequest");
+	request.setFilterText("lookup");
+	request.setData(lookup);
+
+	// GravityDataProduct for response
+	GravityDataProduct response("ComponentLookupResponse");
+
+	// Send request to service directory
+	GravityReturnCode ret = sendRequestToServiceDirectory(request, response);
+
+	if (ret == GravityReturnCodes::SUCCESS)
+	{
+		ComponentLookupResponsePB pb;
+		bool parserSuccess = true;
+		try
+		{
+			response.populateMessage(pb);
+		}
+		catch (char* s)
+		{
+			parserSuccess = false;
+		}
+
+		if (parserSuccess)
+		{
+			if (pb.url_size() > 0)
+			{
+				// Subscribe to all published data products
+				for (int i = 0; i < pb.url_size(); i++)
+				{
+					this->request(pb.url(i), serviceID, dataProduct, requestor, requestID);
+				}
+			}
+			else
+			{
+				ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
+			}
+		}
+		else
+		{
+			ret = GravityReturnCodes::LINK_ERROR;
+		}
+	}
+	else
+	{
+		ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
+	}
+
+	return ret;
 }
 
 GravityReturnCode GravityNode::request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
         const GravityRequestor& requestor, string requestID)
 {
-    return GravityReturnCodes::FAILURE;
+	// Send subscription details
+	sendStringMessage(requestManagerSocket, "request", ZMQ_SNDMORE);
+	sendStringMessage(requestManagerSocket, serviceID, ZMQ_SNDMORE);
+	sendStringMessage(requestManagerSocket, connectionURL, ZMQ_SNDMORE);
+	sendStringMessage(requestManagerSocket, requestID, ZMQ_SNDMORE);
+
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, sizeof(&dataProduct));
+	void* v = (void*)&dataProduct;
+	memcpy(zmq_msg_data(&msg), &v, sizeof(&dataProduct));
+	zmq_sendmsg(requestManagerSocket, &msg, ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	zmq_msg_init_size(&msg, sizeof(&requestor));
+	v = (void*)&requestor;
+	memcpy(zmq_msg_data(&msg), &v, sizeof(&requestor));
+	zmq_sendmsg(requestManagerSocket, &msg, ZMQ_DONTWAIT);
+	zmq_msg_close(&msg);
+
+	return GravityReturnCodes::SUCCESS;
 }
 
 GravityReturnCode GravityNode::registerService(string serviceID, unsigned short networkPort,

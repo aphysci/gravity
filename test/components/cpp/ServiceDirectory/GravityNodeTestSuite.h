@@ -33,7 +33,9 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
-class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber {
+class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
+													   public GravityServiceProvider,
+													   public GravityRequestor {
 
 public:
     void setUp() {
@@ -50,13 +52,12 @@ public:
     void testRegister(void) {
     	pthread_mutex_init(&mutex, NULL);
 
-        GravityNode* node = new GravityNode();
-        GravityReturnCode ret = node->init();
+        GravityReturnCode ret = node.init();
 
-        ret = node->registerDataProduct("TEST", 5656, "tcp");
+        ret = node.registerDataProduct("TEST", 5656, "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->subscribe("TEST", *this, "");
+        ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         // Set the subscribe & unsubscribe functionality
@@ -67,7 +68,7 @@ public:
         // Create and publish a message
         GravityDataProduct gdp("TEST");
         gdp.setFilterText("FILT");
-        ret = node->publish(gdp);
+        ret = node.publish(gdp);
         // Give it a couple secs
         sleep(2);
         // Check for subscription filled
@@ -76,47 +77,65 @@ public:
         // Clear flag
         clearSubFlag();
         // Unsubscribe & wait a couple secs
-        ret = node->unsubscribe("TEST", *this, "");
+        ret = node.unsubscribe("TEST", *this, "");
         sleep(2);
         // Resend message
-        ret = node->publish(gdp);
+        ret = node.publish(gdp);
         sleep(2);
         TS_ASSERT(!subFilled());
 
-        ret = node->unregisterDataProduct("TEST");
+        // Test the request management
+        node.registerService("SERVICE_TEST", 5757, "tcp", *this);
+        sleep(2);
+        node.request("SERVICE_TEST", gdp, *this, "REQUEST_ID");
+
+        ret = node.unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->unregisterDataProduct("TEST");
+        ret = node.unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
-        ret = node->subscribe("TEST", *this, "");
+        ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
 
         /*
          *  try again after unregistering
          */
-        ret = node->registerDataProduct("TEST", 5656, "tcp");
+        ret = node.registerDataProduct("TEST", 5656, "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->subscribe("TEST", *this, "");
+        ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->unregisterDataProduct("TEST");
+        ret = node.unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node->unregisterDataProduct("TEST");
+        ret = node.unregisterDataProduct("TEST");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
-        ret = node->subscribe("TEST", *this, "");
+        ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
-
-        delete node;
     }
 
     void subscriptionFilled(const GravityDataProduct& dataProduct)
     {
     	pthread_mutex_lock(&mutex);
     	subFilledFlag = true;
+    	pthread_mutex_unlock(&mutex);
+    }
+
+    void request(const GravityDataProduct& dataProduct)
+    {
+    	node.sendGravityDataProduct(socket, dataProduct);
+    	pthread_mutex_lock(&mutex);
+    	gotRequest = true;
+    	pthread_mutex_unlock(&mutex);
+    }
+
+    void requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
+    {
+    	pthread_mutex_lock(&mutex);
+    	gotResponse = (serviceID == "SERVICE_TEST" && requestID == "REQUEST_ID");
     	pthread_mutex_unlock(&mutex);
     }
 
@@ -136,6 +155,32 @@ public:
        	pthread_mutex_unlock(&mutex);
     }
 
+    void clearReqRepFlags()
+    {
+    	pthread_mutex_lock(&mutex);
+    	gotRequest = false;
+    	gotResponse = false;
+    	pthread_mutex_unlock(&mutex);
+    }
+
+    bool isRequestReceived()
+    {
+    	bool ret;
+    	pthread_mutex_lock(&mutex);
+    	ret = gotRequest;
+    	pthread_mutex_unlock(&mutex);
+    	return ret;
+    }
+
+    bool isResponseReceived()
+    {
+    	bool ret;
+    	pthread_mutex_lock(&mutex);
+    	ret = gotResponse;
+    	pthread_mutex_unlock(&mutex);
+    	return ret;
+    }
+
 private:
     pid_t pid;
     int sdFd;
@@ -143,6 +188,10 @@ private:
 
     pthread_mutex_t mutex;
     bool subFilledFlag;
+    bool gotRequest;
+    bool gotResponse;
+
+    GravityNode node;
 };
 
 #endif /* GRAVITYNODETESTSUITE_H_ */

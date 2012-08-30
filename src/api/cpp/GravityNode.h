@@ -35,7 +35,8 @@ namespace GravityReturnCodes
         NO_SUCH_SERVICE = -7,
         NO_SUCH_DATA_PRODUCT = -8,
         LINK_ERROR = -9,
-        INTERRUPTED = -10
+        INTERRUPTED = -10,
+        NO_SERVICE_PROVIDER = -11
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
@@ -59,11 +60,13 @@ private:
 
     void* context;
     void* subscriptionManagerSocket;
+    void* requestManagerSocket;
     void sendStringMessage(void* socket, string str, int flags);
     uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
+    GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response);
     NetworkNode serviceDirectoryNode;
     map<string,NetworkNode*> publishMap;
     map<string,NetworkNode*> serviceMap;
