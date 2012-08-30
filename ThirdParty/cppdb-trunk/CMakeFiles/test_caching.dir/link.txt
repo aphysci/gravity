@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -Wextra -O2 -g    CMakeFiles/test_caching.dir/test/test_caching.cpp.o  -o test_caching -rdynamic libcppdb.so.0.3.1 -ldl -lpthread -lodbc -Wl,-rpath,/home/tim/gravity/gravity/ThirdParty/cppdb-trunk 

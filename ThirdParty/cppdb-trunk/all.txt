@@ -1,0 +1,168 @@
+Fail cppdb::driver failed to load driver sqlite3 - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver sqlite3 - no module found
+Fail cppdb::driver failed to load driver sqlite3 - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver sqlite3 - no module found
+Fail cppdb::driver failed to load driver sqlite3 - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver sqlite3 - no module found
+Fail cppdb::driver failed to load driver sqlite3 - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver sqlite3 - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver postgresql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver postgresql - no module found
+Fail cppdb::driver failed to load driver mysql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver mysql - no module found
+Fail cppdb::driver failed to load driver mysql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver mysql - no module found
+Fail cppdb::driver failed to load driver mysql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver mysql - no module found
+Fail cppdb::driver failed to load driver mysql - no module found
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::driver failed to load driver mysql - no module found
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Fail cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'
+Last tested line 0
+Tests: 1 failed: 1
+Fail!
+Testing CppDB version `0.3.1' 301
+ERROR: cppdb::odbc::Failed with error `[unixODBC][Driver Manager]Data source name not found, and no default driver specified'

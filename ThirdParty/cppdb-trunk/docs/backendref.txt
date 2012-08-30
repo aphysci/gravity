@@ -1,0 +1,201 @@
+
+/*! \page backendref Backends Reference
+
+CppDB provides following SQL backends support
+
+- \subpage mysql
+- \subpage postgresql
+- \subpage sqlite3
+- \subpage odbc
+
+*/
+
+//---------------------------
+
+/*! \page mysql MySQL Backend - "mysql"
+
+MySQL backend allows to connect to MySQL database. It uses native MySQL C client API.
+
+
+\section conn Connection String
+
+The driver name is "mysql", cppdb::session::engine() returns "mysql"
+
+Connection Properties are:
+
+- \c host - the remote database host to connect. Default is local host.
+- \c user - the user name to login
+- \c password - the password to login
+- \c database - the name of the database to use - default unspecified
+- \c port - the port to connect - default unspecified
+- \c unix_socket - the socket to connect - default unspecified
+
+Additionaly you can customize the connection with MySQL option parameters.
+Current list of options is specified in http://dev.mysql.com/doc/refman/5.5/en/mysql-options.html .
+In CppDB, they are specified in lower case letters with \c mysql_ prefix removed.
+Boolean values should be given as either 0 or 1. Options which take no arguments (e.g. opt_compress)
+should be passed as a boolean with the value of 1. Example option string: 
+
+\verbatim
+mysql:user=test;password=test;opt_reconnect=1;opt_read_timeout=10;opt_compress=1
+\endverbatim
+
+\section impl Implementation Details
+
+Prepared statements are implemented using mysql_stmt_* family API, while unprepared statements
+use mysql_real_query API and explicit escaping using mysql_real_escape_string instead of parameter binding.
+
+Because MySQL caches query results, it sometimes more efficient to use unprepared statements
+rather then using prepared one that their results are not cached
+
+Last insert row id is fetched using mysql_insert_id() and mysql_stmt_insert_id() API, the
+name of the sequence is ignored.
+
+
+*/
+
+//---------------------------
+
+/*! \page postgresql PostgreSQL Backend - "postgresql"
+
+PostgreSQL backend allows to connect to PostgreSQL database. It uses libpq C client API.
+
+
+\section conn Connection String
+
+The driver name is "postgresql", cppdb::session::engine() returns "posgresql"
+
+PostgreSQL connection properties are passed as it to libpq. So for full list you should refer to
+the <a href="http://www.postgresql.org/docs/8.3/static/libpq-connect.html">libpq manual</a>
+
+The most used properties are:
+
+- \c host - the remote database host to connect. Default is local host.
+- \c user - the user name to login
+- \c password - the password to login
+- \c dbname - the name of the database to use - default unspecified
+- \c port - the port to connect - default unspecified
+
+\subsection connspec Special Properties
+
+PostgreSQL backend has additional internal property that define how to treat
+blob objects: "@blob"
+
+The possible values are:
+
+- \c lo use large object API to store Blobs. This is the default.it adds a restriction to accessing large objects only withing transaction and handing their lifetime using <a href="http://www.postgresql.org/docs/8.3/static/lo.html">lo module</a>. This option has an advantage of small memory footprint when dealing with large objects as it does not require storing full object in memory.
+- \c bytea - treat Blobs as bytea columns. This is simpler method but it is applicable only for objects that can fit to memory.
+
+
+\section impl Implementation Details
+
+Prepared statements are implemented using PQexecPrepared API, while unprepared statements
+use PQexecParams API.
+
+When using PostgreSQL large objects "@blob=lo" - the default - you should access them only during transaction, otherwise
+the operations would fail. It is very good idea to use <a href="http://www.postgresql.org/docs/8.3/static/lo.html">lo module</a>
+that helps handing object lifetime as cppdb backend is not aware of statement type you use and it can't decide whether
+new object should be created in insert statement or same object should be updated. So "lo" module is your friend.
+
+You may also use bytea if want to have a semantics similar to other RDBMSs Blobs.
+
+Fetching last insert id should be done using non-empty sequence name, i.e. using cppdb::statement::sequence_last() and
+it is fetched using "SELECT currval(?)" statement.
+
+
+*/
+
+
+//---------------------------
+
+/*! \page sqlite3 SQlite3 Backend - "sqlite3"
+
+SQlite3 backend allows to connect to SQlite3 database. It uses native SQlite3 C client API.
+
+
+\section conn Connection String
+
+The driver name is "sqlite3", cppdb::session::engine() returns "sqlite3"
+
+Connection Properties are:
+
+- \c db - the path to sqlite3 database file, special name ":memory:" can be used as well.
+- \c mode - the mode to open connection with, one of "create", "readonly" and "readwrite", default is "create". The difference between 
+  "readwrite" and "create" that if the database does not exist the connection fails.
+- \c busy_timeout - the equivalent of \c sqlite3_busy_timeout function. Specifies the minimal number of milliseconds
+  to wait before returning a error if the database is locked by another process. 
+- \c vfs - the name of vfs to use
+
+\section impl Implementation Details
+
+Both prepared and not prepared statements are implemented using sqlite3_ API,
+while unprepared statements just not getting cached unlike prepared ones.
+
+Last insert row id is fetched using sqlite3_last_insert_rowid(), the
+name of the sequence is ignored.
+
+
+*/
+
+//---------------------------
+
+/*! \page odbc CppDB - ODBC bridge - "odbc"
+
+ODBC backend allows to connect to almost any existing SQL database via ODBC driver and
+provides much more convenient interface that ODBC C API.
+
+Unlike other backends, this one is not loaded dynamically by default but rather linked directly
+to cppdb library.
+
+\section conn Connection String
+
+The driver name is "odbc", but the cppdb::session::engine() returns "unknown" unless "@engine" property is specified.
+
+Connection Properties are passed as is into ODBC connection string, so for example for connecting to some database
+you may just simply specify:
+
+\verbatim
+odbc:DSN=MySource;UID=myuser;PWD=secret
+\endverbatim
+
+However there are several additional internal properties that define how cppdb treats the ODBC connection:
+
+- \c \@engine - the type of underlying database engine, it allows the backend to customise the behavior and 
+provide support for features missing in ODBC API itself.
+\n
+Currently following engine names provide additional values: "mysql", "sqlite3", "postgresql", "mssql". It allows
+the driver to support cppdb::statement::sequence_last() or cppdb::statement::last_insert_id() functionality.
+- \c \@utf - with options "narrow" - the default and "wide". This option specifies how to deal with Unicode. If the "narrow"
+option is used (default) it would pass strings as is to the backend assuming that is supports UTF-8 natively using so 
+called "ANSI" API , otherwise, it would use so called "Wide" API and convert the strings to UTF-16 and use wide character
+functions.
+\n
+\note you should almost always use narrow option as most ODBC drivers support UTF-8 happily, however when you
+work with MS SQL under windows you would probably want to use wide API for operation on strings.
+- \c \@sequence_last - the SQL statement that is used for retrieving the last created id. You need to specify this if you
+want to use cppdb::statement::sequence_last() or cppdb::statement::last_insert_id() and the engine is not one of mysql sqlite3, postgresql or mssql.
+\n If the statement contains "?" mark the parameter of cppdb::statement::sequence_last() would be binded to it, otherwise the parameter is ignored.
+
+
+\section impl Implementation Details
+
+Both prepared statements use SQLPrepare API and unprepared statements use SQLExecDirect API. All data
+is fetched using SQLGetData in order to support variable text length.
+
+Following statements are used for fetching last insert id:
+
+- \c sqlite3 - "select last_insert_rowid()"
+- \c mysql - "select last_insert_id()"
+- \c postgresql - "select currval(?)"
+- \c mssql - "select @@identity"
+
+If the engine is not one of the above and "@sequence_last" property is not defined the cppdb::not_supported_by_backend exception
+would be thrown.
+
+cppdb::session::escape() functionality is not supported as actual escaping rules vary by the specific RDBMS and attempt
+to use them would cause cppdb::not_supported_by_backend exception.
+
+
+*/
+
+

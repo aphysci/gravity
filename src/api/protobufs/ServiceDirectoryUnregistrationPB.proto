@@ -1,0 +1,17 @@
+option optimize_for = SPEED;
+option java_outer_classname = "ServiceDirectoryUnregistration";
+
+package gravity;
+
+message ServiceDirectoryUnregistrationPB
+{
+	required string id = 1;
+	required string url = 2;
+	
+	enum RegistrationType
+	{
+		DATA = 0;
+		SERVICE = 1;
+	} 
+	optional RegistrationType type = 3;
+}

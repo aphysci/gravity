@@ -1,0 +1,116 @@
+/*! \page pool Using Connection Pool
+
+\section pool_using Using Connection Pooling
+
+CppDB provides two ways to use connection pooling:
+
+-# Transparent - by setting a connection string option "@pool_size=N" where N is positive integer.
+-# Direct - by using cppdb::pool object directly.
+
+The first is the most simple case, it works fully transparently and only thing that should
+be changed is a connection string. Such that
+
+\code
+cppdb::session sql("sqlite3:db=test.db;@pool_size=10");
+\endcode
+
+Would automatically use connections pool and not require using any additional effort.
+
+On the other hand it has its own downsides - use of global singleton instance of the connections.
+It may give a chance that unrelated components of same software that use same connection
+string may interfere each other, set different connection options, etc.
+
+So libraries should prefer to use explicit pool object.
+
+\code
+// Create the pool
+cppdb::pool::pointer my_pool = cppdb::pool::create("sqlite3:db=test.db");
+
+// Use the pool
+cppdb::session sql(my_pool->open());
+// When sql is destroyed the
+// connection is returned to the pool
+\endcode
+
+This allows to use pool outside the global \ref cppdb::connections_manager.
+
+\section pool_conn_opt Configuring a Connection
+
+It is useful to be able to setup some generic session options that are usually 
+set only once and kept during all the session. It may be things like
+transaction isolation level, durability options and more.
+
+When you use connections pool it would be very useful to distinguish between
+the newly created connection and other, recycled from the pool.
+
+It can be done using \ref cppdb::session::once_called() member function
+or simply by using \ref cppdb::session::once() function with a callback
+that is promised to be called only once per new connection.
+
+For example:
+
+\code
+void config(cppdb::session &sql)
+{
+  sql << "PRAGMA read_uncommited=1" << cppdb::exec;
+}
+...
+
+cppdb::session sql(conn_str);
+sql.once(config); // called for new connections only
+sql << ... ;
+\endcode
+
+Please note that any function like object that receive as 
+a parameter the sql sesion can be used as callback:
+
+\code
+struct config {
+  int uncommited;
+  void operator()(cppdb::session &sql) const // operator ()
+  {
+    sql << "PRAGMA read_uncommited=?" << uncommited << cppdb::exec;
+  }
+  config(int val ) : uncommited(val)
+  {
+  }
+};
+
+...
+cppdb::session sql(conn_str);
+sql.once(config(commit_mode)); // called for new connections only
+sql << ... ;
+
+\endcode
+
+\section pool_conn_specific Connection Specific Data
+
+If more complex configuration of the session is required it is possible to
+associate any user object with a connection using \ref cppdb::connection_specific_data.
+
+User can derive his own classes from it and store it withing a connection object. For example
+
+\code
+struct my_data : public cppdb::connection_specific_data {
+  int foo;
+  std::string bar 
+};
+...
+
+my_data *p=sql.get_specific<my_data>();
+// check if it exists
+if(!p) { 
+   // if not create one and assign one
+   p = new my_data();
+   sql.reset_specific(p);
+}
+p->foo++;
+...
+\endcode
+
+
+*/
+
+
+
+

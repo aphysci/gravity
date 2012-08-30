@@ -1,0 +1,4 @@
+Testing drivers collection
+Testing connection pooling
+Tests: 47 failed: 0
+Ok

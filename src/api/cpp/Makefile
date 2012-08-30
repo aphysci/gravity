@@ -1,37 +1,46 @@
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
+INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
-MYPROTO_DIR=protobufs
+SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
+MYPROTO_DIR=../protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
-LIB_NAME=libgravity.a
+LIB_NAME=libgravity
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src
-CFLAGS=$(INCLUDES)
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
+CFLAGS=$(INCLUDES) -fPIC
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
 DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
-PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
-PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
+PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,%.pb.cc,$(PROTO_SRC))
+PROTO_OBJ=$(patsubst %.cc,%.o,$(PROTO_CODE))
 
 .PRECIOUS: %.pb.cc
 
-all: $(LIB_NAME) 
+all: $(LIB_NAME).a $(LIB_NAME).so
 
-%.pb.cc:%.proto
-	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
+%.pb.cc:$(MYPROTO_DIR)/%.proto
+	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=. $<
 
 %.pb.o:%.pb.cc
-	$(CC) -c -o $@ $< $(CFLAGS)
+	@echo $(CC) proto build $<
+	@$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o:%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-	
-$(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
-	ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
+	@echo $(CC) $<
+	@$(CC) -c -o $@ $< $(CFLAGS)
+
+$(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
+	@echo building $(LIB_NAME).a  
+	@ar rcs $(LIB_NAME).a $(OBJECTS) $(PROTO_OBJ)
+
+$(LIB_NAME).so: $(PROTO_OBJ) $(OBJECTS)
+	@echo building $(LIB_NAME).so  
+	@$(CC) -shared -o $(LIB_NAME).so $(OBJECTS) $(PROTO_OBJ)
 
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc
+	rm -rf *.a *.so *.o *pb.h *.pb.cc

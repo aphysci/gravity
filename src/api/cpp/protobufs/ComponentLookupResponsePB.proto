@@ -1,9 +1,0 @@
-option optimize_for = SPEED;
-
-package gravity;
-
-message ComponentLookupResponsePB
-{
-	required string lookupID = 1;
-	repeated string url = 2;
-}

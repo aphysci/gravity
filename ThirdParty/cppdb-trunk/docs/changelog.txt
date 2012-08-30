@@ -1,0 +1,56 @@
+/*! \page changelog Changelog
+
+\section changelog_v0_3_1 Version 0.3.1
+
+New Features:
+
+- Added an experimental support of Borland Build 6. Thanks to Thorsten Schöning who provided the patch.
+- Added support of LIBDIR cmake option to handle correctly Red-Had distributions
+
+Bugs:
+
+- Fixed bug #3536452:
+    - \c cppdb::transaction::~transaction() could leak exception
+    - \c busy_timeout option was not working for sqlite3 backend
+- Fixed incorrect use of SQLITE_STATIC that could cause crash
+
+
+
+\section changelog_v0_3_0 Version 0.3.0
+
+New Features:
+
+- Added session specific storage for custom data
+- Added support of one time initialization
+- Added version number API
+- Added an option to clear the connections pool
+- Changed library version format to Major.Minor.Patch
+- Added \c busy_timeout option to sqlite3 backend.
+
+Bugs:
+
+- Fixed bug #3451653 - disconnected connections are recycled to the pool
+- Fixed issue #3439445 - build problem on some distributions 
+
+
+\section changelog_v0_0_4 Version 0.0.4 
+
+New Features:
+
+- Added empty() and clear() members for cppdb::statement
+- Added an option to provide default value when the value is NULL in result::get()
+  instead of throwing an exception. Thanks to Krzysztof Wrzalik.
+
+Bugs:
+
+- Switched to using ODBC as internal backend by default due to multiple issues with dynamic unloading of ODBC backend. Now if you want to use it dynamically you must sed the build option \c -DODBC_BACKEND_INTERNAL=OFF
+- Build issue of PostgreSQL with MSVC compiler.
+- Various fixes for FreeBSD, Solaris and Darwin
+- Fixed bug #3317277: a exception is not thrown when connection to PostgreSQL server could not be established.
+- Fixed bug #3439445: added search path to PostgreSQL headers for some Linux distributions.
+
+\section changelog_v0_0_3 Version 0.0.3
+
+- Changed a license from LGPL to dual license Boost/MIT
+
+*/
