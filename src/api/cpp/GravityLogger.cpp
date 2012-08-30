@@ -54,6 +54,8 @@ void FileLogger::Log(int level, const char* messagestr)
 
     fputs(messagestr, log_file);
     fputs("\n", log_file);
+
+    //fflush(log_file); //I'm not sure when or how often this should be called.
 }
 
 FileLogger::~FileLogger()
@@ -122,7 +124,7 @@ std::list< std::pair<Logger*, int> > Log::loggers; //Initialize
 
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 {
-    loggers.push_back(make_pair(logger, log_level));
+    loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
 }
 
 const char* Log::LogLevelToString(LogLevel level)
@@ -207,6 +209,24 @@ int Log::LevelToInt(LogLevel level)
     }
 
     return int_level;
+}
+
+
+void Log::CloseLoggers()
+{
+    std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
+    std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
+
+    //Delete all Loggers
+    while(i != l_end);
+    {
+        delete i->first;
+        i++;
+    }
+
+    //Remove all References
+    loggers.erase(loggers.begin(), loggers.end());
+
 }
 
 //Using functions instead of macros so we can use namespaces.

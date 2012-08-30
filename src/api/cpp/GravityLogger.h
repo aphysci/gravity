@@ -63,11 +63,16 @@ public:
     /*
      * You must call this function to initialize the Logger with a generic Logger.  May be called along with other init functions.
      * Called by initAndAddFileLogger() and initAndAddGravityLogger().
+     * After calling this function the Logger is now owned by this class (for now).
      * \param gravity_node     The GravityNode with which to connect to the remote log recorder machine.  Can be NULL for logging only to a file.
      * \param log_level        The logging level to initialize this logger with.
      */
     static void initAndAddLogger(Logger* logger, LogLevel log_level);
 
+    /*
+     * Closes and deletes all open loggers.
+     */
+    static void CloseLoggers();
 
     /*
      * Logging functions:
@@ -86,7 +91,7 @@ public:
     //static void RemoveLogger(Logger* logger);
 private:
     static void vLog(int level, const char* format, va_list args);
-    int LevelToInt(LogLevel level);
+    static int LevelToInt(LogLevel level);
 
     static std::list< std::pair<Logger*, int> > loggers;
 };
