@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcppdb.a  CMakeFiles/cppdb-static.dir/src/utils.cpp.o CMakeFiles/cppdb-static.dir/src/mutex.cpp.o CMakeFiles/cppdb-static.dir/src/driver_manager.cpp.o CMakeFiles/cppdb-static.dir/src/conn_manager.cpp.o CMakeFiles/cppdb-static.dir/src/shared_object.cpp.o CMakeFiles/cppdb-static.dir/src/pool.cpp.o CMakeFiles/cppdb-static.dir/src/backend.cpp.o CMakeFiles/cppdb-static.dir/src/frontend.cpp.o CMakeFiles/cppdb-static.dir/src/atomic_counter.cpp.o CMakeFiles/cppdb-static.dir/drivers/odbc_backend.cpp.o
-/usr/bin/ranlib libcppdb.a
