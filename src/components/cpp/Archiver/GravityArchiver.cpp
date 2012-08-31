@@ -20,7 +20,8 @@ Archiver::Archiver(GravityNode* gn, const string db_name, const string table_nam
 {
     grav_node = gn;
 
-    sql = new cppdb::session("odbc:@Driver=MySql;database=" + db_name + ";user=" + db_user + ";password=" + db_pass);
+    //sql = new cppdb::session("odbc:@Driver=MySql;database=" + db_name + ";user=" + db_user + ";password=" + db_pass);    
+    sql = new cppdb::session("odbc:@Driver=MySql;DSN=timtest");
 
     insert_stmt = sql->prepare("INSERT INTO " + table_name + " (timestamp, DataproductID, Message) VALUES (?, ?, ?)");
 }

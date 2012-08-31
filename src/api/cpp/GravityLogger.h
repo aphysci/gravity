@@ -4,6 +4,7 @@
 #include <string>
 #include <stdarg.h>
 #include <stdio.h>
+#include <list>
 
 //class GravityNode {};
 
@@ -20,6 +21,12 @@ namespace gravity {
 #define COMPILE_GRAVITY_LOGGING_LEVEL GRAVITY_LOG_TRACE
 #endif
 
+class Logger {
+public:
+    virtual void Log(int level, const char* messagestr) = 0;
+    virtual ~Logger() {}
+};
+
 class Log
 {
 public:
@@ -32,11 +39,47 @@ public:
         DEBUG = 1 << GRAVITY_LOG_DEBUG,
         TRACE = 1 << GRAVITY_LOG_TRACE
     };
+    /*
+     * Helper function.
+     */
+    static const char* LogLevelToString(LogLevel level);
+    /*
+     * Helper function.
+     */
+    static LogLevel LogStringToLevel(const char* string);
 
-    static void init(GravityNode *gravity_node, const char* filename, unsigned short port, LogLevel local_log_level, LogLevel net_log_level);
+    /*
+     * You must call this function to initialize the Logger with File logging to the file specified.  May be called multiple times.
+     * \param filename         Local logging filename.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
+     * \param log_local_level  The initial local logging level.
+     */
+    static void initAndAddFileLogger(const char* filename, LogLevel local_log_level);
+    /*
+     * You must call this function to initialize the Logger with Gravity network logging.  May be called in addition to initAndAddFileLogger().
+     * \param gravity_node     The GravityNode with which to connect to the remote log recorder machine.  Can be NULL for logging only to a file.
+     * \param log_net_level    The initial network logging leve.
+     */
+    static void initAndAddGravityLogger(GravityNode *gravity_node, unsigned short port, LogLevel net_log_level);
+    /*
+     * You must call this function to initialize the Logger with a generic Logger.  May be called along with other init functions.
+     * Called by initAndAddFileLogger() and initAndAddGravityLogger().
+     * After calling this function the Logger is now owned by this class (for now).
+     * \param gravity_node     The GravityNode with which to connect to the remote log recorder machine.  Can be NULL for logging only to a file.
+     * \param log_level        The logging level to initialize this logger with.
+     */
+    static void initAndAddLogger(Logger* logger, LogLevel log_level);
 
-    static void vLog(int level, const char* format, va_list args);
+    /*
+     * Closes and deletes all open loggers.
+     */
+    static void CloseLoggers();
 
+    /*
+     * Logging functions:
+     *  Use these to log messages.
+     *  \param message  The log message format string.  Use printf style.
+     *  \param ...      Addition printf style parameters
+     */
     static void fatal(const char* message, ...);
     static void critical(const char* message, ...);
     static void warning(const char* message, ...);
@@ -44,23 +87,13 @@ public:
     static void debug(const char* message, ...);
     static void trace(const char* message, ...);
 
-    //TODO: write these accessors
-    static void setLocalLevel(LogLevel level);
-    static LogLevel getLocalLevel();
-
-    static void setNetworkLevel(LogLevel level);
-    static LogLevel getNetworkLevel();
-
-    static const char* LogLevelToString(LogLevel level);
-    static LogLevel LogStringToLevel(const char* string);
-
+    static void AddLogger(Logger* logger);
+    //static void RemoveLogger(Logger* logger);
 private:
-    //std::map<std::string, std::map<LogLevel, logfunc> > log_config;
-    static FILE* log_file;
-    static int current_local_levels;
-    static int current_network_levels;
-    static std::string log_dataProductID;
-    static GravityNode* gravity_node;
+    static void vLog(int level, const char* format, va_list args);
+    static int LevelToInt(LogLevel level);
+
+    static std::list< std::pair<Logger*, int> > loggers;
 };
 
 } //Namespace

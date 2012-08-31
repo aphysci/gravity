@@ -1,6 +1,7 @@
 CC=g++
 THIRDPARTY_DIR=../../../../ThirdParty
 INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
+SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 GRAVLIB_DIR=../../../api/cpp
@@ -8,9 +9,9 @@ MYPROTO_DIR=protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)
-LIBS=-lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
+CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR) -L$(SQLLIB_DIR)
+LIBS=-lcppdb -lgravity -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))

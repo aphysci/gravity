@@ -27,11 +27,12 @@ int main(void)
 {
     gravity::GravityConfigParser parser;
     parser.ParseConfigFile("ServiceDirectory.ini");
-
-    gravity::Log::init(NULL, "ServiceDirectory.log", 0, parser.getLocalLogLevel(), parser.getNetLogLevel());
+    gravity::Log::initAndAddFileLogger("ServiceDirectory.log", parser.getLocalLogLevel());
+    //Not logging to GravityLogRecorder for now.
 
     gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
     serviceDirectory->start();
+
 }
 
 namespace gravity
