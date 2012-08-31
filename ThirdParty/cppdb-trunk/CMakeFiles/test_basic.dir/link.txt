@@ -1,1 +1,0 @@
-/usr/bin/c++    -Wall -Wextra -O2 -g    CMakeFiles/test_basic.dir/test/test_basic.cpp.o  -o test_basic -rdynamic libcppdb.so.0.3.1 -ldl -lpthread -lodbc -Wl,-rpath,/home/tim/gravity/gravity/ThirdParty/cppdb-trunk 

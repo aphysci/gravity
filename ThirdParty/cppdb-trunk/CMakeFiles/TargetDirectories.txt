@@ -1,7 +1,0 @@
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/cppdb.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/cppdb-static.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/example.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/test_backend.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/test_basic.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/test_caching.dir
-/home/tim/gravity/gravity/ThirdParty/cppdb-trunk/CMakeFiles/test_perf.dir
