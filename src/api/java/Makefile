@@ -33,7 +33,7 @@ gravity/%.java:$(MYPROTO_DIR)/%PB.proto
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --java_out=. $<
 
 %.class:%.java
-	javac -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:. $<
+	javac -d build -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:. $<
 
 gravity_wrap.o: gravity_wrap.cxx
 	$(CC) -c -o $@ $< $(INCLUDES)
@@ -45,5 +45,4 @@ $(LIB_NAME): gravity.java $(OBJECTS) $(PROTO_OBJ)
 #	@echo building $(LIB_NAME)  
 
 clean:
-	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk
-	find . -name "*.class" -exec rm {} \;
+	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk build/*
