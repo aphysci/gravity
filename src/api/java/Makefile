@@ -1,3 +1,6 @@
+
+include autosrcs.mk
+
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-jzmq
@@ -6,34 +9,44 @@ MYPROTO_DIR=../protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 LIB_NAME=gravity.jar
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux -I../cpp
 CFLAGS=$(INCLUDES)
 
-SRC=$(wildcard *.java)
-OBJECTS=$(patsubst %.java,%.class,$(SRC))
+OBJECTS=$(patsubst %.java,%.class,$(AUTO_SRCS))
 
-PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
-PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,%.pb.java,$(PROTO_SRC))
-PROTO_OBJ=$(patsubst %.cc,%.class,$(PROTO_CODE))
+PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*PB.proto)
+PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%PB.proto,gravity/%.java,$(PROTO_SRC))
+PROTO_OBJ=$(patsubst %.java,%.class,$(PROTO_CODE))
 
 .PRECIOUS: %.pb.java
 
-all: $(LIB_NAME) 
+all: $(LIB_NAME) libgravity_wrap.so
 
-%.pb.java:$(MYPROTO_DIR)/%.proto
+#gravity.java: gravity.i
+autosrcs.mk: gravity.i
+	swig -c++ -java $<
+	echo "AUTO_SRCS=`echo \`ls -R | grep java$ \``" > autosrcs.mk
+
+#%.pb.java:$(patsubst gravity/%.pb.java,$(MYPROTO_DIR)/%PB.proto,)
+gravity/%.java:$(MYPROTO_DIR)/%PB.proto
+	echo $@
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --java_out=. $<
 
-%.pb.class:%.pb.java
-	@echo $(CC) proto build $<
-	@$(CC) -c -o $@ $< $(CFLAGS)
+#%.pb.class:%.pb.java
+#	javac $<
 
-%.o:%.cpp $(DEPS)
-	@echo $(CC) $<
-	@$(CC) -c -o $@ $< $(CFLAGS)
+%.class:%.java
+	javac $<
 
-$(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
-	@echo building $(LIB_NAME)  
-	@ar rcs $(LIB_NAME) $(OBJECTS) $(PROTO_OBJ)
+gravity_wrap.o: gravity_wrap.cxx
+	$(CC) -c -o $@ $< $(INCLUDES)
+
+libgravity_wrap.so: gravity_wrap.o
+	$(CC) -shared -o $@ $<
+
+$(LIB_NAME): gravity.java $(OBJECTS) $(PROTO_OBJ)
+#	@echo building $(LIB_NAME)  
 
 clean:
-	rm -rf *.o *pb.h *.pb.cc
+	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk
+	find . -name "*.class" -exec rm {} \;
