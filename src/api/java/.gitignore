@@ -1,0 +1,6 @@
+*.class
+*.so
+*.o
+*.mk
+*.java
+*.cxx

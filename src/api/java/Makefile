@@ -32,11 +32,8 @@ gravity/%.java:$(MYPROTO_DIR)/%PB.proto
 	echo $@
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --java_out=. $<
 
-#%.pb.class:%.pb.java
-#	javac $<
-
 %.class:%.java
-	javac $<
+	javac -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:. $<
 
 gravity_wrap.o: gravity_wrap.cxx
 	$(CC) -c -o $@ $< $(INCLUDES)
