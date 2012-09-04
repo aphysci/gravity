@@ -24,7 +24,8 @@ public:
      */
     virtual void Log(int level, const char* messagestr);
     virtual ~FileLogger();
-private:
+protected:
+    FileLogger() { }
     FILE* log_file;
 };
 
@@ -63,10 +64,27 @@ FileLogger::~FileLogger()
     fclose(log_file);
 }
 
-
 void Log::initAndAddFileLogger(const char* filename, LogLevel local_log_level)
 {
     Log::initAndAddLogger(new FileLogger(filename), local_log_level);
+}
+
+
+class ConsoleLogger : public FileLogger
+{
+public:
+    ConsoleLogger();
+};
+
+ConsoleLogger::ConsoleLogger()
+{
+    log_file = stdout; //fdopen(dup(STDOUT_FILENO), "w"); //Duplicate the file handle so we can close it after we're done with it.
+    //I hope this is the right way to do this.
+}
+
+void Log::initAndAddConsoleLogger(LogLevel local_log_level)
+{
+    Log::initAndAddLogger(new ConsoleLogger(), local_log_level);
 }
 
 /*
