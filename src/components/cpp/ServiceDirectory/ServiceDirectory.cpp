@@ -25,14 +25,15 @@ using namespace std;
 
 int main(void)
 {
-    gravity::GravityConfigParser parser;
-    parser.ParseConfigFile("ServiceDirectory.ini");
-    gravity::Log::initAndAddFileLogger("ServiceDirectory.log", parser.getLocalLogLevel());
-    //Not logging to GravityLogRecorder for now.
+    gravity::GravityConfigParser parser("ServiceDirectory.ini");
+    parser.ParseConfigFile();
+    //gravity::Log::initAndAddFileLogger("ServiceDirectory.log", parser.getLocalLogLevel());
+    gravity::Log::initAndAddConsoleLogger(parser.getLocalLogLevel());
+    cout << gravity::Log::LogLevelToString( parser.getLocalLogLevel()) << endl;
+    //Not logging to GravityLogRecorder for now because that relies on having a gravity node.
 
     gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
     serviceDirectory->start();
-
 }
 
 namespace gravity
@@ -130,7 +131,6 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
         list<string>* urls = &dataProductMap[lookupRequest.lookupid()];
         ComponentDataLookupResponsePB lookupResponse;
         lookupResponse.set_lookupid(lookupRequest.lookupid());
-        cout << "DEBUG: lookup request: " << lookupRequest.lookupid() << endl;
         for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
         {
             lookupResponse.add_url(*iter);
