@@ -46,4 +46,4 @@ $(LIB_NAME): gravity.java $(OBJECTS) $(PROTO_OBJ)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
-	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk $(JAVA_BUILD_DIR)/*
+	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk $(JAVA_BUILD_DIR)/* *.jar
