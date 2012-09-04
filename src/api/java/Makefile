@@ -39,11 +39,14 @@ gravity/%.java:$(MYPROTO_DIR)/%PB.proto
 gravity_wrap.o: gravity_wrap.cxx
 	$(CC) -c -o $@ $< $(INCLUDES)
 
-libgravity_wrap.so: gravity_wrap.o
-	$(CC) -shared -o $@ $<
+libgravity_wrap.so: gravity_wrap.o ../cpp/libgravity.a
+	$(CC) -shared -o $@ $< -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L../../../ThirdParty/protobuf-2.4.1/src/.libs -L../../../ThirdParty/zeromq-3.2.0/src/.libs -L../cpp -lrt -Wl,-Bdynamic
 
-$(LIB_NAME): gravity.java $(OBJECTS) $(PROTO_OBJ)
+$(LIB_NAME): autosrcs.mk gravity.java $(OBJECTS) $(PROTO_OBJ)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
+
+run:
+	java -Djava.library.path=.:../cpp:../../../ThirdParty/protobuf-2.4.1/src/.libs:../../../ThirdParty/zeromq-3.2.0/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar MyTest
 
 clean:
 	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk $(JAVA_BUILD_DIR)/* *.jar
