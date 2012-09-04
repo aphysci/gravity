@@ -24,7 +24,7 @@ public:
     /**
      * Writes to the Log.
      */
-    virtual void subscriptionFilled(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts);
+    virtual void subscriptionFilled(const GravityDataProduct &dataProduct);
 private:
     GravityNode* grav_node;
     FILE* log_file;

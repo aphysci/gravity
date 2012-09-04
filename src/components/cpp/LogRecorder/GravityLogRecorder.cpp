@@ -34,7 +34,7 @@ void LogRecorder::getNewFilename(char* outfilename, string basefilename)
     time(&rawtime);
     timeinfo = localtime( &rawtime );
 
-    strftime(timestr, 100, "%y_%m_%d_H%_%M_%S", timeinfo); //2012/08/23 12:12:12 - 19 chars
+    strftime(timestr, 100, "%Y_%m_%d_%H_%M_%S", timeinfo); //2012/08/23 12:12:12 - 19 chars
 
     strncpy(outfilename, filebasename.c_str(), len);
     strncpy(outfilename+len, timestr, 19);
@@ -62,34 +62,34 @@ void LogRecorder::start()
 }
 
 
-void LogRecorder::subscriptionFilled(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts)
+void LogRecorder::subscriptionFilled(const GravityDataProduct &dataProduct)
 {
-    shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
-
+//    shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
 //    for_each(dataProducts.begin(), dataProducts.end(), [ this ] (shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
-    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
-    {
-        shared_ptr<GravityDataProduct> dataProduct = *i;
+//    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+//    {
+//        shared_ptr<GravityDataProduct> dataProduct = *i;
         num_logs++;
 
         GravityLogMessagePB message;
-        dataProduct->populateMessage(message);
+        dataProduct.populateMessage(message);
 
         //Format the Logs nicely.
         char timestr[100];
-        time_t rawtime = dataProduct->getGravityTimestamp(); //TODO: what does this represent?!
+        time_t rawtime = dataProduct.getGravityTimestamp(); //TODO: what does this represent?!
         struct tm * timeinfo;
 
         timeinfo = gmtime( &rawtime );
 
         strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
+        cout << timestr << endl;
 
         fprintf(log_file, "[%s %s %s] %s\n", message.domain().c_str(), message.level().c_str(), timestr, message.message().c_str());
 
         if(num_logs >= NUM_LOGS_BEFORE_ROTATE)
             rotateLogs();
         return;
-    }
+//    }
 }
 
 void LogRecorder::rotateLogs()
