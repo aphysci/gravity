@@ -220,24 +220,28 @@ void GravityServiceManager::removeService()
 	// Read the service id for this request
 	string serviceID = readStringMessage();
 
-	shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
-	void* socket = serviceDetails->pollItem.socket;
-	serviceMapBySocket.erase(socket);
-	serviceMapByServiceID.erase(serviceID);
-	zmq_unbind(socket, serviceDetails->url.c_str());
-	zmq_close(socket);
-
-	// Remove from poll items
-	vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
-	while (iter != pollItems.end())
+	// If service ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
+	if (serviceMapByServiceID.count(serviceID))
 	{
-		if (iter->socket == socket)
+		shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
+		void* socket = serviceDetails->pollItem.socket;
+		serviceMapBySocket.erase(socket);
+		serviceMapByServiceID.erase(serviceID);
+		zmq_unbind(socket, serviceDetails->url.c_str());
+		zmq_close(socket);
+
+		// Remove from poll items
+		vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
+		while (iter != pollItems.end())
 		{
-			iter = pollItems.erase(iter);
-		}
-		else
-		{
-			iter++;
+			if (iter->socket == socket)
+			{
+				iter = pollItems.erase(iter);
+			}
+			else
+			{
+				iter++;
+			}
 		}
 	}
 }
