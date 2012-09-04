@@ -4,65 +4,69 @@
 #include <map>
 #include <iostream>
 
+#include "ezOptionParser.hpp"
+
 namespace gravity {
 
-GravityConfigParser::GravityConfigParser()
+GravityConfigParser::GravityConfigParser(const char* config_filename)
 {
-    serviceDirectoryUrl = NULL;
-}
-
-GravityConfigParser::~GravityConfigParser()
-{
-    free(serviceDirectoryUrl);
-}
-
-
-void GravityConfigParser::ParseConfigFile(const char* filename, const char** additional_keys_to_extract)
-{
-    dictionary* myconfig = iniparser_load(filename);
-
-    if(!myconfig)
+    if(!Open(config_filename))
     {
         std::cout << "Could not open config file.  Using defaults.  " << std::endl;
-        log_local_level = Log::WARNING;
-        log_net_level = Log::WARNING;
-
-        if(!serviceDirectoryUrl)
-            serviceDirectoryUrl = strdup("tcp://*:5555");
-
         return;
     }
 
-    //Ini parser causes warnings!!!
-    const char* protocol = iniparser_getstring(myconfig, "ServiceDirectory:protocol", "tcp");
-    const char* interface = iniparser_getstring(myconfig, "ServiceDirectory:interface", "*");
-    const char* port = iniparser_getstring(myconfig, "ServiceDirectory:port", "5555");
+    log_local_level = Log::WARNING;
+    log_net_level = Log::WARNING;
 
-    free(serviceDirectoryUrl);
-    serviceDirectoryUrl = (char*) malloc(sizeof(char)*256);
-
-    sprintf(serviceDirectoryUrl, "%s://%s:%s", protocol, interface, port);
-
-    const char* loglevstr = iniparser_getstring(myconfig, "General:LogLocalLevel", "warning");
-    log_local_level = Log::LogStringToLevel(loglevstr);
-
-    loglevstr = iniparser_getstring(myconfig, "General:LogNetLevel", "warning");
-    log_net_level = Log::LogStringToLevel(loglevstr);
-
-    while(additional_keys_to_extract != NULL)
-    {
-        values[*additional_keys_to_extract] = string(iniparser_getstring(myconfig, (*additional_keys_to_extract), ""));
-        additional_keys_to_extract++;
-    }
-
-    GetOtherConfigOptions(myconfig);
-
-    iniparser_freedict(myconfig);
+    serviceDirectoryUrl = "tcp://*:5555";
 }
 
-void GravityConfigParser::GetOtherConfigOptions(dictionary* myconfig)
+void GravityConfigParser::ParseCmdLine(int argc, const char** argv)
 {
+    ez::ezOptionParser opt;
 
+    opt.add("warning", false, 1, '\0', "Local Log Level", "--local_log");
+    opt.add("warning", false, 1, '\0', "Network Log Level", "--net_log");
+
+    opt.add("", false, 1, '\0', "Service Directory URL", "--sd_url");
+
+//    opt.add("", false, 1, '\0', "Service Directory Transport Type", "--sd_transport");
+//    opt.add("", false, 1, '\0', "Service Directory Host", "--sd_host");
+//    opt.add("", false, 1, '\0', "Service Directory Port", "--sd_port");
+
+    opt.parse(argc, argv);
+
+    if(opt.get("--local_log")->isSet)
+    {
+        std::string localloglevstr;
+        opt.get("--local_log")->getString(localloglevstr);
+        log_local_level = Log::LogStringToLevel(localloglevstr.c_str());
+    }
+
+    if(opt.get("--net_log")->isSet)
+    {
+        std::string netloglevstr;
+        opt.get("--net_log")->getString(netloglevstr);
+        log_net_level = Log::LogStringToLevel(netloglevstr.c_str());
+    }
+
+    if(opt.get("--sd_url")->isSet)
+        opt.get("--sd_url")->getString(serviceDirectoryUrl);
+}
+
+void GravityConfigParser::ParseConfigFile()
+{
+    std::string protocol = IniConfigParser::getString("ServiceDirectory:protocol", "tcp");
+    std::string interface = IniConfigParser::getString("ServiceDirectory:interface", "*");
+    std::string port = IniConfigParser::getString("ServiceDirectory:port", "5555");
+    serviceDirectoryUrl = protocol + "://" + interface + ":" + port;
+
+    std::string localloglevstr = IniConfigParser::getString("General:LogLocalLevel", "warning");
+    log_local_level = Log::LogStringToLevel(localloglevstr.c_str());
+
+    std::string netloglevstr = IniConfigParser::getString("General:LogNetLevel", "warning");
+    log_net_level = Log::LogStringToLevel(netloglevstr.c_str());
 }
 
 }
