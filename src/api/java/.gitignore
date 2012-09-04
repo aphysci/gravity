@@ -4,3 +4,4 @@
 *.mk
 *.cxx
 *.jar
+SWIGTYPE*.java
