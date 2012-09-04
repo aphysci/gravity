@@ -41,6 +41,8 @@ void GravitySubscriptionManager::start()
 	pollItem.revents = 0;
 	pollItems.push_back(pollItem);
 
+	ready();
+
 	// Process forever...
 	while (true)
 	{
@@ -56,11 +58,7 @@ void GravitySubscriptionManager::start()
 		if (pollItems[0].revents & ZMQ_POLLIN)
 		{
 			// Get new GravityNode request
-			zmq_msg_t msg;
-			zmq_msg_init(&msg);
-			zmq_recvmsg(gravityNodeSocket, &msg, -1);
-			std::string command((char*)zmq_msg_data(&msg), zmq_msg_size(&msg));
-			zmq_msg_close(&msg);
+			string command = readStringMessage();
 
 			// message from gravity node should be either a subscribe or unsubscribe request
 			if (command == "subscribe")
@@ -127,6 +125,29 @@ void GravitySubscriptionManager::start()
 		zmq_close(subDetails->pollItem.socket);
 	}
 	zmq_close(gravityNodeSocket);
+}
+
+void GravitySubscriptionManager::ready()
+{
+	// Create the request socket
+	void* initSocket = zmq_socket(context, ZMQ_REQ);
+
+	// Connect to service
+	zmq_connect(initSocket, "inproc://gravity_init");
+
+	// Send request to service provider
+	sendStringMessage(initSocket, "GravitySubscriptionManager", ZMQ_DONTWAIT);
+
+	zmq_close(initSocket);
+}
+
+void GravitySubscriptionManager::sendStringMessage(void* socket, string str, int flags)
+{
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, str.length());
+	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
+	zmq_sendmsg(socket, &msg, flags);
+	zmq_msg_close(&msg);
 }
 
 string GravitySubscriptionManager::readStringMessage()
