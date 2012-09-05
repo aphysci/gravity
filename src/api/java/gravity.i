@@ -8,6 +8,17 @@
 %}
 %module gravity
 
+%pragma(java) jniclasscode=%{
+  static {
+    try {
+        System.loadLibrary("gravity_wrap");
+    } catch (UnsatisfiedLinkError e) {
+      System.err.println("Native code library failed to load. \n" + e);
+      System.exit(1);
+    }
+  }
+%}
+
 namespace gravity {
     enum GravityReturnCode {
         SUCCESS = 0,

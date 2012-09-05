@@ -1,10 +1,6 @@
 
 public class GravityJavaTest {
 
-    static {
-        System.loadLibrary("gravity_wrap");
-    }
-
     public static void main(String[] argv) {
         System.out.println("in main");
 
