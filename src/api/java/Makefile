@@ -34,7 +34,7 @@ gravity/%.java:$(MYPROTO_DIR)/%PB.proto
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --java_out=. $<
 
 %.class:%.java
-	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:. $<
+	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
 gravity_wrap.o: gravity_wrap.cxx
 	$(CC) -c -o $@ $< $(INCLUDES)
@@ -42,7 +42,7 @@ gravity_wrap.o: gravity_wrap.cxx
 libgravity_wrap.so: gravity_wrap.o ../cpp/libgravity.a
 	$(CC) -shared -o $@ $< -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L../../../ThirdParty/protobuf-2.4.1/src/.libs -L../../../ThirdParty/zeromq-3.2.0/src/.libs -L../cpp -lrt -Wl,-Bdynamic
 
-$(LIB_NAME): autosrcs.mk gravity.java $(OBJECTS) $(PROTO_OBJ)
+$(LIB_NAME): autosrcs.mk gravity.java $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 run:
