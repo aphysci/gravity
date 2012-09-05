@@ -3,13 +3,12 @@ THIRDPARTY_DIR=../../../ThirdParty
 INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
-SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
 MYPROTO_DIR=../protobufs
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 EZOPTION_PARSER=$(THIRDPARTY_DIR)/EZOptionParser
 LIB_NAME=libgravity
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR) -I$(EZOPTION_PARSER)
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(EZOPTION_PARSER)
 CFLAGS=$(INCLUDES) -fPIC
 
 SRC=$(wildcard *.cpp)
@@ -41,7 +40,8 @@ $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 
 $(LIB_NAME).so: $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).so  
-	@$(CC) -shared -o $(LIB_NAME).so $(OBJECTS) $(PROTO_OBJ)
+	$(CC) -shared -o $@ $< -Wl,-Bstatic -lzmq -lprotobuf -liniparser -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L$(INIPARSE_DIR) -lrt -Wl,-Bdynamic
+#	@$(CC) -shared -o $(LIB_NAME).so $(OBJECTS) $(PROTO_OBJ)
 
 clean:
 	rm -rf *.a *.so *.o *pb.h *.pb.cc
