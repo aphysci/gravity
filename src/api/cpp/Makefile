@@ -40,8 +40,8 @@ $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 
 $(LIB_NAME).so: $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).so  
-	$(CC) -shared -o $@ $< -Wl,-Bstatic -lzmq -lprotobuf -liniparser -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L$(INIPARSE_DIR) -lrt -Wl,-Bdynamic
-#	@$(CC) -shared -o $(LIB_NAME).so $(OBJECTS) $(PROTO_OBJ)
+	@$(CC) -shared -o $(LIB_NAME).so $(OBJECTS) $(PROTO_OBJ)
+#	$(CC) -shared -o $@ $< -Wl,-Bstatic -lzmq -lprotobuf -liniparser -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L$(INIPARSE_DIR) -lrt -Wl,-Bdynamic
 
 clean:
 	rm -rf *.a *.so *.o *pb.h *.pb.cc
