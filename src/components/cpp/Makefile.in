@@ -36,4 +36,4 @@ $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
 
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc
+	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
