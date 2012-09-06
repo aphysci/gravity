@@ -1,9 +1,13 @@
 #include <GravityNode.h>
+#include <sstream>
+#include <iostream>
+
+using namespace std;
 
 int main(int argc, char** argv)
 {
   using namespace gravity;
-  char* myDataProductID = "DummyDataProduct";
+  const char* myDataProductID = "DummyDataProduct";
 
   if(argc > 1)
     myDataProductID = argv[1];
@@ -17,7 +21,14 @@ int main(int argc, char** argv)
 
   while(true)
   {
-    dataProduct.setData(&count, sizeof(count));
+    stringstream ss("");
+    ss << count;
+    string cnt_str = ss.str();
+
+    cout << cnt_str.length() << endl;
+    cout << cnt_str << endl;
+    
+    dataProduct.setData((void*)cnt_str.c_str(), cnt_str.length());
 
     gn.publish(dataProduct);
 
