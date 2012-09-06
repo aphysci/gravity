@@ -8,5 +8,5 @@ message GravityDataProductPB
 	optional uint64 timestamp = 1;
 	optional string dataProductID = 2;
 	optional string softwareVersion = 3;
-	repeated bytes data = 4;
+	optional bytes data = 4;
 }

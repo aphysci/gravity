@@ -653,14 +653,13 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 	sendStringMessage(requestManagerSocket, requestID, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, sizeof(&dataProduct));
-	void* v = (void*)&dataProduct;
-	memcpy(zmq_msg_data(&msg), &v, sizeof(&dataProduct));
+	zmq_msg_init_size(&msg, dataProduct.getSize());
+	dataProduct.serializeToArray(zmq_msg_data(&msg));
 	zmq_sendmsg(requestManagerSocket, &msg, ZMQ_SNDMORE);
 	zmq_msg_close(&msg);
 
 	zmq_msg_init_size(&msg, sizeof(&requestor));
-	v = (void*)&requestor;
+	void* v = (void*)&requestor;
 	memcpy(zmq_msg_data(&msg), &v, sizeof(&requestor));
 	zmq_sendmsg(requestManagerSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
@@ -749,13 +748,6 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
                 ret = GravityReturnCodes::LINK_ERROR;
             }
         }
-    }
-
-    if (ret != GravityReturnCodes::SUCCESS)
-    {
-    	// remove from service manager
-    	sendStringMessage(serviceManagerSocket, "unregister", ZMQ_SNDMORE);
-    	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_DONTWAIT);
     }
 
     return ret;
