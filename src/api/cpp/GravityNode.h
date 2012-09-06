@@ -13,6 +13,11 @@
 #include "GravityRequestor.h"
 #include "GravityServiceProvider.h"
 
+//This is defined in Windows for NetBIOS in nb30.h  
+#ifdef DUPLICATE
+#undef DUPLICATE
+#endif
+
 namespace gravity
 {
 

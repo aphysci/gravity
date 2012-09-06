@@ -4,15 +4,17 @@
  *  Created on: Aug 14, 2012
  *      Author: Chris Brundick
  */
-
-#include "GravityNode.h"
-
+ 
 #include <zmq.h>
 #include <iostream>
 #include <pthread.h>
 #include <assert.h>
+#ifdef WIN32
+#include <winsock2.h>
+#else
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include <sstream>
 #include <signal.h>
 #include <tr1/memory>
@@ -27,6 +29,8 @@
 #include "GravitySubscriptionManager.h"
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
+
+#include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition. 
 
 static void* startSubscriptionManager(void* context)
 {
@@ -56,18 +60,19 @@ static void* startServiceManager(void* context)
 }
 
 static int s_interrupted = 0;
+static void (*previousHandlerAbrt)(int); //Function Pointer
+static void (*previousHandlerInt)(int); //Function Pointer
 static void s_signal_handler(int signal_value)
 {
-    s_interrupted = 1;
+    s_interrupted = signal_value;
+	//Restore Previous Handlers
+	signal(SIGABRT, previousHandlerAbrt);
+	signal(SIGINT, previousHandlerInt);
 }
 void s_catch_signals()
 {
-    struct sigaction action;
-    action.sa_handler = s_signal_handler;
-    action.sa_flags = 0;
-    sigemptyset(&action.sa_mask);
-    sigaction(SIGINT, &action, NULL);
-    sigaction(SIGTERM, &action, NULL);
+	previousHandlerAbrt = signal(SIGABRT, s_signal_handler);
+	previousHandlerInt = signal(SIGINT, s_signal_handler);
 }
 
 namespace gravity
@@ -165,6 +170,9 @@ GravityReturnCode GravityNode::init()
     }
     zmq_bind(initSocket, "inproc://gravity_init");
     zmq_close(initSocket);
+	
+	if(s_interrupted)
+		raise(s_interrupted);
 
     return ret;
 }
@@ -259,6 +267,9 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
         // Close socket
         zmq_close(socket);
     }
+	
+	if(s_interrupted)
+		raise(s_interrupted);
 
     return ret;
 }
@@ -822,6 +833,71 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
+//Replace the clock_gettime for Windows.  
+#ifdef WIN32
+//From http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
+LARGE_INTEGER
+getFILETIMEoffset()
+{
+    SYSTEMTIME s;
+    FILETIME f;
+    LARGE_INTEGER t;
+
+    s.wYear = 1970;
+    s.wMonth = 1;
+    s.wDay = 1;
+    s.wHour = 0;
+    s.wMinute = 0;
+    s.wSecond = 0;
+    s.wMilliseconds = 0;
+    SystemTimeToFileTime(&s, &f);
+    t.QuadPart = f.dwHighDateTime;
+    t.QuadPart <<= 32;
+    t.QuadPart |= f.dwLowDateTime;
+    return (t);
+}
+
+//T. Ludwinski: changed timeval to timespec and microseconds to nanoseconds
+int
+clock_gettime(int X, struct timespec *tv)
+{
+    LARGE_INTEGER           t;
+    FILETIME            f;
+    double                  nanoseconds;
+    static LARGE_INTEGER    offset;
+    static double           frequencyToNanoseconds;
+    static int              initialized = 0;
+    static BOOL             usePerformanceCounter = 0;
+
+    if (!initialized) {
+        LARGE_INTEGER performanceFrequency;
+        initialized = 1;
+        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
+        if (usePerformanceCounter) {
+            QueryPerformanceCounter(&offset);
+            frequencyToNanoseconds = (double)performanceFrequency.QuadPart / 1000000000.;
+        } else {
+            offset = getFILETIMEoffset();
+            frequencyToNanoseconds = .01;
+        }
+    }
+    if (usePerformanceCounter) QueryPerformanceCounter(&t);
+    else {
+        GetSystemTimeAsFileTime(&f);
+        t.QuadPart = f.dwHighDateTime;
+        t.QuadPart <<= 32;
+        t.QuadPart |= f.dwLowDateTime;
+    }
+
+    t.QuadPart -= offset.QuadPart;
+    nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
+    t.QuadPart = nanoseconds;
+    tv->tv_sec = t.QuadPart / 1000000000LL;
+    tv->tv_nsec = t.QuadPart % 1000000000LL;
+    return (0);
+}
+#endif
+
 uint64_t GravityNode::getCurrentTime()
 {
     timespec ts;
@@ -829,12 +905,31 @@ uint64_t GravityNode::getCurrentTime()
     return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
 }
 
+#ifdef WIN32
+//convert binary address to string.  
+const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
+{
+	assert(af == AF_INET); //We only support IPV4
+	
+	const char* new_src = (const char*)src;
+	std::stringstream ss;
+	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.  
+	if(dest_length < ss.str().length() + 1)
+		return NULL;
+	
+	memcpy(dest, ss.str().c_str(), ss.str().length() + 1);
+	
+	return dest;
+}
+#endif
+
 string GravityNode::getIP()
 {
     string ip = "127.0.0.1";
 
     if (!serviceDirectoryNode.ipAddress.empty() && serviceDirectoryNode.ipAddress != "localhost")
     {
+		//Reads the IP used to connect to the Service Directory.  
         int buflen = 16;
         char* buffer = (char*)malloc(buflen);
 
@@ -854,14 +949,18 @@ string GravityNode::getIP()
         assert(err != -1);
 
         sockaddr_in name;
-        socklen_t namelen = sizeof(name);
+        int namelen = sizeof(name);
         err = getsockname(sock, (sockaddr*)&name, &namelen);
         assert(err != -1);
 
         const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
         assert(p);
 
+#ifdef WIN32
+		closesocket(sock);
+#else
         close(sock);
+#endif
 
         ip.assign(buffer);
     }

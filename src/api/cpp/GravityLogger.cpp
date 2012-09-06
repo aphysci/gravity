@@ -2,6 +2,7 @@
 #include "GravityLogger.h"
 #include "GravityLogMessagePB.pb.h"
 #include <stdarg.h>
+#include <time.h>
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
