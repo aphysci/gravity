@@ -2,9 +2,6 @@
 %include "enums.swg"
 %include "std_string.i" // for std::string typemaps
 %include "various.i"
-//%include "javahead.swg"
-//%include "carrays.i"
-//%array_class(signed char, ByteArray);
 
 %module gravity
 
@@ -24,8 +21,6 @@
     }
   }
 %}
-
-//%rename(CPPGravitySubscriber) CPPGravitySubscriber; 
 
 %typemap(jstype) const gravity::GravitySubscriber& "GravitySubscriber";
 %typemap(javainterfaces) GravitySubscriber "GravitySubscriber"
@@ -82,10 +77,6 @@ import gravity.GravityDataProduct.GravityDataProductPB;
 
 
 namespace gravity {
-
-//	class GravitySubscriber {
-//		virtual void subscriptionFilled(const GravityDataProduct& dataProduct) = 0;
-//	};
 
 	class CPPGravitySubscriber {
 		void subscriptionFilled(const GravityDataProduct& dataProduct);
