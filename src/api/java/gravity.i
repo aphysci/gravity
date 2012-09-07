@@ -1,6 +1,12 @@
 
 %include "enums.swg"
 %include "std_string.i" // for std::string typemaps
+%include "various.i"
+//%include "javahead.swg"
+//%include "carrays.i"
+//%array_class(signed char, ByteArray);
+
+%module gravity
 
 %javaconst(1);
 %{
@@ -21,20 +27,32 @@
 
 //%rename(CPPGravitySubscriber) CPPGravitySubscriber; 
 
-// (2.2)
 %typemap(jstype) const gravity::GravitySubscriber& "GravitySubscriber";
-
-// (2.3)
 %typemap(javainterfaces) GravitySubscriber "GravitySubscriber"
-
-// (2.5)
-//%typemap(javaout,pgcppname="n",
-//         pre="    CPPGravitySubscriber n = gravity.makeNative($javainput);")
-//        GravitySubscriber  "CPPGravitySubscriber.getCPtr(n)"
 
 %typemap(javain,pgcppname="n",
          pre="    CPPGravitySubscriber n = gravity.makeNative($javainput);")
         const gravity::GravitySubscriber&  "CPPGravitySubscriber.getCPtr(n)"
+
+%typemap(jtype) const gravity::GravityDataProduct& "byte[]";
+%typemap(jstype) const gravity::GravityDataProduct& "GravityDataProductPB";
+%typemap(jni) const gravity::GravityDataProduct&  "jbyteArray"
+%typemap(javain) const gravity::GravityDataProduct&  "$javainput.toByteArray()"
+
+%typemap(in) const gravity::GravityDataProduct&  {
+    signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
+    int length = JCALL1(GetArrayLength, jenv, $input);
+	$1 = new gravity::GravityDataProduct((void *)data, length);
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT); 
+}
+
+%typemap(freearg) const gravity::GravityDataProduct&  {
+	delete $1;
+}
+
+%typemap(javaimports) gravity::GravityNode %{
+import gravity.GravityDataProduct.GravityDataProductPB;
+%}
 
 %pragma(java) moduleimports="import gravity.GravityDataProduct;" 
 %pragma(java) modulecode=%{
@@ -62,7 +80,6 @@
   }
 %}
 
-%module gravity
 
 namespace gravity {
 
@@ -96,6 +113,6 @@ public:
     GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
-
+	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct);
 };
 };
