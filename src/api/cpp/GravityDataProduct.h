@@ -9,7 +9,7 @@
 #define GRAVITYDATAPRODUCT_H_
 
 #include <tr1/memory>
-#include "GravityDataProductPB.pb.h"
+#include "protobuf/GravityDataProductPB.pb.h"
 
 namespace gravity
 {
