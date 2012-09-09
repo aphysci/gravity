@@ -48,6 +48,9 @@
 %typemap(javaimports) gravity::GravityNode %{
 import gravity.GravityDataProduct.GravityDataProductPB;
 %}
+%typemap(javaimports) gravity::CPPGravitySubscriber %{
+import gravity.GravityDataProduct.GravityDataProductPB;
+%}
 
 %pragma(java) moduleimports="import gravity.GravityDataProduct;" 
 %pragma(java) modulecode=%{
@@ -79,7 +82,9 @@ import gravity.GravityDataProduct.GravityDataProductPB;
 namespace gravity {
 
 	class CPPGravitySubscriber {
-		void subscriptionFilled(const GravityDataProduct& dataProduct);
+	public:
+		void subscriptionFilled(const gravity::GravityDataProduct& dataProduct);
+		void setJavaSubscriber(const gravity::GravitySubscriber& subscriber);
 	};
 
     enum GravityReturnCode {
