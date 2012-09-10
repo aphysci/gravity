@@ -20,12 +20,12 @@
 #include <tr1/memory>
 
 #include "GravitySubscriptionManager.h"
-#include "protobuf/ComponentLookupRequestPB.pb.h"
-#include "protobuf/ComponentDataLookupResponsePB.pb.h"
-#include "protobuf/ComponentServiceLookupResponsePB.pb.h"
-#include "protobuf/ServiceDirectoryResponsePB.pb.h"
-#include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
-#include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+#include "ComponentLookupRequestPB.pb.h"
+#include "ComponentDataLookupResponsePB.pb.h"
+#include "ComponentServiceLookupResponsePB.pb.h"
+#include "ServiceDirectoryResponsePB.pb.h"
+#include "ServiceDirectoryRegistrationPB.pb.h"
+#include "ServiceDirectoryUnregistrationPB.pb.h"
 #include "GravitySubscriptionManager.h"
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
@@ -942,7 +942,7 @@ string GravityNode::getIP()
 
         sockaddr_in name;
         int namelen = sizeof(name);
-        err = getsockname(sock, (sockaddr*)&name, &namelen);
+        err = getsockname(sock, (sockaddr*)&name, (socklen_t*)&namelen);
         assert(err != -1);
 
         const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);

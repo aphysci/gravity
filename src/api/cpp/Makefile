@@ -20,18 +20,18 @@ LIB_NAME=libgravity
 
 #OS Specific
 SYSTEM = $(shell uname -s)
-ifeq $(findstring 'MINGW_NT',$(SYSTEM)) 'MINGW32_NT'
+ifeq ( $(findstring 'MINGW_NT',$(SYSTEM)), 'MINGW32_NT')
 	LIB_EXT = dll
 	#Not including rt and zmq
 	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic
-else ifeq $(findstring 'LINUX',$(SYSTEM)) 'LINUX'
+else ifeq ($(findstring 'LINUX',$(SYSTEM)), 'LINUX')
 	LIB_EXT = so
 	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lzmq -lprotobuf -liniparser -lrt -Wl,-Bdynamic
 	OS_SPECIFIC_FLAGS = -fpic
 endif 
 
 #Compiler Flags
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR)
+INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR)
 LIBDIRS=-L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L$(INIPARSE_DIR) 
 LIBS=$(OS_SPECIFIC_LIBS)
 CFLAGS=$(INCLUDES) $(OS_SPECIFIC_FLAGS)
@@ -56,11 +56,11 @@ all: $(LIB_NAME).a $(LIB_NAME).$(LIB_EXT)
 
 %.pb.o:%.pb.cc
 	@echo $(CC) proto build $<
-	@$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o:%.cpp $(DEPS)
 	@echo $(CC) $<
-	@$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).a  

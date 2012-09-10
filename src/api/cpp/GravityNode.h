@@ -8,7 +8,7 @@
 #ifndef GRAVITYNODE_H_
 #define GRAVITYNODE_H_
 
-#include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
+#include "ServiceDirectoryRegistrationPB.pb.h"
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
 #include "GravityServiceProvider.h"

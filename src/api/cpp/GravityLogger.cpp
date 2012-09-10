@@ -1,6 +1,6 @@
 #include "GravityNode.h"
 #include "GravityLogger.h"
-#include "protobuf/GravityLogMessagePB.pb.h"
+#include "GravityLogMessagePB.pb.h"
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
