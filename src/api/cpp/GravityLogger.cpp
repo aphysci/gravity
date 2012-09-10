@@ -1,7 +1,8 @@
 #include "GravityNode.h"
 #include "GravityLogger.h"
-#include "GravityLogMessagePB.pb.h"
+#include "protobuf/GravityLogMessagePB.pb.h"
 #include <stdarg.h>
+#include <time.h>
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
@@ -224,6 +225,11 @@ int Log::LevelToInt(LogLevel level)
         case TRACE:
             int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
             break;
+        case NONE:
+        	int_level = 0;
+        	break;
+        default:
+        	int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
     }
 
     return int_level;

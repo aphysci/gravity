@@ -8,10 +8,15 @@
 #ifndef GRAVITYNODE_H_
 #define GRAVITYNODE_H_
 
-#include "ServiceDirectoryRegistrationPB.pb.h"
+#include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
 #include "GravityServiceProvider.h"
+
+//This is defined in Windows for NetBIOS in nb30.h  
+#ifdef DUPLICATE
+#undef DUPLICATE
+#endif
 
 namespace gravity
 {
