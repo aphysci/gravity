@@ -15,7 +15,6 @@ class CPPGravitySubscriber : public GravitySubscriber
 public:
 
     void subscriptionFilled(const GravityDataProduct& dataProduct);
-    void setJavaSubscriber(const GravitySubscriber& subscriber);
 };
 
 }

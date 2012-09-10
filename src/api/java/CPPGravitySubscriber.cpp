@@ -10,8 +10,4 @@ void CPPGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProd
     cout << "made it into CPPGravitySubscriber::subscriptionFilled\n" << endl;
 }
 
-void CPPGravitySubscriber::setJavaSubscriber(const GravitySubscriber& subscriber)
-{
-    cout << "made it into CPPGravitySubscriber::setJavaSubscriber\n" << endl;
-}
 

@@ -84,7 +84,6 @@ namespace gravity {
 	class CPPGravitySubscriber {
 	public:
 		void subscriptionFilled(const gravity::GravityDataProduct& dataProduct);
-		void setJavaSubscriber(const gravity::GravitySubscriber& subscriber);
 	};
 
     enum GravityReturnCode {
