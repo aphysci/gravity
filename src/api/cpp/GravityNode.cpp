@@ -914,6 +914,8 @@ const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 	
 	return dest;
 }
+
+typedef int socklen_t;
 #endif
 
 string GravityNode::getIP()
@@ -942,8 +944,8 @@ string GravityNode::getIP()
         assert(err != -1);
 
         sockaddr_in name;
-        int namelen = sizeof(name);
-        err = getsockname(sock, (sockaddr*)&name, (int*)&namelen);
+        socklen_t namelen = sizeof(name);
+        err = getsockname(sock, (sockaddr*)&name, &namelen);
         assert(err != -1);
 
         const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
