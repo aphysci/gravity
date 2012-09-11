@@ -8,12 +8,14 @@
 #include "GravityLogger.h"
 #include "GravityConfigParser.h"
 #include "ServiceDirectory.h"
-#include "ServiceDirectoryRegistrationPB.pb.h"
-#include "ServiceDirectoryUnregistrationPB.pb.h"
-#include "ServiceDirectoryResponsePB.pb.h"
-#include "ComponentLookupRequestPB.pb.h"
-#include "ComponentDataLookupResponsePB.pb.h"
-#include "ComponentServiceLookupResponsePB.pb.h"
+
+#include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
+#include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+#include "protobuf/ServiceDirectoryResponsePB.pb.h"
+#include "protobuf/ComponentLookupRequestPB.pb.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "protobuf/ComponentServiceLookupResponsePB.pb.h"
+
 #include "zmq.h"
 #include <stdlib.h>
 #include <string>
