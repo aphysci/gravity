@@ -942,7 +942,7 @@ string GravityNode::getIP()
 
         sockaddr_in name;
         int namelen = sizeof(name);
-        err = getsockname(sock, (sockaddr*)&name, (socklen_t*)&namelen);
+        err = getsockname(sock, (sockaddr*)&name, (int*)&namelen);
         assert(err != -1);
 
         const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
