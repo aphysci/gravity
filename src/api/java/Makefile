@@ -3,7 +3,7 @@ include autosrcs.mk
 
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
-ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-jzmq
+ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
@@ -47,19 +47,19 @@ $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
 	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
 $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
-	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
+	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(INCLUDES)
 
 libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
-	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L../../../ThirdParty/protobuf-2.4.1/src/.libs -L../../../ThirdParty/zeromq-3.2.0/src/.libs -L../cpp -lrt -Wl,-Bdynamic
+	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L../cpp -lrt -Wl,-Bdynamic
 
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 run:
-	java -Djava.library.path=.:../cpp:../../../ThirdParty/protobuf-2.4.1/src/.libs:../../../ThirdParty/zeromq-3.2.0/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar GravityJavaTest
+	java -Djava.library.path=.:../cpp:$(PROTOBUF_DIR)/src/.libs:$(ZMQ_DIR)/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar com.aphysci.gravity.GravityJavaTest
 
 clean:
 	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* *.jar *.so *.o autosrcs.mk 
