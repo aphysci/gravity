@@ -1,5 +1,6 @@
 option optimize_for = SPEED;
 option java_outer_classname = "ServiceDirectoryRegistration";
+option java_package = "com.aphysci.gravity.protobuf";
 
 package gravity;
 

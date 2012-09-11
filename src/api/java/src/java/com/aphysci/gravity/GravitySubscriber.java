@@ -1,4 +1,6 @@
 
+package com.aphysci.gravity;
+
 import gravity.GravityDataProduct;
 
 public interface GravitySubscriber {
