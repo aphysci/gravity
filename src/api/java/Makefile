@@ -8,7 +8,9 @@ PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
 CPPSRC_DIR=src/cpp
-PROTOGEN_DIR=$(JAVASRC_DIR)/com/aphysci/gravity/protobuf
+GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
+PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
+SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 JAVA_BUILD_DIR=build
 LIB_NAME=gravity.jar
@@ -16,10 +18,11 @@ LIB_NAME=gravity.jar
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux -I../cpp -I.
 CFLAGS=$(INCLUDES)
 
-CPP_SRC=gravity_wrap.cxx CPPGravitySubscriber.cpp
-CPP_OBJ=gravity_wrap.o CPPGravitySubscriber.o
+#CPP_SRC=gravity_wrap.cxx CPPGravitySubscriber.cpp
+#CPP_OBJ=gravity_wrap.o CPPGravitySubscriber.o
+CPP_OBJ=$(patsubst %.cpp,%.o,$(CPP_SRC))
 
-OBJECTS=$(patsubst %.java,%.class,$(AUTO_SRCS))
+OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(AUTO_SRCS))
 
 PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
 PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%.java,$(PROTO_SRC))
@@ -32,8 +35,9 @@ all: $(LIB_NAME) libgravity_wrap.so
 # Generate source from SWIG file and update AUTO_SRCS to include the generated .java files
 # The changce to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
 autosrcs.mk: gravity.i
-	swig -c++ -o $(CPPSRC_DIR)/gravity_wrap.cpp -outdir $(JAVASRC_DIR)/com/aphysci/gravity/swig -package com.aphysci.gravity.swig -java $<
-	echo "AUTO_SRCS=`echo *.java`" > autosrcs.mk
+	swig -c++ -o $(CPPSRC_DIR)/gravity_wrap.cpp -outdir $(SWIGGEN_DIR) -package com.aphysci.gravity.swig -java $<
+	echo "AUTO_SRCS=`echo $(SWIGGEN_DIR)/*.java $(GRAVSRC_DIR)/*.java`" > autosrcs.mk
+	echo "CPP_SRC=`echo $(CPPSRC_DIR)/*.cpp`" >> autosrcs.mk
 
 $(PROTOGEN_DIR)/%.java:$(PROTO_DIR)/%PB.proto
 	echo $@
@@ -42,10 +46,10 @@ $(PROTOGEN_DIR)/%.java:$(PROTO_DIR)/%PB.proto
 $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
 	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
-%.o: %.cpp
-	$(CC) -c -o $@ $< $(INCLUDES)
+$(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
+	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
-%.o: %.cxx
+%.o: %.cpp
 	$(CC) -c -o $@ $< $(INCLUDES)
 
 libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a

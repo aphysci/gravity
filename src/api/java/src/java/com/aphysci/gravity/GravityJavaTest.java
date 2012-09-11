@@ -1,8 +1,9 @@
 
 package com.aphysci.gravity;
 
-import gravity.GravityDataProduct;
-import gravity.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.protobuf.GravityDataProduct;
+import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.swig.*;
 
 
 public class GravityJavaTest {

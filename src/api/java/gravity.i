@@ -46,10 +46,10 @@
 }
 
 %typemap(javaimports) gravity::GravityNode %{
-import gravity.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
 %}
 %typemap(javaimports) gravity::CPPGravitySubscriber %{
-import gravity.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
 %}
 
 //%typemap(directorin, descriptor="[B") (const signed char* arr, int length) {
@@ -72,7 +72,7 @@ import gravity.GravityDataProduct.GravityDataProductPB;
 
 //"jbyteArray";
 
-%pragma(java) moduleimports="import gravity.GravityDataProduct;" 
+%pragma(java) moduleimports="import com.aphysci.gravity.protobuf.GravityDataProduct;" 
 %pragma(java) modulecode=%{
 
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
