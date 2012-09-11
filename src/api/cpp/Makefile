@@ -19,16 +19,23 @@ CC=g++
 LIB_NAME=libgravity
 
 #OS Specific
-SYSTEM = $(shell uname -s)
-ifeq ( $(findstring 'MINGW_NT',$(SYSTEM)), 'MINGW32_NT')
+SYSTEM:=$(strip $(shell uname -s))
+#SYSTEM:=LINUX
+#SYSTEM=MINGW32_NT-6.1
+#WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	LIB_EXT = dll
 	#Not including rt and zmq
 	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic
-else ifeq ($(findstring 'LINUX',$(SYSTEM)), 'LINUX')
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
 	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lzmq -lprotobuf -liniparser -lrt -Wl,-Bdynamic
 	OS_SPECIFIC_FLAGS = -fpic
-endif 
+linux: all;
+else
+ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
 
 #Compiler Flags
 INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR)
@@ -67,7 +74,7 @@ $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 	@ar rcs $(LIB_NAME).a $(OBJECTS) $(PROTO_OBJ)
 
 $(LIB_NAME).$(LIB_EXT): $(PROTO_OBJ) $(OBJECTS)
-	@echo building $(LIB_NAME).$(LIB_EXT)  
+	@echo building $(LIB_NAME).$(LIB_EXT)
 #	@$(CC) -shared -o $@ $(OBJECTS) $(PROTO_OBJ)
 	$(CC) -shared -o $@ $< $(LIBDIRS) $(LIBS)
 
