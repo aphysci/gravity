@@ -10,8 +10,11 @@ PROTOC=$(PROTOBUF_DIR)/src/protoc
 JAVA_BUILD_DIR=build
 LIB_NAME=gravity.jar
 
-INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux -I../cpp
+INCLUDES=-I$(GRAVLIB_DIR) $(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux -I../cpp -I.
 CFLAGS=$(INCLUDES)
+
+CPP_SRC=gravity_wrap.cxx CPPGravitySubscriber.cpp
+CPP_OBJ=gravity_wrap.o CPPGravitySubscriber.o
 
 OBJECTS=$(patsubst %.java,%.class,$(AUTO_SRCS))
 
@@ -34,19 +37,22 @@ gravity/%.java:$(MYPROTO_DIR)/%PB.proto
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --java_out=. $<
 
 %.class:%.java
-	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:. $<
+	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
-gravity_wrap.o: gravity_wrap.cxx
+%.o: %.cpp
 	$(CC) -c -o $@ $< $(INCLUDES)
 
-libgravity_wrap.so: gravity_wrap.o ../cpp/libgravity.a
-	$(CC) -shared -o $@ $< -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L../../../ThirdParty/protobuf-2.4.1/src/.libs -L../../../ThirdParty/zeromq-3.2.0/src/.libs -L../cpp -lrt -Wl,-Bdynamic
+%.o: %.cxx
+	$(CC) -c -o $@ $< $(INCLUDES)
 
-$(LIB_NAME): autosrcs.mk gravity.java $(OBJECTS) $(PROTO_OBJ)
+libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
+	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L../../../ThirdParty/protobuf-2.4.1/src/.libs -L../../../ThirdParty/zeromq-3.2.0/src/.libs -L../cpp -lrt -Wl,-Bdynamic
+
+$(LIB_NAME): autosrcs.mk gravity.java $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 run:
 	java -Djava.library.path=.:../cpp:../../../ThirdParty/protobuf-2.4.1/src/.libs:../../../ThirdParty/zeromq-3.2.0/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar GravityJavaTest
 
 clean:
-	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk $(JAVA_BUILD_DIR)/* *.jar SWIGTYPE*.java GravityReturnCode.java
+	rm -rf Codes.java gravity.java gravityJNI.java GravityNode.java gravity_wrap.cxx  SWIGTYPE_p_GravityReturnCode.java gravity *.so *.o autosrcs.mk $(JAVA_BUILD_DIR)/* *.jar SWIGTYPE*.java GravityReturnCode.java NativeGravitySubscriber.java CPPGravitySubscriber.java

@@ -169,8 +169,7 @@ void GravityRequestManager::processRequest()
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
 	zmq_recvmsg(gravityNodeSocket, &msg, -1);
-	GravityDataProduct* dataProduct;
-	memcpy(&dataProduct, zmq_msg_data(&msg), zmq_msg_size(&msg));
+	GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
 	// Read the data product
@@ -189,11 +188,12 @@ void GravityRequestManager::processRequest()
 	zmq_connect(reqSocket, url.c_str());
 
 	// Send request to service provider
-	sendStringMessage(reqSocket, dataProduct->getFilterText(), ZMQ_SNDMORE);
+	sendStringMessage(reqSocket, dataProduct.getFilterText(), ZMQ_SNDMORE);
+
 	// Send data product
 	zmq_msg_t data;
-	zmq_msg_init_size(&data, dataProduct->getSize());
-	dataProduct->serializeToArray(zmq_msg_data(&data));
+	zmq_msg_init_size(&data, dataProduct.getSize());
+	dataProduct.serializeToArray(zmq_msg_data(&data));
 	zmq_sendmsg(reqSocket, &data, ZMQ_DONTWAIT);
 	zmq_msg_close(&data);
 
