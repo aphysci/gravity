@@ -14,7 +14,9 @@ class CPPGravitySubscriber : public GravitySubscriber
 {
 public:
 
-    void subscriptionFilled(const GravityDataProduct& dataProduct);
+    virtual ~CPPGravitySubscriber();
+    virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
+    virtual void subscriptionFilled(const signed char* array, int length);
 };
 
 }

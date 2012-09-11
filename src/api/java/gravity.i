@@ -3,7 +3,7 @@
 %include "std_string.i" // for std::string typemaps
 %include "various.i"
 
-%module gravity
+%module(directors="1") gravity
 
 %javaconst(1);
 %{
@@ -52,10 +52,29 @@ import gravity.GravityDataProduct.GravityDataProductPB;
 import gravity.GravityDataProduct.GravityDataProductPB;
 %}
 
+//%typemap(directorin, descriptor="[B") (const signed char* arr, int length) {
+//    jbyteArray jb = (jenv)->NewByteArray(length);
+//    (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)arr);
+//    $input = jb;
+//}
+
+//%typemap(directorout) (const signed char* arr, int length) {
+//	$1 = 0;
+//	if($input){
+//		$result = (char *) jenv->GetByteArrayElements($input, 0);
+//		if(!$1)
+//			return $null;
+//	}
+//}
+
+//%typemap(javadirectorin) (const signed char* arr, int length) "$jniinput"
+//%typemap(javadirectorout) (const signed char* arr, int length) "$javacall"
+
+//"jbyteArray";
+
 %pragma(java) moduleimports="import gravity.GravityDataProduct;" 
 %pragma(java) modulecode=%{
 
-  // (2.4)
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
     private GravitySubscriber delegate;
     public CPPGravitySubscriberProxy(GravitySubscriber i) {
@@ -63,12 +82,12 @@ import gravity.GravityDataProduct.GravityDataProductPB;
     }
 
     @SuppressWarnings("unused")
-    public void subscriptionFilled(final GravityDataProduct dataProduct) {
-      delegate.subscriptionFilled(dataProduct);
+    public void subscriptionFilled(SWIGTYPE_p_signed_char arr, int length) {
+      System.out.println("made it to CPPGravitySubscriberProxy.subscriptionFilled");
+      delegate.subscriptionFilled(null);
     }
   }
 
-  // (2.5)
   public static CPPGravitySubscriber makeNative(GravitySubscriber i) {
     if (i instanceof CPPGravitySubscriber) {
       // If it already *is* a CPPGravitySubscriber don't bother wrapping it again
@@ -78,12 +97,14 @@ import gravity.GravityDataProduct.GravityDataProductPB;
   }
 %}
 
+%feature("director") gravity::CPPGravitySubscriber;
 
 namespace gravity {
 
 	class CPPGravitySubscriber {
 	public:
-		void subscriptionFilled(const gravity::GravityDataProduct& dataProduct);
+		virtual ~CPPGravitySubscriber();
+		virtual void subscriptionFilled(const signed char* arr, int length);
 	};
 
     enum GravityReturnCode {
