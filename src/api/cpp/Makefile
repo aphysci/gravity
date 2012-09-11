@@ -1,5 +1,6 @@
 #Locations
 MYPROTO_DIR=../protobufs
+MY_PROTOBUF_BUILD_DIR=./protobuf
 THIRDPARTY_DIR=../../../ThirdParty
 
 #Libraries
@@ -46,28 +47,29 @@ CFLAGS=$(INCLUDES) $(OS_SPECIFIC_FLAGS)
 #Source/Object/Dependancies
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
-DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
+DEPS=$(wildcard *.h $(MY_PROTOBUF_BUILD_DIR)/*.h)
 
 #Protobuf Source/Generated c++/Objects
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
-PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,%.pb.cc,$(PROTO_SRC))
-PROTO_OBJ=$(patsubst %.cc,%.o,$(PROTO_CODE))
+PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MY_PROTOBUF_BUILD_DIR)/%.pb.cc,$(PROTO_SRC))
+PROTO_OBJ=$(patsubst $(MY_PROTOBUF_BUILD_DIR)/%.cc,$(MY_PROTOBUF_BUILD_DIR)/%.o,$(PROTO_CODE))
 
-.PRECIOUS: %.pb.cc
+#.PRECIOUS: %.pb.cc
 
 all: $(LIB_NAME).a $(LIB_NAME).$(LIB_EXT)
 
-%.pb.cc:$(MYPROTO_DIR)/%.proto
+#it looks like make automatically deletes these guys after building.  
+$(MY_PROTOBUF_BUILD_DIR)/%.pb.cc:$(MYPROTO_DIR)/%.proto
 	@echo protoc $<
-	@$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=. $<
+	@$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MY_PROTOBUF_BUILD_DIR) $<
 
-%.pb.o:%.pb.cc
+$(MY_PROTOBUF_BUILD_DIR)/%.pb.o:$(MY_PROTOBUF_BUILD_DIR)/%.pb.cc
 	@echo $(CC) proto build $<
-	$(CC) -c -o $@ $< $(CFLAGS)
+	@$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o:%.cpp $(DEPS)
 	@echo $(CC) $<
-	$(CC) -c -o $@ $< $(CFLAGS)
+	@$(CC) -c -o $@ $< $(CFLAGS)
 
 $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).a  
@@ -76,7 +78,7 @@ $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 $(LIB_NAME).$(LIB_EXT): $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).$(LIB_EXT)
 #	@$(CC) -shared -o $@ $(OBJECTS) $(PROTO_OBJ)
-	$(CC) -shared -o $@ $< $(LIBDIRS) $(LIBS)
+	@$(CC) -shared -o $@ $< $(LIBDIRS) $(LIBS)
 
 clean:
-	rm -rf *.a *.so *.o *pb.h *.pb.cc
+	rm -rf *.a *.$(LIB_EXT) *.o $(MY_PROTOBUF_BUILD_DIR)/*.*

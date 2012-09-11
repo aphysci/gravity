@@ -20,15 +20,16 @@
 #include <tr1/memory>
 
 #include "GravitySubscriptionManager.h"
-#include "ComponentLookupRequestPB.pb.h"
-#include "ComponentDataLookupResponsePB.pb.h"
-#include "ComponentServiceLookupResponsePB.pb.h"
-#include "ServiceDirectoryResponsePB.pb.h"
-#include "ServiceDirectoryRegistrationPB.pb.h"
-#include "ServiceDirectoryUnregistrationPB.pb.h"
 #include "GravitySubscriptionManager.h"
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
+
+#include "protobuf/ComponentLookupRequestPB.pb.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "protobuf/ComponentServiceLookupResponsePB.pb.h"
+#include "protobuf/ServiceDirectoryResponsePB.pb.h"
+#include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
+#include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition. 
 
@@ -906,7 +907,7 @@ const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 	const char* new_src = (const char*)src;
 	std::stringstream ss;
 	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.  
-	if(dest_length < ss.str().length() + 1)
+	if(dest_length < (int) ss.str().length() + 1)
 		return NULL;
 	
 	memcpy(dest, ss.str().c_str(), ss.str().length() + 1);
