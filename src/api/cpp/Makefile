@@ -56,6 +56,9 @@ PROTO_OBJ=$(patsubst $(MY_PROTOBUF_BUILD_DIR)/%.cc,$(MY_PROTOBUF_BUILD_DIR)/%.o,
 
 #.PRECIOUS: %.pb.cc
 
+#Just in case
+$(shell mkdir protobuf -p)
+
 all: $(LIB_NAME).a $(LIB_NAME).$(LIB_EXT)
 
 #it looks like make automatically deletes these guys after building.  
