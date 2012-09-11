@@ -83,7 +83,11 @@ void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
             insert_stmt.reset();
             insert_stmt.bind(1, dataProduct.getGravityTimestamp());
             insert_stmt.bind(2, dataProduct.getDataProductID());
-            insert_stmt.bind(3, messageData, messageData + msg_size);
+
+            cout << dataProduct.getDataSize() << endl;
+            cout << messageData[4] << endl;
+
+            insert_stmt.bind(3, messageData, messageData + dataProduct.getDataSize());
 
             insert_stmt.exec();
 //        }

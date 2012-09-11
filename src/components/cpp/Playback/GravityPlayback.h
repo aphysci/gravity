@@ -7,7 +7,10 @@ namespace gravity {
 class GravityPlayback
 {
 public:
-    GravityPlayback(GravityNode* grav_node, const string db_url, const string db_name, const string table_name, const string db_user, const string db_pass);
+    GravityPlayback(GravityNode* grav_node, const string db_name, const string table_name, const string db_user, const string db_pass);
+    /**
+     * Does not return until all data has been played back.
+     */
     void start(time_t start_time, time_t end_time);
     //TODO: stop?? thread support???
 private:
@@ -109,13 +112,58 @@ void GravityPlayback::start(time_t start_time, time_t end_time)
     select_stmt = sql.prepare("SELECT (timestamp, DataproductID, Message) FROM " + table_name + " WHERE timestamp > ? AND timestamp <= ? AND DataproductID IN(" + values.str() + ")");
 
 
-
     //cppdb::result dp_results = sql << "SELECT DISTINCT DataproductID FROM " << table_name << " WHERE timestamp >= " << start_time <<
     //        "AND timestamp < " << end_time << cppdb::exec;
 
-    time(&start_time);
+    time_t startdb_timestep, currentdb_end_timestep;
+    time_t current_time, last_start_time, next_start_time;
+    time(&current_time);
+    next_start_time = current_time; //When we "hope" to start the next timestep (this time we want to start it immediately).
+    last_start_time = current_time - 1;  //This will be our "last" time the next time we enter this loop.
+
+    startdb_timestep = start_time - 1;
+    currentdb_end_timestep = start_time;
+
+    do
+    {
+        //If we've just processed a message sleep until we need to do the next message.
+        time(&current_time);
+        while(difftime(current_time, next_start_time) > 0.0) //TODO: make sure this is right.
+        {
+            sleep(0);
+            time(&current_time);
+        }
+        startdb_timestep = currentdb_timestep;
+        currentdb_end_timestep = startdb_timestep + difftime(last_start_time, current_time);
+        if(currentdb_end_timestep > end_time)
+            currentdb_end_timestep = end_time;
+
+
+        next_start_time = current_time + 1; //When we "hope" to start the next timestep.
+        last_start_time = current_time;  //This will be our "last" time the next time we enter this loop.
+
+        //Publish data products.
+        select_stmt.reset();
+        select_stmt.bind(1, startdb_timestep);
+        select_stmt.bind(2, currentdb_end_timestep);
+        cppdb::result res = select_stmt.query();
+
+        while(res.next())
+        {
+            res.fetch(1, currentdb_timestep);
+
+            //TODO: fix timestamp!!!
+
+            std::string dpID, message;
+            res.fetch(2, dpID);
+            res.fetch(3, message);
+
+            GravityDataProduct gdp(dpID);
+            gdp.setData(message.c_str(), message.length());
+            grav_node->publish(gdp);
+        }
+
+    } while(currentdb_end_timestep != end_time); //While we still have time left.
 }
 
 }
-//    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
-//    GravityReturnCode publish(const GravityDataProduct& dataProduct);
