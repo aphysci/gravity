@@ -103,8 +103,7 @@ void GravitySubscriptionManager::start()
 				zmq_msg_close(&message);
 
 				// Deliver to subscriber(s)
-				string id = dataProduct.getDataProductID() + ":" + dataProduct.getFilterText();
-				shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[id];
+				shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[i].socket];
 
 				// Loop through all subscribers and deliver the message
 				vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
@@ -221,6 +220,8 @@ void GravitySubscriptionManager::addSubscription()
 
 		// Track these subscription details by id (data product + filter)
 		subscriptionMap[id] = subDetails;
+		// and by socket for quick lookup as data arrives
+		subscriptionSocketMap[subSocket] = subDetails;
 	}
 
 	// Add new subscriber
@@ -272,6 +273,10 @@ void GravitySubscriptionManager::removeSubscription()
 		// If no more subscribers, close the subscription socket and clear the details
 		if (subDetails->subscribers.empty())
 		{
+            // Remove from details maps
+            subscriptionMap.erase(id);
+            subscriptionSocketMap.erase(subDetails->pollItem.socket);
+
 			// Close the socket
 			zmq_close(subDetails->pollItem.socket);
 
@@ -288,9 +293,6 @@ void GravitySubscriptionManager::removeSubscription()
 					iter++;
 				}
 			}
-
-			// Remove from details map
-			subscriptionMap.erase(id);
 		}
 	}
 }

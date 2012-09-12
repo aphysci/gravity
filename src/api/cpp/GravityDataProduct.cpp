@@ -12,7 +12,6 @@ namespace gravity {
 GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProductPB(new GravityDataProductPB())
 {
     gravityDataProductPB->set_dataproductid(dataProductID);
-    filterText = "";
 }
 
 GravityDataProduct::GravityDataProduct(void* arrayPtr, int size) : gravityDataProductPB(new GravityDataProductPB())
@@ -25,16 +24,6 @@ GravityDataProduct::~GravityDataProduct() {}
 string GravityDataProduct::getDataProductID() const
 {
     return gravityDataProductPB->dataproductid();
-}
-
-void GravityDataProduct::setFilterText(string filterText)
-{
-    this->filterText = filterText;
-}
-
-string GravityDataProduct::getFilterText() const
-{
-    return filterText;
 }
 
 void GravityDataProduct::setSoftwareVersion(string softwareVersion)

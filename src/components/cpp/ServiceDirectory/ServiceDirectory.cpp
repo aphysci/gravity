@@ -67,20 +67,10 @@ void ServiceDirectory::start()
     zmq_msg_t request, response, envelope;
     while (1)
     {
-        //   Wait for next request
-        zmq_msg_init(&envelope);
-        gravity::Log::debug("Waiting for lookup request...");
-        zmq_recvmsg(socket, &envelope, 0);
-        Log::debug("received message");
-        int size = zmq_msg_size(&envelope);
-        string requestType((char*) zmq_msg_data(&envelope), size);
-        zmq_msg_close(&envelope);
-        Log::debug("got a %s request", requestType.c_str());
-
         zmq_msg_init(&request);
-        Log::debug("Waiting for data...");
+        gravity::Log::debug("Waiting for lookup request...");
         zmq_recvmsg(socket, &request, 0);
-        size = zmq_msg_size(&request);
+        int size = zmq_msg_size(&request);
         char data [size + 1];
         memcpy(data, zmq_msg_data(&request), size);
         zmq_msg_close(&request);
@@ -89,18 +79,19 @@ void ServiceDirectory::start()
         Log::debug("Setting up data products from data. ");
         GravityDataProduct gdpRequest(data, size);
         GravityDataProduct gdpResponse("DataProductRegistrationResponse");
+        string requestType = gdpRequest.getDataProductID();
 
-        if (requestType == "lookup")
+        if (requestType == "ComponentLookupRequest")
         {
             Log::trace("Handling lookup");
             handleLookup(gdpRequest, gdpResponse);
         }
-        else if (requestType == "register")
+        else if (requestType == "RegistrationRequest")
         {
             Log::trace("Handling register");
             handleRegister(gdpRequest, gdpResponse);
         }
-        else if (requestType == "unregister")
+        else if (requestType == "UnregistrationRequest")
         {
             Log::trace("Handling unregister");
             handleUnregister(gdpRequest, gdpResponse);
@@ -113,7 +104,7 @@ void ServiceDirectory::start()
         // Send reply back to client
         Log::debug("Sending Response");
         zmq_msg_init_size(&response, gdpResponse.getSize());
-        Log::trace("Serializign Message");
+        Log::trace("Serializing Message");
         gdpResponse.serializeToArray(zmq_msg_data(&response));
         Log::trace("Sending");
         zmq_sendmsg(socket, &response, 0);

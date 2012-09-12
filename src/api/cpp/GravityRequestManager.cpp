@@ -156,7 +156,7 @@ void GravityRequestManager::sendStringMessage(void* socket, string str, int flag
 
 void GravityRequestManager::processRequest()
 {
-	// Read the serive id for this request
+	// Read the service id for this request
 	string serviceID = readStringMessage();
 
 	// Read the service url
@@ -186,9 +186,6 @@ void GravityRequestManager::processRequest()
 
 	// Connect to service
 	zmq_connect(reqSocket, url.c_str());
-
-	// Send request to service provider
-	sendStringMessage(reqSocket, dataProduct.getFilterText(), ZMQ_SNDMORE);
 
 	// Send data product
 	zmq_msg_t data;

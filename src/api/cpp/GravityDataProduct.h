@@ -24,7 +24,6 @@ class GravityDataProduct
 {
 private:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
-    string filterText; ///< text string on which subscribers of this data product can apply a filter
 public:
     /**
      * Constructor
@@ -67,18 +66,6 @@ public:
      * \return the software version number associated with this data product
      */
     string getSoftwareVersion() const;
-
-    /**
-     * Setter for the filter-able text associated with this data product
-     * \param filterText text string that can be filtered against by subscribers
-     */
-    void setFilterText(string filterText);
-
-    /**
-     * Getter for the filter-able text associated with this data product
-     * \return filterText text string that can be filtered against by subscribers
-     */
-    string getFilterText() const;
 
     /**
      * Set the application-specific data for this data product

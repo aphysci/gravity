@@ -38,6 +38,7 @@ private:
 	void* context;
 	void* gravityNodeSocket;
 	map<string,shared_ptr<SubscriptionDetails> > subscriptionMap;
+    map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
 	vector<zmq_pollitem_t> pollItems;
 
 	void addSubscription();
