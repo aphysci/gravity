@@ -30,9 +30,9 @@
         const gravity::GravitySubscriber&  "CPPGravitySubscriber.getCPtr(n)"
 
 %typemap(jtype) const gravity::GravityDataProduct& "byte[]";
-%typemap(jstype) const gravity::GravityDataProduct& "GravityDataProductPB";
+%typemap(jstype) const gravity::GravityDataProduct& "GravityDataProduct";
 %typemap(jni) const gravity::GravityDataProduct&  "jbyteArray"
-%typemap(javain) const gravity::GravityDataProduct&  "$javainput.toByteArray()"
+%typemap(javain) const gravity::GravityDataProduct&  "$javainput.serializeToArray()"
 
 %typemap(in) const gravity::GravityDataProduct&  {
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
@@ -46,11 +46,11 @@
 }
 
 %typemap(javaimports) gravity::GravityNode %{
-import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
 %typemap(javaimports) gravity::CPPGravitySubscriber %{
-import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
 
@@ -75,7 +75,7 @@ import com.aphysci.gravity.GravitySubscriber;
 //"jbyteArray";
 
 %pragma(java) moduleimports=%{
-import com.aphysci.gravity.protobuf.GravityDataProduct;
+import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
  

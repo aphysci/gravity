@@ -3,7 +3,7 @@
  */
 package com.aphysci.gravity;
 
-import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
+import com.aphysci.gravity.protobuf.GravityDataProductContainer.GravityDataProductPB;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -14,7 +14,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
  */
 public class GravityDataProduct {
 	
-	private GravityDataProductPB.Builder gdp;
+	private GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
 	private String filter = "";
 
     /**

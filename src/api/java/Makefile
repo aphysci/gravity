@@ -25,7 +25,7 @@ CPP_OBJ=$(patsubst %.cpp,%.o,$(CPP_SRC))
 OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(AUTO_SRCS))
 
 PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
-PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%.java,$(PROTO_SRC))
+PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%Container.java,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE))
 
 .PRECIOUS: %.java $(PROTO_CODE)
@@ -39,7 +39,7 @@ autosrcs.mk: gravity.i
 	echo "AUTO_SRCS=`echo $(SWIGGEN_DIR)/*.java $(GRAVSRC_DIR)/*.java`" > autosrcs.mk
 	echo "CPP_SRC=`echo $(CPPSRC_DIR)/*.cpp`" >> autosrcs.mk
 
-$(PROTOGEN_DIR)/%.java:$(PROTO_DIR)/%PB.proto
+$(PROTOGEN_DIR)/%Container.java:$(PROTO_DIR)/%PB.proto
 	echo $@
 	$(PROTOC) --proto_path=$(PROTO_DIR) --java_out=$(JAVASRC_DIR) $<
 
@@ -58,7 +58,7 @@ libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
-run:
+test:
 	java -Djava.library.path=.:../cpp:$(PROTOBUF_DIR)/src/.libs:$(ZMQ_DIR)/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar com.aphysci.gravity.GravityJavaTest
 
 clean:

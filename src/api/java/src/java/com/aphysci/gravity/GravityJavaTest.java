@@ -1,10 +1,8 @@
 
 package com.aphysci.gravity;
 
-import com.aphysci.gravity.protobuf.GravityDataProduct;
-import com.aphysci.gravity.protobuf.GravityDataProduct.GravityDataProductPB;
-import com.aphysci.gravity.swig.*;
-
+import com.aphysci.gravity.swig.GravityNode;
+import com.aphysci.gravity.swig.GravityReturnCode;
 
 public class GravityJavaTest {
 
@@ -21,11 +19,10 @@ public class GravityJavaTest {
         Subscriber s = new Subscriber();
         ret = node.subscribe("JavaGDP", s, "");
   
-        GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
+        GravityDataProduct gdp = new GravityDataProduct("JavaGDP");
         gdp.setSoftwareVersion("version 1");
-        gdp.setDataProductID("JavaGDP");
         
-        ret = node.publish(gdp.build());
+        ret = node.publish(gdp);
         
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.SUCCESS);
