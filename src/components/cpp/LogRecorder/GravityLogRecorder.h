@@ -1,6 +1,6 @@
 #include "GravityNode.h"
 #include "GravitySubscriber.h"
-#include "GravityLogMessagePB.pb.h"
+#include "protobuf/GravityLogMessagePB.pb.h"
 #include <string>
 
 namespace gravity {

@@ -11,13 +11,13 @@ namespace gravity {
 class Archiver : public GravitySubscriber
 {
 public:
-    /*
+    /**
      * Initalizes the Archiver
      * \param grav_node Assumed to be initialized.
      */
     Archiver(GravityNode* gn, const string db_name, const string table_name, const string db_user, const string db_pass);
 
-    /*
+    /**
      * Starts the Archiver (Calls Subscribe).
      */
     void start();

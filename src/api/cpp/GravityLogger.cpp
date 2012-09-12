@@ -1,6 +1,6 @@
 #include "GravityNode.h"
 #include "GravityLogger.h"
-#include "GravityLogMessagePB.pb.h"
+#include "protobuf/GravityLogMessagePB.pb.h"
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
@@ -107,19 +107,20 @@ std::string GravityLogger::log_dataProductID = "GRAVITY_LOGGER";
 GravityLogger::GravityLogger(GravityNode* gn, unsigned short port)
 {
     gravity_node = gn;
-    if(gravity_node->registerDataProduct(string(log_dataProductID), port, string("tcp")) != GravityReturnCodes::SUCCESS)
+    if(gravity_node->registerDataProduct(log_dataProductID, port, "tcp") != GravityReturnCodes::SUCCESS)
         cerr << "[Log::init] Could not register Logger" << endl;
 }
 
 void GravityLogger::Log(int level, const char* messagestr)
 {
+    GravityDataProduct dp(log_dataProductID);
+
     //TODO: how is this supposed to work???
     gravity::GravityLogMessagePB log_message;
-    //log_message.set_domain(domain);
+    log_message.set_domain("None");
     log_message.set_level(Log::LogLevelToString((Log::LogLevel)level));
     log_message.set_message(messagestr);
 
-    GravityDataProduct dp(log_dataProductID);
     dp.setData(log_message);
 
     gravity_node->publish(dp);

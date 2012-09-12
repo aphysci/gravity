@@ -54,20 +54,22 @@ uint64_t GravityDataProduct::getGravityTimestamp() const
 
 void GravityDataProduct::setData(void* data, int size)
 {
-	gravityDataProductPB->set_data(data, size);
+    delete gravityDataProductPB->release_data(); //Looking at the protobuf, this seems necessary.
+    gravityDataProductPB->set_data(data, size);
 }
 
 void GravityDataProduct::setData(const google::protobuf::Message& data)
 {
     char* vdata = (char*)malloc(data.ByteSize());
     data.SerializeToArray(vdata, data.ByteSize());
-    setData(vdata, data.ByteSize());
-    delete vdata;
+    delete gravityDataProductPB->release_data(); //Looking at the protobuf, this seems necessary.
+    gravityDataProductPB->set_data(vdata, data.ByteSize());
+    free(vdata);
 }
 
 bool GravityDataProduct::getData(void* data, int size) const
 {
-    memcpy(data, gravityDataProductPB->mutable_data()->c_str(), size);
+    memcpy(data, gravityDataProductPB->data().c_str(), size);
 
     return true;
 }
@@ -79,7 +81,7 @@ int GravityDataProduct::getDataSize() const
 
 bool GravityDataProduct::populateMessage(google::protobuf::Message& data) const
 {
-	return data.ParseFromArray((void*)gravityDataProductPB->mutable_data()->c_str(), getDataSize());
+    return data.ParseFromArray((void*)gravityDataProductPB->data().c_str(), getDataSize());
 }
 
 int GravityDataProduct::getSize() const
