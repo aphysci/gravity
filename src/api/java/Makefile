@@ -65,4 +65,4 @@ test: all
 	java -Djava.library.path=.:../cpp:$(PROTOBUF_DIR)/src/.libs:$(ZMQ_DIR)/src/.libs -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar com.aphysci.gravity.GravityJavaTest
 
 clean:
-	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* *.jar *.so *.o autosrcs.mk 
+	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* $(CPPSRC_DIR)/*.o *.jar *.so *.o autosrcs.mk 
