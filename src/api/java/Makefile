@@ -53,7 +53,7 @@ $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	@javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
 
 %.o: %.cpp
-	$(CC) -c -o $@ $< $(INCLUDES)
+	$(CC) -c -fPIC -o $@ $< $(INCLUDES)
 
 libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
 	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L../cpp -lrt -Wl,-Bdynamic
