@@ -15,7 +15,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class GravityDataProduct {
 	
 	private GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
-	private String filter = "";
 
     /**
      * Constructor
@@ -69,22 +68,6 @@ public class GravityDataProduct {
      */
     public String getSoftwareVersion() {
     	return gdp.getSoftwareVersion();
-    }
-
-    /**
-     * Setter for the filter-able text associated with this data product
-     * @param filterText text string that can be filtered against by subscribers
-     */
-    public void setFilterText(String filterText) {
-    	filter = filterText;
-    }
-
-    /**
-     * Getter for the filter-able text associated with this data product
-     * @return filterText text string that can be filtered against by subscribers
-     */
-    public String getFilterText() {
-    	return filter;
     }
 
     /**

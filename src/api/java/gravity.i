@@ -134,7 +134,7 @@ public:
     GravityReturnCode init();
     GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
-    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
-	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct);
+    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
+	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
 };
 };

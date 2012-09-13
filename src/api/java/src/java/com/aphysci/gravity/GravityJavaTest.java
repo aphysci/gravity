@@ -22,7 +22,7 @@ public class GravityJavaTest {
         GravityDataProduct gdp = new GravityDataProduct("JavaGDP");
         gdp.setSoftwareVersion("version 1");
         
-        ret = node.publish(gdp);
+        ret = node.publish(gdp, "Java");
         
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.SUCCESS);
