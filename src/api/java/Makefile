@@ -14,8 +14,9 @@ SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 JAVA_BUILD_DIR=build
 LIB_NAME=gravity.jar
+JAVAINCLUDE_DIR=/usr/lib/jvm/java-7-oracle/include
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux -I../cpp -I.
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(JAVAINCLUDE_DIR)/linux -I../cpp -I.
 CFLAGS=$(INCLUDES)
 
 #CPP_SRC=gravity_wrap.cxx CPPGravitySubscriber.cpp
@@ -40,14 +41,16 @@ autosrcs.mk: gravity.i
 	echo "CPP_SRC=`echo $(CPPSRC_DIR)/*.cpp`" >> autosrcs.mk
 
 $(PROTOGEN_DIR)/%Container.java:$(PROTO_DIR)/%PB.proto
-	echo $@
-	$(PROTOC) --proto_path=$(PROTO_DIR) --java_out=$(JAVASRC_DIR) $<
+	@echo $<
+	@$(PROTOC) --proto_path=$(PROTO_DIR) --java_out=$(JAVASRC_DIR) $<
 
 $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
-	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
+	@echo $<
+	@javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
 
 $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
-	javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
+	@echo $<
+	@javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(INCLUDES)

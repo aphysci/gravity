@@ -124,7 +124,8 @@ namespace gravity {
         NO_SUCH_SERVICE = -7,
         NO_SUCH_DATA_PRODUCT = -8,
         LINK_ERROR = -9,
-        INTERRUPTED = -10
+        INTERRUPTED = -10,
+        NO_SERVICE_PROVIDER = -11
     };
 
 class GravityNode {
