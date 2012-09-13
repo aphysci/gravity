@@ -113,7 +113,7 @@ public:
     	ret = node.registerDataProduct("TEST", 5656, "tcp");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-    	ret = node.subscribe("TEST", *this, "");
+    	ret = node.subscribe("TEST", *this, "FILT");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	// Give the consumer thread time to start up
@@ -135,17 +135,17 @@ public:
     	// Clear flag
     	clearSubFlag();
 
-//        // Resend message
-//        ret = node.publish(gdp, "JKGSGH");
-//
-//        // Give it a couple secs
-//        sleep(2);
-//
-//        // Check for subscription filled
-//        TS_ASSERT(!subFilled());
-//
-//        // Clear flag
-//        clearSubFlag();
+        // Resend message
+        ret = node.publish(gdp, "FIL");
+
+        // Give it a couple secs
+        sleep(2);
+
+        // Since full filter text isn't there, sub should not be filled
+        TS_ASSERT(!subFilled());
+
+        // Clear flag
+        clearSubFlag();
 
     	// Unsubscribe & wait a couple secs
     	ret = node.unsubscribe("TEST", *this, "");
