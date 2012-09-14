@@ -52,7 +52,7 @@ uint64_t GravityDataProduct::getGravityTimestamp() const
     return gravityDataProductPB->timestamp();
 }
 
-void GravityDataProduct::setData(void* data, int size)
+void GravityDataProduct::setData(const void* data, int size)
 {
 	gravityDataProductPB->set_data(data, size);
 }

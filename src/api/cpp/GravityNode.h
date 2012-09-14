@@ -69,7 +69,6 @@ private:
     void* serviceManagerSocket;
     void sendStringMessage(void* socket, string str, int flags);
     string readStringMessage(void* socket);
-    uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
@@ -78,6 +77,7 @@ private:
     map<string,NetworkNode*> publishMap;
     map<string,string> serviceMap;
 public:
+    uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 
     /**
      * Default Constructor

@@ -27,7 +27,7 @@ SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	LIB_EXT = dll
 	#Not including rt and zmq
-	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic
+	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic -lzmq -lpthread -lwsock32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
@@ -81,7 +81,7 @@ $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
 $(LIB_NAME).$(LIB_EXT): $(PROTO_OBJ) $(OBJECTS)
 	@echo building $(LIB_NAME).$(LIB_EXT)
 #	@$(CC) -shared -o $@ $(OBJECTS) $(PROTO_OBJ)
-	@$(CC) -shared -o $@ $< $(LIBDIRS) $(LIBS)
+	@$(CC) -shared -o $@ $^ $(LIBDIRS) $(LIBS)
 
 clean:
 	rm -rf *.a *.$(LIB_EXT) *.o $(MY_PROTOBUF_BUILD_DIR)/*.*

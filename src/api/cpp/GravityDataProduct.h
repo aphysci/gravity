@@ -17,6 +17,8 @@ namespace gravity
 using namespace std;
 using namespace std::tr1;
 
+class GravityNode;
+
 /**
  * Generic Data Product for the Gravity Infrastructure
  */
@@ -24,6 +26,8 @@ class GravityDataProduct
 {
 private:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
+    friend class GravityNode;
+    void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); } //Yeah, I'm telling the compiler this is const.
     string filterText; ///< text string on which subscribers of this data product can apply a filter
 public:
     /**
@@ -85,7 +89,7 @@ public:
      * \param data pointer to arbitrary data
      * \param size length of data
      */
-    void setData(void* data, int size);
+    void setData(const void* data, int size);
 
     /**
      * Set the application-specific data for this data product

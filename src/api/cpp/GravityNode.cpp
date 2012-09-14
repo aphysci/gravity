@@ -584,6 +584,9 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
     // Create message & send filter text
     sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
 
+    //Set Timestamp
+    dataProduct.setTimestamp(this->getCurrentTime());
+
     // Serialize data
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());
@@ -861,6 +864,7 @@ clock_gettime(int X, struct timespec *tv)
     static double           frequencyToNanoseconds;
     static int              initialized = 0;
     static BOOL             usePerformanceCounter = 0;
+    static LARGE_INTEGER 	startTime;
 
     if (!initialized) {
         LARGE_INTEGER performanceFrequency;
@@ -873,6 +877,14 @@ clock_gettime(int X, struct timespec *tv)
             offset = getFILETIMEoffset();
             frequencyToNanoseconds = .01;
         }
+
+        GetSystemTimeAsFileTime(&f);
+        startTime.QuadPart = f.dwHighDateTime;
+        startTime.QuadPart <<= 32;
+        startTime.QuadPart |= f.dwLowDateTime;
+
+        startTime.QuadPart -= 116444736000000000ULL; //Convert from Window time to UTC (100ns)
+        startTime.QuadPart = startTime.QuadPart * 100; //To nanoseconds
     }
     if (usePerformanceCounter) QueryPerformanceCounter(&t);
     else {
@@ -884,6 +896,7 @@ clock_gettime(int X, struct timespec *tv)
 
     t.QuadPart -= offset.QuadPart;
     nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
+    nanoseconds += startTime.QuadPart;
     t.QuadPart = nanoseconds;
     tv->tv_sec = t.QuadPart / 1000000000LL;
     tv->tv_nsec = t.QuadPart % 1000000000LL;
