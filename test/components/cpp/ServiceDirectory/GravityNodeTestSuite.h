@@ -113,7 +113,7 @@ public:
     	ret = node.registerDataProduct("TEST", 5656, "tcp");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-    	ret = node.subscribe("TEST", *this, "");
+    	ret = node.subscribe("TEST", *this, "FILT");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	// Give the consumer thread time to start up
@@ -124,8 +124,7 @@ public:
 
     	// Create and publish a message
     	GravityDataProduct gdp("TEST");
-    	gdp.setFilterText("FILT");
-    	ret = node.publish(gdp);
+    	ret = node.publish(gdp, "FILTER");
 
     	// Give it a couple secs
     	sleep(2);
@@ -135,6 +134,18 @@ public:
 
     	// Clear flag
     	clearSubFlag();
+
+        // Resend message
+        ret = node.publish(gdp, "FIL");
+
+        // Give it a couple secs
+        sleep(2);
+
+        // Since full filter text isn't there, sub should not be filled
+        TS_ASSERT(!subFilled());
+
+        // Clear flag
+        clearSubFlag();
 
     	// Unsubscribe & wait a couple secs
     	ret = node.unsubscribe("TEST", *this, "");
@@ -158,7 +169,6 @@ public:
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	GravityDataProduct gdp("TEST");
-    	gdp.setFilterText("FILT");
 
     	clearServiceFlags();
 
@@ -250,7 +260,6 @@ public:
     shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct)
     {
     	shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
-    	ret->setFilterText(dataProduct.getFilterText());
 
     	pthread_mutex_lock(&mutex);
     	gotRequestFlag = true;

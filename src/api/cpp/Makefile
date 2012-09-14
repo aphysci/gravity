@@ -54,7 +54,7 @@ PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MY_PROTOBUF_BUILD_DIR)/%.pb.cc,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(MY_PROTOBUF_BUILD_DIR)/%.cc,$(MY_PROTOBUF_BUILD_DIR)/%.o,$(PROTO_CODE))
 
-#.PRECIOUS: %.pb.cc
+.PRECIOUS: $(MY_PROTOBUF_BUILD_DIR)/%.pb.cc
 
 #Just in case
 $(shell mkdir protobuf -p)

@@ -6564,7 +6564,7 @@ test -z "$RANLIB" && RANLIB=:
 
 
 # Determine commands to create old-style static archives.
-old_archive_cmds='$AR $AR_FLAGS $oldlib$oldobjs'
+old_archive_cmds='$AR $AR_FLAGS $oldlib$libobjs'
 old_postinstall_cmds='chmod 644 $oldlib'
 old_postuninstall_cmds=
 

@@ -144,7 +144,7 @@ public:
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
      * \return success flag
      */
-    GravityReturnCode publish(const GravityDataProduct& dataProduct);
+    GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "");
 
     /**
      * Make a request against a service provider through the Gravity Service Directory

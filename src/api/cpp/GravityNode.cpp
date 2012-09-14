@@ -180,9 +180,6 @@ GravityReturnCode GravityNode::init()
 
 void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
 {
-    // Send raw filter text as first part of message
-	sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
-
     // Send data product
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());
@@ -328,12 +325,11 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
         registration.set_type(ServiceDirectoryRegistrationPB::DATA);
 
         // Wrap request in GravityDataProduct
-        GravityDataProduct request("DataProductRegistrationRequest");
-        request.setFilterText("register");
+        GravityDataProduct request("RegistrationRequest");
         request.setData(registration);
 
         // GravityDataProduct for response
-        GravityDataProduct response("DataProductRegistrationResponse");
+        GravityDataProduct response("RegistrationResponse");
 
         // Send request to service directory
         ret = sendRequestToServiceDirectory(request, response);
@@ -402,12 +398,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
         unregistration.set_url(ss.str());
         unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
 
-        GravityDataProduct request("DataProductUnregistrationRequest");
-        request.setFilterText("unregister");
+        GravityDataProduct request("UnregistrationRequest");
         request.setData(unregistration);
 
         // GravityDataProduct for response
-        GravityDataProduct response("DataProductUnregistrationResponse");
+        GravityDataProduct response("UnregistrationResponse");
 
         // Send request to service directory
         ret = sendRequestToServiceDirectory(request, response);
@@ -460,7 +455,6 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
     // Wrap request in GravityDataProduct
     GravityDataProduct request("ComponentLookupRequest");
-    request.setFilterText("lookup");
     request.setData(lookup);
 
     // GravityDataProduct for response
@@ -572,7 +566,7 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
+GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText)
 {
     string dataProductID = dataProduct.getDataProductID();
     NetworkNode* node = this->publishMap[dataProductID];
@@ -582,7 +576,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct)
     void* socket = node->socket;
 
     // Create message & send filter text
-    sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
+    sendStringMessage(socket, filterText, ZMQ_SNDMORE);
 
     //Set Timestamp
     dataProduct.setTimestamp(this->getCurrentTime());
@@ -611,7 +605,6 @@ GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduc
 
 	// Wrap request in GravityDataProduct
 	GravityDataProduct requestDataProduct("ComponentLookupRequest");
-	requestDataProduct.setFilterText("lookup");
 	requestDataProduct.setData(lookup);
 
 	// GravityDataProduct for response
@@ -717,12 +710,11 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
 
         // Wrap request in GravityDataProduct
-        GravityDataProduct request("ServiceRegistrationRequest");
-        request.setFilterText("register");
+        GravityDataProduct request("RegistrationRequest");
         request.setData(registration);
 
         // GravityDataProduct for response
-        GravityDataProduct response("ServiceRegistrationResponse");
+        GravityDataProduct response("RegistrationResponse");
 
         // Send request to service directory
         ret = sendRequestToServiceDirectory(request, response);
@@ -782,12 +774,11 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 	unregistration.set_url(serviceMap[serviceID]);
 	unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
 
-	GravityDataProduct request("ServiceUnregistrationRequest");
-	request.setFilterText("unregister");
+	GravityDataProduct request("UnregistrationRequest");
 	request.setData(unregistration);
 
 	// GravityDataProduct for response
-	GravityDataProduct response("ServiceUnregistrationResponse");
+	GravityDataProduct response("UnregistrationResponse");
 
 	// Send request to service directory
 	ret = sendRequestToServiceDirectory(request, response);

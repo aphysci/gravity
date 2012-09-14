@@ -135,9 +135,6 @@ void GravityServiceManager::ready()
 
 void GravityServiceManager::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
 {
-    // Send raw filter text as first part of message
-	sendStringMessage(socket, dataProduct.getFilterText(), ZMQ_SNDMORE);
-
     // Send data product
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());

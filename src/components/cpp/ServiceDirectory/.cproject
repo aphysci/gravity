@@ -40,13 +40,12 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.1162702009" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
 								<option id="gnu.cpp.link.option.libs.559231444" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="zmq"/>
-									<listOptionValue builtIn="false" value="protobuf"/>
 									<listOptionValue builtIn="false" value="gravity"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1170079799" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\zeromq-3.2.0\src\.libs\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src\.libs&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Default}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Windows}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.257106749" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -73,4 +72,5 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
