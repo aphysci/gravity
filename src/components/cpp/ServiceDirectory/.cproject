@@ -26,10 +26,10 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1101862538" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
 								<option id="gnu.cpp.compiler.option.include.paths.1187435171" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Protobuff}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\iniparser\src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\zeromq-3.2.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\EZOptionParser&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1139423180" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

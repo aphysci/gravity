@@ -85,8 +85,8 @@
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/protobuf-2.4.1/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/iniparser/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/cppdb-trunk&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/EZOptionParser&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.189198518" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

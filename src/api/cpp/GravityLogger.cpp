@@ -231,6 +231,7 @@ int Log::LevelToInt(LogLevel level)
         	break;
         default:
         	int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
+        	break;
     }
 
     return int_level;

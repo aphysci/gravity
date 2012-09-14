@@ -26,7 +26,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.207380053" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
 								<option id="gnu.cpp.compiler.option.include.paths.438841226" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Protobuff}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.962947975" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -36,10 +35,10 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.base.652498995" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.788876950" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
-								<option id="gnu.cpp.link.option.paths.441143305" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Default}&quot;"/>
+								<option id="gnu.cpp.link.option.paths.441143305" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Windows}&quot;"/>
 								</option>
-								<option id="gnu.cpp.link.option.libs.1296287496" superClass="gnu.cpp.link.option.libs" valueType="libs">
+								<option id="gnu.cpp.link.option.libs.1296287496" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="gravity"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1647081674" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
