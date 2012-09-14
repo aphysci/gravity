@@ -15,7 +15,7 @@ public:
      * Initalizes the Archiver
      * \param grav_node Assumed to be initialized.
      */
-    Archiver(GravityNode* gn, const string db_name, const string table_name, const string db_user, const string db_pass);
+    Archiver(GravityNode* gn, const string connection_str, const string table_name, std::vector<std::string> dpIDs);
 
     /**
      * Starts the Archiver (Calls Subscribe).

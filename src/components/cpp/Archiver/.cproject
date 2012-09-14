@@ -27,8 +27,10 @@
 								<option id="gnu.cpp.compiler.option.include.paths.373617191" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Protobuff}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/cppdb-trunk&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}\protobuf-2.4.1\src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/iniparser/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/EZOptionParser&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1847414528" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
