@@ -53,14 +53,14 @@ void GravityArchiverConfigParser::ParseConfigFile()
 	//Do global configs
 	GravityConfigParser::ParseConfigFile();
 
-	con_str = getString("Playback:ConnectionString", "");
+	con_str = getString("Archiver:ConnectionString", "");
 
 	string dsn, database, user, password, other;
-	dsn = getString("Playback:DSN", "");
-	database = getString("Playback:Database", "");
-	user = getString("Playback:User", "");
-	password = getString("Playback:Password", "");
-	other = getString("Playback:OtherDBOpts", "");
+	dsn = getString("Archiver:DSN", "");
+	database = getString("Archiver:Database", "");
+	user = getString("Archiver:User", "");
+	password = getString("Archiver:Password", "");
+	other = getString("Archiver:OtherDBOpts", "");
 
 	if(con_str != "")
 	{
@@ -83,9 +83,9 @@ void GravityArchiverConfigParser::ParseConfigFile()
 		con_str = ss.str();
 	}
 
-	table_name = getString("Playback:Table", "");
+	table_name = getString("Archiver:Table", "");
 
-	dpfn = getString("Playback:DataproductFile", "dataproductids");
+	dpfn = getString("Archiver:DataproductFile", "dataproductids");
 }
 
 void GravityArchiverConfigParser::ParseCmdLine(int argc, const char** argv)
