@@ -23,7 +23,7 @@ kill $ARPID
 kill $SDPID
 
 #Get the results
-echo "Select HEX(message), DataproductID from test;" > tmpsql321.sql
+echo "Select HEX(message), DataproductID from archivetest;" > tmpsql321.sql
 mysql test -uroot -pesmf < tmpsql321.sql > tmpoutsql321.txt
 rm tmpsql321.sql
 
