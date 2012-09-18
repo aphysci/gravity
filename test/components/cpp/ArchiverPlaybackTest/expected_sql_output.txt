@@ -1,0 +1,17 @@
+HEX(message)	DataproductID
+38	dummydataproduct
+39	dummydataproduct
+3130	dummydataproduct
+3131	dummydataproduct
+3132	dummydataproduct
+3133	dummydataproduct
+3134	dummydataproduct
+3135	dummydataproduct
+3136	dummydataproduct
+3137	dummydataproduct
+3138	dummydataproduct
+3139	dummydataproduct
+30	dummydataproduct
+31	dummydataproduct
+32	dummydataproduct
+33	dummydataproduct
