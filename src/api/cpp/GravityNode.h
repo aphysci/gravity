@@ -11,6 +11,7 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
+#include "GravityHeartbeatListener.h"
 #include "GravityServiceProvider.h"
 
 //This is defined in Windows for NetBIOS in nb30.h  
@@ -69,6 +70,7 @@ private:
     void* subscriptionManagerSocket;
     void* requestManagerSocket;
     void* serviceManagerSocket;
+    void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     void sendStringMessage(void* socket, string str, int flags);
     string readStringMessage(void* socket);
     string getIP(); ///< Utility method to get the host machine's IP address
@@ -78,6 +80,7 @@ private:
     NetworkNode serviceDirectoryNode;
     map<string,NetworkNode*> publishMap;
     map<string,string> serviceMap;
+
 public:
     uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 
@@ -95,22 +98,7 @@ public:
      * Initialize the Gravity infrastructure.
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
-    GravityReturnCode init();
-
-    /**
-     * Register a data product with the Gravity Directory Service, making it available to the
-     * rest of the Gravity-enabled system.
-     * \param dataProductID string ID used to uniquely identify this published data product
-     * \param networkPort network port on which this data product is made available
-     * \param transport type (e.g. 'tcp', 'ipc')
-     * \return success flag
-     */
-    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
-
-    /**
-     * Un-register a data product, resulting in its removal from the Gravity Service Directory
-     */
-    GravityReturnCode unregisterDataProduct(string dataProductID);
+    GravityReturnCode init(); //TODO: add service directory as a parameter to this guy!
 
     /**
      * Setup a subscription to a data product through the Gravity Service Directory.
@@ -172,6 +160,27 @@ public:
             const GravityRequestor& requestor, string requestID = emptyString);
 
     /**
+     * @name Registration functions
+     *  These presumably must only be accessed by one thread at a time (this is true for registerHeartbeatListener,
+     *   registerDataProduct doesn't syncronize access to publishMap either [besides that it's ok]).
+     * @{
+     */
+
+    /**
+     * Register a data product with the Gravity Directory Service, making it available to the
+     * rest of the Gravity-enabled system.
+     * \param dataProductID string ID used to uniquely identify this published data product
+     * \param networkPort network port on which this data product is made available
+     * \param transport type (e.g. 'tcp', 'ipc')
+     * \return success flag
+     */
+    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
+
+    /**
+     * Un-register a data product, resulting in its removal from the Gravity Service Directory
+     */
+    GravityReturnCode unregisterDataProduct(string dataProductID);
+    /**
      * Register as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which to register this service
      * \param networkPort network port on which this provider will listen for requests
@@ -187,6 +196,13 @@ public:
      * \param serviceID Unique ID with which the service was originially registered
      */
     GravityReturnCode unregisterService(string serviceID);
+
+    /**
+     * Registers a callback to be called when we don't get a heartbeat from another component.
+     */
+    GravityReturnCode registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+
+    /** @} */ //Registration Functions
 };
 
 } /* namespace gravity */
