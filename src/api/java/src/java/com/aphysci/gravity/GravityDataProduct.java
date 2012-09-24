@@ -89,16 +89,13 @@ public class GravityDataProduct {
 
     /**
      * Getter for the application-specific data contained within this data product
-     * @param data pointer to array to populate with message data content
-     * @param size size of data array to populate
-     * @return success flag
+     * @return byte array containing data, or null if no data is available. 
      */
-    public boolean getData(byte[] data) {
+    public byte[] getData() {
     	if (gdp.getData() != null) {
-    		data = gdp.getData().toByteArray();
-    		return true;
+    		return gdp.getData().toByteArray();
     	}
-    	return false;
+    	return null;
     }
 
     /**
