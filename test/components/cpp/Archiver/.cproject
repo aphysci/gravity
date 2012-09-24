@@ -26,7 +26,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1919892946" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
 								<option id="gnu.cpp.compiler.option.include.paths.904584394" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Protobuff}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1268454197" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -41,8 +40,8 @@
 									<listOptionValue builtIn="false" value="zmq"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.619684390" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Default}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\zeromq-3.2.0\src\.libs&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Windows}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}\zeromq-3.2.0\src\.libs&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.201240693" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -59,7 +58,9 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="DummyPublisher.null.1377356389" name="DummyPublisher"/>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/DummyPublisher"/>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.1487164749;cdt.managedbuild.toolchain.gnu.mingw.base.1487164749.287490628;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.814750182;cdt.managedbuild.tool.gnu.c.compiler.input.1517777206">

@@ -1,12 +1,20 @@
 #ifndef GRAVITYCONFIGPARSER_H_
 #define GRAVITYCONFIGPARSER_H_
 
-
 #include "GravityLogger.h"
 #include <string>
 #include <map>
 #include <iniparser.h>
 #include <dictionary.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+#include <ezOptionParser.hpp>
+#pragma GCC diagnostic pop
 
 /**
  * A really simple C++ wrapper for the iniparser library.
@@ -134,7 +142,7 @@ public:
         return (iniparser_find_entry(mydict, key.c_str()) == 1);
     }
     /**@}*/ //End Finding
-private:
+protected:
     dictionary* mydict;
 };
 
@@ -159,6 +167,8 @@ public:
     /** Get the Network Logging level from the config. */
     gravity::Log::LogLevel getNetLogLevel() { return log_net_level; }
 
+protected:
+    ez::ezOptionParser* opt;
 private:
     std::string serviceDirectoryUrl;
     gravity::Log::LogLevel log_local_level;

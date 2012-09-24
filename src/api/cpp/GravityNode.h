@@ -11,6 +11,7 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
+#include "GravityHeartbeatListener.h"
 #include "GravityServiceProvider.h"
 
 //This is defined in Windows for NetBIOS in nb30.h  
@@ -22,6 +23,8 @@ namespace gravity
 {
 
 using namespace std;
+
+extern std::string emptyString; //This allows us to use default parameters inside a dll.
 
 /**
  * Enumerated Type for Gravity Return Codes
@@ -67,9 +70,9 @@ private:
     void* subscriptionManagerSocket;
     void* requestManagerSocket;
     void* serviceManagerSocket;
+    void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     void sendStringMessage(void* socket, string str, int flags);
     string readStringMessage(void* socket);
-    uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
@@ -77,7 +80,9 @@ private:
     NetworkNode serviceDirectoryNode;
     map<string,NetworkNode*> publishMap;
     map<string,string> serviceMap;
+
 public:
+    uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 
     /**
      * Default Constructor
@@ -93,7 +98,73 @@ public:
      * Initialize the Gravity infrastructure.
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
-    GravityReturnCode init();
+    GravityReturnCode init(); //TODO: add service directory as a parameter to this guy!
+
+    /**
+     * Setup a subscription to a data product through the Gravity Service Directory.
+     * \param dataProductID string ID of the data product of interest
+     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
+     * \param filter text filter to apply to subscription
+     * \return success flag
+     */
+    GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = emptyString);
+
+    /**
+     * Setup a subscription to a data product through direct connection to known producer
+     * \param connectionURL connection string of data producer
+     * \param dataProductID string ID of the data product of interest
+     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
+     * \param filter text filter to apply to subscription
+     * \return success flag
+     */
+    GravityReturnCode subscribe(string connectionURL, string dataProductID,
+            const GravitySubscriber& subscriber, string filter = emptyString);
+
+    /**
+     * Un-subscribe to a data product
+     * \param dataProductID ID of data product for which subscription is to be removed
+     * \param subscriber the subscriber that will be removed from the notification list for this subscription
+     * \param filter text filter associated with the subscription to cancel
+     * \return success flag
+     */
+    GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter=emptyString);
+
+    /**
+     * Publish a data product
+     * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
+     * \return success flag
+     */
+    GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = emptyString);
+
+    /**
+     * Make a request against a service provider through the Gravity Service Directory
+     * \param serviceID The registered service ID of a service provider
+     * \param dataProduct data product representation of the request
+     * \param requestor object implementing the GravityRequestor interface that will be notified of the response
+     * \param requestID identifier for this request
+     * \return success flag
+     */
+    GravityReturnCode request(string serviceID, const GravityDataProduct& dataProduct,
+            const GravityRequestor& requestor, string requestID = emptyString);
+
+    /**
+     * Make a request against a service provider directly
+     * \param connectionURL connection string on which service provider is listening for requests
+     * \param serviceID The registered service ID of a service provider
+     * \param dataProduct data product representation of the request
+     * \param requestor object implementing the GravityRequestor interface that will be notified of the response
+     * \param requestID identifier for this request
+     * \return success flag
+     */
+    GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
+            const GravityRequestor& requestor, string requestID = emptyString);
+
+    /**
+     * @name Registration functions
+     *  These presumably must only be accessed by one thread at a time (this is true for registerHeartbeatListener,
+     *   registerDataProduct doesn't syncronize access to publishMap either [besides that it's ok]).
+     * @{
+     */
 
     /**
      * Register a data product with the Gravity Directory Service, making it available to the
@@ -109,66 +180,6 @@ public:
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
      */
     GravityReturnCode unregisterDataProduct(string dataProductID);
-
-    /**
-     * Setup a subscription to a data product through the Gravity Service Directory.
-     * \param dataProductID string ID of the data product of interest
-     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
-     * \param filter text filter to apply to subscription
-     * \return success flag
-     */
-    GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = "");
-
-    /**
-     * Setup a subscription to a data product through direct connection to known producer
-     * \param connectionURL connection string of data producer
-     * \param dataProductID string ID of the data product of interest
-     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
-     * \param filter text filter to apply to subscription
-     * \return success flag
-     */
-    GravityReturnCode subscribe(string connectionURL, string dataProductID,
-            const GravitySubscriber& subscriber, string filter = "");
-
-    /**
-     * Un-subscribe to a data product
-     * \param dataProductID ID of data product for which subscription is to be removed
-     * \param subscriber the subscriber that will be removed from the notification list for this subscription
-     * \param filter text filter associated with the subscription to cancel
-     * \return success flag
-     */
-    GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter="");
-
-    /**
-     * Publish a data product
-     * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
-     * \return success flag
-     */
-    GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "");
-
-    /**
-     * Make a request against a service provider through the Gravity Service Directory
-     * \param serviceID The registered service ID of a service provider
-     * \param dataProduct data product representation of the request
-     * \param requestor object implementing the GravityRequestor interface that will be notified of the response
-     * \param requestID identifier for this request
-     * \return success flag
-     */
-    GravityReturnCode request(string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = "");
-
-    /**
-     * Make a request against a service provider directly
-     * \param connectionURL connection string on which service provider is listening for requests
-     * \param serviceID The registered service ID of a service provider
-     * \param dataProduct data product representation of the request
-     * \param requestor object implementing the GravityRequestor interface that will be notified of the response
-     * \param requestID identifier for this request
-     * \return success flag
-     */
-    GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = "");
-
     /**
      * Register as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which to register this service
@@ -185,6 +196,13 @@ public:
      * \param serviceID Unique ID with which the service was originially registered
      */
     GravityReturnCode unregisterService(string serviceID);
+
+    /**
+     * Registers a callback to be called when we don't get a heartbeat from another component.
+     */
+    GravityReturnCode registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+
+    /** @} */ //Registration Functions
 };
 
 } /* namespace gravity */

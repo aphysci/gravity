@@ -41,7 +41,7 @@ uint64_t GravityDataProduct::getGravityTimestamp() const
     return gravityDataProductPB->timestamp();
 }
 
-void GravityDataProduct::setData(void* data, int size)
+void GravityDataProduct::setData(const void* data, int size)
 {
     delete gravityDataProductPB->release_data(); //Looking at the protobuf, this seems necessary.
     gravityDataProductPB->set_data(data, size);

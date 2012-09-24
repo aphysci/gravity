@@ -1,5 +1,6 @@
 #include "GravityArchiver.h"
 #include <string>
+#include <time.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sstream>
@@ -16,55 +17,24 @@ namespace gravity {
  * Assuming table_name, and other paramters are safe from attacks!!!
  * Throws: cppdb::cppdb_error
  */
-Archiver::Archiver(GravityNode* gn, const string db_name, const string table_name, const string db_user, const string db_pass)
+Archiver::Archiver(GravityNode* gn, const string connection_str, const string table_name, std::vector<std::string> dpIDs)
 {
     grav_node = gn;
 
-    //sql = new cppdb::session("odbc:@Driver=MySql;database=" + db_name + ";user=" + db_user + ";password=" + db_pass);    
-    sql = new cppdb::session("odbc:@Driver=MySql;DSN=timtest");
+    sql = new cppdb::session("odbc:" + connection_str);
+    //("odbc:@Driver=MySql;DSN=test;database=" + db_name + ";user=" + db_user + ";password=" + db_pass);
+    //sql = new cppdb::session("odbc:@Driver=MySql;DSN=test"); //We DO need to specify the DSN in ODBC.  That is the only thing we NEED to specify.
 
     insert_stmt = sql->prepare("INSERT INTO " + table_name + " (timestamp, DataproductID, Message) VALUES (?, ?, ?)");
-}
 
-std::string& trim_inplace(
-  std::string&       s,
-  const std::string& delimiters = " \f\n\r\t\v" )
-{
-    s.erase( s.find_last_not_of( delimiters ) + 1 );
-    return s.erase( 0, s.find_first_not_of( delimiters ) );
+    dataProductIDs = dpIDs;
 }
 
 void Archiver::start()
 {
-    ifstream config_file;
-    string dataProductID;
-    config_file.open("config_file");
-
-    //Subscribe to the DataProduct IDs in config file.
-
-
-    while(true)
-    {
-        //Get Next DataproductID
-        dataProductID = "";
-        while(dataProductID == "" || dataProductID.find_first_of("#") == 0)
-        {
-            if(!config_file.eof())
-            {
-                getline(config_file, dataProductID);
-                trim_inplace(dataProductID);
-            }
-            else
-                break;
-        }
-
-        if(config_file.eof() && dataProductID == "")
-            break;
-
-        //Subscribe
-        grav_node->subscribe(dataProductID, *this);
-        dataProductIDs.push_back(dataProductID);
-    }
+	//Subscribe
+	for(std::vector<std::string>::iterator i = dataProductIDs.begin(); i != dataProductIDs.end(); i++)
+		grav_node->subscribe(*i, *this);
 }
 
 void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
@@ -81,11 +51,15 @@ void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
             dataProduct.getData(messageData, msg_size); //Warning: This copies the data!!!
 
             insert_stmt.reset();
+//            time_t mytime = dataProduct.getGravityTimestamp();
+//            insert_stmt.bind(1, *gmtime(&mytime));
             insert_stmt.bind(1, dataProduct.getGravityTimestamp());
+            cout << dataProduct.getGravityTimestamp() << endl;
+
             insert_stmt.bind(2, dataProduct.getDataProductID());
 
             cout << dataProduct.getDataSize() << endl;
-            cout << messageData[4] << endl;
+            //cout << messageData[4] << endl;
 
             insert_stmt.bind(3, messageData, messageData + dataProduct.getDataSize());
 

@@ -26,9 +26,10 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1530161394" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
 								<option id="gnu.cpp.compiler.option.include.paths.373617191" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Protobuff}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/cppdb-trunk&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}\protobuf-2.4.1\src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/iniparser/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/EZOptionParser&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1847414528" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -39,7 +40,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.1742036291" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
 								<option id="gnu.cpp.link.option.paths.1283831119" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${THIRDPARTY_DIR}/cppdb-trunk&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Default}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GravityAPI/Windows}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1218086736" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="cppdb"/>

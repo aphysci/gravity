@@ -23,6 +23,7 @@
 #include "GravitySubscriptionManager.h"
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
+#include "GravityHeartbeatListener.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -32,6 +33,8 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition. 
+
+std::string gravity::emptyString("");
 
 static void* startSubscriptionManager(void* context)
 {
@@ -63,18 +66,24 @@ static void* startServiceManager(void* context)
 static int s_interrupted = 0;
 static void (*previousHandlerAbrt)(int); //Function Pointer
 static void (*previousHandlerInt)(int); //Function Pointer
-static void s_signal_handler(int signal_value)
+void s_restore_signals()
 {
-    s_interrupted = signal_value;
-	//Restore Previous Handlers
 	signal(SIGABRT, previousHandlerAbrt);
 	signal(SIGINT, previousHandlerInt);
 }
+
+static void s_signal_handler(int signal_value)
+{
+    s_interrupted = signal_value;
+    s_restore_signals();
+}
+
 void s_catch_signals()
 {
 	previousHandlerAbrt = signal(SIGABRT, s_signal_handler);
 	previousHandlerInt = signal(SIGINT, s_signal_handler);
 }
+
 
 namespace gravity
 {
@@ -89,6 +98,9 @@ GravityNode::GravityNode()
     serviceDirectoryNode.port = 5555;
     serviceDirectoryNode.transport = "tcp";
     serviceDirectoryNode.socket = NULL;
+
+    //Initialize this guy so we can know whether the heartbeat thread has started.
+    hbSocket = NULL;
 }
 
 GravityNode::~GravityNode()
@@ -172,6 +184,8 @@ GravityReturnCode GravityNode::init()
     zmq_bind(initSocket, "inproc://gravity_init");
     zmq_close(initSocket);
 	
+    s_restore_signals();
+
 	if(s_interrupted)
 		raise(s_interrupted);
 
@@ -578,6 +592,9 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     // Create message & send filter text
     sendStringMessage(socket, filterText, ZMQ_SNDMORE);
 
+    //Set Timestamp
+    dataProduct.setTimestamp(this->getCurrentTime());
+
     // Serialize data
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());
@@ -817,6 +834,39 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
+GravityReturnCode GravityNode::registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+{
+	void* startHeartbeatListener(void*); //Forward declaration.
+
+	if(hbSocket == NULL)
+	{
+		//Initialize Heartbeat thread.
+		hbSocket = zmq_socket(context, ZMQ_REQ);
+		zmq_bind(hbSocket, "inproc://heartbeat_listener");
+		pthread_t heartbeatListener;
+		pthread_create(&heartbeatListener, NULL, startHeartbeatListener, context);
+	}
+
+	//Send the DataproductID
+	sendStringMessage(hbSocket, dataProductID, ZMQ_SNDMORE);
+
+//	//Send the Port
+//	zmq_msg_t msg;
+//	zmq_msg_init_size(&msg, 2);
+//	memcpy(zmq_msg_data(&msg), &port, 2);
+//	zmq_sendmsg(hbSocket, &msg, ZMQ_SNDMORE);
+//	zmq_msg_close(&msg);
+
+	//Send the Max time between messages
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, 8);
+	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
+	zmq_sendmsg(hbSocket, &msg, 0);
+	zmq_msg_close(&msg);
+
+	return GravityReturnCodes::SUCCESS;
+}
+
 //Replace the clock_gettime for Windows.  
 #ifdef WIN32
 //From http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
@@ -852,6 +902,7 @@ clock_gettime(int X, struct timespec *tv)
     static double           frequencyToNanoseconds;
     static int              initialized = 0;
     static BOOL             usePerformanceCounter = 0;
+    static LARGE_INTEGER 	startTime;
 
     if (!initialized) {
         LARGE_INTEGER performanceFrequency;
@@ -864,6 +915,14 @@ clock_gettime(int X, struct timespec *tv)
             offset = getFILETIMEoffset();
             frequencyToNanoseconds = .01;
         }
+
+        GetSystemTimeAsFileTime(&f);
+        startTime.QuadPart = f.dwHighDateTime;
+        startTime.QuadPart <<= 32;
+        startTime.QuadPart |= f.dwLowDateTime;
+
+        startTime.QuadPart -= 116444736000000000ULL; //Convert from Window time to UTC (100ns)
+        startTime.QuadPart = startTime.QuadPart * 100; //To nanoseconds
     }
     if (usePerformanceCounter) QueryPerformanceCounter(&t);
     else {
@@ -875,6 +934,7 @@ clock_gettime(int X, struct timespec *tv)
 
     t.QuadPart -= offset.QuadPart;
     nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
+    nanoseconds += startTime.QuadPart;
     t.QuadPart = nanoseconds;
     tv->tv_sec = t.QuadPart / 1000000000LL;
     tv->tv_nsec = t.QuadPart % 1000000000LL;

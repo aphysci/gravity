@@ -31,7 +31,6 @@ int main(void)
     parser.ParseConfigFile();
     //gravity::Log::initAndAddFileLogger("ServiceDirectory.log", parser.getLocalLogLevel());
     gravity::Log::initAndAddConsoleLogger(parser.getLocalLogLevel());
-    cout << gravity::Log::LogLevelToString( parser.getLocalLogLevel()) << endl;
     //Not logging to GravityLogRecorder for now because that relies on having a gravity node.
 
     gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
@@ -64,7 +63,7 @@ void ServiceDirectory::start()
     free(bind_address); //We don't need this guy any more.
     bind_address = NULL;
 
-    zmq_msg_t request, response, envelope;
+    zmq_msg_t request, response;
     while (1)
     {
         zmq_msg_init(&request);
