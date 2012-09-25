@@ -54,23 +54,25 @@ import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
 
-//%typemap(directorin, descriptor="[B") (const signed char* arr, int length) {
-//    jbyteArray jb = (jenv)->NewByteArray(length);
-//    (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)arr);
-//    $input = jb;
-//}
+%typemap(directorin, descriptor="[B") char *BYTE {
+    jbyteArray jb = (jenv)->NewByteArray(length);
+    (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)BYTE);
+    $input = jb;
+    (jenv)->DeleteLocalRef(jb);
+}
 
-//%typemap(directorout) (const signed char* arr, int length) {
-//	$1 = 0;
-//	if($input){
-//		$result = (char *) jenv->GetByteArrayElements($input, 0);
-//		if(!$1)
-//			return $null;
-//	}
-//}
+%typemap(directorout) char *BYTE {
+	$1 = 0;
+	if($input){
+		$result = (char *) jenv->GetByteArrayElements($input, 0);
+		if(!$1)
+			return $null;
+		jenv->ReleaseByteArrayElements($input, $result, 0);
+	}
+}
 
-//%typemap(javadirectorin) (const signed char* arr, int length) "$jniinput"
-//%typemap(javadirectorout) (const signed char* arr, int length) "$javacall"
+%typemap(javadirectorin) char *BYTE "$jniinput"
+%typemap(javadirectorout) char *BYTE "$javacall"
 
 //"jbyteArray";
 
@@ -88,9 +90,9 @@ import com.aphysci.gravity.GravitySubscriber;
     }
 
     @SuppressWarnings("unused")
-    public void subscriptionFilled(SWIGTYPE_p_signed_char arr, int length) {
+    public void subscriptionFilled(byte[] arr, int length) {
       System.out.println("made it to CPPGravitySubscriberProxy.subscriptionFilled");
-      delegate.subscriptionFilled(null);
+      delegate.subscriptionFilled(new GravityDataProduct(arr));
     }
   }
 
@@ -110,7 +112,7 @@ namespace gravity {
 	class CPPGravitySubscriber {
 	public:
 		virtual ~CPPGravitySubscriber();
-		virtual void subscriptionFilled(const signed char* arr, int length);
+		virtual void subscriptionFilled(char *BYTE, int length);
 	};
 
     enum GravityReturnCode {
