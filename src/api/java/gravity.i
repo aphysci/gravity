@@ -55,26 +55,23 @@ import com.aphysci.gravity.GravitySubscriber;
 %}
 
 %typemap(directorin, descriptor="[B") char *BYTE {
+    // length var is assumed to be passed into the function as well
     jbyteArray jb = (jenv)->NewByteArray(length);
     (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)BYTE);
     $input = jb;
+    // can't deallocate here because it hasn't been used yet.
 //    (jenv)->DeleteLocalRef(jb);
 }
 
-%typemap(directorout) char *BYTE {
-	$1 = 0;
-	if($input){
-		$result = (char *) jenv->GetByteArrayElements($input, 0);
-		if(!$1)
-			return $null;
-		jenv->ReleaseByteArrayElements($input, $result, 0);
-	}
-}
+// egregious hack alert - the below typemap is added just to deallocate the memory for
+// the java byte array allocated above.
+%typemap(directorout) int %{
+    $result = ($1_ltype)$input;
+    (jenv)->DeleteLocalRef(jBYTE);
+%}
 
 %typemap(javadirectorin) char *BYTE "$jniinput"
 %typemap(javadirectorout) char *BYTE "$javacall"
-
-//"jbyteArray";
 
 %pragma(java) moduleimports=%{
 import com.aphysci.gravity.GravityDataProduct;
@@ -90,9 +87,10 @@ import com.aphysci.gravity.GravitySubscriber;
     }
 
     @SuppressWarnings("unused")
-    public void subscriptionFilled(byte[] arr, int length) {
+    public int subscriptionFilled(byte[] arr, int length) {
       System.out.println("made it to CPPGravitySubscriberProxy.subscriptionFilled");
       delegate.subscriptionFilled(new GravityDataProduct(arr));
+      return 0;
     }
   }
 
@@ -112,7 +110,7 @@ namespace gravity {
 	class CPPGravitySubscriber {
 	public:
 		virtual ~CPPGravitySubscriber();
-		virtual void subscriptionFilled(char *BYTE, int length);
+		virtual int subscriptionFilled(char *BYTE, int length);
 	};
 
     enum GravityReturnCode {
