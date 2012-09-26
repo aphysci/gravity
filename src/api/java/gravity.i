@@ -11,6 +11,7 @@
 #include "CPPGravitySubscriber.h"
 %}
 
+// load the shared lib in the generated code
 %pragma(java) jniclasscode=%{
   static {
     try {
@@ -22,6 +23,9 @@
   }
 %}
 
+/******
+* All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
+*******/
 %typemap(jstype) const gravity::GravitySubscriber& "GravitySubscriber";
 %typemap(javainterfaces) GravitySubscriber "GravitySubscriber"
 
@@ -41,9 +45,14 @@
 	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT); 
 }
 
+// this frees the memory allocated in the 'in' typemap above.
 %typemap(freearg) const gravity::GravityDataProduct&  {
 	delete $1;
 }
+/******
+* End GDP typemaps
+*******/
+
 
 %typemap(javaimports) gravity::GravityNode %{
 import com.aphysci.gravity.GravityDataProduct;
@@ -64,7 +73,8 @@ import com.aphysci.gravity.GravitySubscriber;
 }
 
 // egregious hack alert - the below typemap is added just to deallocate the memory for
-// the java byte array allocated above.
+// the java byte array allocated above.  Unfortunately there doesn't seem to be a freearg
+// equivalent for directorin typemaps.
 %typemap(directorout) int %{
     $result = ($1_ltype)$input;
     (jenv)->DeleteLocalRef(jBYTE);
@@ -73,11 +83,13 @@ import com.aphysci.gravity.GravitySubscriber;
 %typemap(javadirectorin) char *BYTE "$jniinput"
 %typemap(javadirectorout) char *BYTE "$javacall"
 
+// imports for gravity.java
 %pragma(java) moduleimports=%{
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
  
+// code for gravity.java that creates a proxy class for emulating a Java interface to a C++ class.
 %pragma(java) modulecode=%{
 
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
@@ -103,8 +115,12 @@ import com.aphysci.gravity.GravitySubscriber;
   }
 %}
 
+// this turns on director features for CPPGravitySubscriber
 %feature("director") gravity::CPPGravitySubscriber;
 
+
+// This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
+// sync with the Gravity API.
 namespace gravity {
 
 	class CPPGravitySubscriber {
