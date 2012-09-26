@@ -215,8 +215,13 @@ public:
     GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-    GravityReturnCode subscribe(const std::string& connectionURL, const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter=emptyString);
+    GravityReturnCode subscribe(const std::string& connectionURL, const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, 
+            const std::string& filter = "");
+    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
 	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
+	GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct, 
+	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
+	GravityReturnCode request(const std::string& connectionURL, const std::string& serviceID, const const gravity::GravityDataProduct& dataProduct,
+            const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
 };
 };
