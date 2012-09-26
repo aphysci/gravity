@@ -85,13 +85,17 @@ import com.aphysci.gravity.GravitySubscriber;
 
 // imports for gravity.java
 %pragma(java) moduleimports=%{
+import java.util.WeakHashMap;
+import java.util.Map;
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 %}
  
 // code for gravity.java that creates a proxy class for emulating a Java interface to a C++ class.
 %pragma(java) modulecode=%{
-
+  private static Map<GravitySubscriber, CPPGravitySubscriberProxy> proxyMap = 
+            new WeakHashMap<GravitySubscriber, CPPGravitySubscriberProxy>();
+  
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
     private GravitySubscriber delegate;
     public CPPGravitySubscriberProxy(GravitySubscriber i) {
@@ -111,7 +115,12 @@ import com.aphysci.gravity.GravitySubscriber;
       // If it already *is* a CPPGravitySubscriber don't bother wrapping it again
       return (CPPGravitySubscriber)i;
     }
-    return new CPPGravitySubscriberProxy(i);
+    CPPGravitySubscriberProxy proxy = proxyMap.get(i);
+    if (proxy == null) {
+      proxy = new CPPGravitySubscriberProxy(i);
+      proxyMap.put(i, proxy);
+    }
+    return proxy;
   }
 %}
 
@@ -152,6 +161,8 @@ public:
     GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
+    GravityReturnCode subscribe(const std::string& connectionURL, const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
+    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter=emptyString);
 	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
 };
 };

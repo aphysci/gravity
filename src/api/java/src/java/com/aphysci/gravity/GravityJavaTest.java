@@ -24,6 +24,11 @@ public class GravityJavaTest {
         
         ret = node.publish(gdp, "Java");
         
+        ret = node.unsubscribe("JavaGDP", s, "");
+        assert(ret == GravityReturnCode.SUCCESS);
+        
+        ret = node.publish(gdp, "Java");
+        
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.SUCCESS);
 
