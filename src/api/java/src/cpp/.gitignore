@@ -1,2 +1,3 @@
-*
+gravity_wrap*
+*.o
 !.gitignore
