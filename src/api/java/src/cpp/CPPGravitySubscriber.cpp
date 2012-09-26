@@ -11,8 +11,9 @@ CPPGravitySubscriber::~CPPGravitySubscriber()
 void CPPGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
     cout << "made it into CPPGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)\n" << endl;
-    char array[dataProduct.getSize()];
-    subscriptionFilled(array, dataProduct.getSize());
+    unsigned char array[dataProduct.getSize()];
+    dataProduct.serializeToArray(array);
+    subscriptionFilled((char*)array, dataProduct.getSize());
 }
 
 void CPPGravitySubscriber::subscriptionFilled(char* array, int length)

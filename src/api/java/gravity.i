@@ -58,7 +58,7 @@ import com.aphysci.gravity.GravitySubscriber;
     jbyteArray jb = (jenv)->NewByteArray(length);
     (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)BYTE);
     $input = jb;
-    (jenv)->DeleteLocalRef(jb);
+//    (jenv)->DeleteLocalRef(jb);
 }
 
 %typemap(directorout) char *BYTE {
