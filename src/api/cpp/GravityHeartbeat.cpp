@@ -21,8 +21,8 @@ bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElem
 	return a.expectedTime < b.expectedTime;
 }
 
-int ZMQSemiphore::num = 0;
-ZMQSemiphore::ZMQSemiphore()
+int ZMQSemephore::num = 0;
+ZMQSemephore::ZMQSemephore()
 {
 	socket = zmq_socket(zmq_context, ZMQ_PAIR);
 	stringstream ss;
@@ -36,23 +36,23 @@ ZMQSemiphore::ZMQSemiphore()
 	zmq_send(socket, buf, 4, 0);
 }
 
-void ZMQSemiphore::Lock()
+void ZMQSemephore::Lock()
 {
 	char buf[4];
 	zmq_recv(socket, buf, 4, 0);
 }
-void ZMQSemiphore::Unlock()
+void ZMQSemephore::Unlock()
 {
 	char buf[4];
 	zmq_send(socket, buf, 4, 0);
 }
 
-ZMQSemiphore::~ZMQSemiphore()
+ZMQSemephore::~ZMQSemephore()
 {
 	zmq_close(socket);
 }
 
-void ZMQSemiphore::init(void* context)
+void ZMQSemephore::init(void* context)
 {
 	zmq_context = context;
 }
@@ -61,8 +61,8 @@ std::list<ExpectedMessasgeQueueElement> Heartbeat::queueElements; //This is so w
 std::priority_queue<ExpectedMessasgeQueueElement*> Heartbeat::messageTimes;
 std::map<std::string, GravityHeartbeatListener*> Heartbeat::listener;
 
-ZMQSemiphore Heartbeat::lock;
-void* ZMQSemiphore::zmq_context = NULL;
+ZMQSemephore Heartbeat::lock;
+void* ZMQSemephore::zmq_context = NULL;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 
@@ -95,7 +95,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 			struct timespec request;
 			request.tv_sec = mqe.expectedTime / 1000000;
 			request.tv_nsec = (mqe.expectedTime % 1000000)*1000; //Convert from Microseconds to Nanoseconds
-			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, request, NULL);
+			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &request, NULL);
 #endif
 
 			lock.Lock();
@@ -137,13 +137,6 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				free(s);
 				//zmq_msg_close(&msg); //Closed after the end of the if statement.
 
-//				//Recieve port
-//				zmq_msg_t msg1;
-//				zmq_msg_init(&msg1);
-//				zmq_recvmsg(hbSocket, &msg2, ZMQ_DONTWAIT); //These are guarunteed to not fail since this is a multi part message.
-//				memcpy(&port, zmq_msg_data(&msg), 2);
-//				zmq_msg_close(&msg1);
-
 				//Receive address of listener
 				zmq_msg_t msg2;
 				zmq_msg_init(&msg2);
@@ -165,7 +158,6 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				mqe1.dataproductID = dataproductID;
 				mqe1.expectedTime = getCurrentTime() + maxtime;
 				mqe1.lastHeartbeatTime = 0;
-			    //TODO: Fill queue with how long (MAX) we'd like to wait for each message.
 				mqe1.timetowaitBetweenHeartbeats = maxtime;
 
 				//We should already be subscribed to the Heartbeats.
@@ -202,7 +194,7 @@ void* Heartbeat(void* thread_context)
 		struct timespec request;
 		request.tv_sec = params->interval_in_microseconds / 1000000;
 		request.tv_nsec = (params->interval_in_microseconds % 1000000)*1000; //Convert from Microseconds to Nanoseconds
-		clock_nanosleep(CLOCK_REALTIME, 0, request, NULL);
+		clock_nanosleep(CLOCK_REALTIME, 0, &request, NULL);
 #endif
 	}
 

@@ -38,15 +38,15 @@ struct ExpectedMessasgeQueueElement {
 
 bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b);
 
-class ZMQSemiphore
+class ZMQSemephore
 {
 public:
 	static void init(void* context);
 
-	ZMQSemiphore();
+	ZMQSemephore();
 	void Lock();
 	void Unlock();
-	~ZMQSemiphore();
+	~ZMQSemephore();
 private:
 	void* socket;
 	static int num;
@@ -64,7 +64,7 @@ public:
     static std::priority_queue<ExpectedMessasgeQueueElement*> messageTimes;
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
-    static ZMQSemiphore lock;
+    static ZMQSemephore lock;
     static std::set<std::string> filledHeartbeats;
 };
 

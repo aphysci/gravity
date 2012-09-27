@@ -837,7 +837,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 
 GravityReturnCode GravityNode::startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port)
 {
-	ZMQSemiphore::init(context);
+	ZMQSemephore::init(context);
 
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
@@ -868,7 +868,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uin
 	void* HeartbeatListener(void*); //Forward declaration.
 	static Heartbeat hbSub;
 
-	ZMQSemiphore::init(context);
+	ZMQSemephore::init(context);
 
 	if(hbSocket == NULL)
 	{
@@ -885,13 +885,6 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uin
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
-
-//	//Send the Port
-//	zmq_msg_t msg;
-//	zmq_msg_init_size(&msg, 2);
-//	memcpy(zmq_msg_data(&msg), &port, 2);
-//	zmq_sendmsg(hbSocket, &msg, ZMQ_SNDMORE);
-//	zmq_msg_close(&msg);
 
 	//Send the address of the listener
 	zmq_msg_t msg1;
