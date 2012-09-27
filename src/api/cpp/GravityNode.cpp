@@ -24,6 +24,7 @@
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
 #include "GravityHeartbeatListener.h"
+#include "GravityHeartbeat.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -593,7 +594,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     sendStringMessage(socket, filterText, ZMQ_SNDMORE);
 
     //Set Timestamp
-    dataProduct.setTimestamp(this->getCurrentTime());
+    dataProduct.setTimestamp(getCurrentTime());
 
     // Serialize data
     zmq_msg_t data;
@@ -834,21 +835,56 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-GravityReturnCode GravityNode::registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+GravityReturnCode GravityNode::startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port)
 {
-	void* startHeartbeatListener(void*); //Forward declaration.
+	ZMQSemiphore::init(context);
+
+	if(interval_in_microseconds < 0)
+		return gravity::GravityReturnCodes::FAILURE;
+
+	static bool started = false;
+
+	if(started)
+		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
+
+	this->registerDataProduct(componentID, 54541, "tcp");
+
+	void* Heartbeat(void* thread_context); //Forward Declaration
+
+	HBParams* params = new HBParams(); //(freed by thread)
+	params->zmq_context = context;
+	params->interval_in_microseconds = interval_in_microseconds;
+	params->componentID = componentID;
+	params->gn = this;
+
+	pthread_t heartbeatThread;
+	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
+
+	return gravity::GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+{
+	void* HeartbeatListener(void*); //Forward declaration.
+	static Heartbeat hbSub;
+
+	ZMQSemiphore::init(context);
 
 	if(hbSocket == NULL)
 	{
 		//Initialize Heartbeat thread.
 		hbSocket = zmq_socket(context, ZMQ_REQ);
 		zmq_bind(hbSocket, "inproc://heartbeat_listener");
-		pthread_t heartbeatListener;
-		pthread_create(&heartbeatListener, NULL, startHeartbeatListener, context);
+		HBListenerContext* thread_context = new HBListenerContext();
+		thread_context->zmq_context = this->context;
+		pthread_t heartbeatListenerThread;
+		pthread_create(&heartbeatListenerThread, NULL, Heartbeat::HeartbeatListenerThrFunc, thread_context);
 	}
 
+	this->subscribe(componentID, hbSub);
+
 	//Send the DataproductID
-	sendStringMessage(hbSocket, dataProductID, ZMQ_SNDMORE);
+	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
 
 //	//Send the Port
 //	zmq_msg_t msg;
@@ -856,6 +892,14 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string dataProductID, u
 //	memcpy(zmq_msg_data(&msg), &port, 2);
 //	zmq_sendmsg(hbSocket, &msg, ZMQ_SNDMORE);
 //	zmq_msg_close(&msg);
+
+	//Send the address of the listener
+	zmq_msg_t msg1;
+	zmq_msg_init_size(&msg1, sizeof(GravityHeartbeatListener*));
+	intptr_t p = (intptr_t) &listener;
+	memcpy(zmq_msg_data(&msg1), &p, sizeof(GravityHeartbeatListener*));
+	zmq_sendmsg(hbSocket, &msg1, ZMQ_SNDMORE);
+	zmq_msg_close(&msg1);
 
 	//Send the Max time between messages
 	zmq_msg_t msg;
@@ -942,7 +986,7 @@ clock_gettime(int X, struct timespec *tv)
 }
 #endif
 
-uint64_t GravityNode::getCurrentTime()
+uint64_t getCurrentTime()
 {
     timespec ts;
     clock_gettime(0, &ts);
