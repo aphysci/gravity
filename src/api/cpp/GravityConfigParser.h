@@ -157,6 +157,8 @@ public:
     void ParseCmdLine(int argc, const char** argv);
     /** Update configuration based on .ini file */
     void ParseConfigFile();
+    /** Update configuration based on Config Service */
+    void ParseConfigService(GravityNode &gn, std::string componentID);
 
     /** Get the url of the service directory from the config. */
     std::string getServiceDirectoryUrl() { return serviceDirectoryUrl; }

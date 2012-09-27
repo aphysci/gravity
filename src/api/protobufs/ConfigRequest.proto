@@ -1,0 +1,15 @@
+option optimize_for = SPEED;
+package gravity;
+
+message ConfigRequestPB
+{
+	required string requestor = 1;
+	required string section = 2;
+	required string key = 3;
+	optional bool start = 4;
+}
+
+message ConfigeResponsePB
+{
+	required string response = 1;
+}

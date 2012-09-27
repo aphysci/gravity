@@ -9,6 +9,7 @@
 #include "GravityNode.h"
 #include "GravityHeartbeatListener.h"
 #include "GravityHeartbeat.h"
+#include "GravitySemaphore.h"
 
 namespace gravity
 {
@@ -21,48 +22,12 @@ bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElem
 	return a.expectedTime < b.expectedTime;
 }
 
-int ZMQSemephore::num = 0;
-ZMQSemephore::ZMQSemephore()
-{
-	socket = zmq_socket(zmq_context, ZMQ_PAIR);
-	stringstream ss;
-	ss << "ipc://zmq_semephore" << num;
-	zmq_bind(socket, ss.str().c_str());
-	//Connect to ourself (loopback).
-	zmq_connect(socket, ss.str().c_str());
-
-	//Set the count to 0 so we can immediately lock without blocking.
-	char buf[4];
-	zmq_send(socket, buf, 4, 0);
-}
-
-void ZMQSemephore::Lock()
-{
-	char buf[4];
-	zmq_recv(socket, buf, 4, 0);
-}
-void ZMQSemephore::Unlock()
-{
-	char buf[4];
-	zmq_send(socket, buf, 4, 0);
-}
-
-ZMQSemephore::~ZMQSemephore()
-{
-	zmq_close(socket);
-}
-
-void ZMQSemephore::init(void* context)
-{
-	zmq_context = context;
-}
 
 std::list<ExpectedMessasgeQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
 std::priority_queue<ExpectedMessasgeQueueElement*> Heartbeat::messageTimes;
 std::map<std::string, GravityHeartbeatListener*> Heartbeat::listener;
 
-ZMQSemephore Heartbeat::lock;
-void* ZMQSemephore::zmq_context = NULL;
+Semaphore Heartbeat::lock;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 

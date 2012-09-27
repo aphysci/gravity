@@ -11,6 +11,7 @@
 #include <zmq.h>
 #include "GravityNode.h"
 #include "GravityHeartbeatListener.h"
+#include "GravitySemaphore.h"
 
 namespace gravity
 {
@@ -38,21 +39,6 @@ struct ExpectedMessasgeQueueElement {
 
 bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b);
 
-class ZMQSemephore
-{
-public:
-	static void init(void* context);
-
-	ZMQSemephore();
-	void Lock();
-	void Unlock();
-	~ZMQSemephore();
-private:
-	void* socket;
-	static int num;
-	static void* zmq_context;
-};
-
 class Heartbeat : public GravitySubscriber
 {
 public:
@@ -64,7 +50,7 @@ public:
     static std::priority_queue<ExpectedMessasgeQueueElement*> messageTimes;
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
-    static ZMQSemephore lock;
+    static Semaphore lock;
     static std::set<std::string> filledHeartbeats;
 };
 
