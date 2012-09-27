@@ -24,6 +24,11 @@ public class GravityJavaTest {
         
         ret = node.publish(gdp, "Java");
         
+        ret = node.unsubscribe("JavaGDP", s, "");
+        assert(ret == GravityReturnCode.SUCCESS);
+        
+        ret = node.publish(gdp, "Java");
+        
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.SUCCESS);
 
@@ -37,8 +42,9 @@ public class GravityJavaTest {
 
 		@Override
 		public void subscriptionFilled(GravityDataProduct dataProduct) {
-			System.out.println("made it to java callback");
-			
+			System.out.println("made it to java callback, gdp = "+dataProduct);
+			if (dataProduct != null) 
+				System.out.println("dataProduct id = " + dataProduct.getDataProductID());
 		}
     	
     }

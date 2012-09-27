@@ -11,12 +11,14 @@ CPPGravitySubscriber::~CPPGravitySubscriber()
 void CPPGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
     cout << "made it into CPPGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)\n" << endl;
-    signed char array[dataProduct.getSize()];
-    subscriptionFilled(array, dataProduct.getSize());
+    unsigned char array[dataProduct.getSize()];
+    dataProduct.serializeToArray(array);
+    subscriptionFilled((char*)array, dataProduct.getSize());
 }
 
-void CPPGravitySubscriber::subscriptionFilled(const signed char* array, int length)
+int CPPGravitySubscriber::subscriptionFilled(char* array, int length)
 {
     cout << "made it into CPPGravitySubscriber::subscriptionFilled(const signed char* array, int length)\n" << endl;
+    return 0;
 }
 
