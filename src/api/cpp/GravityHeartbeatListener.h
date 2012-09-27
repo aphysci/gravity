@@ -27,7 +27,7 @@ public:
     /**
      * Default destructor
      */
-	virtual ~GravityHeartbeatListener();
+	virtual ~GravityHeartbeatListener() { }
 };
 
 } /* namespace gravity */

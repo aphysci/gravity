@@ -162,12 +162,12 @@ public:
     /**
      * Starts a heartbeat for this gravity process.
      */
-    GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
+    GravityReturnCode startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port = 54541);
 
     /**
      * @name Registration functions
      *  These presumably must only be accessed by one thread at a time (this is true for registerHeartbeatListener,
-     *   registerDataProduct doesn't syncronize access to publishMap either [besides that it's ok]).
+     *   registerDataProduct doesn't synchronize access to publishMap either [besides that it's ok]).
      * @{
      */
 

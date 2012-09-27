@@ -24,6 +24,7 @@
 #include "GravityRequestManager.h"
 #include "GravityServiceManager.h"
 #include "GravityHeartbeatListener.h"
+#include "GravityHeartbeat.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -834,14 +835,10 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-struct HBParams {
-	void* zmq_context;
-	int interval_in_microseconds;
-	//unsigned short port;
-};
-
-GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
+GravityReturnCode GravityNode::startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port)
 {
+	ZMQSemiphore::init(context);
+
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
 
@@ -850,11 +847,15 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
+	this->registerDataProduct(componentID, 54541, "tcp");
+
 	void* Heartbeat(void* thread_context); //Forward Declaration
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
 	params->interval_in_microseconds = interval_in_microseconds;
+	params->componentID = componentID;
+	params->gn = this;
 
 	pthread_t heartbeatThread;
 	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
@@ -862,14 +863,12 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 	return gravity::GravityReturnCodes::SUCCESS;
 }
 
-struct HBListenerContext {
-	void* zmq_context;
-	GravityNode* gn; //Not used.
-};
-
-GravityReturnCode GravityNode::registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
 {
 	void* HeartbeatListener(void*); //Forward declaration.
+	static Heartbeat hbSub;
+
+	ZMQSemiphore::init(context);
 
 	if(hbSocket == NULL)
 	{
@@ -879,11 +878,13 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string dataProductID, u
 		HBListenerContext* thread_context = new HBListenerContext();
 		thread_context->zmq_context = this->context;
 		pthread_t heartbeatListenerThread;
-		pthread_create(&heartbeatListenerThread, NULL, HeartbeatListener, thread_context);
+		pthread_create(&heartbeatListenerThread, NULL, Heartbeat::HeartbeatListenerThrFunc, thread_context);
 	}
 
+	this->subscribe(componentID, hbSub);
+
 	//Send the DataproductID
-	sendStringMessage(hbSocket, dataProductID, ZMQ_SNDMORE);
+	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
 
 //	//Send the Port
 //	zmq_msg_t msg;

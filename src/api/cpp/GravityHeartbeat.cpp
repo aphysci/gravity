@@ -3,23 +3,17 @@
 #include <list>
 #include <map>
 #include <set>
+#include <sstream>
 
 #include <zmq.h>
 #include "GravityNode.h"
 #include "GravityHeartbeatListener.h"
+#include "GravityHeartbeat.h"
 
 namespace gravity
 {
 
 using namespace std;
-
-struct ExpectedMessasgeQueueElement {
-	uint64_t expectedTime; //Absolute (Maximum amount we can wait).
-	uint64_t lastHeartbeatTime; //Absolute
-	uint64_t timetowaitBetweenHeartbeats; //In Microseconds
-	std::string dataproductID;
-	void* socket;
-};
 
 //Comparison so the Heap works correctly.
 bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b)
@@ -27,31 +21,56 @@ bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElem
 	return a.expectedTime < b.expectedTime;
 }
 
-struct HBListenerContext {
-	void* zmq_context;
-	void* gn; //Not used.
-};
-
-class Heartbeat : public GravitySubscriber
+int ZMQSemiphore::num = 0;
+ZMQSemiphore::ZMQSemiphore()
 {
-public:
-    virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
+	socket = zmq_socket(zmq_context, ZMQ_PAIR);
+	stringstream ss;
+	ss << "ipc://zmq_semephore" << num;
+	zmq_bind(socket, ss.str().c_str());
+	//Connect to ourself (loopback).
+	zmq_connect(socket, ss.str().c_str());
 
-    static void* HeartbeatListenerThrFunc(void* thread_context);
+	//Set the count to 0 so we can immediately lock without blocking.
+	char buf[4];
+	zmq_send(socket, buf, 4, 0);
+}
 
-    static list<ExpectedMessasgeQueueElement> queueElements; //This is so we can reuse these guys.
-    static priority_queue<ExpectedMessasgeQueueElement*> messageTimes;
-    static map<std::string, GravityHeartbeatListener*> listener;
+void ZMQSemiphore::Lock()
+{
+	char buf[4];
+	zmq_recv(socket, buf, 4, 0);
+}
+void ZMQSemiphore::Unlock()
+{
+	char buf[4];
+	zmq_send(socket, buf, 4, 0);
+}
 
-    //Need a lock.
-    std::set<std::string> filledHeartbeats;
-};
+ZMQSemiphore::~ZMQSemiphore()
+{
+	zmq_close(socket);
+}
+
+void ZMQSemiphore::init(void* context)
+{
+	zmq_context = context;
+}
+
+std::list<ExpectedMessasgeQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
+std::priority_queue<ExpectedMessasgeQueueElement*> Heartbeat::messageTimes;
+std::map<std::string, GravityHeartbeatListener*> Heartbeat::listener;
+
+ZMQSemiphore Heartbeat::lock;
+void* ZMQSemiphore::zmq_context = NULL;
+std::set<std::string> Heartbeat::filledHeartbeats;
+
 
 void Heartbeat::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
-	//Lock
+	lock.Lock();
 	filledHeartbeats.insert(dataProduct.getDataProductID());
-	//Unlock
+	lock.Unlock();
 }
 
 
@@ -60,7 +79,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 	HBListenerContext* params = (HBListenerContext*) thread_context;
 
     void* hbSocket = zmq_socket(params->zmq_context, ZMQ_REP);
-    zmq_bind(hbSocket, "inproc://heartbeat_listener");
+    zmq_connect(hbSocket, "inproc://heartbeat_listener");
 
     while(true)
     {
@@ -71,7 +90,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
 			ExpectedMessasgeQueueElement& mqe = *messageTimes.top();
 #ifdef WIN32
-			Sleep((mqe.expectedTime - GetCurrentTime())/1000);
+			Sleep((mqe.expectedTime - getCurrentTime())/1000);
 #else
 			struct timespec request;
 			request.tv_sec = mqe.expectedTime / 1000000;
@@ -79,31 +98,20 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, request, NULL);
 #endif
 
-			if(zmq_recvmsg(mqe.socket, &msg, ZMQ_DONTWAIT) != 0)
-				if(zmq_errno() == EAGAIN)
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), "Missed");
-				else
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), "SocketError");
-			else
-			{
-				if(zmq_msg_size(&msg) != 4 && strncmp((char*)zmq_msg_data(&msg), "Good", 4) != 0)
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), string((const char*)zmq_msg_data(&msg), zmq_msg_size(&msg)));
-				else
-				{
-					//Receive any other extraneous heartbeats we may have missed.  //TODO: check status.
-					int rc;
-					do
-					{
-			    		zmq_msg_t msg;
-			    	    zmq_msg_init(&msg);
-			    	    rc = zmq_recvmsg(mqe.socket, &msg, ZMQ_DONTWAIT);
-						zmq_msg_close(&msg);
-					} while(rc == 0); //TODO: refactor this so there is one loop.
+			lock.Lock();
+			std::set<std::string>::iterator i = filledHeartbeats.find(mqe.dataproductID);
+			bool gotHeartbeat = (i != filledHeartbeats.end());
+			if(gotHeartbeat)
+				filledHeartbeats.erase(i);
+			lock.Unlock();
 
-					mqe.lastHeartbeatTime = getCurrentTime();
-				}
+			if(!gotHeartbeat)
+			{
+				listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
 			}
-			zmq_msg_close(&msg);
+			else
+				mqe.lastHeartbeatTime = getCurrentTime();
+
 
 			messageTimes.pop();
 			mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
@@ -118,7 +126,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     	    //unsigned short port;
     	    uint64_t maxtime;
 
-    	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_DONTWAIT) == 0)
+    	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_DONTWAIT) != -1)
     	    {
 				//Receive Dataproduct ID
 				int size = zmq_msg_size(&msg);
@@ -159,8 +167,8 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				mqe1.lastHeartbeatTime = 0;
 			    //TODO: Fill queue with how long (MAX) we'd like to wait for each message.
 				mqe1.timetowaitBetweenHeartbeats = maxtime;
-				mqe1.socket = zmq_socket(params->zmq_context, ZMQ_SUB);
-				zmq_connect(mqe1.socket, "tcp://*:54541"); //TODO: GET ENDPOINT!!!
+
+				//We should already be subscribed to the Heartbeats.
 
 				queueElements.push_back(mqe1);
 				messageTimes.push(&queueElements.back());
@@ -178,29 +186,18 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     return NULL;
 }
 
-struct HBParams {
-	void* zmq_context;
-	int interval_in_microseconds;
-	//unsigned short port;
-};
-
 void* Heartbeat(void* thread_context)
 {
 	HBParams* params = (HBParams*) thread_context;
-	void* heartbeatSocket = zmq_socket(params->zmq_context, ZMQ_PUB);
-    zmq_bind(heartbeatSocket, "tcp://*:54541"); //Arbitrary port
-
-    //Setup Message
-    string str = "Good";
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, str.length());
-	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
+	GravityNode* gn = (GravityNode*) params->gn;
+	GravityDataProduct gdp(params->componentID);
+	gdp.setData((void*)"Good", 5);
 
 	while(true)
 	{
-		zmq_sendmsg(heartbeatSocket, &msg, 0); //TODO: is message reusable?
+		gn->publish(gdp);
 #ifdef WIN32
-		Sleep(params->interval_in_microseconds);
+		Sleep(params->interval_in_microseconds/1000);
 #else
 		struct timespec request;
 		request.tv_sec = params->interval_in_microseconds / 1000000;
@@ -210,7 +207,6 @@ void* Heartbeat(void* thread_context)
 	}
 
 	//This will never be reached but should be done when the thread ends.
-	zmq_msg_close(&msg);
 	delete params;
 
 	return NULL;
