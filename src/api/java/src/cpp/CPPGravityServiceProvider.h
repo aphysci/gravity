@@ -16,7 +16,7 @@ public:
 
     virtual ~CPPGravityServiceProvider();
     virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
-    virtual int request(char* array, int length);
+    virtual shared_ptr<GravityDataProduct>  request(char* array, int length, GravityDataProduct& outputResponse);
 };
 
 }

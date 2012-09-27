@@ -16,7 +16,7 @@ void CPPGravityRequestor::requestFilled(string serviceID, string requestID, cons
     requestFilled(serviceID, requestID, (char*)array, response.getSize());
 }
 
-int CPPGravityRequestor::requestFilled(string serviceID, string requestID, char* array, int length)
+int CPPGravityRequestor::requestFilled(const std::string& serviceID, const std::string& requestID, char* array, int length)
 {
     cout << "made it into CPPGravityRequestor::requestFilled(string serviceID, string requestID, const signed char* array, int length)\n" << endl;
     return 0;

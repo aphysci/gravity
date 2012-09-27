@@ -109,6 +109,12 @@ import com.aphysci.gravity.GravityServiceProvider;
     (jenv)->DeleteLocalRef(jBYTE);
 %}
 
+%typemap(directorout) shared_ptr<gravity::GravityDataProduct> %{
+	shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct("RESPONSE"));
+    $result = ret;
+    (jenv)->DeleteLocalRef(jBYTE);
+%}
+
 %typemap(javadirectorin) char *BYTE "$jniinput"
 %typemap(javadirectorout) char *BYTE "$javacall"
 
@@ -166,10 +172,10 @@ import com.aphysci.gravity.GravityServiceProvider;
     }
 
     @SuppressWarnings("unused")
-    public int request(byte[] arr, int length) {
+    public SWIGTYPE_p_shared_ptrT_gravity__GravityDataProduct_t request(byte[] arr, int length) {
       System.out.println("made it to CPPGravityServiceProviderProxy.request");
       delegate.request(new GravityDataProduct(arr));
-      return 0;
+      return null;
     }
   }
 
@@ -237,7 +243,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 		virtual ~CPPGravityServiceProvider();
-		virtual int request(char *BYTE, int length);
+		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length, gravity::GravityDataProduct& outputResponse);
 	};
 
     enum GravityReturnCode {

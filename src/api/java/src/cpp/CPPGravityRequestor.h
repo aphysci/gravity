@@ -16,7 +16,7 @@ public:
 
     virtual ~CPPGravityRequestor();
     virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
-    virtual int requestFilled(string serviceID, string requestID, char* array, int length);
+    virtual int requestFilled(const string& serviceID, const string& requestID, char* array, int length);
 };
 
 }
