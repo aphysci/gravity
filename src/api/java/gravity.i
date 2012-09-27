@@ -9,7 +9,7 @@
 %{
 #include "GravityNode.h"
 #include "CPPGravitySubscriber.h"
-//#include "CPPGravityServiceProvider.h"
+#include "CPPGravityServiceProvider.h"
 #include "CPPGravityRequestor.h"
 %}
 
@@ -46,6 +46,16 @@
         const gravity::GravityRequestor&  "CPPGravityRequestor.getCPtr(n)"
 
 /******
+* GravityServiceProvider conversion
+*******/
+%typemap(jstype) const gravity::GravityServiceProvider& "GravityServiceProvider";
+%typemap(javainterfaces) GravityServiceProvider "GravityServiceProvider"
+
+%typemap(javain,pgcppname="n",
+         pre="    CPPGravityServiceProvider n = gravity.makeNativeProvider($javainput);")
+        const gravity::GravityServiceProvider&  "CPPGravityServiceProvider.getCPtr(n)"
+
+/******
 * All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
 *******/
 %typemap(jtype) const gravity::GravityDataProduct& "byte[]";
@@ -73,11 +83,13 @@
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
+import com.aphysci.gravity.GravityServiceProvider;
 %}
 %typemap(javaimports) gravity::CPPGravitySubscriber %{
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
+import com.aphysci.gravity.GravityServiceProvider;
 %}
 
 %typemap(directorin, descriptor="[B") char *BYTE {
@@ -107,6 +119,7 @@ import java.util.Map;
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
+import com.aphysci.gravity.GravityServiceProvider;
 %}
  
 // code for gravity.java that creates a proxy class for emulating a Java interface to a C++ class.
@@ -115,6 +128,8 @@ import com.aphysci.gravity.GravityRequestor;
             new WeakHashMap<GravitySubscriber, CPPGravitySubscriberProxy>();
   private static Map<GravityRequestor, CPPGravityRequestorProxy> proxyRequestorMap = 
             new WeakHashMap<GravityRequestor, CPPGravityRequestorProxy>();
+  private static Map<GravityServiceProvider, CPPGravityServiceProviderProxy> proxyProviderMap = 
+            new WeakHashMap<GravityServiceProvider, CPPGravityServiceProviderProxy>();
   
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
     private GravitySubscriber delegate;
@@ -144,6 +159,20 @@ import com.aphysci.gravity.GravityRequestor;
     }
   }
 
+  private static class CPPGravityServiceProviderProxy extends CPPGravityServiceProvider {
+    private GravityServiceProvider delegate;
+    public CPPGravityServiceProviderProxy(GravityServiceProvider i) {
+      delegate = i;
+    }
+
+    @SuppressWarnings("unused")
+    public int request(byte[] arr, int length) {
+      System.out.println("made it to CPPGravityServiceProviderProxy.request");
+      delegate.request(new GravityDataProduct(arr));
+      return 0;
+    }
+  }
+
   public static CPPGravitySubscriber makeNativeSubscriber(GravitySubscriber i) {
     if (i instanceof CPPGravitySubscriber) {
       // If it already *is* a CPPGravitySubscriber don't bother wrapping it again
@@ -157,7 +186,7 @@ import com.aphysci.gravity.GravityRequestor;
     return proxy;
   }
   
-    public static CPPGravityRequestor makeNativeRequestor(GravityRequestor i) {
+  public static CPPGravityRequestor makeNativeRequestor(GravityRequestor i) {
     if (i instanceof CPPGravityRequestor) {
       // If it already *is* a CPPGravityRequestor don't bother wrapping it again
       return (CPPGravityRequestor)i;
@@ -169,12 +198,25 @@ import com.aphysci.gravity.GravityRequestor;
     }
     return proxy;
   }
+  
+  public static CPPGravityServiceProvider makeNativeProvider(GravityServiceProvider i) {
+    if (i instanceof CPPGravityServiceProvider) {
+      // If it already *is* a CPPGravityServiceProvider don't bother wrapping it again
+      return (CPPGravityServiceProvider)i;
+    }
+    CPPGravityServiceProviderProxy proxy = proxyProviderMap.get(i);
+    if (proxy == null) {
+      proxy = new CPPGravityServiceProviderProxy(i);
+      proxyProviderMap.put(i, proxy);
+    }
+    return proxy;
+  }
 %}
 
 // this turns on director features for CPPGravitySubscriber
 %feature("director") gravity::CPPGravitySubscriber;
 %feature("director") gravity::CPPGravityRequestor;
-
+%feature("director") gravity::CPPGravityServiceProvider;
 
 // This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
 // sync with the Gravity API.
@@ -190,6 +232,12 @@ namespace gravity {
 	public:
 		virtual ~CPPGravityRequestor();
 		virtual int requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int length);
+	};
+
+	class CPPGravityServiceProvider {
+	public:
+		virtual ~CPPGravityServiceProvider();
+		virtual int request(char *BYTE, int length);
 	};
 
     enum GravityReturnCode {
@@ -223,5 +271,9 @@ public:
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
 	GravityReturnCode request(const std::string& connectionURL, const std::string& serviceID, const const gravity::GravityDataProduct& dataProduct,
             const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
+    GravityReturnCode registerService(const std::string& serviceID, short networkPort,
+            const std::string& transportType, const gravity::GravityServiceProvider& server);
+    GravityReturnCode unregisterService(const std::string& serviceID);
+            
 };
 };
