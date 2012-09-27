@@ -10,7 +10,8 @@ CPPGravityRequestor::~CPPGravityRequestor()
 
 void CPPGravityRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
 {
-    cout << "made it into CPPGravityRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& dataProduct)\n" << endl;
+    cout << "made it into CPPGravityRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& dataProduct), response id = "
+         << response.getDataProductID() << endl;
     unsigned char array[response.getSize()];
     response.serializeToArray(array);
     requestFilled(serviceID, requestID, (char*)array, response.getSize());

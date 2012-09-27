@@ -64,7 +64,7 @@ public class GravityJavaTest {
 		@Override
 		public void requestFilled(String serviceID, String requestID,
 				GravityDataProduct response) {
-			System.out.println("Made it Java Request filled for serviceID = "+serviceID);
+			System.out.println("Made it Java Request filled for serviceID = "+serviceID +", response id = "+response.getDataProductID());
 		}
     }
     
