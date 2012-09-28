@@ -78,17 +78,6 @@ void GravityRequestManager::start()
 		{
 			if (pollItems[i].revents && ZMQ_POLLIN)
 			{
-				// Read response data product from socket
-				zmq_msg_init(&filter);
-				zmq_recvmsg(pollItems[i].socket, &filter, 0);
-				int size = zmq_msg_size(&filter);
-				char* s = (char*)malloc(size+1);
-				memcpy(s, zmq_msg_data(&filter), size);
-				s[size] = 0;
-				std::string filterText(s, size);
-				delete s;
-				zmq_msg_close(&filter);
-
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItems[i].socket, &message, 0);
 				// Create new GravityDataProduct from the incoming message
