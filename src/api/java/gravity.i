@@ -160,7 +160,6 @@ import com.aphysci.gravity.GravityServiceProvider;
 
     @SuppressWarnings("unused")
     public int subscriptionFilled(byte[] arr, int length) {
-      System.out.println("made it to CPPGravitySubscriberProxy.subscriptionFilled");
       delegate.subscriptionFilled(new GravityDataProduct(arr));
       return 0;
     }
@@ -174,7 +173,6 @@ import com.aphysci.gravity.GravityServiceProvider;
 
     @SuppressWarnings("unused")
     public int requestFilled(String serviceID, String requestID, byte[] arr, int length) {
-      System.out.println("made it to CPPGravityRequestorProxy.requestFilled");
       delegate.requestFilled(serviceID, requestID, new GravityDataProduct(arr));
       return 0;
     }
@@ -188,7 +186,6 @@ import com.aphysci.gravity.GravityServiceProvider;
 
     @SuppressWarnings("unused")
     public byte[] request(byte[] arr, int length) {
-      System.out.println("made it to CPPGravityServiceProviderProxy.request");
       GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
       return gdp.serializeToArray();
     }

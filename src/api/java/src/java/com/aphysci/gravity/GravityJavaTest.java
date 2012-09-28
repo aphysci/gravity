@@ -6,15 +6,15 @@ import com.aphysci.gravity.swig.GravityReturnCode;
 
 public class GravityJavaTest {
 
-    public static void main(String[] argv) throws InterruptedException {
+    public static void main(String[] argv) {
         System.out.println("in main");
 
         GravityNode node = new GravityNode();
         GravityReturnCode ret = node.init();
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         ret = node.registerDataProduct("JavaGDP", 5678, "tcp");
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         Subscriber s = new Subscriber();
         ret = node.subscribe("JavaGDP", s, "");
@@ -25,37 +25,36 @@ public class GravityJavaTest {
         ret = node.publish(gdp, "Java");
         
         ret = node.unsubscribe("JavaGDP", s, "");
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         ret = node.publish(gdp, "Java");
         
         ret = node.unregisterDataProduct("JavaGDP");
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.unregisterDataProduct("JavaGDP");
-        assert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
+        testAssert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
         
         GravityServiceProvider gsp = new ServiceProvider();
         ret = node.registerService("JavaService", (short)8888, "tcp", gsp);
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityRequestor gr = new Requestor();
-        GravityDataProduct request = new GravityDataProduct("Request");
+        GravityDataProduct request = new GravityDataProduct("JavaRequest");
         ret = node.request("JavaService", request, gr);
-        assert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         ret = node.unregisterService("JavaService");
-        assert(ret == GravityReturnCode.SUCCESS);
-//        Thread.sleep(10000);
+        testAssert(ret == GravityReturnCode.SUCCESS);
+
+        System.out.println("Tests OK!!");
     }
     
     private static class Subscriber implements GravitySubscriber {
 
 		@Override
 		public void subscriptionFilled(GravityDataProduct dataProduct) {
-			System.out.println("made it to java callback, gdp = "+dataProduct);
-			if (dataProduct != null) 
-				System.out.println("dataProduct id = " + dataProduct.getDataProductID());
+			testAssert(dataProduct.getDataProductID().equals("JavaGDP"));
 		}
     }
     
@@ -64,7 +63,7 @@ public class GravityJavaTest {
 		@Override
 		public void requestFilled(String serviceID, String requestID,
 				GravityDataProduct response) {
-			System.out.println("Made it Java Request filled for serviceID = "+serviceID +", response id = "+response.getDataProductID());
+			testAssert(response.getDataProductID().equals("JavaResponse"));
 		}
     }
     
@@ -72,10 +71,17 @@ public class GravityJavaTest {
 
 		@Override
 		public GravityDataProduct request(GravityDataProduct dataProduct) {
-			System.out.println("Made it to Java Received service request with dataProduct id = "+dataProduct.getDataProductID());
+			testAssert(dataProduct.getDataProductID().equals("JavaRequest"));
 			return new GravityDataProduct("JavaResponse");
 		}
-    	
+    }
+    
+    private static void testAssert(boolean test) {
+    	if (!test) {
+    		System.err.println("Failed assertion, aborting");
+    		(new Exception()).printStackTrace();
+    		System.exit(1);
+    	}
     }
 }
 
