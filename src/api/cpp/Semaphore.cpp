@@ -2,7 +2,7 @@
 #include <zmq.h>
 #include <sstream>
 #include <pthread.h>
-#include <Semaphore.h>
+#include "GravitySemaphore.h"
 
 using namespace std;
 
