@@ -108,15 +108,30 @@ import com.aphysci.gravity.GravityServiceProvider;
     $result = ($1_ltype)$input;
     (jenv)->DeleteLocalRef(jBYTE);
 %}
-
-%typemap(directorout) shared_ptr<gravity::GravityDataProduct> %{
-	shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct("RESPONSE"));
-    $result = ret;
-    (jenv)->DeleteLocalRef(jBYTE);
-%}
-
 %typemap(javadirectorin) char *BYTE "$jniinput"
 %typemap(javadirectorout) char *BYTE "$javacall"
+
+/*****
+* typemaps to convert handle return of GDP from java method
+******/
+%typemap(directorout) shared_ptr<gravity::GravityDataProduct> {
+    signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
+    int length = JCALL1(GetArrayLength, jenv, $input);
+	shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct((void *)data, length));
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT); 
+    $result = ret;
+    (jenv)->DeleteLocalRef(jBYTE);
+}
+%typemap(javadirectorout) shared_ptr<gravity::GravityDataProduct> "$javacall"
+%typemap(jni) shared_ptr<gravity::GravityDataProduct> "jbyteArray"
+%typemap(jstype) shared_ptr<gravity::GravityDataProduct> "byte[]"
+%typemap(jtype) shared_ptr<gravity::GravityDataProduct> "byte[]"
+%typemap(javaout) shared_ptr<gravity::GravityDataProduct> {
+    return $jnicall;
+  }
+%typemap(javain) shared_ptr<gravity::GravityDataProduct> "$javainput"
+%typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
+%typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
 
 // imports for gravity.java
 %pragma(java) moduleimports=%{
@@ -172,10 +187,10 @@ import com.aphysci.gravity.GravityServiceProvider;
     }
 
     @SuppressWarnings("unused")
-    public SWIGTYPE_p_shared_ptrT_gravity__GravityDataProduct_t request(byte[] arr, int length) {
+    public byte[] request(byte[] arr, int length) {
       System.out.println("made it to CPPGravityServiceProviderProxy.request");
-      delegate.request(new GravityDataProduct(arr));
-      return null;
+      GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
+      return gdp.serializeToArray();
     }
   }
 
@@ -243,7 +258,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length, gravity::GravityDataProduct& outputResponse);
+		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length);
 	};
 
     enum GravityReturnCode {

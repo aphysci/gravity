@@ -10,20 +10,14 @@ CPPGravityServiceProvider::~CPPGravityServiceProvider()
 
 shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const GravityDataProduct& dataProduct)
 {
-    cout << "made it into CPPGravityServiceProvider::request(const GravityDataProduct& dataProduct)\n" << endl;
     unsigned char array[dataProduct.getSize()];
     dataProduct.serializeToArray(array);
-    GravityDataProduct gdp("sgdfjghs");
-    return request((char*)array, dataProduct.getSize(), gdp);
-//    shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
-//    return ret;
+    return request((char*)array, dataProduct.getSize());
 }
 
-shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(char* array, int length, GravityDataProduct& outputResponse)
+shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(char* array, int length)
 {
-    cout << "made it into CPPGravityServiceProvider::request(const signed char* array, int length)\n" << endl;
     shared_ptr<GravityDataProduct> ret(new GravityDataProduct("CPP RESPONSE"));
     return ret;
-//    return 0;
 }
 
