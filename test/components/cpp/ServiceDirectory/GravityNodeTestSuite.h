@@ -168,7 +168,8 @@ public:
     	//sleep(2);
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-    	GravityDataProduct gdp("TEST");
+    	GravityDataProduct gdp("REQUEST");
+    	gdp.setData("REQ_DATA", 9);
 
     	clearServiceFlags();
 
@@ -206,6 +207,24 @@ public:
 
         ret = node.unregisterService("TEST2");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+    }
+
+    void testDataProduct(void)
+    {
+    	GravityDataProduct gdp("GDP_ID");
+    	gdp.setData("TEST_DATA", 10);
+
+    	char* data = (char*)malloc(gdp.getSize());
+    	gdp.serializeToArray(data);
+
+    	GravityDataProduct gdp2(data, gdp.getSize());
+    	TS_ASSERT(strcmp(gdp2.getDataProductID().c_str(), "GDP_ID")==0);
+    	char* data2 = (char*)malloc(gdp.getDataSize());
+    	gdp2.getData(data2, gdp2.getDataSize());
+    	TS_ASSERT(strcmp(data2, "TEST_DATA")==0);
+
+    	delete data;
+    	delete data2;
     }
 
     void subscriptionFilled(const GravityDataProduct& dataProduct)
@@ -260,9 +279,13 @@ public:
     shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct)
     {
     	shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
+    	ret->setData("RESP_DATA", 10);
 
     	pthread_mutex_lock(&mutex);
-    	gotRequestFlag = true;
+    	char* data = (char*)malloc(dataProduct.getDataSize());
+    	dataProduct.getData(data, dataProduct.getDataSize());
+    	gotRequestFlag = (strcmp(dataProduct.getDataProductID().c_str(), "REQUEST")==0 &&
+    	    						strcmp(data, "REQ_DATA")==0);
     	pthread_mutex_unlock(&mutex);
 
     	return ret;
@@ -271,7 +294,10 @@ public:
     void requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
     {
     	pthread_mutex_lock(&mutex);
-    	gotResponseFlag = true;
+    	char* data = (char*)malloc(response.getDataSize());
+    	response.getData(data, response.getDataSize());
+    	gotResponseFlag = (strcmp(response.getDataProductID().c_str(), "RESPONSE")==0 &&
+    						strcmp(data, "RESP_DATA")==0);
     	pthread_mutex_unlock(&mutex);
     }
 
