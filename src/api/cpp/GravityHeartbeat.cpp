@@ -1,89 +1,97 @@
 #include <iostream>
 #include <queue>
 #include <list>
+#include <map>
+#include <set>
+#include <sstream>
 
+#include <zmq.h>
+#include "GravityNode.h"
 #include "GravityHeartbeatListener.h"
+#include "GravityHeartbeat.h"
+#include "GravitySemaphore.h"
 
 namespace gravity
 {
 
-#ifdef FINISHED_WITH_HEARTBEAT
-
 using namespace std;
 
-struct ExpectedMessasgeQueueElement {
-	uint64_t expectedTime; //Absolute (Maximum amount we can wait).
-	uint64_t lastHeartbeatTime; //Absolute
-	uint64_t timetowaitBetweenHeartbeats; //In Microseconds
-	std::string dataproductID;
-	void* socket;
-};
-
+//Comparison so the Heap works correctly.
 bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b)
 {
 	return a.expectedTime < b.expectedTime;
 }
 
-void* startHeartbeatListener(void* context)
-{
-    void* hbSocket = zmq_socket(context, ZMQ_REP);
-    zmq_bind(hbSocket, "inproc://heartbeat_listener");
 
-    list<ExpectedMessasgeQueueElement> queueElements; //This is so we can reuse these guys.
-    priority_queue<ExpectedMessasgeQueueElement&> messageTimes;
-    //TODO: Fill queue with how long (MAX) we'd like to wait for each message.
+std::list<ExpectedMessasgeQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
+std::priority_queue<ExpectedMessasgeQueueElement*> Heartbeat::messageTimes;
+std::map<std::string, GravityHeartbeatListener*> Heartbeat::listener;
+
+Semaphore Heartbeat::lock;
+std::set<std::string> Heartbeat::filledHeartbeats;
+
+
+void Heartbeat::subscriptionFilled(const GravityDataProduct& dataProduct)
+{
+	lock.Lock();
+	filledHeartbeats.insert(dataProduct.getDataProductID());
+	lock.Unlock();
+}
+
+
+void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
+{
+	HBListenerContext* params = (HBListenerContext*) thread_context;
+
+    void* hbSocket = zmq_socket(params->zmq_context, ZMQ_REP);
+    zmq_connect(hbSocket, "inproc://heartbeat_listener");
 
     while(true)
     {
-    	if(!messageTimes.empty()) //This should never happen because we should start with at least 1 heartbeat to monitor.
+    	if(!messageTimes.empty())
     	{
     		zmq_msg_t msg;
     	    zmq_msg_init(&msg);
 
-			ExpectedMessasgeQueueElement& mqe = messageTimes.top();
-			wait(mqe.expectedTime - getCurrentTime());
+			ExpectedMessasgeQueueElement& mqe = *messageTimes.top();
+#ifdef WIN32
+			Sleep((mqe.expectedTime - getCurrentTime())/1000);
+#else
+			struct timespec request;
+			request.tv_sec = mqe.expectedTime / 1000000;
+			request.tv_nsec = (mqe.expectedTime % 1000000)*1000; //Convert from Microseconds to Nanoseconds
+			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &request, NULL);
+#endif
 
-			if(zmq_recvmsg(mqe.socket, &msg, ZMQ_NOBLOCK) != 0)
-				if(zmq_errno() == EAGAIN)
-					gn.findHeartbeatListener(mqe.dataproductID)->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), "Missed");
-				else
-					gn.findHeartbeatListener(mqe.dataproductID)->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), "SocketError");
-			else
+			lock.Lock();
+			std::set<std::string>::iterator i = filledHeartbeats.find(mqe.dataproductID);
+			bool gotHeartbeat = (i != filledHeartbeats.end());
+			if(gotHeartbeat)
+				filledHeartbeats.erase(i);
+			lock.Unlock();
+
+			if(!gotHeartbeat)
 			{
-				if(zmq_msg_size(&msg) != 4 && strncmp(zmq_msg_data(&msg), "Good", 4) != 0)
-					gn.findHeartbeatListener(mqe.dataproductID)->MissedHeartbeat(mqe.dataproductID, mqe.lastHeartbeatTime - getCurrentTime(), string(zmq_msg_data(&msg), zmq_msg_size(&msg)));
-				else
-				{
-					//Receive any other extrainious heartbeats we may have missed.  //TODO: check status.
-					int rc;
-					do
-					{
-			    		zmq_msg_t msg;
-			    	    zmq_msg_init(&msg);
-			    	    rc = zmq_recvmsg(socket, &msg, ZMQ_NOBLOCK);
-						zmq_msg_close(&msg);
-					} while(rc == 0); //TODO: refactor this so there is one loop.
-
-					mqe.lastHeartbeatTime = getCurrentTime();
-				}
-
-				zmq_msg_close(&msg);
+				listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
 			}
+			else
+				mqe.lastHeartbeatTime = getCurrentTime();
+
 
 			messageTimes.pop();
-			mqe.expectedTime = getCurrentTime() + timetowaitBetweenHeartbeats;
-			messageTimes.push(mqe);
-    	}
+			mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
+			messageTimes.push(&mqe);
+    	}//Process Messages
 
         //Allow Gravity to add Heartbeat listeners.
     	{
     		zmq_msg_t msg;
     	    zmq_msg_init(&msg);
     	    std::string dataproductID;
-    	    unsigned short port;
+    	    //unsigned short port;
     	    uint64_t maxtime;
 
-    	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_NOBLOCK) == 0)
+    	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_DONTWAIT) != -1)
     	    {
 				//Receive Dataproduct ID
 				int size = zmq_msg_size(&msg);
@@ -94,77 +102,71 @@ void* startHeartbeatListener(void* context)
 				free(s);
 				//zmq_msg_close(&msg); //Closed after the end of the if statement.
 
-//				//Recieve port
-//				zmq_msg_t msg1;
-//				zmq_msg_init(&msg1);
-//				zmq_recvmsg(hbSocket, &msg, ZMQ_NOBLOCK); //These are guarunteed to not fail since this is a multi part message.
-//				memcpy(&port, zmq_msg_data(&msg), 2);
-//				zmq_msg_close(&msg1);
-
-				//Receive maxtime.
+				//Receive address of listener
 				zmq_msg_t msg2;
 				zmq_msg_init(&msg2);
-				zmq_recvmsg(hbSocket, &msg, ZMQ_NOBLOCK);
-				memcpy(&maxtime, zmq_msg_data(&msg), 8);
+				intptr_t p;
+				zmq_recvmsg(hbSocket, &msg2, ZMQ_DONTWAIT); //These are guarunteed to not fail since this is a multi part message.
+				memcpy(&p, zmq_msg_data(&msg2), sizeof(intptr_t));
 				zmq_msg_close(&msg2);
+
+				listener[dataproductID] = (GravityHeartbeatListener*) p;
+
+				//Receive maxtime.
+				zmq_msg_t msg3;
+				zmq_msg_init(&msg3);
+				zmq_recvmsg(hbSocket, &msg3, ZMQ_DONTWAIT);
+				memcpy(&maxtime, zmq_msg_data(&msg3), 8);
+				zmq_msg_close(&msg3);
 
 				ExpectedMessasgeQueueElement mqe1;
 				mqe1.dataproductID = dataproductID;
 				mqe1.expectedTime = getCurrentTime() + maxtime;
 				mqe1.lastHeartbeatTime = 0;
 				mqe1.timetowaitBetweenHeartbeats = maxtime;
-				mqe1.socket = zmq_socket(context, ZMQ_SUB);
-				zmq_bind(mqe1.socket, "tcp://*:54541"); //Arbitrary port
+
+				//We should already be subscribed to the Heartbeats.
 
 				queueElements.push_back(mqe1);
-				messageTimes.push(queueElements.back());
+				messageTimes.push(&queueElements.back());
     	    }
 
 	    	zmq_msg_close(&msg);
 
-    	}//Gravity
+    	}//Add Heartbeat listeners
 
     }//while(true)
 
-    zmq_msg_close(&msg);
+	//This will never be reached but should be done when the thread ends.
+    delete params;
+
+    return NULL;
 }
 
-
-void* startHeartbeat(void* context)
+void* Heartbeat(void* thread_context)
 {
-	void* heartbeatSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(initSocket, "tcp://*:54541"); //Arbitrary port
-
-    //Setup Message
-    string str = "Good";
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, str.length());
-	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
+	HBParams* params = (HBParams*) thread_context;
+	GravityNode* gn = (GravityNode*) params->gn;
+	GravityDataProduct gdp(params->componentID);
+	gdp.setData((void*)"Good", 5);
 
 	while(true)
 	{
-		zmq_sendmsg(socket, &msg, flags);
-		sleep(interval);
+		gn->publish(gdp);
+#ifdef WIN32
+		Sleep(params->interval_in_microseconds/1000);
+#else
+		struct timespec request;
+		request.tv_sec = params->interval_in_microseconds / 1000000;
+		request.tv_nsec = (params->interval_in_microseconds % 1000000)*1000; //Convert from Microseconds to Nanoseconds
+		clock_nanosleep(CLOCK_REALTIME, 0, &request, NULL);
+#endif
 	}
 
 	//This will never be reached but should be done when the thread ends.
-	zmq_msg_close(&msg);
+	delete params;
+
+	return NULL;
 }
-
-#else //Not finished with Heartbeat.  This should keep things from breaking.
-
-void* startHeartbeat(void* context)
-{
-	while(true)
-		;
-}
-
-void* startHeartbeatListener(void* context)
-{
-	while(true)
-		;
-}
-
-#endif
 
 } //namespace gravity

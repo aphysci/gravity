@@ -1,5 +1,8 @@
 #include "GravityConfigParser.h"
 #include "GravityLogger.h"
+#include "GravitySemaphore.h"
+#include "protobuf/ConfigRequest.pb.h"
+
 #include <iniparser.h>
 #include <map>
 #include <iostream>
@@ -57,15 +60,87 @@ void GravityConfigParser::ParseCmdLine(int argc, const char** argv)
 void GravityConfigParser::ParseConfigFile()
 {
     std::string protocol = IniConfigParser::getString("ServiceDirectory:protocol", "tcp");
-    std::string interface = IniConfigParser::getString("ServiceDirectory:interface", "*");
+    std::string my_interface = IniConfigParser::getString("ServiceDirectory:interface", "*");
     std::string port = IniConfigParser::getString("ServiceDirectory:port", "5555");
-    serviceDirectoryUrl = protocol + "://" + interface + ":" + port;
+    serviceDirectoryUrl = protocol + "://" + my_interface + ":" + port;
 
     std::string localloglevstr = IniConfigParser::getString("General:LogLocalLevel", "warning");
     log_local_level = Log::LogStringToLevel(localloglevstr.c_str());
 
     std::string netloglevstr = IniConfigParser::getString("General:LogNetLevel", "warning");
     log_net_level = Log::LogStringToLevel(netloglevstr.c_str());
+}
+
+class ConfigRequestor: public GravityRequestor
+{
+public:
+	ConfigRequestor(GravityNode &gn);
+	void gravityConfigRequest(string componentID, string section, string key, bool start = false);
+
+	void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
+	virtual ~ConfigRequestor() {}
+
+	std::map<std::string, std::string> config_map;
+	void WaitForConfig();
+private:
+	GravityNode &gn;
+	Semaphore lock;
+	int nConfigs;
+};
+
+ConfigRequestor::ConfigRequestor(GravityNode &other_gn) : gn(other_gn)
+{
+	nConfigs = 0;
+}
+
+void ConfigRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
+{
+	cout << "serviceID: " << serviceID << endl;
+	cout << "requestID: " << requestID << endl;
+	cout << "dataProductID: " << response.getDataProductID() << endl;
+	cout << "dataSize: " << response.getDataSize() << endl;
+
+	ConfigeResponsePB responseMessage;
+	response.populateMessage(responseMessage);
+	config_map[requestID] = responseMessage.response();
+
+	lock.Unlock();
+}
+
+void ConfigRequestor::gravityConfigRequest(string componentID, string section, string key, bool start)
+{
+	nConfigs++;
+	ConfigRequestPB crpb;
+	crpb.set_requestor(componentID);
+	crpb.set_section(section);
+	crpb.set_key(key);
+	if(start)
+		crpb.set_start(true);
+
+	GravityDataProduct dataproduct("ConfigRequestPB");
+	dataproduct.setData(crpb);
+
+	string sectionkey = section + ":" + key;
+	gn.request("ConfigService", dataproduct, *this, sectionkey);
+}
+
+void ConfigRequestor::WaitForConfig()
+{
+	for(; nConfigs >= 0; nConfigs--)
+		lock.Lock();
+}
+
+void GravityConfigParser::ParseConfigService(GravityNode &gn, std::string componentID)
+{
+	ConfigRequestor requestor(gn);
+	requestor.gravityConfigRequest(componentID, "General", "LogLocalLevel");
+	requestor.gravityConfigRequest(componentID, "General", "LogNetLevel");
+
+	//Wait for all values to come in...
+	requestor.WaitForConfig();
+
+    log_local_level = Log::LogStringToLevel(requestor.config_map["General:LogLocalLevel"].c_str());
+    log_net_level = Log::LogStringToLevel(requestor.config_map["General:LogLocalLevel"].c_str());
 }
 
 }

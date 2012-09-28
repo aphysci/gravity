@@ -16,7 +16,9 @@ namespace gravity
 /**
  * Interface specification for an object that will respond to connection outages of gravity products.
  */
-class GravityHeartbeatListener {
+class GravityHeartbeatListener
+{
+public:
 	/**
 	 * Called when another component's heartbeat is off by a certain amount.
 	 */
@@ -25,7 +27,7 @@ class GravityHeartbeatListener {
     /**
      * Default destructor
      */
-	virtual ~GravityHeartbeatListener();
+	virtual ~GravityHeartbeatListener() { }
 };
 
 } /* namespace gravity */

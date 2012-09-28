@@ -24,12 +24,28 @@ public class GravityJavaTest {
         
         ret = node.publish(gdp, "Java");
         
+        ret = node.unsubscribe("JavaGDP", s, "");
+        assert(ret == GravityReturnCode.SUCCESS);
+        
+        ret = node.publish(gdp, "Java");
+        
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.unregisterDataProduct("JavaGDP");
         assert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
         
+        GravityServiceProvider gsp = new ServiceProvider();
+        ret = node.registerService("JavaService", (short)8888, "tcp", gsp);
+        assert(ret == GravityReturnCode.SUCCESS);
+        
+        GravityRequestor gr = new Requestor();
+        GravityDataProduct request = new GravityDataProduct("Request");
+        ret = node.request("JavaService", request, gr);
+        assert(ret == GravityReturnCode.SUCCESS);
+        
+        ret = node.unregisterService("JavaService");
+        assert(ret == GravityReturnCode.SUCCESS);
 //        Thread.sleep(10000);
     }
     
@@ -37,8 +53,27 @@ public class GravityJavaTest {
 
 		@Override
 		public void subscriptionFilled(GravityDataProduct dataProduct) {
-			System.out.println("made it to java callback");
-			
+			System.out.println("made it to java callback, gdp = "+dataProduct);
+			if (dataProduct != null) 
+				System.out.println("dataProduct id = " + dataProduct.getDataProductID());
+		}
+    }
+    
+    private static class Requestor implements GravityRequestor {
+
+		@Override
+		public void requestFilled(String serviceID, String requestID,
+				GravityDataProduct response) {
+			System.out.println("Made it Java Request filled for serviceID = "+serviceID +", response id = "+response.getDataProductID());
+		}
+    }
+    
+    private static class ServiceProvider implements GravityServiceProvider {
+
+		@Override
+		public GravityDataProduct request(GravityDataProduct dataProduct) {
+			System.out.println("Made it to Java Received service request with dataProduct id = "+dataProduct.getDataProductID());
+			return new GravityDataProduct("JavaResponse");
 		}
     	
     }
