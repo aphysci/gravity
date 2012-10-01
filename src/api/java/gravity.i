@@ -165,20 +165,17 @@ namespace gravity {
 
 	class CPPGravitySubscriber {
 	public:
-		virtual ~CPPGravitySubscriber();
-		virtual int subscriptionFilled(char *BYTE, int length);
+		int subscriptionFilled(char *BYTE, int length);
 	};
 
 	class CPPGravityRequestor {
 	public:
-		virtual ~CPPGravityRequestor();
-		virtual int requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int length);
+		int requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int length);
 	};
 
 	class CPPGravityServiceProvider {
 	public:
-		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length);
+		shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length);
 	};
 
     enum GravityReturnCode {
