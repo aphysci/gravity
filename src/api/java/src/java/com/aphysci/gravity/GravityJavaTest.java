@@ -3,11 +3,13 @@ package com.aphysci.gravity;
 
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
+import com.aphysci.gravity.swig.Log;
 
 public class GravityJavaTest {
 
     public static void main(String[] argv) {
-        System.out.println("in main");
+    	Log.initAndAddConsoleLogger(Log.LogLevel.DEBUG);
+        Log.debug("in main");
 
         GravityNode node = new GravityNode();
         GravityReturnCode ret = node.init();
@@ -47,7 +49,7 @@ public class GravityJavaTest {
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
 
-        System.out.println("Tests OK!!");
+        Log.message("Tests OK!!");
     }
     
     private static class Subscriber implements GravitySubscriber {
@@ -78,7 +80,7 @@ public class GravityJavaTest {
     
     private static void testAssert(boolean test) {
     	if (!test) {
-    		System.err.println("Failed assertion, aborting");
+    		Log.fatal("Failed assertion, aborting");
     		(new Exception()).printStackTrace();
     		System.exit(1);
     	}

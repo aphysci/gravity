@@ -11,6 +11,7 @@
 #include "CPPGravitySubscriber.h"
 #include "CPPGravityServiceProvider.h"
 #include "CPPGravityRequestor.h"
+#include "CPPGravityLogger.h"
 %}
 
 // load the shared lib in the generated code
@@ -56,6 +57,17 @@
         const gravity::GravityServiceProvider&  "CPPGravityServiceProvider.getCPtr(n)"
 
 /******
+* Logger conversion
+*******/
+%typemap(jstype) gravity::Logger* "Logger";
+%typemap(javainterfaces) Logger "Logger"
+
+%typemap(javain,pgcppname="n",
+         pre="    CPPGravityLogger n = gravity.makeNativeLogger($javainput);")
+        gravity::Logger*  "CPPGravityLogger.getCPtr(n)"
+
+
+/******
 * All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
 *******/
 %typemap(jtype) const gravity::GravityDataProduct& "byte[]";
@@ -84,13 +96,19 @@ import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.GravityServiceProvider;
+import com.aphysci.gravity.Logger;
 %}
-%typemap(javaimports) gravity::CPPGravitySubscriber %{
-import com.aphysci.gravity.GravityDataProduct;
-import com.aphysci.gravity.GravitySubscriber;
-import com.aphysci.gravity.GravityRequestor;
-import com.aphysci.gravity.GravityServiceProvider;
+//%typemap(javaimports) gravity::CPPGravitySubscriber %{
+//import com.aphysci.gravity.GravityDataProduct;
+//import com.aphysci.gravity.GravitySubscriber;
+//import com.aphysci.gravity.GravityRequestor;
+//import com.aphysci.gravity.GravityServiceProvider;
+//import com.aphysci.gravity.Logger;
+//%}
+%typemap(javaimports) gravity::Log %{
+import com.aphysci.gravity.Logger;
 %}
+
 
 %typemap(directorin, descriptor="[B") char *BYTE {
     // length var is assumed to be passed into the function as well
@@ -133,103 +151,8 @@ import com.aphysci.gravity.GravityServiceProvider;
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
 %typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
 
-// imports for gravity.java
-%pragma(java) moduleimports=%{
-import java.util.WeakHashMap;
-import java.util.Map;
-import com.aphysci.gravity.GravityDataProduct;
-import com.aphysci.gravity.GravitySubscriber;
-import com.aphysci.gravity.GravityRequestor;
-import com.aphysci.gravity.GravityServiceProvider;
-%}
- 
-// code for gravity.java that creates a proxy class for emulating a Java interface to a C++ class.
-%pragma(java) modulecode=%{
-  private static Map<GravitySubscriber, CPPGravitySubscriberProxy> proxySubscriberMap = 
-            new WeakHashMap<GravitySubscriber, CPPGravitySubscriberProxy>();
-  private static Map<GravityRequestor, CPPGravityRequestorProxy> proxyRequestorMap = 
-            new WeakHashMap<GravityRequestor, CPPGravityRequestorProxy>();
-  private static Map<GravityServiceProvider, CPPGravityServiceProviderProxy> proxyProviderMap = 
-            new WeakHashMap<GravityServiceProvider, CPPGravityServiceProviderProxy>();
-  
-  private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
-    private GravitySubscriber delegate;
-    public CPPGravitySubscriberProxy(GravitySubscriber i) {
-      delegate = i;
-    }
-
-    @SuppressWarnings("unused")
-    public int subscriptionFilled(byte[] arr, int length) {
-      delegate.subscriptionFilled(new GravityDataProduct(arr));
-      return 0;
-    }
-  }
-
-  private static class CPPGravityRequestorProxy extends CPPGravityRequestor {
-    private GravityRequestor delegate;
-    public CPPGravityRequestorProxy(GravityRequestor i) {
-      delegate = i;
-    }
-
-    @SuppressWarnings("unused")
-    public int requestFilled(String serviceID, String requestID, byte[] arr, int length) {
-      delegate.requestFilled(serviceID, requestID, new GravityDataProduct(arr));
-      return 0;
-    }
-  }
-
-  private static class CPPGravityServiceProviderProxy extends CPPGravityServiceProvider {
-    private GravityServiceProvider delegate;
-    public CPPGravityServiceProviderProxy(GravityServiceProvider i) {
-      delegate = i;
-    }
-
-    @SuppressWarnings("unused")
-    public byte[] request(byte[] arr, int length) {
-      GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
-      return gdp.serializeToArray();
-    }
-  }
-
-  public static CPPGravitySubscriber makeNativeSubscriber(GravitySubscriber i) {
-    if (i instanceof CPPGravitySubscriber) {
-      // If it already *is* a CPPGravitySubscriber don't bother wrapping it again
-      return (CPPGravitySubscriber)i;
-    }
-    CPPGravitySubscriberProxy proxy = proxySubscriberMap.get(i);
-    if (proxy == null) {
-      proxy = new CPPGravitySubscriberProxy(i);
-      proxySubscriberMap.put(i, proxy);
-    }
-    return proxy;
-  }
-  
-  public static CPPGravityRequestor makeNativeRequestor(GravityRequestor i) {
-    if (i instanceof CPPGravityRequestor) {
-      // If it already *is* a CPPGravityRequestor don't bother wrapping it again
-      return (CPPGravityRequestor)i;
-    }
-    CPPGravityRequestorProxy proxy = proxyRequestorMap.get(i);
-    if (proxy == null) {
-      proxy = new CPPGravityRequestorProxy(i);
-      proxyRequestorMap.put(i, proxy);
-    }
-    return proxy;
-  }
-  
-  public static CPPGravityServiceProvider makeNativeProvider(GravityServiceProvider i) {
-    if (i instanceof CPPGravityServiceProvider) {
-      // If it already *is* a CPPGravityServiceProvider don't bother wrapping it again
-      return (CPPGravityServiceProvider)i;
-    }
-    CPPGravityServiceProviderProxy proxy = proxyProviderMap.get(i);
-    if (proxy == null) {
-      proxy = new CPPGravityServiceProviderProxy(i);
-      proxyProviderMap.put(i, proxy);
-    }
-    return proxy;
-  }
-%}
+%include "logger.i"
+%include "modulecode.i"
 
 // this turns on director features for CPPGravitySubscriber
 %feature("director") gravity::CPPGravitySubscriber;
@@ -294,4 +217,5 @@ public:
     GravityReturnCode unregisterService(const std::string& serviceID);
             
 };
+
 };
