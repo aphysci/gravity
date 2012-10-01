@@ -8,6 +8,7 @@ PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
 CPPSRC_DIR=src/cpp
+SWIGSRC_DIR=src/swig
 GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
 PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
 SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
@@ -33,9 +34,9 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 
 all: $(LIB_NAME) libgravity_wrap.so
 
-# Generate source from SWIG file and update AUTO_SRCS to include the generated .java files
-# The changce to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
-autosrcs.mk: gravity.i
+# Generate source from SWIG files and update AUTO_SRCS to include the generated .java files
+# The change to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
+autosrcs.mk: $(SWIGSRC_DIR)/gravity.i $(wildcard $(SWIGSRC_DIR)/*.i)
 	swig -c++ -o $(CPPSRC_DIR)/gravity_wrap.cpp -outdir $(SWIGGEN_DIR) -package com.aphysci.gravity.swig -java $<
 	echo "AUTO_SRCS=`echo $(SWIGGEN_DIR)/*.java $(GRAVSRC_DIR)/*.java`" > autosrcs.mk
 	echo "CPP_SRC=`echo $(CPPSRC_DIR)/*.cpp`" >> autosrcs.mk
