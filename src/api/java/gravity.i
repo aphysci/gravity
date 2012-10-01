@@ -11,6 +11,7 @@
 #include "CPPGravitySubscriber.h"
 #include "CPPGravityServiceProvider.h"
 #include "CPPGravityRequestor.h"
+#include "CPPGravityHeartbeatListener.h"
 #include "CPPGravityLogger.h"
 %}
 
@@ -55,6 +56,16 @@
 %typemap(javain,pgcppname="n",
          pre="    CPPGravityServiceProvider n = gravity.makeNativeProvider($javainput);")
         const gravity::GravityServiceProvider&  "CPPGravityServiceProvider.getCPtr(n)"
+
+/******
+ * GravityHeartbeatListener conversion
+ *******/
+%typemap(jstype) const gravity::GravityHeartbeatListener& "GravityHeartbeatListener";
+%typemap(javainterfaces) GravityHeartbeatListener "GravityHeartbeatListener"
+
+%typemap(javain,pgcppname="n",
+         pre="    CPPGravityHeartbeatListener n = gravity.makeNativeHeartbeatListener($javainput);")
+        const gravity::GravityHeartbeatListener&  "CPPGravityHeartbeatListener.getCPtr(n)"
 
 /******
  * Logger conversion

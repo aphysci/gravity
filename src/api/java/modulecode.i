@@ -7,6 +7,7 @@ import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.GravityServiceProvider;
+import com.aphysci.gravity.GravityHeartbeatListener;
 import com.aphysci.gravity.Logger;
 %}
 
@@ -20,6 +21,8 @@ import com.aphysci.gravity.Logger;
             new WeakHashMap<GravityRequestor, CPPGravityRequestorProxy>();
   private static Map<GravityServiceProvider, CPPGravityServiceProviderProxy> proxyProviderMap = 
             new WeakHashMap<GravityServiceProvider, CPPGravityServiceProviderProxy>();
+  private static Map<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy> proxyHeartbeatListenerMap = 
+            new WeakHashMap<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy>();
   private static Map<Logger, CPPGravityLoggerProxy> proxyLoggerMap = 
             new WeakHashMap<Logger, CPPGravityLoggerProxy>();
   
@@ -59,6 +62,18 @@ import com.aphysci.gravity.Logger;
     public byte[] request(byte[] arr, int length) {
       GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
       return gdp.serializeToArray();
+    }
+  }
+
+  private static class CPPGravityHeartbeatListenerProxy extends CPPGravityHeartbeatListener {
+    private GravityHeartbeatListener delegate;
+    public CPPGravityHeartbeatListenerProxy(GravityHeartbeatListener i) {
+      delegate = i;
+    }
+
+    @SuppressWarnings("unused")
+    public void MissedHeartbeat(String dataProductID, int microsecond_to_last_heartbeat, String status) {
+      delegate.MissedHeartbeat(dataProductID, microsecond_to_last_heartbeat, status);
     }
   }
 
@@ -109,6 +124,19 @@ import com.aphysci.gravity.Logger;
     if (proxy == null) {
       proxy = new CPPGravityServiceProviderProxy(i);
       proxyProviderMap.put(i, proxy);
+    }
+    return proxy;
+  }
+  
+  public static CPPGravityHeartbeatListener makeNativeHeartbeatListener(GravityHeartbeatListener i) {
+    if (i instanceof CPPGravityHeartbeatListener) {
+      // If it already *is* a CPPGravityHeartbeatListener don't bother wrapping it again
+      return (CPPGravityHeartbeatListener)i;
+    }
+    CPPGravityHeartbeatListenerProxy proxy = proxyHeartbeatListenerMap.get(i);
+    if (proxy == null) {
+      proxy = new CPPGravityHeartbeatListenerProxy(i);
+      proxyHeartbeatListenerMap.put(i, proxy);
     }
     return proxy;
   }
