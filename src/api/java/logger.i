@@ -2,6 +2,10 @@
 
 %feature("director") gravity::CPPGravityLogger;
 
+%typemap(javaimports) gravity::Log %{
+import com.aphysci.gravity.Logger;
+%}
+
 namespace gravity{
 
 #define GRAVITY_LOG_FATAL 0

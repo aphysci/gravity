@@ -27,8 +27,8 @@
 %}
 
 /******
-* GravitySubscriber conversion
-*******/
+ * GravitySubscriber conversion
+ *******/
 %typemap(jstype) const gravity::GravitySubscriber& "GravitySubscriber";
 %typemap(javainterfaces) GravitySubscriber "GravitySubscriber"
 
@@ -37,8 +37,8 @@
         const gravity::GravitySubscriber&  "CPPGravitySubscriber.getCPtr(n)"
 
 /******
-* GravityRequestor conversion
-*******/
+ * GravityRequestor conversion
+ *******/
 %typemap(jstype) const gravity::GravityRequestor& "GravityRequestor";
 %typemap(javainterfaces) GravityRequestor "GravityRequestor"
 
@@ -47,8 +47,8 @@
         const gravity::GravityRequestor&  "CPPGravityRequestor.getCPtr(n)"
 
 /******
-* GravityServiceProvider conversion
-*******/
+ * GravityServiceProvider conversion
+ *******/
 %typemap(jstype) const gravity::GravityServiceProvider& "GravityServiceProvider";
 %typemap(javainterfaces) GravityServiceProvider "GravityServiceProvider"
 
@@ -57,8 +57,8 @@
         const gravity::GravityServiceProvider&  "CPPGravityServiceProvider.getCPtr(n)"
 
 /******
-* Logger conversion
-*******/
+ * Logger conversion
+ *******/
 %typemap(jstype) gravity::Logger* "Logger";
 %typemap(javainterfaces) Logger "Logger"
 
@@ -68,8 +68,8 @@
 
 
 /******
-* All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
-*******/
+ * All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
+ *******/
 %typemap(jtype) const gravity::GravityDataProduct& "byte[]";
 %typemap(jstype) const gravity::GravityDataProduct& "GravityDataProduct";
 %typemap(jni) const gravity::GravityDataProduct&  "jbyteArray"
@@ -86,30 +86,12 @@
 %typemap(freearg) const gravity::GravityDataProduct&  {
 	delete $1;
 }
-/******
-* End GDP typemaps
-*******/
 
-
-%typemap(javaimports) gravity::GravityNode %{
-import com.aphysci.gravity.GravityDataProduct;
-import com.aphysci.gravity.GravitySubscriber;
-import com.aphysci.gravity.GravityRequestor;
-import com.aphysci.gravity.GravityServiceProvider;
-import com.aphysci.gravity.Logger;
-%}
-//%typemap(javaimports) gravity::CPPGravitySubscriber %{
-//import com.aphysci.gravity.GravityDataProduct;
-//import com.aphysci.gravity.GravitySubscriber;
-//import com.aphysci.gravity.GravityRequestor;
-//import com.aphysci.gravity.GravityServiceProvider;
-//import com.aphysci.gravity.Logger;
-//%}
-%typemap(javaimports) gravity::Log %{
-import com.aphysci.gravity.Logger;
-%}
-
-
+/*****
+ * Typemaps to handle passing a byte array from C++ into Java.  Conversion between
+ * GDP and byte array is handled outside of this interface code (unlike the conversion
+ * when passing GDP's from Java to C++).
+ *****/
 %typemap(directorin, descriptor="[B") char *BYTE {
     // length var is assumed to be passed into the function as well
     jbyteArray jb = (jenv)->NewByteArray(length);
@@ -119,7 +101,7 @@ import com.aphysci.gravity.Logger;
 //    (jenv)->DeleteLocalRef(jb);
 }
 
-// egregious hack alert - the below typemap is added just to deallocate the memory for
+// The below typemap is added just to deallocate the memory for
 // the java byte array allocated above.  Unfortunately there doesn't seem to be a freearg
 // equivalent for directorin typemaps.
 %typemap(directorout) int %{
@@ -130,8 +112,8 @@ import com.aphysci.gravity.Logger;
 %typemap(javadirectorout) char *BYTE "$javacall"
 
 /*****
-* typemaps to convert handle return of GDP from java method
-******/
+ * typemaps to convert handle return of GDP from java method
+ ******/
 %typemap(directorout) shared_ptr<gravity::GravityDataProduct> {
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
     int length = JCALL1(GetArrayLength, jenv, $input);
@@ -151,72 +133,7 @@ import com.aphysci.gravity.Logger;
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
 %typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
 
+
 %include "modulecode.i"
-
-// this turns on director features for CPPGravitySubscriber
-%feature("director") gravity::CPPGravitySubscriber;
-%feature("director") gravity::CPPGravityRequestor;
-%feature("director") gravity::CPPGravityServiceProvider;
-
 %include "logger.i"
-
-// This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
-// sync with the Gravity API.
-namespace gravity {
-
-	class CPPGravitySubscriber {
-	public:
-		virtual ~CPPGravitySubscriber();
-		virtual int subscriptionFilled(char *BYTE, int length);
-	};
-
-	class CPPGravityRequestor {
-	public:
-		virtual ~CPPGravityRequestor();
-		virtual int requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int length);
-	};
-
-	class CPPGravityServiceProvider {
-	public:
-		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length);
-	};
-
-    enum GravityReturnCode {
-        SUCCESS = 0,
-        FAILURE = -1,
-        NO_SERVICE_DIRECTORY = -2,
-        REQUEST_TIMEOUT = -3,
-        DUPLICATE = -4,
-        REGISTRATION_CONFLICT = -5,
-        NOT_REGISTERED = -6,
-        NO_SUCH_SERVICE = -7,
-        NO_SUCH_DATA_PRODUCT = -8,
-        LINK_ERROR = -9,
-        INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11
-    };
-
-class GravityNode {
-public:    
-	GravityNode();
-	~GravityNode();
-    GravityReturnCode init();
-    GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
-    GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
-    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-    GravityReturnCode subscribe(const std::string& connectionURL, const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, 
-            const std::string& filter = "");
-    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
-	GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct, 
-	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
-	GravityReturnCode request(const std::string& connectionURL, const std::string& serviceID, const const gravity::GravityDataProduct& dataProduct,
-            const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
-    GravityReturnCode registerService(const std::string& serviceID, short networkPort,
-            const std::string& transportType, const gravity::GravityServiceProvider& server);
-    GravityReturnCode unregisterService(const std::string& serviceID);
-            
-};
-
-};
+%include "gravitynode.i"
