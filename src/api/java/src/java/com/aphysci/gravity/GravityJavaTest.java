@@ -7,8 +7,14 @@ import com.aphysci.gravity.swig.Log;
 
 public class GravityJavaTest {
 
+	private static boolean subCalled = false;
+	private static boolean reqCalled = false;
+	private static boolean provCalled = false;
+	private static boolean logCalled = false;
+	
     public static void main(String[] argv) {
     	Log.initAndAddConsoleLogger(Log.LogLevel.DEBUG);
+    	Log.initAndAddLogger(new TestLogger(), Log.LogLevel.DEBUG);
         Log.debug("in main");
 
         GravityNode node = new GravityNode();
@@ -48,6 +54,11 @@ public class GravityJavaTest {
         
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
+        
+        testAssert(subCalled);
+        testAssert(reqCalled);
+        testAssert(provCalled);
+        testAssert(logCalled);
 
         Log.message("Tests OK!!");
     }
@@ -56,6 +67,7 @@ public class GravityJavaTest {
 
 		@Override
 		public void subscriptionFilled(GravityDataProduct dataProduct) {
+			subCalled = true;
 			testAssert(dataProduct.getDataProductID().equals("JavaGDP"));
 		}
     }
@@ -65,6 +77,7 @@ public class GravityJavaTest {
 		@Override
 		public void requestFilled(String serviceID, String requestID,
 				GravityDataProduct response) {
+			reqCalled = true;
 			testAssert(response.getDataProductID().equals("JavaResponse"));
 		}
     }
@@ -73,8 +86,17 @@ public class GravityJavaTest {
 
 		@Override
 		public GravityDataProduct request(GravityDataProduct dataProduct) {
+			provCalled = true;
 			testAssert(dataProduct.getDataProductID().equals("JavaRequest"));
 			return new GravityDataProduct("JavaResponse");
+		}
+    }
+    
+    private static class TestLogger implements Logger {
+		@Override
+		public void Log(int level, String messagestr) {
+			System.out.println("log called (level = "+level+"): "+messagestr);
+			logCalled = true;
 		}
     }
     

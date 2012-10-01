@@ -151,13 +151,14 @@ import com.aphysci.gravity.Logger;
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
 %typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
 
-%include "logger.i"
 %include "modulecode.i"
 
 // this turns on director features for CPPGravitySubscriber
 %feature("director") gravity::CPPGravitySubscriber;
 %feature("director") gravity::CPPGravityRequestor;
 %feature("director") gravity::CPPGravityServiceProvider;
+
+%include "logger.i"
 
 // This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
 // sync with the Gravity API.

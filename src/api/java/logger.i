@@ -1,5 +1,7 @@
 
 
+%feature("director") gravity::CPPGravityLogger;
+
 namespace gravity{
 
 #define GRAVITY_LOG_FATAL 0
@@ -11,6 +13,8 @@ namespace gravity{
 
 class CPPGravityLogger
 {
+public:
+	virtual ~CPPGravityLogger();
     virtual void Log(int level, const char* messagestr);
 };
 
