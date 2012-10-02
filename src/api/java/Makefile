@@ -26,7 +26,8 @@ CPP_OBJ=$(patsubst %.cpp,%.o,$(CPP_SRC))
 
 OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(AUTO_SRCS))
 
-PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
+PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto
+#PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
 PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%Container.java,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE))
 
