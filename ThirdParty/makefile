@@ -2,14 +2,22 @@
 
 cppdb:
 	@-cd cppdb-trunk; \
-	cmake . #Ignoring errors if we don't have cmake
+	cmake . -G"MSYS Makefiles" #Ignoring errors if we don't have cmake.  CHANGE THIS if you aren't using MinGW
 	@cd cppdb-trunk; \
 	make -s
 
 iniparser:
 	cd iniparser; \
 	make -s
+	
+zmq:
+	cd zeromq-3.2.0; \
+	./configure; \
+	make -s
 
-#TODO: other libraries
-
-all: cppdb iniparser
+protobuf:
+	cd protobuf-2.4.1; \
+	./configure; \
+	make -s
+	
+all: cppdb iniparser zmq protobuf
