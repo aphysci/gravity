@@ -5,6 +5,7 @@ CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
+INIPARSER_DIR=$(THIRDPARTY_DIR)/iniparser
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
 CPPSRC_DIR=src/cpp
@@ -58,7 +59,7 @@ $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	$(CC) -c -fPIC -o $@ $< $(INCLUDES)
 
 libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
-	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L../cpp -lrt -Wl,-Bdynamic
+	$(CC) -shared -o $@ $(CPP_OBJ) -Wl,-Bstatic -lgravity -lzmq -lprotobuf -liniparser -L$(PROTOBUF_DIR)/src/.libs -L$(ZMQ_DIR)/src/.libs -L../cpp -L$(INIPARSER_DIR) -lrt -Wl,-Bdynamic
 
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
