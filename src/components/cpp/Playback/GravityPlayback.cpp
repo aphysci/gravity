@@ -11,28 +11,6 @@
 #define sleep(x) Sleep(x)
 #endif
 
-
-std::string& trim_right_inplace(
-  std::string&       s,
-  const std::string& delimiters = " \f\n\r\t\v" )
-{
-  return s.erase( s.find_last_not_of( delimiters ) + 1 );
-}
-
-std::string& trim_left_inplace(
-  std::string&       s,
-  const std::string& delimiters = " \f\n\r\t\v" )
-{
-  return s.erase( 0, s.find_first_not_of( delimiters ) );
-}
-
-std::string& trim(
-  std::string&       s,
-  const std::string& delimiters = " \f\n\r\t\v" )
-{
-  return trim_left_inplace( trim_right_inplace( s, delimiters ), delimiters );
-}
-
 using namespace std;
 
 namespace gravity {
@@ -95,7 +73,7 @@ void GravityPlaybackConfigParser::ParseConfigFile()
 	if(con_str != "")
 	{
 		if(dsn != "" || database != "" || user != "" || password != "" || other != "")
-			cout << "Warning connection string specified but also conflicting DB parameters specified.  Using connection string" << endl;
+			gravity::Log::warning("Connection string specified but also conflicting DB parameters specified.  Using connection string");
 	}
 	else
 	{
@@ -165,7 +143,7 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 {
 	std::ifstream file(dpfn.c_str());
 	if(!file.is_open())
-		cerr << "Could not open file specified in config: " << dpfn << endl;
+		gravity::Log::critical("Could not open file specified in config: %s", dpfn.c_str());
 	else
 	{
 		int line_no = 0;
@@ -175,7 +153,6 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 			string line;
 			getline(file, line);
 			line_no++;
-			//cout << "line " << line_no << endl;
 
 			trim(line);
 
@@ -187,7 +164,7 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 
 				if(split == string::npos)
 				{
-					cerr << "Invalid Configuration in file " << dpfn << " at line " << line_no << endl;
+					gravity::Log::warning("Invalid line in Configuration file at line %d", line_no);
 					continue;
 				}
 
@@ -206,7 +183,6 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 				stringstream ss(port_str);
 				ss >> port;
 
-				//cout << dp << ":" << port << ":" << transport << endl;
 				dataProducts.push_back(dp);
 				ports.push_back(port);
 				transports.push_back(transport);
@@ -222,41 +198,41 @@ bool GravityPlaybackConfigParser::Validate()
     if(con_str.length() == 0)
     {
     	valid = false;
-    	cerr << "No connection string or parameters" << endl;
+    	gravity::Log::critical("No connection string or parameters");
     }
 
     if(start_time == 0)
     {
     	valid = false;
-    	cerr << "Invalid Start Time" << endl;
+    	gravity::Log::critical("Invalid Start Time");
     }
 	if(end_time == 0)
     {
     	valid = false;
-    	cerr << "Invalid End Time" << endl;
+    	gravity::Log::critical("Invalid End Time");
     }
 	if(table_name.length() == 0)
 	{
     	valid = false;
-    	cerr << "No Table Name" << endl;
+    	gravity::Log::critical("No Table Name");
 	}
 
     if(dataProducts.size() == 0)
 	{
     	valid = false;
-    	cerr << "No Data products" << endl;
+    	gravity::Log::critical("No Data products");
 	}
 
     if(dataProducts.size() != ports.size())
     {
     	valid = false;
-    	cerr << "Configuration Error: problem with ports" << endl;
+    	gravity::Log::critical("Configuration Error: problem with ports");
     }
 
     if(dataProducts.size() != transports.size())
     {
     	valid = false;
-    	cerr << "Configuration Error: problem with transports" << endl;
+    	gravity::Log::critical("Configuration Error: problem with transports");
     }
 
 	return valid;
@@ -318,17 +294,17 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
 
         if(port == -1)
         {
-            cerr << "Invalid Port for Stream '" << dps[i] << "'" << endl;
+        	gravity::Log::warning("Invalid Port for Stream '%s'", dps[i].c_str());
             continue;
         }
 
         if(transport != "tcp" && transport != "icp")
         {
-            cerr << "Invalid Transport type '" << transport << "'for Stream '" << dps[i] << "'" << endl;
+        	gravity::Log::warning("Invalid Transport type '%s' for Stream '%s'", transport.c_str(), dps[i].c_str());
             continue;
         }
 
-        cout << "Registering " << dps[i] << " on port " << port << endl;
+        gravity::Log::message("Registering %s on port %d", dps[i].c_str(), port);
         grav_node->registerDataProduct(dps[i], (unsigned short) port, transport);
 
 //        string dp = sql.escape(dps[i].c_str()); //Just in case :?
@@ -374,16 +350,15 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
             gdp.setData(message.c_str(), message.length());
 
             //Wait until the proper time to publish.
-            current_time = grav_node->getCurrentTime();
+            current_time = gravity::getCurrentTime();
             //sleep for (current time relative to query start - time when we need to publish relative to query start).
-#ifndef WIN32
-            if((currentdb_timestep - start_time) > (current_time - clock_start_time))
-            	usleep((currentdb_timestep - start_time) - (current_time - clock_start_time));
-#else
-            if((currentdb_timestep - start_time) > (current_time - clock_start_time))
-            	Sleep(((currentdb_timestep - start_time) - (current_time - clock_start_time))/1000);
-#endif
+            gravity::Log::trace("Sleeping for %d", (currentdb_timestep - start_time) - (current_time - clock_start_time));
 
+            if((currentdb_timestep - start_time) > (current_time - clock_start_time))
+            	gravity::sleep(((currentdb_timestep - start_time) - (current_time - clock_start_time))/1000);
+
+            gravity::Log::debug("Publishing %s", gdp.getDataProductID().c_str());
+            gravity::Log::trace(" with data size %d", gdp.getDataSize());
             grav_node->publish(gdp);
         }
 

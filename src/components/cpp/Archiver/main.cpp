@@ -65,7 +65,7 @@ void GravityArchiverConfigParser::ParseConfigFile()
 	if(con_str != "")
 	{
 		if(dsn != "" || database != "" || user != "" || password != "" || other != "")
-			cout << "Warning connection string specified but also conflicting DB parameters specified.  Using connection string" << endl;
+			gravity::Log::warning("Connection string specified but also conflicting DB parameters specified.  Using connection string");
 	}
 	else
 	{
@@ -143,6 +143,7 @@ void GravityArchiverConfigParser::ParseDataproductFile(std::string dpfn)
 		if(config_file.eof() && dataProductID == "")
 			break;
 
+		gravity::Log::message("Recording data product: %s", dataProductID.c_str());
 		dataProducts.push_back(dataProductID);
 	}
 }
@@ -154,18 +155,18 @@ bool GravityArchiverConfigParser::Validate()
     if(con_str.length() == 0)
     {
     	valid = false;
-    	cerr << "No connection string or parameters" << endl;
+    	gravity::Log::critical("No connection string or parameters");
     }
 	if(table_name.length() == 0)
 	{
     	valid = false;
-    	cerr << "No Table Name" << endl;
+    	gravity::Log::critical("No Table Name");
 	}
 
     if(dataProducts.size() == 0)
 	{
     	valid = false;
-    	cerr << "No Data products" << endl;
+    	gravity::Log::critical("No Data products");
 	}
 
 	return valid;
@@ -182,6 +183,7 @@ int main(int argc, const char** argv)
 
   GravityNode gn;
   gn.init();
+  gravity::Log::initAndAddConsoleLogger(parser.getLocalLogLevel());
 
   gravity::Archiver arch(&gn, parser.getConnectionString(),  parser.getTableName(), parser.getDataProducts());
 

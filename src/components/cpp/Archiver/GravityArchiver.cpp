@@ -38,37 +38,26 @@ void Archiver::start()
 }
 
 void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
-//(string dataProductID, const vector<shared_ptr<GravityDataProduct> > dataProducts)
 {
     try
     {
-//        for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
-//        {
-//            shared_ptr<GravityDataProduct> dataProduct = *i;
+		char messageData[1024];
+		int msg_size = 1024;
+		dataProduct.getData(messageData, msg_size); //Warning: This copies the data!!!
 
-            char messageData[1024];
-            int msg_size = 1024;
-            dataProduct.getData(messageData, msg_size); //Warning: This copies the data!!!
+		insert_stmt.reset();
+		insert_stmt.bind(1, dataProduct.getGravityTimestamp());
+		gravity::Log::debug("Received %s", dataProduct.getDataProductID().c_str());
+		gravity::Log::trace(" with data TS: %d, Size: %d", dataProduct.getGravityTimestamp(), dataProduct.getDataSize());
 
-            insert_stmt.reset();
-//            time_t mytime = dataProduct.getGravityTimestamp();
-//            insert_stmt.bind(1, *gmtime(&mytime));
-            insert_stmt.bind(1, dataProduct.getGravityTimestamp());
-            cout << dataProduct.getGravityTimestamp() << endl;
+		insert_stmt.bind(2, dataProduct.getDataProductID());
+		insert_stmt.bind(3, messageData, messageData + dataProduct.getDataSize());
 
-            insert_stmt.bind(2, dataProduct.getDataProductID());
-
-            cout << dataProduct.getDataSize() << endl;
-            //cout << messageData[4] << endl;
-
-            insert_stmt.bind(3, messageData, messageData + dataProduct.getDataSize());
-
-            insert_stmt.exec();
-//        }
+		insert_stmt.exec();
     }
     catch(cppdb::cppdb_error const &e)
     {
-        cerr << "Error Writing to Database.  " << e.what() << endl;
+    	gravity::Log::critical("Error Writing to Database.  %s", e.what());
     }
 }
 
@@ -77,8 +66,8 @@ Archiver::~Archiver()
     //Unsubscribe
     for(vector<string>::iterator i = dataProductIDs.begin(); i != dataProductIDs.end(); i++)
     {
-            const string dataProductID = *i;
-            grav_node->unsubscribe(dataProductID, *this);
+		const string dataProductID = *i;
+		grav_node->unsubscribe(dataProductID, *this);
     }
 
     //Close the database connection!!!
