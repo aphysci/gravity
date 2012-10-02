@@ -9,7 +9,12 @@ namespace gravity {
 
 Semaphore::Semaphore()
 {
-	sem_init(&semaphore, 0, 0);
+	sem_init(&semaphore, 0, 1);
+}
+
+Semaphore::Semaphore(int count)
+{
+	sem_init(&semaphore, 0, count);
 }
 
 void Semaphore::Lock()

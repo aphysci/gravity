@@ -65,6 +65,8 @@ typedef struct NetworkNode
 
 uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 
+class GravityConfigParser;
+
 /**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
  */
@@ -93,6 +95,8 @@ private:
     map<string,NetworkNode*> publishMap;
     map<string,string> serviceMap;
 
+    std::string componentID;
+	GravityConfigParser* parser;
 public:
     /**
      * Default Constructor
@@ -108,7 +112,7 @@ public:
      * Initialize the Gravity infrastructure.
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
-    GravityReturnCode init(); //TODO: add service directory as a parameter to this guy!
+    GravityReturnCode init(std::string componentID);
 
     /**
      * Wait for the GravityNode to exit.
@@ -177,7 +181,17 @@ public:
     /**
      * Starts a heartbeat for this gravity process.
      */
-    GravityReturnCode startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port = 54541);
+    GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
+
+    std::string getStringParam(std::string key, std::string default_value = "");
+    int getIntParam(std::string key, int default_value = -1);
+    double getFloatParam(std::string key, double default_value = 0.0);
+    bool getBoolParam(std::string key, bool default_value = false);
+
+    /**
+     * Get the ID of this gravity node (givin in the init function).
+     */
+    std::string getComponentID();
 
     /**
      * @name Registration functions
@@ -220,7 +234,7 @@ public:
     /**
      * Registers a callback to be called when we don't get a heartbeat from another component.
      */
-    GravityReturnCode registerHeartbeatListener(string dataProductID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+    GravityReturnCode registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
 
     /** @} */ //Registration Functions
 };

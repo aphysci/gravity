@@ -25,6 +25,8 @@
 #include "GravityServiceManager.h"
 #include "GravityHeartbeatListener.h"
 #include "GravityHeartbeat.h"
+#include "GravityConfigParser.h"
+#include "GravityLogger.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -89,13 +91,15 @@ void s_catch_signals()
 namespace gravity
 {
 
+bool IsValidFilename(const std::string filename);
+int IntToString(std::string str, int default_value);
+
 using namespace std;
 using namespace std::tr1;
 
 GravityNode::GravityNode()
 {
     // Eventually to be read from a config/properties file
-    serviceDirectoryNode.ipAddress = "localhost";
     serviceDirectoryNode.port = 5555;
     serviceDirectoryNode.transport = "tcp";
     serviceDirectoryNode.socket = NULL;
@@ -127,9 +131,10 @@ GravityNode::~GravityNode()
     zmq_term(context);
 }
 
-GravityReturnCode GravityNode::init()
+GravityReturnCode GravityNode::init(std::string componentID)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+	this->componentID = componentID;
 
     // Setup zmq context
     context = zmq_init(1);
@@ -182,12 +187,63 @@ GravityReturnCode GravityNode::init()
     zmq_bind(initSocket, "inproc://gravity_init");
     zmq_close(initSocket);
 	
-    s_restore_signals();
+	s_restore_signals();
 
 	if(s_interrupted)
 		raise(s_interrupted);
 
-    return ret;
+	////////////////////////////////////////////////////////
+	//Now that Gravity is set up, get gravity configuration.
+	parser = new GravityConfigParser(componentID);
+
+	parser->ParseConfigFile("Gravity.ini");
+	std::string config_file_name = componentID + ".ini";
+	if(gravity::IsValidFilename(config_file_name))
+		parser->ParseConfigFile(config_file_name.c_str());
+
+	//Set Service Directory URL (because we can't connect to the ConfigService without it).
+    std::string serviceDirectoryUrl = parser->getString("ServiceDirectoryURL");
+    size_t pos = serviceDirectoryUrl.find_first_of("://");
+    if(pos != std::string::npos)
+    {
+    	serviceDirectoryNode.transport = serviceDirectoryUrl.substr(0, pos);
+    	pos += 3;
+    }
+    else
+    {
+    	serviceDirectoryNode.transport = "tcp";
+    	pos = 0;
+    }
+
+    size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
+    serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1);
+    if(serviceDirectoryNode.ipAddress == "")
+    	serviceDirectoryNode.ipAddress = "localhost";
+   	serviceDirectoryNode.port = gravity::IntToString(serviceDirectoryUrl.substr(pos1 + 1), 5555);
+
+   	if(componentID != "ConfigServer" && StringToLowerCase(parser->getString("NoConfigServer", "False")) != "true")
+   	{
+   		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
+   	}
+	//parser->ParseCmdLine
+
+	//Setup Logging if enabled.
+    Log::LogLevel local_log_level = Log::LogStringToLevel(parser->getString("LocalLogLevel", "warning").c_str());
+    std::string log_filename = componentID + ".log";
+    if(gravity::IsValidFilename(log_filename))
+    {
+    	if(local_log_level != Log::NONE)
+    		Log::initAndAddFileLogger(log_filename.c_str(), local_log_level);
+    }
+    else
+    	if(local_log_level != Log::NONE)
+    		Log::initAndAddFileLogger("Gravity.log", local_log_level);
+
+    Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "warning").c_str());
+	if(net_log_level != Log::NONE)
+		Log::initAndAddGravityLogger(this, 54543, net_log_level); //TODO: port number???
+
+	return ret;
 }
 
 void GravityNode::waitForExit()
@@ -217,11 +273,11 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
     int retriesLeft = NETWORK_RETRIES;
     while (retriesLeft && !s_interrupted)
     {
-        // Connect to service directory component
+        // Connect to service provider
         socket = zmq_socket(context, ZMQ_REQ);
         zmq_connect(socket, url.c_str());
 
-        // Send registration message to service directory
+        // Send message to service provider
         sendGravityDataProduct(socket, request);
         retriesLeft--;
 
@@ -239,7 +295,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
             break;
         }
 
-        // Process the directory service response
+        // Process the response
         if (items[0].revents & ZMQ_POLLIN)
         {
             // Get service directory response
@@ -838,7 +894,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-GravityReturnCode GravityNode::startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port)
+GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
 {
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
@@ -901,88 +957,6 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uin
 	zmq_msg_close(&msg);
 
 	return GravityReturnCodes::SUCCESS;
-}
-
-//Replace the clock_gettime for Windows.  
-#ifdef WIN32
-//From http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
-LARGE_INTEGER
-getFILETIMEoffset()
-{
-    SYSTEMTIME s;
-    FILETIME f;
-    LARGE_INTEGER t;
-
-    s.wYear = 1970;
-    s.wMonth = 1;
-    s.wDay = 1;
-    s.wHour = 0;
-    s.wMinute = 0;
-    s.wSecond = 0;
-    s.wMilliseconds = 0;
-    SystemTimeToFileTime(&s, &f);
-    t.QuadPart = f.dwHighDateTime;
-    t.QuadPart <<= 32;
-    t.QuadPart |= f.dwLowDateTime;
-    return (t);
-}
-
-//T. Ludwinski: changed timeval to timespec and microseconds to nanoseconds
-int
-clock_gettime(int X, struct timespec *tv)
-{
-    LARGE_INTEGER           t;
-    FILETIME            f;
-    double                  nanoseconds;
-    static LARGE_INTEGER    offset;
-    static double           frequencyToNanoseconds;
-    static int              initialized = 0;
-    static BOOL             usePerformanceCounter = 0;
-    static LARGE_INTEGER 	startTime;
-
-    if (!initialized) {
-        LARGE_INTEGER performanceFrequency;
-        initialized = 1;
-        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
-        if (usePerformanceCounter) {
-            QueryPerformanceCounter(&offset);
-            frequencyToNanoseconds = (double)performanceFrequency.QuadPart / 1000000000.;
-        } else {
-            offset = getFILETIMEoffset();
-            frequencyToNanoseconds = .01;
-        }
-
-        GetSystemTimeAsFileTime(&f);
-        startTime.QuadPart = f.dwHighDateTime;
-        startTime.QuadPart <<= 32;
-        startTime.QuadPart |= f.dwLowDateTime;
-
-        startTime.QuadPart -= 116444736000000000ULL; //Convert from Window time to UTC (100ns)
-        startTime.QuadPart = startTime.QuadPart * 100; //To nanoseconds
-    }
-    if (usePerformanceCounter) QueryPerformanceCounter(&t);
-    else {
-        GetSystemTimeAsFileTime(&f);
-        t.QuadPart = f.dwHighDateTime;
-        t.QuadPart <<= 32;
-        t.QuadPart |= f.dwLowDateTime;
-    }
-
-    t.QuadPart -= offset.QuadPart;
-    nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
-    nanoseconds += startTime.QuadPart;
-    t.QuadPart = nanoseconds;
-    tv->tv_sec = t.QuadPart / 1000000000LL;
-    tv->tv_nsec = t.QuadPart % 1000000000LL;
-    return (0);
-}
-#endif
-
-uint64_t getCurrentTime()
-{
-    timespec ts;
-    clock_gettime(0, &ts);
-    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
 }
 
 #ifdef WIN32
@@ -1049,5 +1023,18 @@ string GravityNode::getIP()
 
     return ip;
 }
+
+std::string GravityNode::getStringParam(std::string key, std::string default_value)
+{
+	return parser->getString(key, default_value);
+}
+
+int GravityNode::getIntParam(std::string key, int default_value)
+{
+	std::string value = parser->getString(key, "");
+
+	return IntToString(value, default_value);
+}
+
 
 } /* namespace gravity */
