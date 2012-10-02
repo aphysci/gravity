@@ -4,3 +4,4 @@
 *.pb.cc
 libtool
 *.log
+autom4te.cache

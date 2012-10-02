@@ -10,3 +10,4 @@ libtool
 src/libzmq.pc
 src/platform.hpp
 src/stamp-h1
+autom4te.cache
