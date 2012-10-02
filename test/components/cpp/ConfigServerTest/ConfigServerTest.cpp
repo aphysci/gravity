@@ -22,15 +22,15 @@ using namespace gravity;
 
 int main() {
 	GravityNode gn;
-	gn.init();
+	gn.init("ConfigTest");
 
-	cout << "Start" << endl;
-
-	GravityConfigParser gcp("config.ini"); //Not Using INI file.  Just here because we need something here.  
-	gcp.ParseConfigService(gn, "dummycomponentid");
-
-	cout << "LocalLogLevel: " << Log::LogLevelToString(gcp.getLocalLogLevel()) << endl;
-	cout << "NetLogLevel: " << Log::LogLevelToString(gcp.getNetLogLevel()) << endl;
+	cout << "LocalLogLevel=" << gn.getStringParam("LocalLogLevel") << endl;
+	cout << "NetLogLevel=" << gn.getStringParam("NetLogLevel") << endl;
+	
+	cout << "Override=" << gn.getStringParam("Override")  << endl;
+	cout << "NonOverride=" << gn.getStringParam("NonOverride")  << endl;
+	
+	cout << "Param1=" << gn.getStringParam("Param1") << endl;
 
 	return 0;
 }
