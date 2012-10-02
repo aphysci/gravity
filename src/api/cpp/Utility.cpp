@@ -4,6 +4,9 @@
 
 namespace gravity {
 
+////////////////////////////
+// String Helpers
+
 //In Place case conversion.
 std::string StringToLowerCase(std::string str)
 {
@@ -24,8 +27,8 @@ std::string StringCopyToLowerCase(const std::string &str)
 	return StringToLowerCase(copy);
 }
 
-
-int IntToString(std::string str, int default_value)
+//Conversions
+int StringToInt(std::string str, int default_value)
 {
 	int ret_val;
 	std::stringstream ss(str);
@@ -35,6 +38,39 @@ int IntToString(std::string str, int default_value)
 	return ret_val;
 }
 
+double StringToDouble(std::string str, double default_value)
+{
+	double ret_val;
+	std::stringstream ss(str);
+	ss >> ret_val;
+	if(!ss.good())
+		ret_val = default_value;
+	return ret_val;
+}
+
+//Trimming
+std::string& trim_right_inplace(
+  std::string&       s,
+  const std::string& delimiters = " \f\n\r\t\v" )
+{
+  return s.erase( s.find_last_not_of( delimiters ) + 1 );
+}
+
+std::string& trim_left_inplace(
+  std::string&       s,
+  const std::string& delimiters = " \f\n\r\t\v" )
+{
+  return s.erase( 0, s.find_first_not_of( delimiters ) );
+}
+
+std::string& trim(
+  std::string&       s,
+  const std::string& delimiters = " \f\n\r\t\v" )
+{
+  return trim_left_inplace( trim_right_inplace( s, delimiters ), delimiters );
+}
+
+// OS
 bool IsValidFilename(const std::string filename)
 {
 	char restrictedChars[] = "/\\?%*:|\"<>";
@@ -146,6 +182,15 @@ uint64_t getCurrentTime()
     timespec ts;
     clock_gettime(0, &ts);
     return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
+}
+
+void sleep(int milliseconds)
+{
+#ifndef WIN32
+	Sleep(milliseconds);
+else
+	usleep(milliseconds*1000); //Maybe replace this guy with clock_nanosleep???
+#endif
 }
 
 }

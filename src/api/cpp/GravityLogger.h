@@ -108,8 +108,7 @@ public:
     /**
      * Adds a custom logging function.  Used by the init functions.
      */
-    static void AddLogger(Logger* logger);
-    //static void RemoveLogger(Logger* logger);
+    static void RemoveLogger(Logger* logger);
 private:
     static void vLog(int level, const char* format, va_list args);
     static int LevelToInt(LogLevel level);

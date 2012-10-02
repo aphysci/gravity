@@ -144,7 +144,18 @@ std::list< std::pair<Logger*, int> > Log::loggers; //Initialize
 
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 {
-    loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
+	loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
+}
+
+void Log::RemoveLogger(Logger* logger)
+{
+
+	for(std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+			i != loggers.end(); i++)
+	{
+		if(i->first == logger)
+			loggers.erase(i);
+	}
 }
 
 const char* Log::LogLevelToString(LogLevel level)
@@ -166,8 +177,9 @@ const char* Log::LogLevelToString(LogLevel level)
 
 Log::LogLevel Log::LogStringToLevel(const char* level)
 {
+	void StringToLowerCase(char* str, int leng);
     char* llevel = strdup(level);
-    std::use_facet< std::ctype<char> >(std::locale("")).tolower(&llevel[0], &llevel[0] + strlen(llevel)); //Convert to lowercase.
+    StringToLowerCase(llevel, strlen(llevel));
     if(strcmp(llevel, "fatal") == 0)
         return Log::FATAL;
     else if(strcmp(llevel, "critical") == 0)
@@ -190,7 +202,7 @@ void Log::vLog(int level, const char* format, va_list args)
     if(i != l_end)
     {
         char messagestr[512];
-        vsprintf(messagestr, format, args);
+        vsnprintf(messagestr, 512, format, args);
 
         do
         {

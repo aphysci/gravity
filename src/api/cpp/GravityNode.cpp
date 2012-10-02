@@ -92,7 +92,8 @@ namespace gravity
 {
 
 bool IsValidFilename(const std::string filename);
-int IntToString(std::string str, int default_value);
+int StringToInt(std::string str, int default_value);
+double StringToDouble(std::string str, double default_value);
 
 using namespace std;
 using namespace std::tr1;
@@ -199,7 +200,9 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	parser->ParseConfigFile("Gravity.ini");
 	std::string config_file_name = componentID + ".ini";
 	if(gravity::IsValidFilename(config_file_name))
+	{
 		parser->ParseConfigFile(config_file_name.c_str());
+	}
 
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
     std::string serviceDirectoryUrl = parser->getString("ServiceDirectoryURL");
@@ -219,9 +222,9 @@ GravityReturnCode GravityNode::init(std::string componentID)
     serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1);
     if(serviceDirectoryNode.ipAddress == "")
     	serviceDirectoryNode.ipAddress = "localhost";
-   	serviceDirectoryNode.port = gravity::IntToString(serviceDirectoryUrl.substr(pos1 + 1), 5555);
+   	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
-   	if(componentID != "ConfigServer" && StringToLowerCase(parser->getString("NoConfigServer", "False")) != "true")
+   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer") != true)
    	{
    		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
    	}
@@ -239,7 +242,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	if(local_log_level != Log::NONE)
     		Log::initAndAddFileLogger("Gravity.log", local_log_level);
 
-    Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "warning").c_str());
+    Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
 		Log::initAndAddGravityLogger(this, 54543, net_log_level); //TODO: port number???
 
@@ -1033,8 +1036,25 @@ int GravityNode::getIntParam(std::string key, int default_value)
 {
 	std::string value = parser->getString(key, "");
 
-	return IntToString(value, default_value);
+	return StringToInt(value, default_value);
 }
 
+double GravityNode::getFloatParam(std::string key, double default_value)
+{
+	std::string value = parser->getString(key, "");
+
+	return StringToDouble(value, default_value);
+}
+
+bool GravityNode::getBoolParam(std::string key, bool default_value)
+{
+	if( StringToLowerCase(parser->getString("NoConfigServer", "False")) == "true" ||
+		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "t" ||
+		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "yes" ||
+		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "y" )
+		return true;
+	else
+		return false;
+}
 
 } /* namespace gravity */
