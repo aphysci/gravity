@@ -12,10 +12,11 @@ int main()
 {
   using namespace gravity;
   GravityNode gn;
-  gn.init();
+  gn.init("GravityLogRecorder");
 
   LogRecorder lr(&gn, "MyBase");
 
   lr.start();
-  pause();
+
+  gn.waitForExit();
 }

@@ -1,20 +1,32 @@
 #include "GravityArchiver.h"
 #include <GravityConfigParser.h>
+#include <sstream>
+
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN //Smaller include
 #include <windows.h> //For Sleep
 #define sleep Sleep
 #endif
 
-class GravityArchiverConfigParser : public gravity::GravityConfigParser
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+#include <ezOptionParser.hpp>
+#pragma GCC diagnostic pop
+
+
+class GravityArchiverConfigParser
 {
 public:
-    GravityArchiverConfigParser(const char* config_filename);
+    GravityArchiverConfigParser();
 
     /// This call the below four functions
-    bool Configure(int argc, const char** argv);
+    bool Configure(int argc, const char** argv, gravity::GravityNode &gn);
 
-    void ParseConfigFile();
+    void ParseGravityConfig(gravity::GravityNode &gn);
     void ParseCmdLine(int argc, const char** argv);
 	void ParseDataproductFile(std::string dpfn);
     bool Validate();
@@ -33,13 +45,13 @@ private:
 	std::string dpfn;
 };
 
-GravityArchiverConfigParser::GravityArchiverConfigParser(const char* config_filename) : GravityConfigParser(config_filename)
+GravityArchiverConfigParser::GravityArchiverConfigParser()
 {
 }
 
-bool GravityArchiverConfigParser::Configure(int argc, const char** argv)
+bool GravityArchiverConfigParser::Configure(int argc, const char** argv, gravity::GravityNode &gn)
 {
-    ParseConfigFile();
+	ParseGravityConfig(gn);
     ParseCmdLine(argc, argv);
 
     ParseDataproductFile(dpfn);
@@ -48,19 +60,16 @@ bool GravityArchiverConfigParser::Configure(int argc, const char** argv)
 }
 
 
-void GravityArchiverConfigParser::ParseConfigFile()
+void GravityArchiverConfigParser::ParseGravityConfig(gravity::GravityNode &gn)
 {
-	//Do global configs
-	GravityConfigParser::ParseConfigFile();
-
-	con_str = getString("Archiver:ConnectionString", "");
+	con_str = gn.getStringParam("ConnectionString", "");
 
 	string dsn, database, user, password, other;
-	dsn = getString("Archiver:DSN", "");
-	database = getString("Archiver:Database", "");
-	user = getString("Archiver:User", "");
-	password = getString("Archiver:Password", "");
-	other = getString("Archiver:OtherDBOpts", "");
+	dsn = gn.getStringParam("DSN", "");
+	database = gn.getStringParam("Database", "");
+	user = gn.getStringParam("User", "");
+	password = gn.getStringParam("Password", "");
+	other = gn.getStringParam("OtherDBOpts", "");
 
 	if(con_str != "")
 	{
@@ -83,20 +92,21 @@ void GravityArchiverConfigParser::ParseConfigFile()
 		con_str = ss.str();
 	}
 
-	table_name = getString("Archiver:Table", "");
+	table_name = gn.getStringParam("Table", "");
 
-	dpfn = getString("Archiver:DataproductFile", "dataproductids");
+	dpfn = gn.getStringParam("DataproductFile", "dataproductids");
 }
 
 void GravityArchiverConfigParser::ParseCmdLine(int argc, const char** argv)
 {
+	using namespace ez;
+	ezOptionParser* opt = new ezOptionParser();
+
     opt->add("", false, 1, '\0', "Database connection string", "-c", "--con_str");
 
     opt->add("", false, 1, '\0', "DataproductID Filename", "-c", "--dp_file");
 
     opt->add("", false, 1, '\0', "Table Name", "-c", "--table");
-
-	GravityConfigParser::ParseCmdLine(argc, argv);
 
     if(opt->get("--con_str")->isSet)
         opt->get("--con_str")->getString(con_str);
@@ -177,21 +187,14 @@ int main(int argc, const char** argv)
 {
   using namespace gravity;
 
-  GravityArchiverConfigParser parser("GravityArchiver.ini");
-  if(!parser.Configure(argc, argv))
-  	return -1;
-
   GravityNode gn;
-  gn.init();
-  gravity::Log::initAndAddConsoleLogger(parser.getLocalLogLevel());
+  gn.init("GravityArchiver");
+
+  GravityArchiverConfigParser parser;
+  if(!parser.Configure(argc, argv, gn))
+  	return -1;
 
   gravity::Archiver arch(&gn, parser.getConnectionString(),  parser.getTableName(), parser.getDataProducts());
 
   arch.start();
-
-  while(true)
-  {
-    sleep(4294967295u); //Sleep for as long as we can.  (We can't join on the Subscription Manager thread).
-  }
-
 }

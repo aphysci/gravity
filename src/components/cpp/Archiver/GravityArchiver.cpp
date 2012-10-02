@@ -1,4 +1,3 @@
-#include "GravityArchiver.h"
 #include <string>
 #include <time.h>
 #include <stdarg.h>
@@ -8,6 +7,9 @@
 #include <fstream>
 
 #include <cppdb/frontend.h>
+
+#include "GravityArchiver.h"
+#include "GravityLogger.h"
 
 using namespace std;
 
@@ -35,6 +37,8 @@ void Archiver::start()
 	//Subscribe
 	for(std::vector<std::string>::iterator i = dataProductIDs.begin(); i != dataProductIDs.end(); i++)
 		grav_node->subscribe(*i, *this);
+
+	grav_node->waitForExit();
 }
 
 void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)

@@ -1,29 +1,34 @@
 #include "GravityPlayback.h"
+#include "Utility.h"
+
 #include <GravityConfigParser.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#define sleep(x) Sleep(x)
-#endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+#include <ezOptionParser.hpp>
+#pragma GCC diagnostic pop
 
 using namespace std;
 
 namespace gravity {
 
-class GravityPlaybackConfigParser : public GravityConfigParser
+class GravityPlaybackConfigParser
 {
 public:
     GravityPlaybackConfigParser(const char* config_filename);
 
     /// This call the below four functions
-    bool Configure(int argc, const char** argv);
+    bool Configure(int argc, const char** argv, GravityNode &gn);
 
-    void ParseConfigFile();
+    void ParseGravityConfig(GravityNode &gn);
     void ParseCmdLine(int argc, const char** argv);
 	void ParseDataproductFile(std::string dpfn);
     bool Validate();
@@ -50,25 +55,23 @@ private:
 	std::string dpfn;
 };
 
-GravityPlaybackConfigParser::GravityPlaybackConfigParser(const char* config_filename) : GravityConfigParser(config_filename)
+GravityPlaybackConfigParser::GravityPlaybackConfigParser(const char* config_filename)
 {
 	start_time = 0;
 	end_time = 0;
 }
 
-void GravityPlaybackConfigParser::ParseConfigFile()
+void GravityPlaybackConfigParser::ParseGravityConfig(GravityNode &gn)
 {
 	//Do global configs
-	GravityConfigParser::ParseConfigFile();
-
-	con_str = getString("Playback:ConnectionString", "");
+	con_str = gn.getStringParam("ConnectionString", "");
 
 	string dsn, database, user, password, other;
-	dsn = getString("Playback:DSN", "");
-	database = getString("Playback:Database", "");
-	user = getString("Playback:User", "");
-	password = getString("Playback:Password", "");
-	other = getString("Playback:OtherDBOpts", "");
+	dsn = gn.getStringParam("DSN", "");
+	database = gn.getStringParam("Database", "");
+	user = gn.getStringParam("User", "");
+	password = gn.getStringParam("Password", "");
+	other = gn.getStringParam("OtherDBOpts", "");
 
 	if(con_str != "")
 	{
@@ -91,11 +94,11 @@ void GravityPlaybackConfigParser::ParseConfigFile()
 		con_str = ss.str();
 	}
 
-	table_name = getString("Playback:Table", "");
+	table_name = gn.getStringParam("Table", "");
 
 	{
-		string st = getString("Playback:StartTime", "");
-		string et= getString("Playback:EndTime", "");
+		string st = gn.getStringParam("StartTime", "");
+		string et= gn.getStringParam("EndTime", "");
 
 		//NOTE: we need to do this like this to support 64 bit numbers.
 		stringstream ss1(st);
@@ -105,18 +108,19 @@ void GravityPlaybackConfigParser::ParseConfigFile()
     	ss2 >> end_time;
 	}
 
-	dpfn = getString("Playback:DataproductFile", "dataproductids");
+	dpfn = gn.getStringParam("DataproductFile", "dataproductids");
 }
 
 void GravityPlaybackConfigParser::ParseCmdLine(int argc, const char** argv)
 {
+	using namespace ez;
+	ezOptionParser* opt = new ezOptionParser();
+
     opt->add("", false, 1, '\0', "Database connection string", "-c", "--con_str");
 
     opt->add("", false, 1, '\0', "DataproductID Filename", "-c", "--dp_file");
 
     opt->add("", false, 1, '\0', "Table Name", "-c", "--table");
-
-	GravityConfigParser::ParseCmdLine(argc, argv);
 
     if(opt->get("--con_str")->isSet)
         opt->get("--con_str")->getString(con_str);
@@ -153,8 +157,9 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 			string line;
 			getline(file, line);
 			line_no++;
+			//cout << "line " << line_no << endl;
 
-			trim(line);
+			gravity::trim(line);
 
 			if(line != "" && line.find_first_of('#') != 0)
 			{
@@ -183,6 +188,7 @@ void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
 				stringstream ss(port_str);
 				ss >> port;
 
+				//cout << dp << ":" << port << ":" << transport << endl;
 				dataProducts.push_back(dp);
 				ports.push_back(port);
 				transports.push_back(transport);
@@ -238,9 +244,9 @@ bool GravityPlaybackConfigParser::Validate()
 	return valid;
 }
 
-bool GravityPlaybackConfigParser::Configure(int argc, const char** argv)
+bool GravityPlaybackConfigParser::Configure(int argc, const char** argv, GravityNode &gn)
 {
-    ParseConfigFile();
+	ParseGravityConfig(gn);
     ParseCmdLine(argc, argv);
 
     ParseDataproductFile(dpfn);
@@ -254,12 +260,12 @@ int main(int argc, const char** argv)
 {
 	using namespace gravity;
 
-    GravityPlaybackConfigParser parser("GravityPlayback.ini");
-    if(!parser.Configure(argc, argv))
-    	return -1;
-
 	GravityNode gn;
-	gn.init();
+	gn.init("Playback");
+
+    GravityPlaybackConfigParser parser("GravityPlayback.ini");
+    if(!parser.Configure(argc, argv, gn))
+    	return -1;
 
 	GravityPlayback gp(&gn, parser.getConnectionString());
 	gp.start(parser.getStartTime(), parser.getEndTime(), parser.getTableName(), parser.getDataProducts(), parser.getPorts(), parser.getTransports());
@@ -321,7 +327,7 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
     //cppdb::result dp_results = sql << "SELECT DISTINCT DataproductID FROM " << table_name << " WHERE timestamp >= " << start_time <<
     //        "AND timestamp < " << end_time << cppdb::exec;
 
-	uint64_t clock_start_time = grav_node->getCurrentTime(); //In System Time
+	uint64_t clock_start_time = gravity::getCurrentTime(); //In System Time
 	uint64_t current_time = clock_start_time; //In System Time
     uint64_t startdb_timestep = start_time;
     uint64_t currentdb_end_timestep = startdb_timestep + 1000000;
