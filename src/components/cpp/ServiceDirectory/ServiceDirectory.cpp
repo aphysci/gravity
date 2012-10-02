@@ -8,6 +8,7 @@
 #include "GravityLogger.h"
 #include "GravityConfigParser.h"
 #include "ServiceDirectory.h"
+#include <GravityLogger.h>
 
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
@@ -27,13 +28,13 @@ using namespace std;
 
 int main(void)
 {
-    gravity::GravityConfigParser parser("ServiceDirectory.ini");
-    parser.ParseConfigFile();
-    //gravity::Log::initAndAddFileLogger("ServiceDirectory.log", parser.getLocalLogLevel());
-    gravity::Log::initAndAddConsoleLogger(parser.getLocalLogLevel());
+    IniConfigParser parser;
+    parser.Open("ServiceDirectory.ini");
+    gravity::Log::initAndAddFileLogger("ServiceDirectory.log", gravity::Log::LogStringToLevel(parser.getString("general:LocalLogLevel", "warning").c_str()));
+    gravity::Log::initAndAddConsoleLogger(gravity::Log::LogStringToLevel(parser.getString("general:LocalLogLevel", "warning").c_str()));
     //Not logging to GravityLogRecorder for now because that relies on having a gravity node.
 
-    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getServiceDirectoryUrl().c_str());
+    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getString("ServiceDirectoryUrl", "tcp://*:5555").c_str());
     serviceDirectory->start();
 }
 

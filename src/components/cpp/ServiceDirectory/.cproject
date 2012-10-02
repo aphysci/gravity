@@ -5,7 +5,15 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.mingw.base.1132442318">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.mingw.base.1132442318" moduleId="org.eclipse.cdt.core.settings" name="Default">
-				<externalSettings/>
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/GravityAPI"/>
+						<entry flags="RESOLVED" kind="includePath" name="C:\Users\tludwinski\Documents\gravity\ThirdParty\protobuf-2.4.1\src"/>
+						<entry flags="RESOLVED" kind="includePath" name="C:\Users\tludwinski\Documents\gravity\ThirdParty\iniparser\src"/>
+						<entry flags="RESOLVED" kind="includePath" name="C:\Users\tludwinski\Documents\gravity\ThirdParty\zeromq-3.2.0\include"/>
+						<entry flags="RESOLVED" kind="includePath" name="C:\Users\tludwinski\Documents\gravity\ThirdParty\EZOptionParser"/>
+					</externalSetting>
+				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
