@@ -51,9 +51,6 @@ public:
     static void message(const char* message, ...);
     static void debug(const char* message, ...);
     static void trace(const char* message, ...);
-    /** @} */ //Logging Functions
-
-    static void AddLogger(gravity::Logger* logger);
 
 };
 

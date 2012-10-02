@@ -61,7 +61,7 @@ class GravityNode {
 public:    
 	GravityNode();
 	~GravityNode();
-    GravityReturnCode init();
+    GravityReturnCode init(std::string);
     void waitForExit();
     GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
@@ -82,7 +82,7 @@ public:
             const std::string& transportType, const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
     
-    GravityReturnCode startHeartbeat(std::string componentID, int interval_in_microseconds, unsigned short port = 54541);
+    GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, unsigned long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
 };
 
