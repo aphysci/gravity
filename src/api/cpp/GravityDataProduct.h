@@ -27,8 +27,10 @@ class GravityDataProduct
 private:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
+    //In Microseconds
     void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); } //Yeah, I'm telling the compiler this is const.
 public:
+    GravityDataProduct() {}
     /**
      * Constructor
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
@@ -49,6 +51,7 @@ public:
 
     /**
      * Method to return the timestamp associated with this data product
+     *  Represents Microseconds since the Unix Epoch
      * \return timestamp for data
      */
     uint64_t getGravityTimestamp() const;

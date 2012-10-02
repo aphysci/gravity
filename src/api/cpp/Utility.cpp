@@ -184,6 +184,7 @@ clock_gettime(int X, struct timespec *tv)
 }
 #endif
 
+//In Microseconds
 uint64_t getCurrentTime()
 {
     timespec ts;

@@ -523,7 +523,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     return ret;
 }
 
-GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
+GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls)
 {
     // Create the object describing the data product to lookup
     ComponentLookupRequestPB lookup;
@@ -557,11 +557,9 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
         {
             if (pb.url_size() > 0)
             {
-                // Subscribe to all published data products
             	for (int i = 0; i < pb.url_size(); i++)
-            	{
-            		subscribe(pb.url(i), dataProductID, subscriber, filter);
-            	}
+            		urls.push_back(pb.url(i));
+            	ret = GravityReturnCodes::SUCCESS;
             }
             else
             {
@@ -579,6 +577,24 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
     }
 
     return ret;
+}
+
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
+{
+	vector<string> url;
+
+	GravityReturnCode ret;
+	ret = ServiceDirectoryDataProductLookup(dataProductID, url);
+	if(ret != GravityReturnCodes::SUCCESS)
+		return ret;
+
+    // Subscribe to all published data products
+	for (size_t i = 0; i < url.size(); i++)
+	{
+		subscribe(url[i], dataProductID, subscriber, filter);
+	}
+
+	return GravityReturnCodes::SUCCESS;
 }
 
 void GravityNode::sendStringMessage(void* socket, string str, int flags)
@@ -672,8 +688,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID)
+GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url)
 {
 	// Create the object describing the data product to lookup
 	ComponentLookupRequestPB lookup;
@@ -708,7 +723,8 @@ GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduc
 
 			if (!pb.url().empty())
 			{
-				request(pb.url(), serviceID, dataProduct, requestor, requestID);
+				url = pb.url();
+				return GravityReturnCodes::SUCCESS;
 			}
 			else
 			{
@@ -728,8 +744,18 @@ GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduc
 	return ret;
 }
 
+GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
+        const GravityRequestor& requestor, string requestID, uint64_t timeout_microseconds)
+{
+	std::string url;
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url);
+	if(ret != GravityReturnCodes::SUCCESS)
+		return ret;
+	return request(url, serviceID, dataProduct, requestor, requestID);
+}
+
 GravityReturnCode GravityNode::request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID)
+        const GravityRequestor& requestor, string requestID, uint64_t timeout_microseconds)
 {
 	// Send subscription details
 	sendStringMessage(requestManagerSocket, "request", ZMQ_SNDMORE);
@@ -750,6 +776,21 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 	zmq_msg_close(&msg);
 
 	return GravityReturnCodes::SUCCESS;
+}
+
+shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, uint64_t timeout_microseconds)
+{
+	std::string connectionURL;
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL);
+	if(ret != GravityReturnCodes::SUCCESS)
+		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+
+	shared_ptr<GravityDataProduct> response(new GravityDataProduct());
+	ret = sendRequestToServiceProvider(connectionURL, request, *response);
+	if(ret != GravityReturnCodes::SUCCESS)
+		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+
+	return response;
 }
 
 GravityReturnCode GravityNode::registerService(string serviceID, unsigned short networkPort,
@@ -1048,10 +1089,10 @@ double GravityNode::getFloatParam(std::string key, double default_value)
 
 bool GravityNode::getBoolParam(std::string key, bool default_value)
 {
-	if( StringToLowerCase(parser->getString("NoConfigServer", "False")) == "true" ||
-		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "t" ||
-		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "yes" ||
-		StringToLowerCase(parser->getString("NoConfigServer", "False")) == "y" )
+	if( StringToLowerCase(parser->getString(key, "False")) == "true" ||
+		StringToLowerCase(parser->getString(key, "False")) == "t" ||
+		StringToLowerCase(parser->getString(key, "False")) == "yes" ||
+		StringToLowerCase(parser->getString(key, "False")) == "y" )
 		return true;
 	else
 		return false;

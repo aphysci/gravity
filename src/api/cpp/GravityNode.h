@@ -97,6 +97,9 @@ private:
 
     std::string componentID;
 	GravityConfigParser* parser;
+
+	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url);
+	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, vector<std::string> &urls);
 public:
     /**
      * Default Constructor
@@ -161,11 +164,11 @@ public:
      * \param dataProduct data product representation of the request
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
+     * \param timeout_microseconds Timeout in Microseconds
      * \return success flag
      */
-    GravityReturnCode request(string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = emptyString);
-
+    GravityReturnCode request(string serviceID, const GravityDataProduct& request,
+            const GravityRequestor& requestor, string requestID = emptyString, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
     /**
      * Make a request against a service provider directly
      * \param connectionURL connection string on which service provider is listening for requests
@@ -173,10 +176,20 @@ public:
      * \param dataProduct data product representation of the request
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
+     * \param timeout_microseconds Timeout in Microseconds
      * \return success flag
      */
     GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = emptyString);
+            const GravityRequestor& requestor, string requestID = emptyString, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
+
+    /**
+     * Make a synchronous request against a service provider
+     * \param serviceID The registered service ID of a service provider
+     * \param dataProduct data product representation of the request
+     * \param timeout_microseconds Timeout in Microseconds
+     * \return shared_ptr<GravityDataProduct> NULL upon failure.
+     */
+    shared_ptr<GravityDataProduct> request(string serviceID, const GravityDataProduct& request, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
 
     /**
      * Starts a heartbeat for this gravity process.
