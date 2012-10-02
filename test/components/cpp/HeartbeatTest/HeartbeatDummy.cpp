@@ -9,30 +9,20 @@
 #include <iostream>
 #include <GravityNode.h>
 
-#ifdef WIN32
-#include <Windows.h>
-#define sleep Sleep
-#else
-#include <unistd.h>
-#endif
-
 using namespace std;
 using namespace gravity;
 
 int main() {
 	GravityNode gn;
-	gn.init();
+	gn.init("hbdummydpid");
 
 	cout << "Start" << endl;	
 	
-	gn.startHeartbeat("hbdummydpid", 490000); //About 1/2 second.
+	gn.startHeartbeat(490000); //About 1/2 second.
 
 	cout << "Started" << endl;
-	
-	while(true)
-		sleep(2000000000);
 
-	cout << "Hey" << endl;
+	gn.waitForExit();
 		
 	return 0;
 }

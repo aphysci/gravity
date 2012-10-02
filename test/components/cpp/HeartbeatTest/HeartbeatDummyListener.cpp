@@ -30,13 +30,12 @@ void MyHeartbeatListener::MissedHeartbeat(std::string dataProductID, int microse
 
 int main() {
 	GravityNode gn;
-	gn.init();
+	gn.init("HBListener");
 
 	MyHeartbeatListener listener;
 	gn.registerHeartbeatListener("hbdummydpid", 490000, listener);
 
-	while(true)
-		sleep(2000000000);
+	gn.waitForExit();
 
 	return 0;
 }

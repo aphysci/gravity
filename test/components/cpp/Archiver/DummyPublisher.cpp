@@ -3,11 +3,6 @@
 #include <iostream>
 
 using namespace std;
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN //Smaller include
-#include <windows.h> //For Sleep
-#define sleep(x) Sleep((x)*1000)
-#endif
 
 int main(int argc, char** argv)
 {
@@ -18,7 +13,7 @@ int main(int argc, char** argv)
     myDataProductID = argv[1];
 
   GravityNode gn;
-  gn.init();
+  gn.init("DummyPublisher");
   gn.registerDataProduct(myDataProductID, 54321, "tcp");
 
   GravityDataProduct dataProduct(myDataProductID);
@@ -37,7 +32,7 @@ int main(int argc, char** argv)
 
     gn.publish(dataProduct);
 
-    sleep(1);
+    gravity::sleep(1000);
 
     count++;
     count = count % 20;

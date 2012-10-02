@@ -6,13 +6,12 @@ int main()
 {
   using namespace gravity;
   GravityNode gn;
-  gn.init();
+  gn.init("TestLogger");
 
   cout << "test" << endl;
 
   //Log::setLocalLevel(Log::TRACE);
   //Log::init(gn, "test.log", 43211);
-  Log::initAndAddGravityLogger(&gn, 43212, Log::TRACE);
 
   int i = 0;
   scanf("%d\n", &i);
