@@ -8,6 +8,7 @@ PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
 CPPSRC_DIR=src/cpp
+SWIGSRC_DIR=src/swig
 GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
 PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
 SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
@@ -25,7 +26,8 @@ CPP_OBJ=$(patsubst %.cpp,%.o,$(CPP_SRC))
 
 OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(AUTO_SRCS))
 
-PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
+PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto
+#PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
 PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%Container.java,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE))
 
@@ -33,9 +35,9 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 
 all: $(LIB_NAME) libgravity_wrap.so
 
-# Generate source from SWIG file and update AUTO_SRCS to include the generated .java files
-# The changce to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
-autosrcs.mk: gravity.i
+# Generate source from SWIG files and update AUTO_SRCS to include the generated .java files
+# The change to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
+autosrcs.mk: $(SWIGSRC_DIR)/gravity.i $(wildcard $(SWIGSRC_DIR)/*.i)
 	swig -c++ -o $(CPPSRC_DIR)/gravity_wrap.cpp -outdir $(SWIGGEN_DIR) -package com.aphysci.gravity.swig -java $<
 	echo "AUTO_SRCS=`echo $(SWIGGEN_DIR)/*.java $(GRAVSRC_DIR)/*.java`" > autosrcs.mk
 	echo "CPP_SRC=`echo $(CPPSRC_DIR)/*.cpp`" >> autosrcs.mk
@@ -60,9 +62,6 @@ libgravity_wrap.so: $(CPP_OBJ) ../cpp/libgravity.a
 
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
-
-test: all
-	java -Djava.library.path=. -cp build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar com.aphysci.gravity.GravityJavaTest
 
 clean:
 	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* $(CPPSRC_DIR)/*.o *.jar *.so *.o autosrcs.mk 

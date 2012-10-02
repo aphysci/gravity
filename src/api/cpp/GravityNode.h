@@ -70,6 +70,10 @@ private:
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
 
+    pthread_t subscriptionManagerThread;
+    pthread_t requestManagerThread;
+    pthread_t serviceManagerThread;
+
     void* context;
     void* subscriptionManagerSocket;
     void* requestManagerSocket;
@@ -103,6 +107,11 @@ public:
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
     GravityReturnCode init(std::string componentID);
+
+    /**
+     * Wait for the GravityNode to exit.
+     */
+    void waitForExit();
 
     /**
      * Setup a subscription to a data product through the Gravity Service Directory.

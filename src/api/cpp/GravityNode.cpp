@@ -151,24 +151,21 @@ GravityReturnCode GravityNode::init(std::string componentID)
     zmq_bind(subscriptionManagerSocket, "inproc://gravity_subscription_manager");
 
     // Setup the subscription manager
-    pthread_t subscriptionManager;
-    pthread_create(&subscriptionManager, NULL, startSubscriptionManager, context);
+    pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
 
     // Setup up communication channel to request manager
     requestManagerSocket = zmq_socket(context, ZMQ_PUB);
     zmq_bind(requestManagerSocket, "inproc://gravity_request_manager");
 
     // Setup the request manager
-    pthread_t requestManager;
-    pthread_create(&requestManager, NULL, startRequestManager, context);
+    pthread_create(&requestManagerThread, NULL, startRequestManager, context);
 
     // Setup up communication channel to service manager
     serviceManagerSocket = zmq_socket(context, ZMQ_PUB);
     zmq_bind(serviceManagerSocket, "inproc://gravity_service_manager");
 
     // Setup the service manager
-    pthread_t serviceManager;
-    pthread_create(&serviceManager, NULL, startServiceManager, context);
+    pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
 
     // Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
     s_catch_signals();
@@ -247,6 +244,12 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		Log::initAndAddGravityLogger(this, 54543, net_log_level); //TODO: port number???
 
 	return ret;
+}
+
+void GravityNode::waitForExit()
+{
+	// Wait on the subscription manager thread
+	pthread_join(subscriptionManagerThread, NULL);
 }
 
 void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
