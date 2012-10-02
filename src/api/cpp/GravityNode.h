@@ -13,10 +13,16 @@
 #include "GravityRequestor.h"
 #include "GravityHeartbeatListener.h"
 #include "GravityServiceProvider.h"
+#include <pthread.h>
 
 //This is defined in Windows for NetBIOS in nb30.h  
 #ifdef DUPLICATE
 #undef DUPLICATE
+#endif
+
+// This is defined in Windows, and causes ezOptionParser to not compile
+#ifdef IN
+#undef IN
 #endif
 
 namespace gravity

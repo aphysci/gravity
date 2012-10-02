@@ -5,3 +5,4 @@
 *.la
 .libs
 .deps
+*.exe
