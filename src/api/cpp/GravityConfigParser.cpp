@@ -10,72 +10,35 @@
 
 namespace gravity {
 
-GravityConfigParser::GravityConfigParser(const char* config_filename)
+GravityConfigParser::GravityConfigParser(std::string componentID)
 {
-    if(!Open(config_filename))
-    {
-        std::cout << "Could not open config file.  Using defaults.  " << std::endl;
-        return;
-    }
-
-    log_local_level = Log::WARNING;
-    log_net_level = Log::WARNING;
-
-    serviceDirectoryUrl = "tcp://*:5555";
-
-    opt = new ez::ezOptionParser();
+	this->componentID = componentID;
 }
 
-void GravityConfigParser::ParseCmdLine(int argc, const char** argv)
+void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
-    opt->add("warning", false, 1, '\0', "Local Log Level", "--local_log");
-    opt->add("warning", false, 1, '\0', "Network Log Level", "--net_log");
+	IniConfigParser parser;
 
-    opt->add("", false, 1, '\0', "Service Directory URL", "--sd_url");
+	if(!parser.Open(config_filename)) //TODO: if this doesn't work try stat.
+        return; //Fail Silently
 
-//    opt->add("", false, 1, '\0', "Service Directory Transport Type", "--sd_transport");
-//    opt->add("", false, 1, '\0', "Service Directory Host", "--sd_host");
-//    opt->add("", false, 1, '\0', "Service Directory Port", "--sd_port");
+	std::vector<std::string> keys = parser.GetSectionKeys(componentID);
 
-    opt->parse(argc, argv);
+	for(std::vector<std::string>::iterator i = keys.begin();
+			i != keys.end(); i++)
+	{
+		std::string value = parser.getString(*i);
+		if(value != "")
+			key_value_map[*i] = value;
+	}
 
-    if(opt->get("--local_log")->isSet)
-    {
-        std::string localloglevstr;
-        opt->get("--local_log")->getString(localloglevstr);
-        log_local_level = Log::LogStringToLevel(localloglevstr.c_str());
-    }
-
-    if(opt->get("--net_log")->isSet)
-    {
-        std::string netloglevstr;
-        opt->get("--net_log")->getString(netloglevstr);
-        log_net_level = Log::LogStringToLevel(netloglevstr.c_str());
-    }
-
-    if(opt->get("--sd_url")->isSet)
-        opt->get("--sd_url")->getString(serviceDirectoryUrl);
-}
-
-void GravityConfigParser::ParseConfigFile()
-{
-    std::string protocol = IniConfigParser::getString("ServiceDirectory:protocol", "tcp");
-    std::string my_interface = IniConfigParser::getString("ServiceDirectory:interface", "*");
-    std::string port = IniConfigParser::getString("ServiceDirectory:port", "5555");
-    serviceDirectoryUrl = protocol + "://" + my_interface + ":" + port;
-
-    std::string localloglevstr = IniConfigParser::getString("General:LogLocalLevel", "warning");
-    log_local_level = Log::LogStringToLevel(localloglevstr.c_str());
-
-    std::string netloglevstr = IniConfigParser::getString("General:LogNetLevel", "warning");
-    log_net_level = Log::LogStringToLevel(netloglevstr.c_str());
+	return;
 }
 
 class ConfigRequestor: public GravityRequestor
 {
 public:
-	ConfigRequestor(GravityNode &gn);
-	void gravityConfigRequest(string componentID, string section, string key, bool start = false);
+	ConfigRequestor(GravityConfigParser* parser, GravityNode &gn);
 
 	void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
 	virtual ~ConfigRequestor() {}
@@ -85,62 +48,61 @@ public:
 private:
 	GravityNode &gn;
 	Semaphore lock;
-	int nConfigs;
+	GravityConfigParser* parser;
 };
 
-ConfigRequestor::ConfigRequestor(GravityNode &other_gn) : gn(other_gn)
+ConfigRequestor::ConfigRequestor(GravityConfigParser* other_parser, GravityNode &other_gn) : gn(other_gn), parser(other_parser),
+		lock(0) //Initialize the lock with a value of 0 (locked)
 {
-	nConfigs = 0;
 }
 
 void ConfigRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
 {
-	cout << "serviceID: " << serviceID << endl;
-	cout << "requestID: " << requestID << endl;
-	cout << "dataProductID: " << response.getDataProductID() << endl;
-	cout << "dataSize: " << response.getDataSize() << endl;
-
 	ConfigeResponsePB responseMessage;
 	response.populateMessage(responseMessage);
-	config_map[requestID] = responseMessage.response();
+
+	int config_len = min(responseMessage.key_size(), responseMessage.value_size());
+
+	for(int i = 0; i < config_len; i++)
+	{
+		//if(parser->key_value_map.find(responseMessage.key(i)) == parser->key_value_map.end()) //Don't overwrite keys.
+			parser->key_value_map[responseMessage.key(i)] = responseMessage.value(i);
+	}
 
 	lock.Unlock();
 }
 
-void ConfigRequestor::gravityConfigRequest(string componentID, string section, string key, bool start)
-{
-	nConfigs++;
-	ConfigRequestPB crpb;
-	crpb.set_requestor(componentID);
-	crpb.set_section(section);
-	crpb.set_key(key);
-	if(start)
-		crpb.set_start(true);
-
-	GravityDataProduct dataproduct("ConfigRequestPB");
-	dataproduct.setData(crpb);
-
-	string sectionkey = section + ":" + key;
-	gn.request("ConfigService", dataproduct, *this, sectionkey);
-}
-
 void ConfigRequestor::WaitForConfig()
 {
-	for(; nConfigs >= 0; nConfigs--)
-		lock.Lock();
+	//Barrier Synchronization.
+	lock.Lock();
 }
 
-void GravityConfigParser::ParseConfigService(GravityNode &gn, std::string componentID)
+void GravityConfigParser::ParseConfigService(GravityNode &gn)
 {
-	ConfigRequestor requestor(gn);
-	requestor.gravityConfigRequest(componentID, "General", "LogLocalLevel");
-	requestor.gravityConfigRequest(componentID, "General", "LogNetLevel");
+	GravityDataProduct dataproduct("ConfigRequestPB");
+
+	ConfigRequestPB crpb;
+	crpb.set_componentid(componentID);
+
+	dataproduct.setData(crpb);
+
+	ConfigRequestor requestor(this, gn);
+
+	gn.request("ConfigService", dataproduct, requestor, componentID);
 
 	//Wait for all values to come in...
 	requestor.WaitForConfig();
+}
 
-    log_local_level = Log::LogStringToLevel(requestor.config_map["General:LogLocalLevel"].c_str());
-    log_net_level = Log::LogStringToLevel(requestor.config_map["General:LogLocalLevel"].c_str());
+std::string GravityConfigParser::getString(std::string key, std::string default_value)
+{
+	std::string key_lower = StringCopyToLowerCase(key);
+	std::map<std::string, std::string>::iterator i = key_value_map.find(key_lower);
+	if(i == key_value_map.end())
+		return default_value;
+	else
+		return i->second;
 }
 
 }

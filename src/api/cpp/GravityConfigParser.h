@@ -2,19 +2,12 @@
 #define GRAVITYCONFIGPARSER_H_
 
 #include "GravityLogger.h"
+#include "Utility.h"
 #include <string>
 #include <map>
 #include <iniparser.h>
 #include <dictionary.h>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wreorder"
-#pragma GCC diagnostic ignored "-Wparentheses"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wformat-extra-args"
-#include <ezOptionParser.hpp>
-#pragma GCC diagnostic pop
+#include <iostream>
 
 /**
  * A really simple C++ wrapper for the iniparser library.
@@ -65,23 +58,28 @@ public:
      * @{
      */
     std::string getString(const std::string key, const std::string default_value = "") {
-        return iniparser_getstring(mydict, key.c_str(), (char*) default_value.c_str());
+    	std::string key_lower = gravity::StringCopyToLowerCase(key);
+    	return iniparser_getstring(mydict, key_lower.c_str(), (char*) default_value.c_str());
     }
 
     int getInt(const std::string key, int default_value = -1) {
-        return iniparser_getint(mydict, key.c_str(), default_value);
+    	std::string key_lower = gravity::StringCopyToLowerCase(key);
+        return iniparser_getint(mydict, key_lower.c_str(), default_value);
     }
 
     double getDouble(const std::string key, double default_value = 0.0) {
-        return iniparser_getdouble(mydict, key.c_str(), default_value);
+    	std::string key_lower = gravity::StringCopyToLowerCase(key);
+        return iniparser_getdouble(mydict, key_lower.c_str(), default_value);
     }
 
     bool getBoolean(const std::string key, bool default_value = false) {
-        return iniparser_getboolean(mydict, key.c_str(), default_value);
+    	std::string key_lower = gravity::StringCopyToLowerCase(key);
+        return iniparser_getboolean(mydict, key_lower.c_str(), default_value);
     }
 
     void Set(const std::string key, const std::string value) {
-        iniparser_set(mydict, key.c_str(), value.c_str());
+    	std::string key_lower = gravity::StringCopyToLowerCase(key);
+        iniparser_set(mydict, key_lower.c_str(), value.c_str());
     }
 
     void Clear(const std::string key) {
@@ -123,9 +121,11 @@ public:
      * \param   section   The name of the section to get the keys for.
      */
     std::vector<std::string> GetSectionKeys(const std::string section) {
-        int nsect = iniparser_getsecnkeys(mydict, (char*) section.c_str());
+    	std::string section_cpy = gravity::StringCopyToLowerCase(section);
+
+        int nsect = iniparser_getsecnkeys(mydict, (char*) section_cpy.c_str());
         std::vector<std::string> sects(nsect);
-        const char** keys = iniparser_getseckeys(mydict, (char*) section.c_str());
+        const char** keys = iniparser_getseckeys(mydict, (char*) section_cpy.c_str());
         for(int i = 0; i < nsect; i++)
         {
             sects[i] = keys[i];
@@ -148,33 +148,22 @@ protected:
 
 namespace gravity {
 
-class GravityConfigParser : public IniConfigParser
+class GravityConfigParser
 {
 public:
     /** Constructor */
-    GravityConfigParser(const char* config_filename);
-    /** Update the configuration based on command line parameters */
-    void ParseCmdLine(int argc, const char** argv);
+    GravityConfigParser(std::string componentID);
     /** Update configuration based on .ini file */
-    void ParseConfigFile();
+    void ParseConfigFile(const char* config_filename);
     /** Update configuration based on Config Service */
-    void ParseConfigService(GravityNode &gn, std::string componentID);
+    void ParseConfigService(GravityNode &gn);
 
-    /** Get the url of the service directory from the config. */
-    std::string getServiceDirectoryUrl() { return serviceDirectoryUrl; }
-
-    /** Get the Local Logging level from the config. */
-    gravity::Log::LogLevel getLocalLogLevel() { return log_local_level; }
-
-    /** Get the Network Logging level from the config. */
-    gravity::Log::LogLevel getNetLogLevel() { return log_net_level; }
-
-protected:
-    ez::ezOptionParser* opt;
+    std::string getString(std::string key, std::string default_value = "");
 private:
-    std::string serviceDirectoryUrl;
-    gravity::Log::LogLevel log_local_level;
-    gravity::Log::LogLevel log_net_level;
+    std::string componentID;
+    std::map<std::string, std::string> key_value_map;
+    friend class ConfigRequestor;
+    friend class GravityNode;
 };
 
 }

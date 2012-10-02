@@ -10,6 +10,7 @@ class Semaphore
 {
 public:
 	Semaphore();
+	Semaphore(int count);
 	void Lock();
 	void Unlock();
 	~Semaphore();

@@ -3,6 +3,7 @@
 	<name>ConfigServer</name>
 	<comment></comment>
 	<projects>
+		<project>GravityAPI</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
