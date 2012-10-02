@@ -70,7 +70,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const GravityDataProduct& d
 	}
 
 	//Populate Response Message and Send it
-	Log::message("Sending %s Config", dataProduct.getDataProductID().c_str());
+	Log::message("Sending Config to %s", cfpb.componentid().c_str());
 	ConfigeResponsePB message;
 	for(std::map<std::string, std::string>::iterator i = key_value_map.begin();
 			i != key_value_map.end(); i++)

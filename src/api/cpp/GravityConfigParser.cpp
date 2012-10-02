@@ -22,14 +22,27 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 	if(!parser.Open(config_filename)) //TODO: if this doesn't work try stat.
         return; //Fail Silently
 
-	std::vector<std::string> keys = parser.GetSectionKeys(componentID);
+	std::vector<std::string> keys = parser.GetSectionKeys("general");
 
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
 		std::string value = parser.getString(*i);
+		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
 		if(value != "")
-			key_value_map[*i] = value;
+			key_value_map[key_nosection] = value;
+	}
+
+
+	keys = parser.GetSectionKeys(componentID);
+
+	for(std::vector<std::string>::iterator i = keys.begin();
+			i != keys.end(); i++)
+	{
+		std::string value = parser.getString(*i);
+		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
+		if(value != "")
+			key_value_map[key_nosection] = value;
 	}
 
 	return;
@@ -47,8 +60,8 @@ public:
 	void WaitForConfig();
 private:
 	GravityNode &gn;
-	Semaphore lock;
 	GravityConfigParser* parser;
+	Semaphore lock;
 };
 
 ConfigRequestor::ConfigRequestor(GravityConfigParser* other_parser, GravityNode &other_gn) : gn(other_gn), parser(other_parser),
