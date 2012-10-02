@@ -2,6 +2,13 @@
 #include <sstream>
 #include <pthread.h>
 
+
+#ifdef WIN32
+#include <Windows.h>
+#else
+#include <stdint.h>
+#endif
+
 namespace gravity {
 
 ////////////////////////////
@@ -65,7 +72,7 @@ std::string& trim_left_inplace(
 
 std::string& trim(
   std::string&       s,
-  const std::string& delimiters = " \f\n\r\t\v" )
+  const std::string& delimiters)
 {
   return trim_left_inplace( trim_right_inplace( s, delimiters ), delimiters );
 }
@@ -184,12 +191,13 @@ uint64_t getCurrentTime()
     return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
 }
 
-void sleep(int milliseconds)
+unsigned int sleep(int milliseconds)
 {
-#ifndef WIN32
+#ifdef WIN32
 	Sleep(milliseconds);
-else
-	usleep(milliseconds*1000); //Maybe replace this guy with clock_nanosleep???
+	return 0;
+#else
+	return usleep(milliseconds*1000); //Maybe replace this guy with clock_nanosleep???
 #endif
 }
 
