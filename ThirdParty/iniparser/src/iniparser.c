@@ -644,7 +644,7 @@ dictionary * iniparser_load(const char const* ininame)
     dictionary * dict ;
 
     if ((in=fopen(ininame, "r"))==NULL) {
-        fprintf(stderr, "iniparser: cannot open %s\n", ininame);
+        /*fprintf(stderr, "iniparser: cannot open %s\n", ininame); //TLudwinski */
         return NULL ;
     }
 
@@ -667,10 +667,10 @@ dictionary * iniparser_load(const char const* ininame)
             continue;
         /* Safety check against buffer overflows */
         if (line[len]!='\n') {
-            fprintf(stderr,
-                    "iniparser: input line too long in %s (%d)\n",
-                    ininame,
-                    lineno);
+            /*fprintf(stderr,
+            //        "iniparser: input line too long in %s (%d)\n",
+            //        ininame,
+            //        lineno);*/
             dictionary_del(dict);
             fclose(in);
             return NULL ;
@@ -704,10 +704,10 @@ dictionary * iniparser_load(const char const* ininame)
             break ;
 
             case LINE_ERROR:
-            fprintf(stderr, "iniparser: syntax error in %s (%d):\n",
-                    ininame,
-                    lineno);
-            fprintf(stderr, "-> %s\n", line);
+            /*fprintf(stderr, "iniparser: syntax error in %s (%d):\n",
+            //        ininame,
+            //        lineno);
+            //fprintf(stderr, "-> %s\n", line);*/
             errs++ ;
             break;
 
