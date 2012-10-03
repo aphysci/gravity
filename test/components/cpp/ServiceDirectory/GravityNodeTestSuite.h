@@ -13,6 +13,7 @@
 #include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
 #include "TestUtil.h"
+#include "Utility.h"
 
 #define BUFFER_SIZE 1000
 
@@ -33,6 +34,7 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
+#ifndef WIN32
 class TestFixture : public CxxTest::GlobalFixture
 {
 public:
@@ -55,6 +57,7 @@ private:
     int sdFd;
 };
 static TestFixture testFixture;
+#endif
 
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
 															  GravityServiceProvider,

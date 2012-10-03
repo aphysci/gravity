@@ -13,6 +13,7 @@
 #define READ 0
 #define WRITE 1
 
+#ifndef WIN32
 pid_t popen2(const char *command, int *infp, int *outfp) {
     int p_stdin[2], p_stdout[2];
     pid_t pid;
@@ -46,4 +47,4 @@ pid_t popen2(const char *command, int *infp, int *outfp) {
 
     return pid;
 }
-
+#endif
