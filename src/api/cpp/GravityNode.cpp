@@ -224,7 +224,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
-   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer") != true)
+   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", true) != true)
    	{
    		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
    	}
@@ -1089,10 +1089,11 @@ double GravityNode::getFloatParam(std::string key, double default_value)
 
 bool GravityNode::getBoolParam(std::string key, bool default_value)
 {
-	if( StringToLowerCase(parser->getString(key, "False")) == "true" ||
-		StringToLowerCase(parser->getString(key, "False")) == "t" ||
-		StringToLowerCase(parser->getString(key, "False")) == "yes" ||
-		StringToLowerCase(parser->getString(key, "False")) == "y" )
+    string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
+	if( val == "true" ||
+		val == "t" ||
+		val == "yes" ||
+		val == "y" )
 		return true;
 	else
 		return false;
