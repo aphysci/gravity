@@ -35,11 +35,13 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
 	CLASSPATH="$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar;build;."
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
+	LIB_EXT=dll
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -lzmq -lrt -Wl,-Bdynamic
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
 	CLASSPATH=$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:.
+	LIB_EXT=so
 linux: all;
 else
 	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
@@ -51,7 +53,7 @@ LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
 
 .PRECIOUS: %.java $(PROTO_CODE)
 
-all: $(LIB_NAME) libgravity_wrap.so
+all: $(LIB_NAME) libgravity_wrap.$(LIB_EXT)
 
 # Generate source from SWIG files and update AUTO_SRCS to include the generated .java files
 # The change to autosrcs.mk will cause the Makefile to be reloaded so the updated AUTO_SRCS will be seen.
@@ -75,11 +77,11 @@ $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 %.o: %.cpp
 	$(CC) -c -fPIC -o $@ $< $(INCLUDES)
 
-libgravity_wrap.so: $(CPP_OBJ) $(GRAVLIB_DIR)/libgravity.a
+libgravity_wrap.$(LIB_EXT): $(CPP_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -shared -o $@ $(CPP_OBJ) $(CFLAGS) $(LIBS)
 
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
-	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* $(CPPSRC_DIR)/*.o *.jar *.so *.o autosrcs.mk 
+	rm -rf $(JAVASRC_DIR)/com/aphysci/gravity/swig/* $(PROTOGEN_DIR)/* $(JAVA_BUILD_DIR)/* $(CPPSRC_DIR)/gravity_wrap.* $(CPPSRC_DIR)/*.o *.jar *.so *.dll *.o autosrcs.mk 
