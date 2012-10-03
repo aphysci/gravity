@@ -37,7 +37,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic
+	OS_SPECIFIC_LIBS = -lzmq -lrt -Wl,-Bdynamic
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
 	CLASSPATH=$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:.
 linux: all;
@@ -46,8 +46,8 @@ else
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
-CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSER_DIR) -L$(SQLLIB_DIR)
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSER_DIR)
+LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
 
 .PRECIOUS: %.java $(PROTO_CODE)
 
