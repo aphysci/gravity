@@ -16,7 +16,7 @@ SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
 PROTOC=$(PROTOBUF_DIR)/src/protoc
 JAVA_BUILD_DIR=build
 LIB_NAME=gravity.jar
-JAVAINCLUDE_DIR=/usr/lib/jvm/java-7-oracle/include
+JAVAINCLUDE_DIR=$(JAVA_HOME)/include
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(JAVAINCLUDE_DIR)/linux -I../cpp -I.
 CFLAGS=$(INCLUDES)
