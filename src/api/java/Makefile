@@ -32,6 +32,16 @@ PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto
 PROTO_CODE=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGEN_DIR)/%Container.java,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE))
 
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+	CLASSPATH="$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar;build;."
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+	CLASSPATH=$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:.
+linux: all;
+else
+	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
 .PRECIOUS: %.java $(PROTO_CODE)
 
 all: $(LIB_NAME) libgravity_wrap.so
@@ -49,11 +59,11 @@ $(PROTOGEN_DIR)/%Container.java:$(PROTO_DIR)/%PB.proto
 
 $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
 	@echo $<
-	@javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. $<
+	javac -d $(JAVA_BUILD_DIR) -cp $(CLASSPATH) $<
 
 $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	@echo $<
-	@javac -d $(JAVA_BUILD_DIR) -cp $(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
+	@javac -d $(JAVA_BUILD_DIR) -cp $(CLASSPATH) -sourcepath src/java $<
 
 %.o: %.cpp
 	$(CC) -c -fPIC -o $@ $< $(INCLUDES)
