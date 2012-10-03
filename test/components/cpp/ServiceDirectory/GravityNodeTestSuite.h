@@ -186,6 +186,9 @@ public:
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     	sleep(2);
 
+    	ret = node.unregisterService("SERVICE_TEST");
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
     	// Check for request
     	TS_ASSERT(gotRequest());
 
