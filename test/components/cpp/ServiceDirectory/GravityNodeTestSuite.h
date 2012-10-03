@@ -65,7 +65,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
         GravityNode node;
-        GravityReturnCode ret = node.init();
+        GravityReturnCode ret = node.init("TestNode");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerDataProduct("TEST", 5656, "tcp");
@@ -107,7 +107,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
     	GravityNode node;
-    	GravityReturnCode ret = node.init();
+    	GravityReturnCode ret = node.init("TestNode2");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	ret = node.registerDataProduct("TEST", 5656, "tcp");
@@ -164,7 +164,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
     	GravityNode node;
-    	GravityReturnCode ret = node.init();
+    	GravityReturnCode ret = node.init("TestNode3");
     	//sleep(2);
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
@@ -193,7 +193,7 @@ public:
     void testRegisterService(void)
     {
         GravityNode node;
-        GravityReturnCode ret = node.init();
+        GravityReturnCode ret = node.init("TestNode4");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerService("TEST2", 5657, "tcp", *this);
