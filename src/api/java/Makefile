@@ -35,6 +35,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
 	CLASSPATH="$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar;build;."
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
+	OS_SPECIFIC_LIBFLAGS=-Wl,--kill-at
 	LIB_EXT=dll
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
@@ -78,7 +79,7 @@ $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	$(CC) -c -fPIC -o $@ $< $(INCLUDES)
 
 libgravity_wrap.$(LIB_EXT): $(CPP_OBJ) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) -shared -o $@ $(CPP_OBJ) $(CFLAGS) $(LIBS)
+	$(CC) $(OS_SPECIFIC_LIBFLAGS) -shared -o $@ $(CPP_OBJ) $(CFLAGS) $(LIBS)
 
 $(LIB_NAME): autosrcs.mk $(PROTO_OBJ) $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
