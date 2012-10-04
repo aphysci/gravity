@@ -1,5 +1,6 @@
 
 THIRDPARTY_DIR=../../../ThirdParty
+ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src
@@ -36,7 +37,7 @@ $(LIB_NAME): $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 test: $(LIB_NAME)
-	java -Djava.library.path=$(PRODGRAV_DIR) -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
+	java -Djava.library.path=$(PRODGRAV_DIR):$(ZMQ_DIR)/src/.libs -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
 
 clean:
 	rm -rf $(JAVA_BUILD_DIR)/* *.jar 
