@@ -162,8 +162,8 @@ public:
 private:
     std::string componentID;
     std::map<std::string, std::string> key_value_map;
-    friend class ConfigRequestor;
-    friend class GravityNode;
+
+    static int CONFIG_REQUEST_TIMEOUT;
 };
 
 }
