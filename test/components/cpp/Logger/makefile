@@ -11,7 +11,7 @@ PROTOC=$(PROTOBUF_DIR)/src/protoc
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR)
 
 LIBDIRS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR)/
-LIBS=-Wl,-Bstatic -lgravity -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lpthread -lrt
+LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser -Wl,-Bdynamic -lpthread -lzmq -lwsock32
 
 
 all: testLogger.cpp
