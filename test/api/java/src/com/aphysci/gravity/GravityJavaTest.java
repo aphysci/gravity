@@ -32,9 +32,15 @@ public class GravityJavaTest {
         
         ret = node.publish(gdp, "Java");
         
+        // wait a bit before unsubscribing to allow the message to get through
+        try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+		}
+
         ret = node.unsubscribe("JavaGDP", s, "");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         ret = node.publish(gdp, "Java");
         
         ret = node.unregisterDataProduct("JavaGDP");
