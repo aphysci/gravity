@@ -38,7 +38,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	LIB_EXT=dll
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lzmq -lrt -Wl,-Bdynamic
+	OS_SPECIFIC_LIBS = -lrt -Wl,-Bdynamic -lzmq 
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
 	CLASSPATH=$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:.
 	LIB_EXT=so
