@@ -13,6 +13,7 @@
 #include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
 #include "TestUtil.h"
+#include "Utility.h"
 
 #define BUFFER_SIZE 1000
 
@@ -33,6 +34,7 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
+#ifndef WIN32
 class TestFixture : public CxxTest::GlobalFixture
 {
 public:
@@ -55,6 +57,7 @@ private:
     int sdFd;
 };
 static TestFixture testFixture;
+#endif
 
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
 															  GravityServiceProvider,
@@ -65,7 +68,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
         GravityNode node;
-        GravityReturnCode ret = node.init();
+        GravityReturnCode ret = node.init("TestNode");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerDataProduct("TEST", 5656, "tcp");
@@ -107,7 +110,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
     	GravityNode node;
-    	GravityReturnCode ret = node.init();
+    	GravityReturnCode ret = node.init("TestNode2");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	ret = node.registerDataProduct("TEST", 5656, "tcp");
@@ -164,7 +167,7 @@ public:
     	pthread_mutex_init(&mutex, NULL);
 
     	GravityNode node;
-    	GravityReturnCode ret = node.init();
+    	GravityReturnCode ret = node.init("TestNode3");
     	//sleep(2);
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
@@ -183,6 +186,9 @@ public:
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     	sleep(2);
 
+    	ret = node.unregisterService("SERVICE_TEST");
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
     	// Check for request
     	TS_ASSERT(gotRequest());
 
@@ -193,7 +199,7 @@ public:
     void testRegisterService(void)
     {
         GravityNode node;
-        GravityReturnCode ret = node.init();
+        GravityReturnCode ret = node.init("TestNode4");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerService("TEST2", 5657, "tcp", *this);

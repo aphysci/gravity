@@ -19,10 +19,25 @@
 %pragma(java) jniclasscode=%{
   static {
     try {
+        System.loadLibrary("zmq");
+    } catch (UnsatisfiedLinkError unused) {
+	    try {
+	        System.loadLibrary("libzmq");
+	    } catch (UnsatisfiedLinkError e) {
+	      System.err.println("Native code library failed to load. Tried both zmq and libzmq.\n" + e);
+	      System.exit(1);
+	    }
+    }
+
+    try {
         System.loadLibrary("gravity_wrap");
-    } catch (UnsatisfiedLinkError e) {
-      System.err.println("Native code library failed to load. \n" + e);
-      System.exit(1);
+    } catch (UnsatisfiedLinkError unused) {
+	    try {
+	        System.loadLibrary("libgravity_wrap");
+	    } catch (UnsatisfiedLinkError e) {
+	      System.err.println("Native code library failed to load. Tried both gravity_wrap and libgravity_wrap.\n" + e);
+	      System.exit(1);
+	    }
     }
   }
 %}
