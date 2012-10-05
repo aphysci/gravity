@@ -78,7 +78,12 @@
             <configuration>
               <tasks>
                 <mkdir dir="target/generated-sources" />
-                <exec executable="../src/protoc">
+		<exec executable="../src/protoc.exe" osfamily="windows">
+                  <arg value="--java_out=target/generated-sources" />
+                  <arg value="--proto_path=../src" />
+                  <arg value="../src/google/protobuf/descriptor.proto" />
+                </exec>
+		<exec executable="../src/protoc" osfamily="unix">
                   <arg value="--java_out=target/generated-sources" />
                   <arg value="--proto_path=../src" />
                   <arg value="../src/google/protobuf/descriptor.proto" />
@@ -96,7 +101,32 @@
             <configuration>
               <tasks>
                 <mkdir dir="target/generated-test-sources" />
-                <exec executable="../src/protoc">
+		<exec executable="../src/protoc.exe" osfamily="windows">
+                  <arg value="--java_out=target/generated-test-sources" />
+                  <arg value="--proto_path=../src" />
+                  <arg value="--proto_path=src/test/java" />
+                  <arg value="../src/google/protobuf/unittest.proto" />
+                  <arg value="../src/google/protobuf/unittest_import.proto" />
+                  <arg value="../src/google/protobuf/unittest_mset.proto" />
+                  <arg
+                    value="src/test/java/com/google/protobuf/multiple_files_test.proto" />
+                  <arg value="src/test/java/com/google/protobuf/nested_builders_test.proto" />
+                  <arg value="src/test/java/com/google/protobuf/nested_extension.proto" />
+                  <arg value="src/test/java/com/google/protobuf/nested_extension_lite.proto" />
+                  <arg value="src/test/java/com/google/protobuf/non_nested_extension.proto" />
+                  <arg value="src/test/java/com/google/protobuf/non_nested_extension_lite.proto" />
+                  <arg value="src/test/java/com/google/protobuf/test_bad_identifiers.proto" />
+                  <arg
+                    value="../src/google/protobuf/unittest_optimize_for.proto" />
+                  <arg
+                    value="../src/google/protobuf/unittest_custom_options.proto" />
+                  <arg value="../src/google/protobuf/unittest_lite.proto" />
+                  <arg value="../src/google/protobuf/unittest_import_lite.proto" />
+                  <arg value="../src/google/protobuf/unittest_lite_imports_nonlite.proto" />
+                  <arg value="../src/google/protobuf/unittest_enormous_descriptor.proto" />
+                  <arg value="../src/google/protobuf/unittest_no_generic_services.proto" />
+                </exec>
+		<exec executable="../src/protoc" osfamily="unix">
                   <arg value="--java_out=target/generated-test-sources" />
                   <arg value="--proto_path=../src" />
                   <arg value="--proto_path=src/test/java" />
