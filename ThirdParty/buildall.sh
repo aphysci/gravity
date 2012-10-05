@@ -27,7 +27,11 @@ make $@ || exit 1
 popd
 
 pushd cppdb-trunk
-cmake . || exit 1
+if [ `uname -o` == "Msys" ]; then
+    cmake -G "MSYS Makefiles" || exit 1
+else
+    cmake . || exit 1
+fi
 make $@ || exit 1
 popd
 
