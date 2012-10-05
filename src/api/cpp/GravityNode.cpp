@@ -359,8 +359,15 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
     // Build the connection string
     stringstream ss;
-    string ipAddr = getIP();
-    ss << transportType << "://" << ipAddr << ":" << networkPort;
+
+    string endpoint;
+    if(transportType == "tcp")
+    	endpoint = getIP();
+    else
+    	endpoint = dataProductID;
+    ss << transportType << "://" << endpoint;
+    if(transportType == "tcp")
+    	ss << ":" << networkPort;
     string connectionString = ss.str();
 
     // Create the publish socket
