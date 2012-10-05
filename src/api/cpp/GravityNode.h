@@ -90,10 +90,14 @@ private:
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
-    GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response);
+    GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
+    		int timeout_in_milliseconds, int retries);
+    GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
+    		int timeout_in_milliseconds);
+
     NetworkNode serviceDirectoryNode;
     map<string,NetworkNode*> publishMap;
-    map<string,string> serviceMap;
+    map<string,string> serviceMap; ///< Maps serviceID to url
 
     std::string componentID;
 	GravityConfigParser* parser;
@@ -164,11 +168,11 @@ public:
      * \param dataProduct data product representation of the request
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
-     * \param timeout_microseconds Timeout in Microseconds
+     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return success flag
      */
     GravityReturnCode request(string serviceID, const GravityDataProduct& request,
-            const GravityRequestor& requestor, string requestID = emptyString, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
+            const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
     /**
      * Make a request against a service provider directly
      * \param connectionURL connection string on which service provider is listening for requests
@@ -176,23 +180,23 @@ public:
      * \param dataProduct data product representation of the request
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
-     * \param timeout_microseconds Timeout in Microseconds
+     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return success flag
      */
     GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = emptyString, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
+            const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
 
     /**
      * Make a synchronous request against a service provider
      * \param serviceID The registered service ID of a service provider
      * \param dataProduct data product representation of the request
-     * \param timeout_microseconds Timeout in Microseconds
+     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
-    shared_ptr<GravityDataProduct> request(string serviceID, const GravityDataProduct& request, uint64_t timeout_microseconds = 0xFFFFFFFFFFFFFFFF);
+    shared_ptr<GravityDataProduct> request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds = -1);
 
     /**
-     * Starts a heartbeat for this gravity process.
+     * Starts a heart beat for this gravity process.
      */
     GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
 
@@ -202,7 +206,7 @@ public:
     bool getBoolParam(std::string key, bool default_value = false);
 
     /**
-     * Get the ID of this gravity node (givin in the init function).
+     * Get the ID of this gravity node (given in the init function).
      */
     std::string getComponentID();
 

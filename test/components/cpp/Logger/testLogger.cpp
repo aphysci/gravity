@@ -13,8 +13,7 @@ int main()
   //Log::setLocalLevel(Log::TRACE);
   //Log::init(gn, "test.log", 43211);
 
-  int i = 0;
-  scanf("%d\n", &i);
+  getchar();
 
   cout << "finished init" << endl;
 

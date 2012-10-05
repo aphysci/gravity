@@ -77,13 +77,12 @@ void LogRecorder::subscriptionFilled(const GravityDataProduct &dataProduct)
 
         //Format the Logs nicely.
         char timestr[100];
-        time_t rawtime = dataProduct.getGravityTimestamp(); //TODO: what does this represent?!
+        time_t rawtime = (time_t) (dataProduct.getGravityTimestamp() / 1000000);
         struct tm * timeinfo;
 
         timeinfo = gmtime( &rawtime );
 
         strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
-        cout << timestr << endl;
 
         fprintf(log_file, "[%s %s %s] %s\n", message.domain().c_str(), message.level().c_str(), timestr, message.message().c_str());
 

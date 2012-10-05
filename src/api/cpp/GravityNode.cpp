@@ -224,7 +224,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
-   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", true) != true)
+   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
    	{
    		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
    	}
@@ -266,88 +266,81 @@ void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct&
 }
 
 GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const GravityDataProduct& request,
-        GravityDataProduct& response)
+        GravityDataProduct& response, int timeout_in_milliseconds, int retries)
 {
-    GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+    GravityReturnCode ret = GravityReturnCodes::FAILURE;
 
-    // Socket to connect to service provider
-    void* socket = NULL;
-
-    int retriesLeft = NETWORK_RETRIES;
-    while (retriesLeft && !s_interrupted)
+    int retriesLeft = retries;
+    while(retriesLeft && ret != GravityReturnCodes::INTERRUPTED && ret != GravityReturnCodes::SUCCESS)
     {
-        // Connect to service provider
-        socket = zmq_socket(context, ZMQ_REQ);
-        zmq_connect(socket, url.c_str());
-
-        // Send message to service provider
-        sendGravityDataProduct(socket, request);
-        retriesLeft--;
-
-        // Poll socket for reply with a timeout
-        zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
-        int rc = zmq_poll(items, 1, NETWORK_TIMEOUT);
-        if (rc == -1)
-        {
-            // Interrupted
-            ret = GravityReturnCodes::INTERRUPTED;
-
-            // Close socket
-            zmq_close(socket);
-
-            break;
-        }
-
-        // Process the response
-        if (items[0].revents & ZMQ_POLLIN)
-        {
-            // Get service directory response
-            zmq_msg_t resp;
-            zmq_msg_init(&resp);
-            zmq_recvmsg(socket, &resp, 0);
-
-            bool parserSuccess = true;
-            try
-            {
-                response.parseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
-            }
-            catch (char* s)
-            {
-                parserSuccess = false;
-            }
-
-            // Clean up message
-            zmq_msg_close(&resp);
-
-            if (parserSuccess)
-            {
-                ret = GravityReturnCodes::SUCCESS;
-                retriesLeft = 0;
-
-                // Close socket
-                zmq_close(socket);
-                break;
-            }
-            else
-            {
-                // Bad response.
-                ret = GravityReturnCodes::LINK_ERROR;
-            }
-        }
-        else
-        {
-            ret = GravityReturnCodes::NO_SERVICE_PROVIDER;
-        }
-
-        // Close socket
-        zmq_close(socket);
+    	--retriesLeft;
+    	ret = sendRequestToServiceProvider(url, request, response, timeout_in_milliseconds);
     }
-	
-	if(s_interrupted)
-		raise(s_interrupted);
 
     return ret;
 }
+
+GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const GravityDataProduct& request,
+        GravityDataProduct& response, int timeout_in_milliseconds)
+{
+    GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
+	// Connect to service provider
+    void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
+	zmq_connect(socket, url.c_str());
+
+	// Send message to service provider
+	sendGravityDataProduct(socket, request);
+
+	// Poll socket for reply with a timeout
+	zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
+	int rc = zmq_poll(items, 1, timeout_in_milliseconds);
+	if (rc == -1)
+		ret = GravityReturnCodes::INTERRUPTED;
+	else if(rc == 0)
+		ret = GravityReturnCodes::REQUEST_TIMEOUT;
+	// Got a Response, now process it.  Process the response
+	else if(items[0].revents & ZMQ_POLLIN)
+	{
+		// Get service directory response
+		zmq_msg_t resp;
+		zmq_msg_init(&resp);
+		zmq_recvmsg(socket, &resp, 0);
+
+		bool parserSuccess = true;
+		try
+		{
+			response.parseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
+		}
+		catch (char* s)
+		{
+			parserSuccess = false;
+		}
+
+		// Clean up message
+		zmq_msg_close(&resp);
+
+		if (parserSuccess)
+			ret = GravityReturnCodes::SUCCESS;
+		else
+			// Bad response.
+			ret = GravityReturnCodes::LINK_ERROR;
+	}
+	else
+		ret = GravityReturnCodes::NO_SERVICE_PROVIDER;
+
+	// Close socket
+	zmq_close(socket);
+
+	if(s_interrupted)
+	{
+		ret = GravityReturnCodes::INTERRUPTED;
+		raise(s_interrupted);
+	}
+
+    return ret;
+}
+
 
 GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataProduct& request,
         GravityDataProduct& response)
@@ -357,7 +350,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	                ":" << serviceDirectoryNode.port;
 	string serviceDirectoryURL = ss.str();
 
-	return sendRequestToServiceProvider(serviceDirectoryURL, request, response);
+	return sendRequestToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType)
@@ -744,18 +737,20 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 	return ret;
 }
 
+//Asynchronous Request with Service Directory Lookup
 GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID, uint64_t timeout_microseconds)
+        const GravityRequestor& requestor, string requestID, int timeout_milliseconds)
 {
 	std::string url;
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
-	return request(url, serviceID, dataProduct, requestor, requestID);
+	return request(url, serviceID, dataProduct, requestor, requestID, timeout_milliseconds);
 }
 
+//Asynchronous Request with URL
 GravityReturnCode GravityNode::request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID, uint64_t timeout_microseconds)
+        const GravityRequestor& requestor, string requestID, int timeout_milliseconds)
 {
 	// Send subscription details
 	sendStringMessage(requestManagerSocket, "request", ZMQ_SNDMORE);
@@ -778,7 +773,8 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 	return GravityReturnCodes::SUCCESS;
 }
 
-shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, uint64_t timeout_microseconds)
+//Synchronous Request
+shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds)
 {
 	std::string connectionURL;
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL);
@@ -786,7 +782,7 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 
 	shared_ptr<GravityDataProduct> response(new GravityDataProduct());
-	ret = sendRequestToServiceProvider(connectionURL, request, *response);
+	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 

@@ -178,8 +178,9 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     }
     else if (foundConflict)
     {
+    	//TODO: check if registration.url() == origUrl
         sdr.set_returncode(ServiceDirectoryResponsePB::REGISTRATION_CONFLICT);
-        cout << "Attempt to register conflicting url (" << registration.url() << ", was " << origUrl << ") for " << registration.id() << endl;
+        Log::warning("Attempt to register conflicting url (%s, was %s) for %s", registration.url().c_str(), origUrl.c_str(), registration.id().c_str());
     }
     else
         sdr.set_returncode(ServiceDirectoryResponsePB::SUCCESS);
