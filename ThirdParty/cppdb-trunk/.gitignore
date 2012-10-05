@@ -3,6 +3,7 @@
 *.log
 *.dir
 CMakeCache.txt
+CMakeFiles
 CMakeFiles/CMakeDetermineCompilerABI_C.bin
 CMakeFiles/CMakeDetermineCompilerABI_CXX.bin
 CMakeFiles/CompilerIdC/
