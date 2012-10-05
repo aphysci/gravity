@@ -1,3 +1,5 @@
+*.dll
+*.a
 *.cmake
 *.make
 *.log
