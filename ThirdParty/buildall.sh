@@ -35,3 +35,6 @@ fi
 make $@ || exit 1
 popd
 
+rm -rf ./lib/*
+find . -path './lib' -prune -o -name *.so -exec cp {} lib \;
+find . -path './lib' -prune -o -name *.a -exec cp {} lib \;
