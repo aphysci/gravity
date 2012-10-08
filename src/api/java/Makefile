@@ -14,7 +14,7 @@ SWIGSRC_DIR=src/swig
 GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
 PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
 SWIGGEN_DIR=$(GRAVSRC_DIR)/swig
-PROTOC=$(PROTOBUF_DIR)/src/protoc
+PROTOC=$(THIRDPARTY_DIR)/bin/protoc
 JAVA_BUILD_DIR=build
 LIB_NAME=gravity.jar
 JAVAINCLUDE_DIR="$(JAVA_HOME)/include"
@@ -49,7 +49,7 @@ else
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
-CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSER_DIR)
+CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
 LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
 
 .PRECIOUS: %.java $(PROTO_CODE)
