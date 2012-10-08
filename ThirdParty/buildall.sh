@@ -38,8 +38,9 @@ popd
 rm -rf ./lib/*
 find . -path './lib' -prune -o -name *.so -exec cp {} lib \;
 find . -path './lib' -prune -o -name *.a -exec cp {} lib \;
+find . -path './lib' -prune -o -name *.dll -exec cp {} lib \;
 
 rm -rf ./bin/*
-find . -path './bin' -prune -o -regex '.*/protoc[\.ex]*' -exec cp {} bin \;
-
+cp protobuf-2.4.1/src/.libs/protoc protobuf-2.4.1/src/.libs/protoc.exe ./bin >& /dev/null
+cp protobuf-2.4.1/src/.libs/*dll ./bin >& /dev/null
 
