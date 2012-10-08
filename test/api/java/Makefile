@@ -37,7 +37,7 @@ $(LIB_NAME): $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 test: $(LIB_NAME)
-	java -Djava.library.path=$(PRODGRAV_DIR):$(ZMQ_DIR)/src/.libs -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
+	java -Djava.library.path=$(PRODGRAV_DIR):$(THIRDPARTY_DIR)/bin -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
 
 clean:
 	rm -rf $(JAVA_BUILD_DIR)/* *.jar 
