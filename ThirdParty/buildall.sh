@@ -6,6 +6,9 @@ if [ ${#*} -gt 1 ]; then
 fi
 
 pushd zeromq-3.2.0
+# address issue where configure doesn't work right if there are carridge returns.
+find . -name "*.in" -exec dos2unix {} \;
+
 ./configure || exit 1
 make $@ || exit 1
 popd
