@@ -1,9 +1,13 @@
 #include <iostream>
 #include "GravityNode.h"
+#include "GravityLogger.h"
+#include "GravitySubscriber.h"
 #include "Utility.h"
 
+using namespace gravity;
+
 //Declare a class for receiving Published messages.  
-class SimpleGravitySubscriber : public GravitySubscriber
+class SimpleGravityHelloWorldSubscriber : public GravitySubscriber
 {
 public:
 	virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
@@ -11,21 +15,31 @@ public:
 
 int main()
 {
-	using namespace gravity;
-
 	GravityNode gn;
-	//Initialize gravity, giving this node a componentID.  
-	gn.init("SimpleGravityComponentID2");
+	const std::string dataProductID = "HelloWorldDataProduct";
 
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(LogLevel::MESSAGE);
-	
+	//Tell the logger to also log to the console.
+	Log::initAndAddConsoleLogger(Log::MESSAGE);
+
+	//Initialize gravity, giving this node a componentID.  
+	GravityReturnCode ret = gn.init("SimpleGravityComponentSubscriber");
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::critical("Could not initialize GravityNode, return code was %d", ret);
+		exit(1);
+	}
+
 	//Subscribe a SimpleGravityHelloWorldSubscriber to the counter.  
 	SimpleGravityHelloWorldSubscriber hwSubscriber;
-	gn.subscribe("HelloWorldDataProduct", hwSubscriber);
+	ret = gn.subscribe(dataProductID, hwSubscriber);
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::critical("Could not subscribe, return code was %d", ret);
+		exit(1);
+	}
 		
-	//Wait for us to exit (Ctrl-C or being killed).  
-	gn.waitForExit();
+	cout << "Tell publisher to publish... " << endl;
+	cin.ignore();
 	
 	//Currently this will never be hit because we will have been killed (unfortunately).  
 	//But this shouldn't make a difference because the OS should close the socket and free all resources.  
@@ -43,4 +57,6 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const GravityDataProd
 	Log::message("Got message: %s", message);
 	//Don't forget to free the memory we allocated.  
 	delete message;
+
+	cout << "Press enter to exit..." << endl;
 }
