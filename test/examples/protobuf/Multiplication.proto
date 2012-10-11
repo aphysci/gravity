@@ -1,7 +1,5 @@
 option optimize_for = SPEED;
 
-package gravity;
-
 message MultiplicationOperandsPB
 {
 	required int32 multiplicand_a = 1;

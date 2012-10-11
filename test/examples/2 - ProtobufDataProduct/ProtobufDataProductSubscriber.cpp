@@ -4,7 +4,7 @@
 #include <GravitySubscriber.h>
 #include <Utility.h>
 
-#include "../protobuf/BasicCounterDataProductPB.pb.h"
+#include "../protobuf/BasicCounterDataProduct.pb.h"
 
 using namespace gravity;
 

@@ -3,7 +3,7 @@
 #include <GravityLogger.h>
 #include <Utility.h>
 
-#include "../protobuf/BasicCounterDataProductPB.pb.h"
+#include "../protobuf/BasicCounterDataProduct.pb.h"
 
 int main()
 {

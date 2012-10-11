@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>JavaBasicService</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>gravity.jar</name>
+			<type>1</type>
+			<locationURI>GRAVITY_LOC/src/api/java/gravity.jar</locationURI>
+		</link>
+		<link>
+			<name>protobuf-java-2.4.1.jar</name>
+			<type>1</type>
+			<locationURI>GRAVITY_LOC/ThirdParty/protobuf-2.4.1/java/target/protobuf-java-2.4.1.jar</locationURI>
+		</link>
+		<link>
+			<name>src/Multiplication.java</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PARENT_LOC/protobuf/Multiplication.java</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>GRAVITY_LOC</name>
+			<value>file:/C:/Users/tludwinski/Documents/gravity</value>
+		</variable>
+	</variableList>
+</projectDescription>

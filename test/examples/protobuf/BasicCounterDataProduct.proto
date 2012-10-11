@@ -1,7 +1,5 @@
 option optimize_for = SPEED;
 
-package gravity;
-
 message BasicCounterDataProductPB
 {
 	required int32 count = 1;
