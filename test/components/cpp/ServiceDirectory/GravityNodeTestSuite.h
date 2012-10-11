@@ -5,6 +5,27 @@
  *      Author: Chris Brundick
  */
 
+ /*
+  * Gravity APIs Tested here:
+  * registerDataProduct
+  * unregisterDataProduct
+  * subscribe
+  * publish
+  * registerService
+  * unregisterService
+  * request
+  *
+  * GravityDataProduct
+  *
+  * Gravity APIs NOT Tested here:
+  * - Heart beat functionality: registerHeartbeatListener, startHeartbeat
+  * - request (Synchronous)
+  * - Config functionality (uses Sync request).  
+  * - Logging
+  * - getComponentID (very simple function)
+  * - Connections over sockets on different machines (See ArchiverPlaybackTest)
+  */
+ 
 #ifndef GRAVITYNODETESTSUITE_H_
 #define GRAVITYNODETESTSUITE_H_
 
