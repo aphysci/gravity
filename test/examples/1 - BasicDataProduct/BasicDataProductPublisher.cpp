@@ -1,7 +1,7 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "GravityLogger.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
 
 int main()
 {
@@ -28,18 +28,18 @@ int main()
 	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.  
 	int count = 1;
 	while(!quit)
-	{		
+	{
 		//Create a data product to send across the network of type "HelloWorldDataProduct"
 		GravityDataProduct helloWorldDataProduct("HelloWorldDataProduct");
 		//This is going to be a raw data product (ie not using protobufs).  
 		std::string data = "Hello World";
-		helloWorldDataProduct.setData(data, data.length());
+		helloWorldDataProduct.setData((void*)data.c_str(), data.length());
 		
 		//Publish the  data product.  
 		gn.publish(helloWorldDataProduct);
 		
 		//Sleep for 1 second.  
-		gravity::sleep(1000); 
+		gravity::sleep(1000);
 	}
 
 }

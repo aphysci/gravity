@@ -23,9 +23,6 @@ GravityRequestManager::~GravityRequestManager() {}
 
 void GravityRequestManager::start()
 {
-	// Messages
-	zmq_msg_t filter, message;
-
 	// Set up the inproc socket to subscribe to request messages from the GravityNode
 	gravityNodeSocket = zmq_socket(context, ZMQ_SUB);
 	zmq_connect(gravityNodeSocket, "inproc://gravity_request_manager");
@@ -42,6 +39,7 @@ void GravityRequestManager::start()
 	ready();
 
 	// Process forever...
+	zmq_msg_t message;
 	while (true)
 	{
 		// Start polling socket(s), blocking while we wait
@@ -88,6 +86,8 @@ void GravityRequestManager::start()
 				// Deliver to requestor
 				shared_ptr<RequestDetails> reqDetails = requestMap[pollItems[i].socket];
 				reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, dataProduct);
+				//TODO: requestMap.erase(pollItems[i].socket);
+				//Remove socket from pollItems!!!
 			}
 		}
 	}

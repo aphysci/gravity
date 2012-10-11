@@ -1,7 +1,9 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "GravityLogger.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+#include "../protobuf/BasicCounterDataProductPB.pb.h"
 
 int main()
 {
@@ -27,7 +29,7 @@ int main()
 	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.  
 	int count = 1;
 	while(!quit)
-	{	
+	{
 		//Create a data product to send across the network of type "BasicCounterDataProduct".  
 		GravityDataProduct counterDataProduct("BasicCounterDataProduct"); //In order to publish, the DataProductID must match one of the registered types.  
 
@@ -36,7 +38,7 @@ int main()
 		counterDataPB.set_count(count);
 		
 		//Put message into data product
-		counterDataProduct.populateMessage(counterDataPB);
+		counterDataProduct.setData(counterDataPB);
 
 		//Publish the data product.  
 		gn.publish(counterDataProduct);
