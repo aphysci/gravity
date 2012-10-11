@@ -1,0 +1,14 @@
+option optimize_for = SPEED;
+
+package gravity;
+
+message MultiplicationOperandsPB
+{
+	required int32 multiplicand_a = 1;
+	required int32 multiplicand_b = 2;
+}
+
+message MultiplicationResultPB
+{
+	required int32 result = 1;
+}
