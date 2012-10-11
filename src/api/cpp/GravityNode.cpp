@@ -387,7 +387,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
 
     // Track dataProductID->socket mapping
     NetworkNode* node = new NetworkNode;
-    node->ipAddress = ipAddr;
+    node->ipAddress = endpoint;
     node->port = networkPort;
     node->transport = transportType;
     node->socket = pubSocket;
