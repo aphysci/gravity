@@ -38,7 +38,7 @@ BasicDataProductSubscriber$(OS_EXE_EXT):BasicDataProductSubscriber.cpp
 components: ServiceDirectory$(OS_EXE_EXT)
 
 ServiceDirectory$(OS_EXE_EXT):
-	cd $(SERVICEDIRECTORY_LOCATION); \
+	@cd $(SERVICEDIRECTORY_LOCATION); \
 	make
 
 clean:
