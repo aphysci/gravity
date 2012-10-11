@@ -6,6 +6,7 @@ ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 CXXTEST_DIR=$(THIRDPARTY_DIR)/cxxtest
 GRAVLIB_DIR=../../../../src/api/cpp
+COMPONENTS_BIN_DIR=../../../../src/components/cpp/bin
 CXXTESTGEN=$(CXXTEST_DIR)/bin/cxxtestgen
 PROG_NAME=$(notdir $(shell pwd) )
 
@@ -15,12 +16,12 @@ SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
         TEST_NAME=$(PROG_NAME)Test.exe
-	PATH:=${PATH}:../../../../src/components/cpp/$(PROG_NAME):$(ZMQ_DIR)/src/.libs
+	PATH:=${PATH}:$(COMPONENTS_BIN_DIR):$(THIRDPARTY_DIR)/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
         TEST_NAME=$(PROG_NAME)Test
-	PATH:=${PATH}:../../../../src/components/cpp/$(PROG_NAME)
+	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);

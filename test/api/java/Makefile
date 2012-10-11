@@ -16,9 +16,11 @@ OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(SRC))
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	CLASSPATH="$(GRAVLIB);build;$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar"
+	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	CLASSPATH=$(GRAVLIB):build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar
+	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/lib
 linux: all;
 else
         ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
@@ -37,7 +39,7 @@ $(LIB_NAME): $(OBJECTS)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 test: $(LIB_NAME)
-	java -Djava.library.path=$(PRODGRAV_DIR):$(ZMQ_DIR)/src/.libs -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
+	java -Djava.library.path=$(PRODGRAV_DIR):$(THIRDPARTY_LIB) -cp $(CLASSPATH) com.aphysci.gravity.GravityJavaTest
 
 clean:
 	rm -rf $(JAVA_BUILD_DIR)/* *.jar 

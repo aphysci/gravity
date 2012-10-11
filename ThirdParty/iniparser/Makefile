@@ -48,7 +48,7 @@ libiniparser.so:	$(OBJS)
 		-Wl,-soname=`basename $@`.0
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) *.a
 
 veryclean:
 	$(RM) $(OBJS) libiniparser.a libiniparser.so*

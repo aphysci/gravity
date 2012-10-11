@@ -58,6 +58,12 @@ public class GravityJavaTest {
         ret = node.request("JavaService", request, gr);
         testAssert(ret == GravityReturnCode.SUCCESS);
         
+        // wait a bit before unsubscribing to allow the message to get through
+        try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+		}
+
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
         

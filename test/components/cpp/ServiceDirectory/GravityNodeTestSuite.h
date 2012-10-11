@@ -33,7 +33,6 @@
 #include "GravityNode.h"
 #include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
-#include "TestUtil.h"
 #include "Utility.h"
 
 #define BUFFER_SIZE 1000
@@ -54,31 +53,6 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::LINK_ERROR )
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
-
-#ifndef WIN32
-class TestFixture : public CxxTest::GlobalFixture
-{
-public:
-    bool setUpWorld()
-    {
-        //memset(buffer, 0, BUFFER_SIZE);
-        cout << endl << "starting SD" << endl;
-        pid = popen2("ServiceDirectory > sd.out", NULL, &sdFd);
-        //int nbytes = read(sdFd, buffer, BUFFER_SIZE);
-        //cout << endl << "output: " << buffer << endl;
-        return true;
-    }
-    bool tearDownWorld()
-    {
-        popen2("pkill -f \"^ServiceDirectory$\"", NULL, NULL);
-        return true;
-    }
-private:
-    pid_t pid;
-    int sdFd;
-};
-static TestFixture testFixture;
-#endif
 
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
 															  GravityServiceProvider,
