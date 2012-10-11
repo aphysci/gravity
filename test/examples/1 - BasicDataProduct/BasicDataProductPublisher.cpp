@@ -19,7 +19,7 @@ int main()
 	}
 
 	//Register a data product
-	gn.registerDataProduct(
+	ret = gn.registerDataProduct(
 							//This identifies the Data Product to the service directory so that others can 
 							// subscribe to it.  (See BasicDataProductSubscriber.cpp).  
 							dataProductID,
@@ -31,6 +31,11 @@ int main()
 							//Assign a transport type to the socket (almost always tcp, unless you are only 
 							//using the gravity data product between two processes on the same computer).  							
 							"tcp");
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::fatal("Could not register data product with id %s, return code was %d", dataProductID.c_str(), ret);
+		exit(1);
+	}
 	
 	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.  
 	int count = 1;
@@ -47,7 +52,6 @@ int main()
 		if (ret != GravityReturnCodes::SUCCESS)
 		{
 			Log::critical("Could not publish data product with id %s, return code was %d", dataProductID.c_str(), ret);
-			exit(1);
 		}
 
 		//Sleep for 1 second.  

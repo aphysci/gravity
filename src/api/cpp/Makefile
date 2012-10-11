@@ -31,7 +31,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
-	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lzmq -lprotobuf -liniparser -Wl,-Bdynamic
+	OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic -lzmq
 	OS_SPECIFIC_FLAGS = -fpic
 linux: all;
 else
