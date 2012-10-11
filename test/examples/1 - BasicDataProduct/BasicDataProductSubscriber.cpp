@@ -15,15 +15,27 @@ public:
 int main()
 {
 	GravityNode gn;
-	//Initialize gravity, giving this node a componentID.  
-	gn.init("SimpleGravityComponentID2");
+	const std::string dataProductID = "HelloWorldDataProduct";
 
 	//Tell the logger to also log to the console.  
 	Log::initAndAddConsoleLogger(Log::MESSAGE);
 	
+	//Initialize gravity, giving this node a componentID.
+	GravityReturnCode ret = gn.init("SimpleGravityComponentID2");
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::fatal("Could not initialize GravityNode, return code is %d", ret);
+		exit(1);
+	}
+
 	//Subscribe a SimpleGravityHelloWorldSubscriber to the counter.  
 	SimpleGravitySubscriber hwSubscriber;
-	gn.subscribe("HelloWorldDataProduct", hwSubscriber);
+	ret = gn.subscribe(dataProductID, hwSubscriber);
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::critical("Could not subscribe to data product with id %s, return code was %d", dataProductID.c_str(), ret);
+		exit(1);
+	}
 		
 	//Wait for us to exit (Ctrl-C or being killed).  
 	gn.waitForExit();
