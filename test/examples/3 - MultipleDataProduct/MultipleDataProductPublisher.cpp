@@ -1,11 +1,14 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "GravityLogger.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+#include "../protobuf/BasicCounterDataProductPB.pb.h"
+
+using namespace gravity;
 
 int main()
 {
-	using namespace gravity;
 
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.  
@@ -39,7 +42,7 @@ int main()
 		counterDataPB.set_count(count);
 		
 		//Put message into data product
-		counterDataProduct.populateMessage(counterDataPB);
+		counterDataProduct.setData(counterDataPB);
 
 		//Publish the data product.  
 		gn.publish(counterDataProduct);
@@ -52,7 +55,7 @@ int main()
 		//Create a second Data Product without using protobufs.  
 		GravityDataProduct helloWorldDataProduct("HelloWorldDataProduct");
 		std::string data = "Hello World";
-		helloWorldDataProduct.setData(data, data.length());
+		helloWorldDataProduct.setData(data.c_str(), data.length());
 		
 		//Publish the second data product.  
 		gn.publish(helloWorldDataProduct);

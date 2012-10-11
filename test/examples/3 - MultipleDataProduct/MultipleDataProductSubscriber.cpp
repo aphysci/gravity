@@ -1,6 +1,11 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+#include "../protobuf/BasicCounterDataProductPB.pb.h"
+
+using namespace gravity;
 
 //Declare a class for receiving Published messages.  
 class SimpleGravitySubscriber : public GravitySubscriber
@@ -35,17 +40,15 @@ public:
 
 int main()
 {
-	using namespace gravity;
-
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("SimpleGravityComponentID2");
 
 	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(LogLevel::MESSAGE);
+	Log::initAndAddConsoleLogger(Log::MESSAGE);
 	
 	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
-	SimpleGravityCounterSubscriber counterSubscriber();
+	SimpleGravityCounterSubscriber counterSubscriber;
 	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  
 	gn.subscribe("BasicCounterDataProduct", counterSubscriber); 
 
@@ -69,20 +72,21 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const GravityDataProduct
 	dataProduct.populateMessage(counterDataPB);
 	
 	//Process the message
-	countTotals = countTotals + count;
+	countTotals = countTotals + counterDataPB.count();
 
-	Log::message("Sum of All Counts Received: %d", countTotals);
+	Log::message("Subscriber 1: Sum of All Counts Received: %d", countTotals);
 }
 
 void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
 	//Get a raw message
 	int size = dataProduct.getDataSize();
-	char* message = new char[size];
+	char* message = new char[size + 1];
 	dataProduct.getData(message, size);
+	message[size] = 0; //Add NULL terminator
 	
 	//Output the message
-	Log::message("Got message: %s", message);
+	Log::message("Subscriber 2: Got message: %s", message);
 	//Don't forget to free the memory we allocated.  
 	delete message;
 }
@@ -90,13 +94,13 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const GravityDataProd
 void SimpleGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
 	//Process Message
-	Log::message("Got a %s data product", dataProduct.getDataProductID().c_str());
+	Log::message("Subscriber 3: Got a %s data product", dataProduct.getDataProductID().c_str());
 
 	//Take different actions based on the message type.  
 	if(dataProduct.getDataProductID() == "BasicCounterDataProduct")
 	{
 		BasicCounterDataProductPB counterDataPB;
 		dataProduct.populateMessage(counterDataPB);
-		Log::debug("Current Count: %d", counterDataPB.count());
+		Log::debug("Subscriber 3: Current Count: %d", counterDataPB.count());
 	}
 }
