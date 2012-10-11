@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PATH=$PATH:../../../ThirdParty/bin:../../../src/components/cpp/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../ThirdParty/lib:../../../src/api/cpp
 
 ServiceDirectory &
 BasicDataProductPublisher &
@@ -9,3 +10,4 @@ BasicDataProductPublisher &
 sleep 1
 
 BasicDataProductSubscriber
+
