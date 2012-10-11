@@ -1,6 +1,9 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+using namespace gravity;
 
 //Declare a class for receiving Published messages.  
 class SimpleGravitySubscriber : public GravitySubscriber
@@ -11,17 +14,15 @@ public:
 
 int main()
 {
-	using namespace gravity;
-
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("SimpleGravityComponentID2");
 
 	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(LogLevel::MESSAGE);
+	Log::initAndAddConsoleLogger(Log::MESSAGE);
 	
 	//Subscribe a SimpleGravityHelloWorldSubscriber to the counter.  
-	SimpleGravityHelloWorldSubscriber hwSubscriber;
+	SimpleGravitySubscriber hwSubscriber;
 	gn.subscribe("HelloWorldDataProduct", hwSubscriber);
 		
 	//Wait for us to exit (Ctrl-C or being killed).  
@@ -32,7 +33,7 @@ int main()
 	gn.unsubscribe("HelloWorldDataProduct", hwSubscriber);
 }
 
-void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
+void SimpleGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
 {
 	//Get a raw message
 	int size = dataProduct.getDataSize();
