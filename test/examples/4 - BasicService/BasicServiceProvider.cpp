@@ -1,7 +1,11 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "GravityLogger.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+#include "../protobuf/Multiplication.pb.h"
+
+using namespace gravity;
 
 class MultiplicationServiceProvider : public GravityServiceProvider
 {
@@ -13,36 +17,39 @@ public:
 shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const GravityDataProduct& dataProduct)
 {
 	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.  
-	if(dataProduct.getDataProductID() == "Multiplication") {
-		Log::error("Request is not for multiplication!");
-		return shared_ptr<GravityDataProduct>(GravityDataProduct("BadRequest"));
+	if(dataProduct.getDataProductID() != "Multiplication") {
+		Log::critical("Request is not for multiplication!");
+		return shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
 	}
 
 	//Get the parameters for this request.  
 	MultiplicationOperandsPB params;
 	dataProduct.populateMessage(params);
+
+	Log::message("%d x %d", params.multiplicand_a(), params.multiplicand_b());
 	
 	//Do the calculation
 	int result = params.multiplicand_a() * params.multiplicand_b();
 	
 	//Return the results to the requestor
-	MultiplicationResultPB result;
-	result.set_result(result);
+	MultiplicationResultPB resultPB;
+	resultPB.set_result(result);
 	
 	shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
-	resultDP.setData(result);
+	resultDP->setData(resultPB);
 
 	return resultDP;
 }
 
 int main()
 {
-	using namespace gravity;
-
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MultiplicationComponent");
 
+	//Tell the logger to also log to the console.  
+	Log::initAndAddConsoleLogger(Log::MESSAGE);	
+	
 	MultiplicationServiceProvider msp;
 	gn.registerService(
 						//This identifies the Service to the service directory so that others can 

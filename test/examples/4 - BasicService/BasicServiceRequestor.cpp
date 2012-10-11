@@ -1,7 +1,12 @@
 #include <iostream>
-#include "GravityNode.h"
-#include "GravityLogger.h"
-#include "Utility.h"
+#include <GravityNode.h>
+#include <GravityLogger.h>
+#include <Utility.h>
+
+#include "../protobuf/Multiplication.pb.h"
+
+using namespace gravity;
+
 
 bool gotAsyncMessage = false;
 
@@ -10,7 +15,7 @@ class MultiplicationRequestor : public GravityRequestor
 {
 public:
 	virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
-}
+};
 
 void MultiplicationRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
 {
@@ -26,17 +31,15 @@ void MultiplicationRequestor::requestFilled(string serviceID, string requestID, 
 
 int main()
 {
-	using namespace gravity;
-
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MultiplicationRequestor");
 	
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(LogLevel::MESSAGE);	
+	// Tell the logger to also log to the console.  
+	Log::initAndAddConsoleLogger(Log::MESSAGE);	
 
-	/////////////////////////////////////////
-	//Set up the first multiplication request
+	/////////////////////////////
+	// Set up the first multiplication request
 	MultiplicationRequestor requestor;
 	
 	GravityDataProduct multRequest1("Multiplication");
@@ -45,7 +48,7 @@ int main()
 	params1.set_multiplicand_b(2);
 	multRequest1.setData(params1);
 	
-	//Make an Asyncronous request for multiplication
+	// Make an Asyncronous request for multiplication
 	gn.request("Multiplication", //Service Name
 				multRequest1, //Request
 				requestor, //Object containing callback that will get the result.  
@@ -63,10 +66,17 @@ int main()
 	shared_ptr<GravityDataProduct> multSync = gn.request("Multiplication", //Service Name
 														multRequest2, //Request
 														1000); //Timeout in milliseconds
-	MultiplicationResultPB result;
-	multSync.populateMessage(result);
-	
-	Log::message("5 x 7 = %d", result.result());
+	if(multSync == NULL)
+	{
+		Log::critical("Request Returned NULL!");
+	}
+	else
+	{
+		MultiplicationResultPB result;
+		multSync->populateMessage(result);
+		
+		Log::message("5 x 7 = %d", result.result());
+	}
 
 	/////////////////////////////////////////
 	//Wait for the Asynchronous message to come in.  

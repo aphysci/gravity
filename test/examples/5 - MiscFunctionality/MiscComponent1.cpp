@@ -5,18 +5,6 @@
 
 using namespace gravity;
 
-class MiscHBListener : public GravityHeartbeatListener
-{
-public:
-	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
-}
-
-void MiscHBListener::MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status)
-{
-	Log::warning("Missed Heartbeat.  Last heartbeat %d microseconds ago.  ", microsecond_to_last_heartbeat);
-}
-
-
 int main()
 {
 
@@ -24,6 +12,9 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MiscGravityComponentID1");
 
+	// Tell the logger to also log to the console.  
+	Log::initAndAddConsoleLogger(Log::MESSAGE);	
+	
 	//Get a parameter from either the gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.  
 	int interval = gn.getIntParam("HeartbeatInterval", 500000);
 	
@@ -39,7 +30,7 @@ int main()
 		GravityDataProduct ipcDataProduct("IPCDataProduct");
 		
 		std::string data = "hey!";
-		ipcDataProduct.setData(data, data.length());
+		ipcDataProduct.setData(data.c_str(), data.length());
 		
 		gn.publish(ipcDataProduct);
 	
