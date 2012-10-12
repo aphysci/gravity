@@ -1,10 +1,6 @@
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
-INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
-SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
-ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
-EZOPTION_PARSER_DIR=$(THIRDPARTY_DIR)/EZOptionParser
 GRAVLIB_DIR=../../../src/api/cpp
 MYPROTO_DIR=../protobuf
 PROTOC=$(PROTOBUF_DIR)/src/protoc
@@ -30,18 +26,16 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR) -I$(EZOPTION_PARSER_DIR)
-CFLAGS=-L$(GRAVLIB_DIR) -L$(ZMQ_DIR)/src/.libs -L$(PROTOBUF_DIR)/src/.libs -L$(INIPARSE_DIR) -L$(SQLLIB_DIR)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src
+CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib 
 LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
-
-SRC=$(wildcard *.cpp)
-OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
-DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
-OUTPUT=$(patsubst %.cpp,%$(OS_EXE_EXT),$(SRC))
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
+
+# Don't delete generated .cc files so that eclipse (or any ide) is happy
+.PRECIOUS: %.pb.cc
 
 all: $(PROTO_OBJ) ProtobufDataProductPublisher$(OS_EXE_EXT) ProtobufDataProductSubscriber$(OS_EXE_EXT)
 
@@ -52,26 +46,20 @@ all: $(PROTO_OBJ) ProtobufDataProductPublisher$(OS_EXE_EXT) ProtobufDataProductS
 	$(CC) -c -o $@ $< $(INCLUDES)
 
 #Compile each cpp file to a separate executable.  
-ProtobufDataProductPublisher$(OS_EXE_EXT):ProtobufDataProductPublisher.cpp $(DEPS) $(GRAVLIB_DIR)/libgravity.a
+ProtobufDataProductPublisher$(OS_EXE_EXT):ProtobufDataProductPublisher.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
-ProtobufDataProductSubscriber$(OS_EXE_EXT):ProtobufDataProductSubscriber.cpp $(DEPS) $(GRAVLIB_DIR)/libgravity.a
+ProtobufDataProductSubscriber$(OS_EXE_EXT):ProtobufDataProductSubscriber.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 	
-components: ServiceDirectory$(OS_EXE_EXT) ConfigService$(OS_EXE_EXT)
+components: ServiceDirectory$(OS_EXE_EXT)
 
 ServiceDirectory$(OS_EXE_EXT):
 	cd $(SERVICEDIRECTORY_LOCATION); \
 	make
 
-ConfigService$(OS_EXE_EXT):
-	cd $(CONFIGSERVER_LOCATION); \
-	make
-	
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
+	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*pb.h $(MYPROTO_DIR)/*pb.cc ProtobufDataProductSubscriber$(OS_EXE_EXT) ProtobufDataProductPublisher$(OS_EXE_EXT)
 
 run: components ProtobufDataProductPublisher$(OS_EXE_EXT) ProtobufDataProductSubscriber$(OS_EXE_EXT)
-	$(SERVICEDIRECTORY_LOCATION)/ServiceDirectory$(OS_EXE_EXT) &
-	ProtobufDataProductPublisher$(OS_EXE_EXT) &
-	ProtobufDataProductSubscriber$(OS_EXE_EXT) &
+	./run.sh

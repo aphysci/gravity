@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <GravityNode.h>
 #include <GravityLogger.h>
 #include <Utility.h>
@@ -44,8 +45,9 @@ int main()
 		//Create a data product to send across the network of type "HelloWorldDataProduct"
 		GravityDataProduct helloWorldDataProduct(dataProductID);
 		//This is going to be a raw data product (ie not using protobufs).  
-		std::string data = "Hello World";
-		helloWorldDataProduct.setData((void*)data.c_str(), data.length());
+		char data[20];
+		sprintf(data, "Hello World #%d", count++);
+		helloWorldDataProduct.setData((void*)data, strlen(data));
 		
 		//Publish the  data product.  
 		ret = gn.publish(helloWorldDataProduct);
