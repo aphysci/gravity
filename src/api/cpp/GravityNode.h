@@ -90,7 +90,7 @@ private:
     string getIP(); ///< Utility method to get the host machine's IP address
     void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
-    GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
+    GravityReturnCode sendRequestsToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
     		int timeout_in_milliseconds, int retries);
     GravityReturnCode sendRequestToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
     		int timeout_in_milliseconds);

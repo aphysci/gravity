@@ -265,7 +265,7 @@ void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct&
     zmq_msg_close(&data);
 }
 
-GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const GravityDataProduct& request,
+GravityReturnCode GravityNode::sendRequestsToServiceProvider(string url, const GravityDataProduct& request,
         GravityDataProduct& response, int timeout_in_milliseconds, int retries)
 {
     GravityReturnCode ret = GravityReturnCodes::FAILURE;
@@ -350,7 +350,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	                ":" << serviceDirectoryNode.port;
 	string serviceDirectoryURL = ss.str();
 
-	return sendRequestToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
+	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType)
@@ -788,7 +788,7 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	if(ret != GravityReturnCodes::SUCCESS)
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 
-	shared_ptr<GravityDataProduct> response(new GravityDataProduct());
+	shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);

@@ -58,7 +58,7 @@ namespace gravity {
     };
 
 class GravityNode {
-public:    
+public:
 	GravityNode();
 	~GravityNode();
     GravityReturnCode init(std::string);
@@ -84,6 +84,12 @@ public:
     
     GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, unsigned long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
+
+    std::string getStringParam(std::string key, std::string default_value = "");
+    int getIntParam(std::string key, int default_value = -1);
+    double getFloatParam(std::string key, double default_value = 0.0);
+    bool getBoolParam(std::string key, bool default_value = false);
+
 };
 
 };
