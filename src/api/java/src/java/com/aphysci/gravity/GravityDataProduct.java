@@ -6,7 +6,11 @@ package com.aphysci.gravity;
 import com.aphysci.gravity.protobuf.GravityDataProductContainer.GravityDataProductPB;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Message;
+import com.google.protobuf.Message;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.ByteArrayOutputStream;
+
 
 /**
  * @author mbarger
@@ -114,9 +118,17 @@ public class GravityDataProduct {
      * @param data Google Protocol Buffer Message object to populate
      * @return success flag
      */
-    public GeneratedMessage populateMessage(GeneratedMessage data) {
-    	// TODO: fill in this stub
-    	return null;
+    public boolean populateMessage(Message.Builder data) {
+    	try
+    	{
+    		byte[] data_temp = gdp.build().toByteArray();
+    		data.mergeFrom(data_temp);
+    		return true;
+    	}
+    	catch(InvalidProtocolBufferException e)
+    	{
+    		return false;
+    	}
     }
 
     /**
