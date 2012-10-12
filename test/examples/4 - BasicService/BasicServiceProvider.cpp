@@ -26,7 +26,7 @@ shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const Grav
 	MultiplicationOperandsPB params;
 	dataProduct.populateMessage(params);
 
-	Log::message("%d x %d", params.multiplicand_a(), params.multiplicand_b());
+	Log::message("Request received: %d x %d", params.multiplicand_a(), params.multiplicand_b());
 	
 	//Do the calculation
 	int result = params.multiplicand_a() * params.multiplicand_b();

@@ -24,7 +24,7 @@ void MultiplicationRequestor::requestFilled(string serviceID, string requestID, 
 	response.populateMessage(result);
 	
 	//Write the answer
-	Log::message("%s: %d", requestID.c_str(), result.result());
+	Log::message("Asynchronous response received: %s = %d", requestID.c_str(), result.result());
 	
 	gotAsyncMessage = true;
 }
@@ -41,18 +41,18 @@ int main()
 	/////////////////////////////
 	// Set up the first multiplication request
 	MultiplicationRequestor requestor;
-	
+
 	GravityDataProduct multRequest1("Multiplication");
 	MultiplicationOperandsPB params1;
 	params1.set_multiplicand_a(8);
 	params1.set_multiplicand_b(2);
 	multRequest1.setData(params1);
 	
-	// Make an Asyncronous request for multiplication
+	// Make an Asynchronous request for multiplication
 	gn.request("Multiplication", //Service Name
 				multRequest1, //Request
-				requestor, //Object containing callback that will get the result.  
-				"8 x 2"); //A string that identifies which request this is.  
+				requestor, //Object containing callback that will get the result.
+				"8 x 2"); //A string that identifies which request this is.
 
 	/////////////////////////////////////////
 	//Set up the second multiplication request
@@ -75,7 +75,7 @@ int main()
 		MultiplicationResultPB result;
 		multSync->populateMessage(result);
 		
-		Log::message("5 x 7 = %d", result.result());
+		Log::message("Synchronous response received: 5 x 7 = %d", result.result());
 	}
 
 	/////////////////////////////////////////
