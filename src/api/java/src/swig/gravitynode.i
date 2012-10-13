@@ -77,6 +77,7 @@ public:
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
 	GravityReturnCode request(const std::string& connectionURL, const std::string& serviceID, const const gravity::GravityDataProduct& dataProduct,
             const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
+    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
             
     GravityReturnCode registerService(const std::string& serviceID, short networkPort,
             const std::string& transportType, const gravity::GravityServiceProvider& server);

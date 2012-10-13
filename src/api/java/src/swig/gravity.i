@@ -138,7 +138,7 @@
 %typemap(javadirectorout) char *BYTE "$javacall"
 
 /*****
- * typemaps to convert handle return of GDP from java method
+ * typemaps to convert handle return of GDP from java method so that it can travel across jni boundary as a byte[]
  ******/
 %typemap(directorout) shared_ptr<gravity::GravityDataProduct> {
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
@@ -150,15 +150,25 @@
 }
 %typemap(javadirectorout) shared_ptr<gravity::GravityDataProduct> "$javacall"
 %typemap(jni) shared_ptr<gravity::GravityDataProduct> "jbyteArray"
-%typemap(jstype) shared_ptr<gravity::GravityDataProduct> "byte[]"
 %typemap(jtype) shared_ptr<gravity::GravityDataProduct> "byte[]"
+%typemap(jstype) shared_ptr<gravity::GravityDataProduct> "byte[]"
 %typemap(javaout) shared_ptr<gravity::GravityDataProduct> {
     return $jnicall;
   }
+
 %typemap(javain) shared_ptr<gravity::GravityDataProduct> "$javainput"
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
 %typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
 
+/******
+ * When gravity::GravityNode::request returns shared_ptr<GravityDataProduct> though, we want to
+ * convert that to a GravityDataProduct on the java side of the JNI interface so that users
+ * get a GDP rather than a byte[]. 
+ ******/
+%typemap(jstype) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request "GravityDataProduct"
+%typemap(javaout) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request {
+    return new GravityDataProduct($jnicall);
+  }
 
 %include "modulecode.i"
 %include "logger.i"
