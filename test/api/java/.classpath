@@ -4,5 +4,6 @@
 	<classpathentry kind="lib" path="gravitytest.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GravityJavaAPI"/>
+	<classpathentry kind="lib" path="/ThirdParty/protobuf-2.4.1/java/target/protobuf-java-2.4.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

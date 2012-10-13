@@ -1,0 +1,11 @@
+option optimize_for = SPEED;
+option java_outer_classname = "JavaTestContainer";
+option java_package = "com.aphysci.gravity.protobuf";
+
+package gravity;
+
+message JavaTestPB
+{
+	optional uint64 count = 1;
+	optional string message = 2;
+}

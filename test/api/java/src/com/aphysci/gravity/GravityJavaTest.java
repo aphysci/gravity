@@ -1,6 +1,7 @@
 
 package com.aphysci.gravity;
 
+import com.aphysci.gravity.protobuf.JavaTestContainer.JavaTestPB;
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
 import com.aphysci.gravity.swig.Log;
@@ -29,6 +30,10 @@ public class GravityJavaTest {
   
         GravityDataProduct gdp = new GravityDataProduct("JavaGDP");
         gdp.setSoftwareVersion("version 1");
+        JavaTestPB.Builder builder = JavaTestPB.newBuilder();
+        builder.setCount(100);
+        builder.setMessage("Hello Java World");
+        gdp.setData(builder.build());
         
         ret = node.publish(gdp, "Java");
         
@@ -81,6 +86,13 @@ public class GravityJavaTest {
 		public void subscriptionFilled(GravityDataProduct dataProduct) {
 			subCalled = true;
 			testAssert(dataProduct.getDataProductID().equals("JavaGDP"));
+			testAssert(dataProduct.getSoftwareVersion().equals("version 1"));
+
+			JavaTestPB.Builder builder = JavaTestPB.newBuilder();
+			dataProduct.populateMessage(builder);
+			JavaTestPB pb = builder.build();
+			testAssert(pb.getCount() == 100);
+			testAssert(pb.getMessage().equals("Hello Java World"));
 		}
     }
     
