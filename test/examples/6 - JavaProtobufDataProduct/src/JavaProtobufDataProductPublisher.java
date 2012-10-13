@@ -11,7 +11,7 @@ public class JavaProtobufDataProductPublisher {
 		
 		GravityNode gn = new GravityNode();
 		//Initialize gravity, giving this node a componentID.
-		gn.init("JavaProtobufDataProducts");
+		gn.init("JavaProtobufDataProductPublisher");
 		
 		gn.registerDataProduct(
 				//This identifies the Data Product to the service directory so that others can 

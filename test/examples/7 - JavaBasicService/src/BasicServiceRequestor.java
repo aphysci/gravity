@@ -1,6 +1,3 @@
-import Multiplication.MultiplicationOperandsPB;
-import Multiplication.MultiplicationResultPB;
-
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.swig.GravityNode;
@@ -14,7 +11,7 @@ class MultiplicationRequestor implements GravityRequestor
 	public void requestFilled(String serviceID, String requestID, GravityDataProduct response)
 	{
 		//Parse the message into a protobuf.  
-		Multiplication.MultiplicationResultPB result;
+		Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
 		response.populateMessage(result);
 		
 		//Write the answer
@@ -34,9 +31,10 @@ public class BasicServiceRequestor {
 	
 	/**
 	 * @param args
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) {
-		GravityNode gn;
+	public static void main(String[] args) throws InterruptedException {
+		GravityNode gn = new GravityNode();
 		//Initialize gravity, giving this node a componentID.  
 		gn.init("MultiplicationRequestor");
 		
@@ -66,22 +64,22 @@ public class BasicServiceRequestor {
 		params2.setMultiplicandA(5);
 		params2.setMultiplicandB(7);
 		multRequest2.setData(params2.build());
-		
-		//Make a Synchronous request for multiplication
-		GravityDataProduct multSync = gn.request("Multiplication", //Service Name
-															multRequest2, //Request
-															1000); //Timeout in milliseconds
-		if(multSync == null)
-		{
-			Log.critical("Request Returned NULL!");
-		}
-		else
-		{
-			Multiplication.MultiplicationResultPB result;
-			multSync.populateMessage(result);
-			
-			Log.message(String.format("5 x 7 = %d", result.getResult()));
-		}
+
+//		//Make a Synchronous request for multiplication
+//		GravityDataProduct multSync = gn.request("Multiplication", //Service Name
+//															multRequest2, //Request
+//															1000); //Timeout in milliseconds
+//		if(multSync == null)
+//		{
+//			Log.critical("Request Returned NULL!");
+//		}
+//		else
+//		{
+//			Multiplication.MultiplicationResultPB result;
+//			multSync.populateMessage(result);
+//			
+//			Log.message(String.format("5 x 7 = %d", result.getResult()));
+//		}
 
 		/////////////////////////////////////////
 		//Wait for the Asynchronous message to come in.  

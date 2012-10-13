@@ -14,13 +14,13 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 	public GravityDataProduct request(GravityDataProduct dataProduct)
 	{
 		//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.  
-		if(dataProduct.getDataProductID() != "Multiplication") {
-			Log.critical("Request is not for multiplication!");
+		if(!dataProduct.getDataProductID().equals("Multiplication")) {
+			Log.critical(String.format("Request is not for %s, not Multiplication!", dataProduct.getDataProductID()));
 			return new GravityDataProduct("BadRequest");
 		}
 
 		//Get the parameters for this request.  
-		Multiplication.MultiplicationOperandsPB params;
+		Multiplication.MultiplicationOperandsPB.Builder params = Multiplication.MultiplicationOperandsPB.newBuilder();
 		dataProduct.populateMessage(params);
 
 		Log.message(String.format("%d x %d", params.getMultiplicandA(), params.getMultiplicandB()));

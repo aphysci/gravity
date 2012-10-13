@@ -1,5 +1,3 @@
-import java.util.logging.Formatter;
-
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.swig.GravityNode;
@@ -7,36 +5,37 @@ import com.aphysci.gravity.swig.Log;
 import com.aphysci.gravity.swig.Log.LogLevel;
 
 
-public class JavaProtobufDataProductSubscriber {
-
-	class SimpleGravityCounterSubscriber implements GravitySubscriber
+class SimpleGravityCounterSubscriber implements GravitySubscriber
+{
+	@Override
+	public void subscriptionFilled(GravityDataProduct dataProduct)
 	{
-		@Override
-		public void subscriptionFilled(GravityDataProduct dataProduct)
-		{
-			//Get the protobuf object from the message
-			BasicCounterDataProduct.BasicCounterDataProductPB counterDataPB = new BasicCounterDataProduct.BasicCounterDataProductPB(true);
-			dataProduct.populateMessage(counterDataPB);
-			
-			//Process the message
-			Log.message(String.format("Current Count: %d", counterDataPB.getCount()));
-		}
+		//Get the protobuf object from the message
+		BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
+		if(!dataProduct.populateMessage(counterDataPB))
+			Log.message(String.format("Error Parsing Message"));
+		
+		//Process the message
+		Log.message(String.format("Current Count: %d", counterDataPB.getCount()));
 	}
+}
 
+
+public class JavaProtobufDataProductSubscriber {
 	
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {		
-		GravityNode gn;
+	public static void main(String[] args) {
+		GravityNode gn = new GravityNode();
 		//Initialize gravity, giving this node a componentID.  
-		gn.init("SimpleGravityComponentID2");
+		gn.init("JavaProtobufDataProductSubscriber");
 
 		//Tell the logger to also log to the console.  
 		Log.initAndAddConsoleLogger(LogLevel.MESSAGE);
 		
 		//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
-		SimpleGravityCounterSubscriber counterSubscriber;
+		SimpleGravityCounterSubscriber counterSubscriber = new SimpleGravityCounterSubscriber();
 		//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  
 		gn.subscribe("BasicCounterDataProduct", counterSubscriber); 
 
