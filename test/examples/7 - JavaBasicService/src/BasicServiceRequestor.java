@@ -49,7 +49,7 @@ public class BasicServiceRequestor {
 		Multiplication.MultiplicationOperandsPB.Builder params1 = Multiplication.MultiplicationOperandsPB.newBuilder();
 		params1.setMultiplicandA(8);
 		params1.setMultiplicandB(2);
-		multRequest1.setData(params1.build());
+		multRequest1.setData(params1);
 		
 		// Make an Asyncronous request for multiplication
 		gn.request("Multiplication", //Service Name
@@ -63,23 +63,23 @@ public class BasicServiceRequestor {
 		Multiplication.MultiplicationOperandsPB.Builder params2 = Multiplication.MultiplicationOperandsPB.newBuilder();
 		params2.setMultiplicandA(5);
 		params2.setMultiplicandB(7);
-		multRequest2.setData(params2.build());
+		multRequest2.setData(params2);
 
-//		//Make a Synchronous request for multiplication
-//		GravityDataProduct multSync = gn.request("Multiplication", //Service Name
-//															multRequest2, //Request
-//															1000); //Timeout in milliseconds
-//		if(multSync == null)
-//		{
-//			Log.critical("Request Returned NULL!");
-//		}
-//		else
-//		{
-//			Multiplication.MultiplicationResultPB result;
-//			multSync.populateMessage(result);
-//			
-//			Log.message(String.format("5 x 7 = %d", result.getResult()));
-//		}
+		//Make a Synchronous request for multiplication
+		GravityDataProduct multSync = gn.request("Multiplication", //Service Name
+															multRequest2, //Request
+															1000); //Timeout in milliseconds
+		if(multSync == null)
+		{
+			Log.critical("Request Returned NULL!");
+		}
+		else
+		{
+			Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
+			multSync.populateMessage(result);
+			
+			Log.message(String.format("5 x 7 = %d", result.getResult()));
+		}
 
 		/////////////////////////////////////////
 		//Wait for the Asynchronous message to come in.  

@@ -33,7 +33,7 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 		resultPB.setResult(result);
 		
 		GravityDataProduct resultDP = new GravityDataProduct("MultiplicationResult");
-		resultDP.setData(resultPB.build());
+		resultDP.setData(resultPB);
 
 		return resultDP;
 	}
