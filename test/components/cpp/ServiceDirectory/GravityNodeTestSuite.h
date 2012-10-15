@@ -181,6 +181,9 @@ public:
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     	sleep(2);
 
+    	shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp);
+    	TS_ASSERT_EQUALS(retGDP->getDataProductID(), "RESPONSE");
+
     	ret = node.unregisterService("SERVICE_TEST");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
