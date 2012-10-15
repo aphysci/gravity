@@ -72,7 +72,7 @@ public class GravityJavaTest {
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerService("SyncJavaService", (short)8888, "tcp", new SyncServiceProvider());
+        ret = node.registerService("SyncJavaService", (short)8889, "tcp", new SyncServiceProvider());
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityDataProduct syncRequest = new GravityDataProduct("SyncJavaRequest");
@@ -127,7 +127,6 @@ public class GravityJavaTest {
 
 		@Override
 		public GravityDataProduct request(GravityDataProduct dataProduct) {
-			provCalled = true;
 			testAssert(dataProduct.getDataProductID().equals("SyncJavaRequest"));
 			return new GravityDataProduct("SyncJavaResponse");
 		}
