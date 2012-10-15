@@ -6,6 +6,7 @@ JAVA_BUILD_DIR=build
 SRC_DIR=src
 PROTOBUF_SRC_DIR=../protobuf
 PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
+PROTOC=$(PROTOBUF_DIR)/src/protoc
 CLASSPATH="$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar;$(GRAVITY_JAVA_DIR)/gravity.jar;build;."
 
 JAVA_SRC=$(wildcard $(SRC_DIR)/*.java)
@@ -20,7 +21,7 @@ OUTPUT_JAR=JavaProtobufDataProduct.jar
 
 $(PROTOBUF_SRC_DIR)/%.java:$(PROTOBUF_SRC_DIR)/%.proto
 	@echo "Building " $<
-	@protoc --proto_path=$(PROTOBUF_SRC_DIR) --java_out=$(PROTOBUF_SRC_DIR) $<
+	@$(PROTOC) --proto_path=$(PROTOBUF_SRC_DIR) --java_out=$(PROTOBUF_SRC_DIR) $<
 
 $(JAVA_BUILD_DIR)/%.class:$(SRC_DIR)/%.java $(PROTO_JAVA)
 	@echo $<
@@ -34,12 +35,10 @@ $(OUTPUT_JAR): $(JAVA_CLASS)
 all: $(OUTPUT_JAR)
 
 run: $(OUTPUT_JAR)
-	java -cp $(OUTPUT_JAR) -cp $(CLASSPATH) -Djava.library.path="$(GRAVITY_JAVA_DIR);$(THIRDPARTY_DIR)/bin" JavaProtobufDataProductPublisher &
-	sleep 1
-	java -cp $(OUTPUT_JAR) -cp $(CLASSPATH) -Djava.library.path="$(GRAVITY_JAVA_DIR);$(THIRDPARTY_DIR)/bin" JavaProtobufDataProductSubscriber &
+	./run.sh
 
 $(JAVA_BUILD_DIR):
 	@mkdir -p $(JAVA_BUILD_DIR)
 
 clean:
-	rm $(JAVA_BUILD_DIR)/*.class $(OUTPUT_JAR) $(PROTO_JAVA)
+	rm -rf $(JAVA_BUILD_DIR)/*.class $(OUTPUT_JAR) $(PROTO_JAVA)
