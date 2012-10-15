@@ -148,6 +148,13 @@
     $result = ret;
     (jenv)->DeleteLocalRef(jBYTE);
 }
+%typemap(out) shared_ptr<gravity::GravityDataProduct> {
+  $result = JCALL1(NewByteArray, jenv, $1->getSize());
+  byte *bytes = new byte[$1->getSize()];
+  result->serializeToArray(bytes);
+  JCALL4(SetByteArrayRegion, jenv, $result, 0, $1->getSize(), (jbyte*)bytes);
+  delete bytes;
+}
 %typemap(javadirectorout) shared_ptr<gravity::GravityDataProduct> "$javacall"
 %typemap(jni) shared_ptr<gravity::GravityDataProduct> "jbyteArray"
 %typemap(jtype) shared_ptr<gravity::GravityDataProduct> "byte[]"
