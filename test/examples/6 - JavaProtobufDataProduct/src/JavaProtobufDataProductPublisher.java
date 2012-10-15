@@ -40,7 +40,7 @@ public class JavaProtobufDataProductPublisher {
 			counterDataPB.setCount(count);
 			
 			//Put message into data product
-			counterDataProduct.setData(counterDataPB.build());
+			counterDataProduct.setData(counterDataPB);
 
 			//Publish the data product.  
 			gn.publish(counterDataProduct);

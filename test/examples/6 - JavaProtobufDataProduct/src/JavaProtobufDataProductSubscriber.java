@@ -13,7 +13,7 @@ class SimpleGravityCounterSubscriber implements GravitySubscriber
 		//Get the protobuf object from the message
 		BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
 		if(!dataProduct.populateMessage(counterDataPB))
-			Log.message(String.format("Error Parsing Message"));
+			Log.message("Error Parsing Message");
 		
 		//Process the message
 		Log.message(String.format("Current Count: %d", counterDataPB.getCount()));

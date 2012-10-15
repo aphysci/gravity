@@ -33,7 +33,7 @@ public class GravityJavaTest {
         JavaTestPB.Builder builder = JavaTestPB.newBuilder();
         builder.setCount(100);
         builder.setMessage("Hello Java World");
-        gdp.setData(builder.build());
+        gdp.setData(builder);
         
         ret = node.publish(gdp, "Java");
         

@@ -5,7 +5,6 @@ package com.aphysci.gravity;
 
 import com.aphysci.gravity.protobuf.GravityDataProductContainer.GravityDataProductPB;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
@@ -85,8 +84,8 @@ public class GravityDataProduct {
      * Set the application-specific data for this data product
      * @param data A Google Protocol Buffer Message object containing the data
      */
-    public void setData(GeneratedMessage data) {
-    	gdp.setData(data.toByteString());
+    public void setData(Message.Builder data) {
+    	gdp.setData(data.build().toByteString());
     }
 
     /**
