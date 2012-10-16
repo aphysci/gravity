@@ -58,9 +58,12 @@ int main()
 	if(listen_for_heartbeat)
 		gn.registerHeartbeatListener("MiscGravityComponentID1", interval, hbl);
 
+	// IPC isn't supported in Windows.
+#ifndef WIN32
 	//Subscribe to the IPC data product.  
 	MiscGravitySubscriber ipcSubscriber;
 	gn.subscribe("ipc://IPCDataProduct", "IPCDataProduct", ipcSubscriber);
+#endif
 	
 	gn.waitForExit();
 }

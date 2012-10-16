@@ -21,11 +21,17 @@ int main()
 	//Start a heartbeat that other components can listen to, telling them we're alive.  
 	gn.startHeartbeat(interval);
 
+	// IPC isn't supported in Windows.
+#ifndef WIN32
 	//Register a data product that is very fast only for components on this same machine.  
 	gn.registerDataProduct("IPCDataProduct", 54531, "ipc");
+#endif
 	
-	while(true)
+	//Let this exit after a few seconds so the heartbeat listener in MiscComponent2 will be notified when it goes away.
+	int count = 5;
+	while(count-- > 0)
 	{
+#ifndef WIN32
 		//Publish the inter process communication data product.  
 		GravityDataProduct ipcDataProduct("IPCDataProduct");
 		
@@ -33,7 +39,7 @@ int main()
 		ipcDataProduct.setData(data.c_str(), data.length());
 		
 		gn.publish(ipcDataProduct);
-	
+#endif
 		gravity::sleep(1000);
 	}
 }
