@@ -27,8 +27,9 @@ void MiscGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataPro
 {
 	//Get a raw message
 	int size = dataProduct.getDataSize();
-	char* message = new char[size];
+	char* message = new char[size+1];
 	dataProduct.getData(message, size);
+	message[size] = 0; // null terminate
 	
 	//Output the message
 	Log::message("Got message: %s", message);
