@@ -63,7 +63,7 @@ int main()
 #ifndef WIN32
 	//Subscribe to the IPC data product.  
 	MiscGravitySubscriber ipcSubscriber;
-	gn.subscribe("ipc://IPCDataProduct", "IPCDataProduct", ipcSubscriber);
+	gn.subscribe("IPCDataProduct", ipcSubscriber);
 #endif
 	
 	gn.waitForExit();
