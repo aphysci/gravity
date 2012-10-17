@@ -1,7 +1,6 @@
 
 THIRDPARTY_DIR=../../../ThirdParty
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
-PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 JAVASRC_DIR=src
 GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
 PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
@@ -20,11 +19,11 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	CLASSPATH="$(GRAVLIB);build;$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar"
+	CLASSPATH="$(GRAVLIB);build;$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar"
 	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	CLASSPATH=$(GRAVLIB):build:$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar
+	CLASSPATH=$(GRAVLIB):build:$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar
 	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/lib
 linux: all;
 else
@@ -45,7 +44,7 @@ $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
 
 $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	@echo $<
-	@javac -d $(JAVA_BUILD_DIR) -cp $(GRAVLIB):$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
+	@javac -d $(JAVA_BUILD_DIR) -cp $(GRAVLIB):$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
 
 $(LIB_NAME): $(PROTO_OBJ) $(OBJECTS) 
 	echo $(GRAVSRC_DIR)

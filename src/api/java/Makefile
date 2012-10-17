@@ -4,7 +4,6 @@ include autosrcs.mk
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
-PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 INIPARSER_DIR=$(THIRDPARTY_DIR)/iniparser
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
@@ -33,7 +32,7 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
-	CLASSPATH="$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar;build;."
+	CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar;build;."
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
 	OS_SPECIFIC_LIBFLAGS=-D_JNI_IMPLEMENTATION_ -Wl,--kill-at
 	LIB_EXT=dll
@@ -41,14 +40,14 @@ windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lrt 
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
-	CLASSPATH=$(PROTOBUF_DIR)/java/target/protobuf-java-2.4.1.jar:build:.
+	CLASSPATH=$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar:build:.
 	LIB_EXT=so
 linux: all;
 else
 	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_DIR)/src -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(THIRDPARTY_DIR)/include -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
 LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
 
