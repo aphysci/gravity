@@ -219,7 +219,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
     }
 
     size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
-    serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1);
+    serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1 - pos);
+
     if(serviceDirectoryNode.ipAddress == "")
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
