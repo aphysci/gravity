@@ -1013,9 +1013,13 @@ const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 {
 	assert(af == AF_INET); //We only support IPV4
 	
-	const char* new_src = (const char*)src;
+	unsigned short new_src[4];
+	new_src[0] = (uint8_t) ((char *) src)[0];
+	new_src[1] = (uint8_t) ((char *) src)[1];
+	new_src[2] = (uint8_t) ((char *) src)[2];
+	new_src[3] = (uint8_t) ((char *) src)[3];
 	std::stringstream ss;
-	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.  
+	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.
 	if(dest_length < (int) ss.str().length() + 1)
 		return NULL;
 	
