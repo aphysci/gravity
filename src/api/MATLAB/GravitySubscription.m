@@ -22,7 +22,21 @@ classdef GravitySubscription < handle
         end
         
         function gdp = getDataProduct(this, timeoutMS)
-            gdp = this.subscriber.getDataProduct(timeoutMS);            
+            gdp = [];
+            jgdp = this.subscriber.getDataProduct(timeoutMS);
+            if (~isempty(jgdp))
+                gdp = GravityDataProduct(jgdp.getDataProductID());            
+                gdp.setGravityDataProduct(jgdp);
+            end
+        end
+        
+        function gdps = getAllDataProducts(this)
+            dps = this.subscriber.getAllDataProducts();
+            gdps = cell(dps.size(),1);
+            for i = 1 : dps.size()
+                gdps{i} = GravityDataProduct(dps.get(i-1).getDataProductID());
+                gdps{i}.setGravityDataProduct(dps.get(i-1));
+            end
         end
         
         function dataProductID = getDataProductID(this)
