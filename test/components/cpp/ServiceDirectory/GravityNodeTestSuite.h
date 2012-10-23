@@ -31,6 +31,7 @@
 
 #include <iostream>
 #include "GravityNode.h"
+#include "GravityLogger.h"
 #include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
 #include "Utility.h"
@@ -76,7 +77,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -94,7 +95,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -115,7 +116,7 @@ public:
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	// Give the consumer thread time to start up
-    	sleep(2);
+    	sleep(200);
 
     	// Clear out subscription filled flag
     	clearSubFlag();
@@ -125,7 +126,7 @@ public:
     	ret = node.publish(gdp, "FILTER");
 
     	// Give it a couple secs
-    	sleep(2);
+    	sleep(200);
 
     	// Check for subscription filled
     	TS_ASSERT(subFilled());
@@ -137,7 +138,7 @@ public:
         ret = node.publish(gdp, "FIL");
 
         // Give it a couple secs
-        sleep(2);
+        sleep(200);
 
         // Since full filter text isn't there, sub should not be filled
         TS_ASSERT(!subFilled());
