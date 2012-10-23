@@ -87,6 +87,9 @@
       <AdditionalDependencies>iniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\ThirdParty\lib</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>buildproto.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\api\cpp\GravityConfigParser.cpp" />
