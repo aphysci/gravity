@@ -12,21 +12,21 @@
 #include <list>
 #include <map>
 #include "GravityDataProduct.h"
+#include "GravityNode.h"
 
 using namespace std;
 
 namespace gravity
 {
 
-class ServiceDirectory
+class ServiceDirectory : public GravityServiceProvider
 {
 private:
     map<string, list<string> > dataProductMap;
     map<string, string> serviceMap;
 public:
-    ServiceDirectory(const char* bind_address = "tcp://*:5555");
     virtual ~ServiceDirectory();
-    void start();
+    virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
 
 private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);

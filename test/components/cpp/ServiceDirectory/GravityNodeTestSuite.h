@@ -210,7 +210,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterService("TEST2");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     }
 
     void testDataProduct(void)

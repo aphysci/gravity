@@ -354,7 +354,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
-GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType)
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -394,7 +394,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
     node->socket = pubSocket;
     publishMap[dataProductID] = node;
 
-    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
+    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty() && addToDirectory)
     {
         // Create the object describing the data product to register
         ServiceDirectoryRegistrationPB registration;
@@ -462,7 +462,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     {
         ret = GravityReturnCodes::REGISTRATION_CONFLICT;
     }
-    else
+    else if (!serviceDirectoryNode.ipAddress.empty())
     {
         stringstream ss;
         ss << node->transport << "://" << node->ipAddress << ":" << node->port;
@@ -503,10 +503,8 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
                 switch (pb.returncode())
                 {
                 case ServiceDirectoryResponsePB::SUCCESS:
-                    ret = GravityReturnCodes::SUCCESS;
-                    break;
                 case ServiceDirectoryResponsePB::NOT_REGISTERED:
-                    ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+                    ret = GravityReturnCodes::SUCCESS;
                     break;
                 default:
                 	ret = GravityReturnCodes::FAILURE;
@@ -798,18 +796,24 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 }
 
 GravityReturnCode GravityNode::registerService(string serviceID, unsigned short networkPort,
-        string transportType, const GravityServiceProvider& server)
+        string transportType, const GravityServiceProvider& server, bool addToDirectory)
 {
 	// Build the connection string
 	stringstream ss;
 	string ipAddr = getIP();
 	ss << transportType << "://" << ipAddr << ":" << networkPort;
-	string connectionString = ss.str();
+
+	return registerService(serviceID, ss.str(), server, addToDirectory);
+}
+
+GravityReturnCode GravityNode::registerService(string serviceID, string connectionURL,
+    		const GravityServiceProvider& server, bool addToDirectory)
+{
 
 	// Send subscription details
 	sendStringMessage(serviceManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_SNDMORE);
-	sendStringMessage(serviceManagerSocket, connectionString, ZMQ_SNDMORE);
+	sendStringMessage(serviceManagerSocket, connectionURL, ZMQ_SNDMORE);
 
 	// Include the server
 	zmq_msg_t msg;
@@ -821,14 +825,14 @@ GravityReturnCode GravityNode::registerService(string serviceID, unsigned short 
 
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
-    serviceMap[serviceID] = connectionString;
+    serviceMap[serviceID] = connectionURL;
 
-    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
+    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty() && addToDirectory)
     {
         // Create the object describing the data product to register
         ServiceDirectoryRegistrationPB registration;
         registration.set_id(serviceID);
-        registration.set_url(connectionString);
+        registration.set_url(connectionURL);
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
 
         // Wrap request in GravityDataProduct
@@ -923,10 +927,8 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 			switch (pb.returncode())
 			{
 			case ServiceDirectoryResponsePB::SUCCESS:
-				ret = GravityReturnCodes::SUCCESS;
-				break;
 			case ServiceDirectoryResponsePB::NOT_REGISTERED:
-				ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+				ret = GravityReturnCodes::SUCCESS;
 				break;
 			default:
 				ret = GravityReturnCodes::FAILURE;

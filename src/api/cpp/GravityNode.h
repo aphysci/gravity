@@ -14,6 +14,7 @@
 #include "GravityHeartbeatListener.h"
 #include "GravityServiceProvider.h"
 #include <pthread.h>
+#include <iostream>
 
 //This is defined in Windows for NetBIOS in nb30.h  
 #ifdef DUPLICATE
@@ -218,29 +219,42 @@ public:
      */
 
     /**
-     * Register a data product with the Gravity Directory Service, making it available to the
+     * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
      * \param dataProductID string ID used to uniquely identify this published data product
      * \param networkPort network port on which this data product is made available
      * \param transport type (e.g. 'tcp', 'ipc')
+     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType);
+    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory = true);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
      */
     GravityReturnCode unregisterDataProduct(string dataProductID);
     /**
-     * Register as a service provider with the Gravity Service Directory
+     * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
      * \param networkPort network port on which this provider will listen for requests
      * \param transport type for requests (e.g. 'tcp', 'ipc')
      * \param server object implementing the GravityServiceProvider interface that will be notified of requests
+     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
     GravityReturnCode registerService(string serviceID, unsigned short networkPort,
-            string transportType, const GravityServiceProvider& server);
+            string transportType, const GravityServiceProvider& server, bool addToDirectory = true);
+
+    /**
+     * Register as a service provider with Gravity, and optionally, the Service Directory
+     * \param serviceID Unique ID with which to register this service
+     * \param connectionURL connection string on which service provider will listen for requests
+     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
+     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
+     * \return success flag
+     */
+    GravityReturnCode registerService(string serviceID, string connectionURL,
+    		const GravityServiceProvider& server, bool addToDirectory = true);
 
     /**
      * Unregister as a service provider with the Gravity Service Directory
