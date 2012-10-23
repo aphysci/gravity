@@ -24,7 +24,7 @@ public:
     /**
      * Default destructor
      */
-    virtual ~GravityServiceProvider();
+    GRAVITY_API virtual ~GravityServiceProvider();
 
     /**
      * Called when a request is made through the Gravity infrastructure

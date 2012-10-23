@@ -13,8 +13,8 @@
 #include "GravityRequestor.h"
 #include "GravityHeartbeatListener.h"
 #include "GravityServiceProvider.h"
+#include "Utility.h"
 #include <pthread.h>
-#include <iostream>
 
 //This is defined in Windows for NetBIOS in nb30.h  
 #ifdef DUPLICATE
@@ -31,7 +31,7 @@ namespace gravity
 
 using namespace std;
 
-extern std::string emptyString; //This allows us to use default parameters inside a dll.
+GRAVITY_API extern std::string emptyString; //This allows us to use default parameters inside a dll.
 
 /**
  * Enumerated Type for Gravity Return Codes
@@ -111,23 +111,23 @@ public:
     /**
      * Default Constructor
      */
-    GravityNode();
+    GRAVITY_API GravityNode();
 
     /**
      * Default Destructor
      */
-    virtual ~GravityNode();
+    GRAVITY_API virtual ~GravityNode();
 
     /**
      * Initialize the Gravity infrastructure.
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
-    GravityReturnCode init(std::string componentID);
+    GRAVITY_API GravityReturnCode init(std::string componentID);
 
     /**
      * Wait for the GravityNode to exit.
      */
-    void waitForExit();
+    GRAVITY_API void waitForExit();
 
     /**
      * Setup a subscription to a data product through the Gravity Service Directory.
@@ -136,7 +136,7 @@ public:
      * \param filter text filter to apply to subscription
      * \return success flag
      */
-    GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = emptyString);
+    GRAVITY_API GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = emptyString);
 
     /**
      * Setup a subscription to a data product through direct connection to known producer
@@ -146,7 +146,7 @@ public:
      * \param filter text filter to apply to subscription
      * \return success flag
      */
-    GravityReturnCode subscribe(string connectionURL, string dataProductID,
+    GRAVITY_API GravityReturnCode subscribe(string connectionURL, string dataProductID,
             const GravitySubscriber& subscriber, string filter = emptyString);
 
     /**
@@ -156,14 +156,14 @@ public:
      * \param filter text filter associated with the subscription to cancel
      * \return success flag
      */
-    GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter=emptyString);
+    GRAVITY_API GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter=emptyString);
 
     /**
      * Publish a data product
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
      * \return success flag
      */
-    GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = emptyString);
+    GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = emptyString);
 
     /**
      * Make a request against a service provider through the Gravity Service Directory
@@ -174,7 +174,7 @@ public:
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return success flag
      */
-    GravityReturnCode request(string serviceID, const GravityDataProduct& request,
+    GRAVITY_API GravityReturnCode request(string serviceID, const GravityDataProduct& request,
             const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
     /**
      * Make a request against a service provider directly
@@ -186,7 +186,7 @@ public:
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return success flag
      */
-    GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
+    GRAVITY_API GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
 
     /**
@@ -196,22 +196,22 @@ public:
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
-    shared_ptr<GravityDataProduct> request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds = -1);
+    GRAVITY_API shared_ptr<GravityDataProduct> request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds = -1);
 
     /**
      * Starts a heart beat for this gravity process.
      */
-    GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
+    GRAVITY_API GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
 
-    std::string getStringParam(std::string key, std::string default_value = "");
-    int getIntParam(std::string key, int default_value = -1);
-    double getFloatParam(std::string key, double default_value = 0.0);
-    bool getBoolParam(std::string key, bool default_value = false);
+    GRAVITY_API std::string getStringParam(std::string key, std::string default_value = "");
+    GRAVITY_API int getIntParam(std::string key, int default_value = -1);
+    GRAVITY_API double getFloatParam(std::string key, double default_value = 0.0);
+    GRAVITY_API bool getBoolParam(std::string key, bool default_value = false);
 
     /**
      * Get the ID of this gravity node (given in the init function).
      */
-    std::string getComponentID();
+    GRAVITY_API std::string getComponentID();
 
     /**
      * @name Registration functions
@@ -229,12 +229,12 @@ public:
      * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory = true);
+    GRAVITY_API GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory = true);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
      */
-    GravityReturnCode unregisterDataProduct(string dataProductID);
+    GRAVITY_API GravityReturnCode unregisterDataProduct(string dataProductID);
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
@@ -244,9 +244,8 @@ public:
      * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GravityReturnCode registerService(string serviceID, unsigned short networkPort,
+    GRAVITY_API GravityReturnCode registerService(string serviceID, unsigned short networkPort,
             string transportType, const GravityServiceProvider& server, bool addToDirectory = true);
-
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
@@ -255,19 +254,19 @@ public:
      * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GravityReturnCode registerService(string serviceID, string connectionURL,
+    GRAVITY_API GravityReturnCode registerService(string serviceID, string connectionURL,
     		const GravityServiceProvider& server, bool addToDirectory = true);
 
     /**
      * Unregister as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which the service was originially registered
      */
-    GravityReturnCode unregisterService(string serviceID);
+    GRAVITY_API GravityReturnCode unregisterService(string serviceID);
 
     /**
      * Registers a callback to be called when we don't get a heartbeat from another component.
      */
-    GravityReturnCode registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+    GRAVITY_API GravityReturnCode registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
 
     /** @} */ //Registration Functions
 };

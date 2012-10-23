@@ -17,7 +17,11 @@
 #endif
 #include <sstream>
 #include <signal.h>
+#ifndef __GNUC__
+#include <memory>
+#else
 #include <tr1/memory>
+#endif
 
 #include "GravitySubscriptionManager.h"
 #include "GravityPublishManager.h"
@@ -325,7 +329,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 		{
 			response.parseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -415,7 +419,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -488,7 +492,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -498,9 +502,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
                 switch (pb.returncode())
                 {
                 case ServiceDirectoryResponsePB::SUCCESS:
-                case ServiceDirectoryResponsePB::NOT_REGISTERED:
                     ret = GravityReturnCodes::SUCCESS;
                     break;
+                case ServiceDirectoryResponsePB::NOT_REGISTERED:
+					ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+					break;
                 default:
                 	ret = GravityReturnCodes::FAILURE;
                 	break;
@@ -542,7 +548,7 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
         {
             response.populateMessage(pb);
         }
-        catch (char* s)
+        catch (char*)
         {
             parserSuccess = false;
         }
@@ -698,7 +704,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 		{
 			responseDataProduct.populateMessage(pb);
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -839,7 +845,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, string connecti
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -903,7 +909,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 		{
 			response.populateMessage(pb);
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -913,8 +919,10 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 			switch (pb.returncode())
 			{
 			case ServiceDirectoryResponsePB::SUCCESS:
-			case ServiceDirectoryResponsePB::NOT_REGISTERED:
 				ret = GravityReturnCodes::SUCCESS;
+				break;
+			case ServiceDirectoryResponsePB::NOT_REGISTERED:
+				ret = GravityReturnCodes::REGISTRATION_CONFLICT;
 				break;
 			default:
 				ret = GravityReturnCodes::FAILURE;
@@ -930,6 +938,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
+void* Heartbeat(void* thread_context); //Forward Declaration (Needs to be in Gravity namespace).  
 GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
 {
 	if(interval_in_microseconds < 0)
@@ -941,8 +950,6 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	this->registerDataProduct(componentID, 54541, "tcp");
-
-	void* Heartbeat(void* thread_context); //Forward Declaration
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
@@ -959,7 +966,7 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
 {
 	void* HeartbeatListener(void*); //Forward declaration.
-	static Heartbeat hbSub;
+	static class Heartbeat hbSub;
 
 	if(hbSocket == NULL)
 	{

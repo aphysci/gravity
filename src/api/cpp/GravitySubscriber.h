@@ -25,7 +25,7 @@ public:
     /**
      * Default destructor
      */
-    virtual ~GravitySubscriber();
+    GRAVITY_API virtual ~GravitySubscriber();
 
     /**
      * Called on implementing object when a registered subscription is filled with 1 or more GravityDataProducts

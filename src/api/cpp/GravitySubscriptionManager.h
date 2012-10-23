@@ -11,7 +11,11 @@
 #include <zmq.h>
 #include <vector>
 #include <map>
+#ifndef __GNUC__
+#include <memory>
+#else
 #include <tr1/memory>
+#endif
 #include <string>
 #include "GravitySubscriber.h"
 

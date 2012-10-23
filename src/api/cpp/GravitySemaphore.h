@@ -2,6 +2,7 @@
 #define ZMQ_SEMEPHORE_H__
 #include <pthread.h>
 #include <semaphore.h>
+#include "Utility.h"
 
 namespace gravity
 {
@@ -9,11 +10,11 @@ namespace gravity
 class Semaphore
 {
 public:
-	Semaphore();
-	Semaphore(int count);
-	void Lock();
-	void Unlock();
-	~Semaphore();
+	GRAVITY_API Semaphore();
+	GRAVITY_API Semaphore(int count);
+	GRAVITY_API void Lock();
+	GRAVITY_API void Unlock();
+	GRAVITY_API ~Semaphore();
 private:
 	sem_t semaphore;
 };
