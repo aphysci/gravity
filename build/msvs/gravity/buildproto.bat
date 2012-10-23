@@ -1,0 +1,1 @@
+for %%i in (..\..\..\src\api\protobufs\*.proto) do ..\..\..\ThirdParty\protobuf-2.4.1\vsprojects\Release\protoc.exe --cpp_out=..\..\..\src\api\cpp\protobuf\ --proto_path=..\..\..\src\api\protobufs\ %%i

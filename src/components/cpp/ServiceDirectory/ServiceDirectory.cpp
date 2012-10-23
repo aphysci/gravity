@@ -5,8 +5,11 @@
  *      Author: Mark Barger
  */
 
-#include "ServiceDirectory.h"
 #include "GravityLogger.h"
+#include "GravityConfigParser.h"
+#include "ServiceDirectory.h"
+#include <GravityLogger.h>
+#include <IniParserWrap.h>
 
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
@@ -15,6 +18,7 @@
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
 
+#include "zmq.h"
 #include <stdlib.h>
 #include <string>
 #include <cstring>
@@ -22,60 +26,92 @@
 #include <algorithm>
 
 using namespace std;
-using namespace gravity;
 
 int main(void)
 {
-	GravityNode gn;
-	gn.init("ServiceDirectory");
+    IniConfigParser parser;
+    parser.Open("ServiceDirectory.ini");
+    gravity::Log::initAndAddFileLogger("ServiceDirectory.log", gravity::Log::LogStringToLevel(parser.getString("general:LocalLogLevel", "warning").c_str()));
+    gravity::Log::initAndAddConsoleLogger(gravity::Log::LogStringToLevel(parser.getString("general:LocalLogLevel", "warning").c_str()));
+    //Not logging to GravityLogRecorder for now because that relies on having a gravity node.
 
-	Log::initAndAddConsoleLogger(Log::LogStringToLevel(gn.getStringParam("LocalLogLevel", "warning").c_str()));
-
-    std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
-
-    Log::message("running with SD connection string: %s", sdURL.c_str());
-    ServiceDirectory serviceDirectory;
-	gn.registerService("ServiceDirectory", sdURL, serviceDirectory, false);
-
-	gn.waitForExit();
+    gravity::ServiceDirectory* serviceDirectory = new gravity::ServiceDirectory(parser.getString("ServiceDirectoryUrl", "tcp://*:5555").c_str());
+    serviceDirectory->start();
 }
 
 namespace gravity
 {
 
+ServiceDirectory::ServiceDirectory(const char* ba)
+{
+    bind_address = strdup(ba);
+}
+
 ServiceDirectory::~ServiceDirectory()
 {
 }
 
-shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
+void ServiceDirectory::start()
 {
-	shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
-    string requestType = dataProduct.getDataProductID();
+    Log::message("Starting Service Directory");
 
-    ///////////////////////////////////
-    // All requests are coming in via a single thread, so not performing any explicit
-    // synchronization here
-    if (requestType == "ComponentLookupRequest")
-    {
-        Log::trace("Handling lookup");
-        handleLookup(dataProduct, *gdpResponse);
-    }
-    else if (requestType == "RegistrationRequest")
-    {
-        Log::trace("Handling register");
-        handleRegister(dataProduct, *gdpResponse);
-    }
-    else if (requestType == "UnregistrationRequest")
-    {
-        Log::trace("Handling unregister");
-        handleUnregister(dataProduct, *gdpResponse);
-    }
-    else
-    {
-        Log::warning("unknown request type: %s", requestType.c_str());
-    }
+    Log::message("Initializing ZeroMQ");
+    void *context = zmq_init(1);
 
-    return gdpResponse;
+    //   Socket to talk to clients
+    void *socket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(socket, bind_address);
+    Log::message("Binding to %s", bind_address);
+    free(bind_address); //We don't need this guy any more.
+    bind_address = NULL;
+
+    zmq_msg_t request, response;
+    while (1)
+    {
+        zmq_msg_init(&request);
+        gravity::Log::debug("Waiting for lookup request...");
+        zmq_recvmsg(socket, &request, 0);
+        int size = zmq_msg_size(&request);
+        char* data = (char*) malloc((size + 1)*sizeof(char));
+        memcpy(data, zmq_msg_data(&request), size);
+        zmq_msg_close(&request);
+        Log::debug("received");
+
+        Log::debug("Setting up data products from data. ");
+        GravityDataProduct gdpRequest(data, size);
+        GravityDataProduct gdpResponse("DataProductRegistrationResponse");
+        string requestType = gdpRequest.getDataProductID();
+		free(data);
+
+        if (requestType == "ComponentLookupRequest")
+        {
+            Log::trace("Handling lookup");
+            handleLookup(gdpRequest, gdpResponse);
+        }
+        else if (requestType == "RegistrationRequest")
+        {
+            Log::trace("Handling register");
+            handleRegister(gdpRequest, gdpResponse);
+        }
+        else if (requestType == "UnregistrationRequest")
+        {
+            Log::trace("Handling unregister");
+            handleUnregister(gdpRequest, gdpResponse);
+        }
+        else
+        {
+            Log::warning("unknown request type: %s", requestType.c_str());
+        }
+
+        // Send reply back to client
+        Log::debug("Sending Response");
+        zmq_msg_init_size(&response, gdpResponse.getSize());
+        Log::trace("Serializing Message");
+        gdpResponse.serializeToArray(zmq_msg_data(&response));
+        Log::trace("Sending");
+        zmq_sendmsg(socket, &response, 0);
+        zmq_msg_close(&response);
+    }
 }
 
 void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDataProduct& response)

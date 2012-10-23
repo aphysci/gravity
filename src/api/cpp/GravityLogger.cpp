@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
+#include "Utility.h"
 
 using namespace std;
 using namespace gravity;
@@ -177,7 +178,6 @@ const char* Log::LogLevelToString(LogLevel level)
 
 Log::LogLevel Log::LogStringToLevel(const char* level)
 {
-	void StringToLowerCase(char* str, int leng);
     char* llevel = strdup(level);
     StringToLowerCase(llevel, strlen(llevel));
     if(strcmp(llevel, "fatal") == 0)

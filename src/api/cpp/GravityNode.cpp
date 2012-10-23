@@ -313,7 +313,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 		{
 			response.parseFromArray(zmq_msg_data(&resp), zmq_msg_size(&resp));
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -419,7 +419,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -493,7 +493,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -503,9 +503,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
                 switch (pb.returncode())
                 {
                 case ServiceDirectoryResponsePB::SUCCESS:
-                case ServiceDirectoryResponsePB::NOT_REGISTERED:
                     ret = GravityReturnCodes::SUCCESS;
                     break;
+                case ServiceDirectoryResponsePB::NOT_REGISTERED:
+					ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+					break;
                 default:
                 	ret = GravityReturnCodes::FAILURE;
                 	break;
@@ -547,7 +549,7 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
         {
             response.populateMessage(pb);
         }
-        catch (char* s)
+        catch (char*)
         {
             parserSuccess = false;
         }
@@ -712,7 +714,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 		{
 			responseDataProduct.populateMessage(pb);
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -853,7 +855,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, string connecti
             {
                 response.populateMessage(pb);
             }
-            catch (char* s)
+            catch (char*)
             {
                 parserSuccess = false;
             }
@@ -917,7 +919,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 		{
 			response.populateMessage(pb);
 		}
-		catch (char* s)
+		catch (char*)
 		{
 			parserSuccess = false;
 		}
@@ -927,8 +929,10 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 			switch (pb.returncode())
 			{
 			case ServiceDirectoryResponsePB::SUCCESS:
-			case ServiceDirectoryResponsePB::NOT_REGISTERED:
 				ret = GravityReturnCodes::SUCCESS;
+				break;
+			case ServiceDirectoryResponsePB::NOT_REGISTERED:
+				ret = GravityReturnCodes::REGISTRATION_CONFLICT;
 				break;
 			default:
 				ret = GravityReturnCodes::FAILURE;
