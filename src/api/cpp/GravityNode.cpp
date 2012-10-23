@@ -383,12 +383,10 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
     	ss << ":" << networkPort;
     string connectionURL = ss.str();
 
-    Log::message("about to send req tp pub mgr");
-
     // Send subscription details
 	sendStringMessage(publishManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
-	sendStringMessage(publishManagerSocket, connectionURL, ZMQ_SNDMORE);
+	sendStringMessage(publishManagerSocket, connectionURL, ZMQ_DONTWAIT);
 
     publishMap[dataProductID] = connectionURL;
 
@@ -462,7 +460,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     else
     {
     	sendStringMessage(publishManagerSocket, "unregister", ZMQ_SNDMORE);
-    	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
+    	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_DONTWAIT);
         publishMap[dataProductID] = "";
     }
 
@@ -599,7 +597,6 @@ void GravityNode::sendStringMessage(void* socket, string str, int flags)
 	zmq_msg_init_size(&msg, str.length());
 	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
 	int ret = zmq_sendmsg(socket, &msg, flags);
-	Log::warning("sending string %s, ret = %d", str.c_str(), ret);
 	zmq_msg_close(&msg);
 }
 
@@ -664,14 +661,13 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     dataProduct.setTimestamp(getCurrentTime());
 
 	// Send subscription details
-	sendStringMessage(publishManagerSocket, "request", ZMQ_SNDMORE);
-	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
+	sendStringMessage(publishManagerSocket, "publish", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, filterText, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, dataProduct.getSize());
 	dataProduct.serializeToArray(zmq_msg_data(&msg));
-	zmq_sendmsg(publishManagerSocket, &msg, ZMQ_SNDMORE);
+	zmq_sendmsg(publishManagerSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
     return GravityReturnCodes::SUCCESS;

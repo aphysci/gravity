@@ -6,6 +6,7 @@
  */
 
 #include "GravityServiceManager.h"
+#include "GravityLogger.h"
 #include <iostream>
 
 namespace gravity {

@@ -29,7 +29,7 @@ void GravityPublishManager::start()
 	// Messages
 	zmq_msg_t filter, message;
 
-	// Set up the inproc socket to subscribe and unsubscribe messages from
+	// Set up the inproc socket to subscribe and unsubscribe to messages from
 	// the GravityNode
 	gravityNodeSocket = zmq_socket(context, ZMQ_SUB);
 	zmq_connect(gravityNodeSocket, "inproc://gravity_publish_manager");
@@ -48,10 +48,8 @@ void GravityPublishManager::start()
 	// Process forever...
 	while (true)
 	{
-		Log::warning("pub mgr in main loop");
 		// Start polling socket(s), blocking while we wait
 		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
-		Log::warning("pub mgr in main loop 2");
 		if (rc == -1)
 		{
 			// Interrupted
@@ -61,10 +59,9 @@ void GravityPublishManager::start()
 		// Process new requests from the gravity node
 		if (pollItems[0].revents & ZMQ_POLLIN)
 		{
-			Log::warning("pub mgr received msg");
 			// Get new GravityNode request
 			string command = readStringMessage();
-			Log::warning("pub mgr received msg: %s", command.c_str());
+			Log::debug("pub mgr received msg: %s", command.c_str());
 
 			// message from gravity node should be either a register, unregister or publish request
 			if (command == "register")
@@ -142,8 +139,6 @@ void GravityPublishManager::ready()
 	// Send request to service provider
 	sendStringMessage(initSocket, "GravityPublishManager", ZMQ_DONTWAIT);
 
-	Log::warning("pub mgr started");
-
 	zmq_close(initSocket);
 }
 
@@ -182,8 +177,6 @@ void GravityPublishManager::registerDataProduct()
 
 	// Read the publish url
 	string connectionURL = readStringMessage();
-
-	Log::message("received register request for %s at %s", dataProductID.c_str(), connectionURL.c_str());
 
     // Create the publish socket
     void* pubSocket = zmq_socket(context, ZMQ_XPUB);
