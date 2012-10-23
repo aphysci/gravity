@@ -3,6 +3,7 @@ package com.aphysci.gravity.matlab;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityDataProduct;
 import java.util.Vector;
+import java.util.List;
 
 public class MATLABGravitySubscriber implements GravitySubscriber
 {
@@ -36,5 +37,20 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 		} while (timeoutMS != 0 && gdp == null);
 
 		return gdp;
+	}
+
+	public Vector<GravityDataProduct> getAllDataProducts()
+	{
+		@SuppressWarnings("unchecked") 
+		Vector<GravityDataProduct> ret = (Vector<GravityDataProduct>)data.clone();
+		data.clear();
+		return ret;
+	}
+
+	static public Double[] convertDoubleListToDoubleArray(List<Double> list)
+	{
+		Double[] a = new Double[list.size()];
+		list.toArray(a);
+		return a;
 	}
 }
