@@ -27,8 +27,9 @@ using namespace gravity;
 int main(void)
 {
 	GravityNode gn;
-    Log::initAndAddConsoleLogger(Log::MESSAGE);
 	gn.init("ServiceDirectory");
+
+	Log::initAndAddConsoleLogger(Log::LogStringToLevel(gn.getStringParam("LocalLogLevel", "warning").c_str()));
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
 
