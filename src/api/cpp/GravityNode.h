@@ -78,11 +78,13 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
 
     pthread_t subscriptionManagerThread;
+    pthread_t publishManagerThread;
     pthread_t requestManagerThread;
     pthread_t serviceManagerThread;
 
     void* context;
     void* subscriptionManagerSocket;
+    void* publishManagerSocket;
     void* requestManagerSocket;
     void* serviceManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
@@ -97,7 +99,7 @@ private:
     		int timeout_in_milliseconds);
 
     NetworkNode serviceDirectoryNode;
-    map<string,NetworkNode*> publishMap;
+    map<string,string> publishMap;
     map<string,string> serviceMap; ///< Maps serviceID to url
 
     std::string componentID;
