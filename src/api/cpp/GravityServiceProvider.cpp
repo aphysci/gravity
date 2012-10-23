@@ -6,6 +6,7 @@
  */
 
 #include "GravityServiceProvider.h"
+#include "Utility.h"
 
 namespace gravity {
 

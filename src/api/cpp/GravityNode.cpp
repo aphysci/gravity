@@ -17,7 +17,11 @@
 #endif
 #include <sstream>
 #include <signal.h>
+#ifndef __GNUC__
+#include <memory>
+#else
 #include <tr1/memory>
+#endif
 
 #include "GravitySubscriptionManager.h"
 #include "GravitySubscriptionManager.h"
@@ -948,6 +952,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
+void* Heartbeat(void* thread_context); //Forward Declaration (Needs to be in Gravity namespace).  
 GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
 {
 	if(interval_in_microseconds < 0)
@@ -959,8 +964,6 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	this->registerDataProduct(componentID, 54541, "tcp");
-
-	void* Heartbeat(void* thread_context); //Forward Declaration
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
@@ -977,7 +980,7 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
 {
 	void* HeartbeatListener(void*); //Forward declaration.
-	static Heartbeat hbSub;
+	static class Heartbeat hbSub;
 
 	if(hbSocket == NULL)
 	{
