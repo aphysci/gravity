@@ -502,11 +502,9 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
                 switch (pb.returncode())
                 {
                 case ServiceDirectoryResponsePB::SUCCESS:
+                case ServiceDirectoryResponsePB::NOT_REGISTERED:
                     ret = GravityReturnCodes::SUCCESS;
                     break;
-                case ServiceDirectoryResponsePB::NOT_REGISTERED:
-					ret = GravityReturnCodes::REGISTRATION_CONFLICT;
-					break;
                 default:
                 	ret = GravityReturnCodes::FAILURE;
                 	break;
@@ -919,10 +917,8 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 			switch (pb.returncode())
 			{
 			case ServiceDirectoryResponsePB::SUCCESS:
+            case ServiceDirectoryResponsePB::NOT_REGISTERED:
 				ret = GravityReturnCodes::SUCCESS;
-				break;
-			case ServiceDirectoryResponsePB::NOT_REGISTERED:
-				ret = GravityReturnCodes::REGISTRATION_CONFLICT;
 				break;
 			default:
 				ret = GravityReturnCodes::FAILURE;
