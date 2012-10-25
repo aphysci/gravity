@@ -58,7 +58,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\..\ThirdParty\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libiniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>iniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>

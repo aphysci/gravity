@@ -2,21 +2,21 @@
 #include <GravityConfigParser.h>
 #include <sstream>
 
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN //Smaller include
-#include <windows.h> //For Sleep
-#define sleep Sleep
-#endif
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wparentheses"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
-#include <ezOptionParser.hpp>
+#include <ezOptionParser.hpp> //This must be included before Windows.h because of #defines
 #pragma GCC diagnostic pop
 
+
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN //Smaller include
+#include <windows.h> //For Sleep
+#define sleep Sleep
+#endif
 
 class GravityArchiverConfigParser
 {

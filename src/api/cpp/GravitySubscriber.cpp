@@ -12,7 +12,7 @@ namespace gravity {
 using namespace std;
 
 GravitySubscriber::~GravitySubscriber() {}
-void GravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct) {}
+	void GravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) {}
 }
 
 

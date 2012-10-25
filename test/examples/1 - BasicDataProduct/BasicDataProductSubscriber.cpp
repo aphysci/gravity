@@ -9,7 +9,7 @@ using namespace gravity;
 class SimpleGravitySubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
+	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int main()
@@ -45,16 +45,20 @@ int main()
 	gn.unsubscribe("HelloWorldDataProduct", hwSubscriber);
 }
 
-void SimpleGravitySubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
+void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	//Get a raw message
-	int size = dataProduct.getDataSize();
-	char* message = new char[size+1];
-	dataProduct.getData(message, size);
-	message[size] = 0; // null terminate
-	
-	//Output the message
-	Log::message("Got message: %s", message);
-	//Don't forget to free the memory we allocated.  
-	delete message;
+	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+			i != dataProducts.end(); i++)
+	{
+		//Get a raw message
+		int size = (*i)->getDataSize();
+		char* message = new char[size+1];
+		(*i)->getData(message, size);
+		message[size] = 0; // null terminate
+		
+		//Output the message
+		Log::message("Got message: %s", message);
+		//Don't forget to free the memory we allocated.  
+		delete message;
+	}
 }

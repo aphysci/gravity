@@ -64,7 +64,7 @@ typedef struct NetworkNode
     void* socket;
 } NetworkNode;
 
-uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
+GRAVITY_API uint64_t getCurrentTime(); ///< Utility method to get the current system time in epoch milliseconds
 
 class GravityConfigParser;
 

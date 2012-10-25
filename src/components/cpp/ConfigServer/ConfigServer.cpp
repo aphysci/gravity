@@ -1,5 +1,6 @@
 #include <GravityNode.h>
 #include <GravityConfigParser.h>
+#include <IniParserWrap.h>
 #include <protobuf/ConfigRequest.pb.h>
 
 #include <iostream>
@@ -98,6 +99,5 @@ int main(int argc, const char** argv)
 
 	gn.registerService("ConfigService", 54542, "tcp", server);
 
-	while(true)
-		Sleep(2000000000);
+	gn.waitForExit();
 }

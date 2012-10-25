@@ -41,23 +41,26 @@ void Archiver::start()
 	grav_node->waitForExit();
 }
 
-void Archiver::subscriptionFilled(const GravityDataProduct& dataProduct)
+void Archiver::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
     try
     {
-		char messageData[1024];
-		int msg_size = 1024;
-		dataProduct.getData(messageData, msg_size); //Warning: This copies the data!!!
+		for(size_t i = 0; i < dataProducts.size(); i++)
+		{
+			char messageData[1024];
+			int msg_size = 1024;
+			dataProducts[i]->getData(messageData, msg_size); //Warning: This copies the data!!!
 
-		insert_stmt.reset();
-		insert_stmt.bind(1, dataProduct.getGravityTimestamp());
-		gravity::Log::debug("Received %s", dataProduct.getDataProductID().c_str());
-		gravity::Log::trace(" with data TS: %d, Size: %d", dataProduct.getGravityTimestamp(), dataProduct.getDataSize());
+			insert_stmt.reset();
+			insert_stmt.bind(1, dataProducts[i]->getGravityTimestamp());
+			gravity::Log::debug("Received %s", dataProducts[i]->getDataProductID().c_str());
+			gravity::Log::trace(" with data TS: %d, Size: %d", dataProducts[i]->getGravityTimestamp(), dataProducts[i]->getDataSize());
 
-		insert_stmt.bind(2, dataProduct.getDataProductID());
-		insert_stmt.bind(3, messageData, messageData + dataProduct.getDataSize());
+			insert_stmt.bind(2, dataProducts[i]->getDataProductID());
+			insert_stmt.bind(3, messageData, messageData + dataProducts[i]->getDataSize());
 
-		insert_stmt.exec();
+			insert_stmt.exec();
+		}
     }
     catch(cppdb::cppdb_error const &e)
     {

@@ -42,7 +42,7 @@ bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElem
 class Heartbeat : public GravitySubscriber
 {
 public:
-    virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
+    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
 
     static void* HeartbeatListenerThrFunc(void* thread_context);
 
