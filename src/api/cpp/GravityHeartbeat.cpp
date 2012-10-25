@@ -31,10 +31,11 @@ Semaphore Heartbeat::lock;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 
-void Heartbeat::subscriptionFilled(const GravityDataProduct& dataProduct)
+void Heartbeat::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
 	lock.Lock();
-	filledHeartbeats.insert(dataProduct.getDataProductID());
+	for(size_t i = 0; i < dataProducts.size(); i++)
+		filledHeartbeats.insert(dataProducts[i]->getDataProductID());
 	lock.Unlock();
 }
 
