@@ -74,6 +74,8 @@ public:
         subFilledFlag = false;
         gotRequestFlag = false;
         gotResponseFlag = false;
+
+        Log::initAndAddConsoleLogger(Log::MESSAGE);
     }
 
     void testRegisterData(void) {
@@ -131,37 +133,37 @@ public:
         // Give the consumer thread time to start up
         sleep(20);
 
-//        Subscriber subscriber;
-//    	ret = node.subscribe("TEST", subscriber, "FILT");
-//
-//        // Give the consumer thread time to start up
-//        sleep(20);
-//
-//        // Test that old message was received
-//        TS_ASSERT_EQUALS(subscriber.getCount(), 1);
-//
-//        // publish a message again
+        Subscriber subscriber;
+    	ret = node.subscribe("TEST", subscriber, "FILT");
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
+        // Test that old message was received
+        TS_ASSERT_EQUALS(subscriber.getCount(), 1);
+
+        // publish a message again
         ret = node.publish(gdp, "FILTER");
-//
-//        // Give the consumer thread time to start up
-//        sleep(20);
-//
-//        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
-//
-//        // Clear out subscription filled flag
-//        clearSubFlag();
-//
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
+        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
+
+        // Clear out subscription filled flag
+        clearSubFlag();
+
     	ret = node.subscribe("TEST", *this, "FILT");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
     	// Give it a couple secs
-    	sleep(200);
+    	sleep(20);
 
     	// Check for subscription filled
     	TS_ASSERT(subFilled());
 
     	// Check that subscriber wasn't called again
-//        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
+        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
 
     	// Clear flag
     	clearSubFlag();
@@ -170,7 +172,7 @@ public:
         ret = node.publish(gdp, "FIL");
 
         // Give it a couple secs
-        sleep(200);
+        sleep(20);
 
         // Since full filter text isn't there, sub should not be filled
         TS_ASSERT(!subFilled());
