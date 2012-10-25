@@ -60,7 +60,7 @@ public:
     Subscriber() : count(0) {}
     ~Subscriber() {}
     int getCount() { return count; }
-    void subscriptionFilled(const GravityDataProduct &dataProduct) { count++; }
+    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
 };
 
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
@@ -262,7 +262,7 @@ public:
     	delete data2;
     }
 
-    void subscriptionFilled(const GravityDataProduct& dataProduct)
+    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
     {
         pthread_mutex_lock(&mutex);
         subFilledFlag = true;
