@@ -8,6 +8,8 @@
 #include "GravitySubscriptionManager.h"
 #include "GravityLogger.h"
 #include <iostream>
+#include <vector>
+#include <memory>
 
 namespace gravity
 {
@@ -27,6 +29,8 @@ void GravitySubscriptionManager::start()
 {
 	// Messages
 	zmq_msg_t filter, message;
+
+	int ret;
 
 	// Set up the inproc socket to subscribe to subscribe and unsubscribe messages from
 	// the GravityNode
@@ -85,41 +89,52 @@ void GravitySubscriptionManager::start()
 		{
 			if (pollItems[i].revents && ZMQ_POLLIN)
 			{
-				// Read data products from socket
-				zmq_msg_init(&filter);
-				zmq_recvmsg(pollItems[i].socket, &filter, 0);
-				int size = zmq_msg_size(&filter);
-				char* s = (char*)malloc(size+1);
-				memcpy(s, zmq_msg_data(&filter), size);
-				s[size] = 0;
-				std::string filterText(s, size);
-				delete s;
-				zmq_msg_close(&filter);
-
-				zmq_msg_init(&message);
-				zmq_recvmsg(pollItems[i].socket, &message, 0);
-				// Create new GravityDataProduct from the incoming message
-				shared_ptr<GravityDataProduct> dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
-				// Clean up message
-				zmq_msg_close(&message);
-
 				// Deliver to subscriber(s)
 				shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[i].socket];
 
-				// This may be a resend of a previous value if a new subscriber was added, so make sure this is new data.
-				if (!subDetails->lastCachedValue || subDetails->lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
+				vector< shared_ptr<GravityDataProduct> > dataProducts;
+				while (true)
 				{
-                    // Loop through all subscribers and deliver the message
-                    vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
-                    while (iter != subDetails->subscribers.end())
-                    {
-                        (*iter)->subscriptionFilled(*dataProduct);
-                        iter++;
-                    }
+					// Read data products from socket
+					zmq_msg_init(&filter);
+					ret = zmq_recvmsg(pollItems[i].socket, &filter, ZMQ_DONTWAIT);
+					if (ret == -1)
+					{
+						zmq_msg_close(&filter);
+						break;
+					}
+					int size = zmq_msg_size(&filter);
+					char* s = (char*)malloc(size+1);
+					memcpy(s, zmq_msg_data(&filter), size);
+					s[size] = 0;
+					std::string filterText(s, size);
+					delete s;
+					zmq_msg_close(&filter);
 
-                    // Save most recent value so we can provide it to new subscribers, and to perform check above.
-                    subDetails->lastCachedValue = dataProduct;
+					zmq_msg_init(&message);
+					zmq_recvmsg(pollItems[i].socket, &message, 0);
+					// Create new GravityDataProduct from the incoming message
+					shared_ptr<GravityDataProduct> dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
+					// Clean up message
+					zmq_msg_close(&message);
+
+					// This may be a resend of previous value if a new subscriber was added, so make sure this is new data
+					if (!subDetails->lastCachedValue || subDetails->lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
+					{
+						dataProducts.push_back(dataProduct);
+
+						// Save most recent value so we can provide it to new subscribers, and to perform check above.
+						subDetails->lastCachedValue = dataProduct;
+					}
 				}
+
+                // Loop through all subscribers and deliver the messages
+                vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
+                while (iter != subDetails->subscribers.end())
+                {
+                    (*iter)->subscriptionFilled(dataProducts);
+                    iter++;
+                }
 			}
 		}
 	}
