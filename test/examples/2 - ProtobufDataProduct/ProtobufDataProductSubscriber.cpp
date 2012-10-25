@@ -12,7 +12,7 @@ using namespace gravity;
 class SimpleGravityCounterSubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
+	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int main()
@@ -37,12 +37,16 @@ int main()
 	gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);	
 }
 
-void SimpleGravityCounterSubscriber::subscriptionFilled(const GravityDataProduct& dataProduct)
+void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	//Get the protobuf object from the message
-	BasicCounterDataProductPB counterDataPB;
-	dataProduct.populateMessage(counterDataPB);
-	
-	//Process the message
-	Log::message("Current Count: %d", counterDataPB.count());
+	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+			i != dataProducts.end(); i++)
+	{
+		//Get the protobuf object from the message
+		BasicCounterDataProductPB counterDataPB;
+		(*i)->populateMessage(counterDataPB);
+
+		//Process the message
+		Log::message("Current Count: %d", counterDataPB.count());
+	}
 }
