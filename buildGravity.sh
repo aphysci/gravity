@@ -26,6 +26,7 @@ cp ThirdParty/lib/* lib
 cp src/api/cpp/*.a lib
 cp src/api/cpp/*.so lib
 cp src/api/java/*.so lib
+cp src/api/java/*.jar lib
 
 mkdir include
 find src/api/cpp -type f -iname "*.h*" -exec cp --parents {} include ";"
