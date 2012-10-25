@@ -63,21 +63,21 @@ void LogRecorder::start()
 }
 
 
-void LogRecorder::subscriptionFilled(const GravityDataProduct &dataProduct)
+void LogRecorder::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
-//    shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
-//    for_each(dataProducts.begin(), dataProducts.end(), [ this ] (shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
-//    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
-//    {
-//        shared_ptr<GravityDataProduct> dataProduct = *i;
+    //shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
+    //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
+    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    {
+        shared_ptr<GravityDataProduct> dataProduct = *i;
         num_logs++;
 
         GravityLogMessagePB message;
-        dataProduct.populateMessage(message);
+        dataProduct->populateMessage(message);
 
         //Format the Logs nicely.
         char timestr[100];
-        time_t rawtime = (time_t) (dataProduct.getGravityTimestamp() / 1000000);
+        time_t rawtime = (time_t) (dataProduct->getGravityTimestamp() / 1000000);
         struct tm * timeinfo;
 
         timeinfo = gmtime( &rawtime );
@@ -89,7 +89,7 @@ void LogRecorder::subscriptionFilled(const GravityDataProduct &dataProduct)
         if(num_logs >= NUM_LOGS_BEFORE_ROTATE)
             rotateLogs();
         return;
-//    }
+    }
 }
 
 void LogRecorder::rotateLogs()

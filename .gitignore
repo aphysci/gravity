@@ -8,3 +8,7 @@ include
 *.log
 .svn
 \#*\#
+*.sdf
+*.suo
+Debug
+Release
