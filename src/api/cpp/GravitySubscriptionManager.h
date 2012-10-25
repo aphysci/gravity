@@ -29,6 +29,7 @@ typedef struct SubscriptionDetails
 {
 	string id;
 	zmq_pollitem_t pollItem;
+	shared_ptr<GravityDataProduct> lastCachedValue;
 	vector<GravitySubscriber*> subscribers;
 } SubscriptionDetails;
 

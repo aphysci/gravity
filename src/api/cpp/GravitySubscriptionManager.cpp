@@ -99,19 +99,26 @@ void GravitySubscriptionManager::start()
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItems[i].socket, &message, 0);
 				// Create new GravityDataProduct from the incoming message
-				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
+				shared_ptr<GravityDataProduct> dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
 				// Clean up message
 				zmq_msg_close(&message);
 
 				// Deliver to subscriber(s)
 				shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[i].socket];
 
-				// Loop through all subscribers and deliver the message
-				vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
-				while (iter != subDetails->subscribers.end())
+				// This may be a resend of a previous value if a new subscriber was added, so make sure this is new data.
+				if (!subDetails->lastCachedValue || subDetails->lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
 				{
-					(*iter)->subscriptionFilled(dataProduct);
-					iter++;
+                    // Loop through all subscribers and deliver the message
+                    vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
+                    while (iter != subDetails->subscribers.end())
+                    {
+                        (*iter)->subscriptionFilled(*dataProduct);
+                        iter++;
+                    }
+
+                    // Save most recent value so we can provide it to new subscribers, and to perform check above.
+                    subDetails->lastCachedValue = dataProduct;
 				}
 			}
 		}
@@ -122,8 +129,11 @@ void GravitySubscriptionManager::start()
 	{
 		string id = iter->first;
 		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[id];
+		subDetails->lastCachedValue.reset();
 		zmq_close(subDetails->pollItem.socket);
 	}
+
+	subscriptionMap.clear();
 	zmq_close(gravityNodeSocket);
 }
 
@@ -218,6 +228,7 @@ void GravitySubscriptionManager::addSubscription()
 		subDetails.reset(new SubscriptionDetails());
 		subDetails->id = id;
 		subDetails->pollItem = pollItem;
+		subDetails->lastCachedValue.reset();
 
 		// Track these subscription details by id (data product + filter)
 		subscriptionMap[id] = subDetails;
@@ -227,6 +238,11 @@ void GravitySubscriptionManager::addSubscription()
 
 	// Add new subscriber
 	subDetails->subscribers.push_back(subscriber);
+
+	// If we've already received data on this subscription, send the most recent
+	// value to the new subscriber
+	if (subDetails->lastCachedValue)
+	    subscriber->subscriptionFilled(*subDetails->lastCachedValue);
 }
 
 void GravitySubscriptionManager::removeSubscription()
@@ -253,9 +269,6 @@ void GravitySubscriptionManager::removeSubscription()
 		// Get subscription details
 		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[id];
 
-		// Unsubscribe
-		zmq_setsockopt(subDetails->pollItem.socket, ZMQ_UNSUBSCRIBE, filter.c_str(), filter.length());
-
 		// Find & remove subscriber from our list of subscribers for this data product
 		vector<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
 		while (iter != subDetails->subscribers.end())
@@ -277,6 +290,9 @@ void GravitySubscriptionManager::removeSubscription()
             // Remove from details maps
             subscriptionMap.erase(id);
             subscriptionSocketMap.erase(subDetails->pollItem.socket);
+
+            // Unsubscribe
+            zmq_setsockopt(subDetails->pollItem.socket, ZMQ_UNSUBSCRIBE, filter.c_str(), filter.length());
 
 			// Close the socket
 			zmq_close(subDetails->pollItem.socket);

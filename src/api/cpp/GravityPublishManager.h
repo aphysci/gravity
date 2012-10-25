@@ -23,6 +23,10 @@ using namespace std::tr1;
 typedef struct PublishDetails
 {
     string url;
+    string dataProductID;
+    char *lastCachedValue;
+    int lastCachedValueSize;
+    string lastCachedFilterText;
     zmq_pollitem_t pollItem;
     void* socket;
 } PublishDetails;
@@ -46,6 +50,7 @@ private:
 	void registerDataProduct();
 	void unregisterDataProduct();
 	void publish();
+    void publish(void* socket, const string &filterText, const void *data, int size);
 public:
 	/**
 	 * Constructor GravityPublishManager
