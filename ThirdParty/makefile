@@ -11,7 +11,7 @@ iniparser:
 	make -s
 	
 zmq:
-	cd zeromq-3.2.0; \
+	cd zeromq-3.2.1; \
 	./configure; \
 	make -s
 

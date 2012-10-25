@@ -4,6 +4,10 @@ import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityDataProduct;
 import java.util.Vector;
 import java.util.List;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Longs;
+import com.google.common.primitives.Ints;
+
 
 public class MATLABGravitySubscriber implements GravitySubscriber
 {
@@ -47,10 +51,28 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 		return ret;
 	}
 
-	static public Double[] convertDoubleListToDoubleArray(List<Double> list)
+	static public Number[] convertNumberListToNumberArray(List<Number> list)
 	{
-		Double[] a = new Double[list.size()];
+		Number[] a = new Number[list.size()];
 		list.toArray(a);
 		return a;
+	}
+
+	static public List<Double> convertNumberArrayToNumberList(double[] array)
+	{
+		List<Double> list = Doubles.asList(array);
+		return list;
+	}
+
+	static public List<Integer> convertNumberArrayToNumberList(int[] array)
+	{
+		List<Integer> list = Ints.asList(array);
+		return list;
+	}
+
+	static public List<Long> convertNumberArrayToNumberList(long[] array)
+	{
+		List<Long> list = Longs.asList(array);
+		return list;
 	}
 }

@@ -1,3 +1,7 @@
+bin
+lib
+include
+*.tgz
 *.o
 *.exe
 *.d

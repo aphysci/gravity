@@ -31,11 +31,10 @@
 
 #include <iostream>
 #include "GravityNode.h"
+#include "GravityLogger.h"
 #include "GravityDataProduct.h"
 #include "cxxtest/TestSuite.h"
 #include "Utility.h"
-
-#define BUFFER_SIZE 1000
 
 using namespace std;
 using namespace gravity;
@@ -54,14 +53,30 @@ CXXTEST_ENUM_TRAITS( GravityReturnCode,
                      CXXTEST_ENUM_MEMBER( GravityReturnCodes::INTERRUPTED )
                      );
 
+class Subscriber : public GravitySubscriber
+{
+    int count;
+public:
+    Subscriber() : count(0) {}
+    ~Subscriber() {}
+    int getCount() { return count; }
+    void subscriptionFilled(const GravityDataProduct &dataProduct) { count++; }
+};
+
 class GravityNodeTestSuite: public CxxTest::TestSuite, public GravitySubscriber,
 															  GravityServiceProvider,
 															  GravityRequestor {
 
 public:
-    void testRegisterData(void) {
-    	pthread_mutex_init(&mutex, NULL);
+    void setUp()
+    {
+        pthread_mutex_init(&mutex, NULL);
+        subFilledFlag = false;
+        gotRequestFlag = false;
+        gotResponseFlag = false;
+    }
 
+    void testRegisterData(void) {
         GravityNode node;
         GravityReturnCode ret = node.init("TestNode");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -76,7 +91,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -94,7 +109,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -102,8 +117,6 @@ public:
 
     void testSubscriptionManager(void)
     {
-    	pthread_mutex_init(&mutex, NULL);
-
     	GravityNode node;
     	GravityReturnCode ret = node.init("TestNode2");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -111,24 +124,44 @@ public:
     	ret = node.registerDataProduct("TEST", 5656, "tcp");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
+        // Create and publish a message
+        GravityDataProduct gdp("TEST");
+        ret = node.publish(gdp, "FILTER");
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
+        Subscriber subscriber;
+    	ret = node.subscribe("TEST", subscriber, "FILT");
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
+        // Test that old message was received
+        TS_ASSERT_EQUALS(subscriber.getCount(), 1);
+
+        // publish a message again
+        ret = node.publish(gdp, "FILTER");
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
+        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
+
+        // Clear out subscription filled flag
+        clearSubFlag();
+
     	ret = node.subscribe("TEST", *this, "FILT");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-    	// Give the consumer thread time to start up
-    	sleep(2);
-
-    	// Clear out subscription filled flag
-    	clearSubFlag();
-
-    	// Create and publish a message
-    	GravityDataProduct gdp("TEST");
-    	ret = node.publish(gdp, "FILTER");
-
     	// Give it a couple secs
-    	sleep(2);
+    	sleep(20);
 
     	// Check for subscription filled
     	TS_ASSERT(subFilled());
+
+    	// Check that subscriber wasn't called again
+        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
 
     	// Clear flag
     	clearSubFlag();
@@ -137,7 +170,7 @@ public:
         ret = node.publish(gdp, "FIL");
 
         // Give it a couple secs
-        sleep(2);
+        sleep(20);
 
         // Since full filter text isn't there, sub should not be filled
         TS_ASSERT(!subFilled());
@@ -159,8 +192,6 @@ public:
 
     void testServiceManager(void)
     {
-    	pthread_mutex_init(&mutex, NULL);
-
     	GravityNode node;
     	GravityReturnCode ret = node.init("TestNode3");
     	//sleep(2);
@@ -306,8 +337,6 @@ public:
     }
 
 private:
-    char buffer[BUFFER_SIZE];
-
     pthread_mutex_t mutex;
     bool subFilledFlag;
     bool gotRequestFlag;

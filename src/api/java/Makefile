@@ -3,7 +3,6 @@ include autosrcs.mk
 
 CC=g++
 THIRDPARTY_DIR=../../../ThirdParty
-ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 INIPARSER_DIR=$(THIRDPARTY_DIR)/iniparser
 PROTO_DIR=../protobufs
 JAVASRC_DIR=src/java
@@ -47,7 +46,7 @@ else
 	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(THIRDPARTY_DIR)/include -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(THIRDPARTY_DIR)/include -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
 LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
 

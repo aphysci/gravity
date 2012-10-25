@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc">
       <Filter>Source Files\Protobuf</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityPublishManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h">
