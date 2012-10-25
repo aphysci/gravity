@@ -15,8 +15,8 @@ class CPPGravitySubscriber : public GravitySubscriber
 public:
 
     virtual ~CPPGravitySubscriber();
-    virtual void subscriptionFilled(const GravityDataProduct& dataProduct);
-    virtual int subscriptionFilled(char* array, int length);
+    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual int subscriptionFilled(char* array, int arrayLength, int* lengths, int length);
 };
 
 }

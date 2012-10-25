@@ -20,19 +20,19 @@ namespace gravity {
 	class CPPGravitySubscriber {
 	public:
 		virtual ~CPPGravitySubscriber();
-		virtual int subscriptionFilled(char *BYTE, int length);
+		virtual int subscriptionFilled(char *BYTE, int byteLength, int *INTEGER, int intLength);
 	};
 
 	class CPPGravityRequestor {
 	public:
 		virtual ~CPPGravityRequestor();
-		virtual int requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int length);
+		virtual char requestFilled(const std::string& serviceID, const std::string& requestID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityServiceProvider {
 	public:
 		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int length);
+		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener

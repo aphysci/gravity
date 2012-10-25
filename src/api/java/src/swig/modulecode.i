@@ -1,8 +1,11 @@
 
 // imports for gravity.java
 %pragma(java) moduleimports=%{
-import java.util.WeakHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
@@ -33,8 +36,15 @@ import com.aphysci.gravity.Logger;
     }
 
     @SuppressWarnings("unused")
-    public int subscriptionFilled(byte[] arr, int length) {
-      delegate.subscriptionFilled(new GravityDataProduct(arr));
+    public int subscriptionFilled(byte[] arr, int byteLength, int[] lengths, int intLength) {
+      List<GravityDataProduct> dataProducts = new ArrayList<GravityDataProduct>();
+      int offset = 0;
+      for (int i = 0; i < intLength; i++) {
+    	  byte [] singleDPArray = Arrays.copyOfRange(arr, offset, offset+lengths[i]);
+    	  dataProducts.add(new GravityDataProduct(singleDPArray));
+    	  offset += lengths[i];
+      }
+      delegate.subscriptionFilled(dataProducts);
       return 0;
     }
   }
@@ -46,7 +56,7 @@ import com.aphysci.gravity.Logger;
     }
 
     @SuppressWarnings("unused")
-    public int requestFilled(String serviceID, String requestID, byte[] arr, int length) {
+    public char requestFilled(String serviceID, String requestID, byte[] arr, int byteLength) {
       delegate.requestFilled(serviceID, requestID, new GravityDataProduct(arr));
       return 0;
     }
@@ -59,7 +69,7 @@ import com.aphysci.gravity.Logger;
     }
 
     @SuppressWarnings("unused")
-    public byte[] request(byte[] arr, int length) {
+    public byte[] request(byte[] arr, int byteLength) {
       GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
       return gdp.serializeToArray();
     }

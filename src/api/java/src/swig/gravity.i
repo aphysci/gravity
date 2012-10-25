@@ -120,8 +120,31 @@
  *****/
 %typemap(directorin, descriptor="[B") char *BYTE {
     // length var is assumed to be passed into the function as well
-    jbyteArray jb = (jenv)->NewByteArray(length);
-    (jenv)->SetByteArrayRegion(jb, 0, length, (jbyte*)BYTE);
+    jbyteArray jb = (jenv)->NewByteArray(byteLength);
+    (jenv)->SetByteArrayRegion(jb, 0, byteLength, (jbyte*)BYTE);
+    $input = jb;
+    // can't deallocate here because it hasn't been used yet.
+//    (jenv)->DeleteLocalRef(jb);
+}
+
+// The below typemap is added just to deallocate the memory for
+// the java byte array allocated above.  Unfortunately there doesn't seem to be a freearg
+// equivalent for directorin typemaps.
+%typemap(directorout) byte %{
+    $result = ($1_ltype)$input;
+    (jenv)->DeleteLocalRef(jBYTE);
+%}
+
+%typemap(javadirectorin) char *BYTE "$jniinput"
+%typemap(javadirectorout) char *BYTE "$javacall"
+
+/*****
+ * Typemaps to handle passing a int array from C++ into Java.  
+ *****/
+%typemap(directorin, descriptor="[I") int *INTEGER {
+    // length var is assumed to be passed into the function as well
+    jintArray jb = (jenv)->NewIntArray(intLength);
+    (jenv)->SetIntArrayRegion(jb, 0, intLength, (jint*)INTEGER);
     $input = jb;
     // can't deallocate here because it hasn't been used yet.
 //    (jenv)->DeleteLocalRef(jb);
@@ -133,9 +156,29 @@
 %typemap(directorout) int %{
     $result = ($1_ltype)$input;
     (jenv)->DeleteLocalRef(jBYTE);
+    (jenv)->DeleteLocalRef(jINTEGER);
 %}
-%typemap(javadirectorin) char *BYTE "$jniinput"
-%typemap(javadirectorout) char *BYTE "$javacall"
+
+%typemap(javadirectorin) int *INTEGER "$jniinput"
+%typemap(javadirectorout) int *INTEGER "$javacall"
+
+%typemap(jni) int *INTEGER "jintArray"
+%typemap(jtype) int *INTEGER "int[]"
+%typemap(jstype) int *INTEGER "int[]"
+%typemap(in) int *INTEGER {
+  $1 = (int *) JCALL2(GetIntArrayElements, jenv, $input, 0); 
+}
+
+%typemap(argout) int *INTEGER {
+  JCALL3(ReleaseIntArrayElements, jenv, $input, (jint *) $1, 0); 
+}
+
+%typemap(javain) int *INTEGER "$javainput"
+
+/* Prevent default freearg typemap from being used */
+%typemap(freearg) int *INTEGER ""
+
+
 
 /*****
  * typemaps to convert handle return of GDP from java method so that it can travel across jni boundary as a byte[]
