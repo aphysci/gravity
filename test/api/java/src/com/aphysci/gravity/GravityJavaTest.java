@@ -1,6 +1,8 @@
 
 package com.aphysci.gravity;
 
+import java.util.List;
+
 import com.aphysci.gravity.protobuf.JavaTestContainer.JavaTestPB;
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
@@ -90,13 +92,13 @@ public class GravityJavaTest {
     private static class Subscriber implements GravitySubscriber {
 
 		@Override
-		public void subscriptionFilled(GravityDataProduct dataProduct) {
+		public void subscriptionFilled(final List<GravityDataProduct> dataProducts) {
 			subCalled = true;
-			testAssert(dataProduct.getDataProductID().equals("JavaGDP"));
-			testAssert(dataProduct.getSoftwareVersion().equals("version 1"));
+			testAssert(dataProducts.get(0).getDataProductID().equals("JavaGDP"));
+			testAssert(dataProducts.get(0).getSoftwareVersion().equals("version 1"));
 
 			JavaTestPB.Builder builder = JavaTestPB.newBuilder();
-			dataProduct.populateMessage(builder);
+			dataProducts.get(0).populateMessage(builder);
 			JavaTestPB pb = builder.build();
 			testAssert(pb.getCount() == 100);
 			testAssert(pb.getMessage().equals("Hello Java World"));
