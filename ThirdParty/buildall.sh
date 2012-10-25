@@ -5,7 +5,7 @@ if [ ${#*} -gt 1 ]; then
     exit 1
 fi
 
-pushd zeromq-3.2.0
+pushd zeromq-3.2.1
 # address issue where configure doesn't work right if there are carridge returns.
 find . -name "*.in" -exec dos2unix {} \;
 

@@ -2,6 +2,7 @@
 #include <sstream>
 #include <pthread.h>
 
+#include "Utility.h"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -15,12 +16,12 @@ namespace gravity {
 // String Helpers
 
 //In Place case conversion.
-std::string StringToLowerCase(std::string str)
+GRAVITY_API std::string StringToLowerCase(std::string str)
 {
 	std::use_facet< std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + str.length()); //Convert to lowercase.
 	return str;
 }
-char* StringToLowerCase(char* str, int leng)
+GRAVITY_API char* StringToLowerCase(char* str, int leng)
 {
 	std::use_facet< std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + leng); //Convert to lowercase.
 
@@ -28,14 +29,14 @@ char* StringToLowerCase(char* str, int leng)
 }
 
 //Copying case conversion
-std::string StringCopyToLowerCase(const std::string &str)
+GRAVITY_API std::string StringCopyToLowerCase(const std::string &str)
 {
 	std::string copy = str;
 	return StringToLowerCase(copy);
 }
 
 //Conversions
-int StringToInt(std::string str, int default_value)
+GRAVITY_API int StringToInt(std::string str, int default_value)
 {
 	int ret_val;
 	std::stringstream ss(str);
@@ -45,7 +46,7 @@ int StringToInt(std::string str, int default_value)
 	return ret_val;
 }
 
-double StringToDouble(std::string str, double default_value)
+GRAVITY_API double StringToDouble(std::string str, double default_value)
 {
 	double ret_val;
 	std::stringstream ss(str);
@@ -56,21 +57,21 @@ double StringToDouble(std::string str, double default_value)
 }
 
 //Trimming
-std::string& trim_right_inplace(
+GRAVITY_API std::string& trim_right_inplace(
   std::string&       s,
   const std::string& delimiters = " \f\n\r\t\v" )
 {
   return s.erase( s.find_last_not_of( delimiters ) + 1 );
 }
 
-std::string& trim_left_inplace(
+GRAVITY_API std::string& trim_left_inplace(
   std::string&       s,
   const std::string& delimiters = " \f\n\r\t\v" )
 {
   return s.erase( 0, s.find_first_not_of( delimiters ) );
 }
 
-std::string& trim(
+GRAVITY_API std::string& trim(
   std::string&       s,
   const std::string& delimiters)
 {
@@ -78,7 +79,7 @@ std::string& trim(
 }
 
 // OS
-bool IsValidFilename(const std::string filename)
+GRAVITY_API bool IsValidFilename(const std::string filename)
 {
 	char restrictedChars[] = "/\\?%*:|\"<>";
 	const size_t numRChars = 10;
@@ -177,7 +178,7 @@ clock_gettime(int X, struct timespec *tv)
     t.QuadPart -= offset.QuadPart;
     nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
     nanoseconds += startTime.QuadPart;
-    t.QuadPart = nanoseconds;
+    t.QuadPart = (LONGLONG) nanoseconds;
     tv->tv_sec = t.QuadPart / 1000000000LL;
     tv->tv_nsec = t.QuadPart % 1000000000LL;
     return (0);
@@ -185,14 +186,14 @@ clock_gettime(int X, struct timespec *tv)
 #endif
 
 //In Microseconds
-uint64_t getCurrentTime()
+GRAVITY_API uint64_t getCurrentTime()
 {
     timespec ts;
     clock_gettime(0, &ts);
     return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
 }
 
-unsigned int sleep(int milliseconds)
+GRAVITY_API unsigned int sleep(int milliseconds)
 {
 #ifdef WIN32
 	Sleep(milliseconds);

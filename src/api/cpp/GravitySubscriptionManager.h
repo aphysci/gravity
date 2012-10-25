@@ -11,7 +11,11 @@
 #include <zmq.h>
 #include <vector>
 #include <map>
+#ifndef __GNUC__
+#include <memory>
+#else
 #include <tr1/memory>
+#endif
 #include <string>
 #include "GravitySubscriber.h"
 
@@ -25,6 +29,7 @@ typedef struct SubscriptionDetails
 {
 	string id;
 	zmq_pollitem_t pollItem;
+	shared_ptr<GravityDataProduct> lastCachedValue;
 	vector<GravitySubscriber*> subscribers;
 } SubscriptionDetails;
 

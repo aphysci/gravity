@@ -2,6 +2,7 @@
 #include "GravityLogger.h"
 #include "GravitySemaphore.h"
 #include "protobuf/ConfigRequest.pb.h"
+#include "IniParserWrap.h"
 
 #include <iniparser.h>
 #include <map>

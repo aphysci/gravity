@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Protobuf">
+      <UniqueIdentifier>{9ae95032-6a89-455a-9f9a-8268cacc5daf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Protobuf">
+      <UniqueIdentifier>{136b65ba-6979-419a-bbfe-7e745eab8cab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\api\cpp\Utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\Semaphore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriber.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityServiceProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityServiceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityRequestor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityRequestManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityHeartbeat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityDataProduct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityConfigParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ComponentLookupRequestPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ConfigRequest.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\GravityPublishManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityServiceProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityServiceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravitySemaphore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityRequestor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityRequestManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeatListener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityDataProduct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\GravityConfigParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentLookupRequestPB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ConfigRequest.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\IniParserWrap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

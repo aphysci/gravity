@@ -1,0 +1,2 @@
+cd ..\..\gravity\
+buildproto.bat

@@ -23,19 +23,23 @@ RM      = rm -f
 
 # Implicit rules
 
-SUFFIXES = .o .c .h .a .so .sl
+SUFFIXES = .o .obj .c .h .a .so .sl
 
 COMPILE.c=$(CC) $(CFLAGS) -c
 .c.o:
 	@(echo "compiling $< ...")
 	@($(COMPILE.c) -o $@ $<)
-
+%.obj: %.c
+	@(echo "compiling $< ...")
+	@cl //c //Fo$@ //MD $< //nologo
 
 SRCS = src/iniparser.c \
 	   src/dictionary.c
+VSSRCS = src\iniparser.c \
+	   src\dictionary.c
 
 OBJS = $(SRCS:.c=.o)
-
+VSOBJS = $(VSSRCS:.c=.obj)
 
 default:	libiniparser.a libiniparser.so
 
@@ -47,11 +51,14 @@ libiniparser.so:	$(OBJS)
 	@$(SHLD) $(LDSHFLAGS) -o $@.0 $(OBJS) $(LDFLAGS) \
 		-Wl,-soname=`basename $@`.0
 
+libiniparser.lib: $(VSOBJS)
+	lib //OUT:$@ //nologo $(VSOBJS)
+		
 clean:
-	$(RM) $(OBJS) *.a
+	$(RM) $(OBJS) src/*.obj *.a *.lib
 
 veryclean:
-	$(RM) $(OBJS) libiniparser.a libiniparser.so*
+	$(RM) $(OBJS) src/*.obj libiniparser.a libiniparser.so*
 	rm -rf ./html ; mkdir html
 	cd test ; $(MAKE) veryclean
 

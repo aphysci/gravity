@@ -52,7 +52,7 @@ public class GravityJavaTest {
         testAssert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.unregisterDataProduct("JavaGDP");
-        testAssert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityServiceProvider gsp = new ServiceProvider();
         ret = node.registerService("JavaService", (short)8888, "tcp", gsp);
