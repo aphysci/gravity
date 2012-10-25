@@ -15,7 +15,7 @@ msbuild protoc.vcxproj /p:Configuration=Release
 copy Release\libprotobuf.lib ..\..\lib
 copy Release\protoc.exe ..\..\bin
 
-cd ..\..\zeromq-3.2.0\builds\msvc11
+cd ..\..\zeromq-3.2.1\builds\msvc11
 msbuild msvc11.sln /p:Configuration=Release
 copy ..\..\lib\Win32\libzmq.lib ..\..\..\lib\libzmq.lib
 copy ..\..\bin\Win32\libzmq.dll ..\..\..\bin\libzmq.dll

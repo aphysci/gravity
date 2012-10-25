@@ -8,10 +8,14 @@
 #ifndef GRAVITYPUBLISHMANAGER_H_
 #define GRAVITYPUBLISHMANAGER_H_
 
+#ifdef __GNUC__
+#include <tr1/memory>
+#else
+#include <memory>
+#endif
 #include <zmq.h>
 #include <vector>
 #include <map>
-#include <tr1/memory>
 #include <string>
 
 namespace gravity
