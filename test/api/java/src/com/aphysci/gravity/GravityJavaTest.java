@@ -10,7 +10,7 @@ import com.aphysci.gravity.swig.Log;
 
 public class GravityJavaTest {
 
-	private static boolean subCalled = false;
+	private static int subCount = 0;
 	private static boolean reqCalled = false;
 	private static boolean provCalled = false;
 	private static boolean logCalled = false;
@@ -33,15 +33,32 @@ public class GravityJavaTest {
         GravityDataProduct gdp = new GravityDataProduct("JavaGDP");
         gdp.setSoftwareVersion("version 1");
         JavaTestPB.Builder builder = JavaTestPB.newBuilder();
-        builder.setCount(100);
+        int count = 0;
+        builder.setCount(count++);
         builder.setMessage("Hello Java World");
         gdp.setData(builder);
         
         ret = node.publish(gdp, "Java");
+        testAssert(ret == GravityReturnCode.SUCCESS);
+
+        builder.setCount(count++);
+        gdp.setData(builder);
+        ret = node.publish(gdp, "Java");
+        testAssert(ret == GravityReturnCode.SUCCESS);
         
-        // wait a bit before unsubscribing to allow the message to get through
+        builder.setCount(count++);
+        gdp.setData(builder);
+        ret = node.publish(gdp, "Java");
+        testAssert(ret == GravityReturnCode.SUCCESS);
+        
+        builder.setCount(count++);
+        gdp.setData(builder);
+        ret = node.publish(gdp, "Java");
+        testAssert(ret == GravityReturnCode.SUCCESS);
+        
+        // wait a bit before unsubscribing to allow the messages to get through
         try {
-			Thread.sleep(10);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 		}
 
@@ -81,7 +98,7 @@ public class GravityJavaTest {
         GravityDataProduct syncResponse = node.request("SyncJavaService", syncRequest);
         testAssert(syncResponse.getDataProductID().equals("SyncJavaResponse"));
         
-        testAssert(subCalled);
+        testAssert(subCount == 4);
         testAssert(reqCalled);
         testAssert(provCalled);
         testAssert(logCalled);
@@ -93,15 +110,22 @@ public class GravityJavaTest {
 
 		@Override
 		public void subscriptionFilled(final List<GravityDataProduct> dataProducts) {
-			subCalled = true;
-			testAssert(dataProducts.get(0).getDataProductID().equals("JavaGDP"));
-			testAssert(dataProducts.get(0).getSoftwareVersion().equals("version 1"));
+			for (GravityDataProduct gdp : dataProducts) {
+				testAssert(gdp.getDataProductID().equals("JavaGDP"));
+				testAssert(gdp.getSoftwareVersion().equals("version 1"));
 
-			JavaTestPB.Builder builder = JavaTestPB.newBuilder();
-			dataProducts.get(0).populateMessage(builder);
-			JavaTestPB pb = builder.build();
-			testAssert(pb.getCount() == 100);
-			testAssert(pb.getMessage().equals("Hello Java World"));
+				JavaTestPB.Builder builder = JavaTestPB.newBuilder();
+				gdp.populateMessage(builder);
+				JavaTestPB pb = builder.build();
+				testAssert(pb.getCount() == subCount);
+				testAssert(pb.getMessage().equals("Hello Java World"));
+				subCount++;
+			}
+			// sleep to give messages a chance to queue up.
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
 		}
     }
     
@@ -137,8 +161,7 @@ public class GravityJavaTest {
     private static class TestLogger implements Logger {
 		@Override
 		public void Log(int level, String messagestr) {
-			System.out.println("log called (level = "+level+"): "+messagestr);
-			logCalled = true;
+			logCalled = Log.LogLevel.swigToEnum(level) == Log.LogLevel.DEBUG;
 		}
     }
     
