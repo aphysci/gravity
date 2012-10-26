@@ -32,6 +32,7 @@ mkdir include
 find src/api/cpp -type f -iname "*.h*" -exec cp --parents {} include ";"
 mv include/src/api/cpp/* include
 rm -rf include/src
+rm -rf include/protobuf
 cp -r ThirdParty/include/* include
 
 rm gravity.tgz

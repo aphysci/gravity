@@ -253,6 +253,15 @@ void GravitySubscriptionManager::addSubscription()
 
 	// Add new subscriber
 	subDetails->subscribers.push_back(subscriber);
+
+	// If we've already received data on this subscription, send the most recent
+	// value to the new subscriber
+	if (subDetails->lastCachedValue)
+	{
+	    std::vector< shared_ptr<GravityDataProduct> > dataProducts;
+	    dataProducts.push_back(subDetails->lastCachedValue);
+	    subscriber->subscriptionFilled(dataProducts);
+	}
 }
 
 void GravitySubscriptionManager::removeSubscription()

@@ -13,9 +13,9 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 {
 	private Vector<GravityDataProduct> data = new Vector<GravityDataProduct>();	
 
-	public void subscriptionFilled(final GravityDataProduct dataProduct)
+	public void subscriptionFilled(final List<GravityDataProduct> dataProducts)
 	{
-		data.addElement(dataProduct);		
+		data.addAll(dataProducts);
 	}
 
 	public GravityDataProduct getDataProduct(int timeoutMS)
