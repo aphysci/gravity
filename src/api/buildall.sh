@@ -13,4 +13,6 @@ pushd java
 make $@ || exit 1
 popd
 
-
+pushd MATLAB
+make $@ || exit 1
+popd
