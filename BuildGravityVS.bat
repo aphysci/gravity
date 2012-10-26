@@ -2,6 +2,7 @@ Rem ember to run this from the Visual Studio Command Prompt.
 mkdir bin
 mkdir lib
 mkdir include
+mkdir include\protobuf
 
 Rem Build ThirdParty
 cd ThirdParty
@@ -45,6 +46,7 @@ copy Thirdparty\bin\* bin
 copy Thirdparty\lib\libprotobuf.lib lib
 
 copy src\api\cpp\*.h include
+copy src\api\cpp\protobuf\GravityDataProductPB.pb.h include\protobuf
 
 xcopy /s /q /y ThirdParty\protobuf-2.4.1\src\*.h include
 cd include\google

@@ -29,10 +29,9 @@ cp src/api/java/*.so lib
 cp src/api/java/*.jar lib
 
 mkdir include
-find src/api/cpp -type f -iname "*.h*" -exec cp --parents {} include ";"
-mv include/src/api/cpp/* include
-rm -rf include/src
-rm -rf include/protobuf
+cp -r src/api/cpp/*.h include
+mkdir include/protobuf
+cp src/api/cpp/protobuf/GravityDataProductPB.pb.h include/protobuf
 cp -r ThirdParty/include/* include
 
 rm gravity.tgz
