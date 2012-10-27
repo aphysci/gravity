@@ -43,7 +43,7 @@ cd ..\..\..\..\
 
 Rem Copy files to output directory.  
 copy Thirdparty\debug_bin\* debug_bin
-copy Thirdparty\lib\libprotobuf.lib debug_lib
+copy Thirdparty\debug_lib\libprotobuf.lib debug_lib
 
 copy src\api\cpp\*.h include
 
