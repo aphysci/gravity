@@ -24,7 +24,7 @@ public class GravityJavaTest {
         GravityReturnCode ret = node.init("TestNode");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerDataProduct("JavaGDP", 5678, "tcp");
+        ret = node.registerDataProduct("JavaGDP", "tcp");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         Subscriber s = new Subscriber();

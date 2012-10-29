@@ -16,7 +16,7 @@ public:
     /**
      * Does not return until all data has been played back.
      */
-    void start(uint64_t start_time, uint64_t end_time, std::string table_name, std::vector<string> &dps, std::vector<int> &ports, std::vector<string> &transports);
+    void start(uint64_t start_time, uint64_t end_time, std::string table_name, std::vector<string> &dps, std::vector<string> &transports);
     //TODO: stop?? thread support???
 private:
     GravityNode* grav_node;

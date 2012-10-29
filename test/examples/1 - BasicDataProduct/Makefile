@@ -24,7 +24,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
-LIBS=-lgravity -Wl,-Bstatic -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) 
+LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) 
 
 all: BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 
@@ -42,7 +42,7 @@ ServiceDirectory$(OS_EXE_EXT):
 	make
 
 clean:
-	@rm -rf *.o *.exe
+	@rm -rf *.o *.exe BasicDataProductPublisher BasicDataProductSubscriber
 
 run: components BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 	./run.sh

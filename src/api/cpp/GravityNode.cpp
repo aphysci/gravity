@@ -254,7 +254,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
-		Log::initAndAddGravityLogger(this, 54543, net_log_level); //TODO: port number???
+		Log::initAndAddGravityLogger(this, net_log_level);
 
 	return ret;
 }
@@ -353,13 +353,15 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
-GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory)
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string transportType, bool addToDirectory)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
     string endpoint;
     if(transportType == "tcp")
     	endpoint = getIP();
+    else if (transportType == "ipc")
+        endpoint = "/tmp/" + dataProductID;
     else
     	endpoint = dataProductID;
 
@@ -381,6 +383,8 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigne
     sendStringMessage(publishManagerSocket, endpoint, ZMQ_DONTWAIT);
 
 	string connectionURL = readStringMessage(publishManagerSocket);
+
+	Log::debug("Registered publisher at address: %s", connectionURL.c_str());
 
 	zmq_close(publishManagerSocket);
 
@@ -924,7 +928,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 }
 
 void* Heartbeat(void* thread_context); //Forward Declaration (Needs to be in Gravity namespace).  
-GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
+GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
@@ -934,7 +938,7 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
-	this->registerDataProduct(componentID, 54541, "tcp");
+	this->registerDataProduct(componentID, "tcp");
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;

@@ -197,7 +197,7 @@ public:
     /**
      * Starts a heart beat for this gravity process.
      */
-    GRAVITY_API GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
+    GRAVITY_API GravityReturnCode startHeartbeat(int interval_in_microseconds);
 
     GRAVITY_API std::string getStringParam(std::string key, std::string default_value = "");
     GRAVITY_API int getIntParam(std::string key, int default_value = -1);
@@ -220,12 +220,11 @@ public:
      * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
      * \param dataProductID string ID used to uniquely identify this published data product
-     * \param networkPort network port on which this data product is made available
      * \param transport type (e.g. 'tcp', 'ipc')
      * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory = true);
+    GRAVITY_API GravityReturnCode registerDataProduct(string dataProductID, string transportType, bool addToDirectory = true);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory

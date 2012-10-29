@@ -83,7 +83,7 @@ public:
         GravityReturnCode ret = node.init("TestNode");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node.registerDataProduct("TEST", 5656, "tcp");
+        ret = node.registerDataProduct("TEST", "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
@@ -101,7 +101,7 @@ public:
         /*
          *  try again after unregistering
          */
-        ret = node.registerDataProduct("TEST", 5656, "tcp");
+        ret = node.registerDataProduct("TEST", "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
@@ -123,7 +123,7 @@ public:
     	GravityReturnCode ret = node.init("TestNode2");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-    	ret = node.registerDataProduct("TEST", 5656, "tcp");
+    	ret = node.registerDataProduct("TEST", "tcp");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         // Create and publish a message

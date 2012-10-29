@@ -268,7 +268,7 @@ int main(int argc, const char** argv)
     	return -1;
 
 	GravityPlayback gp(&gn, parser.getConnectionString());
-	gp.start(parser.getStartTime(), parser.getEndTime(), parser.getTableName(), parser.getDataProducts(), parser.getPorts(), parser.getTransports());
+	gp.start(parser.getStartTime(), parser.getEndTime(), parser.getTableName(), parser.getDataProducts(), parser.getTransports());
 
 	return 0;
 }
@@ -288,21 +288,14 @@ uint64_t difftime(uint64_t start_time, uint64_t end_time)
 	return end_time - start_time;
 }
 
-void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table_name, vector<string> &dps, vector<int> &ports, vector<string> &transports)
+void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table_name, vector<string> &dps, vector<string> &transports)
 {
 	end_time += 1; //So we have the end time inclusive.
 
     stringstream values;
     for(int i = 0; i < (int) dps.size(); i++)
     {
-        int port = ports[i];
         string transport = transports[i];
-
-        if(port == -1)
-        {
-        	gravity::Log::warning("Invalid Port for Stream '%s'", dps[i].c_str());
-            continue;
-        }
 
         if(transport != "tcp" && transport != "icp")
         {
@@ -310,8 +303,8 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
             continue;
         }
 
-        gravity::Log::message("Registering %s on port %d", dps[i].c_str(), port);
-        grav_node->registerDataProduct(dps[i], (unsigned short) port, transport);
+        gravity::Log::message("Registering %s", dps[i].c_str());
+        grav_node->registerDataProduct(dps[i], transport);
 
 //        string dp = sql.escape(dps[i].c_str()); //Just in case :?
         string dp = dps[i].c_str();

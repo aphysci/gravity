@@ -183,6 +183,14 @@ void GravityPublishManager::registerDataProduct()
         stringstream ss;
         ss << transportType << "://" << endpoint;
         connectionURL = ss.str();
+        int rc = zmq_bind(pubSocket, ss.str().c_str());
+        if (rc < 0)
+        {
+            Log::critical("Could not bind address %s", connectionURL.c_str());
+            zmq_close(pubSocket);
+            sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
+            return;
+        }
     }
 
     sendStringMessage(gravityNodeSocket, connectionURL, ZMQ_DONTWAIT);

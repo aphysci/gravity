@@ -1,3 +1,4 @@
+import java.util.List;
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.swig.GravityNode;
@@ -8,15 +9,17 @@ import com.aphysci.gravity.swig.Log.LogLevel;
 class SimpleGravityCounterSubscriber implements GravitySubscriber
 {
 	@Override
-	public void subscriptionFilled(GravityDataProduct dataProduct)
+	public void subscriptionFilled(List<GravityDataProduct> dataProducts)
 	{
-		//Get the protobuf object from the message
-		BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
-		if(!dataProduct.populateMessage(counterDataPB))
-			Log.message("Error Parsing Message");
-		
-		//Process the message
-		Log.message(String.format("Current Count: %d", counterDataPB.getCount()));
+		for (GravityDataProduct dataProduct : dataProducts) {
+			//Get the protobuf object from the message
+			BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
+			if(!dataProduct.populateMessage(counterDataPB))
+				Log.message("Error Parsing Message");
+			
+			//Process the message
+			Log.message(String.format("Current Count: %d", counterDataPB.getCount()));
+		}
 	}
 }
 

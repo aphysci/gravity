@@ -75,7 +75,7 @@ public:
      * \param gravity_node     The GravityNode with which to connect to the remote log recorder machine.  Can be NULL for logging only to a file.
      * \param log_net_level    The initial network logging leve.
      */
-    GRAVITY_API static void initAndAddGravityLogger(GravityNode *gravity_node, unsigned short port, LogLevel net_log_level);
+    GRAVITY_API static void initAndAddGravityLogger(GravityNode *gravity_node, LogLevel net_log_level);
     /**
      * You must call this function to initialize the Logger with a generic Logger.  May be called along with other init functions.
      * Called by initAndAddFileLogger() and initAndAddGravityLogger().
