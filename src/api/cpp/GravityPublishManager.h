@@ -18,6 +18,8 @@
 #include <map>
 #include <string>
 
+#define PUB_MGR_URL "inproc://gravity_publish_manager"
+
 namespace gravity
 {
 
@@ -48,8 +50,6 @@ private:
     map<string,shared_ptr<PublishDetails> > publishMapByID;
 	vector<zmq_pollitem_t> pollItems;
 
-	string readStringMessage();
-	void sendStringMessage(void* socket, string str, int flags);
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();

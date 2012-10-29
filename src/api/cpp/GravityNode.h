@@ -50,7 +50,8 @@ namespace GravityReturnCodes
         NO_SUCH_DATA_PRODUCT = -8,
         LINK_ERROR = -9,
         INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11
+        NO_SERVICE_PROVIDER = -11,
+        NO_PORTS_AVAILABLE = -12
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
@@ -83,14 +84,10 @@ private:
 
     void* context;
     void* subscriptionManagerSocket;
-    void* publishManagerSocket;
     void* requestManagerSocket;
     void* serviceManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
-    void sendStringMessage(void* socket, string str, int flags);
-    string readStringMessage(void* socket);
     string getIP(); ///< Utility method to get the host machine's IP address
-    void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
     GravityReturnCode sendRequestsToServiceProvider(string url, const GravityDataProduct& request, GravityDataProduct& response,
     		int timeout_in_milliseconds, int retries);

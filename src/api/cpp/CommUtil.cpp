@@ -1,0 +1,92 @@
+/*
+ * GravityPublishManager.cpp
+ *
+ *  Created on: Oct 23, 2012
+ *      Author: Mark Barger
+ */
+
+#include "CommUtil.h"
+#include "GravityLogger.h"
+#include "zmq.h"
+#include <sstream>
+
+namespace gravity
+{
+
+using namespace std;
+
+void sendStringMessage(void* socket, string str, int flags)
+{
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, str.length());
+	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
+	zmq_sendmsg(socket, &msg, flags);
+	zmq_msg_close(&msg);
+}
+
+string readStringMessage(void *socket)
+{
+	// Message holder
+	zmq_msg_t msg;
+
+	zmq_msg_init(&msg);
+	zmq_recvmsg(socket, &msg, 0);
+	int size = zmq_msg_size(&msg);
+	char* s = (char*)malloc(size+1);
+	memcpy(s, zmq_msg_data(&msg), size);
+	s[size] = 0;
+	std::string str(s, size);
+	delete s;
+	zmq_msg_close(&msg);
+
+	return str;
+}
+
+void sendIntMessage(void* socket, int val, int flags)
+{
+    zmq_msg_t msg;
+    zmq_msg_init_size(&msg, sizeof(int));
+    memcpy(zmq_msg_data(&msg), &val, sizeof(int));
+    zmq_sendmsg(socket, &msg, flags);
+    zmq_msg_close(&msg);
+}
+
+int readIntMessage(void *socket)
+{
+    // Message holder
+    zmq_msg_t msg;
+
+    zmq_msg_init(&msg);
+    zmq_recvmsg(socket, &msg, -1);
+    int size = zmq_msg_size(&msg);
+    int val;
+    memcpy(&val, zmq_msg_data(&msg), size);
+    zmq_msg_close(&msg);
+
+    return val;
+}
+
+void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
+{
+    // Send data product
+    zmq_msg_t data;
+    zmq_msg_init_size(&data, dataProduct.getSize());
+    dataProduct.serializeToArray(zmq_msg_data(&data));
+    zmq_sendmsg(socket, &data, ZMQ_DONTWAIT);
+    zmq_msg_close(&data);
+}
+
+
+int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort)
+{
+    for (int i = minPort; i <= maxPort; i++) {
+        stringstream ss;
+        ss << "tcp://" << ipAddr << ":" << i;
+
+        int rc = zmq_bind(socket, ss.str().c_str());
+        if (rc == 0)
+            return i;
+    }
+    return -1;
+}
+} /* namespace gravity */
