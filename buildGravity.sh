@@ -5,10 +5,12 @@ pushd ./ThirdParty >& /dev/null
 popd >& /dev/null
 
 pushd ./src/api >& /dev/null
+./buildall.sh clean || exit 1
 ./buildall.sh || exit 1
 popd >& /dev/null
 
 pushd ./src/components/cpp >& /dev/null
+./buildall.sh clean || exit 1
 ./buildall.sh || exit 1
 popd >& /dev/null
 
@@ -38,6 +40,7 @@ cp src/api/MATLAB/*.m include/MATLAB
 mkdir lib/MATLAB
 cp src/api/MATLAB/*.jar lib/MATLAB
 
+echo building Gravity tarball...
 rm gravity.tgz
 tar czf gravity.tgz bin lib include
 
