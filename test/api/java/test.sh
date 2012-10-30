@@ -10,6 +10,7 @@ SDPID=$!
 # give the SD a second to start up (only seems to be necessary in windows)
 sleep 1
 
+make clean
 make test
 ret=$?
 

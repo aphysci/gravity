@@ -8,6 +8,7 @@ export PATH=$PATH:../../../../ThirdParty/bin:../../../../src/components/cpp/bin
 ServiceDirectory &
 SDPID=$!
 
+make clean
 make test
 ret=$?
 

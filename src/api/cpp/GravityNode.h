@@ -85,7 +85,6 @@ private:
     void* context;
     void* subscriptionManagerSocket;
     void* requestManagerSocket;
-    void* serviceManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     string getIP(); ///< Utility method to get the host machine's IP address
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
@@ -221,10 +220,9 @@ public:
      * rest of the Gravity-enabled system.
      * \param dataProductID string ID used to uniquely identify this published data product
      * \param transport type (e.g. 'tcp', 'ipc')
-     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerDataProduct(string dataProductID, string transportType, bool addToDirectory = true);
+    GRAVITY_API GravityReturnCode registerDataProduct(string dataProductID, string transportType);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
@@ -233,25 +231,11 @@ public:
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
-     * \param networkPort network port on which this provider will listen for requests
+     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
      * \param transport type for requests (e.g. 'tcp', 'ipc')
-     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
-     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
-     * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerService(string serviceID, unsigned short networkPort,
-            string transportType, const GravityServiceProvider& server, bool addToDirectory = true);
-    /**
-     * Register as a service provider with Gravity, and optionally, the Service Directory
-     * \param serviceID Unique ID with which to register this service
-     * \param connectionURL connection string on which service provider will listen for requests
-     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
-     * \param addToDirectory true if this data product should be registered in the ServiceDirectory
-     * \return success flag
-     */
-    GRAVITY_API GravityReturnCode registerService(string serviceID, string connectionURL,
-    		const GravityServiceProvider& server, bool addToDirectory = true);
-
+    GRAVITY_API GravityReturnCode registerService(string serviceID, string transportType,
+            const GravityServiceProvider& server);
     /**
      * Unregister as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which the service was originially registered

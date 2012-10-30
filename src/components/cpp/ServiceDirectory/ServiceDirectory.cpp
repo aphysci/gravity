@@ -7,6 +7,7 @@
 
 #include "ServiceDirectory.h"
 #include "GravityLogger.h"
+#include "CommUtil.h"
 
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
@@ -14,6 +15,7 @@
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
+#include <zmq.h>
 
 #include <stdlib.h>
 #include <string>
@@ -35,9 +37,56 @@ int main(void)
 
     Log::message("running with SD connection string: %s", sdURL.c_str());
     ServiceDirectory serviceDirectory;
-	gn.registerService("ServiceDirectory", sdURL, serviceDirectory, false);
 
-	gn.waitForExit();
+    void *context = zmq_init(1);
+    if (!context)
+    {
+        Log::critical("Could not create ZeroMQ context, exiting");
+        exit(1);
+    }
+
+    // Set up the inproc socket to listen for to requests messages from the GravityNode
+    void *socket = zmq_socket(context, ZMQ_REP);
+    int rc = zmq_bind(socket, sdURL.c_str());
+    if (rc < 0)
+    {
+        Log::fatal("Could bind address for ServiceDirectory, error code was %d", rc);
+        exit(1);
+    }
+
+    // Always have at least the gravity node to poll
+    zmq_pollitem_t pollItem;
+    pollItem.socket = socket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
+
+    // Process forever...
+    while (true)
+    {
+        // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            // Interrupted
+            break;
+        }
+
+        // Process new subscription requests from the gravity node
+        if (pollItem.revents & ZMQ_POLLIN)
+        {
+            // Read the data product
+            zmq_msg_t msg;
+            zmq_msg_init(&msg);
+            zmq_recvmsg(pollItem.socket, &msg, -1);
+            GravityDataProduct request(zmq_msg_data(&msg), zmq_msg_size(&msg));
+            zmq_msg_close(&msg);
+
+            shared_ptr<GravityDataProduct> response = serviceDirectory.request(request);
+
+            sendGravityDataProduct(pollItem.socket, *response);
+        }
+    }
 }
 
 namespace gravity

@@ -19,7 +19,7 @@ using namespace std;
 namespace gravity
 {
 
-class ServiceDirectory : public GravityServiceProvider
+class ServiceDirectory
 {
 private:
     map<string, list<string> > dataProductMap;
@@ -32,8 +32,6 @@ private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
-
-    char* bind_address;
 };
 
 } /* namespace gravity */

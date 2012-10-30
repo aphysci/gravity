@@ -86,6 +86,9 @@ public:
         ret = node.registerDataProduct("TEST", "tcp");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
+        ret = node.registerDataProduct("TEST", "tcp");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
+
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
@@ -93,7 +96,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -111,7 +114,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterDataProduct("TEST");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::NO_SUCH_DATA_PRODUCT);
@@ -205,7 +208,7 @@ public:
     	clearServiceFlags();
 
     	// Register a service
-    	ret = node.registerService("SERVICE_TEST", 5757, "tcp", *this);
+    	ret = node.registerService("SERVICE_TEST", "tcp", *this);
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     	sleep(2);
 
@@ -233,14 +236,20 @@ public:
         GravityReturnCode ret = node.init("TestNode4");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node.registerService("TEST2", 5657, "tcp", *this);
+        ret = node.registerService("TEST2", "tcp", *this);
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
-        ret = node.registerService("TEST2", 5657, "tcp", *this);
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::REGISTRATION_CONFLICT);
+        ret = node.registerService("TEST2", "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
 
         ret = node.unregisterService("TEST2");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node.registerService("TEST2", "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+        ret = node.registerService("TEST2", "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
 
         ret = node.unregisterService("TEST2");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);

@@ -54,7 +54,8 @@ namespace gravity {
         NO_SUCH_DATA_PRODUCT = -8,
         LINK_ERROR = -9,
         INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11
+        NO_SERVICE_PROVIDER = -11,
+        NO_PORTS_AVAILABLE = -12
     };
 
 class GravityNode {
@@ -79,8 +80,8 @@ public:
             const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
     shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
             
-    GravityReturnCode registerService(const std::string& serviceID, short networkPort,
-            const std::string& transportType, const gravity::GravityServiceProvider& server);
+    GravityReturnCode registerService(const std::string& serviceID, const std::string& transportType, 
+    		const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
     
     GravityReturnCode startHeartbeat(int interval_in_microseconds);

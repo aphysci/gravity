@@ -55,11 +55,6 @@ int main()
 						//This identifies the Service to the service directory so that others can 
 						// make a request to it.  
 						"Multiplication", 
-						//This assigns a port on this computer to the data product.  No need to remember 
-						//this because the service directory will tell this to other components looking 
-						//for this data product.  Simply assign a port number between 1024 and 65535 that 
-						//is not in use on this machine.  	
-						54534, 
 						//Assign a transport type to the socket (almost always tcp, unless you are only 
 						//using the gravity data product between two processes on the same computer).  
 						"tcp", 
