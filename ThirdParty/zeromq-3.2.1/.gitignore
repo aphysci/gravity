@@ -1,0 +1,11 @@
+*.lo
+*.la
+.libs
+test_*
+inproc_lat
+inproc_thr
+local_lat
+local_thr
+remote_lat
+remote_thr
+
