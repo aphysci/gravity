@@ -49,7 +49,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 vs: all
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
-	OS_SPECIFIC_LIBS = -lprotobuf -Wl,-Bstatic -liniparser -Wl,-Bdynamic -lzmq
+	OS_SPECIFIC_LIBS = -lprotobuf -liniparser -lzmq
 	OS_SPECIFIC_FLAGS = -fpic
 linux: all;
 else

@@ -15,10 +15,10 @@ SYSTEM:=$(strip $(shell uname -s))
 #SYSTEM=MINGW32_NT-6.1
 #WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
+	OS_SPECIFIC_LIBS = -lrt
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
@@ -26,7 +26,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(THIRDPARTY_DIR)/include -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR) -I$(EZOPTION_PARSER_DIR) $(ADDITIONAL_INCLUDES)
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+LIBS= -lgravity -lprotobuf -liniparser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))

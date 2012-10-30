@@ -30,14 +30,14 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
 	CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar;build;."
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
 	OS_SPECIFIC_LIBFLAGS=-D_JNI_IMPLEMENTATION_ -Wl,--kill-at
 	LIB_EXT=dll
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lrt 
+	OS_SPECIFIC_LIBS = -lrt 
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
 	CLASSPATH=$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar:build:.
 	LIB_EXT=so
@@ -48,7 +48,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(THIRDPARTY_DIR)/include -I$(INIPARSER_DIR)/src -I$(JAVAINCLUDE_DIR) -I$(GRAVLIB_DIR) -I. $(OS_SPECIFIC_INCS)
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS)
+LIBS=-lgravity -lprotobuf -liniparser -lzmq $(OS_SPECIFIC_LIBS)
 
 .PRECIOUS: %.java $(PROTO_CODE)
 
