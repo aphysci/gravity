@@ -8,7 +8,6 @@
 #ifndef COMMUTIL_H_
 #define COMMUTIL_H_
 
-#include "Utility.h"
 #include "GravityDataProduct.h"
 
 #ifdef __GNUC__
