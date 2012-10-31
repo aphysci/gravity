@@ -48,9 +48,7 @@ private:
 
 	void addSubscription();
 	void removeSubscription();
-	string readStringMessage();
 	void ready();
-	void sendStringMessage(void* socket, string str, int flags);
 public:
 	/**
 	 * Constructor GravitySubscriptionManager
