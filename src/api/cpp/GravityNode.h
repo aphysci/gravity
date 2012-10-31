@@ -47,11 +47,10 @@ namespace GravityReturnCodes
         REGISTRATION_CONFLICT = -5,
         NOT_REGISTERED = -6,
         NO_SUCH_SERVICE = -7,
-        NO_SUCH_DATA_PRODUCT = -8,
-        LINK_ERROR = -9,
-        INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11,
-        NO_PORTS_AVAILABLE = -12
+        LINK_ERROR = -8,
+        INTERRUPTED = -9,
+        NO_SERVICE_PROVIDER = -10,
+        NO_PORTS_AVAILABLE = -11
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;

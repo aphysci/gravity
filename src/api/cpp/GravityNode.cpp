@@ -573,16 +573,9 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-            if (pb.url_size() > 0)
-            {
-            	for (int i = 0; i < pb.url_size(); i++)
-            		urls.push_back(pb.url(i));
-            	ret = GravityReturnCodes::SUCCESS;
-            }
-            else
-            {
-                ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
-            }
+            for (int i = 0; i < pb.url_size(); i++)
+                urls.push_back(pb.url(i));
+            ret = GravityReturnCodes::SUCCESS;
         }
         else
         {
@@ -719,7 +712,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 			}
 			else
 			{
-				ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
+				ret = GravityReturnCodes::NO_SUCH_SERVICE;
 			}
 		}
 		else
