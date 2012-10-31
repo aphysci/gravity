@@ -76,8 +76,10 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
 			}
 			else
+			{
+				listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, "Received");
 				mqe.lastHeartbeatTime = getCurrentTime();
-
+			}
 
 			messageTimes.pop();
 			mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)

@@ -16,6 +16,7 @@ public:
 
     virtual ~CPPGravityHeartbeatListener();
     virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
+    virtual void ReceivedHeartbeat(std::string dataProductID, std::string status);
 };
 
 }

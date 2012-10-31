@@ -40,6 +40,7 @@ namespace gravity {
 	public:
 	    virtual ~CPPGravityHeartbeatListener();
     	virtual void MissedHeartbeat(const std::string& dataProductID, int microsecond_to_last_heartbeat, const std::string& status);
+    	virtual void ReceivedHeartbeat(const std::string& dataProductID, const std::string& status);
 	};
 
     enum GravityReturnCode {
