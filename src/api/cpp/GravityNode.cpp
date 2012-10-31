@@ -14,6 +14,7 @@
 #else
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/unistd.h>
 #endif
 #include <sstream>
 #include <signal.h>
@@ -293,7 +294,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 	zmq_connect(socket, url.c_str());
 
 	// Send message to service provider
-	sendGravityDataProduct(socket, request);
+	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
 
 	// Poll socket for reply with a timeout
 	zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
