@@ -238,8 +238,15 @@ public:
 
     void testRegisterService(void)
     {
+	GravityNode* node1 = new GravityNode();
+        GravityReturnCode ret = node1->init("TestNode4a");
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+        ret = node1->registerService("TEST2", "tcp", *this);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+	delete node1;
+	
         GravityNode node;
-        GravityReturnCode ret = node.init("TestNode4");
+        ret = node.init("TestNode4");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerService("TEST2", "tcp", *this);

@@ -191,13 +191,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     }
     else
     {
-        origUrl = serviceMap[registration.id()];
-        if (origUrl == "")
-            serviceMap[registration.id()] = registration.url();
-        else if (origUrl == registration.url())
-            foundDup = true;
-        else
-            foundConflict = true;
+        serviceMap[registration.id()] = registration.url();
     }
     Log::message("[Register] ID: %s, MessageType: %s, URL: %s", registration.id().c_str(),
             registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", registration.url().c_str());
