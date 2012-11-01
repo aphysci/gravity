@@ -7,6 +7,7 @@
 
 #include "GravitySubscriptionManager.h"
 #include "GravityLogger.h"
+#include "CommUtil.h"
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -63,7 +64,7 @@ void GravitySubscriptionManager::start()
 		if (pollItems[0].revents & ZMQ_POLLIN)
 		{
 			// Get new GravityNode request
-			string command = readStringMessage();
+			string command = readStringMessage(gravityNodeSocket);
 
 			// message from gravity node should be either a subscribe or unsubscribe request
 			if (command == "subscribe")
@@ -166,44 +167,16 @@ void GravitySubscriptionManager::ready()
 	zmq_close(initSocket);
 }
 
-void GravitySubscriptionManager::sendStringMessage(void* socket, string str, int flags)
-{
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, str.length());
-	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
-	zmq_sendmsg(socket, &msg, flags);
-	zmq_msg_close(&msg);
-}
-
-string GravitySubscriptionManager::readStringMessage()
-{
-	// Message holder
-	zmq_msg_t msg;
-
-	// Read the data product id for this subscription
-	zmq_msg_init(&msg);
-	zmq_recvmsg(gravityNodeSocket, &msg, -1);
-	int size = zmq_msg_size(&msg);
-	char* s = (char*)malloc(size+1);
-	memcpy(s, zmq_msg_data(&msg), size);
-	s[size] = 0;
-	std::string str(s, size);
-	delete s;
-	zmq_msg_close(&msg);
-
-	return str;
-}
-
 void GravitySubscriptionManager::addSubscription()
 {
 	// Read the data product id for this subscription
-	string dataProductID = readStringMessage();
+	string dataProductID = readStringMessage(gravityNodeSocket);
 
 	// Read the subscription url
-	string url = readStringMessage();
+	string url = readStringMessage(gravityNodeSocket);
 
 	// Read the subscription filter
-	string filter = readStringMessage();
+	string filter = readStringMessage(gravityNodeSocket);
 
 	// Read the subscriber
 	zmq_msg_t msg;
@@ -267,10 +240,10 @@ void GravitySubscriptionManager::addSubscription()
 void GravitySubscriptionManager::removeSubscription()
 {
 	// Read data product id
-	string dataProductID = readStringMessage();
+	string dataProductID = readStringMessage(gravityNodeSocket);
 
 	// Read the subscription filter
-	string filter = readStringMessage();
+	string filter = readStringMessage(gravityNodeSocket);
 
 	// Read the subscriber
 	zmq_msg_t msg;

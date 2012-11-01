@@ -66,13 +66,13 @@ int readIntMessage(void *socket)
     return val;
 }
 
-void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
+void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
 {
     // Send data product
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());
     dataProduct.serializeToArray(zmq_msg_data(&data));
-    zmq_sendmsg(socket, &data, ZMQ_DONTWAIT);
+    zmq_sendmsg(socket, &data, flags);
     zmq_msg_close(&data);
 }
 

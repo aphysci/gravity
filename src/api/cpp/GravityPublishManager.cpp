@@ -10,11 +10,17 @@
 #include "CommUtil.h"
 #include "zmq.h"
 #include <sstream>
+#include <algorithm>
 
 namespace gravity
 {
 
 using namespace std;
+
+bool sortCacheValues (const shared_ptr<CacheValue> &i, const shared_ptr<CacheValue> &j)
+{
+    return i->timestamp < j->timestamp;
+}
 
 GravityPublishManager::GravityPublishManager(void* context)
 {
@@ -100,9 +106,16 @@ void GravityPublishManager::start()
 				if (newsub)
 				{
 				    shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
-				    Log::debug("got a new subscriber for %s", pd->dataProductID.c_str());
-				    if (pd->lastCachedValue)
-				        publish(pd->socket, pd->lastCachedFilterText, pd->lastCachedValue, pd->lastCachedValueSize);
+				    Log::debug("got a new subscriber for %s, resending %d values", pd->dataProductID.c_str(), pd->lastCachedValues.size());
+
+				    list<shared_ptr<CacheValue> > values;
+				    for (map<string,shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
+				        values.push_back(iter->second);
+
+				    // we shouldn't be doing this often, so just sort these when we need it.
+                    values.sort(sortCacheValues);
+				    for (list<shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end(); iter++)
+				        publish(pd->socket, (*iter)->filterText, (*iter)->value, (*iter)->size);
 				}
 			}
 		}
@@ -209,9 +222,6 @@ void GravityPublishManager::registerDataProduct()
     publishDetails->dataProductID = dataProductID;
     publishDetails->socket = pubSocket;
 	publishDetails->pollItem = pollItem;
-    publishDetails->lastCachedFilterText = "";
-	publishDetails->lastCachedValue = NULL;
-	publishDetails->lastCachedValueSize = 0;
 
     publishMapByID[dataProductID] = publishDetails;
     publishMapBySocket[pubSocket] = publishDetails;
@@ -232,8 +242,10 @@ void GravityPublishManager::unregisterDataProduct()
 		zmq_unbind(socket, publishDetails->url.c_str());
 		zmq_close(socket);
 
-		if (publishDetails->lastCachedValue)
-		    delete [] publishDetails->lastCachedValue;
+		// delete any cached values.
+        for (map<string,shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin(); iter != publishDetails->lastCachedValues.end(); iter++)
+		    delete [] iter->second->value;
+        publishDetails->lastCachedValues.clear();
 
 		// Remove from poll items
 		vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
@@ -274,12 +286,16 @@ void GravityPublishManager::publish()
     dataProduct.serializeToArray(bytes);
 
     // delete any old data and ...
-    if (publishDetails->lastCachedValue)
-        delete [] publishDetails->lastCachedValue;
+    if (publishDetails->lastCachedValues.count(filterText) > 0)
+        delete [] publishDetails->lastCachedValues[filterText]->value;
+
     // ... save new data for late subscribers
-    publishDetails->lastCachedFilterText = filterText;
-    publishDetails->lastCachedValue = bytes;
-    publishDetails->lastCachedValueSize = size;
+    shared_ptr<CacheValue> val = shared_ptr<CacheValue>(new CacheValue);
+    val->filterText = filterText;
+    val->value = bytes;
+    val->size = size;
+    val->timestamp = dataProduct.getGravityTimestamp();
+    publishDetails->lastCachedValues[filterText] = val;
 
     publish(publishDetails->socket, filterText, bytes, size);
 

@@ -92,7 +92,7 @@ void GravityServiceManager::start()
 				shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
 				shared_ptr<GravityDataProduct> response = serviceDetails->server->request(dataProduct);
 
-				sendGravityDataProduct(pollItems[i].socket, *response);
+				sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
 			}
 		}
 	}

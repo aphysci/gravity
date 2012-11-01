@@ -14,6 +14,7 @@
 #else
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/unistd.h>
 #endif
 #include <sstream>
 #include <signal.h>
@@ -293,7 +294,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 	zmq_connect(socket, url.c_str());
 
 	// Send message to service provider
-	sendGravityDataProduct(socket, request);
+	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
 
 	// Poll socket for reply with a timeout
 	zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
@@ -572,16 +573,9 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-            if (pb.url_size() > 0)
-            {
-            	for (int i = 0; i < pb.url_size(); i++)
-            		urls.push_back(pb.url(i));
-            	ret = GravityReturnCodes::SUCCESS;
-            }
-            else
-            {
-                ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
-            }
+            for (int i = 0; i < pb.url_size(); i++)
+                urls.push_back(pb.url(i));
+            ret = GravityReturnCodes::SUCCESS;
         }
         else
         {
@@ -718,7 +712,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 			}
 			else
 			{
-				ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
+				ret = GravityReturnCodes::NO_SUCH_SERVICE;
 			}
 		}
 		else
