@@ -16,13 +16,7 @@
 #define GRAVITY_API
 #endif
 
-#ifndef WIN32
 #include <stdint.h>
-#else
-#ifndef uint64_t 
-#define uint64_t unsigned long long
-#endif 
-#endif 
 
 namespace gravity {
 
