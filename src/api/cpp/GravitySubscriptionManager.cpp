@@ -11,9 +11,16 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 namespace gravity
 {
+
+bool sortCacheValues (const shared_ptr<GravityDataProduct> &i, const shared_ptr<GravityDataProduct> &j)
+{
+    return i->getGravityTimestamp() < j->getGravityTimestamp();
+}
+
 
 using namespace std;
 
@@ -119,25 +126,27 @@ void GravitySubscriptionManager::start()
 					// Clean up message
 					zmq_msg_close(&message);
 
+					shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[i].socket];
+
 					// This may be a resend of previous value if a new subscriber was added, so make sure this is new data
-					if (!subDetails->lastCachedValue || subDetails->lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
+					if (!lastCachedValue || lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
 					{
 						dataProducts.push_back(dataProduct);
 
 						// Save most recent value so we can provide it to new subscribers, and to perform check above.
-						subDetails->lastCachedValue = dataProduct;
+						lastCachedValueMap[pollItems[i].socket] = dataProduct;
 					}
 				}
 
-				Log::trace("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
+				Log::debug("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
 
                 // Loop through all subscribers and deliver the messages
-                set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
-                while (iter != subDetails->subscribers.end())
+		        subscriberSem.Lock();
+                for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
                 {
                     (*iter)->subscriptionFilled(dataProducts);
-                    iter++;
                 }
+                subscriberSem.Unlock();
 			}
 		}
 	}
@@ -233,17 +242,28 @@ void GravitySubscriptionManager::addSubscription()
 		subscriptionSocketMap[subSocket] = subDetails;
 	}
 
-	// Add new subscriber if it isn't already in the list
-	subDetails->subscribers.insert(subscriber);
-
 	// If we've already received data on this subscription, send the most recent
 	// value to the new subscriber
-	if (subDetails->lastCachedValue)
+	vector<shared_ptr<GravityDataProduct> > dataProducts;
+	for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
 	{
-	    std::vector< shared_ptr<GravityDataProduct> > dataProducts;
-	    dataProducts.push_back(subDetails->lastCachedValue);
-	    subscriber->subscriptionFilled(dataProducts);
+        if (lastCachedValueMap[iter->second.socket])
+            dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
 	}
+    // Add new subscriber if it isn't already in the list
+    subscriberSem.Lock();
+    if (subDetails->subscribers.find(subscriber) == subDetails->subscribers.end())
+    {
+        subDetails->subscribers.insert(subscriber);
+
+        if (dataProducts.size() > 0)
+        {
+            Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
+            sort(dataProducts.begin(), dataProducts.end(), sortCacheValues);
+            subscriber->subscriptionFilled(dataProducts);
+        }
+    }
+    subscriberSem.Unlock();
 }
 
 void GravitySubscriptionManager::removeSubscription()
@@ -268,6 +288,7 @@ void GravitySubscriptionManager::removeSubscription()
 		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[dataProductID][filter];
 
 		// Find & remove subscriber from our list of subscribers for this data product
+        subscriberSem.Lock();
 		set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
 		while (iter != subDetails->subscribers.end())
 		{
@@ -282,6 +303,7 @@ void GravitySubscriptionManager::removeSubscription()
 				iter++;
 			}
 		}
+        subscriberSem.Unlock();
 
 		// If no more subscribers, close the subscription sockets and clear the details
 		if (subDetails->subscribers.empty())

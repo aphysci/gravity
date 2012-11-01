@@ -19,6 +19,7 @@
 #endif
 #include <string>
 #include "GravitySubscriber.h"
+#include "GravitySemaphore.h"
 
 namespace gravity
 {
@@ -31,7 +32,6 @@ typedef struct SubscriptionDetails
 	string dataProductID;
 	string filter;
 	map<string, zmq_pollitem_t> pollItemMap;
-	shared_ptr<GravityDataProduct> lastCachedValue;
 	set<GravitySubscriber*> subscribers;
 } SubscriptionDetails;
 
@@ -47,7 +47,9 @@ private:
 	map<string, map<string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
 	map<string, string> urlMap; // url -> dp ID
     map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+    map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	vector<zmq_pollitem_t> pollItems;
+	Semaphore subscriberSem;
 
 	void addSubscription();
 	void removeSubscription();
