@@ -161,5 +161,8 @@
     <ClInclude Include="..\..\..\src\api\cpp\IniParserWrap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
