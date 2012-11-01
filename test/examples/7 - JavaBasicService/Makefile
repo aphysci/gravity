@@ -1,6 +1,7 @@
 GRAVITY_ROOT_DIR=../../..
 THIRDPARTY_DIR=$(GRAVITY_ROOT_DIR)/ThirdParty
 GRAVITY_JAVA_DIR=$(GRAVITY_ROOT_DIR)/src/api/java
+GRAVLIB=$(GRAVITY_JAVA_DIR)/gravity.jar
 
 JAVA_BUILD_DIR=build
 SRC_DIR=src
@@ -16,6 +17,19 @@ PROTO_SRC=$(wildcard $(PROTOBUF_SRC_DIR)/*.proto)
 PROTO_JAVA=$(patsubst $(PROTOBUF_SRC_DIR)/%.proto,$(PROTOBUF_SRC_DIR)/%.java,$(PROTO_SRC))
 
 OUTPUT_JAR=JavaBasicService.jar
+
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+        CLASSPATH="$(GRAVLIB);build;$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar"
+        THIRDPARTY_LIB=$(THIRDPARTY_DIR)/bin
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+        CLASSPATH=$(GRAVLIB):build:$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar
+        THIRDPARTY_LIB=$(THIRDPARTY_DIR)/lib
+linux: all;
+else
+        ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
 
 .PRECIOUS: %.java $(PROTO_JAVA)
 

@@ -24,6 +24,11 @@ public:
 	 */
 	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status) = 0;
 
+	/**
+	 * Called when another component's heartbeat is received
+	 */
+	virtual void ReceivedHeartbeat(std::string dataProductID, std::string status) = 0;
+
     /**
      * Default destructor
      */

@@ -24,7 +24,7 @@ public class GravityJavaTest {
         GravityReturnCode ret = node.init("TestNode");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerDataProduct("JavaGDP", 5678, "tcp");
+        ret = node.registerDataProduct("JavaGDP", "tcp");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         Subscriber s = new Subscriber();
@@ -71,10 +71,10 @@ public class GravityJavaTest {
         testAssert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.unregisterDataProduct("JavaGDP");
-        testAssert(ret == GravityReturnCode.SUCCESS);
+        testAssert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
         
         GravityServiceProvider gsp = new ServiceProvider();
-        ret = node.registerService("JavaService", (short)8888, "tcp", gsp);
+        ret = node.registerService("JavaService", "tcp", gsp);
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityRequestor gr = new Requestor();
@@ -91,7 +91,7 @@ public class GravityJavaTest {
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerService("SyncJavaService", (short)8889, "tcp", new SyncServiceProvider());
+        ret = node.registerService("SyncJavaService", "tcp", new SyncServiceProvider());
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityDataProduct syncRequest = new GravityDataProduct("SyncJavaRequest");

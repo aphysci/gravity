@@ -14,6 +14,7 @@
 #else
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/unistd.h>
 #endif
 #include <sstream>
 #include <signal.h>
@@ -31,6 +32,7 @@
 #include "GravityHeartbeat.h"
 #include "GravityConfigParser.h"
 #include "GravityLogger.h"
+#include "CommUtil.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -131,11 +133,15 @@ GravityNode::~GravityNode()
 	sendStringMessage(requestManagerSocket, "kill", ZMQ_DONTWAIT);
 	zmq_close(requestManagerSocket);
 
-	sendStringMessage(serviceManagerSocket, "kill", ZMQ_DONTWAIT);
-	zmq_close(serviceManagerSocket);
+    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(publishManagerSocket, PUB_MGR_URL);
+    sendStringMessage(publishManagerSocket, "kill", ZMQ_DONTWAIT);
+    zmq_close(publishManagerSocket);
 
-	sendStringMessage(publishManagerSocket, "kill", ZMQ_DONTWAIT);
-	zmq_close(publishManagerSocket);
+    void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
+    sendStringMessage(serviceManagerSocket, "kill", ZMQ_DONTWAIT);
+    zmq_close(serviceManagerSocket);
 
     // Clean up the zmq context object
     zmq_term(context);
@@ -163,10 +169,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
     // Setup the subscription manager
     pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
 
-    // Setup up communication channel to publish manager
-    publishManagerSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(publishManagerSocket, "inproc://gravity_publish_manager");
-
     // Setup the publish manager
     pthread_create(&publishManagerThread, NULL, startPublishManager, context);
 
@@ -176,10 +178,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     // Setup the request manager
     pthread_create(&requestManagerThread, NULL, startRequestManager, context);
-
-    // Setup up communication channel to service manager
-    serviceManagerSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(serviceManagerSocket, "inproc://gravity_service_manager");
 
     // Setup the service manager
     pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
@@ -201,7 +199,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	// Decrement counter
     	numThreadsWaiting--;
     }
-    zmq_bind(initSocket, "inproc://gravity_init");
     zmq_close(initSocket);
 	
 	s_restore_signals();
@@ -261,7 +258,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
-		Log::initAndAddGravityLogger(this, 54543, net_log_level); //TODO: port number???
+		Log::initAndAddGravityLogger(this, net_log_level);
 
 	return ret;
 }
@@ -270,16 +267,6 @@ void GravityNode::waitForExit()
 {
 	// Wait on the subscription manager thread
 	pthread_join(subscriptionManagerThread, NULL);
-}
-
-void GravityNode::sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct)
-{
-    // Send data product
-    zmq_msg_t data;
-    zmq_msg_init_size(&data, dataProduct.getSize());
-    dataProduct.serializeToArray(zmq_msg_data(&data));
-    zmq_sendmsg(socket, &data, ZMQ_DONTWAIT);
-    zmq_msg_close(&data);
 }
 
 GravityReturnCode GravityNode::sendRequestsToServiceProvider(string url, const GravityDataProduct& request,
@@ -307,7 +294,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 	zmq_connect(socket, url.c_str());
 
 	// Send message to service provider
-	sendGravityDataProduct(socket, request);
+	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
 
 	// Poll socket for reply with a timeout
 	zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
@@ -370,84 +357,110 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
-GravityReturnCode GravityNode::registerDataProduct(string dataProductID, unsigned short networkPort, string transportType, bool addToDirectory)
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string transportType)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
-    // Build the connection string
-    stringstream ss;
+    if (publishMap.count(dataProductID) > 0)
+    {
+        Log::warning("attempt to register duplicate data product ID: %s", dataProductID.c_str());
+        return GravityReturnCodes::DUPLICATE;
+    }
 
     string endpoint;
     if(transportType == "tcp")
     	endpoint = getIP();
+    else if (transportType == "ipc")
+        endpoint = "/tmp/" + dataProductID;
     else
     	endpoint = dataProductID;
-    ss << transportType << "://" << endpoint;
-    if(transportType == "tcp")
-    	ss << ":" << networkPort;
-    string connectionURL = ss.str();
 
-    // Send subscription details
+    // Setup up communication channel to publish manager
+    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(publishManagerSocket, PUB_MGR_URL);
+
+    // Send publish details
 	sendStringMessage(publishManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
-	sendStringMessage(publishManagerSocket, connectionURL, ZMQ_DONTWAIT);
-
-    publishMap[dataProductID] = connectionURL;
-
-    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty() && addToDirectory)
+    sendStringMessage(publishManagerSocket, transportType, ZMQ_SNDMORE);
+    if(transportType == "tcp")
     {
-        // Create the object describing the data product to register
-        ServiceDirectoryRegistrationPB registration;
-        registration.set_id(dataProductID);
-        registration.set_url(connectionURL);
-        registration.set_type(ServiceDirectoryRegistrationPB::DATA);
+        int minPort = getIntParam("MinPort", MIN_PORT);
+        int maxPort = getIntParam("MaxPort", MAX_PORT);
+        sendIntMessage(publishManagerSocket, minPort, ZMQ_SNDMORE);
+        sendIntMessage(publishManagerSocket, maxPort, ZMQ_SNDMORE);
+    }
+    sendStringMessage(publishManagerSocket, endpoint, ZMQ_DONTWAIT);
 
-        // Wrap request in GravityDataProduct
-        GravityDataProduct request("RegistrationRequest");
-        request.setData(registration);
+	string connectionURL = readStringMessage(publishManagerSocket);
 
-        // GravityDataProduct for response
-        GravityDataProduct response("RegistrationResponse");
+	Log::debug("Registered publisher at address: %s", connectionURL.c_str());
 
-        // Send request to service directory
-        ret = sendRequestToServiceDirectory(request, response);
-        if (ret == GravityReturnCodes::SUCCESS)
+	zmq_close(publishManagerSocket);
+
+	if (connectionURL.size() == 0)
+	{
+	    ret = GravityReturnCodes::NO_PORTS_AVAILABLE;
+	}
+	else
+	{
+	    publishMap[dataProductID] = connectionURL;
+
+        if (!serviceDirectoryNode.ipAddress.empty())
         {
-            ServiceDirectoryResponsePB pb;
-            bool parserSuccess = true;
-            try
-            {
-                response.populateMessage(pb);
-            }
-            catch (char*)
-            {
-                parserSuccess = false;
-            }
+            // Create the object describing the data product to register
+            ServiceDirectoryRegistrationPB registration;
+            registration.set_id(dataProductID);
+            registration.set_url(connectionURL);
+            registration.set_type(ServiceDirectoryRegistrationPB::DATA);
 
-            if (parserSuccess)
+            // Wrap request in GravityDataProduct
+            GravityDataProduct request("RegistrationRequest");
+            request.setData(registration);
+
+            // GravityDataProduct for response
+            GravityDataProduct response("RegistrationResponse");
+
+            // Send request to service directory
+            ret = sendRequestToServiceDirectory(request, response);
+            if (ret == GravityReturnCodes::SUCCESS)
             {
-                switch (pb.returncode())
+                ServiceDirectoryResponsePB pb;
+                bool parserSuccess = true;
+                try
                 {
-                case ServiceDirectoryResponsePB::SUCCESS:
-                    ret = GravityReturnCodes::SUCCESS;
-                    break;
-                case ServiceDirectoryResponsePB::REGISTRATION_CONFLICT:
-                    ret = GravityReturnCodes::REGISTRATION_CONFLICT;
-                    break;
-                case ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION:
-                    ret = GravityReturnCodes::DUPLICATE;
-                    break;
-                case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                    response.populateMessage(pb);
+                }
+                catch (char*)
+                {
+                    parserSuccess = false;
+                }
+
+                if (parserSuccess)
+                {
+                    switch (pb.returncode())
+                    {
+                    case ServiceDirectoryResponsePB::SUCCESS:
+                        ret = GravityReturnCodes::SUCCESS;
+                        break;
+                    case ServiceDirectoryResponsePB::REGISTRATION_CONFLICT:
+                        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+                        break;
+                    case ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION:
+                        ret = GravityReturnCodes::DUPLICATE;
+                        break;
+                    case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                        ret = GravityReturnCodes::LINK_ERROR;
+                        break;
+                    }
+                }
+                else
+                {
                     ret = GravityReturnCodes::LINK_ERROR;
-                    break;
                 }
             }
-            else
-            {
-                ret = GravityReturnCodes::LINK_ERROR;
-            }
         }
-    }
+	}
 
     return ret;
 }
@@ -456,66 +469,73 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
-    string url = publishMap[dataProductID];
-    if (url.size() == 0)
+    if (publishMap.count(dataProductID) == 0)
     {
         ret = GravityReturnCodes::REGISTRATION_CONFLICT;
     }
     else
     {
+        // Setup up communication channel to publish manager
+        void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
+        zmq_connect(publishManagerSocket, PUB_MGR_URL);
+
     	sendStringMessage(publishManagerSocket, "unregister", ZMQ_SNDMORE);
     	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_DONTWAIT);
-        publishMap[dataProductID] = "";
-    }
+    	string url = publishMap[dataProductID];
+        publishMap.erase(dataProductID);
 
-    if (!serviceDirectoryNode.ipAddress.empty())
-    {
-        ServiceDirectoryUnregistrationPB unregistration;
-        unregistration.set_id(dataProductID);
-        unregistration.set_url(url);
-        unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
+        string status = readStringMessage(publishManagerSocket);
 
-        GravityDataProduct request("UnregistrationRequest");
-        request.setData(unregistration);
+        zmq_close(publishManagerSocket);
 
-        // GravityDataProduct for response
-        GravityDataProduct response("UnregistrationResponse");
-
-        // Send request to service directory
-        ret = sendRequestToServiceDirectory(request, response);
-
-        if (ret == GravityReturnCodes::SUCCESS)
+        if (!serviceDirectoryNode.ipAddress.empty())
         {
-            ServiceDirectoryResponsePB pb;
-            bool parserSuccess = true;
-            try
-            {
-                response.populateMessage(pb);
-            }
-            catch (char*)
-            {
-                parserSuccess = false;
-            }
+            ServiceDirectoryUnregistrationPB unregistration;
+            unregistration.set_id(dataProductID);
+            unregistration.set_url(url);
+            unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
 
-            if (parserSuccess)
+            GravityDataProduct request("UnregistrationRequest");
+            request.setData(unregistration);
+
+            // GravityDataProduct for response
+            GravityDataProduct response("UnregistrationResponse");
+
+            // Send request to service directory
+            ret = sendRequestToServiceDirectory(request, response);
+
+            if (ret == GravityReturnCodes::SUCCESS)
             {
-                switch (pb.returncode())
+                ServiceDirectoryResponsePB pb;
+                bool parserSuccess = true;
+                try
                 {
-                case ServiceDirectoryResponsePB::SUCCESS:
-                case ServiceDirectoryResponsePB::NOT_REGISTERED:
-                    ret = GravityReturnCodes::SUCCESS;
-                    break;
-                default:
-                	ret = GravityReturnCodes::FAILURE;
-                	break;
+                    response.populateMessage(pb);
+                }
+                catch (char*)
+                {
+                    parserSuccess = false;
+                }
+
+                if (parserSuccess)
+                {
+                    switch (pb.returncode())
+                    {
+                    case ServiceDirectoryResponsePB::SUCCESS:
+                    case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                        ret = GravityReturnCodes::SUCCESS;
+                        break;
+                    default:
+                        ret = GravityReturnCodes::FAILURE;
+                        break;
+                    }
+                }
+                else
+                {
+                    ret = GravityReturnCodes::LINK_ERROR;
                 }
             }
-            else
-            {
-                ret = GravityReturnCodes::LINK_ERROR;
-            }
         }
-
     }
 
     return ret;
@@ -553,16 +573,9 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-            if (pb.url_size() > 0)
-            {
-            	for (int i = 0; i < pb.url_size(); i++)
-            		urls.push_back(pb.url(i));
-            	ret = GravityReturnCodes::SUCCESS;
-            }
-            else
-            {
-                ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
-            }
+            for (int i = 0; i < pb.url_size(); i++)
+                urls.push_back(pb.url(i));
+            ret = GravityReturnCodes::SUCCESS;
         }
         else
         {
@@ -593,31 +606,6 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 	}
 
 	return GravityReturnCodes::SUCCESS;
-}
-
-void GravityNode::sendStringMessage(void* socket, string str, int flags)
-{
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, str.length());
-	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
-	int ret = zmq_sendmsg(socket, &msg, flags);
-	zmq_msg_close(&msg);
-}
-
-string GravityNode::readStringMessage(void* socket)
-{
-	zmq_msg_t msg;
-    zmq_msg_init(&msg);
-    zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
-    char* s = (char*)malloc(size+1);
-    memcpy(s, zmq_msg_data(&msg), size);
-    s[size] = 0;
-    std::string str(s, size);
-    delete s;
-  	zmq_msg_close(&msg);
-
-  	return str;
 }
 
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
@@ -664,6 +652,10 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     //Set Timestamp
     dataProduct.setTimestamp(getCurrentTime());
 
+    // Setup up communication channel to publish manager
+    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(publishManagerSocket, PUB_MGR_URL);
+
 	// Send subscription details
 	sendStringMessage(publishManagerSocket, "publish", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, filterText, ZMQ_SNDMORE);
@@ -673,6 +665,9 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	dataProduct.serializeToArray(zmq_msg_data(&msg));
 	zmq_sendmsg(publishManagerSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
+
+	string status = readStringMessage(publishManagerSocket);
+	zmq_close(publishManagerSocket);
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -717,7 +712,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 			}
 			else
 			{
-				ret = GravityReturnCodes::NO_SUCH_DATA_PRODUCT;
+				ret = GravityReturnCodes::NO_SUCH_SERVICE;
 			}
 		}
 		else
@@ -785,25 +780,43 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	return response;
 }
 
-GravityReturnCode GravityNode::registerService(string serviceID, unsigned short networkPort,
-        string transportType, const GravityServiceProvider& server, bool addToDirectory)
+GravityReturnCode GravityNode::registerService(string serviceID, string transportType,
+        const GravityServiceProvider& server)
 {
+
+    if (serviceMap.count(serviceID) > 0)
+    {
+        Log::warning("attempt to register duplicate service ID: %s", serviceID.c_str());
+        return GravityReturnCodes::DUPLICATE;
+    }
+
+
 	// Build the connection string
-	stringstream ss;
-	string ipAddr = getIP();
-	ss << transportType << "://" << ipAddr << ":" << networkPort;
+    string endpoint;
+    if(transportType == "tcp")
+        endpoint = getIP();
+    else if (transportType == "ipc")
+        endpoint = "/tmp/" + serviceID;
+    else
+        endpoint = serviceID;
 
-	return registerService(serviceID, ss.str(), server, addToDirectory);
-}
-
-GravityReturnCode GravityNode::registerService(string serviceID, string connectionURL,
-    		const GravityServiceProvider& server, bool addToDirectory)
-{
+    void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
 
 	// Send subscription details
 	sendStringMessage(serviceManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_SNDMORE);
-	sendStringMessage(serviceManagerSocket, connectionURL, ZMQ_SNDMORE);
+	sendStringMessage(serviceManagerSocket, transportType, ZMQ_SNDMORE);
+
+    if(transportType == "tcp")
+    {
+        int minPort = getIntParam("MinPort", MIN_PORT);
+        int maxPort = getIntParam("MaxPort", MAX_PORT);
+        sendIntMessage(serviceManagerSocket, minPort, ZMQ_SNDMORE);
+        sendIntMessage(serviceManagerSocket, maxPort, ZMQ_SNDMORE);
+    }
+    sendStringMessage(serviceManagerSocket, endpoint, ZMQ_SNDMORE);
+
 
 	// Include the server
 	zmq_msg_t msg;
@@ -813,11 +826,16 @@ GravityReturnCode GravityNode::registerService(string serviceID, string connecti
 	zmq_sendmsg(serviceManagerSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
+    string connectionURL = readStringMessage(serviceManagerSocket);
+
+    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
+    zmq_close(serviceManagerSocket);
 
     serviceMap[serviceID] = connectionURL;
 
-    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty() && addToDirectory)
+    if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
     {
         // Create the object describing the data product to register
         ServiceDirectoryRegistrationPB registration;
@@ -879,63 +897,80 @@ GravityReturnCode GravityNode::registerService(string serviceID, string connecti
 GravityReturnCode GravityNode::unregisterService(string serviceID)
 {
 	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+    if (serviceMap.count(serviceID) == 0)
+    {
+        ret = GravityReturnCodes::REGISTRATION_CONFLICT;
+    }
+    else
+    {
+        // Setup up communication channel to publish manager
+        void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
+        zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
 
-	// Send subscription details
-	sendStringMessage(serviceManagerSocket, "unregister", ZMQ_SNDMORE);
-	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_SNDMORE);
+        sendStringMessage(serviceManagerSocket, "unregister", ZMQ_SNDMORE);
+        sendStringMessage(serviceManagerSocket, serviceID, ZMQ_DONTWAIT);
+        string url = serviceMap[serviceID];
+        serviceMap.erase(serviceID);
 
+        string status = readStringMessage(serviceManagerSocket);
 
-	ServiceDirectoryUnregistrationPB unregistration;
-	unregistration.set_id(serviceID);
-	unregistration.set_url(serviceMap[serviceID]);
-	unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
+        zmq_close(serviceManagerSocket);
 
-	GravityDataProduct request("UnregistrationRequest");
-	request.setData(unregistration);
+        if (!serviceDirectoryNode.ipAddress.empty())
+        {
+            ServiceDirectoryUnregistrationPB unregistration;
+            unregistration.set_id(serviceID);
+            unregistration.set_url(url);
+            unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
 
-	// GravityDataProduct for response
-	GravityDataProduct response("UnregistrationResponse");
+            GravityDataProduct request("UnregistrationRequest");
+            request.setData(unregistration);
 
-	// Send request to service directory
-	ret = sendRequestToServiceDirectory(request, response);
+            // GravityDataProduct for response
+            GravityDataProduct response("UnregistrationResponse");
 
-	if (ret == GravityReturnCodes::SUCCESS)
-	{
-		ServiceDirectoryResponsePB pb;
-		bool parserSuccess = true;
-		try
-		{
-			response.populateMessage(pb);
-		}
-		catch (char*)
-		{
-			parserSuccess = false;
-		}
+            // Send request to service directory
+            ret = sendRequestToServiceDirectory(request, response);
 
-		if (parserSuccess)
-		{
-			switch (pb.returncode())
-			{
-			case ServiceDirectoryResponsePB::SUCCESS:
-            case ServiceDirectoryResponsePB::NOT_REGISTERED:
-				ret = GravityReturnCodes::SUCCESS;
-				break;
-			default:
-				ret = GravityReturnCodes::FAILURE;
-				break;
-			}
-		}
-		else
-		{
-			ret = GravityReturnCodes::LINK_ERROR;
-		}
-	}
+            if (ret == GravityReturnCodes::SUCCESS)
+            {
+                ServiceDirectoryResponsePB pb;
+                bool parserSuccess = true;
+                try
+                {
+                    response.populateMessage(pb);
+                }
+                catch (char*)
+                {
+                    parserSuccess = false;
+                }
+
+                if (parserSuccess)
+                {
+                    switch (pb.returncode())
+                    {
+                    case ServiceDirectoryResponsePB::SUCCESS:
+                    case ServiceDirectoryResponsePB::NOT_REGISTERED:
+                        ret = GravityReturnCodes::SUCCESS;
+                        break;
+                    default:
+                        ret = GravityReturnCodes::FAILURE;
+                        break;
+                    }
+                }
+                else
+                {
+                    ret = GravityReturnCodes::LINK_ERROR;
+                }
+            }
+        }
+    }
 
     return ret;
 }
 
 void* Heartbeat(void* thread_context); //Forward Declaration (Needs to be in Gravity namespace).  
-GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsigned short port)
+GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
@@ -945,7 +980,7 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds, unsi
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
-	this->registerDataProduct(componentID, 54541, "tcp");
+	this->registerDataProduct(componentID, "tcp");
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;

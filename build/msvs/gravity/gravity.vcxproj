@@ -93,6 +93,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\api\cpp\CommUtil.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityConfigParser.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityDataProduct.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityHeartbeat.cpp" />

@@ -24,7 +24,7 @@ int main()
 	// IPC isn't supported in Windows.
 #ifndef WIN32
 	//Register a data product that is very fast only for components on this same machine.  
-	gn.registerDataProduct("IPCDataProduct", 54531, "ipc");
+	gn.registerDataProduct("IPCDataProduct", "ipc");
 #endif
 	
 	//Let this exit after a few seconds so the heartbeat listener in MiscComponent2 will be notified when it goes away.

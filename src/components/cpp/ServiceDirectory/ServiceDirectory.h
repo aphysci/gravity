@@ -19,21 +19,22 @@ using namespace std;
 namespace gravity
 {
 
-class ServiceDirectory : public GravityServiceProvider
+class ServiceDirectory
 {
 private:
     map<string, list<string> > dataProductMap;
     map<string, string> serviceMap;
+    GravityNode gn;
 public:
     virtual ~ServiceDirectory();
-    virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
+    void start();
+    shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
 
 private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
-
-    char* bind_address;
+    void addPublishers(const string &dataProductID, GravityDataProduct &response);
 };
 
 } /* namespace gravity */

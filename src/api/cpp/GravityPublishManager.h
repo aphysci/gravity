@@ -8,6 +8,8 @@
 #ifndef GRAVITYPUBLISHMANAGER_H_
 #define GRAVITYPUBLISHMANAGER_H_
 
+#include "Utility.h"
+
 #ifdef __GNUC__
 #include <tr1/memory>
 #else
@@ -18,19 +20,27 @@
 #include <map>
 #include <string>
 
+#define PUB_MGR_URL "inproc://gravity_publish_manager"
+
 namespace gravity
 {
 
 using namespace std;
 using namespace std::tr1;
 
+typedef struct CacheValue
+{
+    string filterText;
+    char *value;
+    int size;
+    uint64_t timestamp;
+} CacheValue;
+
 typedef struct PublishDetails
 {
     string url;
     string dataProductID;
-    char *lastCachedValue;
-    int lastCachedValueSize;
-    string lastCachedFilterText;
+    map<string,shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;
 } PublishDetails;
@@ -48,8 +58,6 @@ private:
     map<string,shared_ptr<PublishDetails> > publishMapByID;
 	vector<zmq_pollitem_t> pollItems;
 
-	string readStringMessage();
-	void sendStringMessage(void* socket, string str, int flags);
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();

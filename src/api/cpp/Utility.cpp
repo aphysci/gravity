@@ -8,6 +8,7 @@
 #include <Windows.h>
 #else
 #include <stdint.h>
+#include <sys/unistd.h>
 #endif
 
 namespace gravity {

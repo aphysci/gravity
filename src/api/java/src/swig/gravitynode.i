@@ -40,6 +40,7 @@ namespace gravity {
 	public:
 	    virtual ~CPPGravityHeartbeatListener();
     	virtual void MissedHeartbeat(const std::string& dataProductID, int microsecond_to_last_heartbeat, const std::string& status);
+    	virtual void ReceivedHeartbeat(const std::string& dataProductID, const std::string& status);
 	};
 
     enum GravityReturnCode {
@@ -54,7 +55,8 @@ namespace gravity {
         NO_SUCH_DATA_PRODUCT = -8,
         LINK_ERROR = -9,
         INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11
+        NO_SERVICE_PROVIDER = -11,
+        NO_PORTS_AVAILABLE = -12
     };
 
 class GravityNode {
@@ -63,7 +65,7 @@ public:
 	~GravityNode();
     GravityReturnCode init(std::string);
     void waitForExit();
-    GravityReturnCode registerDataProduct(const std::string& dataProductID, unsigned short networkPort, const std::string &transportType);
+    GravityReturnCode registerDataProduct(const std::string& dataProductID, const std::string &transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
     
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
@@ -79,11 +81,11 @@ public:
             const const gravity::GravityRequestor& requestor, const std::string& requestID = emptyString);
     shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
             
-    GravityReturnCode registerService(const std::string& serviceID, short networkPort,
-            const std::string& transportType, const gravity::GravityServiceProvider& server);
+    GravityReturnCode registerService(const std::string& serviceID, const std::string& transportType, 
+    		const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
     
-    GravityReturnCode startHeartbeat(int interval_in_microseconds, unsigned short port = 54541);
+    GravityReturnCode startHeartbeat(int interval_in_microseconds);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, unsigned long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
 
     std::string getStringParam(std::string key, std::string default_value = "");

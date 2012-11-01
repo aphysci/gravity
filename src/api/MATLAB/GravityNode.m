@@ -18,8 +18,8 @@ classdef GravityNode < handle
             this.subscriptionMap = containers.Map;
         end
         
-        function ret = registerDataProduct(this, dataProductID, networkPort, protocol)
-            ret = this.gravityNode.registerDataProduct(dataProductID, networkPort, protocol);
+        function ret = registerDataProduct(this, dataProductID, protocol)
+            ret = this.gravityNode.registerDataProduct(dataProductID, protocol);
         end
         
         function ret = unregisterDataProduct(this, dataProductID)
@@ -75,8 +75,8 @@ classdef GravityNode < handle
             end
         end               
         
-        function ret = registerService(this, serviceID, networkPort, transportType, server)
-            ret = this.gravityNode.registerService(serviceID, networkPort, transportType, server.getJavaServer());
+        function ret = registerService(this, serviceID, transportType, server)
+            ret = this.gravityNode.registerService(serviceID, transportType, server.getJavaServer());
         end
         
         function ret = unregisterService(this, serviceID)

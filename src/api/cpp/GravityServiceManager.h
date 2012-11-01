@@ -12,6 +12,8 @@
 #include <vector>
 #include "GravityNode.h"
 
+#define SERVICE_MGR_URL "inproc://gravity_service_manager"
+
 namespace gravity
 {
 
@@ -34,9 +36,6 @@ private:
 	map<void*,shared_ptr<ServiceDetails> > serviceMapBySocket;
 	map<string, shared_ptr<ServiceDetails> > serviceMapByServiceID;
 	vector<zmq_pollitem_t> pollItems;
-	void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct);
-	string readStringMessage();
-	void sendStringMessage(void* socket, string str, int flags);
 	void addService();
 	void removeService();
 	void ready();

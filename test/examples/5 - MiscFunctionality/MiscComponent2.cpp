@@ -9,11 +9,17 @@ class MiscHBListener : public GravityHeartbeatListener
 {
 public:
 	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
+	virtual void ReceivedHeartbeat(std::string dataProductID, std::string status);
 };
 
 void MiscHBListener::MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status)
 {
 	Log::warning("Missed Heartbeat.  Last heartbeat %d microseconds ago.  ", microsecond_to_last_heartbeat);
+}
+
+void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, std::string status)
+{
+	Log::warning("Received Heartbeat.");
 }
 
 //Declare a class for receiving Published messages.  

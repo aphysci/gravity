@@ -25,7 +25,7 @@ classdef GravityDataProduct < handle
         end
         
         function setData(this, protobuf)
-            this.gravityDataProduct.setData(protobuf.getProtobufBuilder().build());
+            this.gravityDataProduct.setData(protobuf.getProtobufBuilder());
         end
         
         function populateMessage(this, protobuf)

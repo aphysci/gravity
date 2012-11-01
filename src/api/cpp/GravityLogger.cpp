@@ -95,7 +95,7 @@ void Log::initAndAddConsoleLogger(LogLevel local_log_level)
 class GravityLogger : public Logger
 {
 public:
-    GravityLogger(GravityNode* gn, unsigned short port);
+    GravityLogger(GravityNode* gn);
     virtual void Log(int level, const char* messagestr);
     virtual ~GravityLogger();
 private:
@@ -105,10 +105,10 @@ private:
 
 std::string GravityLogger::log_dataProductID = "GRAVITY_LOGGER";
 
-GravityLogger::GravityLogger(GravityNode* gn, unsigned short port)
+GravityLogger::GravityLogger(GravityNode* gn)
 {
     gravity_node = gn;
-    if(gravity_node->registerDataProduct(log_dataProductID, port, "tcp") != GravityReturnCodes::SUCCESS)
+    if(gravity_node->registerDataProduct(log_dataProductID, "tcp") != GravityReturnCodes::SUCCESS)
         cerr << "[Log::init] Could not register Logger" << endl;
 }
 
@@ -132,9 +132,9 @@ GravityLogger::~GravityLogger()
 }
 
 
-void Log::initAndAddGravityLogger(GravityNode *gn, unsigned short port, LogLevel net_log_level)
+void Log::initAndAddGravityLogger(GravityNode *gn, LogLevel net_log_level)
 {
-    Log::initAndAddLogger(new GravityLogger(gn, port), net_log_level);
+    Log::initAndAddLogger(new GravityLogger(gn), net_log_level);
 }
 
 ////////////////////////////////////////////////////////////////

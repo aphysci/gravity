@@ -85,6 +85,11 @@ import com.aphysci.gravity.Logger;
     public void MissedHeartbeat(String dataProductID, int microsecond_to_last_heartbeat, String status) {
       delegate.MissedHeartbeat(dataProductID, microsecond_to_last_heartbeat, status);
     }
+    
+    @SuppressWarnings("unused")
+    public void ReceivedHeartbeat(String dataProductID, String status) {
+      delegate.ReceivedHeartbeat(dataProductID, status);
+    }
   }
 
   private static class CPPGravityLoggerProxy extends CPPGravityLogger {

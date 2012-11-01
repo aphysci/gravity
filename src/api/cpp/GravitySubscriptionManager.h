@@ -11,6 +11,7 @@
 #include <zmq.h>
 #include <vector>
 #include <map>
+#include <set>
 #ifndef __GNUC__
 #include <memory>
 #else
@@ -27,10 +28,10 @@ using namespace std::tr1;
 
 typedef struct SubscriptionDetails
 {
-	string id;
-	zmq_pollitem_t pollItem;
-	shared_ptr<GravityDataProduct> lastCachedValue;
-	vector<GravitySubscriber*> subscribers;
+	string dataProductID;
+	string filter;
+	map<string, zmq_pollitem_t> pollItemMap;
+	set<GravitySubscriber*> subscribers;
 } SubscriptionDetails;
 
 /**
@@ -42,15 +43,15 @@ class GravitySubscriptionManager
 private:
 	void* context;
 	void* gravityNodeSocket;
-	map<string,shared_ptr<SubscriptionDetails> > subscriptionMap;
+	map<string, map<string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
+	map<string, string> urlMap; // url -> dp ID
     map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+    map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	vector<zmq_pollitem_t> pollItems;
 
 	void addSubscription();
 	void removeSubscription();
-	string readStringMessage();
 	void ready();
-	void sendStringMessage(void* socket, string str, int flags);
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

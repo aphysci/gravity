@@ -13,19 +13,19 @@ INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(THIRDPARTY_D
 CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-        OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+        OS_SPECIFIC_LIBS = -lwsock32 -lpthread
         TEST_NAME=$(PROG_NAME)Test.exe
 	PATH:=${PATH}:$(COMPONENTS_BIN_DIR):$(THIRDPARTY_DIR)/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-        OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
+        OS_SPECIFIC_LIBS = -lrt
         TEST_NAME=$(PROG_NAME)Test
 	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+LIBS=-lgravity -lprotobuf -liniparser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 #LIBS=-Wl,-Bstatic -lgravity -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)

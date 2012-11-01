@@ -12,4 +12,7 @@ void CPPGravityHeartbeatListener::MissedHeartbeat(std::string dataProductID, int
 {
 }
 
+void CPPGravityHeartbeatListener::ReceivedHeartbeat(std::string dataProductID, std::string status)
+{
+}
 
