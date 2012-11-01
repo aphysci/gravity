@@ -10,9 +10,10 @@ CPPGravityServiceProvider::~CPPGravityServiceProvider()
 
 shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const GravityDataProduct& dataProduct)
 {
-    unsigned char array[dataProduct.getSize()];
+    unsigned char* array = new unsigned char[dataProduct.getSize()];
     dataProduct.serializeToArray(array);
     return request((char*)array, dataProduct.getSize());
+	delete array;
 }
 
 shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(char* array, int length)
