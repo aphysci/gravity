@@ -172,32 +172,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ComponentLookupRequestPB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ComponentServiceLookupResponsePB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ConfigRequest.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\GravityDataProductPB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\GravityLogMessagePB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryRegistrationPB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryResponsePB.proto">
-      <Filter>protobufs</Filter>
-    </None>
-    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
-      <Filter>protobufs</Filter>
-    </None>
+    <CustomBuild Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ComponentLookupRequestPB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ComponentServiceLookupResponsePB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ConfigRequest.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\GravityDataProductPB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\GravityLogMessagePB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryRegistrationPB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryResponsePB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto" />
   </ItemGroup>
 </Project>

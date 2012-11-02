@@ -32,8 +32,6 @@ copy ThirdParty\pthreads\bin\pthreadVCE2.dll ThirdParty\bin
 Rem Build gravity
 cd build\msvs\gravity
 msbuild gravity.sln /p:Configuration=Release || goto build_fail
-copy Release\gravity.dll ..\..\..\bin
-copy Release\gravity.lib ..\..\..\lib
 
 cd ..\..\..\build\msvs\components\ServiceDirectory
 msbuild ServiceDirectory.sln /p:Configuration=Release || goto build_fail
