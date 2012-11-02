@@ -278,7 +278,10 @@ void GravityPublishManager::publish()
 
     shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProduct.getDataProductID()];
     if (!publishDetails)
+    {
+    	sendStringMessage(gravityNodeSocket, "FAILURE", ZMQ_DONTWAIT);
         return;
+    }
 
     // Serialize data
     int size = dataProduct.getSize();

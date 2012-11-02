@@ -647,6 +647,8 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText)
 {
+	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
     string dataProductID = dataProduct.getDataProductID();
 
     //Set Timestamp
@@ -667,9 +669,13 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	zmq_msg_close(&msg);
 
 	string status = readStringMessage(publishManagerSocket);
+	if (status != "OK")
+	{
+		ret = GravityReturnCodes::FAILURE;
+	}
 	zmq_close(publishManagerSocket);
 
-    return GravityReturnCodes::SUCCESS;
+    return ret;
 }
 
 GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url)
