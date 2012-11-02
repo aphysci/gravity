@@ -141,12 +141,10 @@ void GravitySubscriptionManager::start()
 				Log::debug("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
 
                 // Loop through all subscribers and deliver the messages
-		        subscriberSem.Lock();
                 for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
                 {
                     (*iter)->subscriptionFilled(dataProducts);
                 }
-                subscriberSem.Unlock();
 			}
 		}
 	}
@@ -251,7 +249,6 @@ void GravitySubscriptionManager::addSubscription()
             dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
 	}
     // Add new subscriber if it isn't already in the list
-    subscriberSem.Lock();
     if (subDetails->subscribers.find(subscriber) == subDetails->subscribers.end())
     {
         subDetails->subscribers.insert(subscriber);
@@ -263,7 +260,6 @@ void GravitySubscriptionManager::addSubscription()
             subscriber->subscriptionFilled(dataProducts);
         }
     }
-    subscriberSem.Unlock();
 }
 
 void GravitySubscriptionManager::removeSubscription()
@@ -288,7 +284,6 @@ void GravitySubscriptionManager::removeSubscription()
 		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[dataProductID][filter];
 
 		// Find & remove subscriber from our list of subscribers for this data product
-        subscriberSem.Lock();
 		set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
 		while (iter != subDetails->subscribers.end())
 		{
@@ -303,7 +298,6 @@ void GravitySubscriptionManager::removeSubscription()
 				iter++;
 			}
 		}
-        subscriberSem.Unlock();
 
 		// If no more subscribers, close the subscription sockets and clear the details
 		if (subDetails->subscribers.empty())

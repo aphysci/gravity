@@ -142,6 +142,7 @@
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
