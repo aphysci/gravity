@@ -57,7 +57,7 @@ all: libgravity_wrap.$(LIB_EXT)
 
 %.$(OBJ_EXT): %.cpp
 	@echo $(CC) $<
-	$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(INCLUDES) $(COUTPUT_FLAG)$@ $<
+	@$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(INCLUDES) $(COUTPUT_FLAG)$@ $<
 
 libgravity_wrap.$(LIB_EXT): $(CPP_OBJ)
 	@echo building $(LIB_NAME).$(LIB_EXT)
