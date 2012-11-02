@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Protobuf">
       <UniqueIdentifier>{136b65ba-6979-419a-bbfe-7e745eab8cab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="protobufs">
+      <UniqueIdentifier>{d6a4a65e-0a7c-4d29-be40-ae6bab674e80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\api\cpp\Utility.cpp">
@@ -167,5 +170,34 @@
     <ClInclude Include="..\..\..\src\api\cpp\Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ComponentLookupRequestPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ComponentServiceLookupResponsePB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ConfigRequest.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\GravityDataProductPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\GravityLogMessagePB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryRegistrationPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryResponsePB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
   </ItemGroup>
 </Project>
