@@ -30,8 +30,6 @@ namespace gravity
 
 using namespace std;
 
-GRAVITY_API extern std::string emptyString; //This allows us to use default parameters inside a dll.
-
 /**
  * Enumerated Type for Gravity Return Codes
  */
@@ -130,7 +128,7 @@ public:
      * \param filter text filter to apply to subscription
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = emptyString);
+    GRAVITY_API GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = "");
 
     /**
      * Setup a subscription to a data product through direct connection to known producer
@@ -141,7 +139,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode subscribe(string connectionURL, string dataProductID,
-            const GravitySubscriber& subscriber, string filter = emptyString);
+            const GravitySubscriber& subscriber, string filter = "");
 
     /**
      * Un-subscribe to a data product
@@ -150,14 +148,14 @@ public:
      * \param filter text filter associated with the subscription to cancel
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter=emptyString);
+    GRAVITY_API GravityReturnCode unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter="");
 
     /**
      * Publish a data product
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = emptyString);
+    GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "");
 
     /**
      * Make a request against a service provider through the Gravity Service Directory
@@ -169,7 +167,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(string serviceID, const GravityDataProduct& request,
-            const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
+            const GravityRequestor& requestor, string requestID = "", int timeout_milliseconds = -1);
     /**
      * Make a request against a service provider directly
      * \param connectionURL connection string on which service provider is listening for requests
@@ -181,7 +179,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, string requestID = emptyString, int timeout_milliseconds = -1);
+            const GravityRequestor& requestor, string requestID = "", int timeout_milliseconds = -1);
 
     /**
      * Make a synchronous request against a service provider

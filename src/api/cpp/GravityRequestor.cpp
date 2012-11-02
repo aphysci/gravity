@@ -11,7 +11,7 @@ namespace gravity {
 
 using namespace std;
 
-GravityRequestor::~GravityRequestor() {}
+GRAVITY_API GravityRequestor::~GravityRequestor() {}
 
 }
 

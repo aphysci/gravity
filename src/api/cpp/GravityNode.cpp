@@ -43,8 +43,6 @@
 
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition. 
 
-std::string gravity::emptyString("");
-
 static void* startSubscriptionManager(void* context)
 {
 	// Create and start the GravitySubscriptionManager
