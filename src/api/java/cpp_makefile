@@ -64,5 +64,5 @@ libgravity_wrap.$(LIB_EXT): $(CPP_OBJ)
 	@$(LINK) $(LINK_FLAGS) $(LIBDIRS) $(OUTPUT_FLAG)$@ $(CPP_OBJ) $(LIBS)
 	
 clean:
-	rm -rf $(CPPSRC_DIR)/*.$(OBJ_EXT) *.so *.dll *.$(OBJ_EXT)
+	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.$(OBJ_EXT)
 	

@@ -6,12 +6,12 @@ PROTO_DIR=../protobufs
 #Java directories  
 JAVASRC_DIR=src/java
 GRAVJAVASRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
-PROTOGENJAVA_DIR=$(GRAVJAVASRC_DIR)/protobuf
+PROTOGENJAVA_DIR=$(GRAVJAVASRC_DIR)/protobuf/
 #Generated Java source dir
 SWIGGENJAVA_DIR=$(GRAVJAVASRC_DIR)/swig
 
 #Java Output dir
-JAVA_BUILD_DIR=build
+JAVA_BUILD_DIR=build/
 
 #Tools
 PROTOC=../../../ThirdParty/bin/protoc
@@ -62,4 +62,4 @@ $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
 #	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
-	rm -rf $(JAVA_BUILD_DIR)/*.class $(PROTOGENJAVA_DIR)/*Container.java
+	rm -rf $(JAVA_BUILD_DIR)*.class $(PROTOGENJAVA_DIR)*Container.java
