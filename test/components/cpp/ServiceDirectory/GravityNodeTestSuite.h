@@ -268,6 +268,24 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
     }
 
+    void testPublish(void)
+    {
+    	GravityNode node;
+    	GravityReturnCode ret = node.init("TestNode5");
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+    	ret = node.registerDataProduct("DP1", "tcp");
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+    	GravityDataProduct gdp0("DP0");
+    	ret = node.publish(gdp0);
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::FAILURE);
+
+    	GravityDataProduct gdp1("DP1");
+    	ret = node.publish(gdp1);
+    	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
+    }
+
     void testDataProduct(void)
     {
     	GravityDataProduct gdp("GDP_ID");
