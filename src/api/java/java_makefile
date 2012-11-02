@@ -18,7 +18,7 @@ PROTOC=../../../ThirdParty/bin/protoc
 
 #Java Compiler Options
 #classpath separator is different on UNIX and Windows
-CLASSPATH_SEP=;
+CLASSPATH_SEP=:
 MY_CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
 
 #Naming
