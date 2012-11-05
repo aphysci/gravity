@@ -131,13 +131,9 @@ GravityNode::~GravityNode()
 	sendStringMessage(requestManagerSocket, "kill", ZMQ_DONTWAIT);
 	zmq_close(requestManagerSocket);
 
-    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(publishManagerSocket, PUB_MGR_URL);
     sendStringMessage(publishManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(publishManagerSocket);
 
-    void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
     sendStringMessage(serviceManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(serviceManagerSocket);
 
@@ -203,6 +199,13 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 	if(s_interrupted)
 		raise(s_interrupted);
+
+	// connect down here to make sure manager has bound address.
+    publishManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(publishManagerSocket, PUB_MGR_URL);
+
+    serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
 
 	////////////////////////////////////////////////////////
 	//Now that Gravity is set up, get gravity configuration.
@@ -373,10 +376,6 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
     else
     	endpoint = dataProductID;
 
-    // Setup up communication channel to publish manager
-    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(publishManagerSocket, PUB_MGR_URL);
-
     // Send publish details
 	sendStringMessage(publishManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
@@ -393,8 +392,6 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
 	string connectionURL = readStringMessage(publishManagerSocket);
 
 	Log::debug("Registered publisher at address: %s", connectionURL.c_str());
-
-	zmq_close(publishManagerSocket);
 
 	if (connectionURL.size() == 0)
 	{
@@ -473,18 +470,12 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     }
     else
     {
-        // Setup up communication channel to publish manager
-        void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
-        zmq_connect(publishManagerSocket, PUB_MGR_URL);
-
     	sendStringMessage(publishManagerSocket, "unregister", ZMQ_SNDMORE);
     	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_DONTWAIT);
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
 
         string status = readStringMessage(publishManagerSocket);
-
-        zmq_close(publishManagerSocket);
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {
@@ -672,10 +663,6 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     //Set Timestamp
     dataProduct.setTimestamp(getCurrentTime());
 
-    // Setup up communication channel to publish manager
-    void *publishManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(publishManagerSocket, PUB_MGR_URL);
-
 	// Send subscription details
 	sendStringMessage(publishManagerSocket, "publish", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerSocket, filterText, ZMQ_SNDMORE);
@@ -687,7 +674,6 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	zmq_msg_close(&msg);
 
 	string status = readStringMessage(publishManagerSocket);
-	zmq_close(publishManagerSocket);
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -820,9 +806,6 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
     else
         endpoint = serviceID;
 
-    void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
-
 	// Send subscription details
 	sendStringMessage(serviceManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_SNDMORE);
@@ -850,8 +833,6 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
 
     Log::debug("Registered publisher at address: %s", connectionURL.c_str());
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
-
-    zmq_close(serviceManagerSocket);
 
     serviceMap[serviceID] = connectionURL;
 
@@ -923,18 +904,12 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     }
     else
     {
-        // Setup up communication channel to publish manager
-        void *serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
-        zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
-
         sendStringMessage(serviceManagerSocket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSocket, serviceID, ZMQ_DONTWAIT);
         string url = serviceMap[serviceID];
         serviceMap.erase(serviceID);
 
         string status = readStringMessage(serviceManagerSocket);
-
-        zmq_close(serviceManagerSocket);
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {

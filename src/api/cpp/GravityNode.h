@@ -81,6 +81,8 @@ private:
 
     void* context;
     void* subscriptionManagerSocket;
+    void *publishManagerSocket;
+    void *serviceManagerSocket;
     void* requestManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     string getIP(); ///< Utility method to get the host machine's IP address
