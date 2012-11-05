@@ -597,10 +597,17 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
 
-    // Subscribe to all published data products
-	for (size_t i = 0; i < url.size(); i++)
+	if (url.size() == 0)
 	{
-		subscribe(url[i], dataProductID, subscriber, filter);
+	    subscribe("", dataProductID, subscriber, filter);
+	}
+	else
+	{
+        // Subscribe to all published data products
+        for (size_t i = 0; i < url.size(); i++)
+        {
+            subscribe(url[i], dataProductID, subscriber, filter);
+        }
 	}
 
 	return GravityReturnCodes::SUCCESS;
@@ -614,6 +621,21 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	sendStringMessage(subscriptionManagerSocket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSocket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSocket, filter, ZMQ_SNDMORE);
+
+	vector<string> url;
+	GravityReturnCode ret;
+	ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url);
+    if(ret != GravityReturnCodes::SUCCESS)
+        return ret;
+    if (url.size() > 1)
+        Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
+    else if (url.size() == 0)
+    {
+        Log::critical("The Service Directory is not registered to publish updates");
+        sendStringMessage(subscriptionManagerSocket, "", ZMQ_SNDMORE);
+    }
+    else
+        sendStringMessage(subscriptionManagerSocket, url[0], ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, sizeof(&subscriber));

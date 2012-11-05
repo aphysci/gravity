@@ -44,13 +44,15 @@ private:
 	void* context;
 	void* gravityNodeSocket;
 	map<string, map<string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
-	map<string, string> urlMap; // url -> dp ID
     map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+    map<string, zmq_pollitem_t> publisherUpdateMap;
     map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	vector<zmq_pollitem_t> pollItems;
 
 	void addSubscription();
 	void removeSubscription();
+	int readSubscription(void *socket, string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
+	void *setupSubscription(const string &url, const string &filter, zmq_pollitem_t &pollItem);
 	void ready();
 public:
 	/**

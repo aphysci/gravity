@@ -8,6 +8,8 @@
 #include "GravitySubscriptionManager.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
+
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -35,12 +37,9 @@ GravitySubscriptionManager::~GravitySubscriptionManager() {}
 
 void GravitySubscriptionManager::start()
 {
-	// Messages
-	zmq_msg_t filter, message;
+    vector<void*> deleteList;
 
-	int ret;
-
-	// Set up the inproc socket to subscribe to subscribe and unsubscribe messages from
+    // Set up the inproc socket to subscribe to subscribe and unsubscribe messages from
 	// the GravityNode
 	gravityNodeSocket = zmq_socket(context, ZMQ_SUB);
 	zmq_connect(gravityNodeSocket, "inproc://gravity_subscription_manager");
@@ -63,6 +62,7 @@ void GravitySubscriptionManager::start()
 		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
+		    Log::debug("Interrupted, exiting (rc = %d)", rc);
 			// Interrupted
 			break;
 		}
@@ -93,61 +93,138 @@ void GravitySubscriptionManager::start()
 		}
 
 		// Check for subscription updates
-		for (unsigned int i = 1; i < pollItems.size(); i++)
+		for (int index = 1; index < pollItems.size(); index++)
 		{
-			if (pollItems[i].revents && ZMQ_POLLIN)
+	        Log::trace("about to check for new poll items, index = %d, size = %d", index, pollItems.size());
+			if (pollItems[index].revents && ZMQ_POLLIN)
 			{
-				// Deliver to subscriber(s)
-				shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[i].socket];
+			    // if it's a regular subscription poll item
+			    if (subscriptionSocketMap.count(pollItems[index].socket) > 0)
+			    {
+                    // Deliver to subscriber(s)
+                    shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
 
-				vector< shared_ptr<GravityDataProduct> > dataProducts;
-				while (true)
-				{
-					// Read data products from socket
-					zmq_msg_init(&filter);
-					ret = zmq_recvmsg(pollItems[i].socket, &filter, ZMQ_DONTWAIT);
-					if (ret == -1)
-					{
-						zmq_msg_close(&filter);
-						break;
-					}
-					int size = zmq_msg_size(&filter);
-					char* s = (char*)malloc(size+1);
-					memcpy(s, zmq_msg_data(&filter), size);
-					s[size] = 0;
-					std::string filterText(s, size);
-					delete s;
-					zmq_msg_close(&filter);
+                    vector< shared_ptr<GravityDataProduct> > dataProducts;
+                    while (true)
+                    {
+                        string filterText;
+                        shared_ptr<GravityDataProduct> dataProduct;
+                        if (readSubscription(pollItems[index].socket, filterText, dataProduct) < 0)
+                            break;
 
-					zmq_msg_init(&message);
-					zmq_recvmsg(pollItems[i].socket, &message, 0);
-					// Create new GravityDataProduct from the incoming message
-					shared_ptr<GravityDataProduct> dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
-					// Clean up message
-					zmq_msg_close(&message);
+                        shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
-					shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[i].socket];
+                        // This may be a resend of previous value if a new subscriber was added, so make sure this is new data
+                        if (!lastCachedValue || lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
+                        {
+                            dataProducts.push_back(dataProduct);
 
-					// This may be a resend of previous value if a new subscriber was added, so make sure this is new data
-					if (!lastCachedValue || lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
-					{
-						dataProducts.push_back(dataProduct);
+                            // Save most recent value so we can provide it to new subscribers, and to perform check above.
+                            lastCachedValueMap[pollItems[index].socket] = dataProduct;
+                        }
+                    }
 
-						// Save most recent value so we can provide it to new subscribers, and to perform check above.
-						lastCachedValueMap[pollItems[i].socket] = dataProduct;
-					}
-				}
+                    Log::trace("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
 
-				Log::debug("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
-
-                // Loop through all subscribers and deliver the messages
-                for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
-                {
-                    (*iter)->subscriptionFilled(dataProducts);
+                    // Loop through all subscribers and deliver the messages
+                    for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
+                    {
+                        (*iter)->subscriptionFilled(dataProducts);
+                    }
                 }
+			    else // it's a publisher update list from the SD
+			    {
+                    shared_ptr<GravityDataProduct> dataProduct;
+                    string dataProductID;
+                    readSubscription(pollItems[index].socket, dataProductID, dataProduct);
+                    ComponentDataLookupResponsePB update;
+                    dataProduct->populateMessage(update);
+                    Log::debug("Found update to publishers list for data product %s", dataProductID.c_str());
+                    if (subscriptionMap.count(dataProductID) == 0)
+                    {
+                        Log::warning("received update for data product (%s) that we aren't subscribed to", dataProductID.c_str());
+                    }
+                    else
+                    {
+                        for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[dataProductID].begin();
+                             iter != subscriptionMap[dataProductID].end();
+                             iter++)
+                        {
+                            for (int i = 0; i < update.url_size(); i++)
+                            {
+                                Log::trace("url: %s", update.url(i).c_str());
+
+                                // if we don't already have this url, add it
+                                if (iter->second->pollItemMap.count(update.url(i)) == 0)
+                                {
+                                    zmq_pollitem_t pollItem;
+                                    void *subSocket = setupSubscription(update.url(i), iter->first, pollItem);
+
+                                    // and by socket for quick lookup as data arrives
+                                    subscriptionSocketMap[subSocket] = iter->second;
+
+                                    // Add url & poll item to subscription details
+                                    iter->second->pollItemMap[update.url(i)] = pollItem;
+                                }
+                            }
+
+                            // loop through the existing urls/sockets to see if any have disappeared.
+                            map<string, zmq_pollitem_t>::iterator socketIter = iter->second->pollItemMap.begin();
+                            while (socketIter != iter->second->pollItemMap.end())
+                            {
+                                bool found = false;
+                                // there doesn't seem to be a good way to check containment in a protobuf set...
+                                for (int i = 0; i < update.url_size(); i++)
+                                {
+                                    if (socketIter->first == update.url(i))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!found) {
+                                    Log::debug("url %s is gone, removing from list", socketIter->first.c_str());
+
+                                    subscriptionSocketMap.erase(socketIter->second.socket);
+                                    deleteList.push_back(socketIter->second.socket);
+
+                                    // Unsubscribe
+                                    zmq_setsockopt(socketIter->second.socket, ZMQ_UNSUBSCRIBE, iter->second->filter.c_str(), iter->second->filter.length());
+
+                                    // Close the socket
+                                    zmq_close(socketIter->second.socket);
+
+                                    iter->second->pollItemMap.erase(socketIter++);
+
+                                } else
+                                    ++socketIter;
+                            }
+
+                            Log::trace("There are now %d (%d) sockets we're listening on", subscriptionSocketMap.size(), iter->second->pollItemMap.size());
+                        }
+                    }
+			    }
 			}
 		}
+
+		if(deleteList.size() > 0)
+		{
+		    for (vector<void*>::iterator iter = deleteList.begin(); iter != deleteList.end(); iter++)
+		    {
+		        for (vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin(); pollIter != pollItems.end(); ++pollIter)
+		            if (*iter == pollIter->socket)
+		            {
+		                pollItems.erase(pollIter);
+                        Log::message("delete socket from pollitems, size is now %d", pollItems.size());
+		                break;
+		            }
+		    }
+		    deleteList.clear();
+		}
 	}
+
+	Log::warning("closing subscription manager");
 
 	// Clean up all our open sockets
 	for (map<void*,shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionSocketMap.begin(); iter != subscriptionSocketMap.end(); iter++)
@@ -155,9 +232,14 @@ void GravitySubscriptionManager::start()
 		zmq_close(iter->first);
 	}
 
+	for (map<string, zmq_pollitem_t>::iterator iter = publisherUpdateMap.begin(); iter != publisherUpdateMap.end(); iter++)
+	{
+	    zmq_close(iter->second.socket);
+	}
+
 	subscriptionMap.clear();
-	urlMap.clear();
 	subscriptionSocketMap.clear();
+	publisherUpdateMap.clear();
 	zmq_close(gravityNodeSocket);
 }
 
@@ -175,6 +257,60 @@ void GravitySubscriptionManager::ready()
 	zmq_close(initSocket);
 }
 
+int GravitySubscriptionManager::readSubscription(void *socket, string &filterText, shared_ptr<GravityDataProduct> &dataProduct)
+{
+    // Messages
+    zmq_msg_t filter, message;
+
+    int ret = 0;
+
+    // Read data products from socket
+    zmq_msg_init(&filter);
+    ret = zmq_recvmsg(socket, &filter, ZMQ_DONTWAIT);
+    if (ret == -1)
+    {
+        zmq_msg_close(&filter);
+        return ret;
+    }
+    int size = zmq_msg_size(&filter);
+    char* s = (char*)malloc(size+1);
+    memcpy(s, zmq_msg_data(&filter), size);
+    s[size] = 0;
+    filterText = string(s, size);
+    delete s;
+    zmq_msg_close(&filter);
+
+    zmq_msg_init(&message);
+    zmq_recvmsg(socket, &message, 0);
+    // Create new GravityDataProduct from the incoming message
+    dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
+    // Clean up message
+    zmq_msg_close(&message);
+
+    return ret;
+}
+
+void *GravitySubscriptionManager::setupSubscription(const string &url, const string &filter, zmq_pollitem_t &pollItem)
+{
+    // Create the socket
+    void* subSocket = zmq_socket(context, ZMQ_SUB);
+
+    // Connect to publisher
+    zmq_connect(subSocket, url.c_str());
+
+    // Configure filter
+    zmq_setsockopt(subSocket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
+
+    // set up the poll item for this subscription
+    pollItem.socket = subSocket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
+    pollItems.push_back(pollItem);
+
+    return subSocket;
+}
+
 void GravitySubscriptionManager::addSubscription()
 {
 	// Read the data product id for this subscription
@@ -185,6 +321,9 @@ void GravitySubscriptionManager::addSubscription()
 
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
+
+    // Read the url for to subscribe to for publisher updates
+    string publisherUpdateUrl = readStringMessage(gravityNodeSocket);
 
 	// Read the subscriber
 	zmq_msg_t msg;
@@ -198,6 +337,12 @@ void GravitySubscriptionManager::addSubscription()
 	{
 	    map<string, shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[dataProductID] = filterMap;
+	    if (publisherUpdateUrl.size() > 0)
+	    {
+            zmq_pollitem_t pollItem;
+            void *socket = setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
+            publisherUpdateMap[dataProductID] = pollItem;
+	    }
 	}
 
 	shared_ptr<SubscriptionDetails> subDetails;
@@ -214,24 +359,11 @@ void GravitySubscriptionManager::addSubscription()
 	    subscriptionMap[dataProductID][filter] = subDetails;
 	}
 
-	if (subDetails->pollItemMap.count(url) == 0)
+	// if we have a url and we haven't seen it before, subscribe to it
+	if (url.size() > 0 && subDetails->pollItemMap.count(url) == 0)
 	{
-		// Create the socket
-		void* subSocket = zmq_socket(context, ZMQ_SUB);
-
-		// Connect to publisher
-		zmq_connect(subSocket, url.c_str());
-
-		// Configure filter
-		zmq_setsockopt(subSocket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
-
-		// Create poll item for this subscription
-		zmq_pollitem_t pollItem;
-		pollItem.socket = subSocket;
-		pollItem.events = ZMQ_POLLIN;
-		pollItem.fd = 0;
-		pollItem.revents = 0;
-		pollItems.push_back(pollItem);
+	    zmq_pollitem_t pollItem;
+	    void *subSocket = setupSubscription(url, filter, pollItem);
 
 		// Create subscription details
 		subDetails->pollItemMap[url] = pollItem;
@@ -240,19 +372,19 @@ void GravitySubscriptionManager::addSubscription()
 		subscriptionSocketMap[subSocket] = subDetails;
 	}
 
-	// If we've already received data on this subscription, send the most recent
-	// value to the new subscriber
-	vector<shared_ptr<GravityDataProduct> > dataProducts;
-	for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
-	{
-        if (lastCachedValueMap[iter->second.socket])
-            dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
-	}
     // Add new subscriber if it isn't already in the list
     if (subDetails->subscribers.find(subscriber) == subDetails->subscribers.end())
     {
         subDetails->subscribers.insert(subscriber);
 
+        // If we've already received data on this subscription, send the most recent
+        // value to the new subscriber
+        vector<shared_ptr<GravityDataProduct> > dataProducts;
+        for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
+        {
+            if (lastCachedValueMap[iter->second.socket])
+                dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
+        }
         if (dataProducts.size() > 0)
         {
             Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
