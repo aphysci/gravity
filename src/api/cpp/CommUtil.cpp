@@ -15,7 +15,7 @@ namespace gravity
 
 using namespace std;
 
-void sendStringMessage(void* socket, string str, int flags)
+GRAVITY_API void sendStringMessage(void* socket, string str, int flags)
 {
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, str.length());
@@ -24,7 +24,7 @@ void sendStringMessage(void* socket, string str, int flags)
 	zmq_msg_close(&msg);
 }
 
-string readStringMessage(void *socket)
+GRAVITY_API string readStringMessage(void *socket)
 {
 	// Message holder
 	zmq_msg_t msg;
@@ -42,7 +42,7 @@ string readStringMessage(void *socket)
 	return str;
 }
 
-void sendIntMessage(void* socket, int val, int flags)
+GRAVITY_API void sendIntMessage(void* socket, int val, int flags)
 {
     zmq_msg_t msg;
     zmq_msg_init_size(&msg, sizeof(int));
@@ -51,7 +51,7 @@ void sendIntMessage(void* socket, int val, int flags)
     zmq_msg_close(&msg);
 }
 
-int readIntMessage(void *socket)
+GRAVITY_API int readIntMessage(void *socket)
 {
     // Message holder
     zmq_msg_t msg;
@@ -66,7 +66,7 @@ int readIntMessage(void *socket)
     return val;
 }
 
-void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
+GRAVITY_API void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
 {
     // Send data product
     zmq_msg_t data;
@@ -77,7 +77,7 @@ void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct,
 }
 
 
-int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort)
+GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort)
 {
     for (int i = minPort; i <= maxPort; i++) {
         stringstream ss;
