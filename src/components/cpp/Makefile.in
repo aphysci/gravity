@@ -1,4 +1,6 @@
-CC=g++
+#CROSS= arm-angstrom-linux-gnueabi-
+CXX=$(CROSS)g++
+CC=$(CROSS)gcc
 THIRDPARTY_DIR=../../../../ThirdParty
 INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk

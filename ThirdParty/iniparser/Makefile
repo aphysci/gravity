@@ -3,7 +3,9 @@
 #
 
 # Compiler settings
-CC      = gcc
+#CROSS= arm-angstrom-linux-gnueabi-
+CXX=$(CROSS)g++
+CC=$(CROSS)gcc
 CFLAGS  = -O2 -fPIC -Wall -ansi -pedantic
 
 # Ar settings to build the library

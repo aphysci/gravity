@@ -1,6 +1,7 @@
 #!/bin/bash
 
 pushd ./ThirdParty >& /dev/null
+./buildall.sh clean || exit 1
 ./buildall.sh || exit 1
 popd >& /dev/null
 

@@ -1,3 +1,8 @@
+#CROSS= arm-angstrom-linux-gnueabi-
+CXX=$(CROSS)g++
+CC=$(CROSS)gcc
+LINK=$(CROSS)g++
+
 #Locations
 MYPROTO_DIR=../protobufs
 MY_PROTOBUF_BUILD_DIR=./protobuf
@@ -15,8 +20,6 @@ PTHREAD_INCLUDE=$(THIRDPARTY_DIR)/pthread/include
 
 #Tools
 PROTOC=$(THIRDPARTY_DIR)/bin/protoc
-CC=g++
-LINK=g++
 
 #Compiler Flags
 INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR)
