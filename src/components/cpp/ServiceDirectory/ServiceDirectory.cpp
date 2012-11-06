@@ -85,7 +85,7 @@ void ServiceDirectory::start()
     if (pthread_attr_init(&attr) == 0)
     {
         pthread_t registerThread;
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) == 0 &&
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
         pthread_create(&registerThread, &attr, registerDataProduct, (void*)&gn);
         pthread_attr_destroy(&attr);
     }
