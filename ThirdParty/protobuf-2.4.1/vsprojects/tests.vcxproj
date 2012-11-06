@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release2010|Win32">
+      <Configuration>Release2010</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -20,6 +24,10 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
@@ -28,6 +36,9 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
@@ -43,6 +54,11 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>true</LinkIncremental>
@@ -81,6 +97,31 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../src;.;../gtest/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -156,9 +197,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.h;google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating cpp_test_bad_identifiers.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating cpp_test_bad_identifiers.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.h;google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.h;google\protobuf\compiler\cpp\cpp_test_bad_identifiers.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest.pb.{h,cc}...</Message>
@@ -166,9 +211,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest.pb.h;google\protobuf\unittest.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest.pb.h;google\protobuf\unittest.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest.pb.h;google\protobuf\unittest.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_custom_options.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_custom_options.pb.{h,cc}...</Message>
@@ -176,9 +225,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_custom_options.pb.h;google\protobuf\unittest_custom_options.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_custom_options.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_custom_options.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_custom_options.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_custom_options.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_custom_options.pb.h;google\protobuf\unittest_custom_options.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_custom_options.pb.h;google\protobuf\unittest_custom_options.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_embed_optimize_for.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_embed_optimize_for.pb.{h,cc}...</Message>
@@ -186,9 +239,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_embed_optimize_for.pb.h;google\protobuf\unittest_embed_optimize_for.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_embed_optimize_for.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_embed_optimize_for.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_embed_optimize_for.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_embed_optimize_for.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_embed_optimize_for.pb.h;google\protobuf\unittest_embed_optimize_for.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_embed_optimize_for.pb.h;google\protobuf\unittest_embed_optimize_for.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_import.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_import.pb.{h,cc}...</Message>
@@ -196,9 +253,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_import.pb.h;google\protobuf\unittest_import.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_import.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_import.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_import.pb.h;google\protobuf\unittest_import.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_import.pb.h;google\protobuf\unittest_import.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_lite_imports_nonlite.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_lite_imports_nonlite.pb.{h,cc}...</Message>
@@ -206,9 +267,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_lite_imports_nonlite.pb.h;google\protobuf\unittest_lite_imports_nonlite.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_lite_imports_nonlite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_lite_imports_nonlite.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite_imports_nonlite.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite_imports_nonlite.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_lite_imports_nonlite.pb.h;google\protobuf\unittest_lite_imports_nonlite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_lite_imports_nonlite.pb.h;google\protobuf\unittest_lite_imports_nonlite.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_mset.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_mset.pb.{h,cc}...</Message>
@@ -216,9 +281,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_mset.pb.h;google\protobuf\unittest_mset.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_mset.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_mset.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_mset.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_mset.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_mset.pb.h;google\protobuf\unittest_mset.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_mset.pb.h;google\protobuf\unittest_mset.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_optimize_for.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_optimize_for.pb.{h,cc}...</Message>
@@ -226,9 +295,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_optimize_for.pb.h;google\protobuf\unittest_optimize_for.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_optimize_for.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_optimize_for.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_optimize_for.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_optimize_for.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_optimize_for.pb.h;google\protobuf\unittest_optimize_for.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_optimize_for.pb.h;google\protobuf\unittest_optimize_for.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_no_generic_services.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_no_generic_services.pb.{h,cc}...</Message>
@@ -236,9 +309,13 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_no_generic_services.pb.h;google\protobuf\unittest_no_generic_services.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_no_generic_services.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_no_generic_services.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_no_generic_services.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_no_generic_services.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_no_generic_services.pb.h;google\protobuf\unittest_no_generic_services.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_no_generic_services.pb.h;google\protobuf\unittest_no_generic_services.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
