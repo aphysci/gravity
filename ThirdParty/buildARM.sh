@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# build native to get the protoc executable
-pushd protobuf-2.4.1
-./configure
-make clean || exit 1
-make || exit 1
-popd
-
-rm -rf ./bin/*
-cp protobuf-2.4.1/src/.libs/protoc protobuf-2.4.1/src/.libs/protoc.exe ./bin >& /dev/null
-
-# build the rest with the arm settings
 source /usr/local/angstrom/arm/environment-setup
 
 TP_DIR=`pwd`
