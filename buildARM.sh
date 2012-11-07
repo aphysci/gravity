@@ -29,9 +29,15 @@ make clean || exit 1
 make CROSS=arm-angstrom-linux-gnueabi- || exit 1
 popd >& /dev/null
 
+pushd ./src/components/cpp/LogRecorder >& /dev/null
+make clean || exit 1
+make CROSS=arm-angstrom-linux-gnueabi- || exit 1
+popd >& /dev/null
+
 rm -rf bin lib include
 mkdir bin
 cp src/components/cpp/ServiceDirectory/ServiceDirectory bin
+cp src/components/cpp/LogRecorder/LogRecorder bin
 
 mkdir lib
 cp ThirdParty/lib/* lib
