@@ -101,6 +101,12 @@ private:
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, vector<std::string> &urls);
+
+    GravityReturnCode subscribe(string connectionURL, string dataProductID,
+            const GravitySubscriber& subscriber, string filter = "");
+
+    GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
+            const GravityRequestor& requestor, string requestID = "", int timeout_milliseconds = -1);
 public:
     /**
      * Default Constructor
@@ -133,17 +139,6 @@ public:
     GRAVITY_API GravityReturnCode subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter = "");
 
     /**
-     * Setup a subscription to a data product through direct connection to known producer
-     * \param connectionURL connection string of data producer
-     * \param dataProductID string ID of the data product of interest
-     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
-     * \param filter text filter to apply to subscription
-     * \return success flag
-     */
-    GRAVITY_API GravityReturnCode subscribe(string connectionURL, string dataProductID,
-            const GravitySubscriber& subscriber, string filter = "");
-
-    /**
      * Un-subscribe to a data product
      * \param dataProductID ID of data product for which subscription is to be removed
      * \param subscriber the subscriber that will be removed from the notification list for this subscription
@@ -169,18 +164,6 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(string serviceID, const GravityDataProduct& request,
-            const GravityRequestor& requestor, string requestID = "", int timeout_milliseconds = -1);
-    /**
-     * Make a request against a service provider directly
-     * \param connectionURL connection string on which service provider is listening for requests
-     * \param serviceID The registered service ID of a service provider
-     * \param dataProduct data product representation of the request
-     * \param requestor object implementing the GravityRequestor interface that will be notified of the response
-     * \param requestID identifier for this request
-     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
-     * \return success flag
-     */
-    GRAVITY_API GravityReturnCode request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, string requestID = "", int timeout_milliseconds = -1);
 
     /**
