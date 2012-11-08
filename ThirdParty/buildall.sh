@@ -17,17 +17,6 @@ pushd protobuf-2.4.1
 ./configure || exit 1
 make $@ || exit 1
 pushd java
-# jar is checked in, so no reason for anyone else to build this.  But just in case, here it is...
-command -v mvn > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-    if [ ${#*} -lt 1 ]; then
-        mvn -DskipTests package || exit 1
-    else
-        mvn $@ || exit 1
-    fi
-else
-    echo Maven is not installed, so not building protobuf jar
-fi
 popd
 popd
 

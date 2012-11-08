@@ -42,6 +42,6 @@ mkdir lib/MATLAB
 cp src/api/MATLAB/*.jar lib/MATLAB
 
 echo building Gravity tarball...
-rm gravity.tgz
+rm gravity.tgz >& /dev/null
 tar czf gravity.tgz bin lib include
 
