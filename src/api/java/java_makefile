@@ -16,13 +16,24 @@ JAVA_BUILD_DIR=build/
 #Tools
 PROTOC=../../../ThirdParty/bin/protoc
 
-#Java Compiler Options
-#classpath separator is different on UNIX and Windows
-CLASSPATH_SEP=:
-MY_CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
-
 #Naming
 JAR_NAME=gravity.jar
+
+#Java Compiler Options
+#classpath separator is different on UNIX and Windows
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+#MinGW
+#Visual Studio
+CLASSPATH_SEP=;
+windows: $(JAR_NAME);
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+CLASSPATH_SEP=:
+linux: $(JAR_NAME);
+else
+ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
+MY_CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
 
 #Source/Object/Dependancies
 CLASSES=$(patsubst $(GRAVJAVASRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(wildcard $(GRAVJAVASRC_DIR)/*.java))
@@ -59,7 +70,7 @@ $(JAVA_BUILD_DIR)/%.class: $(GRAVJAVASRC_DIR)/%.java
 #Swig should have already run
 #classes -> jar
 $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
-#	jar cf $@ -C $(JAVA_BUILD_DIR) .
+	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
-	rm -rf $(JAVA_BUILD_DIR)*.class $(PROTOGENJAVA_DIR)*Container.java
+	rm -rf $(JAVA_BUILD_DIR)/com $(PROTOGENJAVA_DIR)*Container.java
