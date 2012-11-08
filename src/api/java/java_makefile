@@ -59,7 +59,7 @@ $(JAVA_BUILD_DIR)/%.class: $(GRAVJAVASRC_DIR)/%.java
 #Swig should have already run
 #classes -> jar
 $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
-#	jar cf $@ -C $(JAVA_BUILD_DIR) .
+	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
 	rm -rf $(JAVA_BUILD_DIR)*.class $(PROTOGENJAVA_DIR)*Container.java
