@@ -28,15 +28,39 @@ Rem lib File from this project is built directly into the lib directory
 cd ..\..\..
 copy ThirdParty\pthreads\lib\x64\pthreadVC2.lib ThirdParty\lib64
 copy ThirdParty\pthreads\bin\x64\pthreadVC2.dll ThirdParty\bin64
+copy ThirdParty\pthreads\include\*.h include\
 
 Rem Build gravity
 cd build\msvs\gravity
 msbuild gravity.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
 
+Rem Build components
 cd ..\..\..\build\msvs\components\ServiceDirectory
 msbuild ServiceDirectory.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
 copy x64\Release\ServiceDirectory.exe ..\..\..\..\bin64
 copy ..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini ..\..\..\..\bin64
+cd ..\..\..\..\
+
+cd build\msvs\components\Archiver
+msbuild Archiver.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\Archiver.exe ..\..\..\..\bin64
+copy ..\..\..\..\src\components\cpp\Archiver\GravityArchiver.ini ..\..\..\..\bin64
+cd ..\..\..\..\
+
+cd build\msvs\components\Playback
+msbuild Playback.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\Playback.exe ..\..\..\..\bin64
+copy ..\..\..\..\src\components\cpp\Playback\GravityPlayback.ini ..\..\..\..\bin64
+cd ..\..\..\..\
+
+cd build\msvs\components\LogRecorder
+msbuild LogRecorder.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\LogRecorder.exe ..\..\..\..\bin64
+cd ..\..\..\..\
+
+cd build\msvs\components\ConfigServer
+msbuild ConfigServer.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\ConfigServer.exe ..\..\..\..\bin64
 cd ..\..\..\..\
 
 Rem Copy files to output directory.  

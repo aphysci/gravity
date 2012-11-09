@@ -28,15 +28,39 @@ Rem lib File from this project is built directly into the lib directory
 cd ..\..\..
 copy ThirdParty\pthreads\lib\pthreadVCE2.lib ThirdParty\lib
 copy ThirdParty\pthreads\bin\pthreadVCE2.dll ThirdParty\bin
+copy ThirdParty\pthreads\include\*.h include\
 
 Rem Build gravity
 cd build\msvs\gravity
 msbuild gravity.sln /p:Configuration=Release || goto build_fail
 
+Rem Build Components
 cd ..\..\..\build\msvs\components\ServiceDirectory
 msbuild ServiceDirectory.sln /p:Configuration=Release || goto build_fail
 copy Release\ServiceDirectory.exe ..\..\..\..\bin
 copy ..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini ..\..\..\..\bin
+cd ..\..\..\..\
+
+cd build\msvs\components\Archiver
+msbuild Archiver.sln /p:Configuration=Release || goto build_fail
+copy Release\Archiver.exe ..\..\..\..\bin
+copy ..\..\..\..\src\components\cpp\Archiver\GravityArchiver.ini ..\..\..\..\bin
+cd ..\..\..\..\
+
+cd build\msvs\components\Playback
+msbuild Playback.sln /p:Configuration=Release || goto build_fail
+copy Release\Playback.exe ..\..\..\..\bin
+copy ..\..\..\..\src\components\cpp\Playback\GravityPlayback.ini ..\..\..\..\bin
+cd ..\..\..\..\
+
+cd build\msvs\components\LogRecorder
+msbuild LogRecorder.sln /p:Configuration=Release || goto build_fail
+copy Release\LogRecorder.exe ..\..\..\..\bin
+cd ..\..\..\..\
+
+cd build\msvs\components\ConfigServer
+msbuild ConfigServer.sln /p:Configuration=Release || goto build_fail
+copy Release\ConfigServer.exe ..\..\..\..\bin
 cd ..\..\..\..\
 
 Rem Copy files to output directory.  
