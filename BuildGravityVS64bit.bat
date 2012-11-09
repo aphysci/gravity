@@ -41,6 +41,28 @@ copy x64\Release\ServiceDirectory.exe ..\..\..\..\bin64
 copy ..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini ..\..\..\..\bin64
 cd ..\..\..\..\
 
+cd build\msvs\components\LogRecorder
+msbuild LogRecorder.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\LogRecorder.exe ..\..\..\..\bin64
+cd ..\..\..\..\
+
+cd build\msvs\components\ConfigServer
+msbuild ConfigServer.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
+copy x64\Release\ConfigServer.exe ..\..\..\..\bin64
+cd ..\..\..\..\
+
+where /q cmake
+if not errorlevel 1 (
+
+cd ThirdParty\cppdb-trunk
+mkdir buildMSVS11-64bit
+cd buildMSVS11-64bit
+cmake -G"Visual Studio 11 Win64" ..
+msbuild cppdb.vcxproj /p:Configuration=Release /p:Platform=x64 || goto build_fail
+copy Release\cppdb.lib ..\..\lib64
+copy Release\cppdb.dll ..\..\bin64
+cd ..\..\..
+
 cd build\msvs\components\Archiver
 msbuild Archiver.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
 copy x64\Release\Archiver.exe ..\..\..\..\bin64
@@ -53,15 +75,9 @@ copy x64\Release\Playback.exe ..\..\..\..\bin64
 copy ..\..\..\..\src\components\cpp\Playback\GravityPlayback.ini ..\..\..\..\bin64
 cd ..\..\..\..\
 
-cd build\msvs\components\LogRecorder
-msbuild LogRecorder.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
-copy x64\Release\LogRecorder.exe ..\..\..\..\bin64
-cd ..\..\..\..\
-
-cd build\msvs\components\ConfigServer
-msbuild ConfigServer.sln /p:Configuration=Release /p:Platform="x64" || goto build_fail
-copy x64\Release\ConfigServer.exe ..\..\..\..\bin64
-cd ..\..\..\..\
+) else (
+echo "Missing Cmake.  Skipping Archiver/Playback"
+)
 
 Rem Copy files to output directory.  
 copy Thirdparty\bin64\* bin64

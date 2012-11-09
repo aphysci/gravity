@@ -41,6 +41,28 @@ copy Release\ServiceDirectory.exe ..\..\..\..\bin
 copy ..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini ..\..\..\..\bin
 cd ..\..\..\..\
 
+cd build\msvs\components\LogRecorder
+msbuild LogRecorder.sln /p:Configuration=Release || goto build_fail
+copy Release\LogRecorder.exe ..\..\..\..\bin
+cd ..\..\..\..\
+
+cd build\msvs\components\ConfigServer
+msbuild ConfigServer.sln /p:Configuration=Release || goto build_fail
+copy Release\ConfigServer.exe ..\..\..\..\bin
+cd ..\..\..\..\
+
+where /q cmake
+if not errorlevel 1 (
+
+cd ThirdParty\cppdb-trunk
+mkdir buildMSVS11
+cd buildMSVS11
+cmake -G"Visual Studio 11" ..
+msbuild cppdb.vcxproj /p:Configuration=Release || goto build_fail
+copy Release\cppdb.lib ..\..\lib
+copy Release\cppdb.dll ..\..\bin
+cd ..\..\..
+
 cd build\msvs\components\Archiver
 msbuild Archiver.sln /p:Configuration=Release || goto build_fail
 copy Release\Archiver.exe ..\..\..\..\bin
@@ -53,15 +75,9 @@ copy Release\Playback.exe ..\..\..\..\bin
 copy ..\..\..\..\src\components\cpp\Playback\GravityPlayback.ini ..\..\..\..\bin
 cd ..\..\..\..\
 
-cd build\msvs\components\LogRecorder
-msbuild LogRecorder.sln /p:Configuration=Release || goto build_fail
-copy Release\LogRecorder.exe ..\..\..\..\bin
-cd ..\..\..\..\
-
-cd build\msvs\components\ConfigServer
-msbuild ConfigServer.sln /p:Configuration=Release || goto build_fail
-copy Release\ConfigServer.exe ..\..\..\..\bin
-cd ..\..\..\..\
+) else (
+echo "Missing Cmake.  Skipping Archiver/Playback"
+)
 
 Rem Copy files to output directory.  
 copy Thirdparty\bin\* bin
