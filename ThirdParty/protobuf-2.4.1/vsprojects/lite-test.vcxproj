@@ -5,13 +5,25 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release2010|Win32">
       <Configuration>Release2010</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release2010|x64">
+      <Configuration>Release2010</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -24,11 +36,23 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
@@ -38,10 +62,19 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -53,14 +86,23 @@
     <IntDir>Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -86,6 +128,30 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../src;.;../gtest/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildStep>
       <Message />
@@ -106,6 +172,30 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../src;.;../gtest/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
@@ -133,6 +223,30 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../src;.;../gtest/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\google\protobuf\test_util_lite.h" />
     <ClInclude Include="google\protobuf\unittest_lite.pb.h" />
@@ -147,31 +261,55 @@
   <ItemGroup>
     <CustomBuild Include="..\src\google\protobuf\unittest_lite.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating unittest_lite.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Debug\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating unittest_lite.pb.{h,cc}...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">Generating unittest_lite.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_lite.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">google\protobuf\unittest_lite.pb.h;google\protobuf\unittest_lite.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\google\protobuf\unittest_import_lite.proto">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating unittest_import_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating unittest_import_lite.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Debug\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating unittest_import_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating unittest_import_lite.pb.{h,cc}...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Generating unittest_import_lite.pb.{h,cc}...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">Generating unittest_import_lite.pb.{h,cc}...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
 </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">Release\protoc -I../src --cpp_out=. ../src/google/protobuf/unittest_import_lite.proto
+</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">google\protobuf\unittest_import_lite.pb.h;google\protobuf\unittest_import_lite.pb.cc;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
