@@ -127,6 +127,12 @@ public:
     	GravityReturnCode ret = node.init("TestNode2");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
+        Subscriber preSubscriber;
+        ret = node.subscribe("TEST", preSubscriber, "FILT");
+
+        // Give the consumer thread time to start up
+        sleep(20);
+
     	ret = node.registerDataProduct("TEST", "tcp");
     	TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
@@ -134,17 +140,20 @@ public:
         GravityDataProduct gdp("TEST");
         ret = node.publish(gdp, "FILTER");
 
-        // Give the consumer thread time to start up
+        // Give the producer thread time to start up
         sleep(20);
 
-        Subscriber subscriber;
-    	ret = node.subscribe("TEST", subscriber, "FILT");
+        // Test that message was received by the old subscriber
+        TS_ASSERT_EQUALS(preSubscriber.getCount(), 1);
+
+        Subscriber postSubscriber;
+    	ret = node.subscribe("TEST", postSubscriber, "FILT");
 
         // Give the consumer thread time to start up
         sleep(20);
 
         // Test that old message was received
-        TS_ASSERT_EQUALS(subscriber.getCount(), 1);
+        TS_ASSERT_EQUALS(postSubscriber.getCount(), 1);
 
         // publish a message again
         ret = node.publish(gdp, "FILTER");
@@ -152,7 +161,7 @@ public:
         // Give the consumer thread time to start up
         sleep(20);
 
-        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
+        TS_ASSERT_EQUALS(postSubscriber.getCount(), 2);
 
         // Clear out subscription filled flag
         clearSubFlag();
@@ -166,8 +175,8 @@ public:
     	// Check for subscription filled
     	TS_ASSERT(subFilled());
 
-    	// Check that subscriber wasn't called again
-        TS_ASSERT_EQUALS(subscriber.getCount(), 2);
+    	// Check that postSubscriber wasn't called again
+        TS_ASSERT_EQUALS(postSubscriber.getCount(), 2);
 
     	// Clear flag
     	clearSubFlag();
