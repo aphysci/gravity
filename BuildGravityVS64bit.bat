@@ -90,6 +90,32 @@ xcopy /s /q /y ThirdParty\protobuf-2.4.1\src\*.h include
 cd include\google
 cd ..\..
 
+REM Move third party libs into gravity lib dir
+copy ThirdParty\guava-13.0.1\guava-13.0.1.jar lib
+copy ThirdParty\lib\* lib
+
+REM Build the Java code
+cd build\msvs\java
+msbuild java.sln /p:Configuration=Release || goto build_fail
+copy src\api\java\gravity.jar ..\..\..\lib
+cd ..\..\..
+
+REM Build the MATLAB-specific code
+cd src\api\MATLAB
+nmake /f nmake.mak
+cd ..\..\..
+mkdir lib\MATLAB
+copy src\api\MATLAB\*.jar lib\MATLAB
+mkdir include\MATLAB
+copy src\api\MATLAB\*.m include\MATLAB
+
+@echo Zipping files
+AddToZip include gravity-MSVC11-64bit.zip
+AddToZip lib gravity-MSVC11-64bit.zip
+AddToZip bin gravity-MSVC11-64bit.zip
+
+@echo Build Succeeded
+
 goto end
 
 :build_fail
