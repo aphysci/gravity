@@ -18,8 +18,8 @@
 #include <vector>
 #include <string>
 
-#define MIN_PORT 54000
-#define MAX_PORT 54999
+#define MIN_PORT 24000
+#define MAX_PORT 24999
 
 namespace gravity
 {

@@ -58,7 +58,7 @@ void FileLogger::Log(int level, const char* messagestr)
     fputs(messagestr, log_file);
     fputs("\n", log_file);
 
-    //fflush(log_file); //I'm not sure when or how often this should be called.
+    fflush(log_file); //I'm not sure when or how often this should be called.
 }
 
 FileLogger::~FileLogger()
