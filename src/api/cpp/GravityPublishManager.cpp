@@ -106,7 +106,10 @@ void GravityPublishManager::start()
 				if (newsub)
 				{
 				    shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
-				    Log::debug("got a new subscriber for %s, resending %d values", pd->dataProductID.c_str(), pd->lastCachedValues.size());
+				    // can't log here because the network logging uses this code - any logs here will result in an
+				    // infinite loop, or a deadlock.
+				    // This message can be useful though, so leaving it in, but commented out.
+//				    Log::debug("got a new subscriber for %s, resending %d values", pd->dataProductID.c_str(), pd->lastCachedValues.size());
 
 				    list<shared_ptr<CacheValue> > values;
 				    for (map<string,shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
