@@ -96,7 +96,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\debug_bin\</OutDir>
+    <OutDir>..\..\..\debug_lib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -111,7 +111,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\lib\</OutDir>
+    <OutDir>..\..\..\lib2010\</OutDir>
     <TargetName>$(ProjectName)2010</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
@@ -132,6 +132,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\..\ThirdParty\debug_lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>iniparser.lib;libzmq_d.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\..\..\debug_bin\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>..\..\..\debug_lib\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -183,6 +185,7 @@
       <AdditionalDependencies>libprotobuf.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\ThirdParty\lib</AdditionalLibraryDirectories>
       <OutputFile>..\..\..\bin\$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>..\..\..\lib\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -232,7 +235,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libprotobuf.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\ThirdParty\lib2010</AdditionalLibraryDirectories>
-      <OutputFile>..\..\..\bin\$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>..\..\..\bin2010\$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>
       <Command>

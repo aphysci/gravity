@@ -239,6 +239,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
+	cout << "SD: " << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress << ":" << serviceDirectoryNode.port << endl;
+
    	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
    	{
    		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
