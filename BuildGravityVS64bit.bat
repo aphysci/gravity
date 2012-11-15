@@ -111,8 +111,8 @@ copy src\api\MATLAB\*.m include\MATLAB
 
 @echo Zipping files
 AddToZip include gravity-MSVC11-64bit.zip
-AddToZip lib gravity-MSVC11-64bit.zip
-AddToZip bin gravity-MSVC11-64bit.zip
+AddToZip lib64 gravity-MSVC11-64bit.zip
+AddToZip bin64 gravity-MSVC11-64bit.zip
 
 @echo Build Succeeded
 

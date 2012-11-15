@@ -1,5 +1,3 @@
-bin
-lib
 include
 *.tgz
 *.o
