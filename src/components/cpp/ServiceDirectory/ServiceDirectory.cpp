@@ -159,6 +159,7 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			dataProductMap[lookupRequest.lookupid()].front().c_str(): ""); //NOTE: 0MQ does not have a concept of who the message was sent from so that info is lost.
 
 
+
     if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
     {
         addPublishers(lookupRequest.lookupid(), response);
