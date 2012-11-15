@@ -156,7 +156,8 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
     Log::message("[Lookup Request] ID: %s, MessageType: %s, First Server: %s", lookupRequest.lookupid().c_str(),
             lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA? "Data Product": "Service",
 			dataProductMap[lookupRequest.lookupid()].size() != 0 ? 
-			dataProductMap[lookupRequest.lookupid()].front().c_str(), ""); //NOTE: 0MQ does not have a concept of who the message was sent from so that info is lost.
+			dataProductMap[lookupRequest.lookupid()].front().c_str(): ""); //NOTE: 0MQ does not have a concept of who the message was sent from so that info is lost.
+
 
     if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
     {
