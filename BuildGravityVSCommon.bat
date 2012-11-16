@@ -1,54 +1,62 @@
 Rem Build gravity
+
+Rem put directory containing protoc in the path.  
+setlocal PATH=%PATH%;%OLD_CD%\%BIN_DIR%
+
 cd build\msvs\gravity
 msbuild gravity.sln %CONFIGURATION% || goto build_fail
 
 Rem Build components
 cd ..\..\..\build\msvs\components\ServiceDirectory
 msbuild ServiceDirectory.sln %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\ServiceDirectory.exe ..\..\..\..\%BIN_DIR%
-copy ..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini ..\..\..\..\%BIN_DIR%
 cd ..\..\..\..\
 
 cd build\msvs\components\LogRecorder
 msbuild LogRecorder.sln %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\LogRecorder.exe ..\..\..\..\%BIN_DIR%
 cd ..\..\..\..\
 
 cd build\msvs\components\ConfigServer
 msbuild ConfigServer.sln %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\ConfigServer.exe ..\..\..\..\%BIN_DIR%
 cd ..\..\..\..\
 
+Rem Copy files to output directory.  
+copy build\msvs\components\ServiceDirectory\%BUILD_DIR%\ServiceDirectory.exe %BIN_DIR% || goto build_fail
+copy build\msvs\components\LogRecorder\%BUILD_DIR%\LogRecorder.exe %BIN_DIR% || goto build_fail
+copy build\msvs\components\ConfigServer\%BUILD_DIR%\ConfigServer.exe %BIN_DIR% || goto build_fail
+
+copy configs\ServiceDirectory.ini %BIN_DIR% || goto build_fail
+copy configs\config_file.ini %BIN_DIR% || goto build_fail
+
+xcopy /s /q /y Thirdparty\include\*.h include || goto build_fail
+copy Thirdparty\%BIN_DIR%\* %BIN_DIR% || goto build_fail
+copy Thirdparty\%LIB_DIR%\libprotobuf.lib %LIB_DIR% || goto build_fail
+
+copy src\api\cpp\*.h include || goto build_fail
+copy src\api\cpp\protobuf\GravityDataProductPB.pb.h include\protobuf || goto build_fail
+
+Rem Try to build Archiver/Playback
 where /q cmake
 if not errorlevel 1 (
 
 cd build\msvs\components\Archiver
 msbuild Archiver.sln %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\Archiver.exe ..\..\..\..\%BIN_DIR%
-copy ..\..\..\..\src\components\cpp\Archiver\GravityArchiver.ini ..\..\..\..\%BIN_DIR%
 cd ..\..\..\..\
 
 cd build\msvs\components\Playback
 msbuild Playback.sln %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\Playback.exe ..\..\..\..\%BIN_DIR%
-copy ..\..\..\..\src\components\cpp\Playback\GravityPlayback.ini ..\..\..\..\%BIN_DIR%
 cd ..\..\..\..\
 
+copy build\msvs\components\Archiver\%BUILD_DIR%\Archiver.exe %BIN_DIR% || goto build_fail
+copy build\msvs\components\Playback\%BUILD_DIR%\Playback.exe %BIN_DIR% || goto build_fail
+copy configs\GravityArchiver.ini %BIN_DIR% || goto build_fail
+copy configs\GravityPlayback.ini %BIN_DIR% || goto build_fail
+
 ) else (
-echo "Missing Cmake.  Skipping Archiver/Playback"
+@echo "Missing Cmake.  Skipping Archiver/Playback"
 )
 
-Rem Copy files to output directory.  
-xcopy /s /q /y Thirdparty\include\*.h include
-copy Thirdparty\%BIN_DIR%\* %BIN_DIR%
-copy Thirdparty\%LIB_DIR%\libprotobuf.lib %LIB_DIR%
-
-copy src\api\cpp\*.h include
-copy src\api\cpp\protobuf\GravityDataProductPB.pb.h include\protobuf
-
 REM Move third party libs into gravity lib dir
-copy ThirdParty\guava-13.0.1\guava-13.0.1.jar %LIB_DIR%
-copy ThirdParty\%LIB_DIR%\* %LIB_DIR%
+copy ThirdParty\guava-13.0.1\guava-13.0.1.jar %LIB_DIR% || goto build_fail
 
 REM Build the Java code
 if DEFINED JAVA_HOME (
@@ -72,6 +80,7 @@ else
 )
 
 @echo Zipping files
+del %ZIP_OUT_NAME%
 AddToZip include %ZIP_OUT_NAME%
 AddToZip %LIB_DIR% %ZIP_OUT_NAME%
 AddToZip %BIN_DIR% %ZIP_OUT_NAME%

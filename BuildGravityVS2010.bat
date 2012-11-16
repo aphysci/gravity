@@ -1,7 +1,7 @@
-Rem ember to run this from the Visual Studio Command Prompt.  
+Rem ember to run this from the Visual Studio 2010 Command Prompt.  
 set OLD_CD=%CD%
 
-set CONFIGURATION= /p:Configuration=Release2010 
+set CONFIGURATION= /p:Configuration=Release2010 /p:PlatformToolset=Windows7.1SDK /p:PlatformToolset=Windows7.1SDK  
 set BIN_DIR=bin2010
 set LIB_DIR=lib2010
 set BUILD_DIR=Release2010
@@ -22,15 +22,15 @@ Rem Build Third party libs (these have the most variation and may require separa
 cd protobuf-2.4.1\vsprojects
 msbuild libprotobuf.vcxproj %CONFIGURATION% || goto build_fail
 msbuild protoc.vcxproj %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\libprotobuf.lib ..\..\%LIB_DIR%
-copy %BUILD_DIR%\protoc.exe ..\..\%BIN_DIR%
+copy %BUILD_DIR%\libprotobuf.lib ..\..\%LIB_DIR% || goto build_fail
+copy %BUILD_DIR%\protoc.exe ..\..\%BIN_DIR% || goto build_fail
 cd ..\..
 xcopy /s /q /y protobuf-2.4.1\src\*.h include
 
 cd zeromq-3.2.1\builds\msvc
-msbuild msvc10.sln /p:Configuration=Release || goto build_fail
-copy ..\..\lib\Win32\libzmq.lib ..\..\..\%LIB_DIR%\libzmq.lib
-copy ..\..\bin\Win32\libzmq.dll ..\..\..\%BIN_DIR%\libzmq.dll
+msbuild msvc10.sln /p:Configuration=Release  /p:PlatformToolset=Windows7.1SDK  || goto build_fail
+copy ..\..\lib\Win32\libzmq.lib ..\..\..\%LIB_DIR%\libzmq.lib || goto build_fail
+copy ..\..\bin\Win32\libzmq.dll ..\..\..\%BIN_DIR%\libzmq.dll || goto build_fail
 
 cd ..\..\..\iniparser\build
 msbuild iniparser.sln %CONFIGURATION% || goto build_fail
@@ -44,16 +44,27 @@ mkdir buildMSVS10
 cd buildMSVS10
 cmake -G"Visual Studio 10" ..
 msbuild cppdb.vcxproj %CONFIGURATION% || goto build_fail
-copy %BUILD_DIR%\cppdb.lib ..\..\%LIB_DIR%
-copy %BUILD_DIR%\cppdb.dll ..\..\%BIN_DIR%
+copy %BUILD_DIR%\cppdb.lib ..\..\%LIB_DIR% || goto build_fail
+copy %BUILD_DIR%\cppdb.dll ..\..\%BIN_DIR% || goto build_fail
 cd ..\..\..
 
 )
 
 cd ..\..\..
-copy ThirdParty\pthreads\lib\pthreadVCE2.lib ThirdParty\%LIB_DIR%
-copy ThirdParty\pthreads\bin\pthreadVCE2.dll ThirdParty\%BIN_DIR%
-copy ThirdParty\pthreads\include\*.h include\
+copy ThirdParty\pthreads\lib\pthreadVCE2.lib ThirdParty\%LIB_DIR% || goto build_fail
+copy ThirdParty\pthreads\bin\pthreadVCE2.dll ThirdParty\%BIN_DIR% || goto build_fail
+copy ThirdParty\pthreads\include\*.h include\ || goto build_fail
+
+REM Files Copied: 
+REM protoc.exe
+REM libzmq.dll
+REM cppdb.dll
+REM libprotobuf.lib
+
+REM libzmq.lib
+REM iniparser.lib
+REM cppdb.lib
+REM pthreadVCE2.lib
 
 call BuildGravityVSCommon.bat
 if errorlevel 1 goto build_fail

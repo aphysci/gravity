@@ -111,7 +111,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <OutDir>..\..\lib2010\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
+    <OutDir>..\..\lib2010-64bit\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\..\debug_lib\</OutDir>
   </PropertyGroup>

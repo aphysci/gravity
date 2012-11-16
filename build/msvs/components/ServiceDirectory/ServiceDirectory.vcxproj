@@ -209,7 +209,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\ThirdParty\lib2010;..\..\..\..\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\ThirdParty\lib2010;..\..\..\..\lib2010</AdditionalLibraryDirectories>
       <AdditionalDependencies>gravity2010.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -233,8 +233,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\ThirdParty\lib2010;..\..\..\..\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gravity2010.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\ThirdParty\lib2010-64bit;..\..\..\..\lib2010-64bit</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gravity2010.lib;iniparser.lib;libzmq.lib;pthreadVC2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
