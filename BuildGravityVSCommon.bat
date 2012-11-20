@@ -1,8 +1,9 @@
 Rem Build gravity
 
 Rem put directory containing protoc in the path.  
-setlocal PATH=%PATH%;%OLD_CD%\%BIN_DIR%
-
+setlocal 
+set PATH=%PATH%;%OLD_CD%\%BIN_DIR%
+	
 cd build\msvs\gravity
 msbuild gravity.sln %CONFIGURATION% || goto build_fail
 
