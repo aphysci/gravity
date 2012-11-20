@@ -5,7 +5,7 @@ set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=x64 /p:PlatformTools
 set BIN_DIR=bin2010-64bit
 set LIB_DIR=lib2010-64bit
 set BUILD_DIR=x64\Release2010
-set ZIP_OUT_NAME=gravity-MSVC10.zip
+set ZIP_OUT_NAME=gravity-MSVC10-64bit.zip
 
 mkdir %BIN_DIR%
 mkdir %LIB_DIR%
