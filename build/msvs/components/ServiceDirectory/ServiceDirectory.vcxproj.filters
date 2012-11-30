@@ -47,5 +47,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini" />
+    <None Include="..\..\Gravity.props" />
   </ItemGroup>
 </Project>

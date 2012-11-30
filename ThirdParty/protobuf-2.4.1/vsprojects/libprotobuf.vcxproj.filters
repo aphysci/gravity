@@ -216,4 +216,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\build\msvs\Gravity.props" />
+  </ItemGroup>
 </Project>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <GravityRoot>$(SolutionDir)\..\..\</GravityRoot>
+    <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
+    <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="GravityRoot">
+      <Value>$(GravityRoot)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+
+    <BuildMacro Include="BinDir">
+      <Value>$(BinDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+
+    <BuildMacro Include="LibDir">
+      <Value>$(LibDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

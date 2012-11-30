@@ -21,6 +21,11 @@ make clean || exit 1
 make CROSS=arm-angstrom-linux-gnueabi- || exit 1
 popd
 
+rm -rf include/*
+find protobuf-2.4.1/src/ -type f -iname "*.h*" -exec cp --parents {} include ";"
+mv include/protobuf-2.4.1/src/google include
+rm -rf include/protobuf-2.4.1
+
 rm -rf ./lib/*.a ./lib/*.so
 find . -path './lib' -prune -o -name *.so* -exec cp -d {} lib \;
 find . -path './lib' -prune -o -name *.a -exec cp {} lib \;
