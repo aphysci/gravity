@@ -42,7 +42,7 @@ GRAVITY_API int StringToInt(std::string str, int default_value)
 	int ret_val;
 	std::stringstream ss(str);
 	ss >> ret_val;
-	if(!ss.good())
+	if(ss.fail())
 		ret_val = default_value;
 	return ret_val;
 }
@@ -52,7 +52,7 @@ GRAVITY_API double StringToDouble(std::string str, double default_value)
 	double ret_val;
 	std::stringstream ss(str);
 	ss >> ret_val;
-	if(!ss.good())
+	if(ss.fail())
 		ret_val = default_value;
 	return ret_val;
 }
