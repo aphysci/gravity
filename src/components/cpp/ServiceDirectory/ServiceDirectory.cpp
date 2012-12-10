@@ -16,6 +16,7 @@
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
 #include <zmq.h>
+#include <boost/algorithm/string.hpp>
 
 #include <stdlib.h>
 #include <string>
@@ -54,6 +55,7 @@ void ServiceDirectory::start()
 	Log::initAndAddConsoleLogger(Log::LogStringToLevel(gn.getStringParam("LocalLogLevel", "warning").c_str()));
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
+    boost::replace_all(sdURL, "localhost", "127.0.0.1");
 
     Log::message("running with SD connection string: %s", sdURL.c_str());
 
@@ -69,7 +71,7 @@ void ServiceDirectory::start()
     int rc = zmq_bind(socket, sdURL.c_str());
     if (rc < 0)
     {
-        Log::fatal("Could bind address for ServiceDirectory, error code was %d", rc);
+        Log::fatal("Could bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
         exit(1);
     }
 

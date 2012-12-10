@@ -44,10 +44,10 @@ all: $(PROG_NAME)
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) -c -o $@ $< $(INCLUDES)
+	$(CC) -g -c -o $@ $< $(INCLUDES)
 
 %.o:%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(INCLUDES)
+	$(CC) -g -c -o $@ $< $(INCLUDES)
 
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
