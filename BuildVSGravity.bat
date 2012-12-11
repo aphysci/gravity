@@ -9,7 +9,6 @@ if not defined GRAVITY_HOME (
    end
 )
 
-
 :menu
 echo.
 echo ===========================
@@ -23,12 +22,14 @@ echo 5 - Release VS2010 32-bit
 echo 6 - Debug VS2010 32-bit
 echo 7 - Release VS2010 64-bit
 echo 8 - Debug VS2010 64-bit
+echo 9 - Gravity Components (32-bit executables)
 echo Q - Quit
 
 echo Build Selection:	
-choice /c:12345678Q>nul
+choice /c:123456789Q>nul
 
-if errorlevel 9 goto done
+if errorlevel 10 goto done
+if errorlevel 9 goto GravityComponents
 if errorlevel 8 goto VS201064D
 if errorlevel 7 goto VS201064R
 if errorlevel 6 goto VS201032D
@@ -89,6 +90,63 @@ call setenv /x64 /debug
 set CONFIGURATION= /p:Configuration=Debug2010 /p:Platform=x64 /p:PlatformToolset=Windows7.1SDK 
 goto build
 
+:GravityComponents
+
+if not defined BOOST_HOME (
+   echo You must define BOOST_HOME
+   goto build_fail
+   end
+)
+
+:: 32-bit release for all the components
+call setenv /x86 /release
+set CONFIGURATION= /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v110 
+
+echo ========== BUILDING ServiceDirectory ==========
+pushd build\msvs\components\ServiceDirectory
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% ServiceDirectory.sln || goto build_fail
+)
+msbuild /target:ServiceDirectory %CONFIGURATION% ServiceDirectory.sln || goto build_fail
+popd
+
+goto skip
+
+echo ========== BUILDING Archiver ==========
+pushd build\msvs\components\Archiver
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% Archiver.sln || goto build_fail
+)
+msbuild /target:Archiver %CONFIGURATION% Archiver.sln || goto build_fail
+popd
+
+echo ========== BUILDING ConfigServer ==========
+pushd build\msvs\components\ConfigServer
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% ConfigServer.sln || goto build_fail
+)
+msbuild /target:ConfigServer %CONFIGURATION% ConfigServer.sln || goto build_fail
+popd
+
+echo ========== BUILDING LogRecorder ==========
+pushd build\msvs\components\LogRecorder
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% LogRecorder.sln || goto build_fail
+)
+msbuild /target:LogRecorder %CONFIGURATION% LogRecorder.sln || goto build_fail
+popd
+
+echo ========== BUILDING Playback ==========
+pushd build\msvs\components\Playback
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% Playback.sln || goto build_fail
+)
+msbuild /target:Playback %CONFIGURATION% Playback.sln || goto build_fail
+popd
+
+:skip
+goto menu
+
 :build
 :: Build Protobufs
 pushd ThirdParty\protobuf-2.4.1\vsprojects
@@ -121,11 +179,6 @@ if %Clean% EQU 1 (
 )
 msbuild /target:gravity %CONFIGURATION% gravity.sln || goto build_fail
 popd
-
-:: Build Components 
-::pushd build\msvs
-::msbuild /target:ServiceDirectory %CONFIGURATION% buildAll.sln || goto build_fail
-::popd
 
 :: Populate the include directory
 md include
