@@ -1,38 +1,40 @@
-#!/bin/bash
+#!/bin/bash -x
 
+echo starting Gravity ARM build...
 # build native to get the protoc executable
 pushd ThirdParty
 pushd protobuf-2.4.1
-./configure
+./configure CC=gcc CXX=g++
 make clean || exit 1
 make || exit 1
 popd
 
-rm -rf ./bin/*
-cp protobuf-2.4.1/src/.libs/protoc protobuf-2.4.1/src/.libs/protoc.exe ./bin >& /dev/null
+mkdir ./bin
+rm -rf ./bin/protoc
+cp protobuf-2.4.1/src/.libs/protoc ./bin 
 popd
 
 # build the rest with the arm settings
 source /usr/local/angstrom/arm/environment-setup
 
-pushd ./ThirdParty >& /dev/null
+pushd ./ThirdParty 
 ./buildARM.sh || exit 1
-popd >& /dev/null
+popd 
 
-pushd ./src/api/cpp >& /dev/null
+pushd ./src/api/cpp 
 make clean || exit 1
 make CROSS=arm-angstrom-linux-gnueabi- || exit 1
-popd >& /dev/null
+popd 
 
-pushd ./src/components/cpp/ServiceDirectory >& /dev/null
+pushd ./src/components/cpp/ServiceDirectory 
 make clean || exit 1
 make CROSS=arm-angstrom-linux-gnueabi- || exit 1
-popd >& /dev/null
+popd 
 
-pushd ./src/components/cpp/LogRecorder >& /dev/null
+pushd ./src/components/cpp/LogRecorder 
 make clean || exit 1
 make CROSS=arm-angstrom-linux-gnueabi- || exit 1
-popd >& /dev/null
+popd 
 
 rm -rf bin lib include
 mkdir bin
@@ -53,6 +55,6 @@ cp src/api/cpp/protobuf/GravityDataProductPB.pb.h include/protobuf
 cp -r ThirdParty/include/* include
 
 echo building Gravity ARM tarball...
-rm gravityARM.tgz >& /dev/null
+rm gravityARM.tgz 
 tar czf gravityARM.tgz bin lib include
 
