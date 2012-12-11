@@ -1,6 +1,13 @@
 @echo off
 setlocal
 
+if not defined GRAVITY_HOME (
+   echo You must define GRAVITY_HOME
+   goto build_fail
+   end
+)
+
+
 :menu
 echo.
 echo ===========================
@@ -34,41 +41,49 @@ goto done
 
 :VS201232R
 echo ========== BUILDING VS2012 32-bit Release ==========
+call setenv /x86 /release
 set CONFIGURATION= /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v110 
 goto build
 
 :VS201232D
 echo ========== BUILDING VS2012 32-bit Debug ==========
+call setenv /x86 /debug
 set CONFIGURATION= /p:Configuration=Debug /p:Platform=Win32 /p:PlatformToolset=v110 
 goto build
 
 :VS201264R
 echo ========== BUILDING VS2012 64-bit Release ==========
+call setenv /x64 /release
 set CONFIGURATION= /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v110 
 goto build
 
 :VS201264D
 echo ========== BUILDING VS2012 64-bit Debug ==========
+call setenv /x64 /debug
 set CONFIGURATION= /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v110 
 goto build
 
 :VS201032R
 echo ========== BUILDING VS2010 32-bit Release ==========
+call setenv /x86 /release
 set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=Win32 /p:PlatformToolset=Windows7.1SDK 
 goto build
 
 :VS201032D
 echo ========== BUILDING VS2010 32-bit Debug ==========
+call setenv /x86 /debug
 set CONFIGURATION= /p:Configuration=Debug2010 /p:Platform=Win32 /p:PlatformToolset=Windows7.1SDK 
 goto build
 
 :VS201064R
 echo ========== BUILDING VS2010 64-bit Release ==========
+call setenv /x64 /release
 set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=x64 /p:PlatformToolset=Windows7.1SDK 
 goto build
 
 :VS201064D
 echo ========== BUILDING VS2010 64-bit Debug ==========
+call setenv /x64 /debug
 set CONFIGURATION= /p:Configuration=Debug2010 /p:Platform=x64 /p:PlatformToolset=Windows7.1SDK 
 goto build
 
@@ -101,8 +116,8 @@ xcopy /s /y ThirdParty\protobuf-2.4.1\src\*.h include
 xcopy /s /y ThirdParty\pthreads\include\*.h include 
 md include\MATLAB
 copy src\api\MATLAB\*.m include\MATLAB
-md lib\MATLAB
-copy src\api\MATLAB\*.jar lib\MATLAB
+::md lib\MATLAB
+::copy src\api\MATLAB\*.jar lib\MATLAB
 
 echo.
 echo ================================
