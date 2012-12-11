@@ -7,6 +7,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Debug2010|Win32 = Debug2010|Win32
+		Debug2010|x64 = Debug2010|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 		Release2010|Win32 = Release2010|Win32
@@ -17,6 +19,10 @@ Global
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug|Win32.Build.0 = Debug|Win32
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug|x64.ActiveCfg = Debug|x64
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug|x64.Build.0 = Debug|x64
+		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug2010|Win32.ActiveCfg = Debug2010|Win32
+		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug2010|Win32.Build.0 = Debug2010|Win32
+		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug2010|x64.ActiveCfg = Debug2010|x64
+		{801C7417-B350-410D-A104-58EA611FCF2C}.Debug2010|x64.Build.0 = Debug2010|x64
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Release|Win32.ActiveCfg = Release|Win32
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Release|Win32.Build.0 = Release|Win32
 		{801C7417-B350-410D-A104-58EA611FCF2C}.Release|x64.ActiveCfg = Release|x64

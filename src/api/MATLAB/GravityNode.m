@@ -98,5 +98,30 @@ classdef GravityNode < handle
                 this.gravityNode.startHeartbeat(componentID, intervalMicroseconds, 54541);            
             end
         end
+        
+        function ret = getStringParam(this, key, varargin)
+            if isempty(varargin)
+                ret = this.gravityNode.getStringParam(key);
+            else
+                ret = this.gravityNode.getStringParam(key, varargin{1});
+            end
+            ret = char(ret);
+        end
+        
+        function ret = getFloatParam(this, key, varargin)
+            if isempty(varargin)
+                ret = this.gravityNode.getFloatParam(key);
+            else
+                ret = this.gravityNode.getFloatParam(key, varargin{1});
+            end
+        end
+        
+        function ret = getIntParam(this, key, varargin)
+            if isempty(varargin)
+                ret = this.gravityNode.getIntParam(key);
+            else
+                ret = this.gravityNode.getIntParam(key, varargin{1});
+            end
+        end
     end
 end
