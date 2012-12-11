@@ -3,6 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <GravityRoot>$(GRAVITY_HOME)</GravityRoot>
+    <BoostRoot>$(BOOST_HOME)</BoostRoot>
     <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
     <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
   </PropertyGroup>
