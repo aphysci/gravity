@@ -2,8 +2,10 @@
 setlocal
 
 :menu
+echo.
 echo ===========================
 echo ===== BUILD OPTIONS =======
+echo.
 echo 1 - Release VS2012 32-bit
 echo 2 - Debug VS2012 32-bit
 echo 3 - Release VS2012 64-bit
@@ -96,11 +98,17 @@ copy src\api\cpp\*.h include
 md include\protobuf
 copy src\api\cpp\protobuf\GravityDataProductPB.pb.h include\protobuf
 xcopy /s /y ThirdParty\protobuf-2.4.1\src\*.h include 
+xcopy /s /y ThirdParty\pthreads\include\*.h include 
 md include\MATLAB
 copy src\api\MATLAB\*.m include\MATLAB
 md lib\MATLAB
 copy src\api\MATLAB\*.jar lib\MATLAB
 
+echo.
+echo ================================
+echo ======= BUILD SUCCESSFUL =======
+echo ================================
+echo.
 goto menu
 
 :build_fail
