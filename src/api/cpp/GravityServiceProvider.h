@@ -30,7 +30,7 @@ public:
      * Called when a request is made through the Gravity infrastructure
      * \returns the response
      */
-    virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct) = 0;
+    virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct) = 0;
 };
 
 } /* namespace gravity */
