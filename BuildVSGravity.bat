@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+set Clean=1
+
 if not defined GRAVITY_HOME (
    echo You must define GRAVITY_HOME
    goto build_fail
@@ -54,7 +56,7 @@ goto build
 :VS201264R
 echo ========== BUILDING VS2012 64-bit Release ==========
 call setenv /x64 /release
-set CONFIGURATION= /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v110 
+set CONFIGURATION= /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v110
 goto build
 
 :VS201264D
@@ -90,23 +92,41 @@ goto build
 :build
 :: Build Protobufs
 pushd ThirdParty\protobuf-2.4.1\vsprojects
-msbuild /target:libprotobuf %CONFIGURATION% protobuf.sln || goto build_fail
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% protobuf.sln || goto build_fail
+)
+	msbuild /target:libprotobuf;protoc %CONFIGURATION% protobuf.sln || goto build_fail
 popd
 
 :: Build iniparser
 pushd ThirdParty\iniparser\build
-msbuild %CONFIGURATION% iniparser.sln || goto build_fail
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% iniparser.sln || goto build_fail
+)
+msbuild /target:iniparser %CONFIGURATION% iniparser.sln || goto build_fail
 popd
 
 :: Build ZMQ
 pushd ThirdParty\zeromq-3.2.1\builds\msvc11
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% msvc11.sln || goto build_fail
+)
 msbuild /target:libzmq %CONFIGURATION% msvc11.sln || goto build_fail
 popd
 
 :: Build Gravity
 pushd build\msvs\gravity
-msbuild %CONFIGURATION% gravity.sln || goto build_fail
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% gravity.sln || goto build_fail
+)
+msbuild /target:gravity %CONFIGURATION% gravity.sln || goto build_fail
 popd
+
+:: Build Components 
+::pushd build\msvs
+::msbuild /target:ServiceDirectory %CONFIGURATION% buildAll.sln || goto build_fail
+::popd
+
 :: Populate the include directory
 md include
 copy src\api\cpp\*.h include
