@@ -9,6 +9,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <assert.h>
+#include <boost/assign.hpp>
 #ifdef WIN32
 #include <winsock2.h>
 #else
@@ -238,8 +239,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
     if(serviceDirectoryNode.ipAddress == "")
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
-
-	cout << "SD: " << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress << ":" << serviceDirectoryNode.port << endl;
 
    	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
    	{
@@ -1129,5 +1128,32 @@ bool GravityNode::getBoolParam(std::string key, bool default_value)
 	else
 		return false;
 }
+
+static std::map<GravityReturnCode,std::string> code_strings = 
+  boost::assign::map_list_of
+    (GravityReturnCodes::SUCCESS, "SUCCESS")
+    (GravityReturnCodes::FAILURE, "FAILURE")
+    (GravityReturnCodes::NO_SERVICE_DIRECTORY, "NO_SERVICE_DIRECTORY")
+    (GravityReturnCodes::REQUEST_TIMEOUT, "REQUEST_TIMEOUT")
+    (GravityReturnCodes::DUPLICATE, "DUPLICATE")
+    (GravityReturnCodes::REGISTRATION_CONFLICT, "REGISTRATION_CONFLICT")
+    (GravityReturnCodes::NOT_REGISTERED, "NOT_REGISTERED")
+    (GravityReturnCodes::NO_SUCH_SERVICE, "NO_SUCH_SERVICE")
+    (GravityReturnCodes::LINK_ERROR, "LINK_ERROR")
+    (GravityReturnCodes::INTERRUPTED, "INTERRUPTED")
+    (GravityReturnCodes::NO_SERVICE_PROVIDER, "NO_SERVICE_PROVIDER")
+    (GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE");
+
+string GravityNode::getCodeString(GravityReturnCode code) {
+    std::string s;
+    if (code_strings.count(code) == 0) {
+        ostringstream convert;
+        convert << code;
+        s = convert.str();
+    } else {
+        s = code_strings[code];
+    }
+    return s;
+} 
 
 } /* namespace gravity */
