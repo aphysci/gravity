@@ -983,7 +983,9 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 	params->zmq_context = context;
 	params->interval_in_microseconds = interval_in_microseconds;
 	params->componentID = componentID;
-	params->gn = this;
+	params->minPort = getIntParam("MinPort", MIN_PORT);
+	params->maxPort = getIntParam("MaxPort", MAX_PORT);
+	params->endpoint = getIP();
 
 	pthread_t heartbeatThread;
 	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
@@ -1026,6 +1028,9 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uin
 	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
 	zmq_sendmsg(hbSocket, &msg, 0);
 	zmq_msg_close(&msg);
+
+	// Read the ACK
+	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
 }
