@@ -165,6 +165,7 @@
     <OutDir>$(BinDir)</OutDir>
     <TargetName>$(ProjectName)</TargetName>
     <ExecutablePath>$(BinDir);$(ExecutablePath);$(WindowsSdkMSBuildTools);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
     <TargetName>$(ProjectName)</TargetName>
