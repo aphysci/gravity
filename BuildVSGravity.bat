@@ -9,6 +9,13 @@ if not defined GRAVITY_HOME (
    end
 )
 
+if not defined BOOST_HOME (
+   echo You must define BOOST_HOME
+   goto build_fail
+   end
+)
+
+
 :menu
 echo.
 echo ===========================
@@ -91,12 +98,6 @@ set CONFIGURATION= /p:Configuration=Debug2010 /p:Platform=x64 /p:PlatformToolset
 goto build
 
 :GravityComponents
-
-if not defined BOOST_HOME (
-   echo You must define BOOST_HOME
-   goto build_fail
-   end
-)
 
 :: 32-bit release for all the components
 call setenv /x86 /release
