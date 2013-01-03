@@ -84,7 +84,8 @@ private:
 
     void* context;
     void* subscriptionManagerSocket;
-    void *publishManagerSocket;
+    void *publishManagerRequestSocket;
+    void *publishManagerPublishSocket;
     void *serviceManagerSocket;
     void* requestManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.

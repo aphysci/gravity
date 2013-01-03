@@ -159,7 +159,7 @@ void* Heartbeat(void* thread_context)
 
 	// Connect to PublishManager
 	void* pubManagerSocket = zmq_socket(params->zmq_context, ZMQ_REQ);
-	zmq_connect(pubManagerSocket, PUB_MGR_URL);	
+	zmq_connect(pubManagerSocket, PUB_MGR_PUB_URL);
 
 	while(true)
 	{
