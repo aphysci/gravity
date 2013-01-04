@@ -277,7 +277,7 @@ int GravitySubscriptionManager::readSubscription(void *socket, string &filterTex
     memcpy(s, zmq_msg_data(&filter), size);
     s[size] = 0;
     filterText = string(s, size);
-    delete s;
+    free(s);
     zmq_msg_close(&filter);
 
     zmq_msg_init(&message);
