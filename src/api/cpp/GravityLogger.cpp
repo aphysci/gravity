@@ -180,19 +180,21 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
 {
     char* llevel = strdup(level);
     StringToLowerCase(llevel, strlen(llevel));
+    Log::LogLevel ret = Log::NONE;
     if(strcmp(llevel, "fatal") == 0)
-        return Log::FATAL;
+        ret = Log::FATAL;
     else if(strcmp(llevel, "critical") == 0)
-        return Log::CRITICAL;
+        ret = Log::CRITICAL;
     else if(strcmp(llevel, "warning") == 0)
-        return Log::WARNING;
+        ret = Log::WARNING;
     else if(strcmp(llevel, "message") == 0)
-        return Log::MESSAGE;
+        ret = Log::MESSAGE;
     else if(strcmp(llevel, "debug") == 0)
-        return Log::DEBUG;
+        ret = Log::DEBUG;
     else if(strcmp(llevel, "trace") == 0)
-        return Log::TRACE;
-    return Log::NONE;
+        ret = Log::TRACE;
+    free(llevel);
+    return ret;
 }
 
 void Log::vLog(int level, const char* format, va_list args)
