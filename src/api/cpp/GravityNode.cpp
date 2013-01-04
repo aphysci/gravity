@@ -141,6 +141,8 @@ GravityNode::~GravityNode()
 
     // Clean up the zmq context object
     zmq_term(context);
+
+    delete parser;
 }
 
 GravityReturnCode GravityNode::init(std::string componentID)

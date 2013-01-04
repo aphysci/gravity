@@ -152,6 +152,9 @@ void GravityPublishManager::start()
 	{
 		shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
 		zmq_close(pubDetails->pollItem.socket);
+        for (map<string,shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin(); valIter != pubDetails->lastCachedValues.end(); valIter++)
+            delete [] valIter->second->value;
+        pubDetails->lastCachedValues.clear();
 	}
 
 	publishMapBySocket.clear();
