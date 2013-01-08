@@ -127,10 +127,13 @@ void GravitySubscriptionManager::start()
                     Log::trace("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
 
                     // Loop through all subscribers and deliver the messages
-                    for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
-                    {
-                        (*iter)->subscriptionFilled(dataProducts);
-                    }
+					if(dataProducts.size() != 0)
+					{
+						for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
+						{
+							(*iter)->subscriptionFilled(dataProducts);
+						}
+					}
                 }
 			    else // it's a publisher update list from the SD
 			    {
