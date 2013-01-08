@@ -448,16 +448,16 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -465,10 +465,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ComponentLookupRequestPB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -477,8 +477,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -486,10 +486,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ComponentServiceLookupResponsePB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -498,8 +498,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -507,10 +507,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ConfigRequest.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -519,8 +519,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -528,10 +528,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\GravityDataProductPB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -540,8 +540,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -549,10 +549,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\GravityLogMessagePB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -561,8 +561,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -570,10 +570,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryRegistrationPB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -582,8 +582,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -591,10 +591,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryResponsePB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -603,8 +603,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
@@ -612,10 +612,10 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
@@ -624,8 +624,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">..\..\..\$(Platform)\$(Configuration)\bin\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
