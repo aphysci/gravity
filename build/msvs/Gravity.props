@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?> 
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
@@ -13,14 +13,16 @@
       <Value>$(GravityRoot)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
-
     <BuildMacro Include="BinDir">
       <Value>$(BinDir)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
-
     <BuildMacro Include="LibDir">
       <Value>$(LibDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BoostRoot">
+      <Value>$(BoostRoot)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
   </ItemGroup>
