@@ -15,6 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="readme.txt" />
+    <None Include="..\..\..\src\api\java\nmake.mak">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
