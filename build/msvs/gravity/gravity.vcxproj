@@ -184,7 +184,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;..\..\..\ThirdParty\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -211,7 +211,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;C:\Users\tludwinski\Desktop\boost_1_52_0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,7 +238,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -264,7 +264,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -292,7 +292,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -319,7 +319,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -346,7 +346,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -373,7 +373,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
