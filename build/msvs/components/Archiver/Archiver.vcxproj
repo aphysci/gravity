@@ -303,7 +303,9 @@
     <ClInclude Include="..\..\..\..\src\components\cpp\Archiver\GravityArchiver.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Gravity.props" />
+    <None Include="..\..\Gravity.props">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
