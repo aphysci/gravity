@@ -36,18 +36,30 @@ void GravityPublishManager::start()
 	// Messages
 	zmq_msg_t event, id;
 
-	// Set up the inproc socket to subscribe and unsubscribe to messages from
+	// Set up the inproc sockets to subscribe and unsubscribe to messages from
 	// the GravityNode
-	gravityNodeSocket = zmq_socket(context, ZMQ_REP);
-	zmq_bind(gravityNodeSocket, PUB_MGR_URL);
+	gravityNodeResponseSocket = zmq_socket(context, ZMQ_REP);
+	zmq_bind(gravityNodeResponseSocket, PUB_MGR_REQ_URL);
+
+	gravityNodeSubscribeSocket = zmq_socket(context, ZMQ_SUB);
+    zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_PUB_URL);
+    zmq_setsockopt(gravityNodeSubscribeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
 	// Always have at least the gravity node to poll
-	zmq_pollitem_t pollItem;
-	pollItem.socket = gravityNodeSocket;
-	pollItem.events = ZMQ_POLLIN;
-	pollItem.fd = 0;
-	pollItem.revents = 0;
-	pollItems.push_back(pollItem);
+	zmq_pollitem_t pollItemResponse;
+	pollItemResponse.socket = gravityNodeResponseSocket;
+	pollItemResponse.events = ZMQ_POLLIN;
+	pollItemResponse.fd = 0;
+	pollItemResponse.revents = 0;
+	pollItems.push_back(pollItemResponse);
+
+    // Always have at least the gravity node to poll
+    zmq_pollitem_t pollItemSubscribe;
+    pollItemSubscribe.socket = gravityNodeSubscribeSocket;
+    pollItemSubscribe.events = ZMQ_POLLIN;
+    pollItemSubscribe.fd = 0;
+    pollItemSubscribe.revents = 0;
+    pollItems.push_back(pollItemSubscribe);
 
 	ready();
 
@@ -66,14 +78,25 @@ void GravityPublishManager::start()
 		if (pollItems[0].revents & ZMQ_POLLIN)
 		{
 			// Get new GravityNode request
-			string command = readStringMessage(gravityNodeSocket);
+			string command = readStringMessage(gravityNodeResponseSocket);
 
 			// message from gravity node should be either a register, unregister or publish request
 			if (command == "register")
 			{
 				registerDataProduct();
 			}
-			else if (command == "unregister")
+			else
+			{
+			    Log::critical("Received unknown request command %s", command.c_str());
+			}
+		}
+
+		if (pollItems[1].revents & ZMQ_POLLIN)
+		{
+            // Get new GravityNode request
+            string command = readStringMessage(gravityNodeSubscribeSocket);
+
+			if (command == "unregister")
 			{
 				unregisterDataProduct();
 			}
@@ -87,12 +110,12 @@ void GravityPublishManager::start()
 			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+                Log::critical("Received unknown publish command %s", command.c_str());
 			}
 		}
 
 		// Check for publish updates
-		for (unsigned int i = 1; i < pollItems.size(); i++)
+		for (unsigned int i = 2; i < pollItems.size(); i++)
 		{
 			if (pollItems[i].revents && ZMQ_POLLIN)
 			{
@@ -100,7 +123,7 @@ void GravityPublishManager::start()
 				zmq_msg_init(&event);
 				zmq_recvmsg(pollItems[i].socket, &event, 0);
 				char *data = (char*)zmq_msg_data(&event);
-				bool newsub = *((char*)zmq_msg_data(&event)) == 1; //This message is comming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.  
+				bool newsub = *((char*)zmq_msg_data(&event)) == 1;
 				zmq_msg_close(&event);
 
 				if (newsub)
@@ -129,12 +152,16 @@ void GravityPublishManager::start()
 	{
 		shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
 		zmq_close(pubDetails->pollItem.socket);
+        for (map<string,shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin(); valIter != pubDetails->lastCachedValues.end(); valIter++)
+            delete [] valIter->second->value;
+        pubDetails->lastCachedValues.clear();
 	}
 
 	publishMapBySocket.clear();
 	publishMapByID.clear();
 
-	zmq_close(gravityNodeSocket);
+    zmq_close(gravityNodeResponseSocket);
+	zmq_close(gravityNodeSubscribeSocket);
 }
 
 void GravityPublishManager::ready()
@@ -155,20 +182,20 @@ void GravityPublishManager::registerDataProduct()
 {
 
 	// Read the data product id for this request
-	string dataProductID = readStringMessage(gravityNodeSocket);
+	string dataProductID = readStringMessage(gravityNodeResponseSocket);
 
 	// Read the publish transport type
-	string transportType = readStringMessage(gravityNodeSocket);
+	string transportType = readStringMessage(gravityNodeResponseSocket);
 
     int minPort, maxPort;
     if(transportType == "tcp")
     {
-        minPort = readIntMessage(gravityNodeSocket);
-        maxPort = readIntMessage(gravityNodeSocket);
+        minPort = readIntMessage(gravityNodeResponseSocket);
+        maxPort = readIntMessage(gravityNodeResponseSocket);
     }
 
     // Read the publish transport type
-    string endpoint = readStringMessage(gravityNodeSocket);
+    string endpoint = readStringMessage(gravityNodeResponseSocket);
 
     // Create the publish socket
     void* pubSocket = zmq_socket(context, ZMQ_XPUB);
@@ -187,7 +214,7 @@ void GravityPublishManager::registerDataProduct()
         {
             Log::critical("Could not find available port for %s", dataProductID.c_str());
             zmq_close(pubSocket);
-            sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
+            sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
             return;
         }
         stringstream ss;
@@ -204,12 +231,12 @@ void GravityPublishManager::registerDataProduct()
         {
             Log::critical("Could not bind address %s", connectionURL.c_str());
             zmq_close(pubSocket);
-            sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
+            sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
             return;
         }
     }
 
-    sendStringMessage(gravityNodeSocket, connectionURL, ZMQ_DONTWAIT);
+    sendStringMessage(gravityNodeResponseSocket, connectionURL, ZMQ_DONTWAIT);
 
 	// Create poll item for response to this request
 	zmq_pollitem_t pollItem;
@@ -233,7 +260,7 @@ void GravityPublishManager::registerDataProduct()
 void GravityPublishManager::unregisterDataProduct()
 {
 	// Read the data product id for this request
-	string dataProductID = readStringMessage(gravityNodeSocket);
+	string dataProductID = readStringMessage(gravityNodeSubscribeSocket);
 
 	// If data product ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
 	if (publishMapByID.count(dataProductID))
@@ -264,18 +291,17 @@ void GravityPublishManager::unregisterDataProduct()
 			}
 		}
 	}
-    sendStringMessage(gravityNodeSocket, "OK", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::publish()
 {
     // Read the filter text
-    string filterText = readStringMessage(gravityNodeSocket);
+    string filterText = readStringMessage(gravityNodeSubscribeSocket);
 
     // Read the data product
     zmq_msg_t msg;
     zmq_msg_init(&msg);
-    zmq_recvmsg(gravityNodeSocket, &msg, -1);
+    zmq_recvmsg(gravityNodeSubscribeSocket, &msg, -1);
     GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
     zmq_msg_close(&msg);
 
@@ -301,8 +327,6 @@ void GravityPublishManager::publish()
     publishDetails->lastCachedValues[filterText] = val;
 
     publish(publishDetails->socket, filterText, bytes, size);
-
-    sendStringMessage(gravityNodeSocket, "OK", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::publish(void* socket, const string &filterText, const void *bytes, int size)

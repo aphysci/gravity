@@ -21,15 +21,16 @@ struct HBParams {
 	int interval_in_microseconds;
 	//unsigned short port;
 	std::string componentID;
-	void* gn;
+	std::string endpoint;
+	int minPort;
+	int maxPort;
 };
 
 struct HBListenerContext {
 	void* zmq_context;
-	void* gn;
 };
 
-struct ExpectedMessasgeQueueElement {
+struct ExpectedMessageQueueElement {
 	uint64_t expectedTime; //Absolute (Maximum amount we can wait).
 	uint64_t lastHeartbeatTime; //Absolute
 	uint64_t timetowaitBetweenHeartbeats; //In Microseconds
@@ -37,7 +38,13 @@ struct ExpectedMessasgeQueueElement {
 	void* socket;
 };
 
-bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b);
+struct EMQComparator
+{
+	bool operator() (ExpectedMessageQueueElement* a, ExpectedMessageQueueElement* b)
+	{
+		return a->expectedTime > b->expectedTime;
+	}
+};
 
 class Heartbeat : public GravitySubscriber
 {
@@ -46,8 +53,8 @@ public:
 
     static void* HeartbeatListenerThrFunc(void* thread_context);
 
-    static std::list<ExpectedMessasgeQueueElement> queueElements; //This is so we can reuse these guys.
-    static std::priority_queue<ExpectedMessasgeQueueElement*> messageTimes;
+    static std::list<ExpectedMessageQueueElement> queueElements; //This is so we can reuse these guys.
+    static std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> messageTimes;
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
     static Semaphore lock;

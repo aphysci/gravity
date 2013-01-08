@@ -129,7 +129,7 @@ string GravityRequestManager::readStringMessage()
 	memcpy(s, zmq_msg_data(&msg), size);
 	s[size] = 0;
 	std::string str(s, size);
-	delete s;
+	free(s);
 	zmq_msg_close(&msg);
 
 	return str;

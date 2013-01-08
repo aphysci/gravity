@@ -37,6 +37,9 @@ namespace GravityReturnCodes
 {
     enum Codes
     {
+        /*
+         * If you add to this list, also add to GravityNode::getCodeString()
+         */
         SUCCESS = 0,
         FAILURE = -1,
         NO_SERVICE_DIRECTORY = -2,
@@ -81,7 +84,8 @@ private:
 
     void* context;
     void* subscriptionManagerSocket;
-    void *publishManagerSocket;
+    void *publishManagerRequestSocket;
+    void *publishManagerPublishSocket;
     void *serviceManagerSocket;
     void* requestManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
@@ -228,6 +232,11 @@ public:
      * Registers a callback to be called when we don't get a heartbeat from another component.
      */
     GRAVITY_API GravityReturnCode registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+
+    /**
+     * Returns a string representation of the provided error code.
+     */
+    GRAVITY_API string getCodeString(GravityReturnCode code);
 
     /** @} */ //Registration Functions
 };

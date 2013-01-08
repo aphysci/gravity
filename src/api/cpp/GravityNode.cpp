@@ -9,6 +9,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <assert.h>
+#include <boost/assign.hpp>
 #ifdef WIN32
 #include <winsock2.h>
 #else
@@ -131,14 +132,17 @@ GravityNode::~GravityNode()
 	sendStringMessage(requestManagerSocket, "kill", ZMQ_DONTWAIT);
 	zmq_close(requestManagerSocket);
 
-    sendStringMessage(publishManagerSocket, "kill", ZMQ_DONTWAIT);
-    zmq_close(publishManagerSocket);
+    sendStringMessage(publishManagerPublishSocket, "kill", ZMQ_DONTWAIT);
+    zmq_close(publishManagerPublishSocket);
+    zmq_close(publishManagerRequestSocket);
 
     sendStringMessage(serviceManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(serviceManagerSocket);
 
     // Clean up the zmq context object
     zmq_term(context);
+
+    delete parser;
 }
 
 GravityReturnCode GravityNode::init(std::string componentID)
@@ -162,6 +166,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     // Setup the subscription manager
     pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
+
+    // Setup up publish channel to publish manager
+    publishManagerPublishSocket = zmq_socket(context, ZMQ_PUB);
+    zmq_bind(publishManagerPublishSocket, PUB_MGR_PUB_URL);
 
     // Setup the publish manager
     pthread_create(&publishManagerThread, NULL, startPublishManager, context);
@@ -201,8 +209,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		raise(s_interrupted);
 
 	// connect down here to make sure manager has bound address.
-    publishManagerSocket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(publishManagerSocket, PUB_MGR_URL);
+	publishManagerRequestSocket = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(publishManagerRequestSocket, PUB_MGR_REQ_URL);
 
     serviceManagerSocket = zmq_socket(context, ZMQ_REQ);
     zmq_connect(serviceManagerSocket, SERVICE_MGR_URL);
@@ -260,8 +268,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
     Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
 		Log::initAndAddGravityLogger(this, net_log_level);
-
-	Log::debug("Service Directory: %s://%s:%d", serviceDirectoryNode.transport.c_str(), serviceDirectoryNode.ipAddress.c_str(), serviceDirectoryNode.port);
 
 	return ret;
 }
@@ -362,6 +368,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string transportType)
 {
+    static Semaphore lock;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
     if (publishMap.count(dataProductID) > 0)
@@ -378,20 +385,27 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
     else
     	endpoint = dataProductID;
 
-    // Send publish details
-	sendStringMessage(publishManagerSocket, "register", ZMQ_SNDMORE);
-	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_SNDMORE);
-    sendStringMessage(publishManagerSocket, transportType, ZMQ_SNDMORE);
+    // we can't allow multiple threads to make request calls to the pub manager at the same time
+    // because the requests will step on each other.
+    lock.Lock();
+
+    // Send publish details via the request socket.  This allows us to retrieve
+    // register url in response so that we can register with the ServiceDirectory.
+	sendStringMessage(publishManagerRequestSocket, "register", ZMQ_SNDMORE);
+	sendStringMessage(publishManagerRequestSocket, dataProductID, ZMQ_SNDMORE);
+    sendStringMessage(publishManagerRequestSocket, transportType, ZMQ_SNDMORE);
     if(transportType == "tcp")
     {
         int minPort = getIntParam("MinPort", MIN_PORT);
         int maxPort = getIntParam("MaxPort", MAX_PORT);
-        sendIntMessage(publishManagerSocket, minPort, ZMQ_SNDMORE);
-        sendIntMessage(publishManagerSocket, maxPort, ZMQ_SNDMORE);
+        sendIntMessage(publishManagerRequestSocket, minPort, ZMQ_SNDMORE);
+        sendIntMessage(publishManagerRequestSocket, maxPort, ZMQ_SNDMORE);
     }
-    sendStringMessage(publishManagerSocket, endpoint, ZMQ_DONTWAIT);
+    sendStringMessage(publishManagerRequestSocket, endpoint, ZMQ_DONTWAIT);
 
-	string connectionURL = readStringMessage(publishManagerSocket);
+	string connectionURL = readStringMessage(publishManagerRequestSocket);
+
+    lock.Unlock();
 
 	Log::debug("Registered publisher at address: %s", connectionURL.c_str());
 
@@ -472,12 +486,10 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     }
     else
     {
-    	sendStringMessage(publishManagerSocket, "unregister", ZMQ_SNDMORE);
-    	sendStringMessage(publishManagerSocket, dataProductID, ZMQ_DONTWAIT);
+    	sendStringMessage(publishManagerPublishSocket, "unregister", ZMQ_SNDMORE);
+    	sendStringMessage(publishManagerPublishSocket, dataProductID, ZMQ_DONTWAIT);
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
-
-        string status = readStringMessage(publishManagerSocket);
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {
@@ -666,16 +678,14 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     dataProduct.setTimestamp(getCurrentTime());
 
 	// Send subscription details
-	sendStringMessage(publishManagerSocket, "publish", ZMQ_SNDMORE);
-	sendStringMessage(publishManagerSocket, filterText, ZMQ_SNDMORE);
+	sendStringMessage(publishManagerPublishSocket, "publish", ZMQ_SNDMORE);
+	sendStringMessage(publishManagerPublishSocket, filterText, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, dataProduct.getSize());
 	dataProduct.serializeToArray(zmq_msg_data(&msg));
-	zmq_sendmsg(publishManagerSocket, &msg, ZMQ_DONTWAIT);
+	zmq_sendmsg(publishManagerPublishSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
-
-	string status = readStringMessage(publishManagerSocket);
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -983,7 +993,9 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 	params->zmq_context = context;
 	params->interval_in_microseconds = interval_in_microseconds;
 	params->componentID = componentID;
-	params->gn = this;
+	params->minPort = getIntParam("MinPort", MIN_PORT);
+	params->maxPort = getIntParam("MaxPort", MAX_PORT);
+	params->endpoint = getIP();
 
 	pthread_t heartbeatThread;
 	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
@@ -1026,6 +1038,9 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uin
 	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
 	zmq_sendmsg(hbSocket, &msg, 0);
 	zmq_msg_close(&msg);
+
+	// Read the ACK
+	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
 }
@@ -1129,5 +1144,32 @@ bool GravityNode::getBoolParam(std::string key, bool default_value)
 	else
 		return false;
 }
+
+static std::map<GravityReturnCode,std::string> code_strings = 
+  boost::assign::map_list_of
+    (GravityReturnCodes::SUCCESS, "SUCCESS")
+    (GravityReturnCodes::FAILURE, "FAILURE")
+    (GravityReturnCodes::NO_SERVICE_DIRECTORY, "NO_SERVICE_DIRECTORY")
+    (GravityReturnCodes::REQUEST_TIMEOUT, "REQUEST_TIMEOUT")
+    (GravityReturnCodes::DUPLICATE, "DUPLICATE")
+    (GravityReturnCodes::REGISTRATION_CONFLICT, "REGISTRATION_CONFLICT")
+    (GravityReturnCodes::NOT_REGISTERED, "NOT_REGISTERED")
+    (GravityReturnCodes::NO_SUCH_SERVICE, "NO_SUCH_SERVICE")
+    (GravityReturnCodes::LINK_ERROR, "LINK_ERROR")
+    (GravityReturnCodes::INTERRUPTED, "INTERRUPTED")
+    (GravityReturnCodes::NO_SERVICE_PROVIDER, "NO_SERVICE_PROVIDER")
+    (GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE");
+
+string GravityNode::getCodeString(GravityReturnCode code) {
+    std::string s;
+    if (code_strings.count(code) == 0) {
+        ostringstream convert;
+        convert << code;
+        s = convert.str();
+    } else {
+        s = code_strings[code];
+    }
+    return s;
+} 
 
 } /* namespace gravity */

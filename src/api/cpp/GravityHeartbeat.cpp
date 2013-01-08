@@ -10,21 +10,17 @@
 #include "GravityHeartbeatListener.h"
 #include "GravityHeartbeat.h"
 #include "GravitySemaphore.h"
+#include "GravityPublishManager.h"
+#include "GravityLogger.h"
+#include "CommUtil.h"
 
 namespace gravity
 {
 
 using namespace std;
 
-//Comparison so the Heap works correctly.
-bool operator< (const ExpectedMessasgeQueueElement &a, ExpectedMessasgeQueueElement &b)
-{
-	return a.expectedTime < b.expectedTime;
-}
-
-
-std::list<ExpectedMessasgeQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
-std::priority_queue<ExpectedMessasgeQueueElement*> Heartbeat::messageTimes;
+std::list<ExpectedMessageQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
+std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> Heartbeat::messageTimes;
 std::map<std::string, GravityHeartbeatListener*> Heartbeat::listener;
 
 Semaphore Heartbeat::lock;
@@ -54,36 +50,42 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     		zmq_msg_t msg;
     	    zmq_msg_init(&msg);
 
-			ExpectedMessasgeQueueElement& mqe = *messageTimes.top();
+			ExpectedMessageQueueElement& mqe = *messageTimes.top();
+
+			if (mqe.expectedTime > getCurrentTime())
+			{
 #ifdef WIN32
-			Sleep((mqe.expectedTime - getCurrentTime())/1000);
+			Sleep(100);
 #else
 			struct timespec request;
-			request.tv_sec = mqe.expectedTime / 1000000;
-			request.tv_nsec = (mqe.expectedTime % 1000000)*1000; //Convert from Microseconds to Nanoseconds
+			request.tv_sec = 0;
+			request.tv_nsec = 100000000; //Convert from Microseconds to Nanoseconds
 			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &request, NULL);
 #endif
-
-			lock.Lock();
-			std::set<std::string>::iterator i = filledHeartbeats.find(mqe.dataproductID);
-			bool gotHeartbeat = (i != filledHeartbeats.end());
-			if(gotHeartbeat)
-				filledHeartbeats.erase(i);
-			lock.Unlock();
-
-			if(!gotHeartbeat)
-			{
-				listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
 			}
 			else
 			{
-				listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, "Received");
-				mqe.lastHeartbeatTime = getCurrentTime();
-			}
+				lock.Lock();
+				std::set<std::string>::iterator i = filledHeartbeats.find(mqe.dataproductID);
+				bool gotHeartbeat = (i != filledHeartbeats.end());
+				if(gotHeartbeat)
+					filledHeartbeats.erase(i);
+				lock.Unlock();
+	
+				if(!gotHeartbeat)
+				{
+					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
+				}
+				else
+				{
+					listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, "Received");
+					mqe.lastHeartbeatTime = getCurrentTime();
+				}
 
-			messageTimes.pop();
-			mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
-			messageTimes.push(&mqe);
+				messageTimes.pop();
+				mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
+				messageTimes.push(&mqe);
+			}
     	}//Process Messages
 
         //Allow Gravity to add Heartbeat listeners.
@@ -122,11 +124,14 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				memcpy(&maxtime, zmq_msg_data(&msg3), 8);
 				zmq_msg_close(&msg3);
 
-				ExpectedMessasgeQueueElement mqe1;
+				ExpectedMessageQueueElement mqe1;
 				mqe1.dataproductID = dataproductID;
 				mqe1.expectedTime = getCurrentTime() + maxtime;
 				mqe1.lastHeartbeatTime = 0;
 				mqe1.timetowaitBetweenHeartbeats = maxtime;
+
+				// Send ACK
+				sendStringMessage(hbSocket, "ACK", ZMQ_DONTWAIT);
 
 				//We should already be subscribed to the Heartbeats.
 
@@ -148,14 +153,27 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
 void* Heartbeat(void* thread_context)
 {
-	HBParams* params = (HBParams*) thread_context;
-	GravityNode* gn = (GravityNode*) params->gn;
+	HBParams* params = (HBParams*) thread_context;	
 	GravityDataProduct gdp(params->componentID);
 	gdp.setData((void*)"Good", 5);
 
+	// Connect to PublishManager
+	void* pubManagerSocket = zmq_socket(params->zmq_context, ZMQ_REQ);
+	zmq_connect(pubManagerSocket, PUB_MGR_PUB_URL);
+
 	while(true)
 	{
-		gn->publish(gdp);
+		// Publish heartbeat (via the GravityPublishManager)
+		gdp.setTimestamp(getCurrentTime());
+		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
+		sendStringMessage(pubManagerSocket, "publish", ZMQ_SNDMORE);
+		sendStringMessage(pubManagerSocket, "", ZMQ_SNDMORE);
+		zmq_msg_t msg;
+		zmq_msg_init_size(&msg, gdp.getSize());
+		gdp.serializeToArray(zmq_msg_data(&msg));
+		zmq_sendmsg(pubManagerSocket, &msg, ZMQ_DONTWAIT);
+		zmq_msg_close(&msg);
+		string status = readStringMessage(pubManagerSocket);
 #ifdef WIN32
 		Sleep(params->interval_in_microseconds/1000);
 #else

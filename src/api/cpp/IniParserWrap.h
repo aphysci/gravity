@@ -127,6 +127,7 @@ public:
             sects[i] = keys[i];
         }
 
+        free(keys);
         return sects;
     }
 

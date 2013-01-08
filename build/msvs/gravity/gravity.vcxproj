@@ -133,12 +133,14 @@
     <OutDir>$(BinDir)</OutDir>
     <ExecutablePath>$(BinDir);$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);..\..\..\debug_bin\</ExecutablePath>
     <TargetName>$(ProjectName)_d</TargetName>
+    <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
     <ExecutablePath>$(BinDir);$(WindowsSdkDir)\bin;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);..\..\..\debug_bin\;$(ExecutablePath)</ExecutablePath>
     <TargetName>$(ProjectName)_d</TargetName>
+    <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -154,6 +156,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
     <ExecutablePath>$(BinDir);$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -165,6 +168,7 @@
     <OutDir>$(BinDir)</OutDir>
     <TargetName>$(ProjectName)</TargetName>
     <ExecutablePath>$(BinDir);$(ExecutablePath);$(WindowsSdkMSBuildTools);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
     <TargetName>$(ProjectName)</TargetName>

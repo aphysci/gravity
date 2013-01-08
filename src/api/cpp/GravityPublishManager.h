@@ -20,7 +20,8 @@
 #include <map>
 #include <string>
 
-#define PUB_MGR_URL "inproc://gravity_publish_manager"
+#define PUB_MGR_REQ_URL "inproc://gravity_publish_manager_request"
+#define PUB_MGR_PUB_URL "inproc://gravity_publish_manager_publish"
 
 namespace gravity
 {
@@ -53,7 +54,8 @@ class GravityPublishManager
 {
 private:
 	void* context;
-	void* gravityNodeSocket;
+	void* gravityNodeResponseSocket;
+    void* gravityNodeSubscribeSocket;
     map<void*,shared_ptr<PublishDetails> > publishMapBySocket;
     map<string,shared_ptr<PublishDetails> > publishMapByID;
 	vector<zmq_pollitem_t> pollItems;
