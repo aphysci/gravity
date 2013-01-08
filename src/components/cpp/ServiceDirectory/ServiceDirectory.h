@@ -35,6 +35,7 @@ private:
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
     void addPublishers(const string &dataProductID, GravityDataProduct &response);
+	void purgeObsoletePublishers(const string &dataProductID, const string &url);
 };
 
 } /* namespace gravity */
