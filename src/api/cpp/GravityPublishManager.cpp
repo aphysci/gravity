@@ -123,7 +123,7 @@ void GravityPublishManager::start()
 				zmq_msg_init(&event);
 				zmq_recvmsg(pollItems[i].socket, &event, 0);
 				char *data = (char*)zmq_msg_data(&event);
-				bool newsub = *((char*)zmq_msg_data(&event)) == 1;
+				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is comming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.  
 				zmq_msg_close(&event);
 
 				if (newsub)

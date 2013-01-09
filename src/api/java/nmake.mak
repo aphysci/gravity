@@ -21,7 +21,7 @@ PROTOJAVACLASS_DIR=$(GRAVJAVACLASS_DIR)protobuf/
 SWIGJAVACLASS_DIR=$(GRAVJAVACLASS_DIR)swig/
 
 #Tools
-PROTOC=..\..\..\ThirdParty\bin\protoc
+PROTOC=$(BINDIR)\protoc
 
 #Naming
 JAR_NAME=gravity.jar

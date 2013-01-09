@@ -32,7 +32,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(char *BYTE, int byteLength);
+		virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener

@@ -15,8 +15,8 @@ class CPPGravityServiceProvider : public GravityServiceProvider
 public:
 
     virtual ~CPPGravityServiceProvider();
-    virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
-    virtual shared_ptr<GravityDataProduct>  request(char* array, int length);
+    virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    virtual shared_ptr<GravityDataProduct>  request(const std::string serviceID, char* array, int length);
 };
 
 }

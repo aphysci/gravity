@@ -69,8 +69,8 @@ import com.aphysci.gravity.Logger;
     }
 
     @SuppressWarnings("unused")
-    public byte[] request(byte[] arr, int byteLength) {
-      GravityDataProduct gdp = delegate.request(new GravityDataProduct(arr));
+    public byte[] request(String serviceID, byte[] arr, int byteLength) {
+      GravityDataProduct gdp = delegate.request(serviceID, new GravityDataProduct(arr));
       return gdp.serializeToArray();
     }
   }

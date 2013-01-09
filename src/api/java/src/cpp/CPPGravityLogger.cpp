@@ -1,7 +1,4 @@
-
-
 #include "CPPGravityLogger.h"
-#include <iostream>
 
 using namespace gravity;
 

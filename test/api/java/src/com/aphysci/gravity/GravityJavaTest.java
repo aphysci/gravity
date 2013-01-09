@@ -120,6 +120,8 @@ public class GravityJavaTest {
 				testAssert(pb.getCount() == subCount);
 				testAssert(pb.getMessage().equals("Hello Java World"));
 				subCount++;
+				
+				Log.debug("Got GDP");
 			}
 			// sleep to give messages a chance to queue up.
 			try {
@@ -135,6 +137,7 @@ public class GravityJavaTest {
 		public void requestFilled(String serviceID, String requestID,
 				GravityDataProduct response) {
 			reqCalled = true;
+			Log.debug("Got Request");
 			testAssert(response.getDataProductID().equals("JavaResponse"));
 		}
     }
@@ -142,7 +145,8 @@ public class GravityJavaTest {
     private static class ServiceProvider implements GravityServiceProvider {
 
 		@Override
-		public GravityDataProduct request(GravityDataProduct dataProduct) {
+		public GravityDataProduct request(String serviceID, GravityDataProduct dataProduct) {
+			Log.debug("Request Made: " + serviceID);
 			provCalled = true;
 			testAssert(dataProduct.getDataProductID().equals("JavaRequest"));
 			return new GravityDataProduct("JavaResponse");
@@ -152,7 +156,8 @@ public class GravityJavaTest {
     private static class SyncServiceProvider implements GravityServiceProvider {
 
 		@Override
-		public GravityDataProduct request(GravityDataProduct dataProduct) {
+		public GravityDataProduct request(String serviceID, GravityDataProduct dataProduct) {
+			Log.debug("Sync Request Made: " + serviceID);
 			testAssert(dataProduct.getDataProductID().equals("SyncJavaRequest"));
 			return new GravityDataProduct("SyncJavaResponse");
 		}

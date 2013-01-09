@@ -26,7 +26,7 @@ class ConfigServer : public GravityServiceProvider
 {
 public:
 	ConfigServer(IniConfigParser &parser);
-    virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
+    virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
 private:
     IniConfigParser &parser;
@@ -36,7 +36,7 @@ ConfigServer::ConfigServer(IniConfigParser &other_parser) : parser(other_parser)
 {
 }
 
-shared_ptr<GravityDataProduct> ConfigServer::request(const GravityDataProduct& dataProduct)
+shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
 	ConfigRequestPB cfpb;
 	dataProduct.populateMessage(cfpb);
