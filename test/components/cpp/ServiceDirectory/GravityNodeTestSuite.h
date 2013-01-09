@@ -344,7 +344,7 @@ public:
        	return ret;
     }
 
-    shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct)
+    shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct)
     {
     	shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
     	ret->setData("RESP_DATA", 10);
