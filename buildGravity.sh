@@ -1,23 +1,27 @@
 #!/bin/bash
+DO_CLEAN=1
+DO_TEST=1
 
 pushd ./ThirdParty >& /dev/null
-./buildall.sh clean || exit 1
+if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1 ; fi
 ./buildall.sh || exit 1
 popd >& /dev/null
 
 pushd ./src/api >& /dev/null
-./buildall.sh clean || exit 1
+if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1  ; fi
 ./buildall.sh || exit 1
 popd >& /dev/null
 
 pushd ./src/components/cpp >& /dev/null
-./buildall.sh clean || exit 1
+if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1  ; fi
 ./buildall.sh || exit 1
 popd >& /dev/null
 
-pushd ./test >& /dev/null
-./testall.sh || exit 1
-popd >& /dev/null
+if [ $DO_TEST == 1 ]; then
+  pushd ./test >& /dev/null
+  ./testall.sh || exit 1
+  popd >& /dev/null
+fi
 
 rm -rf bin lib include
 mkdir bin
@@ -25,7 +29,7 @@ cp ThirdParty/bin/* bin
 cp src/components/cpp/bin/* bin
 
 mkdir lib
-cp ThirdParty/lib/* lib
+cp -d ThirdParty/lib/* lib
 cp src/api/cpp/*.a lib
 cp src/api/cpp/*.so lib
 cp src/api/java/*.so lib
