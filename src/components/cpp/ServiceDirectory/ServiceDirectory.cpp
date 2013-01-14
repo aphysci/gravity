@@ -210,7 +210,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     sdr.set_id(registration.id());
     if (foundDup)
     {
-        sdr.set_returncode(ServiceDirectoryResponsePB::DUPLICATE_REGISTRATION);
+        sdr.set_returncode(ServiceDirectoryResponsePB::SUCCESS);
         Log::warning("Attempt to register duplicate url (%s) for %s", registration.url().c_str(), registration.id().c_str());
     }
     else if (foundConflict)

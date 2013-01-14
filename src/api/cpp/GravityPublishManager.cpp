@@ -307,7 +307,10 @@ void GravityPublishManager::publish()
 
     shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProduct.getDataProductID()];
     if (!publishDetails)
+    {
+        Log::critical("Unable to process publish for unknown data product %s", dataProduct.getDataProductID().c_str());
         return;
+    }
 
     // Serialize data
     int size = dataProduct.getSize();

@@ -88,7 +88,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerDataProduct("TEST", "tcp");
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.subscribe("TEST", *this, "");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -262,7 +262,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerService("TEST2", "tcp", *this);
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterService("TEST2");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
@@ -271,7 +271,7 @@ public:
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.registerService("TEST2", "tcp", *this);
-        TS_ASSERT_EQUALS(ret, GravityReturnCodes::DUPLICATE);
+        TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);
 
         ret = node.unregisterService("TEST2");
         TS_ASSERT_EQUALS(ret, GravityReturnCodes::SUCCESS);

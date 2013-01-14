@@ -374,7 +374,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
     if (publishMap.count(dataProductID) > 0)
     {
         Log::warning("attempt to register duplicate data product ID: %s", dataProductID.c_str());
-        return GravityReturnCodes::DUPLICATE;
+        return GravityReturnCodes::SUCCESS;
     }
 
     string endpoint;
@@ -407,16 +407,12 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
 
     lock.Unlock();
 
-	Log::debug("Registered publisher at address: %s", connectionURL.c_str());
-
 	if (connectionURL.size() == 0)
 	{
 	    ret = GravityReturnCodes::NO_PORTS_AVAILABLE;
 	}
 	else
 	{
-	    publishMap[dataProductID] = connectionURL;
-
         if (!serviceDirectoryNode.ipAddress.empty())
         {
             // Create the object describing the data product to register
@@ -473,7 +469,20 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
         }
 	}
 
-    return ret;
+	if (ret != GravityReturnCodes::SUCCESS)
+	{
+	    Log::warning("Failed to register %s at url %s with error %s", dataProductID.c_str(), connectionURL.c_str(), getCodeString(ret).c_str());
+	    // if we didn't succesfully register with the SD, then unregister with the publish manager
+        sendStringMessage(publishManagerPublishSocket, "unregister", ZMQ_SNDMORE);
+        sendStringMessage(publishManagerPublishSocket, dataProductID, ZMQ_DONTWAIT);
+	}
+	else
+	{
+	    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
+        publishMap[dataProductID] = connectionURL;
+	}
+
+	return ret;
 }
 
 GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
@@ -805,7 +814,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
     if (serviceMap.count(serviceID) > 0)
     {
         Log::warning("attempt to register duplicate service ID: %s", serviceID.c_str());
-        return GravityReturnCodes::DUPLICATE;
+        return GravityReturnCodes::SUCCESS;
     }
 
 
@@ -843,10 +852,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
 
     string connectionURL = readStringMessage(serviceManagerSocket);
 
-    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
-
-    serviceMap[serviceID] = connectionURL;
 
     if (ret == GravityReturnCodes::SUCCESS && !serviceDirectoryNode.ipAddress.empty())
     {
@@ -904,6 +910,19 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
         }
     }
 
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        // unregister the service from the service manager if we couldn't register with the SD
+        sendStringMessage(serviceManagerSocket, "unregister", ZMQ_SNDMORE);
+        sendStringMessage(serviceManagerSocket, serviceID, ZMQ_DONTWAIT);
+        // wait for it to return
+        readStringMessage(serviceManagerSocket);
+    }
+    else
+    {
+        Log::debug("Registered service at address: %s", connectionURL.c_str());
+        serviceMap[serviceID] = connectionURL;
+    }
     return ret;
 }
 
