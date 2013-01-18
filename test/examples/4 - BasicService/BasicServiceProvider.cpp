@@ -10,11 +10,11 @@ using namespace gravity;
 class MultiplicationServiceProvider : public GravityServiceProvider
 {
 public:
-	virtual shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
+	virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 };
 
 
-shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const GravityDataProduct& dataProduct)
+shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
 	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.  
 	if(dataProduct.getDataProductID() != "Multiplication") {
