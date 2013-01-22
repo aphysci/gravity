@@ -29,7 +29,7 @@ echo 5 - Release VS2010 32-bit
 echo 6 - Debug VS2010 32-bit
 echo 7 - Release VS2010 64-bit
 echo 8 - Debug VS2010 64-bit
-echo 9 - Gravity Components (32-bit executables)
+echo 9 - Gravity Components (VS2010 32-bit executables)
 echo Q - Quit
 
 echo Build Selection:	
@@ -101,7 +101,7 @@ goto build
 
 :: 32-bit release for all the components
 call setenv /x86 /release
-set CONFIGURATION= /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v110 
+set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=Win32 /p:PlatformToolset=Windows7.1SDK
 
 echo ========== BUILDING ServiceDirectory ==========
 pushd build\msvs\components\ServiceDirectory
@@ -111,7 +111,7 @@ if %Clean% EQU 1 (
 msbuild /target:ServiceDirectory %CONFIGURATION% ServiceDirectory.sln || goto build_fail
 popd
 
-goto skip
+goto SkipArchiverAndPlayback
 
 echo ========== BUILDING Archiver ==========
 pushd build\msvs\components\Archiver
@@ -120,6 +120,17 @@ if %Clean% EQU 1 (
 )
 msbuild /target:Archiver %CONFIGURATION% Archiver.sln || goto build_fail
 popd
+
+
+echo ========== BUILDING Playback ==========
+pushd build\msvs\components\Playback
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% Playback.sln || goto build_fail
+)
+msbuild /target:Playback %CONFIGURATION% Playback.sln || goto build_fail
+popd
+
+:SkipArchiverAndPlayback
 
 echo ========== BUILDING ConfigServer ==========
 pushd build\msvs\components\ConfigServer
@@ -137,15 +148,6 @@ if %Clean% EQU 1 (
 msbuild /target:LogRecorder %CONFIGURATION% LogRecorder.sln || goto build_fail
 popd
 
-echo ========== BUILDING Playback ==========
-pushd build\msvs\components\Playback
-if %Clean% EQU 1 (
-	msbuild /target:Clean %CONFIGURATION% Playback.sln || goto build_fail
-)
-msbuild /target:Playback %CONFIGURATION% Playback.sln || goto build_fail
-popd
-
-:skip
 goto menu
 
 :build
