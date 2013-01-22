@@ -52,8 +52,6 @@ void ServiceDirectory::start()
 {
 	gn.init("ServiceDirectory");
 
-	Log::initAndAddConsoleLogger(Log::LogStringToLevel(gn.getStringParam("LocalLogLevel", "warning").c_str()));
-
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
     boost::replace_all(sdURL, "localhost", "127.0.0.1");
 

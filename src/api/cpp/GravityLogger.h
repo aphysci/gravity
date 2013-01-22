@@ -62,13 +62,13 @@ public:
      * \param filename         Local logging filename.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
      * \param log_local_level  The initial local logging level.
      */
-    GRAVITY_API static void initAndAddFileLogger(const char* filename, LogLevel local_log_level);
+    GRAVITY_API static void initAndAddFileLogger(const char* filename, const char* comp_id, LogLevel local_log_level);
 
     /**
      * Adds a console Logger.
      * \param log_local_level  The initial local logging level.
      */
-    GRAVITY_API static void initAndAddConsoleLogger(LogLevel local_log_level);
+    GRAVITY_API static void initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level);
 
     /**
      * You must call this function to initialize the Logger with Gravity network logging.  May be called in addition to initAndAddFileLogger().

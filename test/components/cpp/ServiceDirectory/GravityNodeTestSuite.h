@@ -75,8 +75,6 @@ public:
         subFilledFlag = false;
         gotRequestFlag = false;
         gotResponseFlag = false;
-
-        Log::initAndAddConsoleLogger(Log::MESSAGE);
     }
 
     void testRegisterData(void) {

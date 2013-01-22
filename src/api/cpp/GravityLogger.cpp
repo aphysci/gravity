@@ -20,24 +20,42 @@ using namespace gravity;
  */
 class FileLogger : public Logger {
 public:
-    FileLogger(const char* filename);
+    FileLogger(const string& log_dir, const string& comp_id);
     /*
      * NOTE: no need to filter on level!  This has already been done.
      */
     virtual void Log(int level, const char* messagestr);
     virtual ~FileLogger();
 protected:
-    FileLogger() { }
+    FileLogger(const string& comp_id) {component_id = comp_id; }
     FILE* log_file;
+    string component_id;
 };
 
-FileLogger::FileLogger(const char* filename)
+FileLogger::FileLogger(const string& log_dir, const string& comp_id)
 {
-    log_file = fopen(filename, "a");
+    component_id = comp_id;
+#ifdef WIN32
+    string sep_str = "\\";
+#else
+    string sep_str = "/";
+#endif
+    string filename;
+    if (log_dir.length() == 0 || log_dir.compare (log_dir.length() - sep_str.length(), sep_str.length(), sep_str) == 0)
+        filename = log_dir + component_id + ".log";
+    else
+        filename = log_dir + sep_str + component_id + ".log";
+
+    log_file = fopen(filename.c_str(), "a");
     if(log_file == NULL)
     {
-        log_file = fopen("/dev/null", "a");
         cerr << "[Log::init] Could not open log file: " << filename << endl;
+        log_file = fopen("Gravity.log", "a");
+        if(log_file == NULL)
+        {
+            log_file = fopen("/dev/null", "a");
+            cerr << "[Log::init] Could not open log file: Gravity.log" << endl;
+        }
     }
 }
 
@@ -53,7 +71,7 @@ void FileLogger::Log(int level, const char* messagestr)
 
     strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
 
-    fprintf(log_file, "[%s %s] ", Log::LogLevelToString((Log::LogLevel)level), timestr);
+    fprintf(log_file, "[%s %s-%s] ", Log::LogLevelToString((Log::LogLevel)level), component_id.c_str(), timestr);
 
     fputs(messagestr, log_file);
     fputs("\n", log_file);
@@ -66,27 +84,27 @@ FileLogger::~FileLogger()
     fclose(log_file);
 }
 
-void Log::initAndAddFileLogger(const char* filename, LogLevel local_log_level)
+void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level)
 {
-    Log::initAndAddLogger(new FileLogger(filename), local_log_level);
+    Log::initAndAddLogger(new FileLogger(log_dir, comp_id), local_log_level);
 }
 
 
 class ConsoleLogger : public FileLogger
 {
 public:
-    ConsoleLogger();
+    ConsoleLogger(const string& comp_id);
 };
 
-ConsoleLogger::ConsoleLogger()
+ConsoleLogger::ConsoleLogger(const string& comp_id) : FileLogger(comp_id)
 {
     log_file = stdout; //fdopen(dup(STDOUT_FILENO), "w"); //Duplicate the file handle so we can close it after we're done with it.
     //I hope this is the right way to do this.
 }
 
-void Log::initAndAddConsoleLogger(LogLevel local_log_level)
+void Log::initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level)
 {
-    Log::initAndAddLogger(new ConsoleLogger(), local_log_level);
+    Log::initAndAddLogger(new ConsoleLogger(comp_id), local_log_level);
 }
 
 /*

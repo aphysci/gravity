@@ -11,7 +11,7 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 	}
 	
 	@Override
-	public GravityDataProduct request(GravityDataProduct dataProduct)
+	public GravityDataProduct request(String serviceID, GravityDataProduct dataProduct)
 	{
 		//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.  
 		if(!dataProduct.getDataProductID().equals("Multiplication")) {
@@ -23,7 +23,7 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 		Multiplication.MultiplicationOperandsPB.Builder params = Multiplication.MultiplicationOperandsPB.newBuilder();
 		dataProduct.populateMessage(params);
 
-		Log.message(String.format("%d x %d", params.getMultiplicandA(), params.getMultiplicandB()));
+		Log.warning(String.format("%d x %d", params.getMultiplicandA(), params.getMultiplicandB()));
 		
 		//Do the calculation
 		int result = params.getMultiplicandA() * params.getMultiplicandB();
@@ -50,9 +50,6 @@ public class BasicServiceProvider {
 		//Initialize gravity, giving this node a componentID.  
 		gn.init("MultiplicationComponent");
 
-		//Tell the logger to also log to the console.  
-		Log.initAndAddConsoleLogger(LogLevel.MESSAGE);	
-		
 		MultiplicationServiceProvider msp = new MultiplicationServiceProvider();
 		gn.registerService(
 							//This identifies the Service to the service directory so that others can 

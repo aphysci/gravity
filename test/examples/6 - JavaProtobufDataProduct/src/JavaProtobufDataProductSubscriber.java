@@ -15,10 +15,10 @@ class SimpleGravityCounterSubscriber implements GravitySubscriber
 			//Get the protobuf object from the message
 			BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
 			if(!dataProduct.populateMessage(counterDataPB))
-				Log.message("Error Parsing Message");
+				Log.warning("Error Parsing Message");
 			
 			//Process the message
-			Log.message(String.format("Current Count: %d", counterDataPB.getCount()));
+			Log.warning(String.format("Current Count: %d", counterDataPB.getCount()));
 		}
 	}
 }
@@ -34,9 +34,6 @@ public class JavaProtobufDataProductSubscriber {
 		//Initialize gravity, giving this node a componentID.  
 		gn.init("JavaProtobufDataProductSubscriber");
 
-		//Tell the logger to also log to the console.  
-		Log.initAndAddConsoleLogger(LogLevel.MESSAGE);
-		
 		//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
 		SimpleGravityCounterSubscriber counterSubscriber = new SimpleGravityCounterSubscriber();
 		//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  

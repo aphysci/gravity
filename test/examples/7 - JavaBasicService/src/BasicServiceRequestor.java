@@ -15,7 +15,7 @@ class MultiplicationRequestor implements GravityRequestor
 		response.populateMessage(result);
 		
 		//Write the answer
-		Log.message(String.format("%s: %d", requestID, result.getResult()));
+		Log.warning(String.format("%s: %d", requestID, result.getResult()));
 		
 		gotAsyncMessage = true;
 	}
@@ -38,9 +38,6 @@ public class BasicServiceRequestor {
 		//Initialize gravity, giving this node a componentID.  
 		gn.init("MultiplicationRequestor");
 		
-		// Tell the logger to also log to the console.  
-		Log.initAndAddConsoleLogger(LogLevel.MESSAGE);	
-
 		/////////////////////////////
 		// Set up the first multiplication request
 		MultiplicationRequestor requestor = new MultiplicationRequestor();
@@ -78,7 +75,7 @@ public class BasicServiceRequestor {
 			Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
 			multSync.populateMessage(result);
 			
-			Log.message(String.format("5 x 7 = %d", result.getResult()));
+			Log.warning(String.format("5 x 7 = %d", result.getResult()));
 		}
 
 		/////////////////////////////////////////

@@ -26,7 +26,7 @@ shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std:
 	MultiplicationOperandsPB params;
 	dataProduct.populateMessage(params);
 
-	Log::message("Request received: %d x %d", params.multiplicand_a(), params.multiplicand_b());
+	Log::warning("Request received: %d x %d", params.multiplicand_a(), params.multiplicand_b());
 	
 	//Do the calculation
 	int result = params.multiplicand_a() * params.multiplicand_b();
@@ -47,9 +47,6 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MultiplicationComponent");
 
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);	
-	
 	MultiplicationServiceProvider msp;
 	gn.registerService(
 						//This identifies the Service to the service directory so that others can 

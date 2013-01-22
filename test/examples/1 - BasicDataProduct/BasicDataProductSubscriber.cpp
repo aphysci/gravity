@@ -17,9 +17,6 @@ int main()
 	GravityNode gn;
 	const std::string dataProductID = "HelloWorldDataProduct";
 
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);
-	
 	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode ret = gn.init("SimpleGravityComponentID2");
 	if (ret != GravityReturnCodes::SUCCESS)
@@ -57,7 +54,7 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<G
 		message[size] = 0; // null terminate
 		
 		//Output the message
-		Log::message("Got message: %s", message);
+		Log::warning("Got message: %s", message);
 		//Don't forget to free the memory we allocated.  
 		delete message;
 	}

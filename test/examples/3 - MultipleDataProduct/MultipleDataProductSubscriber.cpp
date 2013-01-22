@@ -44,9 +44,6 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("SimpleGravityComponentID2");
 
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);
-	
 	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
 	SimpleGravityCounterSubscriber counterSubscriber;
 	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  
@@ -77,7 +74,7 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< share
 		//Process the message
 		countTotals = countTotals + counterDataPB.count();
 
-		Log::message("Subscriber 1: Sum of All Counts Received: %d", countTotals);
+		Log::warning("Subscriber 1: Sum of All Counts Received: %d", countTotals);
 	}
 }
 
@@ -93,7 +90,7 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< sh
 		message[size] = 0; //Add NULL terminator
 		
 		//Output the message
-		Log::message("Subscriber 2: Got message: %s", message);
+		Log::warning("Subscriber 2: Got message: %s", message);
 		//Don't forget to free the memory we allocated.  
 		delete message;
 	}
@@ -105,14 +102,14 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<G
 			i != dataProducts.end(); i++)
 	{
 		//Process Message
-		Log::message("Subscriber 3: Got a %s data product", (*i)->getDataProductID().c_str());
+		Log::warning("Subscriber 3: Got a %s data product", (*i)->getDataProductID().c_str());
 
 		//Take different actions based on the message type.  
 		if((*i)->getDataProductID() == "BasicCounterDataProduct")
 		{
 			BasicCounterDataProductPB counterDataPB;
 			(*i)->populateMessage(counterDataPB);
-			Log::debug("Subscriber 3: Current Count: %d", counterDataPB.count());
+			Log::warning("Subscriber 3: Current Count: %d", counterDataPB.count());
 		}
 	}
 }

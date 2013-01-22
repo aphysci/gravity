@@ -16,7 +16,6 @@ public class GravityJavaTest {
 	private static boolean logCalled = false;
 	
     public static void main(String[] argv) {
-    	Log.initAndAddConsoleLogger(Log.LogLevel.DEBUG);
     	Log.initAndAddLogger(new TestLogger(), Log.LogLevel.DEBUG);
         Log.debug("in main");
 

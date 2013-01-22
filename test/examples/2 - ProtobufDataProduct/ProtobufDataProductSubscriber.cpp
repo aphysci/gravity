@@ -21,9 +21,6 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("SimpleGravityComponentID2");
 
-	//Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);
-	
 	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
 	SimpleGravityCounterSubscriber counterSubscriber;
 	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  
@@ -47,6 +44,6 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< share
 		(*i)->populateMessage(counterDataPB);
 
 		//Process the message
-		Log::message("Current Count: %d", counterDataPB.count());
+		Log::warning("Current Count: %d", counterDataPB.count());
 	}
 }

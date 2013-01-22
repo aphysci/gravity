@@ -24,7 +24,7 @@ void MultiplicationRequestor::requestFilled(string serviceID, string requestID, 
 	response.populateMessage(result);
 	
 	//Write the answer
-	Log::message("Asynchronous response received: %s = %d", requestID.c_str(), result.result());
+	Log::warning("Asynchronous response received: %s = %d", requestID.c_str(), result.result());
 	
 	gotAsyncMessage = true;
 }
@@ -35,9 +35,6 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MultiplicationRequestor");
 	
-	// Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);	
-
 	/////////////////////////////
 	// Set up the first multiplication request
 	MultiplicationRequestor requestor;
@@ -75,7 +72,7 @@ int main()
 		MultiplicationResultPB result;
 		multSync->populateMessage(result);
 		
-		Log::message("Synchronous response received: 5 x 7 = %d", result.result());
+		Log::warning("Synchronous response received: 5 x 7 = %d", result.result());
 	}
 
 	/////////////////////////////////////////

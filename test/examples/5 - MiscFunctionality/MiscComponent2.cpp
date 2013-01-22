@@ -55,9 +55,6 @@ int main()
 	//Initialize gravity, giving this node a componentID.  
 	gn.init("MiscGravityComponentID2");
 
-	// Tell the logger to also log to the console.  
-	Log::initAndAddConsoleLogger(Log::MESSAGE);	
-	
 	//Get a parameter from either the Gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.
 	int interval = gn.getIntParam("HeartbeatInterval", //Param Name
 									500000); //Default value.  

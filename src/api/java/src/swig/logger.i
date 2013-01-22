@@ -37,9 +37,9 @@ public:
     static const char* LogLevelToString(LogLevel level);
     static LogLevel LogStringToLevel(const char* string);
 
-    static void initAndAddFileLogger(const char* filename, LogLevel local_log_level);
+    static void initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level);
 
-    static void initAndAddConsoleLogger(LogLevel local_log_level);
+    static void initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level);
 
     static void initAndAddLogger(gravity::Logger* logger, LogLevel log_level);
 
