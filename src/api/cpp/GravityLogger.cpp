@@ -3,6 +3,9 @@
 #include "protobuf/GravityLogMessagePB.pb.h"
 #include <stdarg.h>
 #include <time.h>
+#ifndef WIN32
+#include <sys/time.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
@@ -63,15 +66,26 @@ void FileLogger::Log(int level, const char* messagestr)
 {
     //Format the Logs nicely.
     char timestr[100];
-    time_t rawtime;
     struct tm * timeinfo;
+    time_t rawtime;
+    string format = "%m/%d/%y %H:%M:%S";
 
+#ifdef WIN32
     time ( &rawtime );
     timeinfo = localtime( &rawtime );
+    strftime(timestr, 100, format.c_str(), timeinfo);
+#else
+    struct timeval  tv;
+    gettimeofday(&tv, NULL);
+    rawtime = tv.tv_sec;
+    timeinfo = localtime( &rawtime );
+    format = format + ".%%06u";
+    char buffer[100];
+    strftime(buffer, 100, format.c_str(), timeinfo);
+    snprintf(timestr, sizeof timestr, buffer, tv.tv_usec);
+#endif
 
-    strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
-
-    fprintf(log_file, "[%s %s-%s] ", Log::LogLevelToString((Log::LogLevel)level), component_id.c_str(), timestr);
+    fprintf(log_file, "[%s %s-%s] ", timestr, component_id.c_str(), Log::LogLevelToString((Log::LogLevel)level));
 
     fputs(messagestr, log_file);
     fputs("\n", log_file);
