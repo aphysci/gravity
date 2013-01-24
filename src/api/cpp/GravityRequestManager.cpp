@@ -73,6 +73,8 @@ void GravityRequestManager::start()
 		}
 
 		// init an iterator past the first element so that we can check active requests
+		// We can't create the iterator untl here because ProcessRequest may add elements
+		// to pollItems which would invalidate the iterator.
         vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 1;
 
         // Check for responses
