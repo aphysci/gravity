@@ -72,24 +72,30 @@ void GravityRequestManager::start()
 			}
 		}
 
-		// Check for responses
-		for (unsigned int i = 1; i < pollItems.size(); i++)
+		// init an iterator past the first element so that we can check active requests
+        vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 1;
+
+        // Check for responses
+		while(pollItemIter != pollItems.end())
 		{
-			if (pollItems[i].revents && ZMQ_POLLIN)
+			if (pollItemIter->revents && ZMQ_POLLIN)
 			{
 				zmq_msg_init(&message);
-				zmq_recvmsg(pollItems[i].socket, &message, 0);
+				zmq_recvmsg(pollItemIter->socket, &message, 0);
 				// Create new GravityDataProduct from the incoming message
 				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
 				// Clean up message
 				zmq_msg_close(&message);
 
 				// Deliver to requestor
-				shared_ptr<RequestDetails> reqDetails = requestMap[pollItems[i].socket];
+				shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
 				reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, dataProduct);
-				//TODO: requestMap.erase(pollItems[i].socket);
-				//Remove socket from pollItems!!!
+                zmq_close(pollItemIter->socket);
+				requestMap.erase(pollItemIter->socket);
+				pollItemIter = pollItems.erase(pollItemIter);
 			}
+			else
+			    pollItemIter++;
 		}
 	}
 
