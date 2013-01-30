@@ -22,7 +22,7 @@ JAR_NAME=gravity.jar
 #Java Compiler Options
 #classpath separator is different on UNIX and Windows
 SYSTEM:=$(strip $(shell uname -s))
-ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+ifneq (,$(findstring CYGWIN_NT,$(SYSTEM)))
 #MinGW
 #Visual Studio
 CLASSPATH_SEP=;
@@ -73,4 +73,4 @@ $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
 	jar cf $@ -C $(JAVA_BUILD_DIR) .
 
 clean:
-	rm -rf $(JAVA_BUILD_DIR)/com $(PROTOGENJAVA_DIR)*Container.java
+	rm -rf $(JAVA_BUILD_DIR)/com $(PROTOGENJAVA_DIR)*Container.java ./$(JAR_NAME)
