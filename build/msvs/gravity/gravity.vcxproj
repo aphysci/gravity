@@ -145,11 +145,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
     <ExecutablePath>$(BinDir);$(WindowsSdkDir)\bin\x64;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
     <ExecutablePath>$(BinDir);$(WindowsSdkDir)\bin\x64;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -244,7 +246,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libprotobuf.lib;libzmq_d.lib;pthreadVC2.lib;iniparser.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf_d.lib;libzmq_d.lib;pthreadVC2.lib;iniparser_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -270,7 +272,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libprotobuf.lib;libzmq_d.lib;pthreadVC2.lib;iniparser.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf_d.lib;libzmq_d.lib;pthreadVC2.lib;iniparser_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
