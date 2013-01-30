@@ -259,7 +259,10 @@ echo ================================
 echo.
 
 echo.
-echo ======== BUILDING JAVA =-=======
+echo ================================
+echo ======== BUILDING JAVA =========
+echo ================================
+echo.
 :java
 :: Build Java
 pushd src\api\java
@@ -275,6 +278,21 @@ if %GRAVITY_CONFIG% == RELEASE (
 	move libgravity_wrap_d.lib %GRAVITY_LIB_PATH%
 	move libgravity_wrap_d.exp %GRAVITY_LIB_PATH%
 )
+popd
+
+echo.
+echo ================================
+echo ======= BUILDING MATLAB ========
+echo ================================
+echo.
+pushd src\api\MATLAB
+md build
+javac -d build -cp %GRAVITY_LIB_PATH%/gravity.jar;../../../ThirdParty/guava-13.0.1/guava-13.0.1.jar MATLABGravitySubscriber.java
+jar cf MATLABGravitySubscriber.jar -C build .
+md %GRAVITY_LIB_PATH%\MATLAB
+copy MATLABGravitySubscriber.jar %GRAVITY_LIB_PATH%\MATLAB
+copy ..\..\..\ThirdParty\guava-13.0.1\guava-13.0.1.jar %GRAVITY_LIB_PATH%
+copy ..\..\..\ThirdParty\lib\protobuf-java-2.4.1.jar %GRAVITY_LIB_PATH%
 popd
 
 goto menu
