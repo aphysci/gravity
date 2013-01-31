@@ -17,8 +17,8 @@ LINK=g++
 #Default C++ Compiler Options (g++)
 INCLUDES=-I../cpp -I$(THIRDPARTY_DIR)/include -I$(JAVAINCLUDE_DIR) $(OS_SPECIFIC_INCS)
 LIBDIRS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
-LIBS=$(COMPLIER_SPECIFIC_LIBS)
-COMPLIER_SPECIFIC_LIBS=$(GCC_LIBS) $(OS_SPECIFIC_LIBS)
+LIBS=$(COMPILER_SPECIFIC_LIBS)
+COMPILER_SPECIFIC_LIBS=$(GCC_LIBS) $(OS_SPECIFIC_LIBS)
 GCC_LIBS=-lgravity -lprotobuf -liniparser -lzmq
 COMPILE_FLAG=-c
 COUTPUT_FLAG=-o
@@ -28,6 +28,8 @@ LINK_FLAGS=-shared
 OBJ_EXT=o
 OS_PATH_SEP=/
 
+LIB_NAME=libgravity_wrap
+
 #Source/Object/Dependancies (all swig auto generated sources should have been built by now).  
 #'wildcard' needs UNIX path seperators
 CPP_SRC=$(wildcard $(CPPSRC_DIR_MAKE)*.cpp)
@@ -35,13 +37,7 @@ CPP_SRC=$(wildcard $(CPPSRC_DIR_MAKE)*.cpp)
 CPP_OBJ=$(patsubst $(CPPSRC_DIR_MAKE)%.cpp,$(CPPSRC_DIR_OS)%.$(OBJ_EXT),$(CPP_SRC))
 
 SYSTEM:=$(strip $(shell uname -s))
-ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-#MinGW
-	#OS_SPECIFIC_LIBS = -lwsock32 -lpthread
-	#OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/win32
-	#OS_SPECIFIC_LIBFLAGS=-D_JNI_IMPLEMENTATION_ -Wl,--kill-at
-	#LIB_EXT=dll
-#Visual Studio
+ifneq (,$(findstring CYGWIN_NT,$(SYSTEM)))
 	-include makefile.vs
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
@@ -54,16 +50,17 @@ else
 	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-all: libgravity_wrap.$(LIB_EXT)
+all: $(LIB_NAME).$(LIB_EXT)
 
 %.$(OBJ_EXT): %.cpp
 	@echo $(CC) $<
+	$(warning COMPILE_FLAG is $(COMPILE_FLAG))
 	@$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(INCLUDES) $(COUTPUT_FLAG)$@ $<
 
-libgravity_wrap.$(LIB_EXT): $(CPP_OBJ)
+$(LIB_NAME).$(LIB_EXT): $(CPP_OBJ)
 	@echo building $(LIB_NAME).$(LIB_EXT)
+
 	@$(LINK) $(LINK_FLAGS) $(LIBDIRS) $(OUTPUT_FLAG)$@ $(CPP_OBJ) $(LIBS)
 	
 clean:
-	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.$(OBJ_EXT)
-	
+	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.exp *.lib *.$(OBJ_EXT)
