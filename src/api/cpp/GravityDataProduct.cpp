@@ -9,6 +9,8 @@
 
 namespace gravity {
 
+using namespace std;
+
 GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProductPB(new GravityDataProductPB())
 {
     gravityDataProductPB->set_dataproductid(dataProductID);
@@ -21,7 +23,7 @@ GravityDataProduct::GravityDataProduct(void* arrayPtr, int size) : gravityDataPr
 
 GravityDataProduct::~GravityDataProduct() {}
 
-string GravityDataProduct::getDataProductID() const
+std::string GravityDataProduct::getDataProductID() const
 {
     return gravityDataProductPB->dataproductid();
 }
@@ -31,7 +33,7 @@ void GravityDataProduct::setSoftwareVersion(string softwareVersion)
     gravityDataProductPB->set_softwareversion(softwareVersion);
 }
 
-string GravityDataProduct::getSoftwareVersion() const
+std::string GravityDataProduct::getSoftwareVersion() const
 {
     return gravityDataProductPB->softwareversion();
 }

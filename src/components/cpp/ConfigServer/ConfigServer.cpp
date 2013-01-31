@@ -8,6 +8,7 @@
 #include <map>
 
 using namespace gravity;
+using namespace std;
 
 struct ConfigEntry
 {

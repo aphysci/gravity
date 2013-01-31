@@ -2,14 +2,25 @@
 #include <GravityConfigParser.h>
 #include <sstream>
 
+#ifdef GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wparentheses"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
-#include <ezOptionParser.hpp> //This must be included before Windows.h because of #defines
 #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(push, 1)
+#endif
+
+#include <ezOptionParser.hpp> //This must be included before Windows.h because of #defines
+
+#ifdef GCC
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 
 #ifdef WIN32
@@ -17,6 +28,8 @@
 #include <windows.h> //For Sleep
 #define sleep Sleep
 #endif
+
+using namespace std;
 
 class GravityArchiverConfigParser
 {

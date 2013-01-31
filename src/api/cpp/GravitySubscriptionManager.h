@@ -23,15 +23,14 @@
 namespace gravity
 {
 
-using namespace std;
 using namespace std::tr1;
 
 typedef struct SubscriptionDetails
 {
-	string dataProductID;
-	string filter;
-	map<string, zmq_pollitem_t> pollItemMap;
-	set<GravitySubscriber*> subscribers;
+	std::string dataProductID;
+	std::string filter;
+	std::map<std::string, zmq_pollitem_t> pollItemMap;
+	std::set<GravitySubscriber*> subscribers;
 } SubscriptionDetails;
 
 /**
@@ -43,16 +42,16 @@ class GravitySubscriptionManager
 private:
 	void* context;
 	void* gravityNodeSocket;
-	map<string, map<string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
-    map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
-    map<string, zmq_pollitem_t> publisherUpdateMap;
-    map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
-	vector<zmq_pollitem_t> pollItems;
+	std::map<std::string, std::map<std::string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
+    std::map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+    std::map<std::string, zmq_pollitem_t> publisherUpdateMap;
+    std::map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
+	std::vector<zmq_pollitem_t> pollItems;
 
 	void addSubscription();
 	void removeSubscription();
-	int readSubscription(void *socket, string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
-	void *setupSubscription(const string &url, const string &filter, zmq_pollitem_t &pollItem);
+	int readSubscription(void *socket, std::string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
+	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void ready();
 public:
 	/**

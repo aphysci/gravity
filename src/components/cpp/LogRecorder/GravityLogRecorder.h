@@ -31,9 +31,9 @@ private:
     std::string filebasename;
     int num_logs;
 
-    static const string logDataProductID;
+    static const std::string logDataProductID;
 
-    void getNewFilename(char* outfilename, string basefilename);
+    void getNewFilename(char* outfilename, std::string basefilename);
 
     void rotateLogs();
 };

@@ -54,7 +54,7 @@ public:
     static void* HeartbeatListenerThrFunc(void* thread_context);
 
     static std::list<ExpectedMessageQueueElement> queueElements; //This is so we can reuse these guys.
-    static std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> messageTimes;
+    static std::priority_queue<ExpectedMessageQueueElement*, std::vector<ExpectedMessageQueueElement*>, EMQComparator> messageTimes;
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
     static Semaphore lock;

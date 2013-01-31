@@ -13,6 +13,7 @@
 #include "CPPGravityRequestor.h"
 #include "CPPGravityHeartbeatListener.h"
 #include "CPPGravityLogger.h"
+using namespace std::tr1;
 %}
 
 // load the shared lib in the generated code

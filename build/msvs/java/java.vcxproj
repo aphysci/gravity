@@ -384,6 +384,12 @@
     <ClInclude Include="..\..\..\src\api\java\src\cpp\CPPGravitySubscriber.h" />
     <ClInclude Include="..\..\..\src\api\java\src\cpp\gravity_wrap.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\api\java\src\swig\gravity.i" />
+    <None Include="..\..\..\src\api\java\src\swig\gravitynode.i" />
+    <None Include="..\..\..\src\api\java\src\swig\logger.i" />
+    <None Include="..\..\..\src\api\java\src\swig\modulecode.i" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

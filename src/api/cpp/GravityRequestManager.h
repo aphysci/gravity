@@ -15,13 +15,12 @@
 namespace gravity
 {
 
-using namespace std;
 using namespace std::tr1;
 
 typedef struct RequestDetails
 {
-	string serviceID;
-	string requestID;
+	std::string serviceID;
+	std::string requestID;
 	zmq_pollitem_t pollItem;
 	GravityRequestor* requestor;
 } RequestDetails;
@@ -31,10 +30,10 @@ class GravityRequestManager
 private:
 	void* context;
 	void* gravityNodeSocket;
-	map<void*,shared_ptr<RequestDetails> > requestMap;
-	vector<zmq_pollitem_t> pollItems;
-	string readStringMessage();
-	void sendStringMessage(void* socket, string str, int flags);
+	std::map<void*,shared_ptr<RequestDetails> > requestMap;
+	std::vector<zmq_pollitem_t> pollItems;
+	std::string readStringMessage();
+	void sendStringMessage(void* socket, std::string str, int flags);
 	void processRequest();
 	void ready();
 public:

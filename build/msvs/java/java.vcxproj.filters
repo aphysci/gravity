@@ -19,6 +19,9 @@
     <Filter Include="Source Files\generated">
       <UniqueIdentifier>{e45cdf61-e11d-421e-87e7-cdea79e63aa4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="swig">
+      <UniqueIdentifier>{c47ef473-be8a-472a-8d85-c35a9c8826ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\api\java\src\cpp\CPPGravityLogger.cpp">
@@ -59,5 +62,19 @@
     <ClInclude Include="..\..\..\src\api\java\src\cpp\gravity_wrap.h">
       <Filter>Header Files\generated</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\api\java\src\swig\gravitynode.i">
+      <Filter>swig</Filter>
+    </None>
+    <None Include="..\..\..\src\api\java\src\swig\logger.i">
+      <Filter>swig</Filter>
+    </None>
+    <None Include="..\..\..\src\api\java\src\swig\modulecode.i">
+      <Filter>swig</Filter>
+    </None>
+    <None Include="..\..\..\src\api\java\src\swig\gravity.i">
+      <Filter>swig</Filter>
+    </None>
   </ItemGroup>
 </Project>

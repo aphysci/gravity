@@ -8,7 +8,7 @@ using namespace gravity;
 CPPGravityRequestor::~CPPGravityRequestor()
 {}
 
-void CPPGravityRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
+void CPPGravityRequestor::requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response)
 {
     unsigned char* array = new unsigned char[response.getSize()];
     response.serializeToArray(array);

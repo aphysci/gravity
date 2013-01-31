@@ -7,14 +7,24 @@
 #include <sstream>
 #include <string>
 
+#ifdef GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wparentheses"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
+#elif defined(_MSC_VER)
+#pragma warning(push, 1)
+#endif
+
 #include <ezOptionParser.hpp>
+
+#ifdef GCC
 #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 using namespace std;
 
@@ -354,7 +364,7 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
             gravity::Log::trace("Sleeping for %d", (currentdb_timestep - start_time) - (current_time - clock_start_time));
 
             if((currentdb_timestep - start_time) > (current_time - clock_start_time))
-            	gravity::sleep(((currentdb_timestep - start_time) - (current_time - clock_start_time))/1000);
+            	gravity::sleep((int)((currentdb_timestep - start_time) - (current_time - clock_start_time))/1000);
 
             gravity::Log::debug("Publishing %s", gdp.getDataProductID().c_str());
             gravity::Log::trace(" with data size %d", gdp.getDataSize());

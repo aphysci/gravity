@@ -10,11 +10,10 @@
 
 #include "GravityDataProduct.h"
 
-using namespace std;
-using namespace std::tr1;
-
 namespace gravity
 {
+
+using namespace std::tr1;
 
 /**
  * Interface specification for an object that will respond to subscriptions

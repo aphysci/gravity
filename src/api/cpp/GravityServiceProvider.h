@@ -10,8 +10,6 @@
 
 #include "GravityDataProduct.h"
 
-using namespace std;
-
 namespace gravity
 {
 

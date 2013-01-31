@@ -19,7 +19,6 @@
 namespace gravity
 {
 
-using namespace std;
 using namespace std::tr1;
 
 class GravityNode;
@@ -41,7 +40,7 @@ public:
      * Constructor
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
      */
-    GRAVITY_API GravityDataProduct(string dataProductID);
+    GRAVITY_API GravityDataProduct(std::string dataProductID);
 
     /**
      * Constructor that deserializes this GravityDataProduct from array of bytes
@@ -66,19 +65,19 @@ public:
      * Method to return the data product ID for this data
      * \return data product ID
      */
-    GRAVITY_API string getDataProductID() const;
+    GRAVITY_API std::string getDataProductID() const;
 
     /**
      * Setter for the specification of software version information
      * \param softwareVersion string specifying the version number
      */
-    GRAVITY_API void setSoftwareVersion(string softwareVersion);
+    GRAVITY_API void setSoftwareVersion(std::string softwareVersion);
 
     /**
      * Getter for the software version specified on this data product
      * \return the software version number associated with this data product
      */
-    GRAVITY_API string getSoftwareVersion() const;
+    GRAVITY_API std::string getSoftwareVersion() const;
 
     /**
      * Set the application-specific data for this data product
