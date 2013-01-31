@@ -14,10 +14,10 @@ bool gotAsyncMessage = false;
 class MultiplicationRequestor : public GravityRequestor
 {
 public:
-	virtual void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
+	virtual void requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response);
 };
 
-void MultiplicationRequestor::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
+void MultiplicationRequestor::requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response)
 {
 	//Parse the message into a protobuf.  
 	MultiplicationResultPB result;
