@@ -27,9 +27,9 @@ echo.
 ::echo 4 - Debug VS2012 64-bit
 echo 1 - Release VS2010 32-bit
 echo 2 - Debug VS2010 32-bit
-echo 3 - Release VS2010 64-bit
-echo 4 - Debug VS2010 64-bit
-echo 5 - Gravity Components (VS2010 32-bit executables)
+::echo 3 - Release VS2010 64-bit
+::echo 4 - Debug VS2010 64-bit
+echo 3 - Gravity Components (VS2010 32-bit executables)
 ::echo 6 - Java 32R
 ::echo 7 - Java 32D
 ::echo 8 - Java 64R
@@ -38,17 +38,17 @@ echo Q - Quit
 
 echo Build Selection:	
 ::choice /c:123456789Q>nul
-choice /c:12345Q>nul
+choice /c:123Q>nul
 
 ::if errorlevel 10 goto done
 ::if errorlevel 9 goto Java64D
 ::if errorlevel 8 goto Java64R
 ::if errorlevel 7 goto Java32D
 ::if errorlevel 6 goto Java32R
-if errorlevel 6 goto done
-if errorlevel 5 goto GravityComponents
-if errorlevel 4 goto VS201064D
-if errorlevel 3 goto VS201064R
+if errorlevel 4 goto done
+if errorlevel 3 goto GravityComponents
+::if errorlevel 4 goto VS201064D
+::if errorlevel 3 goto VS201064R
 if errorlevel 2 goto VS201032D
 if errorlevel 1 goto VS201032R
 ::if errorlevel 4 goto VS201264D
