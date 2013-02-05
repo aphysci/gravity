@@ -54,7 +54,7 @@ int main()
 						"Multiplication", 
 						//Assign a transport type to the socket (almost always tcp, unless you are only 
 						//using the gravity data product between two processes on the same computer).  
-						"tcp", 
+						GravityTransportTypes::TCP, 
 						//Give an instance of the multiplication service class to be called when a request is made for multiplication.  
 						msp);
 

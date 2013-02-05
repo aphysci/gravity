@@ -26,7 +26,7 @@ int main()
 							dataProductID,
 							//Assign a transport type to the socket (almost always tcp, unless you are only 
 							//using the gravity data product between two processes on the same computer).  							
-							"tcp");
+							GravityTransportTypes::TCP);
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::fatal("Could not register data product with id %s, return code was %d", dataProductID.c_str(), ret);

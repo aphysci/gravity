@@ -363,9 +363,10 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
 }
 
-GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string transportType)
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType)
 {
     static Semaphore lock;
+    std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
     if (publishMap.count(dataProductID) > 0)
@@ -375,13 +376,34 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
     }
 
     string endpoint;
-    if(transportType == "tcp")
-    	endpoint = getIP();
-    else if (transportType == "ipc")
+    if(transportType == GravityTransportTypes::TCP)
+    {
+        transportType_str = "tcp";
+    	  endpoint = getIP();
+    }
+#ifndef WIN32
+    else if (transportType == GravityTransportTypes::IPC)
+    {
+        transportType_str = "ipc";
         endpoint = "/tmp/" + dataProductID;
-    else
-    	endpoint = dataProductID;
-
+    }
+#endif
+    else if(transportType == GravityTransportTypes::INPROC)
+    {
+        transportType_str = "inproc";
+    	  endpoint = dataProductID;
+    }
+    else if(transportType == GravityTransportTypes::PGM)
+    {
+        transportType_str = "pgm";
+    	  endpoint = dataProductID;
+    }
+    else if(transportType == GravityTransportTypes::EPGM)
+    {
+        transportType_str = "epgm";
+    	  endpoint = dataProductID;
+    }
+    
     // we can't allow multiple threads to make request calls to the pub manager at the same time
     // because the requests will step on each other.
     lock.Lock();
@@ -390,8 +412,8 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, string 
     // register url in response so that we can register with the ServiceDirectory.
 	sendStringMessage(publishManagerRequestSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerRequestSocket, dataProductID, ZMQ_SNDMORE);
-    sendStringMessage(publishManagerRequestSocket, transportType, ZMQ_SNDMORE);
-    if(transportType == "tcp")
+    sendStringMessage(publishManagerRequestSocket, transportType_str, ZMQ_SNDMORE);
+    if(transportType == GravityTransportTypes::TCP)
     {
         int minPort = getIntParam("MinPort", MIN_PORT);
         int maxPort = getIntParam("MaxPort", MAX_PORT);
@@ -804,10 +826,10 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	return response;
 }
 
-GravityReturnCode GravityNode::registerService(string serviceID, string transportType,
+GravityReturnCode GravityNode::registerService(string serviceID, GravityTransportType transportType,
         const GravityServiceProvider& server)
 {
-
+    string transportType_str;
     if (serviceMap.count(serviceID) > 0)
     {
         Log::warning("attempt to register duplicate service ID: %s", serviceID.c_str());
@@ -815,21 +837,42 @@ GravityReturnCode GravityNode::registerService(string serviceID, string transpor
     }
 
 
-	// Build the connection string
+    // Build the connection string
     string endpoint;
-    if(transportType == "tcp")
+    if(transportType == GravityTransportTypes::TCP)
+    {
+        transportType_str = "tcp";
         endpoint = getIP();
-    else if (transportType == "ipc")
+    }
+#ifndef WIN32
+    else if (transportType == GravityTransportTypes::IPC)
+    {
+        transportType_str = "ipc";
         endpoint = "/tmp/" + serviceID;
-    else
-        endpoint = serviceID;
+    }
+#endif
+    else if(transportType == GravityTransportTypes::INPROC)
+    {
+        transportType_str ="inproc";
+    	  endpoint = serviceID;
+    }
+    else if(transportType == GravityTransportTypes::PGM)
+    {
+        transportType_str ="pgm";
+    	  endpoint = serviceID;
+    }
+    else if(transportType == GravityTransportTypes::EPGM)
+    {
+        transportType_str ="epgm";
+    	  endpoint = serviceID;
+    }
 
 	// Send subscription details
 	sendStringMessage(serviceManagerSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(serviceManagerSocket, serviceID, ZMQ_SNDMORE);
-	sendStringMessage(serviceManagerSocket, transportType, ZMQ_SNDMORE);
+	sendStringMessage(serviceManagerSocket, transportType_str, ZMQ_SNDMORE);
 
-    if(transportType == "tcp")
+    if(transportType == GravityTransportTypes::TCP)
     {
         int minPort = getIntParam("MinPort", MIN_PORT);
         int maxPort = getIntParam("MaxPort", MAX_PORT);
@@ -1003,7 +1046,7 @@ GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
-	this->registerDataProduct(componentID, "tcp");
+	this->registerDataProduct(componentID, GravityTransportTypes::TCP);
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;

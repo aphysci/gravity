@@ -37,7 +37,7 @@ int main(void)
 
 static void* registerDataProduct(void* node)
 {
-    ((GravityNode*)node)->registerDataProduct(REGISTERED_PUBLISHERS, "tcp");
+    ((GravityNode*)node)->registerDataProduct(REGISTERED_PUBLISHERS, GravityTransportTypes::TCP);
     return NULL;
 }
 

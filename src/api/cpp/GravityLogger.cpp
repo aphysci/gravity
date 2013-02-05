@@ -140,7 +140,7 @@ std::string GravityLogger::log_dataProductID = "GRAVITY_LOGGER";
 GravityLogger::GravityLogger(GravityNode* gn)
 {
     gravity_node = gn;
-    if(gravity_node->registerDataProduct(log_dataProductID, "tcp") != GravityReturnCodes::SUCCESS)
+    if(gravity_node->registerDataProduct(log_dataProductID, GravityTransportTypes::TCP) != GravityReturnCodes::SUCCESS)
         cerr << "[Log::init] Could not register Logger" << endl;
 }
 

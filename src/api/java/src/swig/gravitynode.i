@@ -31,16 +31,16 @@ namespace gravity {
 
 	class CPPGravityServiceProvider {
 	public:
-		virtual ~CPPGravityServiceProvider();
-		virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
+	   virtual ~CPPGravityServiceProvider();
+	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener
 	{
 	public:
-	    virtual ~CPPGravityHeartbeatListener();
-    	virtual void MissedHeartbeat(const std::string& dataProductID, int microsecond_to_last_heartbeat, const std::string& status);
-    	virtual void ReceivedHeartbeat(const std::string& dataProductID, const std::string& status);
+      virtual ~CPPGravityHeartbeatListener();
+      virtual void MissedHeartbeat(const std::string& dataProductID, int microsecond_to_last_heartbeat, const std::string& status);
+      virtual void ReceivedHeartbeat(const std::string& dataProductID, const std::string& status);
 	};
 
     enum GravityReturnCode {
@@ -59,25 +59,37 @@ namespace gravity {
         NO_PORTS_AVAILABLE = -12
     };
 
+    enum GravityTransportType {
+        TCP = 0,
+        INPROC = 1,
+        PGM = 2,
+        EPGM= 3,
+#ifndef WIN32
+        IPC = 4
+#endif
+    };
+
+
+
 class GravityNode {
 public:
-	GravityNode();
-	~GravityNode();
+    GravityNode();
+    ~GravityNode();
     GravityReturnCode init(std::string);
     void waitForExit();
-    GravityReturnCode registerDataProduct(const std::string& dataProductID, const std::string &transportType);
+    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
     
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
     GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
     
-	GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
+    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
 	
-	GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct, 
+    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct, 
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
     shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
             
-    GravityReturnCode registerService(const std::string& serviceID, const std::string& transportType, 
+    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType, 
     		const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
     

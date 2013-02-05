@@ -307,14 +307,24 @@ void GravityPlayback::start(uint64_t start_time, uint64_t end_time, string table
     {
         string transport = transports[i];
 
-        if(transport != "tcp" && transport != "icp")
+        if(transport != "tcp" && transport != "ipc")
         {
         	gravity::Log::warning("Invalid Transport type '%s' for Stream '%s'", transport.c_str(), dps[i].c_str());
             continue;
         }
 
         gravity::Log::message("Registering %s", dps[i].c_str());
-        grav_node->registerDataProduct(dps[i], transport);
+        
+        if(transport=="tcp")
+        {
+           grav_node->registerDataProduct(dps[i], GravityTransportTypes::TCP);        
+        }
+#ifndef WIN32        
+        else if(transport == "ipc")
+        {
+           grav_node->registerDataProduct(dps[i], GravityTransportTypes::IPC);
+        }
+#endif
 
 //        string dp = sql.escape(dps[i].c_str()); //Just in case :?
         string dp = dps[i].c_str();

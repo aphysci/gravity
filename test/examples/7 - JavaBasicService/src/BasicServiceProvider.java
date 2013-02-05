@@ -3,6 +3,7 @@ import com.aphysci.gravity.GravityServiceProvider;
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.Log;
 import com.aphysci.gravity.swig.Log.LogLevel;
+import com.aphysci.gravity.swig.GravityTransportType;
 
 class MultiplicationServiceProvider implements GravityServiceProvider
 {
@@ -57,7 +58,7 @@ public class BasicServiceProvider {
 							"Multiplication", 
 							//Assign a transport type to the socket (almost always tcp, unless you are only 
 							//using the gravity data product between two processes on the same computer).  
-							"tcp", 
+							GravityTransportType.TCP, 
 							//Give an instance of the multiplication service class to be called when a request is made for multiplication.  
 							msp);
 

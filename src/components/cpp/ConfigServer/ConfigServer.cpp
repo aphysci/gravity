@@ -98,7 +98,7 @@ int main(int argc, const char** argv)
 	GravityNode gn;
 	gn.init("ConfigServer");
 
-	gn.registerService("ConfigService", "tcp", server);
+	gn.registerService("ConfigService", GravityTransportTypes::TCP, server);
 
 	gn.waitForExit();
 }

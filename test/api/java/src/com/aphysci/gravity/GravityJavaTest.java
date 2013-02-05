@@ -6,6 +6,7 @@ import java.util.List;
 import com.aphysci.gravity.protobuf.JavaTestContainer.JavaTestPB;
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
+import com.aphysci.gravity.swig.GravityTransportType;
 import com.aphysci.gravity.swig.Log;
 
 public class GravityJavaTest {
@@ -23,7 +24,7 @@ public class GravityJavaTest {
         GravityReturnCode ret = node.init("TestNode");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerDataProduct("JavaGDP", "tcp");
+        ret = node.registerDataProduct("JavaGDP", GravityTransportType.TCP);
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         Subscriber s = new Subscriber();
@@ -73,7 +74,7 @@ public class GravityJavaTest {
         testAssert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
         
         GravityServiceProvider gsp = new ServiceProvider();
-        ret = node.registerService("JavaService", "tcp", gsp);
+        ret = node.registerService("JavaService", GravityTransportType.TCP, gsp);
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityRequestor gr = new Requestor();
@@ -90,7 +91,7 @@ public class GravityJavaTest {
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
         
-        ret = node.registerService("SyncJavaService", "tcp", new SyncServiceProvider());
+        ret = node.registerService("SyncJavaService", GravityTransportType.TCP, new SyncServiceProvider());
         testAssert(ret == GravityReturnCode.SUCCESS);
         
         GravityDataProduct syncRequest = new GravityDataProduct("SyncJavaRequest");

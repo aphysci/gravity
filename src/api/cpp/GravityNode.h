@@ -54,6 +54,23 @@ namespace GravityReturnCodes
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
 
+
+namespace GravityTransportTypes
+{
+   enum Types
+   {
+      TCP = 0,
+      INPROC = 1,
+      PGM = 2,
+      EPGM= 3,
+#ifndef WIN32
+      IPC = 4
+#endif
+   };
+}
+typedef GravityTransportTypes::Types GravityTransportType;
+
+
 typedef struct NetworkNode
 {
     std::string ipAddress;
@@ -206,7 +223,7 @@ public:
      * \param transport type (e.g. 'tcp', 'ipc')
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, std::string transportType);
+    GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
@@ -218,7 +235,7 @@ public:
      * \param server object implementing the GravityServiceProvider interface that will be notified of requests
      * \param transport type for requests (e.g. 'tcp', 'ipc')
      */
-    GRAVITY_API GravityReturnCode registerService(std::string serviceID, std::string transportType,
+    GRAVITY_API GravityReturnCode registerService(std::string serviceID, GravityTransportType transportType,
             const GravityServiceProvider& server);
     /**
      * Unregister as a service provider with the Gravity Service Directory

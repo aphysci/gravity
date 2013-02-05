@@ -19,7 +19,7 @@ int main()
 							"BasicCounterDataProduct", 
 							//Assign a transport type to the socket (almost always tcp, unless you are only 
 							//using the gravity data product between two processes on the same computer).  
-							"tcp");
+							GravityTransportTypes::TCP);
 	
 	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.  
 	int count = 1;
