@@ -16,6 +16,7 @@ SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
 	OS_EXE_EXT=.exe
+	BUILD_VARIANT_DIRECTIVE=-DWIN32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
@@ -42,14 +43,14 @@ all: $(PROTO_OBJ) MiscComponent1$(OS_EXE_EXT) MiscComponent2$(OS_EXE_EXT)
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -c -o $@ $< $(INCLUDES)
 
 #Compile each cpp file to a separate executable.  
 MiscComponent1$(OS_EXE_EXT):MiscComponent1.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
 MiscComponent2$(OS_EXE_EXT):MiscComponent2.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 	
 components: ServiceDirectory$(OS_EXE_EXT)
 

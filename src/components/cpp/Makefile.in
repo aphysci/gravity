@@ -18,6 +18,7 @@ SYSTEM:=$(strip $(shell uname -s))
 #WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
+	BUILD_VARIANT_DIRECTIVE=-DWIN32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -lrt
@@ -44,13 +45,13 @@ all: $(PROG_NAME)
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) -g -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
 
 %.o:%.cpp $(DEPS)
-	$(CC) -g -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
 
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
 
 clean:
 	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
