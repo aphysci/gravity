@@ -821,7 +821,10 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
+	{
+		Log::warning("service request returned error: %s", getCodeString(ret).c_str());
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+	}
 
 	return response;
 }
