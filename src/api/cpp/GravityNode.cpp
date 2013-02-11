@@ -25,6 +25,8 @@
 #include <tr1/memory>
 #endif
 
+#include "GravityMetricsUtil.h"
+#include "GravityMetricsManager.h"
 #include "GravitySubscriptionManager.h"
 #include "GravityPublishManager.h"
 #include "GravityRequestManager.h"
@@ -80,6 +82,15 @@ static void* startServiceManager(void* context)
 	return NULL;
 }
 
+static void* startMetricsManager(void* context)
+{
+    // Create and start the GravityMetricsManager
+    gravity::GravityMetricsManager metricsManager(context);
+    metricsManager.start();
+
+    return NULL;
+}
+
 static int s_interrupted = 0;
 static void (*previousHandlerAbrt)(int); //Function Pointer
 static void (*previousHandlerInt)(int); //Function Pointer
@@ -121,10 +132,19 @@ GravityNode::GravityNode()
 
     //Initialize this guy so we can know whether the heartbeat thread has started.
     hbSocket = NULL;
+
+    // Default to no metrics
+    metricsEnabled = false;
 }
 
 GravityNode::~GravityNode()
 {
+    // If metrics are enabled, we need to unregister our metrics data product
+    if (metricsEnabled)
+    {
+        unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
+    }
+
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSocket, "kill", ZMQ_DONTWAIT);
 	zmq_close(subscriptionManagerSocket);
@@ -138,6 +158,9 @@ GravityNode::~GravityNode()
 
     sendStringMessage(serviceManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(serviceManagerSocket);
+
+    sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
+    zmq_close(metricsManagerSocket);
 
     // Clean up the zmq context object
     zmq_term(context);
@@ -164,6 +187,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
     subscriptionManagerSocket = zmq_socket(context, ZMQ_PUB);
     zmq_bind(subscriptionManagerSocket, "inproc://gravity_subscription_manager");
 
+    // Setup the metrics control communication channel
+    metricsManagerSocket = zmq_socket(context, ZMQ_PUB);
+    zmq_bind(metricsManagerSocket, GRAVITY_METRICS_CONTROL);
+
     // Setup the subscription manager
     pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
 
@@ -184,12 +211,15 @@ GravityReturnCode GravityNode::init(std::string componentID)
     // Setup the service manager
     pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
 
+    // Start the metrics manager
+    pthread_create(&metricsManagerThread, NULL, startMetricsManager, context);
+
     // Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
     s_catch_signals();
 
     // wait for the manager threads to signal their readiness
     string msgText;
-    int numThreadsWaiting = 4;
+    int numThreadsWaiting = 5;
     while (numThreadsWaiting && !s_interrupted)
     {
     	// Read message
@@ -265,6 +295,30 @@ GravityReturnCode GravityNode::init(std::string componentID)
     Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
 		Log::initAndAddGravityLogger(this, net_log_level);
+
+    // Enable metrics (if configured)
+    metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
+    if (metricsEnabled)
+    {
+        // Register our metrics data product with the service directory
+        registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
+
+        // Command the GravityMetricsManager thread to start collecting metrics
+        sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
+
+        // Get collection parameters from ini file 
+        // (default to 10 second sampling, publishing once per min)
+        int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
+        int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
+
+        // Send collection details to the GravityMetricsManager
+        sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
+        sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+
+        // Finally, send our component id & ip address (to be published with metrics)
+        sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
+        sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
+    }
 
 	return ret;
 }

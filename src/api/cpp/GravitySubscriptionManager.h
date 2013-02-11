@@ -19,6 +19,7 @@
 #endif
 #include <string>
 #include "GravitySubscriber.h"
+#include "GravityMetrics.h"
 
 namespace gravity
 {
@@ -42,6 +43,7 @@ class GravitySubscriptionManager
 private:
 	void* context;
 	void* gravityNodeSocket;
+    void* gravityMetricsSocket;
 	std::map<std::string, std::map<std::string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
     std::map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
     std::map<std::string, zmq_pollitem_t> publisherUpdateMap;
@@ -53,6 +55,10 @@ private:
 	int readSubscription(void *socket, std::string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void ready();
+
+    bool metricsEnabled;
+    GravityMetrics metricsData;
+    void collectMetrics(std::vector<shared_ptr<GravityDataProduct> > dataProducts);
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

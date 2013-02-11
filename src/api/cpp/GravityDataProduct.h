@@ -31,6 +31,7 @@ class GravityDataProduct
 private:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
+    friend class GravityMetricsManager;
     friend void* Heartbeat(void*);
     //In Microseconds
     void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); } //Yeah, I'm telling the compiler this is const.

@@ -31,6 +31,8 @@ GRAVITY_API string readStringMessage(void *socket);
 GRAVITY_API void sendStringMessage(void* socket, string str, int flags);
 GRAVITY_API int readIntMessage(void *socket);
 GRAVITY_API void sendIntMessage(void* socket, int val, int flags);
+GRAVITY_API uint64_t readUint64Message(void* socket);
+GRAVITY_API void sendUint64Message(void* socket, uint64_t val, int flags);
 GRAVITY_API void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags);
 GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort);
 

@@ -9,6 +9,7 @@
 #define GRAVITYPUBLISHMANAGER_H_
 
 #include "Utility.h"
+#include "GravityMetrics.h"
 
 #ifdef __GNUC__
 #include <tr1/memory>
@@ -54,6 +55,8 @@ class GravityPublishManager
 {
 private:
 	void* context;
+    void* gravityMetricsSocket;
+    void* metricsPublishSocket;
 	void* gravityNodeResponseSocket;
     void* gravityNodeSubscribeSocket;
     map<void*,shared_ptr<PublishDetails> > publishMapBySocket;
@@ -63,8 +66,11 @@ private:
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();
-	void publish();
+	void publish(void* requestSocket);
     void publish(void* socket, const string &filterText, const void *data, int size);
+
+    bool metricsEnabled;
+    GravityMetrics metricsData;
 public:
 	/**
 	 * Constructor GravityPublishManager

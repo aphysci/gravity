@@ -8,10 +8,9 @@
 #include "GravitySubscriptionManager.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "GravityMetricsUtil.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 
-#include <iostream>
-#include <vector>
 #include <memory>
 #include <algorithm>
 
@@ -31,6 +30,9 @@ GravitySubscriptionManager::GravitySubscriptionManager(void* context)
 	// This is the zmq context that is shared with the GravityNode. Must use
 	// a shared context to establish an inproc socket.
 	this->context = context;
+
+    // Default to no metrics
+    metricsEnabled = false;
 }
 
 GravitySubscriptionManager::~GravitySubscriptionManager() {}
@@ -45,13 +47,25 @@ void GravitySubscriptionManager::start()
 	zmq_connect(gravityNodeSocket, "inproc://gravity_subscription_manager");
 	zmq_setsockopt(gravityNodeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-	// Always have at least the gravity node to poll
+    // Setup socket to reponsd to metrics requests
+    gravityMetricsSocket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(gravityMetricsSocket, GRAVITY_SUB_METRICS_REQ);
+
+	// Poll the gravity node
 	zmq_pollitem_t pollItem;
 	pollItem.socket = gravityNodeSocket;
 	pollItem.events = ZMQ_POLLIN;
 	pollItem.fd = 0;
 	pollItem.revents = 0;
 	pollItems.push_back(pollItem);
+
+    // Poll the metrics request socket
+    zmq_pollitem_t metricsRequestPollItem;
+    metricsRequestPollItem.socket = gravityMetricsSocket;
+    metricsRequestPollItem.events = ZMQ_POLLIN;
+    metricsRequestPollItem.fd = 0;
+    metricsRequestPollItem.revents = 0;
+    pollItems.push_back(metricsRequestPollItem);
 
 	ready();
 
@@ -92,8 +106,48 @@ void GravitySubscriptionManager::start()
 			}
 		}
 
+        if (pollItems[1].revents & ZMQ_POLLIN)
+        {
+            // Received a command from the metrics control
+            void* socket = pollItems[1].socket;
+            string command = readStringMessage(socket);
+
+            if (command == "MetricsEnable")
+            {
+                // Clear any metrics data
+                metricsData.reset();
+
+                // Enable metrics
+                metricsEnabled = true;
+
+                // Acknowledge message
+                sendStringMessage(socket, "ACK", ZMQ_DONTWAIT);
+            }
+            else if (command == "MetricsDisable")
+            {
+                // Disable metrics
+                metricsEnabled = false;
+
+                // Acknowledge message
+                sendStringMessage(socket, "ACK", ZMQ_DONTWAIT);
+            }
+            else if (command == "GetMetrics")
+            {
+                // The GravityMetricsManager has request our metrics data
+                
+                // Mark the collection as completed
+                metricsData.done();
+
+                // Respond with metrics
+                metricsData.sendAsMessage(socket);
+
+                // Clear metrics data
+                metricsData.reset();
+            }
+        }
+
 		// Check for subscription updates
-		for (int index = 1; index < pollItems.size(); index++)
+		for (int index = 2; index < pollItems.size(); index++)
 		{
 	        Log::trace("about to check for new poll items, index = %d, size = %d", index, pollItems.size());
 			if (pollItems[index].revents && ZMQ_POLLIN)
@@ -133,6 +187,11 @@ void GravitySubscriptionManager::start()
 						{
 							(*iter)->subscriptionFilled(dataProducts);
 						}
+
+                        if (metricsEnabled)
+                        {
+                            collectMetrics(dataProducts);
+                        }
 					}
                 }
 			    else // it's a publisher update list from the SD
@@ -244,6 +303,7 @@ void GravitySubscriptionManager::start()
 	subscriptionSocketMap.clear();
 	publisherUpdateMap.clear();
 	zmq_close(gravityNodeSocket);
+    zmq_close(gravityMetricsSocket);
 }
 
 void GravitySubscriptionManager::ready()
@@ -402,6 +462,9 @@ void GravitySubscriptionManager::removeSubscription()
 	// Read data product id
 	string dataProductID = readStringMessage(gravityNodeSocket);
 
+    // Remove this data product from our metrics
+    metricsData.remove(dataProductID);
+
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
 
@@ -468,6 +531,18 @@ void GravitySubscriptionManager::removeSubscription()
             }
 		}
 	}
+}
+
+void GravitySubscriptionManager::collectMetrics(vector<shared_ptr<GravityDataProduct> > dataProducts)
+{
+    // Iterate over all the data products
+    vector<shared_ptr<GravityDataProduct> >::iterator gdpIter;
+    for (gdpIter = dataProducts.begin(); gdpIter != dataProducts.end(); gdpIter++)
+    {
+        shared_ptr<GravityDataProduct> gdp = *gdpIter;
+        metricsData.incrementMessageCount(gdp->getDataProductID(), 1);
+        metricsData.incrementByteCount(gdp->getDataProductID(), gdp->getSize());
+    }
 }
 
 } /* namespace gravity */

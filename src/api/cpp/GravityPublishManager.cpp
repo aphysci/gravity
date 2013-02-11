@@ -8,6 +8,7 @@
 #include "GravityPublishManager.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "GravityMetricsUtil.h"
 #include "zmq.h"
 #include <sstream>
 #include <algorithm>
@@ -27,6 +28,9 @@ GravityPublishManager::GravityPublishManager(void* context)
 	// This is the zmq context that is shared with the GravityNode. Must use
 	// a shared context to establish an inproc socket.
 	this->context = context;
+
+    // Default to no metrics
+    metricsEnabled = false;
 }
 
 GravityPublishManager::~GravityPublishManager() {}
@@ -45,7 +49,16 @@ void GravityPublishManager::start()
     zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_PUB_URL);
     zmq_setsockopt(gravityNodeSubscribeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-	// Always have at least the gravity node to poll
+    // Setup socket to respond to metrics requests
+    gravityMetricsSocket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(gravityMetricsSocket, GRAVITY_PUB_METRICS_REQ);
+
+    // Setup socket to listen for metrics to be published
+    metricsPublishSocket = zmq_socket(context, ZMQ_SUB);
+    zmq_connect(metricsPublishSocket, GRAVITY_METRICS_PUB);
+    zmq_setsockopt(metricsPublishSocket, ZMQ_SUBSCRIBE, NULL, 0);
+
+	// Configure polling on our sockets
 	zmq_pollitem_t pollItemResponse;
 	pollItemResponse.socket = gravityNodeResponseSocket;
 	pollItemResponse.events = ZMQ_POLLIN;
@@ -53,13 +66,28 @@ void GravityPublishManager::start()
 	pollItemResponse.revents = 0;
 	pollItems.push_back(pollItemResponse);
 
-    // Always have at least the gravity node to poll
     zmq_pollitem_t pollItemSubscribe;
     pollItemSubscribe.socket = gravityNodeSubscribeSocket;
     pollItemSubscribe.events = ZMQ_POLLIN;
     pollItemSubscribe.fd = 0;
     pollItemSubscribe.revents = 0;
     pollItems.push_back(pollItemSubscribe);
+
+    // Poll the metrics request socket
+    zmq_pollitem_t metricsRequestPollItem;
+    metricsRequestPollItem.socket = gravityMetricsSocket;
+    metricsRequestPollItem.events = ZMQ_POLLIN;
+    metricsRequestPollItem.fd = 0;
+    metricsRequestPollItem.revents = 0;
+    pollItems.push_back(metricsRequestPollItem);
+
+    // Poll the socket for metrics data for publishing
+    zmq_pollitem_t metricsPollItem;
+    metricsPollItem.socket = metricsPublishSocket;
+    metricsPollItem.events = ZMQ_POLLIN;
+    metricsPollItem.fd = 0;
+    metricsPollItem.revents = 0;
+    pollItems.push_back(metricsPollItem);
 
 	ready();
 
@@ -102,7 +130,7 @@ void GravityPublishManager::start()
 			}
 			else if (command == "publish")
 			{
-				publish();
+				publish(pollItems[1].socket);
 			}
 			else if (command == "kill")
 			{
@@ -114,8 +142,58 @@ void GravityPublishManager::start()
 			}
 		}
 
+        if (pollItems[2].revents & ZMQ_POLLIN)
+        {
+            // Received a command from the metrics control
+            void* socket = pollItems[2].socket;
+            string command = readStringMessage(socket);
+
+            if (command == "MetricsEnable")
+            {
+                // Clear any metrics data
+                metricsData.reset();
+
+                // Enable metrics
+                metricsEnabled = true;
+
+                // Acknowledge message
+                sendStringMessage(socket, "ACK", ZMQ_DONTWAIT);
+            }
+            else if (command == "MetricsDisable")
+            {
+                // Disable metrics
+                metricsEnabled = false;
+
+                // Acknowledge message
+                sendStringMessage(socket, "ACK", ZMQ_DONTWAIT);
+            }
+            else if (command == "GetMetrics")
+            {
+                // The GravityMetricsManager has request our metrics data
+                
+                // Mark the collection as completed
+                metricsData.done();
+
+                // Respond with metrics
+                metricsData.sendAsMessage(socket);
+
+                // Clear metrics data
+                metricsData.reset();
+            }
+        }
+
+        if (pollItems[3].revents & ZMQ_POLLIN)
+        {
+            string command = readStringMessage(pollItems[3].socket);
+            if (command == "publish")
+            {
+                // This is an instruction to publish the attached metrics data
+                publish(pollItems[3].socket);
+            }
+        }
+
 		// Check for publish updates
-		for (unsigned int i = 2; i < pollItems.size(); i++)
+		for (unsigned int i = 4; i < pollItems.size(); i++)
 		{
 			if (pollItems[i].revents && ZMQ_POLLIN)
 			{
@@ -162,6 +240,8 @@ void GravityPublishManager::start()
 
     zmq_close(gravityNodeResponseSocket);
 	zmq_close(gravityNodeSubscribeSocket);
+    zmq_close(gravityMetricsSocket);
+    zmq_close(metricsPublishSocket);
 }
 
 void GravityPublishManager::ready()
@@ -262,6 +342,9 @@ void GravityPublishManager::unregisterDataProduct()
 	// Read the data product id for this request
 	string dataProductID = readStringMessage(gravityNodeSubscribeSocket);
 
+    // Remove this data product from our metrics data
+    metricsData.remove(dataProductID);
+
 	// If data product ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
 	if (publishMapByID.count(dataProductID))
 	{
@@ -293,15 +376,15 @@ void GravityPublishManager::unregisterDataProduct()
 	}
 }
 
-void GravityPublishManager::publish()
+void GravityPublishManager::publish(void* requestSocket)
 {
     // Read the filter text
-    string filterText = readStringMessage(gravityNodeSubscribeSocket);
+    string filterText = readStringMessage(requestSocket);
 
     // Read the data product
     zmq_msg_t msg;
     zmq_msg_init(&msg);
-    zmq_recvmsg(gravityNodeSubscribeSocket, &msg, -1);
+    zmq_recvmsg(requestSocket, &msg, -1);
     GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
     zmq_msg_close(&msg);
 
@@ -330,6 +413,12 @@ void GravityPublishManager::publish()
     publishDetails->lastCachedValues[filterText] = val;
 
     publish(publishDetails->socket, filterText, bytes, size);
+
+    if (metricsEnabled)
+    {
+        metricsData.incrementMessageCount(dataProduct.getDataProductID(), 1);
+        metricsData.incrementByteCount(dataProduct.getDataProductID(), dataProduct.getSize());
+    }
 }
 
 void GravityPublishManager::publish(void* socket, const string &filterText, const void *bytes, int size)

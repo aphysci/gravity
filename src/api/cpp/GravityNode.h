@@ -92,10 +92,13 @@ private:
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
 
+    bool metricsEnabled;
+
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
     pthread_t requestManagerThread;
     pthread_t serviceManagerThread;
+    pthread_t metricsManagerThread;
 
     void* context;
     void* subscriptionManagerSocket;
@@ -103,6 +106,7 @@ private:
     void *publishManagerPublishSocket;
     void *serviceManagerSocket;
     void* requestManagerSocket;
+    void* metricsManagerSocket;
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     std::string getIP(); ///< Utility method to get the host machine's IP address
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);

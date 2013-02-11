@@ -57,9 +57,31 @@ GRAVITY_API int readIntMessage(void *socket)
     zmq_msg_t msg;
 
     zmq_msg_init(&msg);
-    zmq_recvmsg(socket, &msg, -1);
+    zmq_recvmsg(socket, &msg, 0);
     int size = zmq_msg_size(&msg);
     int val;
+    memcpy(&val, zmq_msg_data(&msg), size);
+    zmq_msg_close(&msg);
+
+    return val;
+}
+
+GRAVITY_API void sendUint64Message(void* socket, uint64_t val, int flags)
+{
+    zmq_msg_t msg;
+    zmq_msg_init_size(&msg, sizeof(uint64_t));
+    memcpy(zmq_msg_data(&msg), &val, sizeof(uint64_t));
+    zmq_sendmsg(socket, &msg, flags);
+    zmq_msg_close(&msg);
+}
+
+GRAVITY_API uint64_t readUint64Message(void* socket)
+{
+    zmq_msg_t msg;
+    zmq_msg_init(&msg);
+    zmq_recvmsg(socket, &msg, 0);
+    int size = zmq_msg_size(&msg);
+    uint64_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
 
