@@ -1,0 +1,30 @@
+option optimize_for = SPEED;
+
+option java_outer_classname = "GravityMetricsDataContainer";
+option java_package = "com.aphysci.gravity.protobuf";
+
+package gravity;
+
+message GravityMetricsPB
+{
+	optional string dataProductID = 1;
+	enum MessageType
+	{
+		PUBLICATION = 0;
+		SUBSCRIPTION = 1;
+		REQUEST = 2;
+		RESPONSE = 3;
+	}
+	optional MessageType messageType = 2;
+	repeated uint64 startTime = 3 [packed=true];
+	repeated uint64 endTime = 4 [packed=true];
+	repeated uint32 numBytes = 5 [packed=true];
+	repeated uint32 numMessages = 6 [packed=true];
+}
+
+message GravityMetricsDataPB
+{
+	optional string componentID = 1;
+	optional string ipAddress = 2;
+	repeated GravityMetricsPB metrics = 3;
+}
