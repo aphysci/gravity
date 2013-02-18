@@ -284,7 +284,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
 
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
                 addPublishers(iter->first, update);
-                gn.publish(update, dataProductID);
+                gn.publish(update, iter->first);
             }
         }
     }
