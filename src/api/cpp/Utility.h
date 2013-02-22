@@ -29,10 +29,7 @@ GRAVITY_API double StringToDouble(std::string str, int default_value);
 
 GRAVITY_API bool IsValidFilename(const std::string filename);
 
-/**
- * Get the time in microseconds from the Unix epoch.
- */
-GRAVITY_API uint64_t getCurrentTime();
+GRAVITY_API uint64_t getCurrentTime();  ///< Utility method to get the current system time in epoch microseconds
 
 GRAVITY_API unsigned int sleep(int milliseconds);
 GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
