@@ -242,6 +242,7 @@ md include
 copy src\api\cpp\*.h include
 md include\protobuf
 copy src\api\cpp\protobuf\GravityDataProductPB.pb.h include\protobuf
+copy src\api\cpp\protobuf\GravityMetricsDataPB.pb.h include\protobuf
 xcopy /s /y ThirdParty\protobuf-2.4.1\src\*.h include 
 xcopy /s /y ThirdParty\pthreads\include\*.h include 
 md include\MATLAB

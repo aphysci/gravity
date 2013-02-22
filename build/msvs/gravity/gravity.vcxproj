@@ -399,6 +399,9 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     <ClCompile Include="..\..\..\src\api\cpp\GravityDataProduct.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityHeartbeat.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityLogger.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\GravityMetrics.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\GravityMetricsManager.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\GravityMetricsUtil.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityNode.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityPublishManager.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityRequestManager.cpp" />
@@ -414,6 +417,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ConfigRequest.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.cc" />
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
@@ -427,6 +431,9 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeat.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeatListener.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityLogger.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\GravityMetrics.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\GravityMetricsManager.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\GravityMetricsUtil.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityNode.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityRequestManager.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityRequestor.h" />
@@ -441,6 +448,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ConfigRequest.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.h" />
@@ -553,6 +561,27 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</LinkObjects>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">../../../src/api/cpp/protobuf/%(Filename).pb.h;../../../src/api/cpp/protobuf/%(Filename).pb.cc;%(Outputs)</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</LinkObjects>
+    </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\GravityLogMessagePB.proto">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BinDir)\protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
@@ -637,6 +666,9 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</LinkObjects>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
