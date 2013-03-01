@@ -23,6 +23,7 @@
 
 #define PUB_MGR_REQ_URL "inproc://gravity_publish_manager_request"
 #define PUB_MGR_PUB_URL "inproc://gravity_publish_manager_publish"
+#define PUB_MGR_HB_URL  "inproc://gravity_heartbeat_publish"
 
 namespace gravity
 {

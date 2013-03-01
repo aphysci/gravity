@@ -74,7 +74,8 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 	
 				if(!gotHeartbeat)
 				{
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, getCurrentTime() - mqe.lastHeartbeatTime, "Missed");
+				    int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
+					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, "Missed");
 				}
 				else
 				{
@@ -151,29 +152,36 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     return NULL;
 }
 
+void *heartbeatSocket;
+void bindHeartbeatSocket(void* context)
+{
+    heartbeatSocket = zmq_socket(context, ZMQ_PUB);
+    zmq_bind(heartbeatSocket, PUB_MGR_HB_URL);
+}
+
+void closeHeartbeatSocket()
+{
+    zmq_close(heartbeatSocket);
+}
+
 void* Heartbeat(void* thread_context)
 {
 	HBParams* params = (HBParams*) thread_context;	
 	GravityDataProduct gdp(params->componentID);
 	gdp.setData((void*)"Good", 5);
 
-	// Connect to PublishManager
-	void* pubManagerSocket = zmq_socket(params->zmq_context, ZMQ_REQ);
-	zmq_connect(pubManagerSocket, PUB_MGR_PUB_URL);
-
 	while(true)
 	{
 		// Publish heartbeat (via the GravityPublishManager)
 		gdp.setTimestamp(getCurrentTime());
 		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
-		sendStringMessage(pubManagerSocket, "publish", ZMQ_SNDMORE);
-		sendStringMessage(pubManagerSocket, "", ZMQ_SNDMORE);
+		sendStringMessage(heartbeatSocket, "publish", ZMQ_SNDMORE);
+		sendStringMessage(heartbeatSocket, "", ZMQ_SNDMORE);
 		zmq_msg_t msg;
 		zmq_msg_init_size(&msg, gdp.getSize());
 		gdp.serializeToArray(zmq_msg_data(&msg));
-		zmq_sendmsg(pubManagerSocket, &msg, ZMQ_DONTWAIT);
+		zmq_sendmsg(heartbeatSocket, &msg, ZMQ_DONTWAIT);
 		zmq_msg_close(&msg);
-		string status = readStringMessage(pubManagerSocket);
 #ifdef WIN32
 		Sleep(params->interval_in_microseconds/1000);
 #else

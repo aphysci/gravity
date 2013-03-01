@@ -116,9 +116,13 @@ void s_catch_signals()
 namespace gravity
 {
 
+//Forward Declarations that we don't want publicly visible (Need to be in gravity namespace).
 bool IsValidFilename(const std::string filename);
 int StringToInt(std::string str, int default_value);
 double StringToDouble(std::string str, double default_value);
+void bindHeartbeatSocket(void* context);
+void closeHeartbeatSocket();
+void* Heartbeat(void* thread_context);
 
 using namespace std;
 using namespace std::tr1;
@@ -144,6 +148,8 @@ GravityNode::~GravityNode()
     {
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
+
+    closeHeartbeatSocket();
 
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSocket, "kill", ZMQ_DONTWAIT);
@@ -182,6 +188,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     void* initSocket = zmq_socket(context, ZMQ_REP);
     zmq_bind(initSocket, "inproc://gravity_init");
+    bindHeartbeatSocket(context);
 
     // Setup up communication channel to subscription manager
     subscriptionManagerSocket = zmq_socket(context, ZMQ_PUB);
@@ -1095,7 +1102,6 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-void* Heartbeat(void* thread_context); //Forward Declaration (Needs to be in Gravity namespace).  
 GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)

@@ -47,6 +47,7 @@ void GravityPublishManager::start()
 
 	gravityNodeSubscribeSocket = zmq_socket(context, ZMQ_SUB);
     zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_PUB_URL);
+    zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_HB_URL);
     zmq_setsockopt(gravityNodeSubscribeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
     // Setup socket to respond to metrics requests
