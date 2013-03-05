@@ -21,24 +21,26 @@ class GravityHeartbeatListener
 public:
 	/**
 	 * Called when another component's heartbeat is off by a certain amount.
-	 * \param dataProductID component id for the component whose heartbeat was missed
-	 * \microsecond_to_last_heartbeat number of microseconds since the last heartbeat was received, or -1 if
+	 * \param componentID component id for the component whose heartbeat was missed
+	 * \param microsecond_to_last_heartbeat number of microseconds since the last heartbeat was received, or -1 if
 	 * a heart beat was never received.
-	 * \param status string that indicates the current status.  Currently always "Missed".
+	 * \param interval_in_microseconds The current heart beat interval for the given component ID.  Updates to this value
+	 * will change the interval used in subsequent iterations.
 	 */
-	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status) = 0;
+	virtual void MissedHeartbeat(std::string componentID, uint64_t microsecond_to_last_heartbeat, uint64_t& interval_in_microseconds) = 0;
 
 	/**
 	 * Called when another component's heartbeat is received
-     * \param dataProductID component id for the component whose heartbeat was received
-     * \param status string that indicates the current status.  Currently always "Received".
+     * \param componentID component id for the component whose heartbeat was received
+     * \param interval_in_microseconds The current heart beat interval for the given component ID.  Updates to this value
+     * will change the interval used in subsequent iterations.
 	 */
-	virtual void ReceivedHeartbeat(std::string dataProductID, std::string status) = 0;
+	virtual void ReceivedHeartbeat(std::string componentID, uint64_t& interval_in_microseconds) = 0;
 
     /**
      * Default destructor
      */
-	virtual ~GravityHeartbeatListener() { }
+	virtual ~GravityHeartbeatListener() { };
 };
 
 } /* namespace gravity */

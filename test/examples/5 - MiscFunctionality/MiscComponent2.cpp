@@ -8,18 +8,20 @@ using namespace gravity;
 class MiscHBListener : public GravityHeartbeatListener
 {
 public:
-	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
-	virtual void ReceivedHeartbeat(std::string dataProductID, std::string status);
+	virtual void MissedHeartbeat(std::string dataProductID, uint64_t microsecond_to_last_heartbeat, uint64_t& interval_in_microseconds);
+	virtual void ReceivedHeartbeat(std::string dataProductID, uint64_t& interval_in_microseconds);
 };
 
-void MiscHBListener::MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status)
+void MiscHBListener::MissedHeartbeat(std::string dataProductID, uint64_t microsecond_to_last_heartbeat, uint64_t& interval_in_microseconds)
 {
 	Log::warning("Missed Heartbeat.  Last heartbeat %d microseconds ago.  ", microsecond_to_last_heartbeat);
 }
 
-void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, std::string status)
+void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, uint64_t& interval_in_microseconds)
 {
 	Log::warning("Received Heartbeat.");
+	// Now that we've received one, change the interval to 10 seconds.
+	interval_in_microseconds = 10 * 1000000;
 }
 
 //Declare a class for receiving Published messages.  
@@ -57,7 +59,7 @@ int main()
 
 	//Get a parameter from either the Gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.
 	int interval = gn.getIntParam("HeartbeatInterval", //Param Name
-									500000); //Default value.  
+									1000000); //Default value.
 	
 	//Get another parameter from gravity.  
 	bool listen_for_heartbeat = gn.getBoolParam("HeartbeatListener", true);

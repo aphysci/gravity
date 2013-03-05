@@ -18,7 +18,7 @@ namespace gravity
 //For passing Data to the HB threads.
 struct HBParams {
 	void* zmq_context;
-	int interval_in_microseconds;
+	uint64_t interval_in_microseconds;
 	//unsigned short port;
 	std::string componentID;
 	std::string endpoint;

@@ -199,7 +199,7 @@ public:
     /**
      * Starts a heart beat for this gravity process.
      */
-    GRAVITY_API GravityReturnCode startHeartbeat(int interval_in_microseconds);
+    GRAVITY_API GravityReturnCode startHeartbeat(uint64_t interval_in_microseconds);
 
     GRAVITY_API std::string getStringParam(std::string key, std::string default_value = "");
     GRAVITY_API int getIntParam(std::string key, int default_value = -1);
@@ -248,7 +248,7 @@ public:
     /**
      * Registers a callback to be called when we don't get a heartbeat from another component.
      */
-    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener);
+    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, uint64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
 
     /**
      * Returns a string representation of the provided error code.

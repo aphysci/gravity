@@ -1102,7 +1102,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-GravityReturnCode GravityNode::startHeartbeat(int interval_in_microseconds)
+GravityReturnCode GravityNode::startHeartbeat(uint64_t interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;

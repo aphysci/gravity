@@ -75,11 +75,11 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				if(!gotHeartbeat)
 				{
 				    int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, "Missed");
+					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, mqe.timetowaitBetweenHeartbeats);
 				}
 				else
 				{
-					listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, "Received");
+					listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, mqe.timetowaitBetweenHeartbeats);
 					mqe.lastHeartbeatTime = getCurrentTime();
 				}
 
