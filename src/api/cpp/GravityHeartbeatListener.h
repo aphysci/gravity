@@ -9,6 +9,12 @@
 #define GRAVITYHEARTBEATLISTENER_H_
 
 #include <string>
+#ifdef WIN32
+#include <Windows.h>
+#else
+#include <stdint.h>
+#include <sys/unistd.h>
+#endif
 
 namespace gravity
 {
