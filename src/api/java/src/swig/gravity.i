@@ -2,6 +2,8 @@
 %include "enums.swg"
 %include "std_string.i" // for std::string typemaps
 %include "various.i"
+//%include "stdint.i"
+//%include "typemaps.i"
 
 %module(directors="1") gravity
 
@@ -94,6 +96,76 @@ using namespace std::tr1;
         gravity::Logger*  "CPPGravityLogger.getCPtr(n)"
 
 
+/******
+ * map int64 to java long
+ ******
+
+%define INOUT_TYPEMAP(TYPE, JNITYPE, JTYPE, JAVATYPE, JNIDESC, TYPECHECKTYPE)
+INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
+*/
+%typemap(jni) int64_t *INOUT, int64_t &INOUT %{jlongArray%}
+%typemap(jtype) int64_t *INOUT, int64_t &INOUT "long[]"
+%typemap(jstype) int64_t *INOUT, int64_t &INOUT "long[]"
+%typemap(javain) int64_t *INOUT, int64_t &INOUT "$javainput"
+%typemap(javadirectorin) int64_t *INOUT, int64_t &INOUT "$jniinput"
+%typemap(javadirectorout) int64_t *INOUT, int64_t &INOUT "$javacall"
+
+%typemap(in) int64_t *INOUT, int64_t &INOUT {
+  if (!$input) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "array null");
+    return $null;
+  }
+  if (JCALL1(GetArrayLength, jenv, $input) == 0) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, "Array must contain at least 1 element");
+    return $null;
+  }
+  $1 = ($1_ltype) JCALL2(GetLongArrayElements, jenv, $input, 0); 
+}
+
+%typemap(freearg) int64_t *INOUT, int64_t &INOUT ""
+
+%typemap(argout) int64_t *INOUT, int64_t &INOUT
+{ JCALL3(ReleaseLongArrayElements, jenv, $input, (jlong *)$1, 0); }
+
+//%typemap(directorout,warning="Need to provide int64_t *INOUT directorout typemap") int64_t *INOUT {
+//}
+
+%typemap(directorin,descriptor="[J") int64_t &INOUT
+%{
+    jlongArray jb = (jenv)->NewLongArray(1);
+    (jenv)->SetLongArrayRegion(jb, 0, 1, (jlong*)&INOUT);
+    $input = jb;
+%}
+
+%typemap(directorin,descriptor="[J",warning="Need to provide int64_t *INOUT directorin typemap, int64_t array length is unknown") int64_t *INOUT
+{
+}
+
+%typemap(typecheck) int64_t *INOUT = jlongArray;
+%typemap(typecheck) int64_t &INOUT = jlongArray;
+
+// The below typemap is added just to deallocate the memory for
+// the java long array allocated above.  Unfortunately there doesn't seem to be a freearg
+// equivalent for directorin typemaps.
+%typemap(directorout) int64_t
+{
+    INOUT = ((int64_t *) jenv->GetLongArrayElements(jINOUT, 0))[0];
+    (jenv)->DeleteLocalRef(jINOUT);
+}
+
+%typemap(jtype) int64_t "long";
+%typemap(jstype) int64_t "long";
+%typemap(jni) int64_t  "jlong"
+%typemap(javain) int64_t  "$javainput"
+%typemap(javadirectorin) int64_t "$jniinput"
+%typemap(javadirectorout) int64_t "$javacall"
+//%typemap(directorout) int64_t {}
+%typemap(directorin,descriptor="J") int64_t {}
+%typemap(javaout) int64_t {
+    return $jnicall;
+  }
+
+ 
 /******
  * All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
  *******/

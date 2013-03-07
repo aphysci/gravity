@@ -39,8 +39,8 @@ namespace gravity {
 	{
 	public:
       virtual ~CPPGravityHeartbeatListener();
-      virtual void MissedHeartbeat(const std::string& dataProductID, int microsecond_to_last_heartbeat, const std::string& status);
-      virtual void ReceivedHeartbeat(const std::string& dataProductID, const std::string& status);
+      virtual int64_t MissedHeartbeatJava(const std::string dataProductID, int64_t microsecond_to_last_heartbeat, int64_t& INOUT);
+      virtual int64_t ReceivedHeartbeatJava(const std::string dataProductID, int64_t& INOUT);
 	};
 
     enum GravityReturnCode {
@@ -93,8 +93,8 @@ public:
     		const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
     
-    GravityReturnCode startHeartbeat(int interval_in_microseconds);
-    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, unsigned long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
+    GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
+    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
 
     std::string getStringParam(std::string key, std::string default_value = "");
     int getIntParam(std::string key, int default_value = -1);

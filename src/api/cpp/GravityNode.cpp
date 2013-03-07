@@ -1102,7 +1102,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
-GravityReturnCode GravityNode::startHeartbeat(uint64_t interval_in_microseconds)
+GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
@@ -1128,7 +1128,7 @@ GravityReturnCode GravityNode::startHeartbeat(uint64_t interval_in_microseconds)
 	return gravity::GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, uint64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int64_t timebetweenMessages, const GravityHeartbeatListener& listener)
 {
 	void* HeartbeatListener(void*); //Forward declaration.
 	static class Heartbeat hbSub;

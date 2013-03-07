@@ -82,13 +82,15 @@ import com.aphysci.gravity.Logger;
     }
 
     @SuppressWarnings("unused")
-    public void MissedHeartbeat(String dataProductID, int microsecond_to_last_heartbeat, String status) {
-      delegate.MissedHeartbeat(dataProductID, microsecond_to_last_heartbeat, status);
+    public long MissedHeartbeatJava(String dataProductID, long microsecond_to_last_heartbeat, long[] interval_in_microseconds) {
+      delegate.MissedHeartbeat(dataProductID, microsecond_to_last_heartbeat, interval_in_microseconds);
+      return 0;
     }
     
     @SuppressWarnings("unused")
-    public void ReceivedHeartbeat(String dataProductID, String status) {
-      delegate.ReceivedHeartbeat(dataProductID, status);
+    public long ReceivedHeartbeatJava(String dataProductID, long[] interval_in_microseconds) {
+      delegate.ReceivedHeartbeat(dataProductID, interval_in_microseconds);
+      return 0;
     }
   }
 

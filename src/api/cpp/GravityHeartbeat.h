@@ -33,7 +33,7 @@ struct HBListenerContext {
 struct ExpectedMessageQueueElement {
 	uint64_t expectedTime; //Absolute (Maximum amount we can wait).
 	uint64_t lastHeartbeatTime; //Absolute
-	uint64_t timetowaitBetweenHeartbeats; //In Microseconds
+	int64_t timetowaitBetweenHeartbeats; //In Microseconds
 	std::string dataproductID;
 	void* socket;
 };

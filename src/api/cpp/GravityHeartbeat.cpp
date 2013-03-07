@@ -95,7 +95,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     	    zmq_msg_init(&msg);
     	    std::string dataproductID;
     	    //unsigned short port;
-    	    uint64_t maxtime;
+    	    int64_t maxtime;
 
     	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_DONTWAIT) != -1)
     	    {
