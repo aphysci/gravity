@@ -47,21 +47,12 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     {
     	if(!messageTimes.empty())
     	{
-    		zmq_msg_t msg;
-    	    zmq_msg_init(&msg);
 
 			ExpectedMessageQueueElement& mqe = *messageTimes.top();
 
 			if (mqe.expectedTime > getCurrentTime())
 			{
-#ifdef WIN32
-			Sleep(100);
-#else
-			struct timespec request;
-			request.tv_sec = 0;
-			request.tv_nsec = 100000000; //Convert from Microseconds to Nanoseconds
-			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &request, NULL);
-#endif
+		 		gravity::sleep(100);	
 			}
 			else
 			{
