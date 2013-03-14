@@ -58,6 +58,16 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 		return a;
 	}
 
+	static public double[] convertNumberListToDoubleArray(List<Number> list)
+	{
+		double[] d = new double[list.size()];
+		for (int i = 0; i < list.size(); i++)
+		{
+			d[i] = list.get(i).doubleValue();	
+		}
+		return d;
+	}
+
 	static public List<Double> convertNumberArrayToNumberList(double[] array)
 	{
 		List<Double> list = Doubles.asList(array);
