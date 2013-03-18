@@ -878,7 +878,7 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::warning("Unable to find service %s", serviceID.c_str());
+		Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
