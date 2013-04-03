@@ -8,7 +8,8 @@ JAVA_BUILD_DIR=build
 LIB_NAME=gravitytest.jar
 PRODGRAV_DIR=../../../src/api/java
 GRAVLIB=$(PRODGRAV_DIR)/gravity.jar
-PROTOC=$(THIRDPARTY_DIR)/bin/protoc
+#PROTOC=$(THIRDPARTY_DIR)/bin/protoc
+PROTOC=protoc
 
 SRC=$(wildcard $(GRAVSRC_DIR)/*java)
 OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(SRC))
@@ -20,7 +21,7 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	CLASSPATH="$(GRAVLIB);build;$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar"
-	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/bin
+	THIRDPARTY_LIB=../../../Win32/Release/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	CLASSPATH=$(GRAVLIB):build:$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar
