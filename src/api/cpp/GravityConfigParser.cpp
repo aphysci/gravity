@@ -2,9 +2,8 @@
 #include "GravityLogger.h"
 #include "GravitySemaphore.h"
 #include "protobuf/ConfigRequest.pb.h"
-#include "IniParserWrap.h"
+#include "KeyValueParserWrap.h"
 
-#include <iniparser.h>
 #include <map>
 #include <iostream>
 
@@ -20,34 +19,30 @@ GravityConfigParser::GravityConfigParser(std::string componentID)
 
 void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
-	IniConfigParser parser;
-
-	if(!parser.Open(config_filename)) //TODO: if this doesn't work try stat.
+    std::vector<const char *> sections;
+    
+    KeyValueConfigParser parser;
+    
+    sections.push_back("general");
+    sections.push_back(componentID.c_str());
+    sections.push_back(NULL);
+    
+	if(!parser.Open(config_filename, sections))
         return; //Fail Silently
 
-	std::vector<std::string> keys = parser.GetSectionKeys("general");
+	std::vector<std::string> keys = parser.GetKeys();
 
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
-		std::string value = parser.getString(*i);
-		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
+		std::string value = parser.GetString(*i);
 		if(value != "")
-			key_value_map[key_nosection] = value;
+        {
+            std::string key_lower = StringCopyToLowerCase(*i);
+			key_value_map[key_lower] = value;
+        }
 	}
-
-
-	keys = parser.GetSectionKeys(componentID);
-
-	for(std::vector<std::string>::iterator i = keys.begin();
-			i != keys.end(); i++)
-	{
-		std::string value = parser.getString(*i);
-		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
-		if(value != "")
-			key_value_map[key_nosection] = value;
-	}
-
+    
 	return;
 }
 
@@ -85,6 +80,6 @@ std::string GravityConfigParser::getString(std::string key, std::string default_
 		return default_value;
 	else
 		return i->second;
-}
+}   
 
 }

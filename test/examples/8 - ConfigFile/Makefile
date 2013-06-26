@@ -4,6 +4,7 @@ PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 GRAVLIB_DIR=../../../src/api/cpp/
 COMPONENT_DIR=../../../src/components/cpp
 SERVICEDIRECTORY_LOCATION=$(COMPONENT_DIR)/ServiceDirectory
+KEYVALUE_DIR=../../../src/keyvalue_parser/
 
 #OS Specific
 SYSTEM:=$(strip $(shell uname -s))
@@ -23,18 +24,15 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L../../../src/keyvalue_parser/
+CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_DIR)
 LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) 
 
-all: BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
+all: ConfigFileExample$(OS_EXE_EXT)
 
 #Compile each cpp file to a separate executable.  
-BasicDataProductPublisher$(OS_EXE_EXT):BasicDataProductPublisher.cpp
+ConfigFileExample$(OS_EXE_EXT):ConfigFileExample.cpp
 	$(CC) -o $@ $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
-BasicDataProductSubscriber$(OS_EXE_EXT):BasicDataProductSubscriber.cpp
-	$(CC) -o $@ $< $(INCLUDES) $(CFLAGS) $(LIBS)
-	
 components: ServiceDirectory$(OS_EXE_EXT)
 
 ServiceDirectory$(OS_EXE_EXT):
@@ -42,7 +40,7 @@ ServiceDirectory$(OS_EXE_EXT):
 	make
 
 clean:
-	@rm -rf *.o *.exe BasicDataProductPublisher BasicDataProductSubscriber
+	@rm -rf *.o *.exe ConfigFileExample 
 
 run: components BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 	./run.sh

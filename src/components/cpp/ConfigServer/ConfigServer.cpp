@@ -1,6 +1,6 @@
 #include <GravityNode.h>
 #include <GravityConfigParser.h>
-#include <IniParserWrap.h>
+#include <KeyValueParserWrap.h>
 #include <protobuf/ConfigRequest.pb.h>
 
 #include <iostream>
@@ -30,10 +30,10 @@ public:
     virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
 private:
-    IniConfigParser &parser;
+    KeyValueConfigParser &parser;
 };
 
-ConfigServer::ConfigServer(IniConfigParser &other_parser) : parser(other_parser)
+ConfigServer::ConfigServer(KeyValueConfigParser &other_parser) : parser(other_parser)
 {
 }
 
@@ -41,31 +41,34 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 {
 	ConfigRequestPB cfpb;
 	dataProduct.populateMessage(cfpb);
-
+    std::vector<const char *> sections;
+    
 	//Get the parameters we're going to send from the config file.
 	std::map<std::string, std::string> key_value_map;
-
+    std::vector<std::string> keys;  
+    
 	//First send all general parameters
-	std::vector<std::string> keys = parser.GetSectionKeys("General");
-
-	for(std::vector<std::string>::iterator i = keys.begin();
-			i != keys.end(); i++)
-	{
-		std::string value = parser.getString(*i);
-		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
-		if(value != "")
-			key_value_map[key_nosection] = value;
-	}
-
+    sections.push_back("general");
+	
 	//Then override/add to general parameters with specific parameters
-	keys = parser.GetSectionKeys(cfpb.componentid().c_str());
+	sections.push_back(cfpb.componentid().c_str());
+    
+    sections.push_back(NULL);
+    
+    if(!parser.Open("config_file.ini", sections))
+	{
+		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
+		return shared_ptr<GravityDataProduct>(NULL);
+	}
+    
+    keys = parser.GetKeys();
+    
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
-		std::string value = parser.getString(*i);
-		std::string key_nosection = i->substr(i->find_first_of(":") + 1);
+		std::string value = parser.GetString(*i);
 		if(value != "")
-			key_value_map[key_nosection] = value;
+			key_value_map[*i] = value;
 	}
 
 	//Populate Response Message and Send it
@@ -87,12 +90,8 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 
 int main(int argc, const char** argv)
 {
-	IniConfigParser parser;
-	if(!parser.Open("config_file.ini"))
-	{
-		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
-		return -1;
-	}
+	KeyValueConfigParser parser;
+	
 	ConfigServer server(parser);
 
 	GravityNode gn;

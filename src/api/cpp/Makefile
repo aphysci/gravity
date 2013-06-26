@@ -22,8 +22,8 @@ PTHREAD_INCLUDE=$(THIRDPARTY_DIR)/pthread/include
 PROTOC=$(THIRDPARTY_DIR)/bin/protoc
 
 #Compiler Flags
-INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR)
-LIBDIRS=-L$(THIRDPARTY_DIR)/lib
+INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR) -I../../keyvalue_parser
+LIBDIRS=-L$(THIRDPARTY_DIR)/lib -L../../keyvalue_parser/
 LIBS=$(OS_SPECIFIC_LIBS)
 CFLAGS=$(INCLUDES) $(OS_SPECIFIC_FLAGS)
 COMPILE_FLAG=-c
@@ -52,7 +52,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 vs: all
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
-	OS_SPECIFIC_LIBS = -lprotobuf -liniparser -lzmq
+	OS_SPECIFIC_LIBS = -lprotobuf -liniparser -lzmq -lkeyvalue_parser
 	OS_SPECIFIC_FLAGS = -fpic
 linux: all;
 else

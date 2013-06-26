@@ -7,6 +7,11 @@ if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1 ; fi
 ./buildall.sh || exit 1
 popd >& /dev/null
 
+pushd ./src/keyvalue_parser >& /dev/null
+if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1  ; fi
+./buildall.sh || exit 1
+
+popd >& /dev/null
 pushd ./src/api >& /dev/null
 if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1  ; fi
 ./buildall.sh || exit 1
@@ -30,6 +35,8 @@ cp src/components/cpp/bin/* bin
 
 mkdir lib
 cp -d ThirdParty/lib/* lib
+cp src/keyvalue_parser/*.a lib
+cp src/keyvalue_parser/*.so lib
 cp src/api/cpp/*.a lib
 cp src/api/cpp/*.so lib
 cp src/api/java/*.so lib

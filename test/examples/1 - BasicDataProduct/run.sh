@@ -16,10 +16,10 @@ trap control_c SIGINT
 
 ServiceDirectory &
 SDPID=$!
-BasicDataProductPublisher &
+./BasicDataProductPublisher &
 PUBPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-BasicDataProductSubscriber
+./BasicDataProductSubscriber
