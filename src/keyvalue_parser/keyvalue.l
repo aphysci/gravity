@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include "queue.h"
 #include "params.h"
 
 #define YYSTYPE char*
@@ -29,7 +28,8 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
     const char **_section_list;
     int retval = 1;
     
-    var_list_init(&g_var_list);
+    g_var_list.len = 0;
+    g_var_list.head = NULL;
 
     if ( ppvarlist )
         *ppvarlist = NULL;
@@ -53,6 +53,7 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
         free_var_list(&g_var_list);
     else 
         *ppvarlist = &g_var_list;
+    
     return retval;
 }
 

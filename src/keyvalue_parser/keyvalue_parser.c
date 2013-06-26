@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-#include "queue.h"
 #include "keyvalue_parser.h"
 #include "params.h"
 
@@ -22,7 +20,7 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
 var_el_t *var_list_find(pvar_list_t pvar_list, const char* key )
 {
     pvar_el_t var_el;
-    for (var_el = var_list_top(pvar_list); key && var_el; var_el = var_list_next(var_el) )
+    for (var_el = var_list_first(pvar_list); key && var_el; var_el = var_el->next )
     {
         if (0 == strncmp(var_el->key, key, strlen(key) ) )
             return var_el;
@@ -35,17 +33,66 @@ var_el_t *var_list_find(pvar_list_t pvar_list, const char* key )
  */
 void free_var_list(pvar_list_t pvar_list)
 {
-    pvar_el_t var_el = var_list_top(pvar_list), tvar_el = NULL;
-    while (var_list_qlen(pvar_list) )
+    pvar_el_t var_el;
+    while ( ( var_el = var_list_first( pvar_list ) ) )
     {
         free(var_el->key);
         free(var_el->val);
-        tvar_el = var_list_remove_inc(pvar_list, var_el);
+        var_list_remove( pvar_list, var_el );
         free(var_el);
-        var_el = tvar_el;
     }
 }
 
+/* Get the length of the parameter list
+ */
+int var_list_length( pvar_list_t pvar_list )
+{
+    if ( pvar_list )
+        return pvar_list->len;
+    return 0;
+}
+
+/* Get the first element in a var list
+ */
+pvar_el_t var_list_first( pvar_list_t pvar_list )
+{
+    if ( pvar_list )
+        return pvar_list->head;
+    return NULL;
+}
+
+/* Remove an element from the list
+ */
+void var_list_remove( pvar_list_t pvar_list, pvar_el_t pvar_el )
+{
+    if ( !pvar_list || !pvar_el )
+        return;
+    if ( pvar_el->next )
+        pvar_el->next->prev = pvar_el->prev;
+    if ( pvar_el->prev )
+        pvar_el->prev->next = pvar_el->next;
+    
+    if ( pvar_list->head == pvar_el )
+        pvar_list->head = pvar_el->next;
+    
+    pvar_el->next = NULL;
+    pvar_el->prev = NULL;
+    pvar_list->len--;
+}
+
+/* Insert an element at the head of the list
+ */
+void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el )
+{
+    if ( !pvar_list || !pvar_el )
+        return;
+    pvar_el->next = pvar_list->head;
+    pvar_el->prev = NULL;
+    if ( pvar_list->head )
+        pvar_list->head->prev = pvar_el;
+    pvar_list->head = pvar_el;
+    pvar_list->len++;
+}
 
 /* 
  * Public Methods
@@ -67,11 +114,11 @@ const char** keyvalue_getkeys(keyvalue_handle_t kv_handle )
     pvar_el_t var_el;
     int i;
     const char **ppkeys = malloc( 
-        (var_list_qlen((pvar_list_t)kv_handle ) + 1 ) * sizeof(const char *));
+        (var_list_length((pvar_list_t)kv_handle ) + 1 ) * sizeof(const char *));
     if (NULL == ppkeys) 
         return ppkeys;
-    for (i = 0, var_el = var_list_top((pvar_list_t)kv_handle); var_el; 
-            var_el = var_list_next(var_el), i++ )
+    for (i = 0, var_el = var_list_first((pvar_list_t)kv_handle); var_el; 
+            var_el = var_el->next, i++ )
         ppkeys[i] = var_el->key;
     ppkeys[i] = NULL;
     return ppkeys;
@@ -94,6 +141,7 @@ void keyvalue_close(keyvalue_handle_t kv_handle)
     free_var_list((pvar_list_t)kv_handle );
 }
 
-QUEUE_FUNCTION_INSTANTIATIONS(var_list, ptrs, list, struct _var_el, struct _var_list);
+
+
 
 

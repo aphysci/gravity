@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "queue.h"
 #include "params.h"
 
 #define YYSTYPE char*
@@ -67,11 +66,11 @@ kvpair:
         if ( CHECK_SECTION )
         {
             var_el_t *var_el = (var_el_t*)malloc(sizeof(var_el_t) );
-            var_list_el_init(var_el);
+            var_el->next = var_el->prev = NULL;
             var_el->key = strdup($1);
             var_el->val = strdup($3);
             free($1); free($3);
-            var_list_push(&g_var_list, var_el);
+            var_list_insert(&g_var_list, var_el);
         }
     } |
 ;
