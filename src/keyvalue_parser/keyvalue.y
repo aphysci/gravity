@@ -31,14 +31,14 @@ extern const char *g_section_name;
 %left '*' '/'
 %left '-' '+'
 %left '='
-%expect 10
+//%expect 10
 %%
 
 file: kvpair '\n'
     | file kvpair '\n'
     | file kvpair
-    | section
     | section '\n'
+    | section
     | file section '\n'
     | file section
 ;
@@ -57,8 +57,7 @@ section:
         if ( end )
             *++end = '\0';
         g_current_section = strdup(begin);
-    }
-;
+    } | ;
 
 kvpair: 
     expr '=' expr
@@ -72,8 +71,7 @@ kvpair:
             free($1); free($3);
             var_list_insert(&g_var_list, var_el);
         }
-    } |
-;
+    } 
 
 expr:
     ERROR

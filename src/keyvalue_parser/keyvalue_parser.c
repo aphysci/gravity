@@ -22,7 +22,7 @@ var_el_t *var_list_find(pvar_list_t pvar_list, const char* key )
     pvar_el_t var_el;
     for (var_el = var_list_first(pvar_list); key && var_el; var_el = var_el->next )
     {
-        if (0 == strncmp(var_el->key, key, strlen(key) ) )
+        if (0 == strncmp(var_el->key, key, strlen(key) ) && strlen(var_el->key) == strlen(key) )
             return var_el;
     }
     return NULL;

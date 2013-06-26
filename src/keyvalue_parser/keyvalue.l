@@ -18,6 +18,7 @@ var_list_t g_var_list;
 const char *g_section_name;
 extern char *g_current_section;
 extern int yyparse();
+extern int yydebug;
     
 int yywrap(void)
 { return 1; }
@@ -27,7 +28,7 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
 {
     const char **_section_list;
     int retval = 1;
-    
+    yydebug = 0;
     g_var_list.len = 0;
     g_var_list.head = NULL;
 

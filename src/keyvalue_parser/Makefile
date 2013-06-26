@@ -46,7 +46,7 @@ MAKE_INC = $(SRCS:%.c=$(OBJ_DIR)/.deps/%.P)
 all: $(LIB) $(SOLIB) $(PROG)
 
 y.tab.c: keyvalue.y
-	$(YACC) -d keyvalue.y -o y.tab.c
+	$(YACC) -dt keyvalue.y -o y.tab.c
 
 lex.yy.c: keyvalue.l
 	$(LEX) -o lex.yy.c keyvalue.l
