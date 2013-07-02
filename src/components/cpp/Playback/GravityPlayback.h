@@ -1,6 +1,5 @@
 #include <sstream>
 #include <GravityNode.h>
-#include <iniparser.h>
 #include <cppdb/frontend.h>
 
 namespace gravity {

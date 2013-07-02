@@ -26,7 +26,7 @@ struct ConfigEntry
 class ConfigServer : public GravityServiceProvider
 {
 public:
-	ConfigServer(IniConfigParser &parser);
+	ConfigServer(KeyValueConfigParser &parser);
     virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
 private:

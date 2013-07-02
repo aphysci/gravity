@@ -277,7 +277,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\..\src\keyvalue_parser\;$(BOOSTROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -285,7 +285,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gravity.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gravity.lib;libkeyvalue_parser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
