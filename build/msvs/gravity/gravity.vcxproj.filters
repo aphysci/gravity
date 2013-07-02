@@ -105,6 +105,9 @@
     <ClCompile Include="..\..\..\src\api\cpp\GravityMetricsUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h">
@@ -188,6 +191,9 @@
     <ClInclude Include="..\..\..\src\api\cpp\GravityMetricsUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto">
@@ -217,6 +223,7 @@
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
       <Filter>protobufs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto">

@@ -213,12 +213,16 @@ if %Clean% EQU 1 (
 	msbuild /target:libprotobuf;protoc %CONFIGURATION% protobuf.sln || goto build_fail
 popd
 
-:: Build iniparser
-pushd ThirdParty\iniparser\build
+:: Build keyvalue parser
+pushd src\keyvalue_parser\msvs
+win_bison.exe -dt ..\keyvalue.y -o ..\y.tab.c
+win_flex.exe -o ..\lex.yy.c ..\keyvalue.l
+popd
+pushd src\keyvalue_parser\msvs\keyvalue_parser
 if %Clean% EQU 1 (
-	msbuild /target:Clean %CONFIGURATION% iniparser.sln || goto build_fail
+	msbuild /target:Clean %CONFIGURATION% keyvalue_parser.sln || goto build_fail
 )
-msbuild /target:iniparser %CONFIGURATION% iniparser.sln || goto build_fail
+msbuild %CONFIGURATION% keyvalue_parser.sln || goto build_fail
 popd
 
 :: Build ZMQ

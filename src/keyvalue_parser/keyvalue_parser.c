@@ -74,23 +74,27 @@ void var_list_remove( pvar_list_t pvar_list, pvar_el_t pvar_el )
     
     if ( pvar_list->head == pvar_el )
         pvar_list->head = pvar_el->next;
+    if ( pvar_list->tail == pvar_el )
+        pvar_list->tail = pvar_el->prev;
     
     pvar_el->next = NULL;
     pvar_el->prev = NULL;
     pvar_list->len--;
 }
 
-/* Insert an element at the head of the list
+/* Insert an element at the tail of the list
  */
 void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el )
 {
     if ( !pvar_list || !pvar_el )
         return;
-    pvar_el->next = pvar_list->head;
-    pvar_el->prev = NULL;
-    if ( pvar_list->head )
-        pvar_list->head->prev = pvar_el;
-    pvar_list->head = pvar_el;
+    pvar_el->prev = pvar_list->tail;
+    pvar_el->next = NULL;
+    if ( pvar_list->tail )
+        pvar_list->tail->next = pvar_el;
+    pvar_list->tail = pvar_el;
+    if ( !pvar_list->head )
+        pvar_list->head = pvar_el;
     pvar_list->len++;
 }
 
@@ -109,7 +113,7 @@ keyvalue_handle_t keyvalue_open(const char *fn, const char* sections[] )
 
 /* Get all the keys parsed
  */
-const char** keyvalue_getkeys(keyvalue_handle_t kv_handle )
+const char **keyvalue_getkeys(keyvalue_handle_t kv_handle )
 {
     pvar_el_t var_el;
     int i;
@@ -140,8 +144,6 @@ void keyvalue_close(keyvalue_handle_t kv_handle)
 {
     free_var_list((pvar_list_t)kv_handle );
 }
-
-
 
 
 

@@ -17,9 +17,11 @@ extern YYSTYPE yylval;
 var_list_t g_var_list;
 const char *g_section_name;
 extern char *g_current_section;
+
 extern int yyparse();
 extern int yydebug;
-    
+
+
 int yywrap(void)
 { return 1; }
 
@@ -31,7 +33,8 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
     yydebug = 0;
     g_var_list.len = 0;
     g_var_list.head = NULL;
-
+    g_var_list.tail = NULL;
+    
     if ( ppvarlist )
         *ppvarlist = NULL;
     
@@ -61,6 +64,8 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
 %}
 %x comment
 %option yylineno
+%option nounistd
+%option never-interactive
 %%
 
 [+()=*\-\n\/]                                           { return(*yytext); }

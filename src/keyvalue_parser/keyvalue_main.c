@@ -1,24 +1,32 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef WIN32
 #include <getopt.h>
+#endif
 #include <errno.h>
 #include <string.h>
 
 
 #include "keyvalue_parser.h"
-    
-#define log(str, args...) fprintf(stdout, str, ##args )
-#define errlog(str, args...) fprintf(stderr, str, ##args )
+
+#define log(str, ...) fprintf(stdout, str, ##__VA_ARGS__ )
+#define errlog(str, ...) fprintf(stderr, str, ##__VA_ARGS__ )
 
 void usage( const char *me )
 {   
+#ifdef WIN32
+    errlog("usage: %s <config_file> <componentid>\n"
+                    "\t<config file>:\t\tconfiguration file\n"
+                    "\t<componentid>:\t\tcomponent ID\n",
+            me);
+#else
     errlog("usage: %s --<option>=<value>\n"
                     "\t--fn=<config file>:\t\tconfiguration file\n"
                     "\t--componentid=<id>:\t\tcomponent ID\n"
                     "\t--help:\t\t\tthis\n",
             me);
+#endif
     exit(-1);
 }
 
@@ -28,6 +36,7 @@ int main(int argc, char *argv[])
     const char **ppkeys;
     keyvalue_handle_t kv_handle;
     const char *componentid = NULL, *fn = NULL;
+#ifndef WIN32
     int c, lval, option_index;
     
     struct option long_options[] = 
@@ -67,6 +76,11 @@ int main(int argc, char *argv[])
                 usage(argv[0]);
         }
     }
+#else
+	fn = argv[1];
+	componentid = argv[2];
+#endif
+
     
     if ( !fn )
         usage(argv[0]);
@@ -88,7 +102,7 @@ int main(int argc, char *argv[])
         const char **_ppkeys;
         for ( _ppkeys = ppkeys; *_ppkeys; _ppkeys++)
             log("%s = %s\n", *_ppkeys, keyvalue_getstring( kv_handle, *_ppkeys ) );
-        free( ppkeys );
+        free( (char**)ppkeys );
     }
     
     /* Close the handle */

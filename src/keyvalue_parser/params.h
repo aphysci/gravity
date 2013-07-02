@@ -10,7 +10,7 @@ typedef struct _var_el
 
 typedef struct _var_list
 {
-    struct _var_el *head;
+    struct _var_el *head, *tail;
     int len;
 } var_list_t, *pvar_list_t;
 

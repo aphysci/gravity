@@ -22,7 +22,7 @@ public:
      */
     bool Open(const char* filename, std::vector<const char *> &sections) 
     {
-        return (bool)( ( keyvalue_handle = keyvalue_open( filename, &sections[0] ) ) );
+        return ( keyvalue_handle = keyvalue_open( filename, &sections[0] ) ) ? true : false;
     }
 
     /**

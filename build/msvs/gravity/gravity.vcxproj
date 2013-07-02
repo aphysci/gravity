@@ -186,13 +186,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;$(BOOSTROOT);..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iniparser_d.lib;libzmq_d.lib;pthreadVCE2.lib;libprotobuf_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libzmq_d.lib;pthreadVCE2.lib;libprotobuf_d.lib;ws2_32.lib;libkeyvalue_parser.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -213,13 +213,13 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\src\keyvalue_parser\;$(BOOSTROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iniparser_d.lib;libzmq_d.lib;pthreadVCE2.lib;libprotobuf_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libkeyvalue_parser_d.lib;libzmq_d.lib;pthreadVCE2.lib;libprotobuf_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -294,7 +294,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;$(BOOSTROOT);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -348,14 +348,14 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;$(BOOSTROOT);..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libprotobuf.lib;iniparser.lib;libzmq.lib;pthreadVCE2.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf.lib;libkeyvalue_parser.lib;libzmq.lib;pthreadVCE2.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>

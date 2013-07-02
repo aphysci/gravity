@@ -13,7 +13,10 @@
 
 #define YYSTYPE char*
 #define YYERROR_VERBOSE
-
+#ifdef WIN32
+#   define snprintf _snprintf
+#   define strcasecmp stricmp
+#endif
 extern int yylineno;
 void yyerror(const char *s)
 {
