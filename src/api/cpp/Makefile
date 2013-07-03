@@ -13,17 +13,16 @@ PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 PROTOBUF_INCLUDE_DIR=$(PROTOBUF_DIR)/src
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.1
 ZMQ_INCLUDE_DIR=$(ZMQ_DIR)/include
-INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
-INIPARSE_INCLUDE_DIR=$(THIRDPARTY_DIR)/iniparser/src
 EZOPTION_PARSER_DIR=$(THIRDPARTY_DIR)/EZOptionParser
 PTHREAD_INCLUDE=$(THIRDPARTY_DIR)/pthread/include
+KEYVALUE_PARSER_INCLUDE_DIR=../../keyvalue_parser
 
 #Tools
 PROTOC=$(THIRDPARTY_DIR)/bin/protoc
 
 #Compiler Flags
-INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR) -I$(INIPARSE_INCLUDE_DIR) -I$(EZOPTION_PARSER_DIR) -I../../keyvalue_parser
-LIBDIRS=-L$(THIRDPARTY_DIR)/lib -L../../keyvalue_parser/
+INCLUDES=-I$(ZMQ_INCLUDE_DIR) -I$(PROTOBUF_INCLUDE_DIR)  -I$(EZOPTION_PARSER_DIR) -I$(KEYVALUE_PARSER_INCLUDE_DIR)
+LIBDIRS=-L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_PARSER_INCLUDE_DIR)
 LIBS=$(OS_SPECIFIC_LIBS)
 CFLAGS=$(INCLUDES) $(OS_SPECIFIC_FLAGS)
 COMPILE_FLAG=-c
@@ -45,14 +44,14 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 #MinGW
 	# LIB_EXT = dll
 	#Not including rt and zmq
-	# OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -liniparser -Wl,-Bdynamic -lzmq -lpthread -lwsock32
+	# OS_SPECIFIC_LIBS = -Wl,-Bstatic -lprotobuf -Wl,-Bdynamic -lzmq -lpthread -lwsock32
 # windows: all;
 #Visual Studio
 	-include makefile.vs
 vs: all
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	LIB_EXT = so
-	OS_SPECIFIC_LIBS = -lprotobuf -liniparser -lzmq -lkeyvalue_parser
+	OS_SPECIFIC_LIBS = -lprotobuf -lzmq -lkeyvalue_parser
 	OS_SPECIFIC_FLAGS = -fpic
 linux: all;
 else
