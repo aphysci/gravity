@@ -1,11 +1,3 @@
-ifeq ($(CROSS), )
-	HOSTARCH=$(shell uname -m)
-	ifeq ($(HOSTARCH), x86_64)
-		CFLAGS+=-m32
-		LDFLAGS+=-m32
-	endif
-endif
-
 #Complier Commands
 YACC= yacc
 LEX= lex
