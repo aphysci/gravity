@@ -17,6 +17,7 @@ void CPPGravityHeartbeatListener::MissedHeartbeat(std::string componentID, int64
 int64_t CPPGravityHeartbeatListener::MissedHeartbeatJava(const std::string componentID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds)
 {
     cout << "in cpp HB listener missed heartbeat" << endl;
+    return 0L;
 }
 
 void CPPGravityHeartbeatListener::ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds)
@@ -27,5 +28,6 @@ void CPPGravityHeartbeatListener::ReceivedHeartbeat(std::string componentID, int
 int64_t CPPGravityHeartbeatListener::ReceivedHeartbeatJava(const std::string componentID, int64_t& interval_in_microseconds)
 {
     cout << "in cpp HB listener received heartbeat" << endl;
+    return 0L;
 }
 
