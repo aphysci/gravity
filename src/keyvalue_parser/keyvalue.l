@@ -68,7 +68,7 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
 %option never-interactive
 %%
 
-[+()=*\-\n\/]                                           { return(*yytext); }
+[+()=*\-\n\r\/]                                           { return(*yytext); }
 <INITIAL>#	                                            { BEGIN(comment); }
 <comment>[^\r\n]*                                       { }
 <comment>(\n)                                           { yyless(1); BEGIN(INITIAL);return('\n'); }

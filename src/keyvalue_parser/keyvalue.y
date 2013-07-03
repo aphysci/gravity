@@ -38,11 +38,15 @@ extern const char *g_section_name;
 %%
 
 file: kvpair '\n'
+      kvpair '\r' '\n'
     | file kvpair '\n'
+    | file kvpair '\r' '\n'
     | file kvpair
     | section '\n'
+    | section '\r' '\n'
     | section
     | file section '\n'
+    | file section '\r' '\n'
     | file section
 ;
 
