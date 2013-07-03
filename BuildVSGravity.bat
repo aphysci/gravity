@@ -17,12 +17,10 @@ if not defined BOOST_HOME (
 
 if not defined LEX_CMD (
    set LEX_CMD=win_flex.exe
-   end
 )
 
 if not defined YACC_CMD (
    set YACC_CMD=win_bison.exe
-   end
 )
 
 
