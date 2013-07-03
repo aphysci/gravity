@@ -1,9 +1,9 @@
 #C++ Include Locations
 THIRDPARTY_DIR=..$(OS_PATH_SEP)..$(OS_PATH_SEP)..$(OS_PATH_SEP)ThirdParty
-INIPARSER_DIR=$(THIRDPARTY_DIR)$(OS_PATH_SEP)iniparser
 JAVAINCLUDE_DIR=$(JAVA_HOME)$(OS_PATH_SEP)include
 GRAVLIB_DIR=..$(OS_PATH_SEP)cpp
 GRAV_HOME=..$(OS_PATH_SEP)..$(OS_PATH_SEP)..$(OS_PATH_SEP)
+KEYVALUE_PARSER_DIR=$(GRAV_HOME)src$(OS_PATH_SEP)keyvalue_parser
 
 #C++ Wrapper source dir
 CPPSRC_DIR_MAKE=src/cpp/
@@ -16,10 +16,10 @@ LINK=g++
 
 #Default C++ Compiler Options (g++)
 INCLUDES=-I../cpp -I$(THIRDPARTY_DIR)/include -I$(JAVAINCLUDE_DIR) $(OS_SPECIFIC_INCS)
-LIBDIRS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
+LIBDIRS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_PARSER_DIR)
 LIBS=$(COMPILER_SPECIFIC_LIBS)
 COMPILER_SPECIFIC_LIBS=$(GCC_LIBS) $(OS_SPECIFIC_LIBS)
-GCC_LIBS=-lgravity -lprotobuf -liniparser -lzmq
+GCC_LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq
 COMPILE_FLAG=-c
 COUTPUT_FLAG=-o
 OUTPUT_FLAG=-o

@@ -2,7 +2,6 @@
 CXX=$(CROSS)g++
 CC=$(CROSS)gcc
 THIRDPARTY_DIR=../../../../ThirdParty
-INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
 SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
 EZOPTION_PARSER_DIR=$(THIRDPARTY_DIR)/EZOptionParser
 GRAVLIB_DIR=../../../api/cpp
@@ -27,10 +26,10 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(THIRDPARTY_DIR)/include -I$(INIPARSE_DIR)/src -I$(SQLLIB_DIR) -I$(EZOPTION_PARSER_DIR) $(ADDITIONAL_INCLUDES)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(THIRDPARTY_DIR)/include -I$(SQLLIB_DIR) -I$(EZOPTION_PARSER_DIR) $(ADDITIONAL_INCLUDES)
 CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib 
 
-LIBS= -lkeyvalue_parser -lgravity -lprotobuf -liniparser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+LIBS= -lkeyvalue_parser -lgravity -lprotobuf -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
