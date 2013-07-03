@@ -6,7 +6,7 @@ LD= $(CROSS)gcc
 AR= $(CROSS)ar
 
 #Compiler Flags
-CFLAGS+= -O3
+CFLAGS+= -O3 -fPIC
 INCLUDE+= -I.
 CFLAGS+= $(INCLUDE) -U_FORTIFY_SOURCE
 LDFLAGS+= -L.
