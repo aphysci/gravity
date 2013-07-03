@@ -1,7 +1,6 @@
-
 CC=g++
 THIRDPARTY_DIR=../../../../ThirdParty
-INIPARSE_DIR=$(THIRDPARTY_DIR)/iniparser
+KEYVALUE_PARSER_DIR=../../../../src/keyvalue_parser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 CXXTEST_DIR=$(THIRDPARTY_DIR)/cxxtest
 GRAVLIB_DIR=../../../../src/api/cpp
@@ -10,7 +9,7 @@ CXXTESTGEN=$(CXXTEST_DIR)/bin/cxxtestgen
 PROG_NAME=$(notdir $(shell pwd) )
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(THIRDPARTY_DIR)/include
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
+CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_PARSER_DIR)
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lwsock32 -lpthread
@@ -25,7 +24,7 @@ linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
-LIBS=-lgravity -lprotobuf -liniparser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 #LIBS=-Wl,-Bstatic -lgravity -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)
