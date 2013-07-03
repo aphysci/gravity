@@ -16,14 +16,12 @@ if not defined BOOST_HOME (
 )
 
 if not defined LEX_CMD (
-   echo You must define LEX_CMD
-   goto build_fail
+   set LEX_CMD=win_flex.exe
    end
 )
 
 if not defined YACC_CMD (
-   echo You must define YACC_CMD
-   goto build_fail
+   set YACC_CMD=win_bison.exe
    end
 )
 
