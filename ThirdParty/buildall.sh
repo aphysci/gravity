@@ -25,10 +25,6 @@ find protobuf-2.4.1/src/ -type f -iname "*.h*" -exec cp --parents {} include ";"
 mv include/protobuf-2.4.1/src/google include
 rm -rf include/protobuf-2.4.1
 
-pushd iniparser
-make $@ || exit 1
-popd
-
 pushd cppdb-trunk
 if [ `uname -o` == "Msys" ]; then
     cmake -G "MSYS Makefiles" || exit 1
