@@ -15,6 +15,18 @@ if not defined BOOST_HOME (
    end
 )
 
+if not defined LEX_CMD (
+   echo You must define LEX_CMD
+   goto build_fail
+   end
+)
+
+if not defined YACC_CMD (
+   echo You must define YACC_CMD
+   goto build_fail
+   end
+)
+
 
 :menu
 echo.
@@ -214,9 +226,9 @@ if %Clean% EQU 1 (
 popd
 
 :: Build keyvalue parser
-pushd src\keyvalue_parser\msvs
-win_bison.exe -dt ..\keyvalue.y -o ..\y.tab.c
-win_flex.exe -o ..\lex.yy.c ..\keyvalue.l
+pushd src\keyvalue_parser\
+%LEX_CMD% -o .\lex.yy.c .\keyvalue.l || goto build_fail
+%YACC_CMD% -dt .\keyvalue.y -o .\y.tab.c || goto build_fail
 popd
 pushd src\keyvalue_parser\msvs\keyvalue_parser
 if %Clean% EQU 1 (
