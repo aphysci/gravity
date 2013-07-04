@@ -1,6 +1,8 @@
 #include "GravityArchiver.h"
 #include <GravityConfigParser.h>
 #include <sstream>
+#include <fstream>
+
 
 #ifdef GCC
 #pragma GCC diagnostic push
@@ -13,8 +15,6 @@
 #elif defined(_MSC_VER)
 #pragma warning(push, 1)
 #endif
-
-#include <ezOptionParser.hpp> //This must be included before Windows.h because of #defines
 
 #ifdef GCC
 #pragma GCC diagnostic pop
@@ -40,7 +40,6 @@ public:
     bool Configure(int argc, const char** argv, gravity::GravityNode &gn);
 
     void ParseGravityConfig(gravity::GravityNode &gn);
-    void ParseCmdLine(int argc, const char** argv);
 	void ParseDataproductFile(std::string dpfn);
     bool Validate();
 
@@ -65,7 +64,6 @@ GravityArchiverConfigParser::GravityArchiverConfigParser()
 bool GravityArchiverConfigParser::Configure(int argc, const char** argv, gravity::GravityNode &gn)
 {
 	ParseGravityConfig(gn);
-    ParseCmdLine(argc, argv);
 
     ParseDataproductFile(dpfn);
 
@@ -108,29 +106,6 @@ void GravityArchiverConfigParser::ParseGravityConfig(gravity::GravityNode &gn)
 	table_name = gn.getStringParam("Table", "");
 
 	dpfn = gn.getStringParam("DataproductFile", "dataproductids");
-}
-
-void GravityArchiverConfigParser::ParseCmdLine(int argc, const char** argv)
-{
-	using namespace ez;
-	ezOptionParser* opt = new ezOptionParser();
-
-    opt->add("", false, 1, '\0', "Database connection string", "-c", "--con_str");
-
-    opt->add("", false, 1, '\0', "DataproductID Filename", "-c", "--dp_file");
-
-    opt->add("", false, 1, '\0', "Table Name", "-c", "--table");
-
-    if(opt->get("--con_str")->isSet)
-        opt->get("--con_str")->getString(con_str);
-
-    if(opt->get("--dp_file")->isSet)
-    {
-        opt->get("--dp_file")->getString(dpfn);
-    }
-
-    if(opt->get("--table")->isSet)
-        opt->get("--table")->getString(table_name);
 }
 
 

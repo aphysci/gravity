@@ -18,7 +18,6 @@
 #pragma warning(push, 1)
 #endif
 
-#include <ezOptionParser.hpp>
 
 #ifdef GCC
 #pragma GCC diagnostic pop
@@ -39,7 +38,6 @@ public:
     bool Configure(int argc, const char** argv, GravityNode &gn);
 
     void ParseGravityConfig(GravityNode &gn);
-    void ParseCmdLine(int argc, const char** argv);
 	void ParseDataproductFile(std::string dpfn);
     bool Validate();
 
@@ -119,38 +117,6 @@ void GravityPlaybackConfigParser::ParseGravityConfig(GravityNode &gn)
 	}
 
 	dpfn = gn.getStringParam("DataproductFile", "dataproductids");
-}
-
-void GravityPlaybackConfigParser::ParseCmdLine(int argc, const char** argv)
-{
-	using namespace ez;
-	ezOptionParser* opt = new ezOptionParser();
-
-    opt->add("", false, 1, '\0', "Database connection string", "-c", "--con_str");
-
-    opt->add("", false, 1, '\0', "DataproductID Filename", "-c", "--dp_file");
-
-    opt->add("", false, 1, '\0', "Table Name", "-c", "--table");
-
-    if(opt->get("--con_str")->isSet)
-        opt->get("--con_str")->getString(con_str);
-
-    if(opt->get("--dp_file")->isSet)
-    {
-        opt->get("--dp_file")->getString(dpfn);
-    }
-
-    if(opt->get("--table")->isSet)
-        opt->get("--table")->getString(table_name);
-
-    if(opt->lastArgs.size() == 2)
-    {
-    	stringstream ss1(opt->lastArgs[0]->c_str());
-    	stringstream ss2(opt->lastArgs[1]->c_str());
-
-    	ss1 >> start_time;
-    	ss2 >> end_time;
-    }
 }
 
 void GravityPlaybackConfigParser::ParseDataproductFile(string dpfn)
@@ -257,7 +223,6 @@ bool GravityPlaybackConfigParser::Validate()
 bool GravityPlaybackConfigParser::Configure(int argc, const char** argv, GravityNode &gn)
 {
 	ParseGravityConfig(gn);
-    ParseCmdLine(argc, argv);
 
     ParseDataproductFile(dpfn);
 
