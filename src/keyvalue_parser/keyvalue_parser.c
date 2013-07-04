@@ -14,6 +14,19 @@
  */
 int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_list_t **ppvarlist);
 
+
+/*
+ * Hash a given key
+ */
+unsigned int get_bucket_idx( const char *key )
+{
+    unsigned int val = 0;
+    for(; key && *key; key++)
+        val += (unsigned int)*key;
+    return val & ( NBUCKETS - 1 );
+}
+
+
 /*
  * Find a parameter by key
  */
@@ -34,12 +47,18 @@ var_el_t *var_list_find(pvar_list_t pvar_list, const char* key )
 void free_var_list(pvar_list_t pvar_list)
 {
     pvar_el_t var_el;
-    while ( ( var_el = var_list_first( pvar_list ) ) )
+    int i;
+    if ( !pvar_list ) 
+        return;
+    for ( i = 0; i < NBUCKETS; i++ )
     {
-        free(var_el->key);
-        free(var_el->val);
-        var_list_remove( pvar_list, var_el );
-        free(var_el);
+        while ( ( var_el = var_list_first( pvar_list + i ) ) )
+        {
+            free(var_el->key);
+            free(var_el->val);
+            var_list_remove( pvar_list + i, var_el );
+            free(var_el);
+        }
     }
 }
 
@@ -82,7 +101,7 @@ void var_list_remove( pvar_list_t pvar_list, pvar_el_t pvar_el )
     pvar_list->len--;
 }
 
-/* Insert an element at the tail of the list
+/* Insert an element at the tail of the list in this key's bucket
  */
 void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el )
 {
@@ -116,15 +135,17 @@ keyvalue_handle_t keyvalue_open(const char *fn, const char* sections[] )
 const char **keyvalue_getkeys(keyvalue_handle_t kv_handle )
 {
     pvar_el_t var_el;
-    int i;
-    const char **ppkeys = malloc( 
-        (var_list_length((pvar_list_t)kv_handle ) + 1 ) * sizeof(const char *));
-    if (NULL == ppkeys) 
+    int i, j, nentries = 0;
+    const char **ppkeys;
+    for ( i = 0; i < NBUCKETS; i++ )
+        nentries += var_list_length((pvar_list_t)kv_handle + i);
+    if ( NULL == ( ppkeys = malloc( ( nentries + 1 ) * sizeof(const char *) ) ) )
         return ppkeys;
-    for (i = 0, var_el = var_list_first((pvar_list_t)kv_handle); var_el; 
-            var_el = var_el->next, i++ )
-        ppkeys[i] = var_el->key;
-    ppkeys[i] = NULL;
+    for ( i = 0, j = 0; i < NBUCKETS; i++ )
+        for (var_el = var_list_first((pvar_list_t)kv_handle + i); var_el; 
+                var_el = var_el->next, j++ )
+                    ppkeys[j] = var_el->key;
+    ppkeys[j] = NULL;
     return ppkeys;
 }
 
@@ -133,7 +154,7 @@ const char **keyvalue_getkeys(keyvalue_handle_t kv_handle )
 const char *keyvalue_getstring(keyvalue_handle_t kv_handle, const char *key)
 {
     pvar_el_t var_el;
-    if ( ( var_el = var_list_find((pvar_list_t)kv_handle, key ) ) )
+    if ( ( var_el = var_list_find((pvar_list_t)kv_handle + get_bucket_idx(key), key ) ) )
         return var_el->val;
     return NULL;
 }

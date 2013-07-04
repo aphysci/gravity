@@ -23,18 +23,17 @@ void yyerror(const char *s)
 	fprintf(stderr, "yacc: error line %d: %s\n", yylineno, s);
 }
 extern char* yytext;
-extern var_list_t g_var_list;
 char *g_current_section = NULL;
 extern const char *g_section_name;
 #define CHECK_SECTION ( g_current_section && 0 == strcasecmp( g_current_section, g_section_name ) )
-
+#define YYPARSE_PARAM pbuckets
 %}
 %start file
 %token TOKEN SECTION VAR ERROR TOKEN_STRING
 %left '*' '/'
 %left '-' '+'
 %left '='
-//%expect 10
+%expect 19
 %%
 
 file: kvpair '\n'
@@ -76,7 +75,7 @@ kvpair:
             var_el->key = strdup($1);
             var_el->val = strdup($3);
             free($1); free($3);
-            var_list_insert(&g_var_list, var_el);
+            var_list_insert(& ( (pvar_list_t)pbuckets)[ get_bucket_idx( var_el->key ) ], var_el);
         }
     } 
 
@@ -90,7 +89,7 @@ expr:
     {
         if ( CHECK_SECTION )
         {
-            var_el_t *var_el = (var_el_t*)var_list_find(&g_var_list, (char*)$1); 
+            var_el_t *var_el = (var_el_t*)var_list_find(& ( (pvar_list_t)pbuckets)[ get_bucket_idx($1) ], (char*)$1); 
             if ( !var_el )
             {
                 char str[32];

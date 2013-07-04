@@ -14,11 +14,11 @@
 #include "y.tab.h"
 extern YYSTYPE yylval;
   
-var_list_t g_var_list;
+var_list_t g_buckets[ NBUCKETS ] ;
 const char *g_section_name;
 extern char *g_current_section;
 
-extern int yyparse();
+extern int yyparse(void* pbuckets);
 extern int yydebug;
 
 
@@ -29,11 +29,14 @@ int yywrap(void)
 int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_list_t **ppvarlist)
 {
     const char **_section_list;
-    int retval = 1;
+    int retval = 1, i;
     yydebug = 0;
-    g_var_list.len = 0;
-    g_var_list.head = NULL;
-    g_var_list.tail = NULL;
+    for ( i = 0; i < NBUCKETS; i++ )
+    {
+        g_buckets[i].len = 0;
+        g_buckets[i].head = NULL;
+        g_buckets[i].tail = NULL;
+    }
     
     if ( ppvarlist )
         *ppvarlist = NULL;
@@ -46,7 +49,7 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
         if (yyin)
         {
             yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );
-            retval = yyparse();
+            retval = yyparse(g_buckets);
             yy_delete_buffer( YY_CURRENT_BUFFER );
             fclose(yyin);
             if ( retval ) 
@@ -54,9 +57,9 @@ int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_
         }
     }
     if ( retval || !ppvarlist )
-        free_var_list(&g_var_list);
+        free_var_list(g_buckets);
     else 
-        *ppvarlist = &g_var_list;
+        *ppvarlist = g_buckets;
     
     return retval;
 }

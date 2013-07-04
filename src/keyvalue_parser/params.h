@@ -20,5 +20,10 @@ int var_list_length( pvar_list_t pvar_list );
 pvar_el_t var_list_first( pvar_list_t pvar_list );
 void var_list_remove( pvar_list_t pvar_list, pvar_el_t pvar_el );
 void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el );
+unsigned int get_bucket_idx( const char *key );
+
+/* Must be a pow2 
+ */
+#define NBUCKETS 64U
 
 #endif
