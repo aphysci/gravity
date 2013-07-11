@@ -33,7 +33,7 @@ endif
 
 .PRECIOUS: $(PROTO_CODE)
 
-all: test
+all: $(LIB_NAME)
 
 $(PROTOGEN_DIR)/%Container.java:%PB.proto
 	@echo $<
