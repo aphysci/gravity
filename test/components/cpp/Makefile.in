@@ -2,13 +2,12 @@ CC=g++
 THIRDPARTY_DIR=../../../../ThirdParty
 KEYVALUE_PARSER_DIR=../../../../src/keyvalue_parser
 ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
-CXXTEST_DIR=$(THIRDPARTY_DIR)/cxxtest
 GRAVLIB_DIR=../../../../src/api/cpp
 COMPONENTS_BIN_DIR=../../../../src/components/cpp/bin
-CXXTESTGEN=$(CXXTEST_DIR)/bin/cxxtestgen
+GRAVTEST_DIR=../../../
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(CXXTEST_DIR) -I$(THIRDPARTY_DIR)/include
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(THIRDPARTY_DIR)/include -I$(GRAVTEST_DIR)
 CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_PARSER_DIR)
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
@@ -25,19 +24,12 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
-#LIBS=-Wl,-Bstatic -lgravity -lzmq -lprotobuf -liniparser -Wl,-Bdynamic -lrt
 
 TEST_SRC=$(wildcard *.h)
 SRC=$(wildcard *.cpp)
-ifeq (,$(findstring runner.cpp,$(SRC)))
-    SRC := runner.cpp $(SRC)
-endif
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
 
 all: $(TEST_NAME) 
-
-runner.cpp: $(TEST_SRC)
-	$(CXXTESTGEN) --error-printer -o runner.cpp $^
 
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
