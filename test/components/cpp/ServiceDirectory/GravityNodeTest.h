@@ -1,5 +1,5 @@
 /*
- * GravityNodeTestSuite.h
+ * GravityNodeTest.h
  *
  *  Created on: Aug 17, 2012
  *      Author: Chris Brundick
@@ -26,14 +26,13 @@
   * - Connections over sockets on different machines (See ArchiverPlaybackTest)
   */
  
-#ifndef GRAVITYNODETESTSUITE_H_
-#define GRAVITYNODETESTSUITE_H_
+#ifndef GRAVITYNODETEST_H_
+#define GRAVITYNODETEST_H_
 
 #include <iostream>
 #include "GravityNode.h"
 #include "GravityLogger.h"
 #include "GravityDataProduct.h"
-#include "GravityTestSuite.h"
 #include "Utility.h"
 
 using namespace std;
@@ -49,7 +48,7 @@ public:
     void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
 };
 
-class GravityNodeTestSuite: public GravitySubscriber, GravityServiceProvider, GravityRequestor 
+class GravityNodeTest: public GravitySubscriber, GravityServiceProvider, GravityRequestor 
 {
 public:
     void setUp();
@@ -74,4 +73,4 @@ private:
     bool gotResponseFlag;
 };
 
-#endif /* GRAVITYNODETESTSUITE_H_ */
+#endif /* GRAVITYNODETEST_H_ */
