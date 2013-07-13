@@ -43,13 +43,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -153,6 +153,7 @@
     <OutDir>$(BinDir)</OutDir>
     <TargetName>$(ProjectName)_d</TargetName>
     <ExecutablePath>$(BinDir);$(WindowsSdkDir)\bin\x64;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -201,8 +202,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>copy $(GravityRoot)\ThirdParty\pthreads\bin\pthreadVCE2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
+      <Command>copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\dll\x86\pthreadVCE2.dll $(BinDir)
+copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x86\pthreadVCE2.lib $(LibDir)
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -213,7 +214,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\src\keyvalue_parser\;$(BOOSTROOT)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\src\keyvalue_parser\;$(BOOSTROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -228,9 +229,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>copy $(GravityRoot)\ThirdParty\pthreads\bin\pthreadVCE2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
-</Command>
+      <Command>copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\dll\x86\pthreadVCE2.dll $(BinDir)
+copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x86\pthreadVCE2.lib $(LibDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -266,13 +266,13 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\src\keyvalue_parser;$(BOOSTROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libprotobuf_d.lib;libzmq_d.lib;pthreadVC2.lib;iniparser_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf_d.lib;libzmq_d.lib;pthreadVC2.lib;libkeyvalue_parser_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -281,7 +281,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>copy $(GravityRoot)\ThirdParty\pthreads\bin\x64\pthreadVC2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
+copy $(GravityRoot)\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x64\pthreadVC2.lib $(LibDir)
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -348,7 +348,7 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;$(BOOSTROOT);..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;$(BOOSTROOT);..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -361,8 +361,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
-      <Command>copy $(GravityRoot)\ThirdParty\pthreads\bin\pthreadVCE2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
+      <Command>copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\dll\x86\pthreadVCE2.dll $(BinDir)
+copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x86\pthreadVCE2.lib $(LibDir)
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -375,21 +375,21 @@ copy $(GravityRoot)\ThirdParty\pthreads\lib\pthreadVCE2.lib $(LibDir)
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GRAVITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\include;..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\ThirdParty\protobuf-2.4.1\src;..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\src\keyvalue_parser\;$(BOOSTROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libprotobuf.lib;libzmq.lib;pthreadVC2.lib;iniparser.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf.lib;libzmq.lib;pthreadVC2.lib;libkeyvalue_parser.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
-      <Command>copy $(GravityRoot)\ThirdParty\pthreads\bin\x64\pthreadVC2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\lib\x64\pthreadVC2.lib $(LibDir)
+      <Command>copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x64\pthreadVC2.dll $(BinDir)
+copy $(GravityRoot)\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x64\pthreadVC2.lib $(LibDir)
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>

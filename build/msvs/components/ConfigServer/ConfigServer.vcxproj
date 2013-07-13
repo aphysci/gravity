@@ -178,7 +178,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -210,7 +210,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -268,7 +268,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -288,14 +288,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\ThirdParty\iniparser\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>gravity.lib;iniparser.lib;libzmq.lib;pthreadVC2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gravity.lib;libkeyvalue_parser.lib;libzmq.lib;pthreadVC2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

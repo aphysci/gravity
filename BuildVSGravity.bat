@@ -29,15 +29,12 @@ echo.
 echo ===========================
 echo ===== BUILD OPTIONS =======
 echo.
-::echo 1 - Release VS2012 32-bit
-::echo 2 - Debug VS2012 32-bit
-::echo 3 - Release VS2012 64-bit
-::echo 4 - Debug VS2012 64-bit
 echo 1 - Release VS2010 32-bit
 echo 2 - Debug VS2010 32-bit
-::echo 3 - Release VS2010 64-bit
-::echo 4 - Debug VS2010 64-bit
 echo 3 - Gravity Components (VS2010 32-bit executables)
+echo 4 - Debug VS2010 64-bit
+echo 5 - Release VS2010 64-bit
+echo 6 - Gravity Component (VS2010 64-bit executables)
 ::echo 6 - Java 32R
 ::echo 7 - Java 32D
 ::echo 8 - Java 64R
@@ -46,14 +43,17 @@ echo Q - Quit
 
 echo Build Selection:	
 ::choice /c:123456789Q>nul
-choice /c:123Q>nul
+choice /c:123456Q>nul
 
 ::if errorlevel 10 goto done
 ::if errorlevel 9 goto Java64D
 ::if errorlevel 8 goto Java64R
 ::if errorlevel 7 goto Java32D
 ::if errorlevel 6 goto Java32R
-if errorlevel 4 goto done
+if errorlevel 7 goto done
+if errorlevel 6 goto GravityComponents64
+if errorlevel 5 goto VS201064R
+if errorlevel 4 goto VS201064D
 if errorlevel 3 goto GravityComponents
 ::if errorlevel 4 goto VS201064D
 ::if errorlevel 3 goto VS201064R
@@ -159,11 +159,20 @@ set GRAVITY_LIB_PATH=..\..\..\x64\Debug2010\lib
 set GRAVITY_CONFIG=DEBUG
 goto build
 
+:GravityComponents64
+
+:: 32-bit release for all the components
+call setenv /x64 /release
+set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=x64 /p:PlatformToolset=Windows7.1SDK
+goto BuildGravityComponents
+
 :GravityComponents
 
 :: 32-bit release for all the components
 call setenv /x86 /release
 set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=Win32 /p:PlatformToolset=Windows7.1SDK
+
+:BuildGravityComponents
 
 echo ========== BUILDING ServiceDirectory ==========
 pushd build\msvs\components\ServiceDirectory
