@@ -8,7 +8,7 @@ OBJ_EXT=obj
 
 #Compiler Flags
 #(NOTE: if I quoted all of the include strings I might be able to use the / separator)
-INCLUDES=/I$(GRAV_HOME)\\include /I$(INIPARSER_DIR)\\src /I"$(JAVAINCLUDE_DIR)" /I$(THIRDPARTY_DIR)\\pthreads\\include /I"$(JAVAINCLUDE_DIR)\\win32"
+INCLUDES=/I$(GRAV_HOME)\\include /I$(KEYVALUE_PARSER_DIR)\\src /I"$(JAVAINCLUDE_DIR)" /I"$(JAVAINCLUDE_DIR)\\win32"
 LIBDIRS=/LIBPATH:"..\..\..\ThirdParty\lib" /LIBPATH:"$(GRAVITY_LIB_PATH)"
 #OS_SPECIFIC_FLAGS=/nologo /EHsc /D "WIN32" /D "_WINDOWS" /D "_USRDLL" /D "GRAVITY_EXPORTS" /D "_WINDLL" /D "_JNI_IMPLEMENTATION_"
 OS_SPECIFIC_FLAGS=/nologo /EHsc

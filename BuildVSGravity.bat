@@ -34,7 +34,7 @@ echo 2 - Debug VS2010 32-bit
 echo 3 - Gravity Components (VS2010 32-bit executables)
 echo 4 - Debug VS2010 64-bit
 echo 5 - Release VS2010 64-bit
-echo 6 - Gravity Component (VS2010 64-bit executables)
+echo 6 - Gravity Components (VS2010 64-bit executables)
 ::echo 6 - Java 32R
 ::echo 7 - Java 32D
 ::echo 8 - Java 64R
@@ -161,7 +161,7 @@ goto build
 
 :GravityComponents64
 
-:: 32-bit release for all the components
+:: 64-bit release for all the components
 call setenv /x64 /release
 set CONFIGURATION= /p:Configuration=Release2010 /p:Platform=x64 /p:PlatformToolset=Windows7.1SDK
 goto BuildGravityComponents
