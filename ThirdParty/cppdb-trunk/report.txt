@@ -1,2 +1,0 @@
-Testing drivers collection
-Testing connection pooling

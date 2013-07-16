@@ -182,7 +182,7 @@ if %Clean% EQU 1 (
 msbuild /target:ServiceDirectory %CONFIGURATION% ServiceDirectory.sln || goto build_fail
 popd
 
-goto SkipArchiverAndPlayback
+::goto SkipArchiverAndPlayback
 
 echo ========== BUILDING Archiver ==========
 pushd build\msvs\components\Archiver

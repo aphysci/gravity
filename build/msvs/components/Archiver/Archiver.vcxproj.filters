@@ -15,19 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\components\cpp\Archiver\GravityArchiver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\components\cpp\Archiver\main.cpp">
+    <None Include="..\..\Gravity.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\components\cpp\Archiver\GravityArchiver.h">
+    <ClInclude Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Gravity.props" />
   </ItemGroup>
 </Project>

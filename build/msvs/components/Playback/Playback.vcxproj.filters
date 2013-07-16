@@ -15,16 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\components\cpp\Playback\GravityPlayback.cpp">
+    <None Include="..\..\Gravity.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\components\cpp\Playback\FileReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\components\cpp\Playback\FileReplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\components\cpp\Playback\GravityPlayback.h">
+    <ClInclude Include="..\..\..\..\src\components\cpp\Playback\FileReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Gravity.props" />
+    <ClInclude Include="..\..\..\..\src\components\cpp\Playback\FileReplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

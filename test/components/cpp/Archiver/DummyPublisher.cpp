@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 
   GravityNode gn;
   gn.init("DummyPublisher");
-  gn.registerDataProduct(myDataProductID, "tcp");
+  gn.registerDataProduct(myDataProductID, GravityTransportType::TCP);
 
   GravityDataProduct dataProduct(myDataProductID);
   int count = 0;
