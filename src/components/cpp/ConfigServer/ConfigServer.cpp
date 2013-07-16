@@ -26,16 +26,10 @@ struct ConfigEntry
 class ConfigServer : public GravityServiceProvider
 {
 public:
-	ConfigServer(KeyValueConfigParser &parser);
+	ConfigServer() {}
     virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
-private:
-    KeyValueConfigParser &parser;
 };
-
-ConfigServer::ConfigServer(KeyValueConfigParser &other_parser) : parser(other_parser)
-{
-}
 
 shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
@@ -55,11 +49,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
     
     sections.push_back(NULL);
     
-    if(!parser.Open("config_file.ini", sections))
-	{
-		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
-		return shared_ptr<GravityDataProduct>(NULL);
-	}
+    KeyValueConfigParser parser("config_file.ini", sections);
     
     keys = parser.GetKeys();
     
@@ -69,6 +59,12 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 		std::string value = parser.GetString(*i);
 		if(value != "")
 			key_value_map[*i] = value;
+	}
+    
+    if(!key_value_map.size())
+	{
+		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
+		return shared_ptr<GravityDataProduct>(NULL);
 	}
 
 	//Populate Response Message and Send it
@@ -90,9 +86,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 
 int main(int argc, const char** argv)
 {
-	KeyValueConfigParser parser;
-	
-	ConfigServer server(parser);
+	ConfigServer server;
 
 	GravityNode gn;
 	gn.init("ConfigServer");

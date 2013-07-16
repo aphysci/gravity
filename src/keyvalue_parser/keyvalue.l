@@ -26,9 +26,9 @@ int yywrap(void)
 { return 1; }
 
 
-int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_list_t **ppvarlist)
+int keyvalue_parse_params(const char* param_fn, const char * const section_list[], var_list_t **ppvarlist)
 {
-    const char **_section_list;
+    const char * const *_section_list;
     int retval = 1, i;
     yydebug = 0;
     for ( i = 0; i < NBUCKETS; i++ )

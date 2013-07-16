@@ -3,6 +3,12 @@
 
 #include <string>
 #include <map>
+#ifndef __GNUC__
+#include <memory>
+#else
+#include <tr1/memory>
+#endif
+
 #include "keyvalue_parser.h"
 
 
@@ -15,32 +21,8 @@ public:
     /**
      * Constructor
      */
-    KeyValueConfigParser() {}
-
-    /**
-     * Opens the config file and reads in the contents.
-     */
-    bool Open(const char* filename, std::vector<const char *> &sections) 
-    {
-        return ( keyvalue_handle = keyvalue_open( filename, &sections[0] ) ) ? true : false;
-    }
-
-    /**
-     * Frees the resources asscociated with the config file.  Same as the destructor.
-     */
-    void Close()
-    {
-        keyvalue_close( keyvalue_handle );
-        keyvalue_handle = NULL;
-    }
-
-    /**
-     * Destructor: closes the config file.
-     */
-    virtual ~KeyValueConfigParser() 
-    {
-        Close();
-    }
+    KeyValueConfigParser(const char* filename, const std::vector<const char *> &sections) :
+        spKeyValueHandle( keyvalue_open( filename, &sections[0] ), keyvalue_close ) {}
 
      /**
      * GetString: fetches a string given a key
@@ -48,7 +30,8 @@ public:
     std::string GetString(const std::string key, const std::string default_value = "") 
     {
     	std::string key_lower = gravity::StringCopyToLowerCase(key);
-        std::string value = keyvalue_getstring( keyvalue_handle, key.c_str() );
+        /* Returns "" if not found */
+        std::string value( keyvalue_getstring( spKeyValueHandle.get(), key.c_str() ) );
     	if ( value.length() )
             return value;
         return default_value;
@@ -60,7 +43,7 @@ public:
     std::vector<std::string> GetKeys() 
     {
         std::vector<std::string> allkeys;
-        const char** keys = keyvalue_getkeys( keyvalue_handle );
+        const char** keys = keyvalue_getkeys( spKeyValueHandle.get() );
         for ( const char **_keys = keys; _keys && *_keys; _keys++ )
             allkeys.push_back( *_keys );
         if (keys)
@@ -69,7 +52,7 @@ public:
     }
     
 protected:
-    keyvalue_handle_t keyvalue_handle;
+    std::tr1::shared_ptr< keyvalue_type_t > spKeyValueHandle;
 };
 
 #endif //_KEYVALUE_PARSERWRAP_H

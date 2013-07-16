@@ -12,7 +12,7 @@
 /*
  * Defined in the Lexer spec, kicks off the parameter file parsing
  */
-int keyvalue_parse_params(const char* param_fn, const char *section_list[], var_list_t **ppvarlist);
+int keyvalue_parse_params(const char* param_fn, const char* const section_list[], var_list_t **ppvarlist);
 
 
 /*
@@ -123,7 +123,7 @@ void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el )
 
 /* Open a keyvalue file and return a handle to it 
  */
-keyvalue_handle_t keyvalue_open(const char *fn, const char* sections[] )
+keyvalue_handle_t keyvalue_open(const char *fn, const char* const sections[] )
 {
     pvar_list_t pvar_list = NULL;
     keyvalue_parse_params( fn, sections, &pvar_list );
@@ -135,16 +135,24 @@ keyvalue_handle_t keyvalue_open(const char *fn, const char* sections[] )
 const char **keyvalue_getkeys(keyvalue_handle_t kv_handle )
 {
     pvar_el_t var_el;
-    int i, j, nentries = 0;
+    int i, j = 0, nentries = 0;
     const char **ppkeys;
-    for ( i = 0; i < NBUCKETS; i++ )
-        nentries += var_list_length((pvar_list_t)kv_handle + i);
+    if ( kv_handle )
+    {
+        for ( i = 0; i < NBUCKETS; i++ )
+            nentries += var_list_length((pvar_list_t)kv_handle + i);
+    }
+    
     if ( NULL == ( ppkeys = malloc( ( nentries + 1 ) * sizeof(const char *) ) ) )
         return ppkeys;
-    for ( i = 0, j = 0; i < NBUCKETS; i++ )
-        for (var_el = var_list_first((pvar_list_t)kv_handle + i); var_el; 
-                var_el = var_el->next, j++ )
-                    ppkeys[j] = var_el->key;
+    
+    if ( kv_handle )
+    {
+        for ( i = 0; i < NBUCKETS; i++ )
+            for (var_el = var_list_first((pvar_list_t)kv_handle + i); var_el; 
+                    var_el = var_el->next, j++ )
+                        ppkeys[j] = var_el->key;
+    }
     ppkeys[j] = NULL;
     return ppkeys;
 }
@@ -154,9 +162,9 @@ const char **keyvalue_getkeys(keyvalue_handle_t kv_handle )
 const char *keyvalue_getstring(keyvalue_handle_t kv_handle, const char *key)
 {
     pvar_el_t var_el;
-    if ( ( var_el = var_list_find((pvar_list_t)kv_handle + get_bucket_idx(key), key ) ) )
+    if ( kv_handle && ( var_el = var_list_find((pvar_list_t)kv_handle + get_bucket_idx(key), key ) ) )
         return var_el->val;
-    return NULL;
+    return "";
 }
 
 /* Close a keyvalue file handle 

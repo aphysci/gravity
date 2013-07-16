@@ -27,5 +27,6 @@ int main()
     Log::message("nsamps = %d\n", gn.getIntParam( "nsamps", 0 ) );
     Log::message("nsamps_minus = %d\n", gn.getIntParam( "nsamps_minus", 0 ) );
     Log::message("operatorstr = %s\n", gn.getStringParam( "operatorstr", "Not found" ).c_str() );
+    Log::message("default_value = %s\n", gn.getStringParam( "default_value", "Not found" ).c_str() );
     return 0;
 }

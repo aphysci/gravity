@@ -16,10 +16,11 @@ extern "C" {
 #endif
 
 typedef void* keyvalue_handle_t;
+typedef void keyvalue_type_t;
 
 /* Open a keyvalue file and return a handle to it 
  */
-KEYVALUE_API keyvalue_handle_t keyvalue_open(const char *fn, const char* sections[] );
+KEYVALUE_API keyvalue_handle_t keyvalue_open(const char *fn, const char* const sections[] );
 
 /* Get all the keys parsed
  */

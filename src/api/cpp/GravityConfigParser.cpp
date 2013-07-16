@@ -21,17 +21,14 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
     std::vector<const char *> sections;
     
-    KeyValueConfigParser parser;
-    
     sections.push_back("general");
     sections.push_back(componentID.c_str());
     sections.push_back(NULL);
     
-	if(!parser.Open(config_filename, sections))
-        return; //Fail Silently
-
+    KeyValueConfigParser parser(config_filename, sections);
+    
 	std::vector<std::string> keys = parser.GetKeys();
-
+    
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
@@ -42,7 +39,6 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 			key_value_map[key_lower] = value;
         }
 	}
-    
 	return;
 }
 

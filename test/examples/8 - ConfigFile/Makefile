@@ -16,7 +16,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_EXE_EXT=.exe
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
+	OS_SPECIFIC_LIBS = -lrt
 	OS_EXE_EXT=
 linux: all;
 else
@@ -25,7 +25,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
 CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_DIR)
-LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) 
+LIBS=-Wl,-Bdynamic -lgravity $(OS_SPECIFIC_LIBS) 
 
 all: ConfigFileExample$(OS_EXE_EXT)
 
