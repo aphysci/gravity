@@ -1,13 +1,11 @@
 #CROSS= arm-angstrom-linux-gnueabi-
 CXX=$(CROSS)g++
 CC=$(CROSS)gcc
-THIRDPARTY_DIR=../../../../ThirdParty
-SQLLIB_DIR=$(THIRDPARTY_DIR)/cppdb-trunk
+
 GRAVLIB_DIR=../../../api/cpp
 MYPROTO_DIR=protobufs
-PROTOC=$(THIRDPARTY_DIR)/bin/protoc
+PROTOC=$(PROTOBUF_INCLUDE_DIR)/protoc
 PROG_NAME=$(notdir $(shell pwd) )
-
 
 #OS Specific
 SYSTEM:=$(strip $(shell uname -s))
@@ -25,8 +23,9 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(THIRDPARTY_DIR)/include -I$(SQLLIB_DIR) $(ADDITIONAL_INCLUDES)
-CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
+INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(PROTOBUF_INCLUDE_DIR) $(ADDITIONAL_INCLUDES)
+CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR)
+
 LIBS=-lkeyvalue_parser -lgravity -lprotobuf -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 SRC=$(wildcard *.cpp)

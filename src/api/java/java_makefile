@@ -1,4 +1,3 @@
-THIRDPARTY_DIR=../../../ThirdParty
 
 #Protobuf sources (.proto)
 PROTO_DIR=../protobufs
@@ -14,7 +13,7 @@ SWIGGENJAVA_DIR=$(GRAVJAVASRC_DIR)/swig
 JAVA_BUILD_DIR=build/
 
 #Tools
-PROTOC=../../../ThirdParty/bin/protoc
+PROTOC=protoc
 
 #Naming
 JAR_NAME=gravity.jar
@@ -33,7 +32,8 @@ linux: $(JAR_NAME);
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
-MY_CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
+
+MY_CLASSPATH="$(JAVAPROTOBUF_DIR)$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
 
 #Source/Object/Dependancies
 CLASSES=$(patsubst $(GRAVJAVASRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(wildcard $(GRAVJAVASRC_DIR)/*.java))

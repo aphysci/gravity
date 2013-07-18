@@ -1,19 +1,18 @@
 CC=g++
-THIRDPARTY_DIR=../../../../ThirdParty
+
 KEYVALUE_PARSER_DIR=../../../../src/keyvalue_parser
-ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 GRAVLIB_DIR=../../../../src/api/cpp
 COMPONENTS_BIN_DIR=../../../../src/components/cpp/bin
 GRAVTEST_DIR=../../../
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(THIRDPARTY_DIR)/include -I$(GRAVTEST_DIR)
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_PARSER_DIR)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_INCLUDE_DIR) -I$(GRAVTEST_DIR)
+CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_LIB_DIR) -L$(KEYVALUE_PARSER_DIR)
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lwsock32 -lpthread
         TEST_NAME=$(PROG_NAME)Test.exe
-	PATH:=${PATH}:$(COMPONENTS_BIN_DIR):$(THIRDPARTY_DIR)/bin
+	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lrt

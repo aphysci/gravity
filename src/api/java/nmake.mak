@@ -1,5 +1,4 @@
 #Use this file with Microsoft NMake
-THIRDPARTY_DIR=../../../ThirdParty
 
 #Protobuf sources (.proto)
 PROTO_DIR=../protobufs
@@ -29,7 +28,7 @@ JAR_NAME=gravity.jar
 #Visual Studio
 CLASSPATH_SEP=;
 
-MY_CLASSPATH="$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
+MY_CLASSPATH="$(JAVAPROTOBUF_DIR)$(CLASSPATH_SEP)build$(CLASSPATH_SEP)."
 
 #Source/Object/Dependancies
 CLASSES=$(GRAVJAVACLASS_DIR)/GravityDataProduct.class $(GRAVJAVACLASS_DIR)/GravityHeartbeatListener.class $(GRAVJAVACLASS_DIR)/GravityRequestor.class $(GRAVJAVACLASS_DIR)/GravityServiceProvider.class $(GRAVJAVACLASS_DIR)/GravitySubscriber.class $(GRAVJAVACLASS_DIR)/Logger.class

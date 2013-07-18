@@ -1,6 +1,5 @@
 CC=g++
-THIRDPARTY_DIR=../../../ThirdParty
-PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
+PROTOBUF_DIR=$(PROTOBUF_INCLUDE_DIR)
 GRAVLIB_DIR=../../../src/api/cpp/
 COMPONENT_DIR=../../../src/components/cpp
 SERVICEDIRECTORY_LOCATION=$(COMPONENT_DIR)/ServiceDirectory
@@ -16,7 +15,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_EXE_EXT=.exe
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lrt
+	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt
 	OS_EXE_EXT=
 linux: all;
 else
@@ -24,8 +23,8 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L$(KEYVALUE_DIR)
-LIBS=-Wl,-Bdynamic -lgravity $(OS_SPECIFIC_LIBS) 
+CFLAGS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_DIR)
+LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS) 
 
 all: ConfigFileExample$(OS_EXE_EXT)
 

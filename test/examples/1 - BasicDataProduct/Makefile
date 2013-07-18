@@ -1,6 +1,4 @@
 CC=g++
-THIRDPARTY_DIR=../../../ThirdParty
-PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 GRAVLIB_DIR=../../../src/api/cpp/
 COMPONENT_DIR=../../../src/components/cpp
 SERVICEDIRECTORY_LOCATION=$(COMPONENT_DIR)/ServiceDirectory
@@ -23,8 +21,8 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib -L../../../src/keyvalue_parser/
-LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) 
+CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/
+LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS) 
 
 all: BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 

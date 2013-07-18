@@ -1,7 +1,8 @@
 JAVASRC_DIR=.
 JAVA_BUILD_DIR=build
 LIB_NAME=MATLABGravitySubscriber.jar
-CLASSPATH=../java/gravity.jar;../../../ThirdParty/guava-13.0.1/guava-13.0.1.jar
+
+CLASSPATH=../java/gravity.jar;$(GUAVAJAR_DIR)
 SOURCES=MATLABGravitySubscriber.java
 CLASSES=MATLABGravitySubscriber.class
 

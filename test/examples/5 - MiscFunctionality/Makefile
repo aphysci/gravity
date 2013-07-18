@@ -1,6 +1,4 @@
 CC=g++
-THIRDPARTY_DIR=../../../ThirdParty
-PROTOBUF_DIR=$(THIRDPARTY_DIR)/protobuf-2.4.1
 GRAVLIB_DIR=../../../src/api/cpp
 MYPROTO_DIR=../protobuf
 PROTOC=$(PROTOBUF_DIR)/src/protoc
@@ -27,8 +25,8 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib 
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -liniparser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ 
+LIBS=-Wl,-Bstatic -lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))

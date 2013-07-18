@@ -2,6 +2,9 @@
 DO_CLEAN=1
 DO_TEST=1
 
+echo "Sourcing the Gravity environment variables ..."
+source ./gravity_env.config
+
 pushd ./ThirdParty >& /dev/null
 if [ $DO_CLEAN == 1 ]; then ./buildall.sh clean || exit 1 ; fi
 ./buildall.sh || exit 1

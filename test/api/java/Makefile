@@ -1,6 +1,4 @@
 
-THIRDPARTY_DIR=../../../ThirdParty
-ZMQ_DIR=$(THIRDPARTY_DIR)/zeromq-3.2.0
 JAVASRC_DIR=src
 GRAVSRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity
 PROTOGEN_DIR=$(GRAVSRC_DIR)/protobuf
@@ -8,7 +6,6 @@ JAVA_BUILD_DIR=build
 LIB_NAME=gravitytest.jar
 PRODGRAV_DIR=../../../src/api/java
 GRAVLIB=$(PRODGRAV_DIR)/gravity.jar
-#PROTOC=$(THIRDPARTY_DIR)/bin/protoc
 PROTOC=protoc
 
 SRC=$(wildcard $(GRAVSRC_DIR)/*java)
@@ -20,12 +17,12 @@ PROTO_OBJ=$(patsubst $(PROTOGEN_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_CODE
 
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	CLASSPATH="$(GRAVLIB);build;$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar"
+        CLASSPATH="$(GRAVLIB);build;$(JAVAPROTOBUF_DIR)"
 	THIRDPARTY_LIB=../../../Win32/Release/bin
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	CLASSPATH=$(GRAVLIB):build:$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar
-	THIRDPARTY_LIB=$(THIRDPARTY_DIR)/lib
+        CLASSPATH=$(GRAVLIB):build:$(JAVAPROTOBUF_DIR)
+        THIRDPARTY_LIB=$(ZMQ_LIB_DIR)
 linux: all;
 else
         ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
@@ -45,7 +42,7 @@ $(JAVA_BUILD_DIR)/%.class:$(PROTOGEN_DIR)/%.java
 
 $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	@echo $<
-	@javac -d $(JAVA_BUILD_DIR) -cp $(GRAVLIB):$(THIRDPARTY_DIR)/lib/protobuf-java-2.4.1.jar:build:. -sourcepath src/java $<
+	@javac -d $(JAVA_BUILD_DIR) -cp $(GRAVLIB):$(JAVAPROTOBUF_DIR):build:. -sourcepath src/java $<
 
 $(LIB_NAME): $(PROTO_OBJ) $(OBJECTS) 
 	echo $(GRAVSRC_DIR)
