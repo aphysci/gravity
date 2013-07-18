@@ -26,9 +26,8 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(THIRDPARTY_DIR)/include -I$(SQLLIB_DIR) $(ADDITIONAL_INCLUDES)
-CFLAGS=-L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib 
-
-LIBS= -lgravity $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) -L$(THIRDPARTY_DIR)/lib
+LIBS= -lgravity -lzmq -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
