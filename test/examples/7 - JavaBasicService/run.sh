@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PATH=$PATH:$PROTOBUF_INCLUDE_DIR:../../../src/api/java:../../../src/components/cpp/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR
 
 ServiceDirectory &
 SDPID=$!
