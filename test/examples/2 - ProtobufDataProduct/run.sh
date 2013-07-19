@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PATH=$PATH:../../../src/components/cpp/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
  control_c()
 # run if user hits control-c

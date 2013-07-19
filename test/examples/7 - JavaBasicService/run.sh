@@ -5,7 +5,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:../../../src/api/cpp:../../
 
 ServiceDirectory &
 SDPID=$!
-java -cp build:$JAVAPROTOBUF_DIR:../../../src/api/java/gravity.jar -Djava.library.path=../../../src/api/java:$PROTOBUF_INCLUDE_DIR:$ZMQ_LIB_DIR BasicServiceProvider &
+java -cp build:$JAVAPROTOBUF_DIR:../../../src/api/java/gravity.jar -Djava.library.path=../../../src/api/java:$PROTOBUF_INCLUDE_DIR:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR BasicServiceProvider &
 JDPPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product

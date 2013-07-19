@@ -24,7 +24,7 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ 
+CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ -L$(PROTOBUF_LIB_DIR) -L$(ZMQ_LIB_DIR)
 LIBS=-Wl,-Bstatic -lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)

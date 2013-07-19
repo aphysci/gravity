@@ -7,7 +7,7 @@ GRAVTEST_DIR=../../../
 PROG_NAME=$(notdir $(shell pwd) )
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(ZMQ_DIR)/include -I$(PROTOBUF_INCLUDE_DIR) -I$(GRAVTEST_DIR)
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_LIB_DIR) -L$(KEYVALUE_PARSER_DIR)
+CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(ZMQ_LIB_DIR) -L$(KEYVALUE_PARSER_DIR) -L$(PROTOBUF_LIB_DIR)
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lwsock32 -lpthread

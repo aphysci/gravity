@@ -23,7 +23,7 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_DIR)
+CFLAGS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_DIR) -L$(PROTOBUF_LIB_DIR) -L$(ZMQ_LIB_DIR)
 LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS) 
 
 all: ConfigFileExample$(OS_EXE_EXT)

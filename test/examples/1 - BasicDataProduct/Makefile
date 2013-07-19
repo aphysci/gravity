@@ -21,7 +21,7 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
-CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/
+CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ -L$(PROTOBUF_LIB_DIR) -L$(ZMQ_LIB_DIR)
 LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS) 
 
 all: BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
