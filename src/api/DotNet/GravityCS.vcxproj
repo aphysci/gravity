@@ -56,7 +56,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\tludwinski\Documents\gravity\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\cpp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -69,7 +69,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\tludwinski\Documents\gravity\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\cpp;..\..\..\ThirdParty\include;..\..\..\ThirdParty\pthreads\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -79,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Reference Include="Google.ProtocolBuffers">
-      <HintPath>..\..\..\..\..\gravity\ThirdParty\csharp\proto-csharp-port\Release\v4.0\Google.ProtocolBuffers.dll</HintPath>
+      <HintPath>..\..\..\ThirdParty\DotNet\proto-csharp-port\v4.0\Google.ProtocolBuffers.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

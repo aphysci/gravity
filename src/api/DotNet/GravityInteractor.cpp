@@ -58,7 +58,7 @@ public:
 		for(size_t i = 0; i < dataProducts.size(); i++)
 		{
 			//Convert Data Product
-			GravityCS::DataProduct^ dataProduct = gcnew GravityCS::DataProduct(const_cast<gravity::GravityDataProduct*>(&(*dataProducts[i])));
+			GravityCS::DataProduct^ dataProduct = gcnew GravityCS::DataProduct(dataProducts[i]);
 			dataProducts_CS->Add(dataProduct);
 		}
 
@@ -136,7 +136,7 @@ public:
 		String^ serviceID = gcnew String(service_ID_str.c_str());
 		String^ requestID = gcnew String(request_ID_str.c_str());
 		//Convert Data Product
-		const GravityCS::DataProduct^ dataProduct = gcnew GravityCS::DataProduct(const_cast<gravity::GravityDataProduct*>(&response));
+		const GravityCS::DataProduct^ dataProduct = gcnew GravityCS::DataProduct(shared_ptr<gravity::GravityDataProduct>(& const_cast<gravity::GravityDataProduct &>(response)));
 
 		//Call the delegate.  
 		requestWrapperHelper::GetDelegateFromRequestor(this)->Invoke(serviceID, requestID, dataProduct); //TODO: make sure this blocks until finished.  
@@ -158,7 +158,86 @@ void GravityInteractor::Request(String^ service_ID, const DataProduct^ request, 
 	genericRequestWrapperCS* callbackWrapper = new genericRequestWrapperCS(callbacks);
 
 	//Call Gravity
-	gn->request(service_ID_str, *(request->cpp_dataProduct), *callbackWrapper, request_ID_str, timeout_in_milliseconds);
+	gn->request(service_ID_str, *(request->cpp_dataProduct->get()), *callbackWrapper, request_ID_str, timeout_in_milliseconds);
+}
+
+
+//Register / Unregister
+
+void GravityInteractor::RegisterDataProduct(String^ dataProductID, GravityTransportType transportType)
+{
+	std::string dataProductID_str = Marshall(dataProductID);
+
+	gn->registerDataProduct(dataProductID_str, transportType);
+}
+
+void GravityInteractor::UnregisterDataProduct(String^ dataProductID)
+{
+	std::string dataProductID_str = Marshall(dataProductID);
+	gn->unregisterDataProduct(dataProductID_str);
+}
+
+class genericServiceProviderCS;
+
+ref class ServiceProviderWrapperHelper
+{
+internal:
+	static Collections::Generic::Dictionary<IntPtr, ServiceRequest^>^ hashtable = gcnew Collections::Generic::Dictionary<IntPtr, ServiceRequest^>();
+	static Collections::Generic::Dictionary<String^, IntPtr>^ string_to_SP = gcnew Collections::Generic::Dictionary<String^, IntPtr>();
+	static ServiceRequest^ GetDelegateFromSP(genericServiceProviderCS* server)
+	{
+		ServiceRequest^ ret_val;
+		if(!hashtable->TryGetValue((IntPtr)server, ret_val))
+			throw gcnew System::ArgumentException("Gravity CS: Could not find Service Provider");
+		return ret_val;
+	}
+};
+
+
+class genericServiceProviderCS : public gravity::GravityServiceProvider
+{
+public:
+	genericServiceProviderCS(String^ serviceID, ServiceRequest^ callbacks)
+	{
+		ServiceProviderWrapperHelper::hashtable->Add((IntPtr)this, callbacks);
+		ServiceProviderWrapperHelper::string_to_SP->Add(serviceID, (IntPtr)this);
+	}
+
+	virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct)
+	{
+		//Marshall Strings
+		String^ serviceID_str = gcnew String(serviceID.c_str());
+		//Convert Data Product
+		const GravityCS::DataProduct^ dataProduct_cs = gcnew GravityCS::DataProduct(shared_ptr<gravity::GravityDataProduct>(& const_cast<gravity::GravityDataProduct &>(dataProduct)));
+
+		//Call the delegate.  
+		GravityCS::DataProduct^ ret_val = ServiceProviderWrapperHelper::GetDelegateFromSP(this)->Invoke(serviceID_str, dataProduct_cs); //TODO: make sure this blocks until finished.  
+
+		return *(ret_val->cpp_dataProduct);
+	}
+};
+
+void GravityInteractor::RegisterService(String^ serviceID, GravityTransportType transportType, ServiceRequest^ serverFunction)
+{
+	std::string serviceID_str = Marshall(serviceID);
+
+	genericServiceProviderCS* gsp = new genericServiceProviderCS(serviceID, serverFunction);
+	gn->registerService(serviceID_str, transportType, *gsp);
+}
+
+void GravityInteractor::UnregisterService(String^ serviceID)
+{
+	std::string serviceID_str = Marshall(serviceID);
+	gn->unregisterService(serviceID_str);
+
+	//Clean ourselves up.  
+	IntPtr ptr;
+	if(ServiceProviderWrapperHelper::string_to_SP->TryGetValue(serviceID, ptr))
+	{
+		ServiceProviderWrapperHelper::string_to_SP->Remove(serviceID);
+		ServiceProviderWrapperHelper::hashtable->Remove(ptr);
+		delete ((genericServiceProviderCS*) ptr.ToPointer());
+	}
 }
 
 } //namespace

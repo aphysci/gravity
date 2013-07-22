@@ -9,13 +9,17 @@ using namespace System;
 
 namespace GravityCS
 {
+using namespace std::tr1;
 
 //Forward Declarations.  
 ref class DataProduct;
 public delegate void RequestFilled(String^ serviceID, String^ requestID, const GravityCS::DataProduct^ response);
 public delegate void SubscriptionFilled(Collections::Generic::IList<DataProduct^>^ dataProducts);
+public delegate DataProduct^ ServiceRequest(String^ serviceID, const DataProduct^ dataProducts);
 
 std::string Marshall(String^ managedString);
+
+using gravity::GravityTransportType;
 
 public ref class GravityInteractor
 {
@@ -42,27 +46,31 @@ public:
 	{
 		return (IntPtr) gn;
 	}
+
+	//Register/Unregister
+	void RegisterDataProduct(String^ dataProductID, GravityTransportType transportType);
+	void UnregisterDataProduct(String^ dataProductID);
+
+    void RegisterService(String^ serviceID, GravityTransportType transportType, ServiceRequest^ serverFunction);
+	void UnregisterService(String^ serviceID);
 };
 
 
 public ref class DataProduct
 {
 internal:
-	DataProduct(gravity::GravityDataProduct* cpp_dataProduct)
+	DataProduct(shared_ptr<gravity::GravityDataProduct> cpp_dataProduct)
 	{
-		this->cpp_dataProduct = cpp_dataProduct;
-		we_own_the_dataproduct = false;
+		this->cpp_dataProduct = new shared_ptr<gravity::GravityDataProduct>(cpp_dataProduct);
 	}
 
 	//Protobuf object
-	gravity::GravityDataProduct* cpp_dataProduct;
-	bool we_own_the_dataproduct;
+	shared_ptr<gravity::GravityDataProduct>* cpp_dataProduct; //This is convoluted but we can't have non-pointer, non-clr C++ types in a .net class.  
 public:
 	//DataProduct();
 	DataProduct(String^ dataProductID)
 	{
-		cpp_dataProduct = new gravity::GravityDataProduct(Marshall(dataProductID));
-		we_own_the_dataproduct = true;
+		this->cpp_dataProduct = new shared_ptr<gravity::GravityDataProduct>(new gravity::GravityDataProduct(Marshall(dataProductID)));
 	}
 
 	void setData(Google::ProtocolBuffers::IMessage^ data)
@@ -70,16 +78,16 @@ public:
 		array<unsigned char>^ bytesArray = data->ToByteArray();
 		pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
 
-		this->cpp_dataProduct->setData(dataPointer, bytesArray->Length);
+		(*cpp_dataProduct)->setData(dataPointer, bytesArray->Length);
 	}
 
 	void getProtobufObject(Google::ProtocolBuffers::IBuilder^ protobufOut)
 	{
-		array<unsigned char>^ bytesArray = gcnew array<unsigned char>(cpp_dataProduct->getDataSize()); //No need to free this guy, right.  
+		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.  
 
 		{
 			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
-			cpp_dataProduct->getData(dataPointer, cpp_dataProduct->getDataSize());
+			(*cpp_dataProduct)->getData(dataPointer, (*cpp_dataProduct)->getDataSize());
 		}
 
 		Google::ProtocolBuffers::ByteString^ bs = Google::ProtocolBuffers::ByteString::CopyFrom(bytesArray);
@@ -88,11 +96,11 @@ public:
 
 	array<unsigned char>^ getRawData()
 	{
-		array<unsigned char>^ bytesArray = gcnew array<unsigned char>(cpp_dataProduct->getDataSize()); //No need to free this guy, right.  
+		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.  
 
 		{
 			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
-			cpp_dataProduct->getData(dataPointer, cpp_dataProduct->getDataSize());
+			(*cpp_dataProduct)->getData(dataPointer, (*cpp_dataProduct)->getDataSize());
 		}
 
 		return bytesArray;
@@ -100,8 +108,7 @@ public:
 
 	~DataProduct()
 	{
-		if(we_own_the_dataproduct)
-			delete cpp_dataProduct;
+		delete cpp_dataProduct;
 	}
 
 	//TODO: 
