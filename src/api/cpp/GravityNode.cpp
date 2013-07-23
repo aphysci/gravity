@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -22,7 +22,7 @@
  *  Created on: Aug 14, 2012
  *      Author: Chris Brundick
  */
- 
+
 #include <zmq.h>
 #include <iostream>
 #include <pthread.h>
@@ -62,7 +62,7 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 
-#include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition. 
+#include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition.
 
 static void* startSubscriptionManager(void* context)
 {
@@ -257,7 +257,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
     	numThreadsWaiting--;
     }
     zmq_close(initSocket);
-	
+
 	s_restore_signals();
 
 	if(s_interrupted)
@@ -331,7 +331,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
         // Command the GravityMetricsManager thread to start collecting metrics
         sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
 
-        // Get collection parameters from ini file 
+        // Get collection parameters from ini file
         // (default to 10 second sampling, publishing once per min)
         int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
         int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
@@ -482,7 +482,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
         transportType_str = "epgm";
     	  endpoint = dataProductID;
     }
-    
+
     // we can't allow multiple threads to make request calls to the pub manager at the same time
     // because the requests will step on each other.
     lock.Lock();
@@ -1189,11 +1189,11 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 }
 
 #ifdef WIN32
-//convert binary address to string.  
+//convert binary address to string.
 const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 {
 	assert(af == AF_INET); //We only support IPV4
-	
+
 	unsigned short new_src[4];
 	new_src[0] = (uint8_t) ((char *) src)[0];
 	new_src[1] = (uint8_t) ((char *) src)[1];
@@ -1203,9 +1203,9 @@ const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.
 	if(dest_length < (int) ss.str().length() + 1)
 		return NULL;
-	
+
 	memcpy(dest, ss.str().c_str(), ss.str().length() + 1);
-	
+
 	return dest;
 }
 
@@ -1218,7 +1218,7 @@ string GravityNode::getIP()
 
     if (!serviceDirectoryNode.ipAddress.empty() && serviceDirectoryNode.ipAddress != "localhost")
     {
-		//Reads the IP used to connect to the Service Directory.  
+		//Reads the IP used to connect to the Service Directory.
         int buflen = 16;
         char* buffer = (char*)malloc(buflen);
 
@@ -1288,7 +1288,7 @@ bool GravityNode::getBoolParam(std::string key, bool default_value)
 		return false;
 }
 
-static std::map<GravityReturnCode,std::string> code_strings = 
+static std::map<GravityReturnCode,std::string> code_strings =
   boost::assign::map_list_of
     (GravityReturnCodes::SUCCESS, "SUCCESS")
     (GravityReturnCodes::FAILURE, "FAILURE")
@@ -1313,6 +1313,6 @@ string GravityNode::getCodeString(GravityReturnCode code) {
         s = code_strings[code];
     }
     return s;
-} 
+}
 
 } /* namespace gravity */

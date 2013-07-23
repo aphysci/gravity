@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -85,7 +85,7 @@ $(shell mkdir protobuf -p)
 
 all: $(LIB_NAME).a $(LIB_NAME).$(LIB_EXT)
 
-#it looks like make automatically deletes these guys after building.  
+#it looks like make automatically deletes these guys after building.
 $(MY_PROTOBUF_BUILD_DIR)/%.pb.cc:$(MYPROTO_DIR)/%.proto
 	@echo protoc $<
 	@$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MY_PROTOBUF_BUILD_DIR) $<
@@ -99,7 +99,7 @@ $(MY_PROTOBUF_BUILD_DIR)$(OS_PATH_SEP)%.pb.$(OBJ_EXT):$(MY_PROTOBUF_BUILD_DIR)/%
 	@$(CC) $(COUTPUT_FLAG)$@ $(COMPILE_FLAG) $(CFLAGS) $<
 
 $(LIB_NAME).a: $(PROTO_OBJ) $(OBJECTS)
-	@echo building $(LIB_NAME).a  
+	@echo building $(LIB_NAME).a
 	@ar rcs $(LIB_NAME).a $(OBJECTS) $(PROTO_OBJ)
 
 $(LIB_NAME).$(LIB_EXT): $(PROTO_OBJ) $(OBJECTS)

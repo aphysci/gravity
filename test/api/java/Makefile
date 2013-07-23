@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -61,7 +61,7 @@ $(JAVA_BUILD_DIR)/%.class:$(GRAVSRC_DIR)/%.java
 	@echo $<
 	@javac -d $(JAVA_BUILD_DIR) -cp $(GRAVLIB):$(JAVAPROTOBUF_DIR):build:. -sourcepath src/java $<
 
-$(LIB_NAME): $(PROTO_OBJ) $(OBJECTS) 
+$(LIB_NAME): $(PROTO_OBJ) $(OBJECTS)
 	echo $(GRAVSRC_DIR)
 	echo $(SRC)
 	echo $(OBJECTS)

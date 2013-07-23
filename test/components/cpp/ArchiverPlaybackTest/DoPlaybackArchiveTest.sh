@@ -11,7 +11,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -34,9 +34,9 @@ PLPID=$!
 Archiver &
 ARPID=$!
 
-#Wait for the playback to finish.  
+#Wait for the playback to finish.
 wait $PLPID
-#Kill other processes.  
+#Kill other processes.
 kill $ARPID
 kill $SDPID
 
@@ -45,8 +45,8 @@ echo "Select HEX(message), DataproductID from archivetest;" > tmpsql321.sql
 mysql test -uroot -pesmf < tmpsql321.sql > tmpoutsql321.txt
 rm tmpsql321.sql
 
-#Compare the data to what was expected.  
-if diff expected_sql_output.txt tmpoutsql321.txt ; then 
+#Compare the data to what was expected.
+if diff expected_sql_output.txt tmpoutsql321.txt ; then
 	echo Test Passed
 else
 	echo Test Failed

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -33,7 +33,7 @@ public class GravityJavaTest {
 	private static boolean reqCalled = false;
 	private static boolean provCalled = false;
 	private static boolean logCalled = false;
-	
+
     public static void main(String[] argv) {
     	Log.initAndAddLogger(new TestLogger(), Log.LogLevel.DEBUG);
         Log.debug("in main");
@@ -41,13 +41,13 @@ public class GravityJavaTest {
         GravityNode node = new GravityNode();
         GravityReturnCode ret = node.init("TestNode");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         ret = node.registerDataProduct("JavaGDP", GravityTransportType.TCP);
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         Subscriber s = new Subscriber();
         ret = node.subscribe("JavaGDP", s, "");
-  
+
         GravityDataProduct gdp = new GravityDataProduct("JavaGDP");
         gdp.setSoftwareVersion("version 1");
         JavaTestPB.Builder builder = JavaTestPB.newBuilder();
@@ -55,7 +55,7 @@ public class GravityJavaTest {
         builder.setCount(count++);
         builder.setMessage("Hello Java World");
         gdp.setData(builder);
-        
+
         ret = node.publish(gdp, "Java");
         testAssert(ret == GravityReturnCode.SUCCESS);
 
@@ -63,17 +63,17 @@ public class GravityJavaTest {
         gdp.setData(builder);
         ret = node.publish(gdp, "Java");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         builder.setCount(count++);
         gdp.setData(builder);
         ret = node.publish(gdp, "Java");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         builder.setCount(count++);
         gdp.setData(builder);
         ret = node.publish(gdp, "Java");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         // wait a bit before unsubscribing to allow the messages to get through
         try {
 			Thread.sleep(2000);
@@ -84,22 +84,22 @@ public class GravityJavaTest {
         testAssert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.publish(gdp, "Java");
-        
+
         ret = node.unregisterDataProduct("JavaGDP");
         testAssert(ret == GravityReturnCode.SUCCESS);
 
         ret = node.unregisterDataProduct("JavaGDP");
         testAssert(ret == GravityReturnCode.REGISTRATION_CONFLICT);
-        
+
         GravityServiceProvider gsp = new ServiceProvider();
         ret = node.registerService("JavaService", GravityTransportType.TCP, gsp);
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         GravityRequestor gr = new Requestor();
         GravityDataProduct request = new GravityDataProduct("JavaRequest");
         ret = node.request("JavaService", request, gr);
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         // wait a bit before unsubscribing to allow the message to get through
         try {
 			Thread.sleep(10);
@@ -108,14 +108,14 @@ public class GravityJavaTest {
 
         ret = node.unregisterService("JavaService");
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         ret = node.registerService("SyncJavaService", GravityTransportType.TCP, new SyncServiceProvider());
         testAssert(ret == GravityReturnCode.SUCCESS);
-        
+
         GravityDataProduct syncRequest = new GravityDataProduct("SyncJavaRequest");
         GravityDataProduct syncResponse = node.request("SyncJavaService", syncRequest);
         testAssert(syncResponse.getDataProductID().equals("SyncJavaResponse"));
-        
+
         testAssert(subCount == 4);
         testAssert(reqCalled);
         testAssert(provCalled);
@@ -123,7 +123,7 @@ public class GravityJavaTest {
 
         Log.message("Tests OK!!");
     }
-    
+
     private static class Subscriber implements GravitySubscriber {
 
 		@Override
@@ -138,7 +138,7 @@ public class GravityJavaTest {
 				testAssert(pb.getCount() == subCount);
 				testAssert(pb.getMessage().equals("Hello Java World"));
 				subCount++;
-				
+
 				Log.debug("Got GDP");
 			}
 			// sleep to give messages a chance to queue up.
@@ -148,7 +148,7 @@ public class GravityJavaTest {
 			}
 		}
     }
-    
+
     private static class Requestor implements GravityRequestor {
 
 		@Override
@@ -159,7 +159,7 @@ public class GravityJavaTest {
 			testAssert(response.getDataProductID().equals("JavaResponse"));
 		}
     }
-    
+
     private static class ServiceProvider implements GravityServiceProvider {
 
 		@Override
@@ -187,7 +187,7 @@ public class GravityJavaTest {
 			logCalled = Log.LogLevel.swigToEnum(level) == Log.LogLevel.DEBUG;
 		}
     }
-    
+
     private static void testAssert(boolean test) {
     	if (!test) {
     		Log.fatal("Failed assertion, aborting");

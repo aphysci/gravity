@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -36,17 +36,17 @@ import com.aphysci.gravity.Logger;
  *  Code for gravity.java that creates proxy classes for emulating Java interfaces to a C++ classes.
  ******/
 %pragma(java) modulecode=%{
-  private static Map<GravitySubscriber, CPPGravitySubscriberProxy> proxySubscriberMap = 
+  private static Map<GravitySubscriber, CPPGravitySubscriberProxy> proxySubscriberMap =
             new WeakHashMap<GravitySubscriber, CPPGravitySubscriberProxy>();
-  private static Map<GravityRequestor, CPPGravityRequestorProxy> proxyRequestorMap = 
+  private static Map<GravityRequestor, CPPGravityRequestorProxy> proxyRequestorMap =
             new WeakHashMap<GravityRequestor, CPPGravityRequestorProxy>();
-  private static Map<GravityServiceProvider, CPPGravityServiceProviderProxy> proxyProviderMap = 
+  private static Map<GravityServiceProvider, CPPGravityServiceProviderProxy> proxyProviderMap =
             new WeakHashMap<GravityServiceProvider, CPPGravityServiceProviderProxy>();
-  private static Map<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy> proxyHeartbeatListenerMap = 
+  private static Map<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy> proxyHeartbeatListenerMap =
             new WeakHashMap<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy>();
-  private static Map<Logger, CPPGravityLoggerProxy> proxyLoggerMap = 
+  private static Map<Logger, CPPGravityLoggerProxy> proxyLoggerMap =
             new WeakHashMap<Logger, CPPGravityLoggerProxy>();
-  
+
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
     private GravitySubscriber delegate;
     public CPPGravitySubscriberProxy(GravitySubscriber i) {
@@ -104,7 +104,7 @@ import com.aphysci.gravity.Logger;
       delegate.MissedHeartbeat(dataProductID, microsecond_to_last_heartbeat, interval_in_microseconds);
       return 0;
     }
-    
+
     @SuppressWarnings("unused")
     public long ReceivedHeartbeatJava(String dataProductID, long[] interval_in_microseconds) {
       delegate.ReceivedHeartbeat(dataProductID, interval_in_microseconds);
@@ -136,7 +136,7 @@ import com.aphysci.gravity.Logger;
     }
     return proxy;
   }
-  
+
   public static CPPGravityRequestor makeNativeRequestor(GravityRequestor i) {
     if (i instanceof CPPGravityRequestor) {
       // If it already *is* a CPPGravityRequestor don't bother wrapping it again
@@ -149,7 +149,7 @@ import com.aphysci.gravity.Logger;
     }
     return proxy;
   }
-  
+
   public static CPPGravityServiceProvider makeNativeProvider(GravityServiceProvider i) {
     if (i instanceof CPPGravityServiceProvider) {
       // If it already *is* a CPPGravityServiceProvider don't bother wrapping it again
@@ -162,7 +162,7 @@ import com.aphysci.gravity.Logger;
     }
     return proxy;
   }
-  
+
   public static CPPGravityHeartbeatListener makeNativeHeartbeatListener(GravityHeartbeatListener i) {
     if (i instanceof CPPGravityHeartbeatListener) {
       // If it already *is* a CPPGravityHeartbeatListener don't bother wrapping it again
@@ -175,7 +175,7 @@ import com.aphysci.gravity.Logger;
     }
     return proxy;
   }
-  
+
   public static CPPGravityLogger makeNativeLogger(Logger i) {
     if (i instanceof CPPGravityLogger) {
       // If it already *is* a CPPGravityLogger don't bother wrapping it again

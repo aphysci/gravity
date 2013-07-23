@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -37,21 +37,21 @@ using namespace std;
 
 class FileReplay
 {
-private:	
+private:
 	static const char* ComponentName;
 	uint64_t firstPublishTime;
 	uint64_t firstDataTime;
 
 	FileReader fileReader;
-    
-	GravityNode gravityNode;	
+
+	GravityNode gravityNode;
 	set<string> datatypes;
-	
+
 	void processArchive();
 public:
 	FileReplay();
 	virtual ~FileReplay();
-	void waitForExit();	
+	void waitForExit();
 };
 
 } /* namespace esmf */

@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -46,10 +46,10 @@ OS_PATH_SEP=/
 
 LIB_NAME=libgravity_wrap
 
-#Source/Object/Dependancies (all swig auto generated sources should have been built by now).  
+#Source/Object/Dependancies (all swig auto generated sources should have been built by now).
 #'wildcard' needs UNIX path seperators
 CPP_SRC=$(wildcard $(CPPSRC_DIR_MAKE)*.cpp)
-#but Microsoft tools need Windows path separators... so substitute them here!  
+#but Microsoft tools need Windows path separators... so substitute them here!
 CPP_OBJ=$(patsubst $(CPPSRC_DIR_MAKE)%.cpp,$(CPPSRC_DIR_OS)%.$(OBJ_EXT),$(CPP_SRC))
 
 SYSTEM:=$(strip $(shell uname -s))
@@ -57,7 +57,7 @@ ifneq (,$(findstring CYGWIN_NT,$(SYSTEM)))
 	-include makefile.vs
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lrt 
+	OS_SPECIFIC_LIBS = -lrt
 	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
 	OS_SPECIFIC_FLAGS=-fPIC
 	LIB_EXT=so
@@ -77,6 +77,6 @@ $(LIB_NAME).$(LIB_EXT): $(CPP_OBJ)
 	@echo building $(LIB_NAME).$(LIB_EXT)
 
 	@$(LINK) $(LINK_FLAGS) $(LIBDIRS) $(OUTPUT_FLAG)$@ $(CPP_OBJ) $(LIBS)
-	
+
 clean:
 	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.exp *.lib *.$(OBJ_EXT)

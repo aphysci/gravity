@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -40,7 +40,7 @@ void var_list_remove( pvar_list_t pvar_list, pvar_el_t pvar_el );
 void var_list_insert( pvar_list_t pvar_list, pvar_el_t pvar_el );
 unsigned int get_bucket_idx( const char *key );
 
-/* Must be a pow2 
+/* Must be a pow2
  */
 #define NBUCKETS 64U
 

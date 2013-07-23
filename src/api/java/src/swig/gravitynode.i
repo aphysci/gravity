@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -97,20 +97,20 @@ public:
     void waitForExit();
     GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
-    
+
     GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
     GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-    
+
     GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
-	
-    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct, 
+
+    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
     shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
-            
-    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType, 
+
+    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
     		const gravity::GravityServiceProvider& server);
     GravityReturnCode unregisterService(const std::string& serviceID);
-    
+
     GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
 

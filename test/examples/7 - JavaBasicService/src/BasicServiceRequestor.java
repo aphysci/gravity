@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -23,18 +23,18 @@ import com.aphysci.gravity.swig.Log;
 import com.aphysci.gravity.swig.Log.LogLevel;
 
 
-//After multiplication is requested, this class may be called with the result.  
+//After multiplication is requested, this class may be called with the result.
 class MultiplicationRequestor implements GravityRequestor
 {
 	public void requestFilled(String serviceID, String requestID, GravityDataProduct response)
 	{
-		//Parse the message into a protobuf.  
+		//Parse the message into a protobuf.
 		Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
 		response.populateMessage(result);
-		
+
 		//Write the answer
 		Log.warning(String.format("%s: %d", requestID, result.getResult()));
-		
+
 		gotAsyncMessage = true;
 	}
 
@@ -45,32 +45,32 @@ class MultiplicationRequestor implements GravityRequestor
 
 public class BasicServiceRequestor {
 
-	
-	
+
+
 	/**
 	 * @param args
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws InterruptedException {
 		GravityNode gn = new GravityNode();
-		//Initialize gravity, giving this node a componentID.  
+		//Initialize gravity, giving this node a componentID.
 		gn.init("MultiplicationRequestor");
-		
+
 		/////////////////////////////
 		// Set up the first multiplication request
 		MultiplicationRequestor requestor = new MultiplicationRequestor();
-		
+
 		GravityDataProduct multRequest1 = new GravityDataProduct("Multiplication");
 		Multiplication.MultiplicationOperandsPB.Builder params1 = Multiplication.MultiplicationOperandsPB.newBuilder();
 		params1.setMultiplicandA(8);
 		params1.setMultiplicandB(2);
 		multRequest1.setData(params1);
-		
+
 		// Make an Asyncronous request for multiplication
 		gn.request("Multiplication", //Service Name
 					multRequest1, //Request
-					requestor, //Object containing callback that will get the result.  
-					"8 x 2"); //A string that identifies which request this is.  
+					requestor, //Object containing callback that will get the result.
+					"8 x 2"); //A string that identifies which request this is.
 
 		/////////////////////////////////////////
 		//Set up the second multiplication request
@@ -92,12 +92,12 @@ public class BasicServiceRequestor {
 		{
 			Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
 			multSync.populateMessage(result);
-			
+
 			Log.warning(String.format("5 x 7 = %d", result.getResult()));
 		}
 
 		/////////////////////////////////////////
-		//Wait for the Asynchronous message to come in.  
+		//Wait for the Asynchronous message to come in.
 		while(!requestor.gotMessage())
 		{
 			Thread.sleep(1000);

@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -59,13 +59,13 @@ all: $(PROTO_OBJ) BasicServiceProvider$(OS_EXE_EXT) BasicServiceRequestor$(OS_EX
 %.pb.o:%.pb.cc
 	$(CC) -c -o $@ $< $(INCLUDES)
 
-#Compile each cpp file to a separate executable.  
+#Compile each cpp file to a separate executable.
 BasicServiceProvider$(OS_EXE_EXT):BasicServiceProvider.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
 BasicServiceRequestor$(OS_EXE_EXT):BasicServiceRequestor.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
-	
+
 components: ServiceDirectory$(OS_EXE_EXT)
 
 ServiceDirectory$(OS_EXE_EXT):

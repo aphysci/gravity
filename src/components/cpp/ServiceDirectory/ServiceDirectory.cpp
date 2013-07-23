@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -211,7 +211,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
             gn.publish(update, registration.id());
 
             // Remove any previous registrations at this URL as they obviously no longer exist
-            purgeObsoletePublishers(registration.id(), registration.url());			
+            purgeObsoletePublishers(registration.id(), registration.url());
         }
         else
             foundDup = true;
@@ -288,17 +288,17 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 }
 
 void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, const string &url)
-{    
+{
     for (map<string,list<string> >::iterator iter = dataProductMap.begin(); iter != dataProductMap.end(); iter++)
-    { 
+    {
         if (iter->first != dataProductID)
         {
-            list<string>& urls = iter->second;     
+            list<string>& urls = iter->second;
             list<string>::iterator it = find(urls.begin(), urls.end(), url);
             if (it != urls.end())
             {
                 // We need to remove/"unregister" this one
-                Log::message("[Auto-Unregister] ID: %s, MessageType: Data Product, URL: %s", 
+                Log::message("[Auto-Unregister] ID: %s, MessageType: Data Product, URL: %s",
                                 iter->first.c_str(), url.c_str());
                 urls.erase(it);
 

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -42,11 +42,11 @@ const char* FileArchiver::ComponentName = "FileArchiver";
 FileArchiver::FileArchiver()
 {
 	// Initialize Gravity Node
-	gravityNode.init(FileArchiver::ComponentName);	
+	gravityNode.init(FileArchiver::ComponentName);
 
 	// Configure logger to log to console
-	Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);	
-	
+	Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);
+
 	// Open archive file
 	string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
 	if (filename == "auto")
@@ -71,7 +71,7 @@ FileArchiver::FileArchiver()
 
 	// Get list of data products to archive
 	string dpList = gravityNode.getStringParam("DataProductList", "");
-	
+
 	// Subscribe to each data product
 	vector<string> dps = split(dpList);
 	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
@@ -102,22 +102,22 @@ vector<string> FileArchiver::split(string s)
 }
 
 void FileArchiver::subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts)
-{   
+{
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
-        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);               
+        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
 
         // Write the size of the data product
         int size = dataProduct->getSize();
         archiveFile.write((char*)&size, sizeof(size));
-        
+
         // Write the data product to the archive file
         std::vector<char> buffer(size);
         dataProduct->serializeToArray(&buffer[0]);
-		archiveFile.write(buffer.data(), size);               
-        
+		archiveFile.write(buffer.data(), size);
+
         // Flush file
-        archiveFile.flush();              
+        archiveFile.flush();
     }
 }
 

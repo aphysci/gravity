@@ -10,14 +10,14 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
  */
 
 /**
- * 
+ *
  */
 package com.aphysci.gravity;
 
@@ -32,7 +32,7 @@ import com.google.protobuf.Message;
  *
  */
 public class GravityDataProduct {
-	
+
 	private GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
 
     /**
@@ -108,7 +108,7 @@ public class GravityDataProduct {
 
     /**
      * Getter for the application-specific data contained within this data product
-     * @return byte array containing data, or null if no data is available. 
+     * @return byte array containing data, or null if no data is available.
      */
     public byte[] getData() {
     	if (gdp != null) {

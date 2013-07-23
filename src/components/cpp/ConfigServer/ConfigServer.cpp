@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -54,23 +54,23 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 	ConfigRequestPB cfpb;
 	dataProduct.populateMessage(cfpb);
     std::vector<const char *> sections;
-    
+
 	//Get the parameters we're going to send from the config file.
 	std::map<std::string, std::string> key_value_map;
-    std::vector<std::string> keys;  
-    
+    std::vector<std::string> keys;
+
 	//First send all general parameters
     sections.push_back("general");
-	
+
 	//Then override/add to general parameters with specific parameters
 	sections.push_back(cfpb.componentid().c_str());
-    
+
     sections.push_back(NULL);
-    
+
     KeyValueConfigParser parser("config_file.ini", sections);
-    
+
     keys = parser.GetKeys();
-    
+
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
@@ -78,7 +78,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 		if(value != "")
 			key_value_map[*i] = value;
 	}
-    
+
     if(!key_value_map.size())
 	{
 		cout << "Critical Error: Could not open config file: config_file.ini" << endl;

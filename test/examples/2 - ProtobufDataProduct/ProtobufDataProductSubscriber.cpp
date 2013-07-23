@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -26,7 +26,7 @@
 
 using namespace gravity;
 
-//Declare class for receiving Published messages.  
+//Declare class for receiving Published messages.
 class SimpleGravityCounterSubscriber : public GravitySubscriber
 {
 public:
@@ -36,20 +36,20 @@ public:
 int main()
 {
 	GravityNode gn;
-	//Initialize gravity, giving this node a componentID.  
+	//Initialize gravity, giving this node a componentID.
 	gn.init("SimpleGravityComponentID2");
 
-	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).  
+	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).
 	SimpleGravityCounterSubscriber counterSubscriber;
-	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.  
-	gn.subscribe("BasicCounterDataProduct", counterSubscriber); 
+	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.
+	gn.subscribe("BasicCounterDataProduct", counterSubscriber);
 
-	//Wait for us to exit (Ctrl-C or being killed).  
+	//Wait for us to exit (Ctrl-C or being killed).
 	gn.waitForExit();
 
-	//Currently this will never be hit because we will have been killed (unfortunately).  
-	//But this shouldn't make a difference because the OS should close the socket and free all resources.  
-	gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);	
+	//Currently this will never be hit because we will have been killed (unfortunately).
+	//But this shouldn't make a difference because the OS should close the socket and free all resources.
+	gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);
 }
 
 void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)

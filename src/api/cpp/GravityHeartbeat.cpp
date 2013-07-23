@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -70,7 +70,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
 			if (mqe.expectedTime > getCurrentTime())
 			{
-		 		gravity::sleep(100);	
+		 		gravity::sleep(100);
 			}
 			else
 			{
@@ -80,7 +80,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				if(gotHeartbeat)
 					filledHeartbeats.erase(i);
 				lock.Unlock();
-	
+
 				if(!gotHeartbeat)
 				{
 				    int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
@@ -175,7 +175,7 @@ void closeHeartbeatSocket()
 
 void* Heartbeat(void* thread_context)
 {
-	HBParams* params = (HBParams*) thread_context;	
+	HBParams* params = (HBParams*) thread_context;
 	GravityDataProduct gdp(params->componentID);
 	gdp.setData((void*)"Good", 5);
 

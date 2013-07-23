@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -20,7 +20,7 @@
 #Protobuf sources (.proto)
 PROTO_DIR=../protobufs
 
-#Java directories  
+#Java directories
 JAVASRC_DIR=src/java
 
 GRAVJAVASRC_DIR=$(JAVASRC_DIR)/com/aphysci/gravity/
@@ -84,7 +84,7 @@ $(PROTO_CLASS): $(PROTO_JAVA)
 {$(GRAVJAVASRC_DIR)}.java{$(GRAVJAVACLASS_DIR)}.class:
 	@echo $<
 	@javac -d $(JAVA_BUILD_DIR) -cp $(MY_CLASSPATH) -sourcepath $(JAVASRC_DIR) $<
-	
+
 #Swig should have already run
 #classes -> jar
 $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
@@ -93,4 +93,4 @@ $(JAR_NAME): $(PROTO_CLASS) $(CLASSES) $(GEN_CLASSES)
 clean:
 	del /q src\java\com\aphysci\gravity\protobuf\GravityDataProductContainer.java
 	del $(JAR_NAME)
-	rmdir /q /s $(JAVA_BUILD_DIR)\com 	
+	rmdir /q /s $(JAVA_BUILD_DIR)\com

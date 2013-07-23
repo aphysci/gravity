@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -38,15 +38,15 @@ GravityConfigParser::GravityConfigParser(std::string componentID)
 void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
     std::vector<const char *> sections;
-    
+
     sections.push_back("general");
     sections.push_back(componentID.c_str());
     sections.push_back(NULL);
-    
+
     KeyValueConfigParser parser(config_filename, sections);
-    
+
 	std::vector<std::string> keys = parser.GetKeys();
-    
+
 	for(std::vector<std::string>::iterator i = keys.begin();
 			i != keys.end(); i++)
 	{
@@ -94,6 +94,6 @@ std::string GravityConfigParser::getString(std::string key, std::string default_
 		return default_value;
 	else
 		return i->second;
-}   
+}
 
 }

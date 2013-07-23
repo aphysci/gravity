@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -28,7 +28,7 @@ using namespace gravity;
 
 bool gotAsyncMessage = false;
 
-//After multiplication is requested, this class may be called with the result.  
+//After multiplication is requested, this class may be called with the result.
 class MultiplicationRequestor : public GravityRequestor
 {
 public:
@@ -37,22 +37,22 @@ public:
 
 void MultiplicationRequestor::requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response)
 {
-	//Parse the message into a protobuf.  
+	//Parse the message into a protobuf.
 	MultiplicationResultPB result;
 	response.populateMessage(result);
-	
+
 	//Write the answer
 	Log::warning("Asynchronous response received: %s = %d", requestID.c_str(), result.result());
-	
+
 	gotAsyncMessage = true;
 }
 
 int main()
 {
 	GravityNode gn;
-	//Initialize gravity, giving this node a componentID.  
+	//Initialize gravity, giving this node a componentID.
 	gn.init("MultiplicationRequestor");
-	
+
 	/////////////////////////////
 	// Set up the first multiplication request
 	MultiplicationRequestor requestor;
@@ -62,7 +62,7 @@ int main()
 	params1.set_multiplicand_a(8);
 	params1.set_multiplicand_b(2);
 	multRequest1.setData(params1);
-	
+
 	// Make an Asynchronous request for multiplication
 	gn.request("Multiplication", //Service Name
 				multRequest1, //Request
@@ -76,7 +76,7 @@ int main()
 	params2.set_multiplicand_a(5);
 	params2.set_multiplicand_b(7);
 	multRequest2.setData(params2);
-	
+
 	//Make a Synchronous request for multiplication
 	shared_ptr<GravityDataProduct> multSync = gn.request("Multiplication", //Service Name
 														multRequest2, //Request
@@ -89,16 +89,16 @@ int main()
 	{
 		MultiplicationResultPB result;
 		multSync->populateMessage(result);
-		
+
 		Log::warning("Synchronous response received: 5 x 7 = %d", result.result());
 	}
 
 	/////////////////////////////////////////
-	//Wait for the Asynchronous message to come in.  
+	//Wait for the Asynchronous message to come in.
 	while(!gotAsyncMessage)
 	{
 		gravity::sleep(1000);
 	}
-	
+
 	return 0;
 }

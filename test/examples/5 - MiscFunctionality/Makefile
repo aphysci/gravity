@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -60,13 +60,13 @@ all: $(PROTO_OBJ) MiscComponent1$(OS_EXE_EXT) MiscComponent2$(OS_EXE_EXT)
 %.pb.o:%.pb.cc
 	$(CC) $(BUILD_VARIANT_DIRECTIVE) -c -o $@ $< $(INCLUDES)
 
-#Compile each cpp file to a separate executable.  
+#Compile each cpp file to a separate executable.
 MiscComponent1$(OS_EXE_EXT):MiscComponent1.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
 MiscComponent2$(OS_EXE_EXT):MiscComponent2.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
 	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
-	
+
 components: ServiceDirectory$(OS_EXE_EXT)
 
 ServiceDirectory$(OS_EXE_EXT):

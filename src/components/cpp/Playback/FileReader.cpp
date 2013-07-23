@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -42,14 +42,14 @@ void FileReader::init(const string& filename, const string& dataProductList)
 
 	// Open archive file
 	archiveFile.open(filename.c_str(), ios::in | ios::binary);
-       
-	// Check endian-ness 	
+
+	// Check endian-ness
 	int i;
 	archiveFile.read((char*)&i, sizeof(i));
 	swapEndian = (i != 1);
 
 	// Build list of data products of interest
-	dpList = split(dataProductList);	
+	dpList = split(dataProductList);
 }
 
 FileReader::~FileReader() {}
@@ -86,18 +86,18 @@ int FileReader::readNextDataProduct()
 
 	while (archiveFile)
 	{
-        	// Read the size of the next data product    
+        	// Read the size of the next data product
         	archiveFile.read((char*)&size, sizeof(size));
         	if (!archiveFile)
         	{
-            		// Likely we've reached the end of file. 
+            		// Likely we've reached the end of file.
             		break;
-        	}        
-   
+        	}
+
 		if (swapEndian)
 		{
 			endian_swap(size);
-		} 
+		}
         	// Read the data product
         	std::vector<char> buffer(size);
         	archiveFile.read(&buffer[0], size);
@@ -105,8 +105,8 @@ int FileReader::readNextDataProduct()
         	{
             		// Treat this as end of file
             		break;
-        	}               
-        
+        	}
+
         	// Convert to GravityDataProduct
 		shared_ptr<GravityDataProduct> gdp = shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
 		//gdp->parseFromArray(buffer, size);
@@ -117,15 +117,15 @@ int FileReader::readNextDataProduct()
 			continue;
 		}
 
-		dataProducts.push_back(gdp);	
+		dataProducts.push_back(gdp);
 		break;
 	}
 
-	int sz = dataProducts.size();	
+	int sz = dataProducts.size();
 	pthread_mutex_unlock(&mutex);
 
 	return sz;
-} 
+}
 
 vector<string> FileReader::split(string s)
 {

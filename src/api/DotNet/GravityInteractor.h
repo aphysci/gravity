@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -29,7 +29,7 @@ namespace GravityCS
 {
 using namespace std::tr1;
 
-//Forward Declarations.  
+//Forward Declarations.
 ref class DataProduct;
 public delegate void RequestFilled(String^ serviceID, String^ requestID, const GravityCS::DataProduct^ response);
 public delegate void SubscriptionFilled(Collections::Generic::IList<DataProduct^>^ dataProducts);
@@ -50,7 +50,7 @@ public:
 	void Unsubscribe(String^ name, SubscriptionFilled^ callback);
 
 	void Request(String^ service_ID, const DataProduct^ request, RequestFilled^ callbacks, String^ request_ID, int timeout_in_milliseconds);
-	//Simple Wrappers for default arguments.  
+	//Simple Wrappers for default arguments.
 	void Request(String^ service_ID, const DataProduct^ request, RequestFilled^ callbacks)
 	{
 		Request(service_ID, request, callbacks, "", -1);
@@ -83,7 +83,7 @@ internal:
 	}
 
 	//Protobuf object
-	shared_ptr<gravity::GravityDataProduct>* cpp_dataProduct; //This is convoluted but we can't have non-pointer, non-clr C++ types in a .net class.  
+	shared_ptr<gravity::GravityDataProduct>* cpp_dataProduct; //This is convoluted but we can't have non-pointer, non-clr C++ types in a .net class.
 public:
 	//DataProduct();
 	DataProduct(String^ dataProductID)
@@ -94,17 +94,17 @@ public:
 	void setData(Google::ProtocolBuffers::IMessage^ data)
 	{
 		array<unsigned char>^ bytesArray = data->ToByteArray();
-		pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
+		pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.
 
 		(*cpp_dataProduct)->setData(dataPointer, bytesArray->Length);
 	}
 
 	void getProtobufObject(Google::ProtocolBuffers::IBuilder^ protobufOut)
 	{
-		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.  
+		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.
 
 		{
-			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
+			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.
 			(*cpp_dataProduct)->getData(dataPointer, (*cpp_dataProduct)->getDataSize());
 		}
 
@@ -114,10 +114,10 @@ public:
 
 	array<unsigned char>^ getRawData()
 	{
-		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.  
+		array<unsigned char>^ bytesArray = gcnew array<unsigned char>((*cpp_dataProduct)->getDataSize()); //No need to free this guy, right.
 
 		{
-			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.  
+			pin_ptr<unsigned char> dataPointer = &bytesArray[0]; //Pin the array while we copy it.
 			(*cpp_dataProduct)->getData(dataPointer, (*cpp_dataProduct)->getDataSize());
 		}
 
@@ -129,11 +129,11 @@ public:
 		delete cpp_dataProduct;
 	}
 
-	//TODO: 
+	//TODO:
 	// getTimestamp();
 	// getDataProductID();
 	// setDataProductID();
-	// etc.  
+	// etc.
 };
 
 }

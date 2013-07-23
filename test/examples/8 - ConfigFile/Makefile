@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -41,11 +41,11 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(PROTOBUF_DIR)/src
 CFLAGS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_DIR) -L$(PROTOBUF_LIB_DIR) -L$(ZMQ_LIB_DIR)
-LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS) 
+LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS)
 
 all: ConfigFileExample$(OS_EXE_EXT)
 
-#Compile each cpp file to a separate executable.  
+#Compile each cpp file to a separate executable.
 ConfigFileExample$(OS_EXE_EXT):ConfigFileExample.cpp
 	$(CC) -o $@ $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
@@ -56,7 +56,7 @@ ServiceDirectory$(OS_EXE_EXT):
 	make
 
 clean:
-	@rm -rf *.o *.exe ConfigFileExample 
+	@rm -rf *.o *.exe ConfigFileExample
 
 run: components BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 	./run.sh

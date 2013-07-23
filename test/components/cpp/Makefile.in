@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -45,11 +45,11 @@ TEST_SRC=$(wildcard *.h)
 SRC=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
 
-all: $(TEST_NAME) 
+all: $(TEST_NAME)
 
 %.o:%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
-	
+
 $(TEST_NAME): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(CFLAGS) $(LIBS)
 

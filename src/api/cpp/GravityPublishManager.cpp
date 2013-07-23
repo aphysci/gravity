@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -189,7 +189,7 @@ void GravityPublishManager::start()
             else if (command == "GetMetrics")
             {
                 // The GravityMetricsManager has request our metrics data
-                
+
                 // Mark the collection as completed
                 metricsData.done();
 
@@ -220,7 +220,7 @@ void GravityPublishManager::start()
 				zmq_msg_init(&event);
 				zmq_recvmsg(pollItems[i].socket, &event, 0);
 				char *data = (char*)zmq_msg_data(&event);
-				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is comming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.  
+				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is comming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.
 				zmq_msg_close(&event);
 
 				if (newsub)

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -29,7 +29,7 @@ import com.google.common.primitives.Ints;
 
 public class MATLABGravitySubscriber implements GravitySubscriber
 {
-	private Vector<GravityDataProduct> data = new Vector<GravityDataProduct>();	
+	private Vector<GravityDataProduct> data = new Vector<GravityDataProduct>();
 
 	public void subscriptionFilled(final List<GravityDataProduct> dataProducts)
 	{
@@ -40,11 +40,11 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 	{
 		GravityDataProduct gdp = null;
 		do
-		{			
+		{
 			if (!data.isEmpty())
 			{
 				gdp = data.elementAt(0);
-				data.removeElementAt(0);			
+				data.removeElementAt(0);
 			}
 			else if (timeoutMS < 0)
 			{
@@ -63,7 +63,7 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 
 	public Vector<GravityDataProduct> getAllDataProducts()
 	{
-		@SuppressWarnings("unchecked") 
+		@SuppressWarnings("unchecked")
 		Vector<GravityDataProduct> ret = (Vector<GravityDataProduct>)data.clone();
 		data.clear();
 		return ret;
@@ -81,7 +81,7 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 		double[] d = new double[list.size()];
 		for (int i = 0; i < list.size(); i++)
 		{
-			d[i] = list.get(i).doubleValue();	
+			d[i] = list.get(i).doubleValue();
 		}
 		return d;
 	}

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -45,7 +45,7 @@ public:
      /**
      * GetString: fetches a string given a key
      */
-    std::string GetString(const std::string key, const std::string default_value = "") 
+    std::string GetString(const std::string key, const std::string default_value = "")
     {
     	std::string key_lower = gravity::StringCopyToLowerCase(key);
         /* Returns "" if not found */
@@ -58,7 +58,7 @@ public:
      /**
      * GetKeys: fetches all the keys
      */
-    std::vector<std::string> GetKeys() 
+    std::vector<std::string> GetKeys()
     {
         std::vector<std::string> allkeys;
         const char** keys = keyvalue_getkeys( spKeyValueHandle.get() );
@@ -68,7 +68,7 @@ public:
             free(keys);
         return allkeys;
     }
-    
+
 protected:
     std::tr1::shared_ptr< keyvalue_type_t > spKeyValueHandle;
 };

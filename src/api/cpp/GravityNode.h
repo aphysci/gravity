@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -33,7 +33,7 @@
 #include "Utility.h"
 #include <pthread.h>
 
-//This is defined in Windows for NetBIOS in nb30.h  
+//This is defined in Windows for NetBIOS in nb30.h
 #ifdef DUPLICATE
 #undef DUPLICATE
 #endif

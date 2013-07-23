@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -137,7 +137,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
     SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, "Array must contain at least 1 element");
     return $null;
   }
-  $1 = ($1_ltype) JCALL2(GetLongArrayElements, jenv, $input, 0); 
+  $1 = ($1_ltype) JCALL2(GetLongArrayElements, jenv, $input, 0);
 }
 
 %typemap(freearg) int64_t *INOUT, int64_t &INOUT ""
@@ -183,7 +183,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
     return $jnicall;
   }
 
- 
+
 /******
  * All the required typemaps to allow a GDP to be passed from Java to C++ (being serialized to a byte array in between)
  *******/
@@ -196,7 +196,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
     int length = JCALL1(GetArrayLength, jenv, $input);
 	$1 = new gravity::GravityDataProduct((void *)data, length);
-	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT); 
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
 }
 
 // this frees the memory allocated in the 'in' typemap above.
@@ -230,7 +230,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 %typemap(javadirectorout) char *BYTE "$javacall"
 
 /*****
- * Typemaps to handle passing a int array from C++ into Java.  
+ * Typemaps to handle passing a int array from C++ into Java.
  *****/
 %typemap(directorin, descriptor="[I") int *INTEGER {
     // length var is assumed to be passed into the function as well
@@ -257,11 +257,11 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 %typemap(jtype) int *INTEGER "int[]"
 %typemap(jstype) int *INTEGER "int[]"
 %typemap(in) int *INTEGER {
-  $1 = (int *) JCALL2(GetIntArrayElements, jenv, $input, 0); 
+  $1 = (int *) JCALL2(GetIntArrayElements, jenv, $input, 0);
 }
 
 %typemap(argout) int *INTEGER {
-  JCALL3(ReleaseIntArrayElements, jenv, $input, (jint *) $1, 0); 
+  JCALL3(ReleaseIntArrayElements, jenv, $input, (jint *) $1, 0);
 }
 
 %typemap(javain) int *INTEGER "$javainput"
@@ -278,7 +278,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
     int length = JCALL1(GetArrayLength, jenv, $input);
 	shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct((void *)data, length));
-	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT); 
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
     $result = ret;
     (jenv)->DeleteLocalRef(jBYTE);
 }
@@ -299,12 +299,12 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 
 %typemap(javain) shared_ptr<gravity::GravityDataProduct> "$javainput"
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
-%typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {} 
+%typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {}
 
 /******
  * When gravity::GravityNode::request returns shared_ptr<GravityDataProduct> though, we want to
  * convert that to a GravityDataProduct on the java side of the JNI interface so that users
- * get a GDP rather than a byte[]. 
+ * get a GDP rather than a byte[].
  ******/
 %typemap(jstype) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request "GravityDataProduct"
 %typemap(javaout) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request {

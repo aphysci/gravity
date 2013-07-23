@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -34,25 +34,25 @@ public:
 
 shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
-	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.  
+	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
 	if(dataProduct.getDataProductID() != "Multiplication") {
 		Log::critical("Request is not for multiplication!");
 		return shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
 	}
 
-	//Get the parameters for this request.  
+	//Get the parameters for this request.
 	MultiplicationOperandsPB params;
 	dataProduct.populateMessage(params);
 
 	Log::warning("Request received: %d x %d", params.multiplicand_a(), params.multiplicand_b());
-	
+
 	//Do the calculation
 	int result = params.multiplicand_a() * params.multiplicand_b();
-	
+
 	//Return the results to the requestor
 	MultiplicationResultPB resultPB;
 	resultPB.set_result(result);
-	
+
 	shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
 	resultDP->setData(resultPB);
 
@@ -62,24 +62,24 @@ shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std:
 int main()
 {
 	GravityNode gn;
-	//Initialize gravity, giving this node a componentID.  
+	//Initialize gravity, giving this node a componentID.
 	gn.init("MultiplicationComponent");
 
 	MultiplicationServiceProvider msp;
 	gn.registerService(
-						//This identifies the Service to the service directory so that others can 
-						// make a request to it.  
-						"Multiplication", 
-						//Assign a transport type to the socket (almost always tcp, unless you are only 
-						//using the gravity data product between two processes on the same computer).  
-						GravityTransportTypes::TCP, 
-						//Give an instance of the multiplication service class to be called when a request is made for multiplication.  
+						//This identifies the Service to the service directory so that others can
+						// make a request to it.
+						"Multiplication",
+						//Assign a transport type to the socket (almost always tcp, unless you are only
+						//using the gravity data product between two processes on the same computer).
+						GravityTransportTypes::TCP,
+						//Give an instance of the multiplication service class to be called when a request is made for multiplication.
 						msp);
 
-	//Wait for us to exit (Ctrl-C or being killed).  
+	//Wait for us to exit (Ctrl-C or being killed).
 	gn.waitForExit();
-	
-	//Currently this will never be hit because we will have been killed (unfortunately).  
-	//This tells the service directory that the multiplication service is no longer available.  
+
+	//Currently this will never be hit because we will have been killed (unfortunately).
+	//This tells the service directory that the multiplication service is no longer available.
 	gn.unregisterService("Multiplication");
 }

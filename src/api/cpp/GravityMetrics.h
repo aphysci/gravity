@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -47,7 +47,7 @@ private:
         int messageCount;
         int byteCount;
     } MetricsSample;
-    
+
     std::map<std::string, MetricsSample> metrics;
     uint64_t startTime;
     uint64_t endTime;
@@ -58,18 +58,18 @@ public:
     GRAVITY_API GravityMetrics();
 
     /**
-     * Constructor. Creates a GravityMetrics object and populates it from 
+     * Constructor. Creates a GravityMetrics object and populates it from
      * and incoming message on the provided socket
      * \param socket zmq_socket on which is an incoming GravityMetrics obj
      */
-    GRAVITY_API GravityMetrics(void* socket); 
+    GRAVITY_API GravityMetrics(void* socket);
 
     /**
      * Default Destructor
      */
     GRAVITY_API virtual ~GravityMetrics();
 
-	
+
     /**
      * Increment the message count metric
      * \param dataProductID data product ID for which the message count is to be incremented
@@ -107,14 +107,14 @@ public:
      * \return message count
      */
     GRAVITY_API int getMessageCount(std::string);
-    
+
     /**
      * Method to return the byte count for the given data product ID
      * \param dataProductID data product ID for which byte count is returned
      * \return byte count
      */
     GRAVITY_API int getByteCount(std::string);
-    
+
     /**
      * Method to return the sample period start time
      * \return sample period start time (microsecond epoch time)
@@ -148,7 +148,7 @@ public:
      * Method to populate this MetricsData object from zmq socket
      * \param zmq_socket from which to populate this MetricsData object
      */
-    GRAVITY_API void populateFromMessage(void* socket); 
+    GRAVITY_API void populateFromMessage(void* socket);
 
     /**
      * Method to get the list of data product ID for which this

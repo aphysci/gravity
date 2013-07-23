@@ -10,7 +10,7 @@
 #** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #** GNU Lesser General Public License for more details.
 #**
-#** You should have received a copy of the GNU Lesser General Public 
+#** You should have received a copy of the GNU Lesser General Public
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
@@ -34,4 +34,4 @@ $(LIB_NAME): $(CLASSES)
 	@jar cf $(LIB_NAME) -C $(JAVA_BUILD_DIR) $(JAVASRC_DIR)
 
 clean:
-	rm -rf $(JAVA_BUILD_DIR) *.jar 
+	rm -rf $(JAVA_BUILD_DIR) *.jar

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -38,12 +38,12 @@
   * Gravity APIs NOT Tested here:
   * - Heart beat functionality: registerHeartbeatListener, startHeartbeat
   * - request (Synchronous)
-  * - Config functionality (uses Sync request).  
+  * - Config functionality (uses Sync request).
   * - Logging
   * - getComponentID (very simple function)
   * - Connections over sockets on different machines (See ArchiverPlaybackTest)
   */
- 
+
 #ifndef GRAVITYNODETEST_H_
 #define GRAVITYNODETEST_H_
 
@@ -66,7 +66,7 @@ public:
     void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
 };
 
-class GravityNodeTest: public GravitySubscriber, GravityServiceProvider, GravityRequestor 
+class GravityNodeTest: public GravitySubscriber, GravityServiceProvider, GravityRequestor
 {
 public:
     void setUp();

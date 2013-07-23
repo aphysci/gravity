@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -28,14 +28,14 @@ int main()
 
 	GravityNode gn;
 
-	//Initialize gravity, giving this node a componentID.  
+	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode ret = gn.init("ConfigFileExample");
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::fatal("Could not initialize GravityNode, return code was %d", ret);
 		exit(1);
 	}
-    
+
     Log::message("ServiceDirectoryURL = %s\n", gn.getStringParam( "ServiceDirectoryURL", "Not found" ).c_str() );
     Log::message("ConfigFileLogLevel = %s\n", gn.getStringParam( "ConfigFileLogLevel", "Not Found" ).c_str() );
     Log::message("bin_ms = %f\n", gn.getFloatParam( "bin_ms", 0. ) );

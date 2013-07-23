@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -38,18 +38,18 @@ using namespace std;
 
 class FileArchiver : public GravitySubscriber
 {
-private:	
+private:
 	static const char* ComponentName;
-	GravityNode gravityNode;	
+	GravityNode gravityNode;
 	ofstream archiveFile;
-	
-	vector<string> split(string s);	
+
+	vector<string> split(string s);
 public:
 	FileArchiver();
 	virtual ~FileArchiver();
 
 	virtual void subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts);
-	void waitForExit();	
+	void waitForExit();
 };
 
 } /* namespace esmf */

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -128,7 +128,7 @@ namespace gravity
                 }
                 else if (command == "MetricsDisable")
                 {
-                    metricsEnabled = false;				
+                    metricsEnabled = false;
                 }
                 else if (command == "kill")
                 {
@@ -160,7 +160,7 @@ namespace gravity
         zmq_close(metricsPubSocket);
         zmq_close(metricsControlSocket);
         zmq_close(pubMetricsSocket);
-        zmq_close(subMetricsSocket);	
+        zmq_close(subMetricsSocket);
     }
 
     void GravityMetricsManager::ready()
@@ -202,7 +202,7 @@ namespace gravity
             gmPB.add_starttime(metrics.getStartTime());
             gmPB.add_endtime(metrics.getEndTime());
             metricsData[key] = gmPB;
-        }	
+        }
     }
 
     void GravityMetricsManager::publishMetrics()
@@ -224,8 +224,8 @@ namespace gravity
         gdp.setData(metrics);
 
         // Send publish command and empty filter
-        sendStringMessage(metricsPubSocket, "publish", ZMQ_SNDMORE);		
-        sendStringMessage(metricsPubSocket, "", ZMQ_SNDMORE);		
+        sendStringMessage(metricsPubSocket, "publish", ZMQ_SNDMORE);
+        sendStringMessage(metricsPubSocket, "", ZMQ_SNDMORE);
 
         // Publish metrics
         sendGravityDataProduct(metricsPubSocket, gdp, ZMQ_DONTWAIT);

@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -23,7 +23,7 @@
 
 using namespace gravity;
 
-//Declare a class for receiving Published messages.  
+//Declare a class for receiving Published messages.
 class SimpleGravitySubscriber : public GravitySubscriber
 {
 public:
@@ -43,7 +43,7 @@ int main()
 		exit(1);
 	}
 
-	//Subscribe a SimpleGravityHelloWorldSubscriber to the counter.  
+	//Subscribe a SimpleGravityHelloWorldSubscriber to the counter.
 	SimpleGravitySubscriber hwSubscriber;
 	ret = gn.subscribe(dataProductID, hwSubscriber);
 	if (ret != GravityReturnCodes::SUCCESS)
@@ -51,12 +51,12 @@ int main()
 		Log::critical("Could not subscribe to data product with id %s, return code was %d", dataProductID.c_str(), ret);
 		exit(1);
 	}
-		
-	//Wait for us to exit (Ctrl-C or being killed).  
+
+	//Wait for us to exit (Ctrl-C or being killed).
 	gn.waitForExit();
-	
-	//Currently this will never be hit because we will have been killed (unfortunately).  
-	//But this shouldn't make a difference because the OS should close the socket and free all resources.  
+
+	//Currently this will never be hit because we will have been killed (unfortunately).
+	//But this shouldn't make a difference because the OS should close the socket and free all resources.
 	gn.unsubscribe("HelloWorldDataProduct", hwSubscriber);
 }
 
@@ -70,10 +70,10 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<G
 		char* message = new char[size+1];
 		(*i)->getData(message, size);
 		message[size] = 0; // null terminate
-		
+
 		//Output the message
 		Log::warning("Got message: %s", message);
-		//Don't forget to free the memory we allocated.  
+		//Don't forget to free the memory we allocated.
 		delete message;
 	}
 }

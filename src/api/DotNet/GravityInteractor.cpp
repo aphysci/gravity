@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -47,7 +47,7 @@ void GravityInteractor::Init(String^ componentName)
 
 class genericSubscribeWrapper;
 
-ref class subscriberWrapperHelper 
+ref class subscriberWrapperHelper
 {
 internal:
 	static Collections::Generic::Dictionary<IntPtr, SubscriptionFilled^>^ hashtable = gcnew Collections::Generic::Dictionary<IntPtr, SubscriptionFilled^>();
@@ -80,20 +80,20 @@ public:
 			dataProducts_CS->Add(dataProduct);
 		}
 
-		//Call the delegate.  
-		subscriberWrapperHelper::GetDelegateForSubscriber(this)->Invoke(dataProducts_CS); //TODO: make sure this blocks until finished.  
+		//Call the delegate.
+		subscriberWrapperHelper::GetDelegateForSubscriber(this)->Invoke(dataProducts_CS); //TODO: make sure this blocks until finished.
 	}
 
 	~genericSubscribeWrapper()
 	{
-		//Clean ourselves up.  
+		//Clean ourselves up.
 		subscriberWrapperHelper::hashtable->Remove((IntPtr)this);
 	}
 };
 
 bool GravityInteractor::Subscribe(String^ name, SubscriptionFilled^ callback, String^ filter)
 {
-	//Convert strings.  
+	//Convert strings.
 	std::string name_str = Marshall(name);
 	std::string filter_str = Marshall(filter);
 
@@ -104,10 +104,10 @@ bool GravityInteractor::Subscribe(String^ name, SubscriptionFilled^ callback, St
 void GravityInteractor::Unsubscribe(String^ name, SubscriptionFilled^ callback)
 {
 	std::string name_str = Marshall(name);
-	
+
 	gravity::GravitySubscriber* sub;
 	Collections::Generic::Dictionary<IntPtr, SubscriptionFilled^>::Enumerator^ e = subscriberWrapperHelper::hashtable->GetEnumerator();
-	
+
 	while(e->MoveNext() != false)
 	{
 		if(e->Current.Value == callback)
@@ -121,8 +121,8 @@ void GravityInteractor::Unsubscribe(String^ name, SubscriptionFilled^ callback)
 	delete sub;
 }
 
-//class: genericRequestWrapperCS 
-// A C++ wrapper that calls the C# callbacks.  
+//class: genericRequestWrapperCS
+// A C++ wrapper that calls the C# callbacks.
 //
 class genericRequestWrapperCS; //Forward Declararion
 
@@ -156,23 +156,23 @@ public:
 		//Convert Data Product
 		const GravityCS::DataProduct^ dataProduct = gcnew GravityCS::DataProduct(shared_ptr<gravity::GravityDataProduct>(& const_cast<gravity::GravityDataProduct &>(response)));
 
-		//Call the delegate.  
-		requestWrapperHelper::GetDelegateFromRequestor(this)->Invoke(serviceID, requestID, dataProduct); //TODO: make sure this blocks until finished.  
+		//Call the delegate.
+		requestWrapperHelper::GetDelegateFromRequestor(this)->Invoke(serviceID, requestID, dataProduct); //TODO: make sure this blocks until finished.
 
-		//Clean ourselves up.  
+		//Clean ourselves up.
 		requestWrapperHelper::hashtable->Remove((IntPtr)this);
 		delete this;
 	}
 };
 
-// A C# wrapper for C++ GravityRequest.  
+// A C# wrapper for C++ GravityRequest.
 void GravityInteractor::Request(String^ service_ID, const DataProduct^ request, RequestFilled^ callbacks, String^ request_ID, int timeout_in_milliseconds)
 {
-	//Convert strings.  
+	//Convert strings.
 	std::string service_ID_str = Marshall(service_ID);
 	std::string request_ID_str = Marshall(request_ID);
 
-	//Create Request Wrapper.  
+	//Create Request Wrapper.
 	genericRequestWrapperCS* callbackWrapper = new genericRequestWrapperCS(callbacks);
 
 	//Call Gravity
@@ -228,8 +228,8 @@ public:
 		//Convert Data Product
 		const GravityCS::DataProduct^ dataProduct_cs = gcnew GravityCS::DataProduct(shared_ptr<gravity::GravityDataProduct>(& const_cast<gravity::GravityDataProduct &>(dataProduct)));
 
-		//Call the delegate.  
-		GravityCS::DataProduct^ ret_val = ServiceProviderWrapperHelper::GetDelegateFromSP(this)->Invoke(serviceID_str, dataProduct_cs); //TODO: make sure this blocks until finished.  
+		//Call the delegate.
+		GravityCS::DataProduct^ ret_val = ServiceProviderWrapperHelper::GetDelegateFromSP(this)->Invoke(serviceID_str, dataProduct_cs); //TODO: make sure this blocks until finished.
 
 		return *(ret_val->cpp_dataProduct);
 	}
@@ -248,7 +248,7 @@ void GravityInteractor::UnregisterService(String^ serviceID)
 	std::string serviceID_str = Marshall(serviceID);
 	gn->unregisterService(serviceID_str);
 
-	//Clean ourselves up.  
+	//Clean ourselves up.
 	IntPtr ptr;
 	if(ServiceProviderWrapperHelper::string_to_SP->TryGetValue(serviceID, ptr))
 	{

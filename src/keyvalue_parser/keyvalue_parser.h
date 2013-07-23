@@ -10,7 +10,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
- ** You should have received a copy of the GNU Lesser General Public 
+ ** You should have received a copy of the GNU Lesser General Public
  ** License along with this program;
  ** If not, see <http://www.gnu.org/licenses/>.
  **
@@ -36,7 +36,7 @@ extern "C" {
 typedef void* keyvalue_handle_t;
 typedef void keyvalue_type_t;
 
-/* Open a keyvalue file and return a handle to it 
+/* Open a keyvalue file and return a handle to it
  */
 KEYVALUE_API keyvalue_handle_t keyvalue_open(const char *fn, const char* const sections[] );
 
@@ -48,7 +48,7 @@ KEYVALUE_API const char**  keyvalue_getkeys(keyvalue_handle_t kv_handle );
  */
 KEYVALUE_API const char* keyvalue_getstring(keyvalue_handle_t kv_handle, const char *key);
 
-/* Close a keyvalue file handle 
+/* Close a keyvalue file handle
  */
 KEYVALUE_API void keyvalue_close(keyvalue_handle_t kv_handle);
 
