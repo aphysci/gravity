@@ -19,23 +19,32 @@
 #ifndef __GRAVITYTEST_H
 #define __GRAVITYTEST_H
 
-class GravityMark
+#include <sstream>
+#include <exception>
+
+class GravityAssertFailed : public std::exception
 {
 public:
-    GravityMark( const char *file, int line ) { fprintf(stderr, "GravityMark: %s:%d\n", file, line ); }
-    virtual ~GravityMark() {}
+    GravityAssertFailed( const char *file, int line )
+    { 
+        std::ostringstream msg;
+        msg << "Gravity assertion failed: " << file << ":" << line;
+        _msg = msg.str();
+    }
+    virtual ~GravityAssertFailed() throw () {}   
+    virtual const char *what() const throw () { return _msg.c_str(); }
 private:
-    GravityMark();
+    std::string _msg;
 };
 
 #define GRAVITY_TEST_EQUALS(a,b) do { \
     if ( !( (a) == (b) ) ) \
-        throw GravityMark(__FILE__, __LINE__); \
+        throw GravityAssertFailed(__FILE__, __LINE__); \
 } while (0)
 
 #define GRAVITY_TEST(a) do { \
     if ( !( a ) ) \
-        throw GravityMark(__FILE__, __LINE__); \
+        throw GravityAssertFailed(__FILE__, __LINE__); \
 } while (0)
 
 
