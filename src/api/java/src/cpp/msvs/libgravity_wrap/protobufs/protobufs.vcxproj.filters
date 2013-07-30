@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\..\..\protobufs\ConfigRequest.proto">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="..\..\..\..\..\..\protobufs\ComponentDataLookupResponsePB.proto">
       <Filter>Source Files</Filter>
     </CustomBuild>
@@ -47,5 +42,10 @@
     <CustomBuild Include="..\..\..\..\..\..\protobufs\ServiceDirectoryUnregistrationPB.proto">
       <Filter>Source Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\protobufs\ConfigRequest.proto">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

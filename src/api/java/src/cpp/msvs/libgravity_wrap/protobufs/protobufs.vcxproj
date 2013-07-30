@@ -94,27 +94,35 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\..\build\msvs\Gravity.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -214,7 +222,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ComponentDataLookupResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ComponentDataLookupResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ComponentDataLookupResponseContainer.java</Outputs>
@@ -235,7 +243,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ComponentLookupRequestContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ComponentLookupRequestContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ComponentLookupRequestContainer.java</Outputs>
@@ -256,7 +264,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ComponentServiceLookupResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ComponentServiceLookupResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ComponentServiceLookupResponseContainer.java</Outputs>
@@ -272,7 +280,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GravityDataProductContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GravityDataProductContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">GravityDataProductContainer.java</Outputs>
@@ -293,7 +301,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GravityLogMessageContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GravityLogMessageContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">GravityLogMessageContainer.java</Outputs>
@@ -308,7 +316,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GravityMetricsDataContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GravityMetricsDataContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">GravityMetricsDataContainer.java</Outputs>
@@ -329,7 +337,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ServiceDirectoryRegistrationContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ServiceDirectoryRegistrationContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ServiceDirectoryRegistrationContainer.java</Outputs>
@@ -350,7 +358,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ServiceDirectoryResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ServiceDirectoryResponseContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ServiceDirectoryResponseContainer.java</Outputs>
@@ -371,7 +379,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(BinDir)\protoc --proto_path=..\..\..\..\..\..\protobufs --java_out=..\..\..\..\java %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ServiceDirectoryUnregistrationContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ServiceDirectoryUnregistrationContainer.java</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">ServiceDirectoryUnregistrationContainer.java</Outputs>
