@@ -52,7 +52,7 @@ echo 3 - Gravity Components (VS2010 32-bit executables)
 echo 4 - Debug VS2010 64-bit
 echo 5 - Release VS2010 64-bit
 echo 6 - Gravity Components (VS2010 64-bit executables)
-::echo 6 - Java 32R
+::echo 7 - Java 32D
 ::echo 7 - Java 32D
 ::echo 8 - Java 64R
 ::echo 9 - Java 64D
@@ -67,6 +67,7 @@ choice /c:123456Q>nul
 ::if errorlevel 8 goto Java64R
 ::if errorlevel 7 goto Java32D
 ::if errorlevel 6 goto Java32R
+::if errorlevel 8 goto done
 if errorlevel 7 goto done
 if errorlevel 6 goto GravityComponents64
 if errorlevel 5 goto VS201064R
@@ -304,19 +305,15 @@ echo ================================
 echo.
 :java
 :: Build Java
-pushd src\api\java
-make -f Makefile clean
-make -f Makefile
-move gravity.jar %GRAVITY_LIB_PATH%
-if %GRAVITY_CONFIG% == RELEASE (
-	move libgravity_wrap.dll %GRAVITY_LIB_PATH%\..\bin
-	move libgravity_wrap.lib %GRAVITY_LIB_PATH%
-	move libgravity_wrap.exp %GRAVITY_LIB_PATH%
-) else (
-	move libgravity_wrap_d.dll %GRAVITY_LIB_PATH%\..\bin
-	move libgravity_wrap_d.lib %GRAVITY_LIB_PATH%
-	move libgravity_wrap_d.exp %GRAVITY_LIB_PATH%
+:: Build libgravity_wrap
+pushd src\api\java\src\cpp\msvs\libgravity_wrap
+if %Clean% EQU 1 (
+	msbuild /target:Clean %CONFIGURATION% libgravity_wrap.sln || goto build_fail
 )
+msbuild %CONFIGURATION% libgravity_wrap.sln || goto build_fail
+popd
+pushd src\api\java
+move gravity.jar %GRAVITY_LIB_PATH%
 popd
 
 echo.

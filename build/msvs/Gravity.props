@@ -4,6 +4,7 @@
   <PropertyGroup Label="UserMacros">
     <GravityRoot>$(GRAVITY_HOME)</GravityRoot>
     <BoostRoot>$(BOOST_HOME)</BoostRoot>
+    <JavaRoot>$(JAVA_HOME)</JavaRoot>
     <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
     <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
   </PropertyGroup>
@@ -11,6 +12,10 @@
   <ItemGroup>
     <BuildMacro Include="GravityRoot">
       <Value>$(GravityRoot)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="JavaRoot">
+      <Value>$(JavaRoot)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
     <BuildMacro Include="BinDir">
