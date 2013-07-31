@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gravity", "gravity\gravity.vcxproj", "{801C7417-B350-410D-A104-58EA611FCF2C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{641C5F36-32EE-4323-B740-992B651CF9D6} = {641C5F36-32EE-4323-B740-992B651CF9D6}
@@ -263,8 +263,8 @@ Global
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Debug2010|Win32.ActiveCfg = Debug2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Debug2010|Win32.Build.0 = Debug2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Debug2010|x64.ActiveCfg = Debug2010|Win32
-		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release|Win32.ActiveCfg = Release2010|Win32
-		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release|Win32.Build.0 = Release2010|Win32
+		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release|Win32.ActiveCfg = Release|Win32
+		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release|Win32.Build.0 = Release|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release|x64.ActiveCfg = Release2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release2010|Win32.ActiveCfg = Release2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release2010|Win32.Build.0 = Release2010|Win32

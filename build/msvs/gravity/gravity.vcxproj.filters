@@ -223,11 +223,8 @@
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
       <Filter>protobufs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto">
+    <CustomBuild Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto">
       <Filter>protobufs</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>

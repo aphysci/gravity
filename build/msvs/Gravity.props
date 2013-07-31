@@ -2,11 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <GravityRoot>$(GRAVITY_HOME)</GravityRoot>
-    <BoostRoot>$(BOOST_HOME)</BoostRoot>
-    <JavaRoot>$(JAVA_HOME)</JavaRoot>
+
+	<GravityRoot>$(SolutionDir)\..\..\</GravityRoot>
+    <GravityRoot Condition=" '$(GRAVITY_HOME)'!='' ">$(GRAVITY_HOME)</GravityRoot>
+
     <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
     <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
+
+	<!-- Third Party -->
+    <JavaRoot>$(JAVA_HOME)</JavaRoot>
+    <BoostRoot>$(BOOST_HOME)</BoostRoot>
+	<LexCommand>win_flex.exe</LexCommand>
+	<LexCommand Condition=" '$(LEX_CMD)'!='' ">$(LEX_CMD)</LexCommand>
+	<YaccCommand>win_bison.exe</YaccCommand>
+	<YaccCommand Condition=" '$(YACC_CMD)'!='' ">$(YACC_CMD)</YaccCommand>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
@@ -30,5 +39,14 @@
       <Value>$(BoostRoot)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
-  </ItemGroup>
+    <BuildMacro Include="LexCommand">
+      <Value>$(LexCommand)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="YaccCommand">
+      <Value>$(YaccCommand)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+
+	</ItemGroup>
 </Project>
