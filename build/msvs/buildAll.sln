@@ -59,6 +59,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matlab_jar", "matlab\matlab
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libkeyvalue_parser", "..\..\src\keyvalue_parser\msvs\keyvalue_parser\libkeyvalue_parser.vcxproj", "{57AF87AB-5E81-4752-88EA-B8352ED67E64}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GravityCS", "..\..\src\api\DotNet\GravityCS.vcxproj", "{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -269,6 +271,18 @@ Global
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release2010|Win32.ActiveCfg = Release2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release2010|Win32.Build.0 = Release2010|Win32
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64}.Release2010|x64.ActiveCfg = Release2010|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug|Win32.Build.0 = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug|x64.ActiveCfg = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug2010|Win32.ActiveCfg = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug2010|Win32.Build.0 = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Debug2010|x64.ActiveCfg = Debug|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release|Win32.ActiveCfg = Release|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release|Win32.Build.0 = Release|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release|x64.ActiveCfg = Release|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release2010|Win32.ActiveCfg = Release|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release2010|Win32.Build.0 = Release|Win32
+		{B575ED14-4BEE-4556-A856-B18A6CB1E7BB}.Release2010|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

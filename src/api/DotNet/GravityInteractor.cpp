@@ -186,7 +186,12 @@ void GravityInteractor::RegisterDataProduct(String^ dataProductID, GravityTransp
 {
 	std::string dataProductID_str = Marshall(dataProductID);
 
-	gn->registerDataProduct(dataProductID_str, transportType);
+	gn->registerDataProduct(dataProductID_str, (gravity::GravityTransportType)transportType);
+}
+
+void GravityInteractor::Publish(const DataProduct^ dataProduct, String^ filter)
+{
+	gn->publish(**dataProduct->cpp_dataProduct, Marshall(filter));
 }
 
 void GravityInteractor::UnregisterDataProduct(String^ dataProductID)
@@ -240,7 +245,7 @@ void GravityInteractor::RegisterService(String^ serviceID, GravityTransportType 
 	std::string serviceID_str = Marshall(serviceID);
 
 	genericServiceProviderCS* gsp = new genericServiceProviderCS(serviceID, serverFunction);
-	gn->registerService(serviceID_str, transportType, *gsp);
+	gn->registerService(serviceID_str, (gravity::GravityTransportType) transportType, *gsp);
 }
 
 void GravityInteractor::UnregisterService(String^ serviceID)

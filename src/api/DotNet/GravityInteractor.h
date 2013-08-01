@@ -37,7 +37,16 @@ public delegate DataProduct^ ServiceRequest(String^ serviceID, const DataProduct
 
 std::string Marshall(String^ managedString);
 
-using gravity::GravityTransportType;
+public enum class GravityTransportType
+{
+      TCP = 0,
+      INPROC = 1,
+      PGM = 2,
+      EPGM= 3,
+#ifndef WIN32
+      IPC = 4
+#endif
+};
 
 public ref class GravityInteractor
 {
@@ -47,6 +56,10 @@ public:
 
 	void Init(String^ componentName);
 	bool Subscribe(String^ name, SubscriptionFilled^ callback, String^ filter);
+	bool Subscribe(String^ name, SubscriptionFilled^ callback)
+	{
+		return Subscribe(name, callback, "");
+	}
 	void Unsubscribe(String^ name, SubscriptionFilled^ callback);
 
 	void Request(String^ service_ID, const DataProduct^ request, RequestFilled^ callbacks, String^ request_ID, int timeout_in_milliseconds);
@@ -67,6 +80,11 @@ public:
 
 	//Register/Unregister
 	void RegisterDataProduct(String^ dataProductID, GravityTransportType transportType);
+	void Publish(const DataProduct^ dataProduct, String^ filter);
+	void Publish(const DataProduct^ dataProduct)
+	{
+		Publish(dataProduct, "");
+	}
 	void UnregisterDataProduct(String^ dataProductID);
 
     void RegisterService(String^ serviceID, GravityTransportType transportType, ServiceRequest^ serverFunction);
