@@ -268,14 +268,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gravity.lib;libkeyvalue_parser.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -288,14 +288,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.0\include;..\..\..\..\src\keyvalue_parser\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gravity.lib;libkeyvalue_parser.lib;libzmq.lib;pthreadVC2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
