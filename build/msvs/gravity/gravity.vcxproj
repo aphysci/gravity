@@ -175,6 +175,7 @@
     <IncludePath>$(BoostRoot);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
+    <TrackFileAccess>false</TrackFileAccess>
     <TargetName>$(ProjectName)</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
