@@ -90,13 +90,9 @@ classdef GravityNode < handle
                 ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor());
             end
         end
-        
-        function startHeartbeat(this, componentID, intervalMicroseconds, varargin)
-            if ~isempty(varargin)
-                this.gravityNode.startHeartbeat(componentID, intervalMicroseconds, varargin{1});
-            else
-                this.gravityNode.startHeartbeat(componentID, intervalMicroseconds, 54541);            
-            end
+       
+        function startHeartbeat(this, intervalMicroseconds)
+            this.gravityNode.startHeartbeat(intervalMicroseconds);
         end
         
         function ret = getStringParam(this, key, varargin)
