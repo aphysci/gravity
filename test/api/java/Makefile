@@ -23,7 +23,7 @@ JAVA_BUILD_DIR=build
 LIB_NAME=gravitytest.jar
 PRODGRAV_DIR=../../../src/api/java
 GRAVLIB=$(PRODGRAV_DIR)/gravity.jar
-PROTOC=protoc
+PROTOC=$(PROTOBUF_INCLUDE_DIR)/protoc
 
 SRC=$(wildcard $(GRAVSRC_DIR)/*java)
 OBJECTS=$(patsubst $(GRAVSRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(SRC))

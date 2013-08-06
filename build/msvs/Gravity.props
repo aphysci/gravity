@@ -3,8 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
 
-	<GravityRoot>$(SolutionDir)\..\..\</GravityRoot>
-    <GravityRoot Condition=" '$(GRAVITY_HOME)'!='' ">$(GRAVITY_HOME)</GravityRoot>
+	<GravityRoot>$(GRAVITY_HOME)</GravityRoot>
 
     <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
     <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
@@ -12,10 +11,13 @@
 	<!-- Third Party -->
     <JavaRoot>$(JAVA_HOME)</JavaRoot>
     <BoostRoot>$(BOOST_HOME)</BoostRoot>
-	<LexCommand>win_flex.exe</LexCommand>
-	<LexCommand Condition=" '$(LEX_CMD)'!='' ">$(LEX_CMD)</LexCommand>
-	<YaccCommand>win_bison.exe</YaccCommand>
-	<YaccCommand Condition=" '$(YACC_CMD)'!='' ">$(YACC_CMD)</YaccCommand>
+	<LexCommand>$(LEX_CMD)</LexCommand>
+	<YaccCommand>$(YACC_CMD)</YaccCommand>
+    <ProtobufRoot>$(PROTOBUF_HOME)</ProtobufRoot>
+	<ZMQRoot>$(ZMQ_HOME)</ZMQRoot>
+    <PThreadsRoot>$(PTHREADS_HOME)</PThreadsRoot>
+    <ThirdPartyLibs>$(GRAVITY_THIRD_PARTY_LIBS)</ThirdPartyLibs>
+    
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
@@ -45,6 +47,22 @@
     </BuildMacro>
     <BuildMacro Include="YaccCommand">
       <Value>$(YaccCommand)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ProtobufRoot">
+      <Value>$(ProtobufRoot)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ZMQRoot">
+      <Value>$(ZMQRoot)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="PThreadsRoot">
+      <Value>$(PThreadsRoot)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ThirdPartyLibs">
+      <Value>$(ThirdPartyLibs)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
 

@@ -30,7 +30,7 @@ SWIGGENJAVA_DIR=$(GRAVJAVASRC_DIR)/swig
 JAVA_BUILD_DIR=build/
 
 #Tools
-PROTOC=protoc
+PROTOC=$(PROTOBUF_INCLUDE_DIR)/protoc
 
 #Naming
 JAR_NAME=gravity.jar

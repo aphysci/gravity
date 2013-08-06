@@ -19,6 +19,7 @@ const char *g_section_name;
 extern char *g_current_section;
 
 extern int yyparse(void* pbuckets);
+extern void yyerror(const char *s);
 extern int yydebug;
 
 

@@ -227,4 +227,7 @@
       <Filter>protobufs</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
+  </ItemGroup>
 </Project>

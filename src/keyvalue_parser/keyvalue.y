@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "params.h"
 
@@ -23,6 +24,7 @@ void yyerror(const char *s)
 	fprintf(stderr, "yacc: error line %d: %s\n", yylineno, s);
 }
 extern char* yytext;
+extern int yylex (void);
 char *g_current_section = NULL;
 extern const char *g_section_name;
 #define CHECK_SECTION ( g_current_section && 0 == strcasecmp( g_current_section, g_section_name ) )
