@@ -179,13 +179,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>gravity_d.lib;libkeyvalue_parser_d.lib;libzmq_d.lib;pthreadVCE2.lib;libprotobuf_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -211,13 +211,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\api\cpp\;..\..\..\..\ThirdParty\protobuf-2.4.1\src\;..\..\..\..\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\include;..\..\..\..\ThirdParty\zeromq-3.2.1\include;..\..\..\..\ThirdParty\iniparser\src;$(BOOSTROOT)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>gravity.lib;iniparser.lib;libzmq_d.lib;pthreadVC2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LibDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gravity_d.lib;libkeyvalue_parser_d.lib;libzmq_d.lib;pthreadVC2.lib;libprotobuf_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
