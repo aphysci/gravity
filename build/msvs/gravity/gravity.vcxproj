@@ -383,9 +383,8 @@ protoc --version</Command>
       <ImportLibrary>$(LibDir)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
-      <Command>copy $(GravityRoot)ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x64\pthreadVC2.dll $(BinDir)
-copy $(GravityRoot)\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\lib\x64\pthreadVC2.lib $(LibDir)
-</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
