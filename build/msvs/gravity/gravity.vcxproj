@@ -231,8 +231,8 @@ copy $(GravityRoot)\ThirdParty\pthreads\pthreads-w32-2-9-1-release\Pre-built.2\l
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>which protoc
-protoc --version</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
