@@ -277,7 +277,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -301,7 +301,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

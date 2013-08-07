@@ -268,7 +268,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -276,7 +276,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>gravity.lib;libkeyvalue_parser.lib;libzmq.lib;pthreadVCE2.lib;libprotobuf.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LibDir)$(ThirdPartyLibs)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
@@ -288,7 +288,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\src\keyvalue_parser\;$(BoostRoot)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GravityRoot)\include;$(ProtobufRoot)\src;$(ZMQRoot)\include;$(PThreadsRoot)\include;..\..\..\..\src\keyvalue_parser\;$(BoostRoot);..\..\..\..\src\api\cpp\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
