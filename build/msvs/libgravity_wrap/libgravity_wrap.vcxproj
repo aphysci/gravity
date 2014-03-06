@@ -145,6 +145,7 @@
     <TargetName>$(ProjectName)_d</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <OutDir>$(BinDir)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -160,6 +161,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
