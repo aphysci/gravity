@@ -6,7 +6,10 @@
 	<GravityRoot>$(GRAVITY_HOME)</GravityRoot>
 
     <BinDir>$(GravityRoot)\$(Platform)\$(Configuration)\bin\</BinDir>
-    <LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
+	<LibDir>$(GravityRoot)\$(Platform)\$(Configuration)\lib\</LibDir>
+
+	<GravityIncludeDir>$(GravityRoot)\$(Platform)\$(Configuration)\include\</GravityIncludeDir>
+	<GravityDepsDir>$(GravityRoot)\$(Platform)\$(Configuration)\deps\</GravityDepsDir>
 
 	<!-- Third Party -->
     <JavaRoot>$(JAVA_HOME)</JavaRoot>
@@ -16,7 +19,8 @@
     <ProtobufRoot>$(PROTOBUF_HOME)</ProtobufRoot>
 	<ZMQRoot>$(ZMQ_HOME)</ZMQRoot>
     <PThreadsRoot>$(PTHREADS_HOME)</PThreadsRoot>
-    <ThirdPartyLibs>$(GRAVITY_THIRD_PARTY_LIBS)</ThirdPartyLibs>
+	<!--<ThirdPartyLibs>$(GRAVITY_THIRD_PARTY_LIBS)</ThirdPartyLibs>-->
+	<ThirdPartyLibs>$(GravityRoot)\$(Platform)\$(Configuration)\deps\</ThirdPartyLibs>
     
   </PropertyGroup>
   <ItemDefinitionGroup />
@@ -63,6 +67,14 @@
     </BuildMacro>
     <BuildMacro Include="ThirdPartyLibs">
       <Value>$(ThirdPartyLibs)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="GravityIncludeDir">
+      <Value>$(GravityIncludeDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="GravityDepsDir">
+      <Value>$(GravityDepsDir)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
 

@@ -76,13 +76,19 @@ echo 3 - Gravity Components (VS2010 32-bit executables)
 echo 4 - Debug VS2010 64-bit
 echo 5 - Release VS2010 64-bit
 echo 6 - Gravity Components (VS2010 64-bit executables)
+echo 7 - Debug VS2012 64-bit
+echo 8 - Release VS2012 64-bit
+echo 9 - Gravity Components (VS2012 64-bit executables)
 echo Q - Quit
 
 echo Build Selection:	
 ::choice /c:123456789Q>nul
-choice /c:123456Q>nul
+choice /c:123456789Q>nul
 
-if errorlevel 7 goto done
+::if errorlevel 0 goto done
+if errorlevel 9 goto GravityComponents_2012_64
+if errorlevel 8 goto VS201264R
+if errorlevel 7 goto VS201264D
 if errorlevel 6 goto GravityComponents64
 if errorlevel 5 goto VS201064R
 if errorlevel 4 goto VS201064D
@@ -109,7 +115,10 @@ goto build
 :VS201264R
 echo ========== BUILDING VS2012 64-bit Release ==========
 call setenv /x64 /release
-set CONFIGURATION= /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v110
+set CONFIGURATION= /p:Configuration=Release2012 /p:Platform=x64 /p:VisualStudioVersion=11.0
+set PROTOC_DIR=x64\Release2012\bin
+set GRAVITY_LIB_PATH=..\..\..\x64\Release2012\lib
+set GRAVITY_CONFIG=RELEASE2012
 goto build
 
 :VS201264D
@@ -218,6 +227,7 @@ goto menu
 
 :build
 :: Build keyvalue parser
+echo ========== BUILDING keyvalue_parser ==========
 pushd build\msvs\keyvalue_parser
 if %Clean% EQU 1 (
 	msbuild /target:Clean %CONFIGURATION% keyvalue_parser.sln || goto build_fail
@@ -226,6 +236,7 @@ msbuild %CONFIGURATION% keyvalue_parser.sln || goto build_fail
 popd
 
 :: Build Gravity
+echo ========== BUILDING gravity ==========
 pushd build\msvs\gravity
 if %Clean% EQU 1 (
 	msbuild /target:Clean %CONFIGURATION% gravity.sln || goto build_fail
@@ -234,6 +245,7 @@ msbuild /target:gravity %CONFIGURATION% gravity.sln || goto build_fail
 popd
 
 :: Populate the include directory
+echo ========== Populating include directory ==========
 md include
 copy src\api\cpp\*.h include
 md include\protobuf
