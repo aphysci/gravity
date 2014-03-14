@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileArchiver.h
- *
- *  Created on: Jan 16, 2013
- *      Author: esmf
- */
-
 #ifndef FILEARCHIVER_H_
 #define FILEARCHIVER_H_
 
@@ -31,7 +24,7 @@
 #include <fstream>
 #include <vector>
 
-namespace esmf {
+namespace gravity {
 
 using namespace gravity;
 using namespace std;
@@ -52,5 +45,5 @@ public:
 	void waitForExit();
 };
 
-} /* namespace esmf */
+} /* namespace gravity */
 #endif /* FILEARCHIVER_H_ */

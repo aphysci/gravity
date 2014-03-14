@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileReplay.cpp
- *
- *  Created on: Jan 16, 2013
- *      Author: esmf
- */
-
 #include "GravityLogger.h"
 #include "FileReader.h"
 #include "FileReplay.h"
@@ -33,11 +26,11 @@
 
 int main(int argc, const char* argv[])
 {
-	esmf::FileReplay replay;
+	gravity::FileReplay replay;
 	replay.waitForExit();
 }
 
-namespace esmf {
+namespace gravity {
 
 const char* FileReplay::ComponentName = "FileReplay";
 
@@ -123,4 +116,4 @@ void FileReplay::waitForExit()
 	gravityNode.waitForExit();
 }
 
-} /* namespace esmf */
+} /* namespace gravity */

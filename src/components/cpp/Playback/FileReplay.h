@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileReplay.h
- *
- *  Created on: Jan 16, 2013
- *      Author: esmf
- */
-
 #ifndef FILEREPLAY_H_
 #define FILEREPLAY_H_
 
@@ -30,7 +23,7 @@
 #include <fstream>
 #include <set>
 
-namespace esmf {
+namespace gravity {
 
 using namespace gravity;
 using namespace std;
@@ -54,5 +47,5 @@ public:
 	void waitForExit();
 };
 
-} /* namespace esmf */
+} /* namespace gravity */
 #endif /* FILEREPLAY_H_ */

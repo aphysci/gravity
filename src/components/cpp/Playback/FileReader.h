@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileReader.h
- *
- *  Created on: Feb 13, 2013
- *      Author: esmf
- */
-
 #ifndef FILEREADER_H_
 #define FILEREADER_H_
 
@@ -31,7 +24,7 @@
 #include <fstream>
 #include <vector>
 
-namespace esmf {
+namespace gravity {
 
 using namespace gravity;
 using namespace std;
@@ -59,5 +52,5 @@ public:
 	shared_ptr<GravityDataProduct> getNextDataProduct();
 };
 
-} /* namespace esmf */
+} /* namespace gravity */
 #endif /* FILEREADER_H_ */

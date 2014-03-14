@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileArchiver.cpp
- *
- *  Created on: Jan 16, 2013
- *      Author: esmf
- */
-
 #include "GravityLogger.h"
 #include "FileArchiver.h"
 #include <sstream>
@@ -31,11 +24,11 @@
 
 int main(int argc, const char* argv[])
 {
-	esmf::FileArchiver archiver;
+	gravity::FileArchiver archiver;
 	archiver.waitForExit();
 }
 
-namespace esmf {
+namespace gravity {
 
 const char* FileArchiver::ComponentName = "FileArchiver";
 
@@ -126,4 +119,4 @@ void FileArchiver::waitForExit()
 	gravityNode.waitForExit();
 }
 
-} /* namespace esmf */
+} /* namespace gravity */

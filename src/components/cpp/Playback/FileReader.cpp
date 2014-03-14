@@ -16,13 +16,6 @@
  **
  */
 
-/*
- * FileReader.cpp
- *
- *  Created on: Feb 13, 2013
- *      Author: esmf
- */
-
 #include "FileReader.h"
 #include <string>
 #include <algorithm>
@@ -31,7 +24,7 @@
 
 using namespace std;
 
-namespace esmf {
+namespace gravity {
 
 FileReader::FileReader() {}
 
@@ -179,4 +172,4 @@ void FileReader::endian_swap(int& i)
 	i = (i >> 24) | ((i<<8)&0x00FF0000) | ((i>>8) & 0x0000FF00) | (i << 24);
 }
 
-} /* namespace esmf */
+} /* namespace gravity */
