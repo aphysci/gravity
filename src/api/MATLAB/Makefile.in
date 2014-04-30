@@ -1,0 +1,58 @@
+#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#**
+#** Gravity is free software; you can redistribute it and/or modify
+#** it under the terms of the GNU Lesser General Public License as published by
+#** the Free Software Foundation; either version 3 of the License, or
+#** (at your option) any later version.
+#**
+#** This program is distributed in the hope that it will be useful,
+#** but WITHOUT ANY WARRANTY; without even the implied warranty of
+#** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#** GNU Lesser General Public License for more details.
+#**
+#** You should have received a copy of the GNU Lesser General Public
+#** License along with this program;
+#** If not, see <http://www.gnu.org/licenses/>.
+#**
+
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# Tool-related substitution variables
+GUAVAJAR_DIR   = @GUAVAJAR_DIR@
+
+# VPATH-related substitution variables
+top_builddir   = @top_builddir@
+builddir       = @builddir@
+srcdir         = @srcdir@
+VPATH          = @srcdir@ 
+
+JAVASRC_DIR=.
+JAVA_BUILD_DIR=build
+LIB_NAME=MATLABGravitySubscriber.jar
+
+CLASSPATH=../java/gravity.jar:$(GUAVAJAR_DIR)
+SOURCES=MATLABGravitySubscriber.java
+CLASSES=$(SOURCES:.java=.class)
+
+all: $(LIB_NAME)
+
+$(LIB_NAME): $(CLASSES)
+
+%.class: %.java
+	@echo $<
+	@mkdir -p $(JAVA_BUILD_DIR)
+	@javac -d $(JAVA_BUILD_DIR) -cp $(CLASSPATH) $(JAVASRC_DIR)/$<
+	@jar cf $(LIB_NAME) -C $(JAVA_BUILD_DIR) $(JAVASRC_DIR)
+
+clean:
+	rm -rf $(JAVA_BUILD_DIR) *.jar

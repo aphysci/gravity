@@ -14,7 +14,6 @@
 #** License along with this program;
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
-
 # @configure_input@
 
 # Package-related substitution variables
@@ -43,15 +42,12 @@ LEX            = @LEX@
 PROTOC         = @PROTOC@
 YACC           = @YACC@
 
-# VPATH-related substitution variables
-top_builddir   = @top_builddir@
-builddir       = @builddir@
-srcdir         = @srcdir@
-VPATH          = @srcdir@ 
-
-GRAVLIB_DIR=../../../api/cpp
-MYPROTO_DIR=protobufs
+CC=$(CXX)
+GRAVLIB_DIR=../../../src/api/cpp
+MYPROTO_DIR=../protobuf
 PROG_NAME=$(notdir $(shell pwd) )
+COMPONENT_DIR=../../../src/components/cpp
+SERVICEDIRECTORY_LOCATION=$(COMPONENT_DIR)/ServiceDirectory/
 
 #OS Specific
 SYSTEM:=$(strip $(shell uname -s))
@@ -59,42 +55,52 @@ SYSTEM:=$(strip $(shell uname -s))
 #SYSTEM=MINGW32_NT-6.1
 #WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
+	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+	OS_EXE_EXT=.exe
 	BUILD_VARIANT_DIRECTIVE=-DWIN32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lrt
+	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt -lpthread
+	OS_EXE_EXT=
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS)
-CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) $(AC_LDFLAGS) $(AC_CFLAGS)
-
-LIBS=-lkeyvalue_parser -lgravity -lprotobuf -lzmq -lpthread $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
-
-SRC=$(wildcard *.cpp)
-OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
-DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(AC_CPPFLAGS)
+CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
+LIBS=-Wl,-Bstatic -lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
 PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
 
-all: $(PROG_NAME)
+# Don't delete generated .cc files so that eclipse (or any ide) is happy
+.PRECIOUS: %.pb.cc
+
+all: $(PROTO_OBJ) MiscComponent1$(OS_EXE_EXT) MiscComponent2$(OS_EXE_EXT)
 
 %.pb.cc:%.proto
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -c -o $@ $< $(INCLUDES)
 
-%.o:%.cpp $(DEPS)
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
+#Compile each cpp file to a separate executable.
+MiscComponent1$(OS_EXE_EXT):MiscComponent1.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
-$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
+MiscComponent2$(OS_EXE_EXT):MiscComponent2.cpp $(PROTO_OBJ) $(GRAVLIB_DIR)/libgravity.a
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $< $(INCLUDES) $(CFLAGS) $(LIBS)
+
+components: ServiceDirectory$(OS_EXE_EXT)
+
+ServiceDirectory$(OS_EXE_EXT):
+	cd $(SERVICEDIRECTORY_LOCATION); \
+	make
 
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
+	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*pb.h $(MYPROTO_DIR)/*pb.cc MiscComponent2$(OS_EXE_EXT) MiscComponent1$(OS_EXE_EXT)
+
+run: components MiscComponent1$(OS_EXE_EXT) MiscComponent2$(OS_EXE_EXT)
+	./run.sh

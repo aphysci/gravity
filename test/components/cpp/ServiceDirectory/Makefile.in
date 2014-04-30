@@ -32,13 +32,12 @@ CC             = @CC@
 CXX            = @CXX@
 DEFS           = @DEFS@
 LIBS           = @LIBS@
-AC_CFLAGS      = @CFLAGS@
-AC_CPPFLAGS    = @CPPFLAGS@
+CFLAGS         = @CFLAGS@
+CPPFLAGS       = @CPPFLAGS@
 INSTALL        = @INSTALL@
 INSTALL_DATA   = @INSTALL_DATA@
 INSTALL_PROGRAM= @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
-AC_LDFLAGS     = @LDFLAGS@
 LEX            = @LEX@
 YACC           = @YACC@
 
@@ -48,49 +47,5 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
-#CC=g++
-CC=$(CXX)
+-include ../Makefile
 
-KEYVALUE_PARSER_DIR=../../../../src/keyvalue_parser
-GRAVLIB_DIR=../../../../src/api/cpp
-COMPONENTS_BIN_DIR=../../../../src/components/cpp/bin
-GRAVTEST_DIR=../../../
-PROG_NAME=$(notdir $(shell pwd) )
-
-INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVTEST_DIR) $(AC_CPPFLAGS)
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(KEYVALUE_PARSER_DIR) $(AC_LDFLAGS) $(AC_CFLAGS) 
-
-SYSTEM:=$(strip $(shell uname -s))
-
-ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-        OS_SPECIFIC_LIBS = -lwsock32 -lpthread
-        TEST_NAME=$(PROG_NAME)Test.exe
-	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
-windows: all;
-else ifneq (,$(findstring Linux,$(SYSTEM)))
-        OS_SPECIFIC_LIBS = -lrt
-        TEST_NAME=$(PROG_NAME)Test
-	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
-linux: all;
-else
-ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
-endif
-LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
-
-TEST_SRC=$(wildcard *.h)
-SRC=$(wildcard *.cpp)
-OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
-
-all: $(TEST_NAME)
-
-%.o:%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-$(TEST_NAME): $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(CFLAGS) $(LIBS)
-
-test: $(TEST_NAME)
-	./$^
-
-clean:
-	@rm -rf $(TEST_NAME) *.o runner.cpp

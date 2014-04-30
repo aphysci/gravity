@@ -1,0 +1,79 @@
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# Tool-related substitution variables
+CC             = @CC@
+DEFS           = @DEFS@
+LIBS           = @LIBS@
+CFLAGS         = @CFLAGS@
+CPPFLAGS       = @CPPFLAGS@
+INSTALL        = @INSTALL@
+INSTALL_DATA   = @INSTALL_DATA@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+WITHOUT_JAVA   = @WITHOUT_JAVA@
+
+# VPATH-related substitution variables
+top_builddir   = @top_builddir@
+builddir       = @builddir@
+srcdir         = @srcdir@
+VPATH          = @srcdir@ 
+
+all clean:
+	$(MAKE) -C src/keyvalue_parser $@
+	$(MAKE) -C src/api/cpp $@
+	$(MAKE) -C src/components/cpp/Archiver $@
+	$(MAKE) -C src/components/cpp/LogRecorder $@
+	$(MAKE) -C src/components/cpp/Playback $@
+	$(MAKE) -C src/components/cpp/ServiceDirectory $@
+	$(MAKE) -C test/examples/1-BasicDataProduct $@
+	$(MAKE) -C test/examples/2-ProtobufDataProduct $@
+	$(MAKE) -C test/examples/3-MultipleDataProduct $@
+	$(MAKE) -C test/examples/4-BasicService $@
+	$(MAKE) -C test/examples/5-MiscFunctionality $@
+	$(MAKE) -C test/examples/8-ConfigFile $@
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		$(MAKE) -C src/api/java $@;\
+		$(MAKE) -C src/api/MATLAB $@;\
+		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $@;\
+		$(MAKE) -C test/examples/7-JavaBasicService $@;\
+	fi
+
+Makefile: Makefile.in config.status
+	./config.status $@
+
+config.status: configure
+	./config.status --recheck
+
+install:
+	cp src/components/cpp/Archiver/Archiver src/components/cpp/bin
+	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
+	cp src/components/cpp/Playback/Playback src/components/cpp/bin
+	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
+#	cp src/api/cpp/libgravity.a ${prefix}/lib
+#	cp src/api/cpp/libgravity.so ${prefix}/lib
+#	cp src/api/java/libgravity_wrap.so ${prefix}/lib
+	chmod 755 test/components/cpp/ServiceDirectory/test.sh
+	chmod 755 test/api/java/test.sh
+	chmod 755 test/examples/1-BasicDataProduct/run.sh
+	chmod 755 test/examples/2-ProtobufDataProduct/run.sh
+	chmod 755 test/examples/3-MultipleDataProduct/run.sh
+	chmod 755 test/examples/4-BasicService/run.sh
+	chmod 755 test/examples/5-MiscFunctionality/run.sh
+	chmod 755 test/examples/6-JavaProtobufDataProduct/run.sh
+	chmod 755 test/examples/7-JavaBasicService/run.sh
+
+test: 
+	./test/testall.sh
+
+.PHONY: all clean test install

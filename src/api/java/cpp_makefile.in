@@ -49,52 +49,67 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
-GRAVLIB_DIR=../../../api/cpp
-MYPROTO_DIR=protobufs
-PROG_NAME=$(notdir $(shell pwd) )
+#C++ Include Locations
+JAVAINCLUDE_DIR=$(JAVA_HOME)$(OS_PATH_SEP)include
+GRAVLIB_DIR=..$(OS_PATH_SEP)cpp
+GRAV_HOME=..$(OS_PATH_SEP)..$(OS_PATH_SEP)..$(OS_PATH_SEP)
+KEYVALUE_PARSER_DIR=$(GRAV_HOME)src$(OS_PATH_SEP)keyvalue_parser
 
-#OS Specific
+#C++ Wrapper source dir
+CPPSRC_DIR_MAKE=src/cpp/
+CPPSRC_DIR_OS=src$(OS_PATH_SEP)cpp$(OS_PATH_SEP)
+
+#Tools
+LINK=$(CXX)
+
+#Default C++ Compiler Options (g++)
+INCLUDES=-I../cpp -I$(JAVAINCLUDE_DIR) $(OS_SPECIFIC_INCS) $(AC_CPPFLAGS)
+LIBDIRS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_PARSER_DIR) $(AC_LDFLAGS) $(AC_CFLAGS) 
+
+LIBS=$(COMPILER_SPECIFIC_LIBS)
+COMPILER_SPECIFIC_LIBS=$(GCC_LIBS) $(OS_SPECIFIC_LIBS)
+GCC_LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq
+COMPILE_FLAG=-c
+COUTPUT_FLAG=-o
+OUTPUT_FLAG=-o
+LINK_FLAGS=-shared
+
+OBJ_EXT=o
+OS_PATH_SEP=/
+
+LIB_NAME=libgravity_wrap
+
+#Source/Object/Dependancies (all swig auto generated sources should have been built by now).
+#'wildcard' needs UNIX path seperators
+CPP_SRC=$(wildcard $(CPPSRC_DIR_MAKE)*.cpp)
+#but Microsoft tools need Windows path separators... so substitute them here!
+CPP_OBJ=$(patsubst $(CPPSRC_DIR_MAKE)%.cpp,$(CPPSRC_DIR_OS)%.$(OBJ_EXT),$(CPP_SRC))
+
 SYSTEM:=$(strip $(shell uname -s))
-#SYSTEM:=LINUX
-#SYSTEM=MINGW32_NT-6.1
-#WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
-ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
-	BUILD_VARIANT_DIRECTIVE=-DWIN32
+ifneq (,$(findstring CYGWIN_NT,$(SYSTEM)))
+	-include makefile.vs
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
 	OS_SPECIFIC_LIBS = -lrt
+	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
+	OS_SPECIFIC_FLAGS=-fPIC
+	LIB_EXT=so
 linux: all;
 else
-ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS)
-CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) $(AC_LDFLAGS) $(AC_CFLAGS)
+all: $(LIB_NAME).$(LIB_EXT)
 
-LIBS=-lkeyvalue_parser -lgravity -lprotobuf -lzmq -lpthread $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+%.$(OBJ_EXT): %.cpp
+	@echo $(CC) $<
+	$(warning COMPILE_FLAG is $(COMPILE_FLAG))
+	@$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(INCLUDES) $(COUTPUT_FLAG)$@ $<
 
-SRC=$(wildcard *.cpp)
-OBJECTS=$(patsubst %.cpp,%.o,$(SRC))
-DEPS=$(wildcard *.h $(MYPROTO_DIR)/*.h)
+$(LIB_NAME).$(LIB_EXT): $(CPP_OBJ)
+	@echo building $(LIB_NAME).$(LIB_EXT)
 
-PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
-PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
-PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
-
-all: $(PROG_NAME)
-
-%.pb.cc:%.proto
-	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
-
-%.pb.o:%.pb.cc
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
-
-%.o:%.cpp $(DEPS)
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
-
-$(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
+	@$(LINK) $(LINK_FLAGS) $(LIBDIRS) $(OUTPUT_FLAG)$@ $(CPP_OBJ) $(LIBS) 
 
 clean:
-	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
+	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.exp *.lib *.$(OBJ_EXT)

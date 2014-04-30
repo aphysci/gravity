@@ -1,0 +1,55 @@
+Installation Instructions
+=========================
+
+ (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+
+ Gravity is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this program;
+ If not, see <http://www.gnu.org/licenses/>.
+
+Package Dependencies and Setup
+==============================
+Protocol Buffers - The latest available Protocol Buffers full source package is required.
+Protobuf Java -    Follow the README.txt in the protobuf Java directory to generate the required .jar file.
+                   This .jar file is specified as the JAVAPROTOBUF_DIR configure option. Type 'configure --help' for more details.
+ZeroMQ -           The ZeroMQ stable release version of 3.x, or greater is required.
+Java -             Installation of the openjdk software package is required.
+Guava Libaries -   This .jar file is specified as the GUAVAJAR_DIR configure option.  Type 'configure --help' for more details.
+Boost -            Boost package installation is required for compilation (ex: apt-get install libboost-all-dev)
+Flex and Bison -   The Flex fast scanner generator and Bison parser generator are required (ex: apt-get install flex bison)
+Swig -             The Simplified Wrapper and Interface Generator is required (ex: apt-get install swig)
+Env Variables -    JAVA_HOME - Reference to the Java Runtime Environment (ex: /usr/lib/jvm/java-7-openjdk-amd64)
+                   JAVAPROTOBUF_DIR - Reference to the Java Protobuf .jar file (ex: /opt/protobuf-2.4.1/java/target/protobuf-java-2.4.1.jar)
+                   GUAVAJAR_DIR - Referene to the Google Guava project core libraries .jar file (ex: /opt/guava-13.0.1/guava-13.0.1.jar)
+
+Basic Installation
+==================
+To configure, build and test the Gravity package:
+
+  1. 'cd' to the directory containing the package's source code and type './configure' to configure the package for your system.  
+
+     Examples of recommended configure options are:
+     JAVAPROTOBUF_DIR=/opt/protobuf-2.4.1/java/target/protobuf-java-2.4.1.jar - Type 'configure --help' for more details.
+     GUAVAJAR_DIR=/opt/guava-13.0.1/guava-13.0.1.jar -  Type 'configure --help' for more details.
+
+     While configure is running, it prints some messages telling which features it is checking for.
+
+  3. Type 'make' to compile the package.
+
+  4. Type 'make install' to copy the required binary to the installation locations.
+
+  5. Optionally, type 'make test' to test the functionality using the just-built binaries.
+
+  6. You can remove the program binaries and object files from the source code directory by typing 'make clean'.  
+
+

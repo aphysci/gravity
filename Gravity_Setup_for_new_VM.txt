@@ -1,0 +1,108 @@
+New VM Setup Procedure for Gravity Installation
+===============================================
+
+ (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+
+ Gravity is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this program;
+ If not, see <http://www.gnu.org/licenses/>.
+
+=================================================================================
+This installation procedure assumes that the user has just completed the  
+installation of a new Ubuntu virtual machine.  The following steps serve as a 
+guide to establishing the environment necessary to build and utilize the Gravity
+software package.  All example installation suggestions require the user to 
+have root privilege (i.e. sudo).
+
+1.  Add "." to the PATH environmental variable in the .bashrc file.
+    ex:  export PATH=:$PATH:./
+
+2.  Perform an update on the apt-get utility to get information on the newest
+    version of packages.
+    ex:  apt-get update
+
+3.  Install the g++ compiler.
+    ex:  apt-get install g++
+
+4.  Install the Git version control and source code management system.
+    ex:  apt-get install git
+
+5.  Download the latest available Protocol buffers full source package and install (at least protobuf 2.4.x or greater).
+    ex:  tar -xvf protobuf-2.5.0.tar -C /opt
+         cd /opt/protobuf-2.5.0
+         configure
+         make
+         make check
+         make install
+
+6.  Download ZeroMQ stable release 3.x and install.
+    ex:  tar -xvf zeromq-3.2.2.tar -C /opt
+         cd /opt/zeromq-3.2.2
+         configure
+         make
+         make check
+         make install
+
+7.  Install openjdk package.
+    ex:  apt-get install openjdk-7-jdk
+
+8.  Define JAVA_HOME in the .bashrc file.
+    ex:  export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+
+9.  Install Apache Maven build manager for Java projects.
+    ex:  apt-get install maven
+
+10. Build the protobuf java .jar file.
+    ex:  cd /opt/protobuf-2.5.0/java
+         mvn test
+         mvn install
+         mvn package
+
+    The resulting .jar file will be installed as /opt/protobuf-2.5.0/java/target/protobuf-java-2.5.0.jar.
+    This file must be referenced as the JAVAPROTOBUF_DIR environmental variables for the autoconf configure process. 
+
+11. Download the latest Google Guava project core libraries .jar file and note the installed directory.
+    This file must be referenced as the GUAVAJAR_DIR environmental variables for the autoconf configure process. 
+
+12. Install the autoconf package for generating configure scripts.
+    ex:  apt-get install autoconf
+
+13. Install the Flex fast scanner generator and Bison parser generator.
+    ex:  apt-get install flex bison
+
+14. Install the latest Boost C++ libraries.
+    ex:  apt-get install libboost-all-dev
+
+15. Install the Simplified Wrapper and Interface Generator (swig).
+    ex:  apt-get install swig
+
+16. Obtain the latest version of the Gravity software package.
+    ex:   git clone http://192.168.2.107/git/gravity.git
+
+17. Build, install and test the Gravity software package.
+    ex:  configure JAVAPROTOBUF_DIR=/opt/protobuf-2.5.0/java/target/protobuf-java-2.5.0.jar GUAVAJAR_DIR=/opt/guava-14.0.1.jar CFLAGS=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+         make
+         make install
+         make test
+
+
+
+
+
+         
+
+
+
+
+
+
