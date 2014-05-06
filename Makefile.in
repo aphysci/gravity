@@ -55,7 +55,7 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
-install:
+test-prep:
 	cp src/components/cpp/Archiver/Archiver src/components/cpp/bin
 	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
 	cp src/components/cpp/Playback/Playback src/components/cpp/bin
@@ -75,5 +75,34 @@ install:
 
 test: 
 	./test/testall.sh
+
+distributable:
+	rm -rf bin lib include
+	mkdir bin
+	cp src/components/cpp/bin/* bin
+
+	mkdir lib
+	cp src/keyvalue_parser/*.a lib
+	cp src/keyvalue_parser/*.so lib
+	cp src/api/cpp/*.a lib
+	cp src/api/cpp/*.so lib
+	cp src/api/java/*.so lib
+	cp src/api/java/*.jar lib
+
+	mkdir include
+	cp -r src/api/cpp/*.h include
+	mkdir include/protobuf
+	cp src/api/cpp/protobuf/GravityDataProductPB.pb.h include/protobuf
+	cp src/api/cpp/protobuf/GravityMetricsDataPB.pb.h include/protobuf
+	mkdir include/MATLAB
+	cp src/api/MATLAB/*.m include/MATLAB
+	mkdir lib/MATLAB
+	cp src/api/MATLAB/*.jar lib/MATLAB
+
+	echo building Gravity tarball...
+	rm gravity.tgz >& /dev/null
+	tar czf gravity.tgz bin lib include
+
+	
 
 .PHONY: all clean test install

@@ -7016,7 +7016,7 @@ fi
 
 
 echo \
-"-------------------------------------------------
+"------------------------------------------------------------------
 
  ${PACKAGE_NAME}: Version ${PACKAGE_VERSION}
 
@@ -7027,8 +7027,9 @@ echo \
    where the optional <target> is:
      clean         - remove binaries and objects
      all           - build all functionality
-     install       - install required binaries
+     test-prep     - configure the necessary file for the test 
      test          - test functionality
+	 distributable - create distributable directories and tar file
 
---------------------------------------------------"
+------------------------------------------------------------------"
 
