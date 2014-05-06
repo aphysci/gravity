@@ -100,7 +100,7 @@ distributable:
 	cp src/api/MATLAB/*.jar lib/MATLAB
 
 	echo building Gravity tarball...
-	rm gravity.tgz >& /dev/null
+	rm -f gravity.tgz 
 	tar czf gravity.tgz bin lib include
 
 	
