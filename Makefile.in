@@ -73,7 +73,7 @@ test-prep:
 	chmod 755 test/examples/6-JavaProtobufDataProduct/run.sh
 	chmod 755 test/examples/7-JavaBasicService/run.sh
 
-test: 
+test: test-prep
 	./test/testall.sh
 
 distributable:
