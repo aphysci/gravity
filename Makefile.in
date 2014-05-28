@@ -56,6 +56,13 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
+components:
+	cp src/components/cpp/Archiver/FileArchiver src/components/cpp/bin
+	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
+	cp src/components/cpp/Playback/FileReplay src/components/cpp/bin
+	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
+	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
+
 test-prep:
 #	cp src/api/cpp/libgravity.a ${prefix}/lib
 #	cp src/api/cpp/libgravity.so ${prefix}/lib
@@ -70,15 +77,10 @@ test-prep:
 	chmod 755 test/examples/6-JavaProtobufDataProduct/run.sh
 	chmod 755 test/examples/7-JavaBasicService/run.sh
 
-test: test-prep
+test: test-prep components
 	./test/testall.sh
 
-distributable:
-	cp src/components/cpp/Archiver/FileArchiver src/components/cpp/bin
-	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
-	cp src/components/cpp/Playback/FileReplay src/components/cpp/bin
-	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
-	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
+distributable: components
 
 	rm -rf bin lib include
 	mkdir bin
