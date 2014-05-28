@@ -7028,8 +7028,8 @@ echo \
    where the optional <target> is:
      clean         - remove binaries and objects
      all           - build all functionality
-     test-prep     - configure the necessary file for the test 
+     test-prep     - configure the necessary files for the test 
      test          - test functionality
-	 distributable - create distributable directories and tar file
+     distributable - create distributable directories and tar file
 
 ------------------------------------------------------------------"

@@ -57,11 +57,6 @@ config.status: configure
 	./config.status --recheck
 
 test-prep:
-	cp src/components/cpp/Archiver/Archiver src/components/cpp/bin
-	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
-	cp src/components/cpp/Playback/Playback src/components/cpp/bin
-	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
-	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
 #	cp src/api/cpp/libgravity.a ${prefix}/lib
 #	cp src/api/cpp/libgravity.so ${prefix}/lib
 #	cp src/api/java/libgravity_wrap.so ${prefix}/lib
@@ -79,6 +74,12 @@ test: test-prep
 	./test/testall.sh
 
 distributable:
+	cp src/components/cpp/Archiver/FileArchiver src/components/cpp/bin
+	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
+	cp src/components/cpp/Playback/FileReplay src/components/cpp/bin
+	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
+	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
+
 	rm -rf bin lib include
 	mkdir bin
 	cp src/components/cpp/bin/* bin
