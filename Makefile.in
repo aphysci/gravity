@@ -35,6 +35,7 @@ all clean:
 	$(MAKE) -C src/components/cpp/LogRecorder $@
 	$(MAKE) -C src/components/cpp/Playback $@
 	$(MAKE) -C src/components/cpp/ServiceDirectory $@
+	$(MAKE) -C src/components/cpp/ConfigServer $@
 	$(MAKE) -C test/examples/1-BasicDataProduct $@
 	$(MAKE) -C test/examples/2-ProtobufDataProduct $@
 	$(MAKE) -C test/examples/3-MultipleDataProduct $@
@@ -60,6 +61,7 @@ test-prep:
 	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
 	cp src/components/cpp/Playback/Playback src/components/cpp/bin
 	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
+	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
 #	cp src/api/cpp/libgravity.a ${prefix}/lib
 #	cp src/api/cpp/libgravity.so ${prefix}/lib
 #	cp src/api/java/libgravity_wrap.so ${prefix}/lib

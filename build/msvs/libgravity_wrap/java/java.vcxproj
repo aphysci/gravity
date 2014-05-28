@@ -311,11 +311,12 @@
     <CustomBuildStep>
       <Command>pushd $(GRAVITY_HOME)\src\api\MATLAB
 md build
-javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\ThirdParty\guava-13.0.1\guava-13.0.1.jar MATLABGravitySubscriber.java
+javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 jar cf MATLABGravitySubscriber.jar -C build .
 md $(OutDir)\..\lib\MATLAB
 copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
-copy $(GRAVITY_HOME)\ThirdParty\guava-13.0.1\guava-13.0.1.jar $(OutDir)\..\lib
+copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 popd</Command>
     </CustomBuildStep>
     <CustomBuildStep>

@@ -288,11 +288,11 @@ echo ================================
 echo.
 pushd src\api\MATLAB
 md build
-javac -d build -cp %GRAVITY_LIB_PATH%/gravity.jar;../../../ThirdParty/guava-13.0.1/guava-13.0.1.jar MATLABGravitySubscriber.java
+javac -d build -cp %GRAVITY_LIB_PATH%/gravity.jar;guava-13.0.1.jar MATLABGravitySubscriber.java
 jar cf MATLABGravitySubscriber.jar -C build .
 md %GRAVITY_LIB_PATH%\MATLAB
 copy MATLABGravitySubscriber.jar %GRAVITY_LIB_PATH%\MATLAB
-copy ..\..\..\ThirdParty\guava-13.0.1\guava-13.0.1.jar %GRAVITY_LIB_PATH%
+copy guava-13.0.1.jar %GRAVITY_LIB_PATH%
 popd
 
 goto menu
