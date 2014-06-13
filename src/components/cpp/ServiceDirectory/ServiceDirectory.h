@@ -37,7 +37,7 @@ using namespace std;
 namespace gravity
 {
 
-class ServiceDirectory
+class ServiceDirectory : GravityServiceProvider
 {
 private:
     map<string, list<string> > dataProductMap;
@@ -47,6 +47,7 @@ public:
     virtual ~ServiceDirectory();
     void start();
     shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
+    shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 
 private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);

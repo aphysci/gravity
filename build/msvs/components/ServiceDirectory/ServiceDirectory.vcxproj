@@ -470,6 +470,7 @@
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentLookupRequestPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.cc" />
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryMapPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc" />

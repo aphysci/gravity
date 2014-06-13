@@ -97,4 +97,9 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryMapContainer.java">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

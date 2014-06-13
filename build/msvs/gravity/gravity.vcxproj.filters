@@ -229,5 +229,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
+    <None Include="..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
   </ItemGroup>
 </Project>

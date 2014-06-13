@@ -47,5 +47,8 @@
     <None Include="..\..\..\..\src\api\protobufs\ConfigRequest.proto">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

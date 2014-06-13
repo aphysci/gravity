@@ -39,6 +39,9 @@
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryMapPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.h">
