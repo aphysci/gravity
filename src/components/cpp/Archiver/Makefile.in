@@ -48,5 +48,7 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
+EXE_NAME = FileArchiver
+
 -include ../Makefile
 

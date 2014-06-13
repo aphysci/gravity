@@ -53,13 +53,16 @@ GRAVLIB_DIR=../../../api/cpp
 MYPROTO_DIR=protobufs
 PROG_NAME=$(notdir $(shell pwd) )
 
+#Libraries
+KEYVALUE_PARSER_INCLUDE_DIR=../../../keyvalue_parser
+
 #OS Specific
 SYSTEM:=$(strip $(shell uname -s))
 #SYSTEM:=LINUX
 #SYSTEM=MINGW32_NT-6.1
 #WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lwsock32 -lpthread
+	OS_SPECIFIC_LIBS = -lwsock32 -lpthread 
 	BUILD_VARIANT_DIRECTIVE=-DWIN32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
@@ -69,7 +72,7 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS)
+INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(KEYVALUE_PARSER_INCLUDE_DIR)$(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS)
 CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) $(AC_LDFLAGS) $(AC_CFLAGS)
 
 LIBS=-lkeyvalue_parser -lgravity -lprotobuf -lzmq -lpthread $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
@@ -94,7 +97,7 @@ all: $(PROG_NAME)
 	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
 
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $@ $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $(EXE_NAME) $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
 
 clean:
 	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)

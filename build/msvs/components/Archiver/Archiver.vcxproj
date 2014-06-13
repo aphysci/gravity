@@ -224,6 +224,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
+    <TargetName>FileArchiver</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

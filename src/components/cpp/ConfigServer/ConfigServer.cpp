@@ -82,7 +82,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
     if(!key_value_map.size())
 	{
 		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
-		return shared_ptr<GravityDataProduct>(NULL);
+		return shared_ptr<GravityDataProduct>();
 	}
 
 	//Populate Response Message and Send it

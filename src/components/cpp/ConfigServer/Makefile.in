@@ -48,7 +48,6 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
-EXE_NAME = ServiceDirectory
+EXE_NAME = ConfigServer
 
 -include ../Makefile
-
