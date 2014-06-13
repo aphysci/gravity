@@ -311,7 +311,10 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
  ******/
 %typemap(jstype) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request "GravityDataProduct"
 %typemap(javaout) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request {
-    return new GravityDataProduct($jnicall);
+    byte[] data = $jnicall;
+    if (data == null || data.length == 0)
+        return null;
+    return new GravityDataProduct(data);
   }
 
 %include "modulecode.i"
