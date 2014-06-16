@@ -26,6 +26,7 @@ message ProductLocations
 {
 	optional string product_id = 1;
 	repeated string url = 2;
+	repeated string component_id = 3;
 }
 
 message ServiceDirectoryMapPB

@@ -33,4 +33,5 @@ message ServiceDirectoryRegistrationPB
 		SERVICE = 1;
 	}
 	optional RegistrationType type = 3;
+	optional string component_id = 4;
 }

@@ -518,6 +518,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
             registration.set_id(dataProductID);
             registration.set_url(connectionURL);
             registration.set_type(ServiceDirectoryRegistrationPB::DATA);
+            registration.set_component_id(componentID);
 
             // Wrap request in GravityDataProduct
             GravityDataProduct request("RegistrationRequest");
@@ -986,6 +987,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
         registration.set_id(serviceID);
         registration.set_url(connectionURL);
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
+        registration.set_component_id(componentID);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");

@@ -42,6 +42,7 @@ class ServiceDirectory : GravityServiceProvider
 private:
     map<string, list<string> > dataProductMap;
     map<string, string> serviceMap;
+	map<string, string> urlToComponentMap;
     GravityNode gn;
 public:
     virtual ~ServiceDirectory();

@@ -201,6 +201,7 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
                 ProductLocations* locs = providerMap.add_service_provider();
                 locs->set_product_id(it->first); // service ID
                 locs->add_url(it->second); // url
+				locs->add_component_id(urlToComponentMap[it->second]); // component id
             }
             
             for(map<string, list<string> >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++) 
@@ -211,6 +212,7 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
                 for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
                 {
                     locs->add_url(*lit); // url
+					locs->add_component_id(urlToComponentMap[*lit]); // component id
                 }
             }
 
@@ -263,7 +265,8 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
         list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
         if (iter == urls->end())
         {
-            dataProductMap[registration.id()].push_back(registration.url());
+            dataProductMap[registration.id()].push_back(registration.url());			
+			urlToComponentMap[registration.url()] = registration.component_id();
             GravityDataProduct update(REGISTERED_PUBLISHERS);
             addPublishers(registration.id(), update);
             gn.publish(update, registration.id());
@@ -284,6 +287,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
         }
         // Add as service provider, overwriting any existing provider for this service
         serviceMap[registration.id()] = registration.url();
+		urlToComponentMap[registration.url()] = registration.component_id();
             
         // Remove any previous publisher registrations at this URL as they obviously no longer exist
         purgeObsoletePublishers(registration.id(), registration.url());
