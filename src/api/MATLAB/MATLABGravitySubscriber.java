@@ -20,8 +20,8 @@ package com.aphysci.gravity.matlab;
 
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityDataProduct;
-import java.util.Vector;
 import java.util.List;
+import java.util.ArrayList;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.Ints;
@@ -29,22 +29,22 @@ import com.google.common.primitives.Ints;
 
 public class MATLABGravitySubscriber implements GravitySubscriber
 {
-	private Vector<GravityDataProduct> data = new Vector<GravityDataProduct>();
+	private ArrayList<GravityDataProduct> data = new ArrayList<GravityDataProduct>();
 
-	public void subscriptionFilled(final List<GravityDataProduct> dataProducts)
+	public synchronized void subscriptionFilled(final List<GravityDataProduct> dataProducts)
 	{
 		data.addAll(dataProducts);
 	}
 
-	public GravityDataProduct getDataProduct(int timeoutMS)
+	public synchronized GravityDataProduct getDataProduct(int timeoutMS)
 	{
 		GravityDataProduct gdp = null;
 		do
 		{
 			if (!data.isEmpty())
 			{
-				gdp = data.elementAt(0);
-				data.removeElementAt(0);
+				gdp = data.get(0);
+				data.remove(0);
 			}
 			else if (timeoutMS < 0)
 			{
@@ -61,10 +61,10 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 		return gdp;
 	}
 
-	public Vector<GravityDataProduct> getAllDataProducts()
+	public synchronized List<GravityDataProduct> getAllDataProducts()
 	{
 		@SuppressWarnings("unchecked")
-		Vector<GravityDataProduct> ret = (Vector<GravityDataProduct>)data.clone();
+		List<GravityDataProduct> ret = (List<GravityDataProduct>)data.clone();
 		data.clear();
 		return ret;
 	}
