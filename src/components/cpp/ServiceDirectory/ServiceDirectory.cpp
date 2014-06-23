@@ -324,6 +324,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         if (iter != urls->end())
         {
             dataProductMap[unregistration.id()].erase(iter);
+			if (dataProductMap[unregistration.id()].empty())
+			{
+				dataProductMap.erase(unregistration.id());
+			}
             GravityDataProduct update(REGISTERED_PUBLISHERS);
             addPublishers(unregistration.id(), update);
             gn.publish(update, unregistration.id());
@@ -383,18 +387,21 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
                 gn.publish(update, iter->first);
             }
         }
-    }
+	}
 }
 
 void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataProduct &response)
 {
-    list<string>* urls = &dataProductMap[dataProductID];
     ComponentDataLookupResponsePB lookupResponse;
     lookupResponse.set_lookupid(dataProductID);
-    for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
-    {
-        lookupResponse.add_url(*iter);
-    }
+	if (dataProductMap.count(dataProductID) != 0)
+	{
+		list<string>* urls = &dataProductMap[dataProductID];
+		for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
+		{
+			lookupResponse.add_url(*iter);
+		}
+	}
     response.setData(lookupResponse);
 }
 
