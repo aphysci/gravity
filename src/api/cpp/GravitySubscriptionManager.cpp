@@ -217,14 +217,15 @@ void GravitySubscriptionManager::start()
                     shared_ptr<GravityDataProduct> dataProduct;
                     string dataProductID;
                     readSubscription(pollItems[index].socket, dataProductID, dataProduct);
+                    if (dataProductID.empty())
+                    {
+                        Log::warning("Received an apparently empty update list from ServiceDirectory");
+                        continue;
+                    }
                     ComponentDataLookupResponsePB update;
                     dataProduct->populateMessage(update);
                     Log::debug("Found update to publishers list for data product %s", dataProductID.c_str());
-                    if (subscriptionMap.count(dataProductID) == 0)
-                    {
-                        Log::warning("received update for data product (%s) that we aren't subscribed to", dataProductID.c_str());
-                    }
-                    else
+                    if (subscriptionMap.count(dataProductID) != 0)
                     {
                         for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[dataProductID].begin();
                              iter != subscriptionMap[dataProductID].end();
