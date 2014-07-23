@@ -739,11 +739,9 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 			return ret;
 		if (url.size() > 1)
 			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
-		else if (url.size() == 0)
-		{
-			Log::critical("The Service Directory is not registered to publish updates");
-			sendStringMessage(subscriptionManagerSocket, "", ZMQ_SNDMORE);
-		}
+		else if (url.size() == 1)
+			break;
+
 		if (tries > 0)
 			gravity::sleep(500);
 	}
