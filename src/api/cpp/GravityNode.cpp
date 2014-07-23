@@ -729,26 +729,37 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
         const GravitySubscriber& subscriber, string filter)
 {
+	vector<string> url;
+	GravityReturnCode ret;
+	int tries = 5;
+	while (url.size() == 0 && tries-- > 0)
+	{
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url);
+		if(ret != GravityReturnCodes::SUCCESS)
+			return ret;
+		if (url.size() > 1)
+			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
+		else if (url.size() == 0)
+		{
+			Log::critical("The Service Directory is not registered to publish updates");
+			sendStringMessage(subscriptionManagerSocket, "", ZMQ_SNDMORE);
+		}
+		if (tries > 0)
+			gravity::sleep(500);
+	}
+
+	if (url.size() == 0)
+	{
+		Log::critical("Service Directory has not finished initialization (RegisteredPublishers not available)");
+		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
+	}
+
 	// Send subscription details
 	sendStringMessage(subscriptionManagerSocket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSocket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSocket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSocket, filter, ZMQ_SNDMORE);
-
-	vector<string> url;
-	GravityReturnCode ret;
-	ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url);
-    if(ret != GravityReturnCodes::SUCCESS)
-        return ret;
-    if (url.size() > 1)
-        Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
-    else if (url.size() == 0)
-    {
-        Log::critical("The Service Directory is not registered to publish updates");
-        sendStringMessage(subscriptionManagerSocket, "", ZMQ_SNDMORE);
-    }
-    else
-        sendStringMessage(subscriptionManagerSocket, url[0], ZMQ_SNDMORE);
+    sendStringMessage(subscriptionManagerSocket, url[0], ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, sizeof(&subscriber));
