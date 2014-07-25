@@ -29,6 +29,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <set>
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
 
@@ -44,6 +45,9 @@ private:
     map<string, string> serviceMap;
 	map<string, string> urlToComponentMap;
     GravityNode gn;
+    bool registeredPublishersReady, registeredPublishersProcessed;
+    set<string> registerUpdatesToSend;
+
 public:
     virtual ~ServiceDirectory();
     void start();

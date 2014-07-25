@@ -82,6 +82,7 @@ ServiceDirectory::~ServiceDirectory()
 
 void ServiceDirectory::start()
 {
+    registeredPublishersReady = registeredPublishersProcessed = false;
     gn.init("ServiceDirectory");
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
@@ -147,6 +148,18 @@ void ServiceDirectory::start()
             zmq_msg_close(&msg);
 
             shared_ptr<GravityDataProduct> response = request(req);
+            if (!registeredPublishersProcessed && registeredPublishersReady)
+            {
+                GravityDataProduct update(REGISTERED_PUBLISHERS);
+                for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); it++)
+                {
+                    Log::debug("Processing pending registered publishers update for %s", it->c_str());
+                    addPublishers(*it, update);
+                    gn.publish(update, *it);
+                }
+                registerUpdatesToSend.clear();
+                registeredPublishersProcessed = true;
+            }
 
             sendGravityDataProduct(pollItem.socket, *response, ZMQ_DONTWAIT);
         }
@@ -261,15 +274,26 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     bool foundDup = false;
     if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
     {
+        if (registration.id() == REGISTERED_PUBLISHERS)
+        {
+            registeredPublishersReady = true;
+        }
         list<string>* urls = &dataProductMap[registration.id()];
         list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
         if (iter == urls->end())
         {
             dataProductMap[registration.id()].push_back(registration.url());			
-			urlToComponentMap[registration.url()] = registration.component_id();
-            GravityDataProduct update(REGISTERED_PUBLISHERS);
-            addPublishers(registration.id(), update);
-            gn.publish(update, registration.id());
+            urlToComponentMap[registration.url()] = registration.component_id();
+            if (registeredPublishersReady)
+            {
+                GravityDataProduct update(REGISTERED_PUBLISHERS);
+                addPublishers(registration.id(), update);
+                gn.publish(update, registration.id());
+            }
+            else
+            {
+                registerUpdatesToSend.insert(registration.id());
+            }
 
             // Remove any previous registrations at this URL as they obviously no longer exist
             purgeObsoletePublishers(registration.id(), registration.url());
@@ -328,9 +352,16 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 			{
 				dataProductMap.erase(unregistration.id());
 			}
-            GravityDataProduct update(REGISTERED_PUBLISHERS);
-            addPublishers(unregistration.id(), update);
-            gn.publish(update, unregistration.id());
+			if (registeredPublishersReady)
+			{
+			    GravityDataProduct update(REGISTERED_PUBLISHERS);
+			    addPublishers(unregistration.id(), update);
+			    gn.publish(update, unregistration.id());
+			}
+			else
+			{
+			    registerUpdatesToSend.insert(unregistration.id());
+			}
         }
         else
         {
@@ -382,9 +413,16 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
                                 iter->first.c_str(), url.c_str());
                 urls.erase(it);
 
-                GravityDataProduct update(REGISTERED_PUBLISHERS);
-                addPublishers(iter->first, update);
-                gn.publish(update, iter->first);
+                if (registeredPublishersReady)
+                {
+                    GravityDataProduct update(REGISTERED_PUBLISHERS);
+                    addPublishers(iter->first, update);
+                    gn.publish(update, iter->first);
+                }
+                else
+                {
+                    registerUpdatesToSend.insert(iter->first);
+                }
             }
         }
 	}
