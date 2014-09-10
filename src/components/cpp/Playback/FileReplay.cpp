@@ -23,7 +23,9 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-#include <unistd.h>
+#ifndef WIN32
+#include <sys/unistd.h>
+#endif
 
 int main(int argc, const char* argv[])
 {

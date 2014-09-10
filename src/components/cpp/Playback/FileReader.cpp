@@ -21,7 +21,9 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
-#include <unistd.h>
+#ifndef WIN32
+#include <sys/unistd.h>
+#endif
 
 using namespace std;
 
