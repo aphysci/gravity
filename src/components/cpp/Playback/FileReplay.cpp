@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <unistd.h>
 
 int main(int argc, const char* argv[])
 {
