@@ -1,3 +1,4 @@
+%parse-param {void *pbuckets}
 %{
 
 /* keyvalue parser specification
@@ -19,7 +20,7 @@
 #   define strcasecmp stricmp
 #endif
 extern int yylineno;
-void yyerror(const char *s)
+void yyerror(void *p, const char *s)
 {
 	fprintf(stderr, "yacc: error line %d: %s\n", yylineno, s);
 }
@@ -28,7 +29,6 @@ extern int yylex (void);
 char *g_current_section = NULL;
 extern const char *g_section_name;
 #define CHECK_SECTION ( g_current_section && 0 == strcasecmp( g_current_section, g_section_name ) )
-#define YYPARSE_PARAM pbuckets
 %}
 %start file
 %token TOKEN SECTION VAR ERROR TOKEN_STRING
@@ -84,7 +84,7 @@ kvpair:
 expr:
     ERROR
     {
-        yyerror("parse error");
+        yyerror(NULL, "parse error");
         YYABORT;
     }
     | VAR
@@ -96,7 +96,7 @@ expr:
             {
                 char str[32];
                 snprintf(str, sizeof(str), "unknown variable %s", $1);
-                yyerror(str);
+                yyerror(NULL, str);
                 YYABORT;
             }
             else
