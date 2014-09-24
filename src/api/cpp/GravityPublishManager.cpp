@@ -127,7 +127,7 @@ void GravityPublishManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeResponseSocket);
 
-			// message from gravity node should be either a register, unregister or publish request
+			// message from gravity node on this socket should be only be register
 			if (command == "register")
 			{
 				registerDataProduct();
@@ -143,6 +143,7 @@ void GravityPublishManager::start()
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
 
+			// message from gravity node should be either a unregister or publish request
 			if (command == "unregister")
 			{
 				unregisterDataProduct();
