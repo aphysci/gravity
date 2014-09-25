@@ -56,16 +56,6 @@
 using namespace std;
 using namespace gravity;
 
-class Subscriber : public GravitySubscriber
-{
-    int count;
-public:
-    Subscriber() : count(0) {}
-    ~Subscriber() {}
-    int getCount() { return count; }
-    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
-};
-
 class GravityNodeTest: public GravitySubscriber, GravityServiceProvider, GravityRequestor
 {
 public:

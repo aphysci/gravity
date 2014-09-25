@@ -151,6 +151,14 @@ public:
      * \return success flag
      */
     GRAVITY_API bool serializeToArray(void* arrayPtr) const;
+
+    /**
+     * Check equivalence between two GravityDataProducts.  GravityDataProducts are considered equivalent
+     * if they're product ID and data are identical.
+     * \gdp GravityDataProduct to compare with this one.
+     * \return true if the two GravityDataProducts are equivalent, false otherwise.
+     */
+    GRAVITY_API bool operator==(const GravityDataProduct &gdp);
 };
 
 } /* namespace gravity */

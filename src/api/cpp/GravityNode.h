@@ -29,6 +29,7 @@
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
 #include "GravityHeartbeatListener.h"
+#include "GravitySemaphore.h"
 #include "GravityServiceProvider.h"
 #include "Utility.h"
 #include <pthread.h>
@@ -97,6 +98,12 @@ typedef struct NetworkNode
     void* socket;
 } NetworkNode;
 
+typedef struct SocketWithLock
+{
+	void *socket;
+	Semaphore lock;
+} SocketWithLock;
+
 class GravityConfigParser;
 
 /**
@@ -117,12 +124,12 @@ private:
     pthread_t metricsManagerThread;
 
     void* context;
-    void* subscriptionManagerSocket;
-    void *publishManagerRequestSocket;
-    void *publishManagerPublishSocket;
-    void *serviceManagerSocket;
-    void* requestManagerSocket;
-    void* metricsManagerSocket;
+    SocketWithLock subscriptionManagerSWL;
+    SocketWithLock publishManagerRequestSWL;
+    SocketWithLock publishManagerPublishSWL;
+    SocketWithLock serviceManagerSWL;
+    SocketWithLock requestManagerSWL;
+    void* metricsManagerSocket; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
     std::string getIP(); ///< Utility method to get the host machine's IP address
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);

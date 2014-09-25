@@ -19,6 +19,86 @@
 #include "GravityNodeTest.h"
 #include "GravityTest.h"
 
+class Subscriber : public GravitySubscriber
+{
+    int count;
+public:
+    Subscriber() : count(0) {}
+    ~Subscriber() {}
+    int getCount() { return count; }
+    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
+};
+
+class GravitySyncTest : public GravitySubscriber
+{
+    GravityNode gravityNode;
+    GravityDataProduct gdp;
+    int gdpcount1, gdpcount2;
+
+public:
+
+    GravitySyncTest();
+    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+    void testSync();
+};
+
+GravitySyncTest::GravitySyncTest() : gdp("SyncTestGDP")
+{
+}
+
+void GravitySyncTest::testSync()
+{
+    gdpcount1 = gdpcount2 = 0;
+    gravityNode.init("TestSync");
+    gravityNode.registerDataProduct("SyncTestGDP", GravityTransportTypes::TCP);
+    gravityNode.registerDataProduct("SyncTestGDP2", GravityTransportTypes::TCP);
+    gravityNode.subscribe("SyncTestGDP", *this);
+    gravityNode.subscribe("SyncTestGDP2", *this);
+
+    // give it a second to setup subscriptions
+    sleep(1000);
+
+    for (int i = 0; i < 100; i++)
+    {
+        gdp.setData(&i, sizeof(int));
+        gravityNode.publish(gdp);
+        // mix up the timing a little
+        if (i % 3 == 0)
+            sleep(1);
+    }
+
+    // give it a second to finish sending subscription data
+    sleep(1000);
+
+    GRAVITY_TEST_EQUALS(gdpcount1, 100);
+    GRAVITY_TEST_EQUALS(gdpcount2, 100);
+}
+
+void GravitySyncTest::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+{
+    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    {
+        shared_ptr<GravityDataProduct> dataProduct = *i;
+        if (dataProduct->getDataProductID().compare("SyncTestGDP") == 0)
+        {
+            gdpcount1++;
+            // only compare these at the end when we know they should be the same
+            if (gdpcount1 == 100)
+            {
+                GRAVITY_TEST(*dataProduct == gdp);
+            }
+            GravityDataProduct gdp2("SyncTestGDP2");
+            gdp.setData(&gdpcount1, sizeof(int));
+            gravityNode.publish(gdp2);
+            GRAVITY_TEST(!(*dataProduct == gdp2));
+        }
+        else
+        {
+            gdpcount2++;
+        }
+    }
+}
+
 void GravityNodeTest::setUp()
 {
     pthread_mutex_init(&mutex, NULL);
@@ -320,12 +400,16 @@ void GravityNodeTest::requestFilled(string serviceID, string requestID, const Gr
 
 int main( int argc, char *argv[] )
 {
-    GravityNodeTest gnTest;
-    gnTest.setUp();
-    gnTest.testRegisterData();
-    gnTest.testSubscriptionManager();
-    gnTest.testServiceManager();
-    gnTest.testRegisterService();
-    gnTest.testDataProduct();
+//    GravityNodeTest gnTest;
+//    gnTest.setUp();
+//    gnTest.testRegisterData();
+//    gnTest.testSubscriptionManager();
+//    gnTest.testServiceManager();
+//    gnTest.testRegisterService();
+//    gnTest.testDataProduct();
+
+    GravitySyncTest syncTest;
+    syncTest.testSync();
+
     return 0;
 }

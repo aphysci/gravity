@@ -108,4 +108,14 @@ bool GravityDataProduct::serializeToArray(void* arrayPtr) const
     return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSize());
 }
 
+bool GravityDataProduct::operator==(const GravityDataProduct &gdp)
+{
+    // fastest test first...
+    if (getDataSize() != gdp.getDataSize())
+        return false;
+    if (getDataProductID().compare(gdp.getDataProductID()) != 0)
+        return false;
+    return memcmp(gravityDataProductPB->data().c_str(), gdp.gravityDataProductPB->data().c_str(), getDataSize()) == 0;
+}
+
 } /* namespace gravity */
