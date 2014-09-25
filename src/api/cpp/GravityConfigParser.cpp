@@ -39,8 +39,8 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
     std::vector<const char *> sections;
 
-    sections.push_back("general");
     sections.push_back(componentID.c_str());
+    sections.push_back("general");
     sections.push_back(NULL);
 
     KeyValueConfigParser parser(config_filename, sections);
