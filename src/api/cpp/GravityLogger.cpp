@@ -41,27 +41,29 @@ using namespace gravity;
  */
 class FileLogger : public Logger {
 public:
-    FileLogger(const string& log_dir, const string& comp_id);
+    FileLogger(const string& log_dir, const string& comp_id, bool close_file);
     /*
      * NOTE: no need to filter on level!  This has already been done.
      */
     virtual void Log(int level, const char* messagestr);
     virtual ~FileLogger();
 protected:
-    FileLogger(const string& comp_id) {component_id = comp_id; }
+    FileLogger(const string& comp_id) {component_id = comp_id; close_file_after_write = false;}  // always keep open here
+    string filename;
     FILE* log_file;
     string component_id;
+    bool close_file_after_write;
 };
 
-FileLogger::FileLogger(const string& log_dir, const string& comp_id)
+FileLogger::FileLogger(const string& log_dir, const string& comp_id, bool close_file)
 {
     component_id = comp_id;
+    close_file_after_write = close_file;
 #ifdef WIN32
     string sep_str = "\\";
 #else
     string sep_str = "/";
 #endif
-    string filename;
     if (log_dir.length() == 0 || log_dir.compare (log_dir.length() - sep_str.length(), sep_str.length(), sep_str) == 0)
         filename = log_dir + component_id + ".log";
     else
@@ -77,6 +79,10 @@ FileLogger::FileLogger(const string& log_dir, const string& comp_id)
             log_file = fopen("/dev/null", "a");
             cerr << "[Log::init] Could not open log file: Gravity.log" << endl;
         }
+    }
+    if (close_file_after_write)
+    {
+        fclose(log_file);
     }
 }
 
@@ -103,12 +109,32 @@ void FileLogger::Log(int level, const char* messagestr)
     snprintf(timestr, sizeof timestr, buffer, tv.tv_usec);
 #endif
 
+    if (close_file_after_write)
+    {
+        log_file = fopen(filename.c_str(), "a");
+        if(log_file == NULL)
+        {
+            cerr << "[Log::init] Could not open log file: " << filename << endl;
+            log_file = fopen("Gravity.log", "a");
+            if(log_file == NULL)
+            {
+                log_file = fopen("/dev/null", "a");
+                cerr << "[Log::init] Could not open log file: Gravity.log" << endl;
+                return;
+            }
+        }
+    }
     fprintf(log_file, "[%s %s-%s] ", timestr, component_id.c_str(), Log::LogLevelToString((Log::LogLevel)level));
 
     fputs(messagestr, log_file);
     fputs("\n", log_file);
 
     fflush(log_file); //I'm not sure when or how often this should be called.
+
+    if (close_file_after_write)
+    {
+        fclose(log_file);
+    }
 }
 
 FileLogger::~FileLogger()
@@ -116,9 +142,9 @@ FileLogger::~FileLogger()
     fclose(log_file);
 }
 
-void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level)
+void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level, bool close_file_after_write)
 {
-    Log::initAndAddLogger(new FileLogger(log_dir, comp_id), local_log_level);
+    Log::initAndAddLogger(new FileLogger(log_dir, comp_id, close_file_after_write), local_log_level);
 }
 
 

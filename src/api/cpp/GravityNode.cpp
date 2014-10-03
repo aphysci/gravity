@@ -309,15 +309,16 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	//parser->ParseCmdLine
 
 	//Setup Logging if enabled.
-    Log::LogLevel local_log_level = Log::LogStringToLevel(parser->getString("LocalLogLevel", "warning").c_str());
+   	Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
     if(local_log_level != Log::NONE)
-        Log::initAndAddFileLogger(parser->getString("LogDirectory", "").c_str(), componentID.c_str(), local_log_level);
+        Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+                local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
 
-    Log::LogLevel console_log_level = Log::LogStringToLevel(parser->getString("ConsoleLogLevel", "warning").c_str());
+    Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
     if(console_log_level != Log::NONE)
         Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
 
-    Log::LogLevel net_log_level = Log::LogStringToLevel(parser->getString("NetLogLevel", "none").c_str());
+    Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
 		Log::initAndAddGravityLogger(this, net_log_level);
 
