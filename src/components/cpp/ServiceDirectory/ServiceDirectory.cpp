@@ -102,7 +102,7 @@ void ServiceDirectory::start()
     int rc = zmq_bind(socket, sdURL.c_str());
     if (rc < 0)
     {
-        Log::fatal("Could bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
+        Log::fatal("Could not bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
         exit(1);
     }
 
