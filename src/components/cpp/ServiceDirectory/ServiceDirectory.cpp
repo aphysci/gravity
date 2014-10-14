@@ -400,8 +400,9 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
 void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, const string &url)
 {
-    for (map<string,list<string> >::iterator iter = dataProductMap.begin(); iter != dataProductMap.end(); iter++)
-    {
+	map<string,list<string> >::iterator iter = dataProductMap.begin();
+	while (iter != dataProductMap.end())
+    {		
         if (iter->first != dataProductID)
         {
             list<string>& urls = iter->second;
@@ -425,7 +426,16 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
                 }
             }
         }
-	}
+
+		if (iter->second.empty())
+		{
+			dataProductMap.erase(iter++);
+		}
+		else
+		{
+			++iter;
+		}
+	}	
 }
 
 void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataProduct &response)
