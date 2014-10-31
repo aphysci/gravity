@@ -113,11 +113,13 @@ public:
 
     GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
+	GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID);
 
     std::string getStringParam(std::string key, std::string default_value = "");
     int getIntParam(std::string key, int default_value = -1);
     double getFloatParam(std::string key, double default_value = 0.0);
     bool getBoolParam(std::string key, bool default_value = false);
+	std::string getIP();
 
 };
 

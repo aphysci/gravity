@@ -80,18 +80,19 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				if(gotHeartbeat)
 					filledHeartbeats.erase(i);
 				lock.Unlock();
-
-				if(!gotHeartbeat)
+				if(listener.find(mqe.dataproductID)!=listener.end())
 				{
-				    int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
-					listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, mqe.timetowaitBetweenHeartbeats);
+					if(!gotHeartbeat)
+					{
+						int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
+						listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, mqe.timetowaitBetweenHeartbeats);
+					}
+					else
+					{
+						listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, mqe.timetowaitBetweenHeartbeats);
+						mqe.lastHeartbeatTime = getCurrentTime();
+					}
 				}
-				else
-				{
-					listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, mqe.timetowaitBetweenHeartbeats);
-					mqe.lastHeartbeatTime = getCurrentTime();
-				}
-
 				messageTimes.pop();
 				mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
 				messageTimes.push(&mqe);
@@ -108,45 +109,98 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
     	    if(zmq_recvmsg(hbSocket, &msg, ZMQ_DONTWAIT) != -1)
     	    {
-				//Receive Dataproduct ID
+				std::string command;
 				int size = zmq_msg_size(&msg);
-				char* s = (char*)malloc(size+1);
-				memcpy(s, zmq_msg_data(&msg), size);
-				s[size] = 0;
-				dataproductID.assign(s, size);
-				free(s);
-				//zmq_msg_close(&msg); //Closed after the end of the if statement.
+				char* c = (char*)malloc(size+1);
+				memcpy(c, zmq_msg_data(&msg), size);
+				c[size] = 0;
+				command.assign(c,size);
+				free(c);
 
-				//Receive address of listener
-				zmq_msg_t msg2;
-				zmq_msg_init(&msg2);
-				intptr_t p;
-				zmq_recvmsg(hbSocket, &msg2, ZMQ_DONTWAIT); //These are guarunteed to not fail since this is a multi part message.
-				memcpy(&p, zmq_msg_data(&msg2), sizeof(intptr_t));
-				zmq_msg_close(&msg2);
+				if (command == "register")
+				{
+					zmq_msg_t msg2;
+					zmq_msg_init(&msg2);
+					//Receive Dataproduct ID
+					zmq_recvmsg(hbSocket,&msg2,0);
+					size = zmq_msg_size(&msg2);
+					char* s = (char*)malloc(size+1);
+					memcpy(s, zmq_msg_data(&msg2), size);
+					s[size] = 0;
+					dataproductID.assign(s, size);
+					free(s);
+					zmq_msg_close(&msg2);
 
-				listener[dataproductID] = (GravityHeartbeatListener*) p;
+					//Receive address of listener
+					zmq_msg_t msg3;
+					zmq_msg_init(&msg3);
+					intptr_t p;
+					zmq_recvmsg(hbSocket, &msg3, ZMQ_DONTWAIT); //These are guarunteed to not fail since this is a multi part message.
+					memcpy(&p, zmq_msg_data(&msg3), sizeof(intptr_t));
+					zmq_msg_close(&msg3);
 
-				//Receive maxtime.
-				zmq_msg_t msg3;
-				zmq_msg_init(&msg3);
-				zmq_recvmsg(hbSocket, &msg3, ZMQ_DONTWAIT);
-				memcpy(&maxtime, zmq_msg_data(&msg3), 8);
-				zmq_msg_close(&msg3);
+					listener[dataproductID] = (GravityHeartbeatListener*) p;
 
-				ExpectedMessageQueueElement mqe1;
-				mqe1.dataproductID = dataproductID;
-				mqe1.expectedTime = getCurrentTime() + maxtime;
-				mqe1.lastHeartbeatTime = 0;
-				mqe1.timetowaitBetweenHeartbeats = maxtime;
+					//Receive maxtime.
+					zmq_msg_t msg4;
+					zmq_msg_init(&msg4);
+					zmq_recvmsg(hbSocket, &msg4, ZMQ_DONTWAIT);
+					memcpy(&maxtime, zmq_msg_data(&msg4), 8);
+					zmq_msg_close(&msg4);
 
+					ExpectedMessageQueueElement mqe1;
+					mqe1.dataproductID = dataproductID;
+					mqe1.expectedTime = getCurrentTime() + maxtime;
+					mqe1.lastHeartbeatTime = 0;
+					mqe1.timetowaitBetweenHeartbeats = maxtime;
+
+					//We should already be subscribed to the Heartbeats.
+
+					queueElements.push_back(mqe1);
+					messageTimes.push(&queueElements.back()); 
+				}
+				else if (command == "unregister")
+				{
+					lock.Lock();
+
+					zmq_msg_t msg2;
+					zmq_msg_init(&msg2);
+					//Receive Dataproduct ID
+					zmq_recvmsg(hbSocket,&msg2,0);
+					size = zmq_msg_size(&msg2);
+					char* s = (char*)malloc(size+1);
+					memcpy(s, zmq_msg_data(&msg2), size);
+					s[size] = 0;
+					dataproductID.assign(s, size);
+					free(s);
+					zmq_msg_close(&msg2);
+
+					listener.erase(dataproductID);
+
+					int queueSize = messageTimes.size();
+
+					std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> tempQueue;
+
+					//loop through whole queue to preserve order
+					for(int i = 0; i <queueSize;i++)
+					{
+						ExpectedMessageQueueElement& entry = *messageTimes.top();
+						messageTimes.pop();
+						//add back all heartbeat entries that are not equal to dataProductID
+						if (entry.dataproductID != dataproductID)
+						{		
+							tempQueue.push(&entry);
+						}
+					}
+
+					messageTimes = tempQueue;
+
+					lock.Unlock();
+				}
+				
 				// Send ACK
 				sendStringMessage(hbSocket, "ACK", ZMQ_DONTWAIT);
-
-				//We should already be subscribed to the Heartbeats.
-
-				queueElements.push_back(mqe1);
-				messageTimes.push(&queueElements.back());
+				
     	    }
 
 	    	zmq_msg_close(&msg);

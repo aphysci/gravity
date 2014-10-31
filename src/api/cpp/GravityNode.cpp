@@ -1203,6 +1203,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	this->subscribe(componentID, hbSub);
 
 	//Send the DataproductID
+	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
 	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
 
 	//Send the address of the listener
@@ -1219,6 +1220,21 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
 	zmq_sendmsg(hbSocket, &msg, 0);
 	zmq_msg_close(&msg);
+
+	// Read the ACK
+	readStringMessage(hbSocket);
+
+	return GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
+{
+	static class Heartbeat hbSub;
+	this->unsubscribe(componentID,hbSub);
+
+	//Send the DataproductID
+	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
+	sendStringMessage(hbSocket, componentID, 0);
 
 	// Read the ACK
 	readStringMessage(hbSocket);

@@ -131,7 +131,7 @@ private:
     SocketWithLock requestManagerSWL;
     void* metricsManagerSocket; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
-    std::string getIP(); ///< Utility method to get the host machine's IP address
+   
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
     GravityReturnCode sendRequestsToServiceProvider(std::string url, const GravityDataProduct& request, GravityDataProduct& response,
     		int timeout_in_milliseconds, int retries);
@@ -281,10 +281,22 @@ public:
      */
     GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
 
+	/**
+     * Unregisters a callback for when we get a heartbeat from another component.
+	 * \param componentID name of component we are currently registered to
+     */
+    GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID);
+
+
     /**
      * Returns a string representation of the provided error code.
      */
     GRAVITY_API std::string getCodeString(GravityReturnCode code);
+
+	/**
+	* Utility method to get the host machine's IP address
+	**/
+	GRAVITY_API std::string getIP();  
 
     /** @} */ //Registration Functions
 };
