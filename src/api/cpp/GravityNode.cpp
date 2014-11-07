@@ -161,6 +161,9 @@ GravityNode::GravityNode()
 
 GravityNode::~GravityNode()
 {
+	Log::warning("Closing Gravity Node: %s",componentID);
+	cout<<"ComponentID = " << componentID<<"\n";
+
     // If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
@@ -1218,7 +1221,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, 8);
 	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
-	zmq_sendmsg(hbSocket, &msg, 0);
+	zmq_sendmsg(hbSocket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
 	// Read the ACK
@@ -1230,11 +1233,12 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
 {
 	static class Heartbeat hbSub;
+
 	this->unsubscribe(componentID,hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, componentID, 0);
+	sendStringMessage(hbSocket, componentID, ZMQ_DONTWAIT);
 
 	// Read the ACK
 	readStringMessage(hbSocket);

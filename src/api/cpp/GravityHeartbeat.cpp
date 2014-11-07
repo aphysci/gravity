@@ -65,7 +65,6 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     {
     	if(!messageTimes.empty())
     	{
-
 			ExpectedMessageQueueElement& mqe = *messageTimes.top();
 
 			if (mqe.expectedTime > getCurrentTime())
@@ -75,6 +74,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 			else
 			{
 				lock.Lock();
+
 				std::set<std::string>::iterator i = filledHeartbeats.find(mqe.dataproductID);
 				bool gotHeartbeat = (i != filledHeartbeats.end());
 				if(gotHeartbeat)
@@ -97,6 +97,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				mqe.expectedTime = getCurrentTime() + mqe.timetowaitBetweenHeartbeats; //(Maybe should be lastHeartbeatTime + timetowaitBetweenHeartbeats, but current version allows for drift etc.)
 				messageTimes.push(&mqe);
 			}
+
     	}//Process Messages
 
         //Allow Gravity to add Heartbeat listeners.
@@ -122,7 +123,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 					zmq_msg_t msg2;
 					zmq_msg_init(&msg2);
 					//Receive Dataproduct ID
-					zmq_recvmsg(hbSocket,&msg2,0);
+					zmq_recvmsg(hbSocket,&msg2,ZMQ_DONTWAIT);
 					size = zmq_msg_size(&msg2);
 					char* s = (char*)malloc(size+1);
 					memcpy(s, zmq_msg_data(&msg2), size);
@@ -166,7 +167,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 					zmq_msg_t msg2;
 					zmq_msg_init(&msg2);
 					//Receive Dataproduct ID
-					zmq_recvmsg(hbSocket,&msg2,0);
+					zmq_recvmsg(hbSocket,&msg2,ZMQ_DONTWAIT);
 					size = zmq_msg_size(&msg2);
 					char* s = (char*)malloc(size+1);
 					memcpy(s, zmq_msg_data(&msg2), size);
@@ -194,14 +195,22 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 					}
 
 					messageTimes = tempQueue;
-
+					
 					lock.Unlock();
 				}
 				
 				// Send ACK
 				sendStringMessage(hbSocket, "ACK", ZMQ_DONTWAIT);
-				
     	    }
+			else
+			{
+				int errnum = zmq_errno();
+				if (errnum != EAGAIN)
+				{
+					cout<<"Heartbeat Message Error: "<<zmq_strerror(errnum)<<"\n";
+					cout.flush();
+				}
+			}
 
 	    	zmq_msg_close(&msg);
 

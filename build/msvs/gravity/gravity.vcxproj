@@ -777,7 +777,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..</Command>
       <Message>Create include director</Message>
       <Outputs>NoOutputGenerated</Outputs>
     </CustomBuildStep>

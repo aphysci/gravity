@@ -1,0 +1,9 @@
+@echo off
+set OUTPUT=
+for /f  %%i in ('git log -l HEAD ^| findstr /n /c:"VERSION.txt"') do set OUTPUT=%%i
+
+if not [%OUTPUT%]==[] (
+set VERSION=
+for /f  %%v in ('type %GRAVITY_HOME%\VERSION.txt') do set VERSION=%%v
+git tag %VERSION%
+)
