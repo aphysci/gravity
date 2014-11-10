@@ -207,8 +207,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				int errnum = zmq_errno();
 				if (errnum != EAGAIN)
 				{
-					cout<<"Heartbeat Message Error: "<<zmq_strerror(errnum)<<"\n";
-					cout.flush();
+					Log::critical("Heartbeat Message Error: %s",zmq_strerror(errnum));
 				}
 			}
 

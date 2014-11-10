@@ -161,8 +161,6 @@ GravityNode::GravityNode()
 
 GravityNode::~GravityNode()
 {
-	Log::warning("Closing Gravity Node: %s",componentID);
-	cout<<"ComponentID = " << componentID<<"\n";
 
     // If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
