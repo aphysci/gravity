@@ -41,21 +41,10 @@ namespace gravity
 class ServiceDirectory : GravityServiceProvider
 {
 private:
-	// domain name for this service directory
-	string domain;
-
-	// dataProductMap <domain, map<dataProductID, list<publishers> > >
-    map<string, map<string, list<string> > > dataProductMap;
-
-	// serviceMap <domain, map<serviceID, serviceProvider> >
-    map<string, map<string, string> > serviceMap;
-
-	// mapping from URL to name of publisher/service provider
+    map<string, list<string> > dataProductMap;
+    map<string, string> serviceMap;
 	map<string, string> urlToComponentMap;
-
-	// own GravityNode
     GravityNode gn;
-
     bool registeredPublishersReady, registeredPublishersProcessed;
     set<string> registerUpdatesToSend;
 
@@ -69,7 +58,7 @@ private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
-    void addPublishers(const string &dataProductID, GravityDataProduct &response, const string &domain);
+    void addPublishers(const string &dataProductID, GravityDataProduct &response);
 	void purgeObsoletePublishers(const string &dataProductID, const string &url);
 };
 

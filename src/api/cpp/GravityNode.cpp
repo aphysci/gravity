@@ -157,9 +157,6 @@ GravityNode::GravityNode()
 
     // Default to no metrics
     metricsEnabled = false;
-
-	// Default domain to empty string
-	domain = "";
 }
 
 GravityNode::~GravityNode()
@@ -348,22 +345,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
         sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
         sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
     }
-
-	// Get own domain info from ServiceDirectory
-	GravityDataProduct request("GetDomain");
-	shared_ptr<GravityDataProduct> response = this->request("DirectoryService", request, 3000);
-	if (response)
-	{
-		char* p = (char*)calloc(response->getDataSize(), sizeof(char));
-		response->getData(p, response->getDataSize());
-		domain.assign(p, response->getDataSize());	
-		delete p;
-		Log::message("GravityNode configured as part of domain '%s'", domain.c_str());
-	}
-	else
-	{
-		Log::critical("Unable to get domain information from ServiceDirectory");
-	}
 
 	return ret;
 }
@@ -675,18 +656,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     return ret;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls, string domain)
+GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
     // Create the object describing the data product to lookup
     ComponentLookupRequestPB lookup;
     lookup.set_lookupid(dataProductID);
-	lookup.set_domain_id(domain);
     lookup.set_type(ComponentLookupRequestPB::DATA);
 
     // Wrap request in GravityDataProduct
@@ -731,31 +705,25 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
     return ret;
 }
 
-GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
 	vector<string> url;
 
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
 	GravityReturnCode ret;
-	ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
+	ret = ServiceDirectoryDataProductLookup(dataProductID, url);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
 
 	if (url.size() == 0)
 	{
-	    subscribe("", dataProductID, subscriber, filter, domain);
+	    subscribe("", dataProductID, subscriber, filter);
 	}
 	else
 	{
         // Subscribe to all published data products
         for (size_t i = 0; i < url.size(); i++)
         {
-            subscribe(url[i], dataProductID, subscriber, filter, domain);
+            subscribe(url[i], dataProductID, subscriber, filter);
         }
 	}
 
@@ -763,20 +731,14 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 }
 
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
-        const GravitySubscriber& subscriber, string filter, string domain)
+        const GravitySubscriber& subscriber, string filter)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
 	vector<string> url;
 	GravityReturnCode ret;
 	int tries = 5;
 	while (url.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, domain);
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
 		if (url.size() > 1)
@@ -801,7 +763,6 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
-	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
     sendStringMessage(subscriptionManagerSWL.socket, url[0], ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
@@ -816,21 +777,14 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
     subscriptionManagerSWL.lock.Lock();
 
 	// Send unsubscribe details
 	sendStringMessage(subscriptionManagerSWL.socket, "unsubscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
-	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
 
 	// Send subscriber
 	zmq_msg_t msg;
@@ -869,18 +823,11 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url, string domain)
+GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
 	// Create the object describing the data product to lookup
 	ComponentLookupRequestPB lookup;
 	lookup.set_lookupid(serviceID);
-	lookup.set_domain_id(domain);
 	lookup.set_type(ComponentLookupRequestPB::SERVICE);
 
 	// Wrap request in GravityDataProduct
@@ -934,16 +881,10 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 
 //Asynchronous Request with Service Directory Lookup
 GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID, int timeout_milliseconds, string domain)
+        const GravityRequestor& requestor, string requestID, int timeout_milliseconds)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
 	std::string url;
-	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url, domain);
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
 	return request(url, serviceID, dataProduct, requestor, requestID, timeout_milliseconds);
@@ -979,17 +920,10 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 }
 
 //Synchronous Request
-shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, 
-													int timeout_milliseconds, string domain)
+shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds)
 {
-	// If domain not specified, use own domain
-	if (domain.empty())
-	{
-		domain = this->domain;
-	}
-
 	std::string connectionURL;
-	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL, domain);
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());

@@ -87,27 +87,8 @@ void ServiceDirectory::start()
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
     boost::replace_all(sdURL, "localhost", "127.0.0.1");
-    Log::message("running with SD connection string: %s", sdURL.c_str());
 
-	// Get the optional domain for this Service Directory instance
-	domain = gn.getStringParam("Domain", "");
-	// Validate domain name
-	bool valid = true;
-	std::locale loc;
-	for (std::string::iterator it = domain.begin(); it != domain.end(); ++it)
-	{
-		if (!std::isalnum(*it, loc))
-		{
-			valid = false;
-			break;
-		}
-	}
-	if (!valid)
-	{
-		domain = "";
-		Log::warning("Invalid Domain (must be alpha-numeric).");		
-	}
-	Log::message("Domain set to '%s'", domain.c_str());
+    Log::message("running with SD connection string: %s", sdURL.c_str());
 
     void *context = zmq_init(1);
     if (!context)
@@ -173,7 +154,7 @@ void ServiceDirectory::start()
                 for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); it++)
                 {
                     Log::debug("Processing pending registered publishers update for %s", it->c_str());
-                    addPublishers(*it, update, domain);
+                    addPublishers(*it, update);
                     gn.publish(update, *it);
                 }
                 registerUpdatesToSend.clear();
@@ -228,45 +209,29 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
         {
             // Build map
             ServiceDirectoryMapPB providerMap;
-			for (map<string, map<string, string> >::iterator it = serviceMap.begin(); it != serviceMap.end(); it++)
-			{
-				string domain = it->first;
-				map<string,string> sMap = it->second;
-				for (map<string,string>::iterator it2 = sMap.begin(); it2 != sMap.end(); it2++)
-				{
-					ProductLocations* locs = providerMap.add_service_provider();
-					locs->set_product_id(it2->first); // service ID
-					locs->add_url(it2->second); // url
-					locs->add_component_id(urlToComponentMap[it2->second]); // component id
-					locs->add_domain_id(domain); // domain
-				}
-			}            
+            for(map<string,string>::iterator it = serviceMap.begin(); it != serviceMap.end(); it++) 
+            {
+                ProductLocations* locs = providerMap.add_service_provider();
+                locs->set_product_id(it->first); // service ID
+                locs->add_url(it->second); // url
+				locs->add_component_id(urlToComponentMap[it->second]); // component id
+            }
             
-			for (map<string, map<string, list<string> > >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++)
-			{
-				string domain = it->first;
-				map<string, list<string> > dpMap = it->second;
-				for(map<string, list<string> >::iterator it = dpMap.begin(); it != dpMap.end(); it++) 
-				{
-					ProductLocations* locs = providerMap.add_data_provider();
-					locs->set_product_id(it->first); // data product ID
-					locs->add_domain_id(domain); // domain
-					list<string> urls = it->second;
-					for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
-					{
-						locs->add_url(*lit); // url
-						locs->add_component_id(urlToComponentMap[*lit]); // component id					
-					}
-				}
-			}            
+            for(map<string, list<string> >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++) 
+            {
+                ProductLocations* locs = providerMap.add_data_provider();
+                locs->set_product_id(it->first); // data product ID
+                list<string> urls = it->second;
+                for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
+                {
+                    locs->add_url(*lit); // url
+					locs->add_component_id(urlToComponentMap[*lit]); // component id
+                }
+            }
 
             // Place map on response data product
             gdpResponse->setData(providerMap);
         }
-		else if (requestType == "GetDomain")
-        {
-			gdpResponse->setData(domain.c_str(), domain.length());
-		}
     }
 
     return gdpResponse;
@@ -276,58 +241,28 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 {
     ComponentLookupRequestPB lookupRequest;
     request.populateMessage(lookupRequest);
-
-	// Get the requested domain (defaulting to our own)
-	string lookupDomain = domain;
-	if (lookupRequest.has_domain_id() && !lookupRequest.domain_id().empty())
-	{
-		lookupDomain = lookupRequest.domain_id();
-	}
-
-    //NOTE: 0MQ does not have a concept of who the message was sent from so that info is lost.    
+    //NOTE: 0MQ does not have a concept of who the message was sent from so that info is lost.
     if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
     {
-		// Get data product map for requested domain (defaulting to our own)
-		if (dataProductMap.count(lookupDomain) > 0)
-		{
-			map<string, list<string> > dpMap = dataProductMap[lookupDomain];		
-
-			Log::message("[Lookup Request] ID: %s, Domain: %s, MessageType: Data Product, First Server: %s", 
-					 lookupRequest.lookupid().c_str(),
-					 lookupDomain.c_str(),
-                     dpMap.count(lookupRequest.lookupid()) != 0 ?
-                     dpMap[lookupRequest.lookupid()].front().c_str(): "");			
-		}
-		else
-		{
-			Log::message("[Lookup Request] No data provider found for ID: %s in Domain: %s",
-						lookupRequest.lookupid().c_str(),
-						lookupDomain.c_str());
-		}
-
-		addPublishers(lookupRequest.lookupid(), response, lookupDomain);
+        Log::message("[Lookup Request] ID: %s, MessageType: Data Product, First Server: %s", lookupRequest.lookupid().c_str(),
+                     dataProductMap.count(lookupRequest.lookupid()) != 0 ?
+                     dataProductMap[lookupRequest.lookupid()].front().c_str(): "");
     }
     else
     {
-		ComponentServiceLookupResponsePB lookupResponse;
-		lookupResponse.set_lookupid(lookupRequest.lookupid());        
-		lookupResponse.set_url("");
-
-		if (serviceMap.count(lookupDomain) > 0)
-		{
-			// Get service map for our domain
-			map<string, string> sMap = serviceMap[lookupDomain];
-
-			Log::message("[Lookup Request] ID: %s, MessageType: Service, Server: %s", lookupRequest.lookupid().c_str(),
-                     sMap.count(lookupRequest.lookupid()) != 0 ?
-                     sMap[lookupRequest.lookupid()].c_str(): "");
-
-			if (sMap.count(lookupRequest.lookupid()) > 0)
-			{
-				lookupResponse.set_url(sMap[lookupRequest.lookupid()]);
-			}
-		}
-
+        Log::message("[Lookup Request] ID: %s, MessageType: Service, Server: %s", lookupRequest.lookupid().c_str(),
+                     serviceMap.count(lookupRequest.lookupid()) != 0 ?
+                     serviceMap[lookupRequest.lookupid()].c_str(): "");
+    }
+    if (lookupRequest.type() == ComponentLookupRequestPB_RegistrationType_DATA)
+    {
+        addPublishers(lookupRequest.lookupid(), response);
+    }
+    else
+    {
+        ComponentServiceLookupResponsePB lookupResponse;
+        lookupResponse.set_lookupid(lookupRequest.lookupid());
+        lookupResponse.set_url(serviceMap[lookupRequest.lookupid()]);
         response.setData(lookupResponse);
     }
 }
@@ -335,27 +270,24 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 void ServiceDirectory::handleRegister(const GravityDataProduct& request, GravityDataProduct& response)
 {
     ServiceDirectoryRegistrationPB registration;
-    request.populateMessage(registration);	
-
+    request.populateMessage(registration);
     bool foundDup = false;
     if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
     {
-		map<string, list<string> >& dpMap = dataProductMap[domain];
-
         if (registration.id() == REGISTERED_PUBLISHERS)
         {
             registeredPublishersReady = true;
         }
-        list<string>* urls = &dpMap[registration.id()];
+        list<string>* urls = &dataProductMap[registration.id()];
         list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
         if (iter == urls->end())
         {
-            dpMap[registration.id()].push_back(registration.url());			
+            dataProductMap[registration.id()].push_back(registration.url());			
             urlToComponentMap[registration.url()] = registration.component_id();
             if (registeredPublishersReady)
             {
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
-                addPublishers(registration.id(), update, domain);
+                addPublishers(registration.id(), update);
                 gn.publish(update, registration.id());
             }
             else
@@ -373,14 +305,12 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     }
     else
     {
-		map<string, string>& sMap = serviceMap[domain];
-
-        if (sMap.find(registration.id()) != sMap.end())
+        if (serviceMap.find(registration.id()) != serviceMap.end())
         {
             Log::warning("Replacing existing provider for service id '%s'", registration.id().c_str()); 
         }
         // Add as service provider, overwriting any existing provider for this service
-        sMap[registration.id()] = registration.url();
+        serviceMap[registration.id()] = registration.url();
 		urlToComponentMap[registration.url()] = registration.component_id();
             
         // Remove any previous publisher registrations at this URL as they obviously no longer exist
@@ -413,21 +343,19 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     bool foundUrl = true;
     if (unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA)
     {
-		map<string, list<string> >& dpMap = dataProductMap[domain];
-
-        list<string>* urls = &dpMap[unregistration.id()];
+        list<string>* urls = &dataProductMap[unregistration.id()];
         list<string>::iterator iter = find(urls->begin(), urls->end(), unregistration.url());
         if (iter != urls->end())
         {
-            dpMap[unregistration.id()].erase(iter);
-			if (dpMap[unregistration.id()].empty())
+            dataProductMap[unregistration.id()].erase(iter);
+			if (dataProductMap[unregistration.id()].empty())
 			{
-				dpMap.erase(unregistration.id());
+				dataProductMap.erase(unregistration.id());
 			}
 			if (registeredPublishersReady)
 			{
 			    GravityDataProduct update(REGISTERED_PUBLISHERS);
-			    addPublishers(unregistration.id(), update, domain);
+			    addPublishers(unregistration.id(), update);
 			    gn.publish(update, unregistration.id());
 			}
 			else
@@ -442,11 +370,9 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     }
     else
     {
-		map<string, string>& sMap = serviceMap[domain];
-
-        if (sMap.find(unregistration.id()) != sMap.end())
+        if (serviceMap.find(unregistration.id()) != serviceMap.end())
         {
-            sMap.erase(unregistration.id());
+            serviceMap.erase(unregistration.id());
         }
         else
         {
@@ -474,9 +400,8 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
 void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, const string &url)
 {
-	map<string, list<string> >& dpMap = dataProductMap[domain];
-	map<string,list<string> >::iterator iter = dpMap.begin();
-	while (iter != dpMap.end())
+	map<string,list<string> >::iterator iter = dataProductMap.begin();
+	while (iter != dataProductMap.end())
     {		
         if (iter->first != dataProductID)
         {
@@ -492,7 +417,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
                 if (registeredPublishersReady)
                 {
                     GravityDataProduct update(REGISTERED_PUBLISHERS);
-                    addPublishers(iter->first, update, domain);
+                    addPublishers(iter->first, update);
                     gn.publish(update, iter->first);
                 }
                 else
@@ -504,7 +429,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
 
 		if (iter->second.empty())
 		{
-			dpMap.erase(iter++);
+			dataProductMap.erase(iter++);
 		}
 		else
 		{
@@ -513,15 +438,13 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
 	}	
 }
 
-void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataProduct &response, const string &domain)
+void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataProduct &response)
 {
-	map<string, list<string> > dpMap = dataProductMap[domain];
     ComponentDataLookupResponsePB lookupResponse;
     lookupResponse.set_lookupid(dataProductID);
-	lookupResponse.set_domain_id(domain);
-	if (dpMap.count(dataProductID) != 0)
+	if (dataProductMap.count(dataProductID) != 0)
 	{
-		list<string>* urls = &dpMap[dataProductID];
+		list<string>* urls = &dataProductMap[dataProductID];
 		for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
 		{
 			lookupResponse.add_url(*iter);

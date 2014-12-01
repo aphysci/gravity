@@ -117,8 +117,6 @@ private:
 
     bool metricsEnabled;
 
-	std::string domain;
-
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
     pthread_t requestManagerThread;
@@ -147,11 +145,11 @@ private:
     std::string componentID;
 	GravityConfigParser* parser;
 
-	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string domain);
-	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string domain);
+	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url);
+	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls);
 
     GravityReturnCode subscribe(std::string connectionURL, std::string dataProductID,
-            const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "");
+            const GravitySubscriber& subscriber, std::string filter = "");
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
@@ -184,8 +182,7 @@ public:
      * \param filter text filter to apply to subscription
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
-											std::string filter = "", std::string domain = "");
+    GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter = "");
 
     /**
      * Un-subscribe to a data product
@@ -194,8 +191,7 @@ public:
      * \param filter text filter associated with the subscription to cancel
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
-												std::string filter="", std::string domain = "");
+    GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter="");
 
     /**
      * Publish a data product
@@ -214,8 +210,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(std::string serviceID, const GravityDataProduct& request,
-										const GravityRequestor& requestor, std::string requestID = "", 
-										int timeout_milliseconds = -1, std::string domain = "");	
+            const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
 
     /**
      * Make a synchronous request against a service provider
@@ -224,8 +219,7 @@ public:
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
-    GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, 
-										int timeout_milliseconds = -1, std::string domain = "");
+    GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, int timeout_milliseconds = -1);
 
     /**
      * Starts a heart beat for this gravity process.
@@ -285,8 +279,7 @@ public:
      * make passing to Java via Swig cleaner.
      * \param listener instance of a GravityHeartbeatListener that will be notified when heart beats are received or missed.
      */
-    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, 
-									const GravityHeartbeatListener& listener);
+    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
 
 	/**
      * Unregisters a callback for when we get a heartbeat from another component.
