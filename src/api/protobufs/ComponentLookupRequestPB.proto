@@ -30,6 +30,6 @@ message ComponentLookupRequestPB
 		DATA = 0;
 		SERVICE = 1;
 	}
-	optional RegistrationType type = 3;
-
+	optional RegistrationType type = 2;
+	optional string domain_id = 3;
 }

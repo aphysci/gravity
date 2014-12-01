@@ -400,13 +400,13 @@ void GravityNodeTest::requestFilled(string serviceID, string requestID, const Gr
 
 int main( int argc, char *argv[] )
 {
-//    GravityNodeTest gnTest;
-//    gnTest.setUp();
-//    gnTest.testRegisterData();
-//    gnTest.testSubscriptionManager();
-//    gnTest.testServiceManager();
-//    gnTest.testRegisterService();
-//    gnTest.testDataProduct();
+    GravityNodeTest gnTest;
+    gnTest.setUp();
+    gnTest.testRegisterData();
+    gnTest.testSubscriptionManager();
+    gnTest.testServiceManager();
+    gnTest.testRegisterService();
+    gnTest.testDataProduct();
 
     GravitySyncTest syncTest;
     syncTest.testSync();
