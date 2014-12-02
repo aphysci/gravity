@@ -65,6 +65,8 @@ public:
     void testServiceManager(void);
     void testRegisterService(void);
     void testDataProduct(void);
+	void testSubscribeDomain(void);
+	void testServiceWithDomain(void);
     void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
     void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
     shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);

@@ -107,6 +107,121 @@ void GravityNodeTest::setUp()
     gotResponseFlag = false;
 }
 
+void GravityNodeTest::testServiceWithDomain(void)
+{
+	GravityNode node;
+	GravityReturnCode ret = node.init("TestDomainServiceNode");
+	GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	// Get the domain from the Service Directory
+	string domain;
+	GravityDataProduct request("GetDomain");
+	shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	GRAVITY_TEST(response);
+	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
+	response->getData(p, response->getDataSize());
+	domain.assign(p, response->getDataSize());	
+	delete p;	
+	GRAVITY_TEST_EQUALS(strcmp(domain.c_str(), "GravityTest"), 0);
+
+	GravityDataProduct gdp("REQUEST");
+	gdp.setData("REQ_DATA", 9);
+
+	clearServiceFlags();
+
+    // Register a service
+    ret = node.registerService("SERVICE_TEST", GravityTransportTypes::TCP, *this);
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+    sleep(2);
+
+    // Submit async request to the service with domain specified
+    ret = node.request("SERVICE_TEST", gdp, *this, "REQUEST_ID", -1, domain);
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+    sleep(2);
+
+	// Check for request
+	GRAVITY_TEST(gotRequest());
+
+	// Check for response
+	GRAVITY_TEST(gotResponse());	
+
+	// Submit sync request  with domain specified
+	shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp, -1, domain);
+	GRAVITY_TEST_EQUALS(retGDP->getDataProductID(), "RESPONSE");
+
+	// Clear service info
+	clearServiceFlags();
+
+	// Submit async request to the service with bad domain specified
+    ret = node.request("SERVICE_TEST", gdp, *this, "REQUEST_ID", -1, domain+"_");
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::NO_SUCH_SERVICE);
+    sleep(2);
+
+	// Check for request (should not be received)
+	GRAVITY_TEST(!gotRequest());
+
+	// Check for response (should not be received)
+	GRAVITY_TEST(!gotResponse());
+
+	// Clear service info
+	clearServiceFlags();
+
+	// Unregister service
+	ret = node.unregisterService("SERVICE_TEST");
+	GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+}
+
+void GravityNodeTest::testSubscribeDomain(void)
+{
+	GravityNode node;
+    GravityReturnCode ret = node.init("TestNode");
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	// Get the domain from the Service Directory
+	string domain;
+	GravityDataProduct request("GetDomain");
+	shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	GRAVITY_TEST(response);
+	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
+	response->getData(p, response->getDataSize());
+	domain.assign(p, response->getDataSize());	
+	delete p;	
+	GRAVITY_TEST_EQUALS(strcmp(domain.c_str(), "GravityTest"), 0);
+
+	ret = node.registerDataProduct("TEST", GravityTransportTypes::TCP);
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	Subscriber badSubscriber;
+	ret = node.subscribe("TEST", badSubscriber, "", domain+"_");
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	Subscriber goodSubscriber1;
+	ret = node.subscribe("TEST", goodSubscriber1, "", domain);
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	Subscriber goodSubscriber2;
+	ret = node.subscribe("TEST", goodSubscriber2);
+    GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+	// Give the consumer threads time to start up
+    sleep(50);
+
+	ret = node.registerDataProduct("TEST", GravityTransportTypes::TCP);
+	GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+    // Create and publish a message
+    GravityDataProduct gdp("TEST");
+    ret = node.publish(gdp);
+
+	// Give the consumers a little time
+    sleep(50);
+
+	// Test that the domains functioned properly
+    GRAVITY_TEST_EQUALS(badSubscriber.getCount(), 0);
+	GRAVITY_TEST_EQUALS(goodSubscriber1.getCount(), 1);
+	GRAVITY_TEST_EQUALS(goodSubscriber2.getCount(), 1);
+}
+
 void GravityNodeTest::testRegisterData(void)
 {
     GravityNode node;
@@ -400,13 +515,15 @@ void GravityNodeTest::requestFilled(string serviceID, string requestID, const Gr
 
 int main( int argc, char *argv[] )
 {
-//    GravityNodeTest gnTest;
-//    gnTest.setUp();
-//    gnTest.testRegisterData();
-//    gnTest.testSubscriptionManager();
-//    gnTest.testServiceManager();
-//    gnTest.testRegisterService();
-//    gnTest.testDataProduct();
+    GravityNodeTest gnTest;
+    gnTest.setUp();
+    gnTest.testRegisterData();
+    gnTest.testSubscriptionManager();
+    gnTest.testServiceManager();
+    gnTest.testRegisterService();
+    gnTest.testDataProduct();
+	gnTest.testSubscribeDomain();
+	gnTest.testServiceWithDomain();
 
     GravitySyncTest syncTest;
     syncTest.testSync();

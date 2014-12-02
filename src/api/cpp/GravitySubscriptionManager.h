@@ -38,6 +38,7 @@
 #include <string>
 #include "GravitySubscriber.h"
 #include "GravityMetrics.h"
+#include "DomainDataKey.h"
 
 namespace gravity
 {
@@ -46,6 +47,7 @@ using namespace std::tr1;
 
 typedef struct SubscriptionDetails
 {
+	std::string domain;
 	std::string dataProductID;
 	std::string filter;
 	std::map<std::string, zmq_pollitem_t> pollItemMap;
@@ -62,9 +64,9 @@ private:
 	void* context;
 	void* gravityNodeSocket;
     void* gravityMetricsSocket;
-	std::map<std::string, std::map<std::string, shared_ptr<SubscriptionDetails> > > subscriptionMap;
+	std::map<DomainDataKey, std::map<std::string, shared_ptr<SubscriptionDetails> > > subscriptionMap;	
     std::map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
-    std::map<std::string, zmq_pollitem_t> publisherUpdateMap;
+	std::map<DomainDataKey, zmq_pollitem_t> publisherUpdateMap;
     std::map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 

@@ -26,4 +26,5 @@ message ComponentDataLookupResponsePB
 {
 	required string lookupID = 1;
 	repeated string url = 2;
+	optional string domain_id = 3;
 }

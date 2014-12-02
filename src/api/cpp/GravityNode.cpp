@@ -656,11 +656,12 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     return ret;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls)
+GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls, string& domain)
 {
     // Create the object describing the data product to lookup
     ComponentLookupRequestPB lookup;
     lookup.set_lookupid(dataProductID);
+	lookup.set_domain_id(domain);
     lookup.set_type(ComponentLookupRequestPB::DATA);
 
     // Wrap request in GravityDataProduct
@@ -688,6 +689,7 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
+			domain.assign(pb.domain_id());
             for (int i = 0; i < pb.url_size(); i++)
                 urls.push_back(pb.url(i));
             ret = GravityReturnCodes::SUCCESS;
@@ -705,25 +707,25 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
     return ret;
 }
 
-GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
 	vector<string> url;
 
 	GravityReturnCode ret;
-	ret = ServiceDirectoryDataProductLookup(dataProductID, url);
+	ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
 
 	if (url.size() == 0)
 	{
-	    subscribe("", dataProductID, subscriber, filter);
+	    subscribe("", dataProductID, subscriber, filter, domain);
 	}
 	else
 	{
         // Subscribe to all published data products
         for (size_t i = 0; i < url.size(); i++)
         {
-            subscribe(url[i], dataProductID, subscriber, filter);
+            subscribe(url[i], dataProductID, subscriber, filter, domain);
         }
 	}
 
@@ -731,14 +733,14 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 }
 
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
-        const GravitySubscriber& subscriber, string filter)
+        const GravitySubscriber& subscriber, string filter, string domain)
 {
 	vector<string> url;
 	GravityReturnCode ret;
 	int tries = 5;
 	while (url.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url);
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, domain);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
 		if (url.size() > 1)
@@ -763,6 +765,7 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
     sendStringMessage(subscriptionManagerSWL.socket, url[0], ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
@@ -777,7 +780,7 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter)
+GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
     subscriptionManagerSWL.lock.Lock();
 
@@ -785,6 +788,7 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 	sendStringMessage(subscriptionManagerSWL.socket, "unsubscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
 
 	// Send subscriber
 	zmq_msg_t msg;
@@ -823,11 +827,12 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url)
+GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url, string &domain)
 {
 	// Create the object describing the data product to lookup
 	ComponentLookupRequestPB lookup;
 	lookup.set_lookupid(serviceID);
+	lookup.set_domain_id(domain);
 	lookup.set_type(ComponentLookupRequestPB::SERVICE);
 
 	// Wrap request in GravityDataProduct
@@ -855,7 +860,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 
 		if (parserSuccess)
 		{
-
+			domain.assign(pb.domain_id());
 			if (!pb.url().empty())
 			{
 				url = pb.url();
@@ -881,10 +886,10 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 
 //Asynchronous Request with Service Directory Lookup
 GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
-        const GravityRequestor& requestor, string requestID, int timeout_milliseconds)
+        const GravityRequestor& requestor, string requestID, int timeout_milliseconds, string domain)
 {
 	std::string url;
-	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url);
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url, domain);
 	if(ret != GravityReturnCodes::SUCCESS)
 		return ret;
 	return request(url, serviceID, dataProduct, requestor, requestID, timeout_milliseconds);
@@ -920,10 +925,11 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 }
 
 //Synchronous Request
-shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, int timeout_milliseconds)
+shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, 
+													int timeout_milliseconds, string domain)
 {
 	std::string connectionURL;
-	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL);
+	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL, domain);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
