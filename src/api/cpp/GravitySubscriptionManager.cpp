@@ -187,7 +187,11 @@ void GravitySubscriptionManager::start()
                         shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
                         // This may be a resend of previous value if a new subscriber was added, so make sure this is new data
-                        if (!lastCachedValue || lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp())
+                        if (!lastCachedValue ||
+                            lastCachedValue->getGravityTimestamp() <= dataProduct->getGravityTimestamp() ||
+                            // or if timestamps are the same, but GDP's are different
+                               (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
+                                && !(*lastCachedValue == *dataProduct)))
                         {
                             dataProducts.push_back(dataProduct);
 
@@ -224,11 +228,17 @@ void GravitySubscriptionManager::start()
                     }
                     ComponentDataLookupResponsePB update;
                     dataProduct->populateMessage(update);
-                    Log::debug("Found update to publishers list for data product %s", dataProductID.c_str());
-                    if (subscriptionMap.count(dataProductID) != 0)
+					string domain = update.domain_id();
+                    Log::debug("Found update to publishers list for data product %s (domain:%s)", dataProductID.c_str(), domain.c_str());
+
+					// Create the domain/data key for tracking subscriptions
+					DomainDataKey key(domain, dataProductID);
+
+					Log::debug("subscriptionMap.count(key) = %d", subscriptionMap.count(key));
+                    if (subscriptionMap.count(key) != 0)
                     {
-                        for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[dataProductID].begin();
-                             iter != subscriptionMap[dataProductID].end();
+                        for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[key].begin();
+                             iter != subscriptionMap[key].end();
                              iter++)
                         {
                             for (int i = 0; i < update.url_size(); i++)
@@ -313,7 +323,7 @@ void GravitySubscriptionManager::start()
 		zmq_close(iter->first);
 	}
 
-	for (map<string, zmq_pollitem_t>::iterator iter = publisherUpdateMap.begin(); iter != publisherUpdateMap.end(); iter++)
+	for (map<DomainDataKey, zmq_pollitem_t>::iterator iter = publisherUpdateMap.begin(); iter != publisherUpdateMap.end(); iter++)
 	{
 	    zmq_close(iter->second.socket);
 	}
@@ -397,15 +407,23 @@ void GravitySubscriptionManager::addSubscription()
 {
 	// Read the data product id for this subscription
 	string dataProductID = readStringMessage(gravityNodeSocket);
+	Log::trace("dataProductID = '%s'", dataProductID.c_str());
 
 	// Read the subscription url
 	string url = readStringMessage(gravityNodeSocket);
+	Log::trace("url = '%s'", url.c_str());
 
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
+	Log::trace("filter = '%s'", filter.c_str());
+
+	// Read the domain
+	string domain = readStringMessage(gravityNodeSocket);
+	Log::trace("domain = '%s'", domain.c_str());
 
     // Read the url for to subscribe to for publisher updates
     string publisherUpdateUrl = readStringMessage(gravityNodeSocket);
+	Log::trace("publisherUpdateUrl = '%s'", publisherUpdateUrl.c_str());
 
 	// Read the subscriber
 	zmq_msg_t msg;
@@ -415,30 +433,34 @@ void GravitySubscriptionManager::addSubscription()
 	memcpy(&subscriber, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	if (subscriptionMap.count(dataProductID) == 0)
+	// Create the domain/data key for tracking subscriptions
+	DomainDataKey key(domain, dataProductID);
+
+	if (subscriptionMap.count(key) == 0)
 	{
 	    map<string, shared_ptr<SubscriptionDetails> > filterMap;
-	    subscriptionMap[dataProductID] = filterMap;
+	    subscriptionMap[key] = filterMap;
 	    if (publisherUpdateUrl.size() > 0)
 	    {
             zmq_pollitem_t pollItem;
             void *socket = setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
-            publisherUpdateMap[dataProductID] = pollItem;
+            publisherUpdateMap[key] = pollItem;
 	    }
 	}
 
 	shared_ptr<SubscriptionDetails> subDetails;
-	if (subscriptionMap[dataProductID].count(filter) > 0)
+	if (subscriptionMap[key].count(filter) > 0)
 	{
 		// Already have a details for this
-		subDetails = subscriptionMap[dataProductID][filter];
+		subDetails = subscriptionMap[key][filter];
 	}
 	else
 	{
 	    subDetails.reset(new SubscriptionDetails());
         subDetails->dataProductID = dataProductID;
+		subDetails->domain = domain;
         subDetails->filter = filter;
-	    subscriptionMap[dataProductID][filter] = subDetails;
+	    subscriptionMap[key][filter] = subDetails;
 	}
 
 	// if we have a url and we haven't seen it before, subscribe to it
@@ -487,6 +509,9 @@ void GravitySubscriptionManager::removeSubscription()
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
 
+	// Read the domain
+	string domain = readStringMessage(gravityNodeSocket);
+
 	// Read the subscriber
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
@@ -495,10 +520,13 @@ void GravitySubscriptionManager::removeSubscription()
 	memcpy(&subscriber, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	if (subscriptionMap.count(dataProductID) > 0 && subscriptionMap[dataProductID].count(filter) > 0)
+	// Create the domain/data key for tracking subscriptions
+	DomainDataKey key(domain, dataProductID);
+
+	if (subscriptionMap.count(key) > 0 && subscriptionMap[key].count(filter) > 0)
 	{
 		// Get subscription details
-		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[dataProductID][filter];
+		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
 
 		// Find & remove subscriber from our list of subscribers for this data product
 		set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
@@ -520,9 +548,9 @@ void GravitySubscriptionManager::removeSubscription()
 		if (subDetails->subscribers.empty())
 		{
             // Remove from details main map
-            subscriptionMap[dataProductID].erase(filter);
-            if (subscriptionMap[dataProductID].size() == 0)
-                subscriptionMap.erase(dataProductID);
+            subscriptionMap[key].erase(filter);
+            if (subscriptionMap[key].size() == 0)
+                subscriptionMap.erase(key);
 
             for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
             {

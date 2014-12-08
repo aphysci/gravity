@@ -98,14 +98,14 @@ public:
     GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
     GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
 
-    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
-    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "");
+    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
+    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 
     GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "");
 
     GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
-	        const gravity::GravityRequestor& requestor, const std::string& requestID = "");
-    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1);
+	        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
+    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 
     GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
     		const gravity::GravityServiceProvider& server);
@@ -113,11 +113,13 @@ public:
 
     GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
+	GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID);
 
     std::string getStringParam(std::string key, std::string default_value = "");
     int getIntParam(std::string key, int default_value = -1);
     double getFloatParam(std::string key, double default_value = 0.0);
     bool getBoolParam(std::string key, bool default_value = false);
+	std::string getIP();
 
 };
 

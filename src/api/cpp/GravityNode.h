@@ -29,6 +29,7 @@
 #include "GravitySubscriber.h"
 #include "GravityRequestor.h"
 #include "GravityHeartbeatListener.h"
+#include "GravitySemaphore.h"
 #include "GravityServiceProvider.h"
 #include "Utility.h"
 #include <pthread.h>
@@ -97,6 +98,12 @@ typedef struct NetworkNode
     void* socket;
 } NetworkNode;
 
+typedef struct SocketWithLock
+{
+	void *socket;
+	Semaphore lock;
+} SocketWithLock;
+
 class GravityConfigParser;
 
 /**
@@ -117,14 +124,14 @@ private:
     pthread_t metricsManagerThread;
 
     void* context;
-    void* subscriptionManagerSocket;
-    void *publishManagerRequestSocket;
-    void *publishManagerPublishSocket;
-    void *serviceManagerSocket;
-    void* requestManagerSocket;
-    void* metricsManagerSocket;
+    SocketWithLock subscriptionManagerSWL;
+    SocketWithLock publishManagerRequestSWL;
+    SocketWithLock publishManagerPublishSWL;
+    SocketWithLock serviceManagerSWL;
+    SocketWithLock requestManagerSWL;
+    void* metricsManagerSocket; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
-    std::string getIP(); ///< Utility method to get the host machine's IP address
+   
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
     GravityReturnCode sendRequestsToServiceProvider(std::string url, const GravityDataProduct& request, GravityDataProduct& response,
     		int timeout_in_milliseconds, int retries);
@@ -138,11 +145,11 @@ private:
     std::string componentID;
 	GravityConfigParser* parser;
 
-	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url);
-	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls);
+	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
+	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string &domain);
 
     GravityReturnCode subscribe(std::string connectionURL, std::string dataProductID,
-            const GravitySubscriber& subscriber, std::string filter = "");
+            const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "");
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
@@ -175,7 +182,8 @@ public:
      * \param filter text filter to apply to subscription
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter = "");
+    GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
+											std::string filter = "", std::string domain = "");
 
     /**
      * Un-subscribe to a data product
@@ -184,7 +192,8 @@ public:
      * \param filter text filter associated with the subscription to cancel
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter="");
+    GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
+												std::string filter="", std::string domain = "");
 
     /**
      * Publish a data product
@@ -203,7 +212,8 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(std::string serviceID, const GravityDataProduct& request,
-            const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
+										const GravityRequestor& requestor, std::string requestID = "", 
+										int timeout_milliseconds = -1, std::string domain = "");	
 
     /**
      * Make a synchronous request against a service provider
@@ -212,7 +222,8 @@ public:
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
-    GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, int timeout_milliseconds = -1);
+    GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, 
+										int timeout_milliseconds = -1, std::string domain = "");
 
     /**
      * Starts a heart beat for this gravity process.
@@ -274,10 +285,22 @@ public:
      */
     GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
 
+	/**
+     * Unregisters a callback for when we get a heartbeat from another component.
+	 * \param componentID name of component we are currently registered to
+     */
+    GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID);
+
+
     /**
      * Returns a string representation of the provided error code.
      */
     GRAVITY_API std::string getCodeString(GravityReturnCode code);
+
+	/**
+	* Utility method to get the host machine's IP address
+	**/
+	GRAVITY_API std::string getIP();  
 
     /** @} */ //Registration Functions
 };

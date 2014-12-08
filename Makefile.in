@@ -109,7 +109,7 @@ distributable: components
 
 	echo building Gravity tarball...
 	rm -f gravity.tgz 
-	tar czf gravity.tgz bin lib include
+	tar czf gravity.tgz bin lib include deps VERSION.txt
 
 	
 

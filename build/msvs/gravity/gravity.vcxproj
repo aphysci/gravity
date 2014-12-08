@@ -777,13 +777,15 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..</Command>
       <Message>Create include director</Message>
       <Outputs>NoOutputGenerated</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\api\cpp\CommUtil.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\DomainDataKey.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityConfigParser.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityDataProduct.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityHeartbeat.cpp" />
@@ -816,6 +818,7 @@ copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
     <ClCompile Include="..\..\..\src\api\cpp\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\api\cpp\DomainDataKey.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityConfigParser.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityDataProduct.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeat.h" />
