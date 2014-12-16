@@ -470,14 +470,19 @@
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentLookupRequestPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ComponentServiceLookupResponsePB.pb.cc" />
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryMapPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.cpp" />
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.cpp" />
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.h" />
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.h" />
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.ini" />

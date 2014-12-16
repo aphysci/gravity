@@ -41,6 +41,10 @@ namespace gravity
 class ServiceDirectory : GravityServiceProvider
 {
 private:
+	static const int DEFAULT_BROADCAST_RATE_SEC  = 10;
+	static const int DEFAULT_BROADCAST_PORT  = 5678;
+
+
 	// domain name for this service directory
 	string domain;
 
@@ -58,6 +62,16 @@ private:
 
     bool registeredPublishersReady, registeredPublishersProcessed;
     set<string> registerUpdatesToSend;
+
+	void* context;
+	SocketWithLock udpBroadcastSocket;
+	SocketWithLock udpReceiverSocket;
+
+	pthread_t udpBroadcasterThread;
+	pthread_t udpReceiverThread;
+
+	void sendBroadcasterParameters(string sdDomain, string url, unsigned int port, unsigned int rate);
+	void sendReceiverParameters(string sdDomain, unsigned int port, unsigned int numValidDomains, string validDomains);
 
 public:
     virtual ~ServiceDirectory();

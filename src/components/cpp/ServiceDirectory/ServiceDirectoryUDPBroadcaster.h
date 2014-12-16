@@ -28,6 +28,15 @@
 
 #include <string>
 #include <zmq.h>
+#ifdef _WIN32
+#include <winSock2.h>
+#include <WinBase.h>
+#include <Windows.h>
+#else
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#endif
 
 namespace gravity{
 
@@ -41,7 +50,7 @@ private:
 	unsigned int port;
 	unsigned int broadcastRate;
 	int broadcastSocket;
-	struct sockaddr* destAddress;
+	struct sockaddr_in destAddress;
 	static bool loop;
 	void* sdSocket;
 

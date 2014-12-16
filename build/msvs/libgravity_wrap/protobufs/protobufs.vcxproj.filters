@@ -42,12 +42,13 @@
     <CustomBuild Include="..\..\..\..\src\api\protobufs\ServiceDirectoryUnregistrationPB.proto">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\api\protobufs\ServiceDirectoryBroadcastPB.proto">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\src\api\protobufs\ConfigRequest.proto">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

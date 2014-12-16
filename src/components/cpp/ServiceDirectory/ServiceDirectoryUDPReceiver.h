@@ -26,30 +26,33 @@
 #ifndef SERVICEDIRECTORYUDPRECEIVER__H__
 #define SERVICEDIRECTORYUDPRECEIVER__H__
 
+#include <vector>
 #include <string>
 #include <zmq.h>
+
 
 namespace gravity
 {
 #define MAXRECVSTRING 255
 
-
-
 class ServiceDirectoryUDPReceiver
 {
 private:
+	static const int MAX_RECEIVE_COUNT = 3;
+
 	void* context;
 	void* sdSocket;
 	std::string ourDomain;
 	unsigned int port;
-	unsigned int numValidDomains;
-	int sock;
+	int receiveSocket;
 
-	std::string *validDomains;
+	std::vector<std::string> validDomains;
 
 	void receiveReceiverParameters();
 	int initReceiveSocket();
 	void parseValidDomains(std::string domainString,unsigned int num);
+	bool isValidDomain(std::string domain);
+
 
 public:
 	ServiceDirectoryUDPReceiver(void* __context__) :

@@ -30,26 +30,29 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstring>
-#ifdef _WIN32
-#include <winSock2.h>
-#include <WinBase.h>
-#include <Windows.h>
-#else
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#endif
+#include <iostream>
+
+#include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
 using namespace std;
 
 namespace gravity
 {
-ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster(){};
+ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster()
+{
+	//close sockets
+	#ifdef _WIN32
+	closesocket(broadcastSocket);
+	#else
+	close(broadcastSocket);
+	#endif
+	zmq_close(sdSocket);
+};
 
 
 void ServiceDirectoryUDPBroadcaster::start()
 {
-	sdSocket = zmq_socket(context,ZMQ_SUB);
+	sdSocket = zmq_socket(context,ZMQ_REP);
 	zmq_connect(sdSocket,"inproc://service_directory_udp_broadcast");
 	zmq_setsockopt(sdSocket,ZMQ_SUBSCRIBE,NULL,0);
 
@@ -61,6 +64,10 @@ void ServiceDirectoryUDPBroadcaster::start()
 	pollItem.revents = 0;
 
 	int block = -1;
+
+
+	ServiceDirectoryBroadcastPB broadcastMessage;
+	string broadcastString;
 
 	bool broadcast = false;
 	while(true)
@@ -80,10 +87,20 @@ void ServiceDirectoryUDPBroadcaster::start()
 
 			if (command == "broadcast")
 			{
+				Log::message("Initializing Service Directory Broadcast");
 				block = 0;
 				//read broadcast parameters
 				receiveBroadcastParameters();
-				initBroadcastSocket();
+				broadcastMessage.set_id("");
+				broadcastMessage.set_domain(domainName);
+				broadcastMessage.set_url(url);
+				broadcastMessage.set_rate(broadcastRate);
+				broadcastMessage.SerializeToString(&broadcastString);
+				rc = initBroadcastSocket();
+				if (rc < 0)
+				{
+					Log::fatal("Broadcast: Socket Init Error: %d",&broadcastSocket);
+				}
 				broadcast = true;
 			}
 			else if (command == "stop")
@@ -104,21 +121,27 @@ void ServiceDirectoryUDPBroadcaster::start()
 		if(broadcast)
 		{
 			//broadcast
-			int bytesSent = sendto(broadcastSocket,domainName.c_str(),strlen(domainName.c_str()),0,destAddress,sizeof(struct sockaddr_in));
+			int bytesSent = sendto(broadcastSocket,broadcastString.c_str(),broadcastMessage.ByteSize(),0,(sockaddr*)&destAddress,sizeof(struct sockaddr_in));
 			if (bytesSent < 0)
 			{
 				//exit
-				return;
+				Log::fatal("Broadcast: sendto() Error");
+				break;
 			}
 			#ifdef _WIN32
-			Sleep(broadcastRate);
+			Sleep(broadcastRate*1000);
 			#else
-			usleep(broadcastRate*1000); //Maybe replace this guy with clock_nanosleep???
+			usleep(broadcastRate*1000000); //Maybe replace this guy with clock_nanosleep???
 			#endif
 		}
 	}
 
 	//close sockets
+	#ifdef _WIN32
+	closesocket(broadcastSocket);
+	#else
+	close(broadcastSocket);
+	#endif
 	zmq_close(sdSocket);
 
 }
@@ -142,6 +165,8 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 	memcpy(&broadcastRate,zmq_msg_data(&msg2),sizeof(unsigned int));
 	zmq_msg_close(&msg2);
 
+	sendStringMessage(sdSocket,"ACK",ZMQ_DONTWAIT);
+
 }
 
 int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
@@ -154,10 +179,9 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	destAddr->sin_port=htons(port);
 	destAddr->sin_addr.s_addr = inet_addr("255.255.255.255");
 
+	memcpy(&destAddress,destAddr,sizeof(struct sockaddr_in));
 
-	destAddress = (struct sockaddr*) &destStorage;
-
-	broadcastSocket = socket(destAddress->sa_family,SOCK_DGRAM,IPPROTO_UDP);
+	broadcastSocket = socket(destAddress.sin_family,SOCK_DGRAM,IPPROTO_UDP);
 
 	if(broadcastSocket < 0)
 	{
@@ -165,7 +189,7 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	}
 
 	int broadcastPerm=1;
-	if(setsockopt(broadcastSocket,SOL_SOCKET,SO_BROADCAST,(char *)&broadcastPerm,sizeof(broadcastPerm)) < 0)
+	if(setsockopt(broadcastSocket,SOL_SOCKET,SO_BROADCAST,(char *)&broadcastPerm,sizeof(broadcastPerm)) != 0)
 	{
 		return -1;
 	}
