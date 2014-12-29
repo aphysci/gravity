@@ -104,7 +104,37 @@ typedef struct SocketWithLock
 	Semaphore lock;
 } SocketWithLock;
 
+typedef struct GravityINIConfig
+{
+	std::string domain;
+	int port;
+	int timeout;
+} GravityINIConfig;
+
 class GravityConfigParser;
+
+
+class GravityNodeDomainListener
+{
+public:
+	static GravityNodeDomainListener *getInstance();
+	static std::string getDomainUrl();
+	static void* start(void* config);
+
+private:
+	static std::string url;
+	static bool timeoutOver;
+	static int sock;
+
+	static Semaphore lock;
+	static Semaphore instanceLock;
+
+	//private constructor
+	GravityNodeDomainListener();
+	//private destructor
+	virtual ~GravityNodeDomainListener();
+};
+
 
 /**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
@@ -114,7 +144,7 @@ class GravityNode
 private:
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
-
+	static bool domainEnabled;
     bool metricsEnabled;
 
     pthread_t subscriptionManagerThread;
@@ -122,6 +152,7 @@ private:
     pthread_t requestManagerThread;
     pthread_t serviceManagerThread;
     pthread_t metricsManagerThread;
+	pthread_t domainListenerThread;
 
     void* context;
     SocketWithLock subscriptionManagerSWL;
@@ -131,6 +162,8 @@ private:
     SocketWithLock requestManagerSWL;
     void* metricsManagerSocket; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
+
+	std::string listenForBroadcastURL(std::string domain, int port, int timeout);
    
     GravityReturnCode sendRequestToServiceDirectory(const GravityDataProduct& request, GravityDataProduct& response);
     GravityReturnCode sendRequestsToServiceProvider(std::string url, const GravityDataProduct& request, GravityDataProduct& response,

@@ -35,6 +35,8 @@
 #include<set>
 #ifdef _WIN32
 #include <winSock2.h>
+#include <WS2tcpip.h>
+#include <winsock.h>
 #include <WinBase.h>
 #include <Windows.h>
 #else
@@ -46,104 +48,6 @@
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
 using namespace std;
-
-#ifdef _WIN32
-
-static int gettimeofday(struct timeval * tp, struct timezone * tzp)
-{
-    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
-    static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
-
-    SYSTEMTIME  system_time;
-    FILETIME    file_time;
-    uint64_t    time;
-
-    GetSystemTime( &system_time );
-    SystemTimeToFileTime( &system_time, &file_time );
-    time =  ((uint64_t)file_time.dwLowDateTime )      ;
-    time += ((uint64_t)file_time.dwHighDateTime) << 32;
-
-    tp->tv_sec  = (long) ((time - EPOCH) / 10000000L);
-    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
-    return 0;
-}
-#endif
-
-static struct timeval addTime(struct timeval *t1, int sec)
-{
-	struct timeval newTime;
-	newTime.tv_sec=t1->tv_sec+sec;
-	newTime.tv_usec= t1->tv_usec;
-
-	return newTime;
-}
-static int timevalcmp(struct timeval* t1, struct timeval* t2)
-{
-	if (t1->tv_sec ==t2->tv_sec)
-	{
-		if(t1->tv_usec == t2->tv_usec)
-		{
-			return 0;
-		}
-		else if(t1->tv_usec < t2->tv_usec)
-		{
-			return -1;
-		}
-		else
-		{
-			return 1;
-		}
-	}
-	else if(t1->tv_sec < t2->tv_sec)
-	{
-		return -1;
-	}
-	else
-	{
-		return 1;
-	}
-}
-
-static struct timeval subtractTime(struct timeval *t1, struct timeval *t2)
-{
-	struct timeval newTime;
-	newTime.tv_sec=0;
-	newTime.tv_usec=0;
-	//make sure t1 is greater than t2
-	if(timevalcmp(t1,t2) <=0)
-	{
-		return newTime;
-	}
-
-	newTime.tv_sec=t1->tv_sec - t2->tv_sec;
-	long sub = t1->tv_usec;
-	if(t2->tv_usec > t1->tv_usec)
-	{
-		sub = 1000000;
-	}
-	newTime.tv_usec=sub-t2->tv_usec;
-
-	return newTime;
-}
-
-static unsigned int timevalToMilliSeconds(struct timeval *tv)
-{
-/*	if(tv->tv_sec == 0 && tv->tv_usec == 0)
-	{
-		return -1;
-	}
-*/
-	return (unsigned int) (tv->tv_usec/1000) + (tv->tv_sec*1000);
-}
-
-static void printByteBuffer(char* buffer, int len)
-{
-	for(int i = 0; i < len; i++)
-	{
-		printf("%02X ",*(buffer+i));
-	}
-	printf("\n");
-}
 
 
 namespace gravity
@@ -230,8 +134,6 @@ void ServiceDirectoryUDPReceiver::start()
 	//set socket to block forever initially
 	setsockopt(receiveSocket,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
 #endif
-
-
 
 	while(true)
 	{
@@ -419,7 +321,7 @@ void ServiceDirectoryUDPReceiver::receiveReceiverParameters()
 }
 
 int ServiceDirectoryUDPReceiver::initReceiveSocket()
-{                        
+{                     
 	/* Socket */
     struct sockaddr_in broadcastAddr; /* Broadcast Address */
 
@@ -430,11 +332,15 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 		return receiveSocket;
     }
 
+	//set socket to be re-usable. Must be set for all other listeners for this port
+	int one = 1;
+	setsockopt(receiveSocket,SOL_SOCKET,SO_REUSEADDR,(const char*)&one,sizeof(one));
+
     /* Construct bind structure */
     memset(&broadcastAddr, 0, sizeof(broadcastAddr));   /* Zero out structure */
     broadcastAddr.sin_family = AF_INET;                 /* Internet address family */
     broadcastAddr.sin_addr.s_addr = htonl(INADDR_ANY);  /* Any incoming interface */
-    broadcastAddr.sin_port = htons(port);      /* Broadcast port */
+    broadcastAddr.sin_port = htons(port);      /* Broadcast port */                                                                                                                                                     
 
     /* Bind to the broadcast port */
 	int rc = 0;

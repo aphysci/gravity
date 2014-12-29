@@ -30,7 +30,9 @@
 
 #ifdef __GNUC__
 #include <tr1/memory>
+#include <sys/time.h>
 #else
+#include <WinSock2.h>
 #include <memory>
 #endif
 #include <vector>
@@ -38,6 +40,11 @@
 
 #define MIN_PORT 24000
 #define MAX_PORT 24999
+
+#define DEFAULT_BROADCAST_RATE_SEC  10
+#define	DEFAULT_BROADCAST_PORT   8276
+#define DEFAULT_BROADCAST_TIMEOUT_SEC 10 
+#define MAXRECVSTRING 255
 
 namespace gravity
 {
@@ -53,6 +60,15 @@ GRAVITY_API uint64_t readUint64Message(void* socket);
 GRAVITY_API void sendUint64Message(void* socket, uint64_t val, int flags);
 GRAVITY_API void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags);
 GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort);
+#ifdef _WIN32
+GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp);
+#endif
+GRAVITY_API struct timeval addTime(struct timeval *t1, int sec);
+GRAVITY_API int timevalcmp(struct timeval* t1, struct timeval* t2);
+GRAVITY_API struct timeval subtractTime(struct timeval *t1, struct timeval *t2);
+GRAVITY_API unsigned int timevalToMilliSeconds(struct timeval *tv);
+GRAVITY_API void printByteBuffer(char* buffer, int len);
 
 } /* namespace gravity */
+
 #endif /* COMMUTIL_H_ */

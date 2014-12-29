@@ -811,6 +811,7 @@ copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..</Command>
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.cc" />
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc" />
@@ -843,6 +844,7 @@ copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..</Command>
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityDataProductPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.h" />
@@ -1183,7 +1185,7 @@ copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..</Command>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">false</LinkObjects>
     </CustomBuild>
-	<CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryBroadcastPB.proto">
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryBroadcastPB.proto">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>

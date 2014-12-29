@@ -41,9 +41,6 @@ namespace gravity
 class ServiceDirectory : GravityServiceProvider
 {
 private:
-	static const int DEFAULT_BROADCAST_RATE_SEC  = 10;
-	static const int DEFAULT_BROADCAST_PORT  = 5678;
-
 
 	// domain name for this service directory
 	string domain;

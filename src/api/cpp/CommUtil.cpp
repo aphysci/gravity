@@ -33,6 +33,7 @@ namespace gravity
 
 using namespace std;
 
+
 GRAVITY_API void sendStringMessage(void* socket, string str, int flags)
 {
 	zmq_msg_t msg;
@@ -129,4 +130,99 @@ GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort,
     }
     return -1;
 }
+
+#ifdef _WIN32
+
+GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp)
+{
+    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
+    static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
+
+    SYSTEMTIME  system_time;
+    FILETIME    file_time;
+    uint64_t    time;
+
+    GetSystemTime( &system_time );
+    SystemTimeToFileTime( &system_time, &file_time );
+    time =  ((uint64_t)file_time.dwLowDateTime )      ;
+    time += ((uint64_t)file_time.dwHighDateTime) << 32;
+
+    tp->tv_sec  = (long) ((time - EPOCH) / 10000000L);
+    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
+    return 0;
+}
+#endif
+
+GRAVITY_API struct timeval addTime(struct timeval *t1, int sec)
+{
+	struct timeval newTime;
+	newTime.tv_sec=t1->tv_sec+sec;
+	newTime.tv_usec= t1->tv_usec;
+
+	return newTime;
+}
+
+GRAVITY_API int timevalcmp(struct timeval* t1, struct timeval* t2)
+{
+	if (t1->tv_sec ==t2->tv_sec)
+	{
+		if(t1->tv_usec == t2->tv_usec)
+		{
+			return 0;
+		}
+		else if(t1->tv_usec < t2->tv_usec)
+		{
+			return -1;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else if(t1->tv_sec < t2->tv_sec)
+	{
+		return -1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+GRAVITY_API struct timeval subtractTime(struct timeval *t1, struct timeval *t2)
+{
+	struct timeval newTime;
+	newTime.tv_sec=0;
+	newTime.tv_usec=0;
+	//make sure t1 is greater than t2
+	if(timevalcmp(t1,t2) <=0)
+	{
+		return newTime;
+	}
+
+	newTime.tv_sec=t1->tv_sec - t2->tv_sec;
+	long sub = t1->tv_usec;
+	if(t2->tv_usec > t1->tv_usec)
+	{
+		sub = 1000000;
+	}
+	newTime.tv_usec=sub-t2->tv_usec;
+
+	return newTime;
+}
+
+GRAVITY_API unsigned int timevalToMilliSeconds(struct timeval *tv)
+{
+	return (unsigned int) (tv->tv_usec/1000) + (tv->tv_sec*1000);
+}
+
+GRAVITY_API void printByteBuffer(char* buffer, int len)
+{
+	for(int i = 0; i < len; i++)
+	{
+		printf("%02X ",*(buffer+i));
+	}
+	printf("\n");
+}
+
 } /* namespace gravity */

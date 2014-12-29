@@ -33,7 +33,6 @@
 
 namespace gravity
 {
-#define MAXRECVSTRING 255
 
 class ServiceDirectoryUDPReceiver
 {
