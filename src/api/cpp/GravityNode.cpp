@@ -509,7 +509,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	bool iniWarning = false;
 	//get the Domain name of the Service Directory to connect to
 	std::string serviceDirectoryDomain = parser->getString("Domain");
-	if(serviceDirectoryDomain != "" )
+	if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
 	{
 		//if the config file specifies both domain and url
 		if( serviceDirectoryUrl != "")
@@ -521,7 +521,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		{
 			int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
 			int broadcastTimeout = ("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
-			//serviceDirectoryUrl = listenForBroadcastURL(serviceDirectoryDomain,port,broadcastTimeout);
+
 			GravityINIConfig config;
 			config.domain=serviceDirectoryDomain;
 			config.port=port;
@@ -552,7 +552,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
     size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
     serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1 - pos);
 
-    if(serviceDirectoryNode.ipAddress == "")
+	/* The "*" is for the case where they did not define a URL in the Gravity.ini file,
+		So the ServiceDirectory broadcasted a URL with a "*" in it
+	*/
+    if(serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
