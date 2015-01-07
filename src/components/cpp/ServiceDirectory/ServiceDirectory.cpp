@@ -127,6 +127,11 @@ static int parseDomainCSV(string &csv)
 	int pos = csv.find(",",0);
 	int commaCount = 0;
 
+	if(csv.length()==0)
+	{
+		return 0;
+	}
+
 	while(pos != string::npos)
 	{
 		//csv = csv.replace(pos,1,"\0");
@@ -182,19 +187,21 @@ void ServiceDirectory::start()
 	}
 	Log::message("Domain set to '%s'", domain.c_str());
 
-	unsigned int broadcastPort = gn.getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
-	unsigned int broadcastRate = gn.getIntParam("ServiceDirectoryBroadcastRate",DEFAULT_BROADCAST_RATE_SEC);
 
-	string knownDomainCSV = gn.getStringParam("ValidDomains","*");
+	unsigned int broadcastPort = gn.getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
+
+	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
+
+	string knownDomainCSV = gn.getStringParam("DomainSyncList","");
 	int  numDomains = parseDomainCSV(knownDomainCSV);
 
-	if(numDomains < 1)
+	if(numDomains < 0)
 	{
-		knownDomainCSV="*";
-		numDomains=1;
+		knownDomainCSV="";
+		numDomains=0;
 		Log::warning("Invalid Domain (must be alpha-numeric).");
 	}
-	Log::message("Valid Domains set to '%s'",knownDomainCSV.c_str());
+	Log::message("DomainSyncList set to '%s'",knownDomainCSV.c_str());
 
     void *context = zmq_init(1);
     if (!context)
@@ -212,27 +219,6 @@ void ServiceDirectory::start()
         exit(1);
     }
 
-	//create the socket for receiving domains from the udp receiver
-	void *domainRecvSocket = zmq_socket(context,ZMQ_SUB);
-	zmq_bind(domainRecvSocket,"inproc://service_directory_domain_socket");
-	zmq_setsockopt(domainRecvSocket,ZMQ_SUBSCRIBE,NULL,0);
-
-	//start the udp broadcaster
-	udpBroadcastSocket.socket = zmq_socket(context,ZMQ_REQ);
-	zmq_bind(udpBroadcastSocket.socket,"inproc://service_directory_udp_broadcast");
-	pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
-
-	//start the udp receiver
-	udpReceiverSocket.socket = zmq_socket(context,ZMQ_REQ);
-	zmq_bind(udpReceiverSocket.socket,"inproc://service_directory_udp_receive");
-	pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
-
-	//configure the broadcaster
-	sendBroadcasterParameters(domain,sdURL,broadcastPort,broadcastRate);
-
-	//configure the receiver
-	sendReceiverParameters(domain,broadcastPort,numDomains,knownDomainCSV);
-
 	std::vector<zmq_pollitem_t> pollItems;
 
     // Always have at least the gravity node to poll
@@ -243,13 +229,47 @@ void ServiceDirectory::start()
     pollItem.revents = 0;
 	pollItems.push_back(pollItem);
 
-	// Poll the UDP Receiver
-	zmq_pollitem_t udpRecvPollItem;
-	udpRecvPollItem.socket=domainRecvSocket;
-	udpRecvPollItem.events=ZMQ_POLLIN;
-	udpRecvPollItem.fd=0;
-	udpRecvPollItem.revents=0;
-	pollItems.push_back(udpRecvPollItem);
+	//If broadcast was enabled, start the broadcaster
+	if(broadcastEnabled)
+	{
+		Log::message("Starting ServiceDirectoryBroadcaster");
+
+		unsigned int broadcastRate = gn.getIntParam("ServiceDirectoryBroadcastRate",DEFAULT_BROADCAST_RATE_SEC);
+
+		//start the udp broadcaster
+		udpBroadcastSocket.socket = zmq_socket(context,ZMQ_REQ);
+		zmq_bind(udpBroadcastSocket.socket,"inproc://service_directory_udp_broadcast");
+		pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
+
+		//configure the broadcaster
+		sendBroadcasterParameters(domain,sdURL,broadcastPort,broadcastRate);
+	}
+
+	//only start the receiver is there is at least one domain to sync to
+	if(numDomains > 0)
+	{
+		Log::message("Starting ServiceDirectoryReceiver");
+		//create the socket for receiving domains from the udp receiver, used for polling
+		void *domainRecvSocket = zmq_socket(context,ZMQ_SUB);
+		zmq_bind(domainRecvSocket,"inproc://service_directory_domain_socket");
+		zmq_setsockopt(domainRecvSocket,ZMQ_SUBSCRIBE,NULL,0);
+
+		//start the udp receiver
+		udpReceiverSocket.socket = zmq_socket(context,ZMQ_REQ);
+		zmq_bind(udpReceiverSocket.socket,"inproc://service_directory_udp_receive");
+		pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
+
+		//configure the receiver
+		sendReceiverParameters(domain,broadcastPort,numDomains,knownDomainCSV);
+
+			// Poll the UDP Receiver
+		zmq_pollitem_t udpRecvPollItem;
+		udpRecvPollItem.socket=domainRecvSocket;
+		udpRecvPollItem.events=ZMQ_POLLIN;
+		udpRecvPollItem.fd=0;
+		udpRecvPollItem.revents=0;
+		pollItems.push_back(udpRecvPollItem);
+	}
 
 
     // register the data product & service in another thread so we can process request below
@@ -303,31 +323,34 @@ void ServiceDirectory::start()
             sendGravityDataProduct(pollItem.socket, *response, ZMQ_DONTWAIT);
         }
 
-		//process domain commands
-		if(pollItems[1].revents & ZMQ_POLLIN)
+		if(numDomains > 0)
 		{
-			void* domainSocket = pollItems[1].socket;
-
-			string command = readStringMessage(domainSocket);
-
-			if (command == "Add")
+			//process domain commands
+			if(pollItems[1].revents & ZMQ_POLLIN)
 			{
-				string domainToAdd = readStringMessage(domainSocket);
-				string url = readStringMessage(domainSocket);
+				void* domainSocket = pollItems[1].socket;
+
+				string command = readStringMessage(domainSocket);
+
+				if (command == "Add")
+				{
+					string domainToAdd = readStringMessage(domainSocket);
+					string url = readStringMessage(domainSocket);
 		
-				shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_AddDomain"));
-				gdp->setData(&domainToAdd,domainToAdd.length());
-				Log::message("Publishing add domain: %s",domainToAdd.c_str());
-				gn.publish(*gdp);
-			}
-			else if (command == "Remove")
-			{
-				string domainToRemove = readStringMessage(domainSocket);
+					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_AddDomain"));
+					gdp->setData(&domainToAdd,domainToAdd.length());
+					Log::message("Publishing add domain: %s",domainToAdd.c_str());
+					gn.publish(*gdp);
+				}
+				else if (command == "Remove")
+				{
+					string domainToRemove = readStringMessage(domainSocket);
 				
-				shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_RemoveDomain"));
-				gdp->setData(&domainToRemove,domainToRemove.length());
-				Log::message("Publishing remove domain: %s",domainToRemove.c_str());
-				gn.publish(*gdp);
+					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_RemoveDomain"));
+					gdp->setData(&domainToRemove,domainToRemove.length());
+					Log::message("Publishing remove domain: %s",domainToRemove.c_str());
+					gn.publish(*gdp);
+				}
 			}
 		}
     }
