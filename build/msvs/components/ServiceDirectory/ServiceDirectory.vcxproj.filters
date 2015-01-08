@@ -42,9 +42,21 @@
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryMapPB.pb.cc">
       <Filter>Source Files\Protobuf</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

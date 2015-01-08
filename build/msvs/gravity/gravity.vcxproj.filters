@@ -111,6 +111,9 @@
     <ClCompile Include="..\..\..\src\api\cpp\DomainDataKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h">
@@ -200,6 +203,9 @@
     <ClInclude Include="..\..\..\src\api\cpp\DomainDataKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.h">
+      <Filter>Header Files\Protobuf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto">
@@ -230,6 +236,9 @@
       <Filter>protobufs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto">
+      <Filter>protobufs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryBroadcastPB.proto">
       <Filter>protobufs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto" />

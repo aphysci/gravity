@@ -30,8 +30,11 @@
 #include <boost/assign.hpp>
 #ifdef WIN32
 #include <winsock2.h>
+#include <WinBase.h>
+#include <Windows.h>
 #else
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/unistd.h>
 #endif
@@ -61,6 +64,7 @@
 #include "protobuf/ServiceDirectoryResponsePB.pb.h"
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+#include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition.
 
@@ -109,6 +113,7 @@ static void* startMetricsManager(void* context)
     return NULL;
 }
 
+
 static int s_interrupted = 0;
 static void (*previousHandlerAbrt)(int); //Function Pointer
 static void (*previousHandlerInt)(int); //Function Pointer
@@ -130,9 +135,22 @@ void s_catch_signals()
 	previousHandlerInt = signal(SIGINT, s_signal_handler);
 }
 
-
 namespace gravity
 {
+
+static void* startDomainBroadcastListener(void *config)
+{
+	static bool running = false;
+	if(!running)
+	{
+		running = true;
+		GravityNodeDomainListener::getInstance()->start((GravityINIConfig*)config);
+	}
+
+	cout<<"Exiting Start Domain Listener\n";
+	return NULL;
+}
+
 
 //Forward Declarations that we don't want publicly visible (Need to be in gravity namespace).
 bool IsValidFilename(const std::string filename);
@@ -142,8 +160,208 @@ void bindHeartbeatSocket(void* context);
 void closeHeartbeatSocket();
 void* Heartbeat(void* thread_context);
 
+
 using namespace std;
 using namespace std::tr1;
+
+Semaphore GravityNodeDomainListener::lock;
+Semaphore GravityNodeDomainListener::instanceLock;
+GravityNodeDomainListener* GravityNodeDomainListener::getInstance()
+{
+	instanceLock.Lock();
+	static GravityNodeDomainListener* instance = 0;
+	if(!instance)
+	{
+		cout << "Creating Domain Listener Instance\n";
+		instance = new GravityNodeDomainListener();
+	}
+	instanceLock.Unlock();
+	return instance;
+}
+
+GravityNodeDomainListener::GravityNodeDomainListener()
+{
+	// Setup the domain Listener
+    url="";
+	timeoutOver=false;
+}
+
+GravityNodeDomainListener::~GravityNodeDomainListener()
+{
+	#ifdef _WIN32
+	closesocket(sock);
+	#else
+	close(sock);
+	#endif
+}
+
+bool GravityNodeDomainListener::timeoutOver=false;
+int GravityNodeDomainListener::sock=0;
+std::string GravityNodeDomainListener::url="";
+void* GravityNodeDomainListener::start(void * config)
+{
+
+	std::string domain=((GravityINIConfig*)config)->domain;
+	int port=((GravityINIConfig*)config)->port;
+	int timeout=((GravityINIConfig*)config)->timeout;
+
+	//aquire sempahore to hold any url requests
+	lock.Lock();
+	sock = 0;
+
+	/* Socket */
+    struct sockaddr_in broadcastAddr; /* Broadcast Address */
+
+    /* Create a best-effort datagram socket using UDP */
+    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+    {
+		return NULL;
+    }
+
+
+    /* Construct bind structure */
+    memset(&broadcastAddr, 0, sizeof(broadcastAddr));   /* Zero out structure */
+    broadcastAddr.sin_family = AF_INET;                 /* Internet address family */
+    broadcastAddr.sin_addr.s_addr = htonl(INADDR_ANY);  /* Any incoming interface */
+    broadcastAddr.sin_port = htons(port);      /* Broadcast port */
+
+	//set socket to be re-usable. Must be set for all other listeners for this port
+	int one = 1;
+	setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char*)&one,sizeof(one));
+
+    /* Bind to the broadcast port */
+	int rc = 0;
+    if ((rc == bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
+    {
+		return NULL;
+    }
+
+	char recvString[MAXRECVSTRING+1]; /* Buffer for received string */
+    int recvStringLen;                /* Length of received string */
+	ServiceDirectoryBroadcastPB broadcastPB;
+
+	struct timeval startTime;
+	struct timeval currTime;
+
+	struct timeval timetowait;
+	timetowait.tv_sec=timeout;
+	timetowait.tv_usec=0;
+
+	int timeout_int = timevalToMilliSeconds(&timetowait);
+
+	//set socket to block forever initially
+#ifdef _WIN32
+	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
+#else
+	//set socket to block forever initially
+	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
+#endif
+
+
+	while(1)
+	{
+		//wait for braodcast message to be recieved
+		memset(recvString,0,MAXRECVSTRING+1);
+
+		gettimeofday(&startTime,NULL);
+
+		/* Receive a broadcast message or timeout */
+		recvStringLen = recvfrom(sock, recvString, MAXRECVSTRING, 0, NULL, 0);
+
+		gettimeofday(&currTime,NULL);
+		
+		//check for socket error
+		if(recvStringLen < 0)
+		{
+			//if we reached the timeout
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				if(timeoutOver==false)
+				{
+					timeoutOver=true;
+					lock.Unlock();
+				}
+				//set timeout to block
+				timetowait.tv_sec=0;
+				timetowait.tv_usec=0;
+				timeout_int = 0;
+				//release lock after timeout
+
+			}
+		}
+		else //we received a message
+		{
+
+			broadcastPB.ParseFromArray(recvString,recvStringLen);
+
+			//if the domains match
+			if(domain.compare(broadcastPB.domain())==0)
+			{
+				//set url to message url
+				url.assign(broadcastPB.url());
+				if(timeoutOver==false)
+				{
+					timeoutOver=true;
+					lock.Unlock();
+				}
+				//set timeout to block
+				timetowait.tv_sec=0;
+				timetowait.tv_usec=0;
+				timeout_int = 0;
+			}
+			//wrong message
+			else
+			{
+				struct timeval tvDiff = subtractTime(&currTime,&startTime);
+			
+				//if the time we were asleep is greter then the timeout -- shouldn't happen, but just in case
+				if(timevalcmp(&tvDiff,&timetowait)>=0)
+				{
+					//set timeout to block
+					timetowait.tv_sec=0;
+					timetowait.tv_usec=0;
+					timeout_int = 0;
+					//release lock after timeout
+					if(timeoutOver==false)
+					{
+						timeoutOver=true;
+						lock.Unlock();
+					}
+				}
+				else
+				{
+					//calculate new time to wait
+					timetowait = subtractTime(&timetowait,&tvDiff);
+					timevalToMilliSeconds(&timetowait);
+				}
+			}
+		}
+
+				
+		//set new timeout
+		#ifdef _WIN32
+		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
+		#else
+		//set socket to block until the timeout
+		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
+		#endif	
+
+	}//end while
+
+	return NULL;
+}
+
+std::string GravityNodeDomainListener::getDomainUrl()
+{
+	while(timeoutOver==false)
+	{
+		gravity::sleep(100);
+		//retrieving the lock should block until the url is ready or has timed out
+		lock.Lock();
+		lock.Unlock();
+	}
+	return url;
+}
 
 GravityNode::GravityNode()
 {
@@ -193,6 +411,7 @@ GravityNode::~GravityNode()
     delete parser;
 }
 
+bool GravityNode::domainEnabled=false;
 GravityReturnCode GravityNode::init(std::string componentID)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
@@ -204,6 +423,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
     {
         ret = GravityReturnCodes::FAILURE;
     }
+
+	//GravityNodeDomainListener* domainListener=GravityNodeDomainListener::getInstance();
 
     void* initSocket = zmq_socket(context, ZMQ_REP);
     zmq_bind(initSocket, "inproc://gravity_init");
@@ -281,9 +502,41 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	{
 		parser->ParseConfigFile(config_file_name.c_str());
 	}
-
+	
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
     std::string serviceDirectoryUrl = parser->getString("ServiceDirectoryURL");
+
+	bool iniWarning = false;
+	//get the Domain name of the Service Directory to connect to
+	std::string serviceDirectoryDomain = parser->getString("Domain");
+	if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
+	{
+		//if the config file specifies both domain and url
+		if( serviceDirectoryUrl != "")
+		{
+			iniWarning=true;
+		}
+		//retrieve the URL from the Service directory broadcast message
+		else
+		{
+			int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
+			int broadcastTimeout = ("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+
+			GravityINIConfig config;
+			config.domain=serviceDirectoryDomain;
+			config.port=port;
+			config.timeout=broadcastTimeout;
+			//only start the domain listener once
+			if(!domainEnabled)
+			{
+				domainEnabled=true;
+				pthread_create(&domainListenerThread,NULL,GravityNodeDomainListener::start,&config);			
+			}
+			serviceDirectoryUrl.assign(GravityNodeDomainListener::getDomainUrl());
+			cout.flush();
+		}
+	}
+
     size_t pos = serviceDirectoryUrl.find_first_of("://");
     if(pos != std::string::npos)
     {
@@ -299,7 +552,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
     size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
     serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1 - pos);
 
-    if(serviceDirectoryNode.ipAddress == "")
+	/* The "*" is for the case where they did not define a URL in the Gravity.ini file,
+		So the ServiceDirectory broadcasted a URL with a "*" in it
+	*/
+    if(serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
     	serviceDirectoryNode.ipAddress = "localhost";
    	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 
@@ -346,6 +602,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
         sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
         sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
     }
+
+	if (iniWarning)
+	{
+			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
+	}
 
 	return ret;
 }

@@ -24,6 +24,8 @@
  */
 
 #include "ServiceDirectory.h"
+#include "ServiceDirectoryUDPReceiver.h"
+#include "ServiceDirectoryUDPBroadcaster.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
 
@@ -34,6 +36,9 @@
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
+
+//#include "protobuf/ServiceDirectoryBroadcastSetup.pb.h"
+
 #include <zmq.h>
 #include <boost/algorithm/string.hpp>
 
@@ -70,27 +75,36 @@ static void* registration(void* regData)
     // Register service for external requests
     gn->registerService(DIRECTORY_SERVICE, gravity::GravityTransportTypes::TCP, *provider);
 
+	//Register the data products for adding and removing domains
+	gn->registerDataProduct("ServiceDirectory_AddDomain",gravity::GravityTransportTypes::TCP);
+	gn->registerDataProduct("ServiceDirectory_RemoveDomain",gravity::GravityTransportTypes::TCP);
+
+
     return NULL;
 }
 
-namespace gravity
+static void* startUDPBroadcastManager(void* context)
 {
 
-ServiceDirectory::~ServiceDirectory()
-{
+	// Create and start the GravitySubscriptionManager
+	gravity::ServiceDirectoryUDPBroadcaster udpBroadcaster(context);
+	udpBroadcaster.start();
+
+	return NULL;
 }
 
-void ServiceDirectory::start()
+static void* startUDPReceiveManager(void* context)
 {
-    registeredPublishersReady = registeredPublishersProcessed = false;
-    gn.init("ServiceDirectory");
 
-    std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
-    boost::replace_all(sdURL, "localhost", "127.0.0.1");
-    Log::message("running with SD connection string: %s", sdURL.c_str());
+	// Create and start the GravitySubscriptionManager
+	gravity::ServiceDirectoryUDPReceiver udpReceiver(context);
+	udpReceiver.start();
 
-	// Get the optional domain for this Service Directory instance
-	domain = gn.getStringParam("Domain", "");
+	return NULL;
+}
+
+static bool validateDomainName(string domain)
+{
 	// Validate domain name
 	bool valid = true;
 	std::locale loc;
@@ -102,12 +116,92 @@ void ServiceDirectory::start()
 			break;
 		}
 	}
-	if (!valid)
+
+	return valid;
+}
+
+static int parseDomainCSV(string &csv)
+{
+	int length = strlen(csv.c_str());
+	int prevPos=0;
+	int pos = csv.find(",",0);
+	int commaCount = 0;
+
+	if(csv.length()==0)
+	{
+		return 0;
+	}
+
+	while(pos != string::npos)
+	{
+		//csv = csv.replace(pos,1,"\0");
+		if(!validateDomainName(csv.substr(prevPos,pos-prevPos)))
+		{
+			return -1;
+		}
+		commaCount++;
+		prevPos=pos;
+		pos=csv.find(",",pos+1);
+	}
+
+	return commaCount+1;
+
+	
+}
+
+namespace gravity
+{
+
+ServiceDirectory::~ServiceDirectory()
+{
+}
+
+void ServiceDirectory::start()
+{
+	//set up zmq context
+	context = zmq_init(1);
+	//set up broadcast and recieve managers
+	if (!context)
+	{
+		Log::fatal("Could not create ZMQ Context");
+		return;
+	}
+	
+
+    registeredPublishersReady = registeredPublishersProcessed = false;
+    gn.init("ServiceDirectory");
+
+
+
+    std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
+    boost::replace_all(sdURL, "localhost", "127.0.0.1");
+    Log::message("running with SD connection string: %s", sdURL.c_str());
+
+	// Get the optional domain for this Service Directory instance
+	domain = gn.getStringParam("Domain", "");
+	
+	if (!validateDomainName(domain))
 	{
 		domain = "";
 		Log::warning("Invalid Domain (must be alpha-numeric).");		
 	}
 	Log::message("Domain set to '%s'", domain.c_str());
+
+
+	unsigned int broadcastPort = gn.getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
+
+	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
+
+	string knownDomainCSV = gn.getStringParam("DomainSyncList","");
+	int  numDomains = parseDomainCSV(knownDomainCSV);
+
+	if(numDomains < 0)
+	{
+		knownDomainCSV="";
+		numDomains=0;
+		Log::warning("Invalid Domain (must be alpha-numeric).");
+	}
+	Log::message("DomainSyncList set to '%s'",knownDomainCSV.c_str());
 
     void *context = zmq_init(1);
     if (!context)
@@ -125,12 +219,58 @@ void ServiceDirectory::start()
         exit(1);
     }
 
+	std::vector<zmq_pollitem_t> pollItems;
+
     // Always have at least the gravity node to poll
     zmq_pollitem_t pollItem;
     pollItem.socket = socket;
     pollItem.events = ZMQ_POLLIN;
     pollItem.fd = 0;
     pollItem.revents = 0;
+	pollItems.push_back(pollItem);
+
+	//If broadcast was enabled, start the broadcaster
+	if(broadcastEnabled)
+	{
+		Log::message("Starting ServiceDirectoryBroadcaster");
+
+		unsigned int broadcastRate = gn.getIntParam("ServiceDirectoryBroadcastRate",DEFAULT_BROADCAST_RATE_SEC);
+
+		//start the udp broadcaster
+		udpBroadcastSocket.socket = zmq_socket(context,ZMQ_REQ);
+		zmq_bind(udpBroadcastSocket.socket,"inproc://service_directory_udp_broadcast");
+		pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
+
+		//configure the broadcaster
+		sendBroadcasterParameters(domain,sdURL,broadcastPort,broadcastRate);
+	}
+
+	//only start the receiver is there is at least one domain to sync to
+	if(numDomains > 0)
+	{
+		Log::message("Starting ServiceDirectoryReceiver");
+		//create the socket for receiving domains from the udp receiver, used for polling
+		void *domainRecvSocket = zmq_socket(context,ZMQ_SUB);
+		zmq_bind(domainRecvSocket,"inproc://service_directory_domain_socket");
+		zmq_setsockopt(domainRecvSocket,ZMQ_SUBSCRIBE,NULL,0);
+
+		//start the udp receiver
+		udpReceiverSocket.socket = zmq_socket(context,ZMQ_REQ);
+		zmq_bind(udpReceiverSocket.socket,"inproc://service_directory_udp_receive");
+		pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
+
+		//configure the receiver
+		sendReceiverParameters(domain,broadcastPort,numDomains,knownDomainCSV);
+
+			// Poll the UDP Receiver
+		zmq_pollitem_t udpRecvPollItem;
+		udpRecvPollItem.socket=domainRecvSocket;
+		udpRecvPollItem.events=ZMQ_POLLIN;
+		udpRecvPollItem.fd=0;
+		udpRecvPollItem.revents=0;
+		pollItems.push_back(udpRecvPollItem);
+	}
+
 
     // register the data product & service in another thread so we can process request below
     struct RegistrationData regData;
@@ -149,7 +289,7 @@ void ServiceDirectory::start()
     while (true)
     {
         // Start polling socket(s), blocking while we wait
-        int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+        int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
         if (rc == -1)
         {
             // Interrupted
@@ -157,7 +297,7 @@ void ServiceDirectory::start()
         }
 
         // Process new subscription requests from the gravity node
-        if (pollItem.revents & ZMQ_POLLIN)
+        if (pollItems[0].revents & ZMQ_POLLIN)
         {
             // Read the data product
             zmq_msg_t msg;
@@ -182,6 +322,37 @@ void ServiceDirectory::start()
 
             sendGravityDataProduct(pollItem.socket, *response, ZMQ_DONTWAIT);
         }
+
+		if(numDomains > 0)
+		{
+			//process domain commands
+			if(pollItems[1].revents & ZMQ_POLLIN)
+			{
+				void* domainSocket = pollItems[1].socket;
+
+				string command = readStringMessage(domainSocket);
+
+				if (command == "Add")
+				{
+					string domainToAdd = readStringMessage(domainSocket);
+					string url = readStringMessage(domainSocket);
+		
+					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_AddDomain"));
+					gdp->setData(&domainToAdd,domainToAdd.length());
+					Log::message("Publishing add domain: %s",domainToAdd.c_str());
+					gn.publish(*gdp);
+				}
+				else if (command == "Remove")
+				{
+					string domainToRemove = readStringMessage(domainSocket);
+				
+					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_RemoveDomain"));
+					gdp->setData(&domainToRemove,domainToRemove.length());
+					Log::message("Publishing remove domain: %s",domainToRemove.c_str());
+					gn.publish(*gdp);
+				}
+			}
+		}
     }
 }
 
@@ -528,6 +699,53 @@ void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataPro
 		}
 	}
     response.setData(lookupResponse);
+}
+
+void ServiceDirectory::sendBroadcasterParameters(string sdDomain, string url,unsigned int port, unsigned int rate)
+{
+	udpBroadcastSocket.lock.Lock();
+
+	sendStringMessage(udpBroadcastSocket.socket,"broadcast",ZMQ_SNDMORE);
+	sendStringMessage(udpBroadcastSocket.socket,sdDomain,ZMQ_SNDMORE);
+	sendStringMessage(udpBroadcastSocket.socket,url,ZMQ_SNDMORE);
+	
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg,sizeof(port));
+	memcpy(zmq_msg_data(&msg),&port,sizeof(port));
+	zmq_sendmsg(udpBroadcastSocket.socket,&msg,ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	zmq_msg_t msg2;
+	zmq_msg_init_size(&msg2,sizeof(rate));
+	memcpy(zmq_msg_data(&msg2),&rate,sizeof(rate));
+	zmq_sendmsg(udpBroadcastSocket.socket,&msg2,ZMQ_DONTWAIT);
+	zmq_msg_close(&msg2);
+
+	udpBroadcastSocket.lock.Unlock();
+}
+
+void ServiceDirectory::sendReceiverParameters(string sdDomain, unsigned int port, unsigned int numValidDomains, string validDomains)
+{
+	udpReceiverSocket.lock.Lock();
+
+	sendStringMessage(udpReceiverSocket.socket,"receive",ZMQ_SNDMORE);
+	sendStringMessage(udpReceiverSocket.socket,sdDomain,ZMQ_SNDMORE);
+
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg,sizeof(port));
+	memcpy(zmq_msg_data(&msg),&port,sizeof(port));
+	zmq_sendmsg(udpReceiverSocket.socket,&msg,ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	zmq_msg_t msg2;
+	zmq_msg_init_size(&msg2,sizeof(numValidDomains));
+	memcpy(zmq_msg_data(&msg2),&numValidDomains,sizeof(numValidDomains));
+	zmq_sendmsg(udpReceiverSocket.socket,&msg2,ZMQ_SNDMORE);
+	zmq_msg_close(&msg2);
+
+	sendStringMessage(udpReceiverSocket.socket,validDomains,ZMQ_DONTWAIT);
+
+	udpReceiverSocket.lock.Unlock();
 }
 
 } /* namespace gravity */
