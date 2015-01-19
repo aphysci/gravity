@@ -32,11 +32,24 @@
 #include <set>
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include "protobuf/ServiceDirectoryMapPB.pb.h"
 
 using namespace std;
 
 namespace gravity
 {
+
+enum RegistrationType
+{
+	SERVICE,
+	DATA
+};
+
+enum ChangeType
+{
+	REMOVE,
+	ADD
+};
 
 class ServiceDirectory : GravityServiceProvider
 {
@@ -63,12 +76,18 @@ private:
 	void* context;
 	SocketWithLock udpBroadcastSocket;
 	SocketWithLock udpReceiverSocket;
+	void* synchronizerSocket;
 
 	pthread_t udpBroadcasterThread;
 	pthread_t udpReceiverThread;
+	pthread_t synchronizerThread;
 
 	void sendBroadcasterParameters(string sdDomain, string url, unsigned int port, unsigned int rate);
 	void sendReceiverParameters(string sdDomain, unsigned int port, unsigned int numValidDomains, string validDomains);
+
+	void updateProductLocations(string productID, string url, ChangeType changeType, RegistrationType registrationType);
+	void updateProductLocations();
+	shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
 
 public:
     virtual ~ServiceDirectory();
