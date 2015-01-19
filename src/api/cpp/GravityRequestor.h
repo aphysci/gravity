@@ -44,6 +44,9 @@ public:
 
     /**
      * Called when a response to a request is received through the Gravity infrastructure
+     * \param serviceID ID of the service request is being filled through
+     * \param requestID ID of the request that was made
+     * \param response GravityDataProduct containing the data of the response
      */
     virtual void requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response) = 0;
 };

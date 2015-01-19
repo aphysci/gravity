@@ -46,6 +46,7 @@ public:
 
     /**
      * Called on implementing object when a registered subscription is filled with 1 or more GravityDataProducts
+     * \param dataProducts the data products that fill the registered subscription
      */
     virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) = 0;
 };
