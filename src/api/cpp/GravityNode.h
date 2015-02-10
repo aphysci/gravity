@@ -199,6 +199,7 @@ public:
 
     /**
      * Initialize the Gravity infrastructure.
+     * \param componentID ID of the component to initialize
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
     GRAVITY_API GravityReturnCode init(std::string componentID);
@@ -213,6 +214,7 @@ public:
      * \param dataProductID string ID of the data product of interest
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
      * \param filter text filter to apply to subscription
+     * \param domain domain of the network components
      * \return success flag
      */
     GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
@@ -223,6 +225,7 @@ public:
      * \param dataProductID ID of data product for which subscription is to be removed
      * \param subscriber the subscriber that will be removed from the notification list for this subscription
      * \param filter text filter associated with the subscription to cancel
+     * \paramn domain domain of the network components
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
@@ -242,6 +245,7 @@ public:
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
      * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
+     * \param domain domain of the network components
      * \return success flag
      */
     GRAVITY_API GravityReturnCode request(std::string serviceID, const GravityDataProduct& request,
@@ -252,7 +256,8 @@ public:
      * Make a synchronous request against a service provider
      * \param serviceID The registered service ID of a service provider
      * \param dataProduct data product representation of the request
-     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
+     * \param timeout_milliseconds Timeout in Milliseconds (-1 for no timeout)
+     * \param domain domain of the network components
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
     GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, 
@@ -293,19 +298,22 @@ public:
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory
+     * \param dataProductID string ID used to uniquely identify this published data product
      */
     GRAVITY_API GravityReturnCode unregisterDataProduct(std::string dataProductID);
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
-     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
      * \param transport type for requests (e.g. 'tcp', 'ipc')
+     * \param server object implementing the GravityServiceProvider interface that will be notified of requests
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode registerService(std::string serviceID, GravityTransportType transportType,
             const GravityServiceProvider& server);
     /**
      * Unregister as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which the service was originially registered
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterService(std::string serviceID);
 
@@ -315,12 +323,14 @@ public:
      * \param interval_in_microseconds interval that heart beats are expected.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
      * \param listener instance of a GravityHeartbeatListener that will be notified when heart beats are received or missed.
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
 
 	/**
      * Unregisters a callback for when we get a heartbeat from another component.
 	 * \param componentID name of component we are currently registered to
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID);
 

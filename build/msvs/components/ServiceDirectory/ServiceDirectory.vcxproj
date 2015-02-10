@@ -476,11 +476,13 @@
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.cpp" />
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectorySynchronizer.cpp" />
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.cpp" />
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.h" />
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectorySynchronizer.h" />
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPBroadcaster.h" />
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.h" />
   </ItemGroup>

@@ -30,8 +30,36 @@ message ProductLocations
 	repeated string domain_id = 4;
 }
 
+message ProductChange
+{
+	enum RegistrationType
+	{
+		DATA = 0;
+		SERVICE = 1;
+	}	
+	
+    enum ChangeType
+	{
+		REMOVE = 0;
+		ADD = 1;
+	}
+	
+	optional string product_id = 1;
+	optional string url = 2;
+	optional RegistrationType registration_type = 3;
+	optional ChangeType change_type = 4;
+	optional string component_id = 5;
+}
+
 message ServiceDirectoryMapPB
 {
+	// Current state
 	repeated ProductLocations service_provider = 1;
 	repeated ProductLocations data_provider = 2;
+   
+	// Changes since last 
+	optional ProductChange change = 3;
+
+	// Service Directories Domain
+	optional string domain = 4;
 }

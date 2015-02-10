@@ -48,6 +48,12 @@
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectorySynchronizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectory.h">
@@ -57,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectorySynchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

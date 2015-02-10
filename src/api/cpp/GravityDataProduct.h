@@ -58,6 +58,7 @@ public:
     /**
      * Constructor
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
+     * \return a GravityDataProduct
      */
     GRAVITY_API GravityDataProduct(std::string dataProductID);
 
@@ -65,6 +66,7 @@ public:
      * Constructor that deserializes this GravityDataProduct from array of bytes
      * \param arrayPtr pointer to array of bytes containing serialized GravityDataProduct
      * \param size size of serialized data
+     * \return a GravityDataProduct
      */
     GRAVITY_API GravityDataProduct(void* arrayPtr, int size);
 
@@ -147,7 +149,7 @@ public:
 
     /**
      * Serialize this GravityDataProduct
-     * \arrayPtr pointer to array into which to serialize this GravityDataProduct
+     * \param arrayPtr pointer to array into which to serialize this GravityDataProduct
      * \return success flag
      */
     GRAVITY_API bool serializeToArray(void* arrayPtr) const;
@@ -155,7 +157,7 @@ public:
     /**
      * Check equivalence between two GravityDataProducts.  GravityDataProducts are considered equivalent
      * if they're product ID and data are identical.
-     * \gdp GravityDataProduct to compare with this one.
+     * \param gdp GravityDataProduct to compare with this one.
      * \return true if the two GravityDataProducts are equivalent, false otherwise.
      */
     GRAVITY_API bool operator==(const GravityDataProduct &gdp);
