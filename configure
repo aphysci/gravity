@@ -5774,7 +5774,10 @@ then
    if test "x$JAVAPROTOBUF_DIR" = x; then :
   JAVAPROTOBUF_DIR="/opt/protobuf-$PROTOBUF_VER/java/target/protobuf-java-$PROTOBUF_VER.jar"
 fi
-   as_ac_File=`$as_echo "ac_cv_file_$JAVAPROTOBUF_DIR" | $as_tr_sh`
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_$JAVAPROTOBUF_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $JAVAPROTOBUF_DIR" >&5
 $as_echo_n "checking for $JAVAPROTOBUF_DIR... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -5801,12 +5804,16 @@ else
   as_fn_error $? "JAVAPROTOBUF_DIR not found. Type 'configure --help' for details." "$LINENO" 5
 fi
 
+   fi
 
 
    if test "x$GUAVAJAR_DIR" = x; then :
   GUAVAJAR_DIR="/opt/guava-13.0.1/guava-13.0.1.jar"
 fi
-   as_ac_File=`$as_echo "ac_cv_file_$GUAVAJAR_DIR" | $as_tr_sh`
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_$GUAVAJAR_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $GUAVAJAR_DIR" >&5
 $as_echo_n "checking for $GUAVAJAR_DIR... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -5833,11 +5840,12 @@ else
   as_fn_error $? "GUAVAJAR_DIR not found. Type 'configure --help' for details." "$LINENO" 5
 fi
 
+   fi
 fi
 
 CPPFLAGS="$CPPFLAGS -Wall"
 
-ac_config_files="$ac_config_files Makefile src/api/MATLAB/Makefile src/api/cpp/Makefile src/components/cpp/Makefile src/components/cpp/Archiver/Makefile src/components/cpp/LogRecorder/Makefile src/components/cpp/Playback/Makefile src/components/cpp/ServiceDirectory/Makefile src/keyvalue_parser/Makefile test/components/cpp/Makefile test/components/cpp/ServiceDirectory/Makefile src/api/java/cpp_makefile src/api/java/java_makefile test/api/java/Makefile test/components/cpp/ServiceDirectory/test.sh test/api/java/test.sh test/examples/1-BasicDataProduct/Makefile test/examples/1-BasicDataProduct/run.sh test/examples/2-ProtobufDataProduct/Makefile test/examples/2-ProtobufDataProduct/run.sh test/examples/3-MultipleDataProduct/Makefile test/examples/3-MultipleDataProduct/run.sh test/examples/4-BasicService/Makefile test/examples/4-BasicService/run.sh test/examples/5-MiscFunctionality/Makefile test/examples/5-MiscFunctionality/run.sh test/examples/6-JavaProtobufDataProduct/Makefile test/examples/6-JavaProtobufDataProduct/run.sh test/examples/7-JavaBasicService/Makefile test/examples/7-JavaBasicService/run.sh test/examples/8-ConfigFile/Makefile"
+ac_config_files="$ac_config_files Makefile src/api/MATLAB/Makefile src/api/cpp/Makefile src/components/cpp/Makefile src/components/cpp/Archiver/Makefile src/components/cpp/ConfigServer/Makefile src/components/cpp/LogRecorder/Makefile src/components/cpp/Playback/Makefile src/components/cpp/ServiceDirectory/Makefile src/keyvalue_parser/Makefile test/components/cpp/Makefile test/components/cpp/ServiceDirectory/Makefile src/api/java/cpp_makefile src/api/java/java_makefile test/api/java/Makefile test/components/cpp/ServiceDirectory/test.sh test/api/java/test.sh test/examples/1-BasicDataProduct/Makefile test/examples/1-BasicDataProduct/run.sh test/examples/2-ProtobufDataProduct/Makefile test/examples/2-ProtobufDataProduct/run.sh test/examples/3-MultipleDataProduct/Makefile test/examples/3-MultipleDataProduct/run.sh test/examples/4-BasicService/Makefile test/examples/4-BasicService/run.sh test/examples/5-MiscFunctionality/Makefile test/examples/5-MiscFunctionality/run.sh test/examples/6-JavaProtobufDataProduct/Makefile test/examples/6-JavaProtobufDataProduct/run.sh test/examples/7-JavaBasicService/Makefile test/examples/7-JavaBasicService/run.sh test/examples/8-ConfigFile/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -6548,6 +6556,7 @@ do
     "src/api/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES src/api/cpp/Makefile" ;;
     "src/components/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Makefile" ;;
     "src/components/cpp/Archiver/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Archiver/Makefile" ;;
+    "src/components/cpp/ConfigServer/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/ConfigServer/Makefile" ;;
     "src/components/cpp/LogRecorder/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/LogRecorder/Makefile" ;;
     "src/components/cpp/Playback/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Playback/Makefile" ;;
     "src/components/cpp/ServiceDirectory/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/ServiceDirectory/Makefile" ;;
