@@ -200,6 +200,7 @@ AC_CONFIG_FILES([Makefile
                  src/api/cpp/Makefile
                  src/components/cpp/Makefile
                  src/components/cpp/Archiver/Makefile
+                 src/components/cpp/ConfigServer/Makefile
                  src/components/cpp/LogRecorder/Makefile
                  src/components/cpp/Playback/Makefile
                  src/components/cpp/ServiceDirectory/Makefile
