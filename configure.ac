@@ -186,11 +186,19 @@ if test $WITHOUT_JAVA == no
 then
    AC_ARG_VAR(JAVAPROTOBUF_DIR, [Location of the Java Protocol Buffers runtime library.  Default = /opt/protobuf-<protobuf_version>/java/target/protobuf-java-<protobuf_version>.jar])
    AS_IF([test "x$JAVAPROTOBUF_DIR" = x], [JAVAPROTOBUF_DIR="/opt/protobuf-$PROTOBUF_VER/java/target/protobuf-java-$PROTOBUF_VER.jar"])
-   AC_CHECK_FILES([$JAVAPROTOBUF_DIR],,[AC_MSG_ERROR([JAVAPROTOBUF_DIR not found. Type 'configure --help' for details.])])
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      AC_CHECK_FILES([$JAVAPROTOBUF_DIR],,[AC_MSG_ERROR([JAVAPROTOBUF_DIR not found. Type 'configure --help' for details.])])
+   fi
 
    AC_ARG_VAR(GUAVAJAR_DIR, [Location of the Guava Google Core Libraries.  Default = /opt/guava-13.0.1/guava-13.0.1.jar])
    AS_IF([test "x$GUAVAJAR_DIR" = x], [GUAVAJAR_DIR="/opt/guava-13.0.1/guava-13.0.1.jar"])
-   AC_CHECK_FILES([$GUAVAJAR_DIR],,[AC_MSG_ERROR([GUAVAJAR_DIR not found. Type 'configure --help' for details.])])
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      AC_CHECK_FILES([$GUAVAJAR_DIR],,[AC_MSG_ERROR([GUAVAJAR_DIR not found. Type 'configure --help' for details.])])
+   fi
 fi
 
 CPPFLAGS="$CPPFLAGS -Wall"

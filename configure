@@ -5774,7 +5774,10 @@ then
    if test "x$JAVAPROTOBUF_DIR" = x; then :
   JAVAPROTOBUF_DIR="/opt/protobuf-$PROTOBUF_VER/java/target/protobuf-java-$PROTOBUF_VER.jar"
 fi
-   as_ac_File=`$as_echo "ac_cv_file_$JAVAPROTOBUF_DIR" | $as_tr_sh`
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_$JAVAPROTOBUF_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $JAVAPROTOBUF_DIR" >&5
 $as_echo_n "checking for $JAVAPROTOBUF_DIR... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -5801,12 +5804,16 @@ else
   as_fn_error $? "JAVAPROTOBUF_DIR not found. Type 'configure --help' for details." "$LINENO" 5
 fi
 
+   fi
 
 
    if test "x$GUAVAJAR_DIR" = x; then :
   GUAVAJAR_DIR="/opt/guava-13.0.1/guava-13.0.1.jar"
 fi
-   as_ac_File=`$as_echo "ac_cv_file_$GUAVAJAR_DIR" | $as_tr_sh`
+   # macro does not work during cross-compile, so skip test in that case
+   if test $cross_compiling != "yes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_$GUAVAJAR_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $GUAVAJAR_DIR" >&5
 $as_echo_n "checking for $GUAVAJAR_DIR... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -5833,6 +5840,7 @@ else
   as_fn_error $? "GUAVAJAR_DIR not found. Type 'configure --help' for details." "$LINENO" 5
 fi
 
+   fi
 fi
 
 CPPFLAGS="$CPPFLAGS -Wall"
