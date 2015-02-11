@@ -51,7 +51,7 @@ VPATH          = @srcdir@
 #YACC= yacc
 #LEX= lex
 #CC= $(CROSS)gcc
-LD= $(CROSS)gcc
+LD= $(CC)
 AR= $(CROSS)ar
 
 #Compiler Flags

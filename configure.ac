@@ -19,6 +19,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+AC_CONFIG_MACRO_DIRS([m4])
 AC_PREREQ([2.68])
 AC_INIT([Gravity], [1.0], [gravity@aphysci.com])
 AC_CONFIG_SRCDIR([test/GravityTest.h])
@@ -147,7 +148,11 @@ AC_SUBST([ZEROMQ_INCDIR])
 CPPFLAGS="$CPPFLAGS -I$ZEROMQ_INCDIR"
 
 # Check for version of zeromq library - need at least 3.x version
-AC_CHECK_FILES([$ZEROMQ_INCDIR/zmq.h],,[AC_MSG_ERROR([$ZEROMQ_INCDIR/zmq.h not found. Check the --with-zeromq-incdir option.])])
+# But macro does not work during cross-compile, so skip test in that case
+if test $cross_compiling != "yes"
+then
+    AC_CHECK_FILES([$ZEROMQ_INCDIR/zmq.h],,[AC_MSG_ERROR([$ZEROMQ_INCDIR/zmq.h not found. Check the --with-zeromq-incdir option.])])
+fi
 
 MAJOR=`egrep '^#define +ZMQ_VERSION_MAJOR +[0-9]+$' $ZEROMQ_INCDIR/zmq.h`
 MINOR=`egrep '^#define +ZMQ_VERSION_MINOR +[0-9]+$' $ZEROMQ_INCDIR/zmq.h`
@@ -173,10 +178,7 @@ AC_ARG_WITH([protoc],
 AC_SUBST([PROTOC])
 
 # Check for Boost Libraries
-AC_LANG_PUSH([C++])
-AC_CHECK_HEADERS([boost/assign.hpp], [],
-    [AC_MSG_ERROR(Unable to find the Boost C++ Libraries.  Please ensure the Boost C++ Libraries are installed.)])
-AC_LANG_POP([C++])
+BOOST_REQUIRE([],[AC_MSG_ERROR(Unable to find the Boost C++ Libraries.  Please ensure the Boost C++ Libraries are installed.)])
 
 PROTOBUF_VER=`pkg-config --modversion protobuf`
 
