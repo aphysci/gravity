@@ -92,6 +92,7 @@ namespace gravity {
 class GravityNode {
 public:
     GravityNode();
+	GravityNode(std::string);
     ~GravityNode();
     GravityReturnCode init(std::string);
     void waitForExit();

@@ -377,6 +377,21 @@ GravityNode::GravityNode()
     metricsEnabled = false;
 }
 
+GravityNode::GravityNode(std::string componentID)
+{
+    // Eventually to be read from a config/properties file
+    serviceDirectoryNode.port = 5555;
+    serviceDirectoryNode.transport = "tcp";
+    serviceDirectoryNode.socket = NULL;
+
+    //Initialize this guy so we can know whether the heartbeat thread has started.
+    hbSocket = NULL;
+
+    // Default to no metrics
+    metricsEnabled = false;
+	init(componentID);
+}
+
 GravityNode::~GravityNode()
 {
 
