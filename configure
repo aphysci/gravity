@@ -5325,49 +5325,6 @@ then
   as_fn_error $? "The Gravity package requires at least version 3.x of ZeroMQ." "$LINENO" 5
 fi
 
-# Check for protoc compiler
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lprotobuf" >&5
-$as_echo_n "checking for main in -lprotobuf... " >&6; }
-if ${ac_cv_lib_protobuf_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lprotobuf  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_protobuf_main=yes
-else
-  ac_cv_lib_protobuf_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_protobuf_main" >&5
-$as_echo "$ac_cv_lib_protobuf_main" >&6; }
-if test "x$ac_cv_lib_protobuf_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPROTOBUF 1
-_ACEOF
-
-  LIBS="-lprotobuf $LIBS"
-
-else
-  as_fn_error $? "cannot find protobuf library" "$LINENO" 5
-fi
-
-
 
 # Check whether --with-protoc was given.
 if test "${with_protoc+set}" = set; then :
@@ -5376,6 +5333,40 @@ else
   PROTOC='protoc'
 fi
 
+
+
+# Check for protoc program
+# But macro does not work during cross-compile, so skip test in that case
+if test $cross_compiling != "yes"
+then
+    as_ac_File=`$as_echo "ac_cv_file_$PROTOC" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $PROTOC" >&5
+$as_echo_n "checking for $PROTOC... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$PROTOC"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$PROTOC" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  as_fn_error $? "$PROTOC not found. Check the --with-protoc option." "$LINENO" 5
+fi
+
+fi
 
 
 # Check for Boost Libraries

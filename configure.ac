@@ -167,15 +167,20 @@ then
   AC_MSG_ERROR([The Gravity package requires at least version 3.x of ZeroMQ.])
 fi
 
-# Check for protoc compiler
-AC_CHECK_LIB([protobuf], [main], [], [AC_MSG_ERROR([cannot find protobuf library])])
-
 AC_ARG_WITH([protoc],
     [AS_HELP_STRING([--with-protoc=PATH],
         [location of the protoc protocol buffer compiler binary, defaults to protoc])],
     [PROTOC="$withval"],
     [PROTOC='protoc'])
 AC_SUBST([PROTOC])
+
+# Check for protoc program
+# But macro does not work during cross-compile, so skip test in that case
+if test $cross_compiling != "yes"
+then
+    AC_CHECK_FILES([$PROTOC],,[AC_MSG_ERROR([$PROTOC not found. Check the --with-protoc option.])])
+fi
+
 
 # Check for Boost Libraries
 BOOST_REQUIRE([],[AC_MSG_ERROR(Unable to find the Boost C++ Libraries.  Please ensure the Boost C++ Libraries are installed.)])
