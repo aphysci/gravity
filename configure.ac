@@ -68,14 +68,14 @@ AS_IF([test "x$ac_cv_prog_LEX" != "xflex"],[
        AC_MSG_ERROR([Flex is required to compile Gravity. Make sure it is installed and in the PATH.])
        ])
 
-# Check for swig program
-AC_CHECK_PROG(SWIGPROG, swig, swig, MISSING)
-if test $SWIGPROG = "MISSING"; then
-  AC_MSG_ERROR([Swig is required to compile Gravity. Make sure it is installed and in the PATH.])
-fi
-
 if test $WITHOUT_JAVA == no
 then
+   # Check for swig program
+   AC_CHECK_PROG(SWIGPROG, swig, swig, MISSING)
+   if test $SWIGPROG = "MISSING"; then
+     AC_MSG_ERROR([Swig is required to compile Gravity. Make sure it is installed and in the PATH.])
+   fi
+
    # Check for JNI headers
    JNI_CPPFLAGS=""
    if test $JAVA_HOME != ""
