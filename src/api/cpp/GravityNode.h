@@ -192,6 +192,12 @@ public:
      */
     GRAVITY_API GravityNode();
 
+	/**
+	* Constructor that also initializes
+	* \param componentID ID of the component to initialize
+	*/
+	GRAVITY_API GravityNode(std::string componentID);
+
     /**
      * Default Destructor
      */
