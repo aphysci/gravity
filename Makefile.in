@@ -110,19 +110,23 @@ distributable: components
 	cp src/keyvalue_parser/*.so lib
 	cp src/api/cpp/*.a lib
 	cp src/api/cpp/*.so lib
-	cp src/api/java/*.so lib
-	cp src/api/java/*.jar lib
 
 	mkdir include
 	cp -r src/api/cpp/*.h include
 	mkdir include/protobuf
 	cp src/api/cpp/protobuf/GravityDataProductPB.pb.h include/protobuf
 	cp src/api/cpp/protobuf/GravityMetricsDataPB.pb.h include/protobuf
-	mkdir include/MATLAB
-	cp src/api/MATLAB/*.m include/MATLAB
-	mkdir lib/MATLAB
-	cp src/api/MATLAB/*.jar lib/MATLAB
-	cp src/api/MATLAB/LICENSE* lib/MATLAB
+
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		cp src/api/java/*.so lib; \
+		cp src/api/java/*.jar lib; \
+		mkdir include/MATLAB; \
+		cp src/api/MATLAB/*.m include/MATLAB; \
+		mkdir lib/MATLAB; \
+		cp src/api/MATLAB/*.jar lib/MATLAB; \
+		cp src/api/MATLAB/LICENSE* lib/MATLAB; \
+	fi
 
 	echo building Gravity tarball...
 	rm -f gravity.tgz 
