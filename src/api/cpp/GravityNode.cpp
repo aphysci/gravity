@@ -519,11 +519,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	}
 	
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
-    std::string serviceDirectoryUrl = parser->getString("ServiceDirectoryURL");
+    std::string serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
 
 	bool iniWarning = false;
 	//get the Domain name of the Service Directory to connect to
-	std::string serviceDirectoryDomain = parser->getString("Domain");
+	std::string serviceDirectoryDomain = getStringParam("Domain");
 	if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
 	{
 		//if the config file specifies both domain and url
@@ -535,7 +535,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		else
 		{
 			int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
-			int broadcastTimeout = ("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+			int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
 
 			GravityINIConfig config;
 			config.domain=serviceDirectoryDomain;
