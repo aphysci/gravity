@@ -165,7 +165,7 @@ void GravitySubscriptionManager::start()
         }
 
 		// Check for subscription updates
-		for (int index = 2; index < pollItems.size(); index++)
+		for (unsigned int index = 2; index < pollItems.size(); index++)
 		{
 	        Log::trace("about to check for new poll items, index = %d, size = %d", index, pollItems.size());
 			if (pollItems[index].revents && ZMQ_POLLIN)
@@ -443,7 +443,7 @@ void GravitySubscriptionManager::addSubscription()
 	    if (publisherUpdateUrl.size() > 0)
 	    {
             zmq_pollitem_t pollItem;
-            void *socket = setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
+            setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
             publisherUpdateMap[key] = pollItem;
 	    }
 	}

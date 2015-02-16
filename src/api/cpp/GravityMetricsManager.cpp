@@ -48,9 +48,6 @@ namespace gravity
 
     void GravityMetricsManager::start()
     {
-        // Messages
-        zmq_msg_t event, id;
-
         metricsPubSocket = zmq_socket(context, ZMQ_PUB);
         zmq_bind(metricsPubSocket, GRAVITY_METRICS_PUB);
 
@@ -187,8 +184,6 @@ namespace gravity
         for (vector<string>::iterator it = dataProductIDs.begin(); it != dataProductIDs.end(); ++it)
         {
             string dataProductID = *it;
-            int messageCount = metrics.getMessageCount(dataProductID);
-            int byteCount = metrics.getByteCount(dataProductID);
 
             pair<string,GravityMetricsPB_MessageType> key (dataProductID, type);
             GravityMetricsPB gmPB = metricsData[key];
@@ -212,7 +207,6 @@ namespace gravity
         metrics.set_ipaddress(ipAddr);
 
         map<pair<string, GravityMetricsPB_MessageType>, GravityMetricsPB>::iterator it;
-        int i = 0;
         for (it = metricsData.begin(); it != metricsData.end(); ++it)
         {
             GravityMetricsPB* gmPB = metrics.add_metrics();

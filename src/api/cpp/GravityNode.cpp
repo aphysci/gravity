@@ -247,10 +247,9 @@ void* GravityNodeDomainListener::start(void * config)
 	timetowait.tv_sec=timeout;
 	timetowait.tv_usec=0;
 
-	int timeout_int = timevalToMilliSeconds(&timetowait);
-
 	//set socket to block forever initially
 #ifdef _WIN32
+	int timeout_int =  = timevalToMilliSeconds(&timetowait);
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
 #else
 	//set socket to block forever initially
@@ -284,7 +283,9 @@ void* GravityNodeDomainListener::start(void * config)
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
+#ifdef _WIN32
 				timeout_int = 0;
+#endif
 				//release lock after timeout
 
 			}
@@ -307,7 +308,9 @@ void* GravityNodeDomainListener::start(void * config)
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
+#ifdef _WIN32
 				timeout_int = 0;
+#endif
 			}
 			//wrong message
 			else
@@ -320,7 +323,9 @@ void* GravityNodeDomainListener::start(void * config)
 					//set timeout to block
 					timetowait.tv_sec=0;
 					timetowait.tv_usec=0;
+#ifdef _WIN32
 					timeout_int = 0;
+#endif
 					//release lock after timeout
 					if(timeoutOver==false)
 					{

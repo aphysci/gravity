@@ -42,7 +42,7 @@ GravityServiceManager::~GravityServiceManager() {}
 void GravityServiceManager::start()
 {
 	// Messages
-	zmq_msg_t filter, message;
+	zmq_msg_t message;
 
 	// Set up the inproc socket to listen for to requests messages from the GravityNode
 	gravityNodeSocket = zmq_socket(context, ZMQ_REP);

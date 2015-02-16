@@ -56,7 +56,7 @@ GravityPublishManager::~GravityPublishManager() {}
 void GravityPublishManager::start()
 {
 	// Messages
-	zmq_msg_t event, id;
+	zmq_msg_t event;
 
 	// Set up the inproc sockets to subscribe and unsubscribe to messages from
 	// the GravityNode
@@ -220,8 +220,7 @@ void GravityPublishManager::start()
 				// Read whether it's a new subscription from socket
 				zmq_msg_init(&event);
 				zmq_recvmsg(pollItems[i].socket, &event, 0);
-				char *data = (char*)zmq_msg_data(&event);
-				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is comming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.
+				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is coming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.
 				zmq_msg_close(&event);
 
 				if (newsub)

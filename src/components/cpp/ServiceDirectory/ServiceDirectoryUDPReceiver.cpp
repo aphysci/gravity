@@ -185,7 +185,7 @@ void ServiceDirectoryUDPReceiver::start()
 					count++;
 
 					//if enough broadcasts have been seen
-					if(count >= MAX_RECEIVE_COUNT)
+					if(count >= (unsigned int) MAX_RECEIVE_COUNT)
 					{
 						//cap the count
 						count = MAX_RECEIVE_COUNT;
@@ -357,9 +357,9 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString,unsigned int numDomains)
 {
 	int start=0;
-	int end = domainString.find(",",start);
+	unsigned int end = domainString.find(",",start);
 
-	for(int i = 0; i < numDomains; i++)
+	for(unsigned int i = 0; i < numDomains; i++)
 	{
 		if(end == string::npos)
 		{
@@ -369,7 +369,7 @@ void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString,unsigned
 		validDomains.push_back(sub);
 
 		start=end+1;
-		int end = domainString.find(",",start);
+		end = domainString.find(",",start);
 	}
 }
 

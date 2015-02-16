@@ -67,8 +67,6 @@ FileReplay::~FileReplay() {}
 
 void FileReplay::processArchive()
 {
-    int size;
-
     shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
     while (gdp)
     {
