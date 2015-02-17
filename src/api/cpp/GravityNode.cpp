@@ -854,10 +854,11 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 	{
 	    Log::warning("Failed to register %s at url %s with error %s", dataProductID.c_str(), connectionURL.c_str(), getCodeString(ret).c_str());
 	    // if we didn't succesfully register with the SD, then unregister with the publish manager
-	    publishManagerPublishSWL.lock.Lock();
-        sendStringMessage(publishManagerPublishSWL.socket, "unregister", ZMQ_SNDMORE);
-        sendStringMessage(publishManagerPublishSWL.socket, dataProductID, ZMQ_DONTWAIT);
-        publishManagerPublishSWL.lock.Unlock();
+	    publishManagerRequestSWL.lock.Lock();
+	    sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
+	    sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
+	    readStringMessage(publishManagerRequestSWL.socket);
+	    publishManagerRequestSWL.lock.Unlock();
 	}
 	else
 	{
@@ -878,10 +879,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     }
     else
     {
-        publishManagerPublishSWL.lock.Lock();
-    	sendStringMessage(publishManagerPublishSWL.socket, "unregister", ZMQ_SNDMORE);
-    	sendStringMessage(publishManagerPublishSWL.socket, dataProductID, ZMQ_DONTWAIT);
-        publishManagerPublishSWL.lock.Unlock();
+        publishManagerRequestSWL.lock.Lock();
+        sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
+        sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
+        readStringMessage(publishManagerRequestSWL.socket);
+        publishManagerRequestSWL.lock.Unlock();
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
 

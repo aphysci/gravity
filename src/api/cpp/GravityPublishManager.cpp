@@ -127,10 +127,14 @@ void GravityPublishManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeResponseSocket);
 
-			// message from gravity node on this socket should be only be register
+			// message from gravity node on this socket should be only be register or unregister
 			if (command == "register")
 			{
 				registerDataProduct();
+			}
+			else if (command == "unregister")
+			{
+			    unregisterDataProduct();
 			}
 			else
 			{
@@ -143,12 +147,8 @@ void GravityPublishManager::start()
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
 
-			// message from gravity node should be either a unregister or publish request
-			if (command == "unregister")
-			{
-				unregisterDataProduct();
-			}
-			else if (command == "publish")
+			// message from gravity node should be either a publish or kill request
+			if (command == "publish")
 			{
 				publish(pollItems[1].socket);
 			}
@@ -359,7 +359,10 @@ void GravityPublishManager::registerDataProduct()
 void GravityPublishManager::unregisterDataProduct()
 {
 	// Read the data product id for this request
-	string dataProductID = readStringMessage(gravityNodeSubscribeSocket);
+	string dataProductID = readStringMessage(gravityNodeResponseSocket);
+
+	// Go ahead and respond since there's nothing to wait for
+	sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
 
     // Remove this data product from our metrics data
     metricsData.remove(dataProductID);
