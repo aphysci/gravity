@@ -1,0 +1,5 @@
+*.cproject linguist-vendored
+*.project linguist-vendored
+*.vcxproj linguist-vendored
+*.vcxproj.filters linguist-vendored
+ThirdParty/* linguist-vendored
