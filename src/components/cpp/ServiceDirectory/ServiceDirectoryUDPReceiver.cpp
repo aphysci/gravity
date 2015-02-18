@@ -141,10 +141,8 @@ void ServiceDirectoryUDPReceiver::start()
 
 		/* Receive a broadcast message or timeout */
 	    recvStringLen = recvfrom(receiveSocket, recvString, MAXRECVSTRING, 0, NULL, 0);
-		
 		//get the current time
 		gettimeofday(&currTime,NULL);
-
 	
 		if(recvStringLen == 0)
 		{
@@ -220,7 +218,7 @@ void ServiceDirectoryUDPReceiver::start()
 			//check if we missed a message
 			if(timevalcmp(&(iter->second),&currTime) <= 0)
 			{
-				unsigned int count = receivedCountMap.at(iter->first);
+				int count = receivedCountMap.at(iter->first);
 				count--;
 				//if we have missed enough messages
 				if(count <=0)
@@ -265,6 +263,7 @@ void ServiceDirectoryUDPReceiver::start()
 		{
 			expectedMsgTimeMap.erase(*iter);
 		}
+
 #ifdef _WIN32
 		//select(receiveSocket,&fds,NULL,NULL,&timeout);
 		timeout_int = timevalToMilliSeconds(&timeout);
@@ -357,7 +356,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString,unsigned int numDomains)
 {
 	int start=0;
-	unsigned int end = domainString.find(",",start);
+	int end = domainString.find(",",start);
 
 	for(unsigned int i = 0; i < numDomains; i++)
 	{

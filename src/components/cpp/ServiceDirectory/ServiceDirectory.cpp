@@ -136,7 +136,7 @@ static bool validateDomainName(string domain)
 static int parseDomainCSV(string &csv)
 {
 	int prevPos=0;
-	unsigned int pos = csv.find(",",0);
+	int pos = csv.find(",",0);
 	int commaCount = 0;
 
 	if(csv.length()==0)
@@ -146,13 +146,12 @@ static int parseDomainCSV(string &csv)
 
 	while(pos != string::npos)
 	{
-		//csv = csv.replace(pos,1,"\0");
 		if(!validateDomainName(csv.substr(prevPos,pos-prevPos)))
 		{
 			return -1;
 		}
 		commaCount++;
-		prevPos=pos;
+		prevPos=pos+1;
 		pos=csv.find(",",pos+1);
 	}
 
@@ -207,7 +206,7 @@ void ServiceDirectory::start()
 	{
 		knownDomainCSV="";
 		numDomains=0;
-		Log::warning("Invalid Domain (must be alpha-numeric).");
+		Log::warning("Invalid DomainSyncList (must be alpha-numeric).");
 	}
 	Log::message("DomainSyncList set to '%s'",knownDomainCSV.c_str());
 
@@ -365,6 +364,7 @@ void ServiceDirectory::start()
 					sendStringMessage(synchronizerSocket, "Add", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToAdd, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
+
 				}
 				else if (command == "Remove")
 				{
