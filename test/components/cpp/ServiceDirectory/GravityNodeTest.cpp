@@ -516,14 +516,23 @@ void GravityNodeTest::requestFilled(string serviceID, string requestID, const Gr
 int main( int argc, char *argv[] )
 {
     GravityNodeTest gnTest;
+    printf("\nAbout to run test setup...\n\n");
     gnTest.setUp();
+    printf("\nFinished setup, about to run testRegisterData.\n\n");
     gnTest.testRegisterData();
+    printf("\nFinished testRegisterData, about to run testSubscriptionManager.\n\n");
     gnTest.testSubscriptionManager();
+    printf("\nFinished testSubscriptionManager, about to run testServiceManager.\n\n");
     gnTest.testServiceManager();
+    printf("\nFinished testServiceManager, about to run testRegisterService.\n\n");
     gnTest.testRegisterService();
+    printf("\nFinished testRegisterService, about to run testDataProduct.\n\n");
     gnTest.testDataProduct();
-	gnTest.testSubscribeDomain();
-	gnTest.testServiceWithDomain();
+    printf("\nFinished testDataProduct, about to run testSubscribeDomain.\n\n");
+    gnTest.testSubscribeDomain();
+    printf("\nFinished testSubscribeDomain, about to run testServiceWithDomain.\n\n");
+    gnTest.testServiceWithDomain();
+    printf("\nFinished testServiceWithDomain.\n\n");
 
     GravitySyncTest syncTest;
     syncTest.testSync();
