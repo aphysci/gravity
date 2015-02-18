@@ -249,7 +249,7 @@ void* GravityNodeDomainListener::start(void * config)
 
 	//set socket to block forever initially
 #ifdef _WIN32
-	int timeout_int =  = timevalToMilliSeconds(&timetowait);
+	int timeout_int = timevalToMilliSeconds(&timetowait);
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
 #else
 	//set socket to block forever initially
