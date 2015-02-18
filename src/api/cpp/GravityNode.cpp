@@ -1497,7 +1497,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	std::string heartbeatName;
 	heartbeatName = componentID.append("_GravityHeartbeat");
 
-	this->subscribe(heartbeatName, GravityTransportTypes::TCP);
+	this->subscribe(heartbeatName, hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
