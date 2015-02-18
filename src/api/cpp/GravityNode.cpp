@@ -1457,15 +1457,15 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
-	std::string name;
-	name = componentID.append("_GravityHeartbeat");
+	std::string heartbeatName;
+	heartbeatName = componentID.append("_GravityHeartbeat");
 
-	this->registerDataProduct(name, GravityTransportTypes::TCP);
+	this->registerDataProduct(heartbeatName, GravityTransportTypes::TCP);
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
 	params->interval_in_microseconds = interval_in_microseconds;
-	params->componentID = name;
+	params->componentID = heartbeatName;
 	params->minPort = getIntParam("MinPort", MIN_PORT);
 	params->maxPort = getIntParam("MaxPort", MAX_PORT);
 	params->endpoint = getIP();
@@ -1492,10 +1492,10 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 		pthread_create(&heartbeatListenerThread, NULL, Heartbeat::HeartbeatListenerThrFunc, thread_context);
 	}
 
-	std::string name;
-	name = componentID.append("_GravityHeartbeat");
+	std::string heartbeatName;
+	heartbeatName = componentID.append("_GravityHeartbeat");
 
-	this->subscribe(name, GravityTransportTypes::TCP);
+	this->subscribe(heartbeatName, GravityTransportTypes::TCP);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
@@ -1526,10 +1526,10 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
 {
 	static class Heartbeat hbSub;
 	
-	std::string name;
-	name = componentID.append("_GravityHeartbeat");
+	std::string heartbeatName;
+	heartbeatName = componentID.append("_GravityHeartbeat");
 
-	this->unsubscribe(name,hbSub);
+	this->unsubscribe(heartbeatName,hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
