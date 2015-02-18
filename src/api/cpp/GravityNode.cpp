@@ -247,10 +247,9 @@ void* GravityNodeDomainListener::start(void * config)
 	timetowait.tv_sec=timeout;
 	timetowait.tv_usec=0;
 
-	int timeout_int = timevalToMilliSeconds(&timetowait);
-
 	//set socket to block forever initially
 #ifdef _WIN32
+	int timeout_int =  = timevalToMilliSeconds(&timetowait);
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
 #else
 	//set socket to block forever initially
@@ -284,7 +283,9 @@ void* GravityNodeDomainListener::start(void * config)
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
+#ifdef _WIN32
 				timeout_int = 0;
+#endif
 				//release lock after timeout
 
 			}
@@ -307,7 +308,9 @@ void* GravityNodeDomainListener::start(void * config)
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
+#ifdef _WIN32
 				timeout_int = 0;
+#endif
 			}
 			//wrong message
 			else
@@ -320,7 +323,9 @@ void* GravityNodeDomainListener::start(void * config)
 					//set timeout to block
 					timetowait.tv_sec=0;
 					timetowait.tv_usec=0;
+#ifdef _WIN32
 					timeout_int = 0;
+#endif
 					//release lock after timeout
 					if(timeoutOver==false)
 					{
@@ -519,11 +524,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	}
 	
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
-    std::string serviceDirectoryUrl = parser->getString("ServiceDirectoryURL");
+    std::string serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
 
 	bool iniWarning = false;
 	//get the Domain name of the Service Directory to connect to
-	std::string serviceDirectoryDomain = parser->getString("Domain");
+	std::string serviceDirectoryDomain = getStringParam("Domain");
 	if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
 	{
 		//if the config file specifies both domain and url
@@ -535,7 +540,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		else
 		{
 			int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
-			int broadcastTimeout = ("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+			int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
 
 			GravityINIConfig config;
 			config.domain=serviceDirectoryDomain;
@@ -1452,12 +1457,10 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	if(started)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
-	 std::string name;
-	 name = componentID.append("_GravityHeartbeat");
+	std::string name;
+	name = componentID.append("_GravityHeartbeat");
 
 	this->registerDataProduct(name, GravityTransportTypes::TCP);
-
-	//this->registerDataProduct(componentID, GravityTransportTypes::TCP);
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
@@ -1488,16 +1491,15 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 		pthread_t heartbeatListenerThread;
 		pthread_create(&heartbeatListenerThread, NULL, Heartbeat::HeartbeatListenerThrFunc, thread_context);
 	}
-		std::string name;
-	 name = componentID.append("_GravityHeartbeat");
-	 
-	 this->subscribe(name, hbSub);
 
-	//this->subscribe(componentID, hbSub);
+	std::string name;
+	name = componentID.append("_GravityHeartbeat");
+
+	this->subscribe(name, GravityTransportTypes::TCP);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, name, ZMQ_SNDMORE);
+	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
 
 	//Send the address of the listener
 	zmq_msg_t msg1;
@@ -1523,11 +1525,11 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
 {
 	static class Heartbeat hbSub;
-			std::string name;
-	 name = componentID.append("_GravityHeartbeat");
+	
+	std::string name;
+	name = componentID.append("_GravityHeartbeat");
 
-	 this->unsubscribe(name, hbSub);
-	//this->unsubscribe(componentID,hbSub);
+	this->unsubscribe(name,hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
