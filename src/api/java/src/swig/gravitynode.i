@@ -94,6 +94,7 @@ public:
     GravityNode();
 	GravityNode(std::string);
     ~GravityNode();
+	GravityReturnCode init();
     GravityReturnCode init(std::string);
     void waitForExit();
     GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);

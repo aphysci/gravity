@@ -203,6 +203,13 @@ public:
      */
     GRAVITY_API virtual ~GravityNode();
 
+	/**
+     * Initialize the Gravity infrastructure.
+	 * Reads the ComponentID from the Gravity.ini file.
+     * \return GravityReturnCode code to identify any errors that occur during initialization
+     */
+    GRAVITY_API GravityReturnCode init();
+
     /**
      * Initialize the Gravity infrastructure.
      * \param componentID ID of the component to initialize

@@ -138,20 +138,6 @@ void s_catch_signals()
 namespace gravity
 {
 
-static void* startDomainBroadcastListener(void *config)
-{
-	static bool running = false;
-	if(!running)
-	{
-		running = true;
-		GravityNodeDomainListener::getInstance()->start((GravityINIConfig*)config);
-	}
-
-	cout<<"Exiting Start Domain Listener\n";
-	return NULL;
-}
-
-
 //Forward Declarations that we don't want publicly visible (Need to be in gravity namespace).
 bool IsValidFilename(const std::string filename);
 int StringToInt(std::string str, int default_value);
@@ -432,6 +418,45 @@ GravityNode::~GravityNode()
 }
 
 bool GravityNode::domainEnabled=false;
+
+GravityReturnCode GravityNode::init()
+{
+	////////////////////////////////////////////////////////
+	//get gravity configuration.
+	parser = new GravityConfigParser("");
+
+	parser->ParseConfigFile("Gravity.ini");
+
+	std::string id = parser->getString("GravityComponentID","");
+
+	if(id != "")
+	{
+		return init(id);
+	}
+	else
+	{
+		//Setup Logging if enabled.
+   		Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+		if(local_log_level != Log::NONE)
+			Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+					local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+
+		Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+		if(console_log_level != Log::NONE)
+			Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+
+		Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
+		if(net_log_level != Log::NONE)
+			Log::initAndAddGravityLogger(this, net_log_level);
+
+		//log an error indicating the componentID was missing
+		Log::critical("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
+
+		return init("GravityNode");
+	}
+
+}
+
 GravityReturnCode GravityNode::init(std::string componentID)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
@@ -1216,7 +1241,15 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL, domain);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
+		//special case for ConfigService. Since this happens frequently, log message not warning.
+		if (serviceID=="ConfigService")
+		{
+			Log::message("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
+		}
+		else
+		{
+			Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
+		}
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
