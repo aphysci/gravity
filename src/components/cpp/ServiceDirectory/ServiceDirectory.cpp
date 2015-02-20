@@ -123,7 +123,7 @@ static bool validateDomainName(string domain)
 	std::locale loc;
 	for (std::string::iterator it = domain.begin(); it != domain.end(); ++it)
 	{
-		if (!std::isalnum(*it, loc))
+		if (!std::isalnum(*it, loc) && *it != '.')
 		{
 			valid = false;
 			break;
@@ -190,7 +190,7 @@ void ServiceDirectory::start()
 	if (!validateDomainName(domain))
 	{
 		domain = "";
-		Log::warning("Invalid Domain (must be alpha-numeric).");		
+		Log::warning("Invalid Domain (must be alpha-numeric or '.').");
 	}
 	Log::message("Domain set to '%s'", domain.c_str());
 
@@ -206,7 +206,7 @@ void ServiceDirectory::start()
 	{
 		knownDomainCSV="";
 		numDomains=0;
-		Log::warning("Invalid DomainSyncList (must be alpha-numeric).");
+		Log::warning("Invalid DomainSyncList (must be alpha-numeric or '.').");
 	}
 	Log::message("DomainSyncList set to '%s'",knownDomainCSV.c_str());
 
