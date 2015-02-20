@@ -33,6 +33,7 @@
 #include "GravityServiceProvider.h"
 #include "Utility.h"
 #include <pthread.h>
+#include <list>
 
 //This is defined in Windows for NetBIOS in nb30.h
 #ifdef DUPLICATE
@@ -89,51 +90,13 @@ namespace GravityTransportTypes
 }
 typedef GravityTransportTypes::Types GravityTransportType;
 
-
-typedef struct NetworkNode
-{
-    std::string ipAddress;
-    unsigned short port;
-    std::string transport;
-    void* socket;
-} NetworkNode;
-
 typedef struct SocketWithLock
 {
 	void *socket;
 	Semaphore lock;
 } SocketWithLock;
 
-typedef struct GravityINIConfig
-{
-	std::string domain;
-	int port;
-	int timeout;
-} GravityINIConfig;
-
 class GravityConfigParser;
-
-
-class GravityNodeDomainListener
-{
-public:
-	static GravityNodeDomainListener *getInstance();
-	static std::string getDomainUrl();
-	static void* start(void* config);
-
-private:
-	static std::string url;
-	static bool timeoutOver;
-	static int sock;
-
-	static Semaphore lock;
-	static Semaphore instanceLock;
-
-	//private constructor
-	GravityNodeDomainListener();
-	//private destructor
-	virtual ~GravityNodeDomainListener();
-};
 
 
 /**
@@ -142,6 +105,51 @@ private:
 class GravityNode
 {
 private:
+    typedef struct NetworkNode
+    {
+        std::string ipAddress;
+        unsigned short port;
+        std::string transport;
+        void* socket;
+    } NetworkNode;
+
+    typedef struct GravityINIConfig
+    {
+        std::string domain;
+        int port;
+        int timeout;
+        GravityNode *gravityNode;
+    } GravityINIConfig;
+
+    class GravityNodeDomainListener
+    {
+    public:
+        static GravityNodeDomainListener *getInstance();
+        static std::string getDomainUrl();
+        static void* start(void* config);
+
+    private:
+        static std::string url;
+        static bool timeoutOver;
+        static int sock;
+
+        static Semaphore lock;
+        static Semaphore instanceLock;
+
+        //private constructor
+        GravityNodeDomainListener();
+        //private destructor
+        virtual ~GravityNodeDomainListener();
+    };
+
+    typedef struct SubscriptionDetails
+    {
+        std::string domain;
+        std::string dataProductID;
+        std::string filter;
+        const GravitySubscriber* subscriber;
+    } SubscriptionDetails;
+
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
 	static bool domainEnabled;
@@ -174,12 +182,20 @@ private:
     NetworkNode serviceDirectoryNode;
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
+    std::list<SubscriptionDetails> subscriptionList;
 
     std::string componentID;
 	GravityConfigParser* parser;
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string &domain);
+    GravityReturnCode ServiceDirectoryReregister();
+
+    // Separate actual functionality of sub/unsub methods so that they can be locked correctly
+    GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
+                                            std::string filter, std::string domain);
+    GravityReturnCode unsubscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
+                                                std::string filter, std::string domain);
 
     GravityReturnCode subscribe(std::string connectionURL, std::string dataProductID,
             const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "");

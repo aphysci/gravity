@@ -25,7 +25,8 @@ package gravity;
 message ServiceDirectoryBroadcastPB
 {
 	optional string id = 1;
-	optional string domain = 2;
-	optional string url = 3;
+	required string domain = 2;
+	required string url = 3;
 	optional uint32 rate = 4;
+	required int64  starttime = 5;
 }

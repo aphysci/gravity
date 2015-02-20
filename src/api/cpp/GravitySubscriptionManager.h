@@ -45,15 +45,6 @@ namespace gravity
 
 using namespace std::tr1;
 
-typedef struct SubscriptionDetails
-{
-	std::string domain;
-	std::string dataProductID;
-	std::string filter;
-	std::map<std::string, zmq_pollitem_t> pollItemMap;
-	std::set<GravitySubscriber*> subscribers;
-} SubscriptionDetails;
-
 /**
  * The GravitySubscriptionManager is a component used internally by the GravityNode to manage
  * subscriptions in its own thread.
@@ -61,6 +52,15 @@ typedef struct SubscriptionDetails
 class GravitySubscriptionManager
 {
 private:
+    typedef struct SubscriptionDetails
+    {
+        std::string domain;
+        std::string dataProductID;
+        std::string filter;
+        std::map<std::string, zmq_pollitem_t> pollItemMap;
+        std::set<GravitySubscriber*> subscribers;
+    } SubscriptionDetails;
+
 	void* context;
 	void* gravityNodeSocket;
     void* gravityMetricsSocket;

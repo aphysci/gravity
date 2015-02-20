@@ -150,9 +150,9 @@ void* Heartbeat(void* thread_context);
 using namespace std;
 using namespace std::tr1;
 
-Semaphore GravityNodeDomainListener::lock;
-Semaphore GravityNodeDomainListener::instanceLock;
-GravityNodeDomainListener* GravityNodeDomainListener::getInstance()
+Semaphore GravityNode::GravityNodeDomainListener::lock;
+Semaphore GravityNode::GravityNodeDomainListener::instanceLock;
+GravityNode::GravityNodeDomainListener* GravityNode::GravityNodeDomainListener::getInstance()
 {
 	instanceLock.Lock();
 	static GravityNodeDomainListener* instance = 0;
@@ -165,14 +165,14 @@ GravityNodeDomainListener* GravityNodeDomainListener::getInstance()
 	return instance;
 }
 
-GravityNodeDomainListener::GravityNodeDomainListener()
+GravityNode::GravityNodeDomainListener::GravityNodeDomainListener()
 {
 	// Setup the domain Listener
     url="";
 	timeoutOver=false;
 }
 
-GravityNodeDomainListener::~GravityNodeDomainListener()
+GravityNode::GravityNodeDomainListener::~GravityNodeDomainListener()
 {
 	#ifdef _WIN32
 	closesocket(sock);
@@ -181,15 +181,18 @@ GravityNodeDomainListener::~GravityNodeDomainListener()
 	#endif
 }
 
-bool GravityNodeDomainListener::timeoutOver=false;
-int GravityNodeDomainListener::sock=0;
-std::string GravityNodeDomainListener::url="";
-void* GravityNodeDomainListener::start(void * config)
+bool GravityNode::GravityNodeDomainListener::timeoutOver=false;
+int GravityNode::GravityNodeDomainListener::sock=0;
+std::string GravityNode::GravityNodeDomainListener::url="";
+void* GravityNode::GravityNodeDomainListener::start(void * config)
 {
 
 	std::string domain=((GravityINIConfig*)config)->domain;
 	int port=((GravityINIConfig*)config)->port;
 	int timeout=((GravityINIConfig*)config)->timeout;
+	GravityNode* gravityNode = ((GravityINIConfig*)config)->gravityNode;
+
+	time_t serviceDirectoryStartTime = 0;
 
 	//aquire sempahore to hold any url requests
 	lock.Lock();
@@ -251,6 +254,7 @@ void* GravityNodeDomainListener::start(void * config)
 		gettimeofday(&startTime,NULL);
 
 		/* Receive a broadcast message or timeout */
+
 		recvStringLen = recvfrom(sock, recvString, MAXRECVSTRING, 0, NULL, 0);
 
 		gettimeofday(&currTime,NULL);
@@ -278,7 +282,6 @@ void* GravityNodeDomainListener::start(void * config)
 		}
 		else //we received a message
 		{
-
 			broadcastPB.ParseFromArray(recvString,recvStringLen);
 
 			//if the domains match
@@ -294,6 +297,16 @@ void* GravityNodeDomainListener::start(void * config)
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
+				// if it's a new start time...
+				if (serviceDirectoryStartTime < broadcastPB.starttime())
+				{
+				    // If we've seen a start time before, then re-register
+				    if (serviceDirectoryStartTime != 0)
+				    {
+				        gravityNode->ServiceDirectoryReregister();
+				    }
+				    serviceDirectoryStartTime = broadcastPB.starttime();
+				}
 #ifdef _WIN32
 				timeout_int = 0;
 #endif
@@ -342,7 +355,7 @@ void* GravityNodeDomainListener::start(void * config)
 	return NULL;
 }
 
-std::string GravityNodeDomainListener::getDomainUrl()
+std::string GravityNode::GravityNodeDomainListener::getDomainUrl()
 {
 	while(timeoutOver==false)
 	{
@@ -571,6 +584,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			config.domain=serviceDirectoryDomain;
 			config.port=port;
 			config.timeout=broadcastTimeout;
+			config.gravityNode = this;
 			//only start the domain listener once
 			if(!domainEnabled)
 			{
@@ -755,9 +769,14 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
+    // we can't allow multiple threads to make request calls to the pub manager at the same time
+    // because the requests will step on each other.  Manage access to publishMap as well.
+    publishManagerRequestSWL.lock.Lock();
+
     if (publishMap.count(dataProductID) > 0)
     {
         Log::warning("attempt to register duplicate data product ID: %s", dataProductID.c_str());
+        publishManagerRequestSWL.lock.Unlock();
         return GravityReturnCodes::SUCCESS;
     }
 
@@ -790,10 +809,6 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
     	  endpoint = dataProductID;
     }
 
-    // we can't allow multiple threads to make request calls to the pub manager at the same time
-    // because the requests will step on each other.
-    publishManagerRequestSWL.lock.Lock();
-
     // Send publish details via the request socket.  This allows us to retrieve
     // register url in response so that we can register with the ServiceDirectory.
 	sendStringMessage(publishManagerRequestSWL.socket, "register", ZMQ_SNDMORE);
@@ -809,8 +824,6 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
     sendStringMessage(publishManagerRequestSWL.socket, endpoint, ZMQ_DONTWAIT);
 
 	string connectionURL = readStringMessage(publishManagerRequestSWL.socket);
-
-	publishManagerRequestSWL.lock.Unlock();
 
 	if (connectionURL.size() == 0)
 	{
@@ -879,17 +892,17 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 	{
 	    Log::warning("Failed to register %s at url %s with error %s", dataProductID.c_str(), connectionURL.c_str(), getCodeString(ret).c_str());
 	    // if we didn't succesfully register with the SD, then unregister with the publish manager
-	    publishManagerRequestSWL.lock.Lock();
 	    sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
 	    sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
 	    readStringMessage(publishManagerRequestSWL.socket);
-	    publishManagerRequestSWL.lock.Unlock();
 	}
 	else
 	{
 	    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
         publishMap[dataProductID] = connectionURL;
 	}
+
+    publishManagerRequestSWL.lock.Unlock();
 
 	return ret;
 }
@@ -898,17 +911,16 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
+    publishManagerRequestSWL.lock.Lock();
     if (publishMap.count(dataProductID) == 0)
     {
         ret = GravityReturnCodes::REGISTRATION_CONFLICT;
     }
     else
     {
-        publishManagerRequestSWL.lock.Lock();
         sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
         readStringMessage(publishManagerRequestSWL.socket);
-        publishManagerRequestSWL.lock.Unlock();
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
 
@@ -961,6 +973,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
             }
         }
     }
+    publishManagerRequestSWL.lock.Unlock();
 
     return ret;
 }
@@ -1018,27 +1031,36 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
-	vector<string> url;
+    subscriptionManagerSWL.lock.Lock();
+    GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain);
+    subscriptionManagerSWL.lock.Unlock();
 
-	GravityReturnCode ret;
-	ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
-	if(ret != GravityReturnCodes::SUCCESS)
-		return ret;
+    return ret;
+}
 
-	if (url.size() == 0)
-	{
-	    subscribe("", dataProductID, subscriber, filter, domain);
-	}
-	else
-	{
+GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+{
+    vector<string> url;
+
+    GravityReturnCode ret;
+    ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
+    if(ret != GravityReturnCodes::SUCCESS)
+        return ret;
+
+    if (url.size() == 0)
+    {
+        subscribe("", dataProductID, subscriber, filter, domain);
+    }
+    else
+    {
         // Subscribe to all published data products
         for (size_t i = 0; i < url.size(); i++)
         {
             subscribe(url[i], dataProductID, subscriber, filter, domain);
         }
-	}
+    }
 
-	return GravityReturnCodes::SUCCESS;
+    return GravityReturnCodes::SUCCESS;
 }
 
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
@@ -1067,8 +1089,6 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
 	}
 
-	subscriptionManagerSWL.lock.Lock();
-
 	// Send subscription details
 	sendStringMessage(subscriptionManagerSWL.socket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
@@ -1084,7 +1104,12 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
-    subscriptionManagerSWL.lock.Unlock();
+	SubscriptionDetails details;
+	details.dataProductID = dataProductID;
+	details.domain = domain;
+	details.filter = filter;
+	details.subscriber = &subscriber;
+	subscriptionList.push_back(details);
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -1092,7 +1117,14 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
     subscriptionManagerSWL.lock.Lock();
+    GravityReturnCode ret = unsubscribeInternal(dataProductID, subscriber, filter, domain);
+    subscriptionManagerSWL.lock.Unlock();
 
+    return ret;
+}
+
+GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+{
 	// Send unsubscribe details
 	sendStringMessage(subscriptionManagerSWL.socket, "unsubscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
@@ -1107,9 +1139,21 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
-	subscriptionManagerSWL.lock.Unlock();
+	list<SubscriptionDetails>::iterator iter = subscriptionList.begin();
+	while (iter != subscriptionList.end())
+	{
+	    if (iter->dataProductID == dataProductID && iter->domain == domain &&
+	        iter->filter == filter && iter->subscriber == &subscriber)
+	    {
+	        iter = subscriptionList.erase(iter);
+	    }
+	    else
+	    {
+	        ++iter;
+	    }
+	}
 
-    return GravityReturnCodes::SUCCESS;
+	return GravityReturnCodes::SUCCESS;
 }
 
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText)
@@ -1134,6 +1178,95 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     publishManagerPublishSWL.lock.Unlock();
 
     return GravityReturnCodes::SUCCESS;
+}
+
+/**
+ * Used to re-register if we see that the ServiceDirectory has restarted.
+ */
+GravityReturnCode GravityNode::ServiceDirectoryReregister()
+{
+    GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
+    Log::warning("ServiceDirectory restart detected, attempting to re-register...");
+
+    // GravityPublishManager already has this info, so just need to update the ServiceDirectory
+    publishManagerRequestSWL.lock.Lock();
+    for (map<string, string>::const_iterator iter = publishMap.begin(); iter != publishMap.end(); ++iter)
+    {
+        ServiceDirectoryRegistrationPB registration;
+        registration.set_id(iter->first);
+        registration.set_url(iter->second);
+        registration.set_type(ServiceDirectoryRegistrationPB::DATA);
+        registration.set_component_id(componentID);
+
+        // Wrap request in GravityDataProduct
+        GravityDataProduct request("RegistrationRequest");
+        request.setData(registration);
+
+        // GravityDataProduct for response
+        GravityDataProduct response("RegistrationResponse");
+
+        // Send request to service directory
+        GravityReturnCode pubRet = sendRequestToServiceDirectory(request, response);
+        if (pubRet == GravityReturnCodes::SUCCESS)
+        {
+            Log::message("Successfully re-registered data product %s", iter->first.c_str());
+        }
+        else
+        {
+            Log::critical("Error re-registering data product %s: %s", iter->first.c_str(), getCodeString(pubRet).c_str());
+            ret = pubRet;
+        }
+    }
+    publishManagerRequestSWL.lock.Unlock();
+
+    // GravityServiceManager already has this info, so just need to update the ServiceDirectory
+    serviceManagerSWL.lock.Lock();
+    for (map<string, string>::const_iterator iter = serviceMap.begin(); iter != serviceMap.end(); ++iter)
+    {
+        ServiceDirectoryRegistrationPB registration;
+        registration.set_id(iter->first);
+        registration.set_url(iter->second);
+        registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
+        registration.set_component_id(componentID);
+
+        // Wrap request in GravityDataProduct
+        GravityDataProduct request("RegistrationRequest");
+        request.setData(registration);
+
+        // GravityDataProduct for response
+        GravityDataProduct response("RegistrationResponse");
+
+        // Send request to service directory
+        GravityReturnCode servRet = sendRequestToServiceDirectory(request, response);
+        if (servRet == GravityReturnCodes::SUCCESS)
+        {
+            Log::message("Successfully re-registered service %s", iter->first.c_str());
+        }
+        else
+        {
+            Log::critical("Error re-registering service %s: %s", iter->first.c_str(), getCodeString(servRet).c_str());
+            ret = servRet;
+        }
+    }
+    serviceManagerSWL.lock.Unlock();
+
+    subscriptionManagerSWL.lock.Lock();
+
+    // Make a copy since subscriptionList will be updated as we re-subscribe to this list
+    list<SubscriptionDetails> origList = subscriptionList;
+
+    for (list<SubscriptionDetails>::const_iterator iter = origList.begin(); iter != origList.end(); ++iter)
+    {
+        unsubscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+        subscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+    }
+    subscriptionManagerSWL.lock.Unlock();
+
+    if (ret == GravityReturnCodes::SUCCESS)
+        Log::warning("Successfully re-registered with the ServiceDirectory");
+
+    return ret;
 }
 
 GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string serviceID, std::string &url, string &domain)
@@ -1268,9 +1401,13 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
         const GravityServiceProvider& server)
 {
     string transportType_str;
+
+    // manage access to service manager socket as well as serviceMap.
+    serviceManagerSWL.lock.Lock();
     if (serviceMap.count(serviceID) > 0)
     {
         Log::warning("attempt to register duplicate service ID: %s", serviceID.c_str());
+        serviceManagerSWL.lock.Unlock();
         return GravityReturnCodes::SUCCESS;
     }
 
@@ -1306,7 +1443,6 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
     }
 
 	// Send subscription details
-    serviceManagerSWL.lock.Lock();
 
 	sendStringMessage(serviceManagerSWL.socket, "register", ZMQ_SNDMORE);
 	sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_SNDMORE);
@@ -1331,8 +1467,6 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
 	zmq_msg_close(&msg);
 
     string connectionURL = readStringMessage(serviceManagerSWL.socket);
-
-    serviceManagerSWL.lock.Unlock();
 
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1396,38 +1530,36 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
     if (ret != GravityReturnCodes::SUCCESS)
     {
         // unregister the service from the service manager if we couldn't register with the SD
-        serviceManagerSWL.lock.Lock();
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
         // wait for it to return
         readStringMessage(serviceManagerSWL.socket);
-        serviceManagerSWL.lock.Unlock();
     }
     else
     {
         Log::debug("Registered service at address: %s", connectionURL.c_str());
         serviceMap[serviceID] = connectionURL;
     }
+    serviceManagerSWL.lock.Unlock();
     return ret;
 }
 
 GravityReturnCode GravityNode::unregisterService(string serviceID)
 {
 	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+    serviceManagerSWL.lock.Lock();
     if (serviceMap.count(serviceID) == 0)
     {
         ret = GravityReturnCodes::REGISTRATION_CONFLICT;
     }
     else
     {
-        serviceManagerSWL.lock.Lock();
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
         string url = serviceMap[serviceID];
         serviceMap.erase(serviceID);
 
         string status = readStringMessage(serviceManagerSWL.socket);
-        serviceManagerSWL.lock.Unlock();
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {
@@ -1478,6 +1610,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
             }
         }
     }
+    serviceManagerSWL.lock.Unlock();
 
     return ret;
 }

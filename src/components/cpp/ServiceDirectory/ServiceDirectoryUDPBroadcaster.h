@@ -53,6 +53,7 @@ private:
 	struct sockaddr_in destAddress;
 	static bool loop;
 	void* sdSocket;
+	time_t starttime;
 
 	void receiveBroadcastParameters();
 	int initBroadcastSocket();

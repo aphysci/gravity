@@ -52,6 +52,7 @@ ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster()
 
 void ServiceDirectoryUDPBroadcaster::start()
 {
+    starttime = time(NULL);
 	sdSocket = zmq_socket(context,ZMQ_REP);
 	zmq_connect(sdSocket,"inproc://service_directory_udp_broadcast");
 	zmq_setsockopt(sdSocket,ZMQ_SUBSCRIBE,NULL,0);
@@ -95,6 +96,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 				broadcastMessage.set_domain(domainName);
 				broadcastMessage.set_url(url);
 				broadcastMessage.set_rate(broadcastRate);
+				broadcastMessage.set_starttime(starttime);
 				broadcastMessage.SerializeToString(&broadcastString);
 				rc = initBroadcastSocket();
 				if (rc < 0)

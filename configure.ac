@@ -220,10 +220,12 @@ AC_CONFIG_FILES([Makefile
                  src/keyvalue_parser/Makefile
                  test/components/cpp/Makefile
                  test/components/cpp/ServiceDirectory/Makefile
+                 test/components/cpp/ServiceDirectoryReregister/Makefile
                  src/api/java/cpp_makefile
                  src/api/java/java_makefile
                  test/api/java/Makefile
                  test/components/cpp/ServiceDirectory/test.sh
+                 test/components/cpp/ServiceDirectoryReregister/test.sh
                  test/api/java/test.sh
                  test/examples/1-BasicDataProduct/Makefile
                  test/examples/1-BasicDataProduct/run.sh
