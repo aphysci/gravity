@@ -32,9 +32,9 @@ testPubSub()
 {
     ServiceDirectory &
     SDPID=$!
-    publisher &
+    ./publisher &
     PUBPID=$!
-    subscriber &
+    ./subscriber &
     SUBPID=$!
 
     sleep 10
@@ -44,7 +44,7 @@ testPubSub()
     ServiceDirectory &
     SDPID=$!
 
-    subscriber
+    ./subscriber
     ret=$?
 
     kill $SDPID $PUBPID
@@ -56,9 +56,9 @@ testProvReq()
 {
     ServiceDirectory &
     SDPID=$!
-    provider &
+    ./provider &
     PROVPID=$!
-    requestor &
+    ./requestor &
     REQPID=$!
 
     sleep 10
@@ -68,7 +68,7 @@ testProvReq()
     ServiceDirectory &
     SDPID=$!
 
-    requestor
+    ./requestor
     ret=$?
 
     kill $SDPID $PROVPID
