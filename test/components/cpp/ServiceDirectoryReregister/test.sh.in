@@ -76,6 +76,9 @@ testProvReq()
     return $ret
 }
 
+make clean || exit 1
+make || exit 1
+
 testPubSub || exit 1
 testProvReq || exit 1
 
