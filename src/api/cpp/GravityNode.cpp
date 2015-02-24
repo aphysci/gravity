@@ -263,7 +263,9 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 		if(recvStringLen < 0)
 		{
 			//if we reached the timeout
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
+		    int error = errno;
+		    Log::warning("Received error reading domain listener socket: %d", error);
+			if (error == EAGAIN || error == EWOULDBLOCK)
 			{
 				if(timeoutOver==false)
 				{
@@ -283,24 +285,32 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 		else //we received a message
 		{
 			broadcastPB.ParseFromArray(recvString,recvStringLen);
+			Log::trace("Domain listener received message from domain '%s'", broadcastPB.domain().c_str());
 
 			//if the domains match
 			if(domain.compare(broadcastPB.domain())==0)
 			{
 				//set url to message url
-				url.assign(broadcastPB.url());
 				if(timeoutOver==false)
 				{
 					timeoutOver=true;
-					lock.Unlock();
 				}
+				else
+				{
+				    // if timeout is over then we need to re-acquire the lock
+				    lock.Lock();
+				}
+                url.assign(broadcastPB.url());
+                lock.Unlock();
 				//set timeout to block
 				timetowait.tv_sec=0;
 				timetowait.tv_usec=0;
 				// if it's a new start time...
 				if (serviceDirectoryStartTime < broadcastPB.starttime())
 				{
-				    // If we've seen a start time before, then re-register
+				    Log::debug("Domain listener found update to our domain, orig SD start time = %u, new SD start time = %llu, SD url is now %s",
+				                serviceDirectoryStartTime, broadcastPB.starttime(), url.c_str());
+				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
 				        gravityNode->ServiceDirectoryReregister();
@@ -357,14 +367,18 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 
 std::string GravityNode::GravityNodeDomainListener::getDomainUrl()
 {
+    // retrieving the lock should block until the url is ready or has timed out
+    lock.Lock();
 	while(timeoutOver==false)
 	{
-		gravity::sleep(100);
-		//retrieving the lock should block until the url is ready or has timed out
-		lock.Lock();
+		// temporarily give up the lock so that the domain listener thread can update
 		lock.Unlock();
+        gravity::sleep(100);
+		lock.Lock();
 	}
-	return url;
+	string retUrl = url;
+	lock.Unlock();
+	return retUrl;
 }
 
 GravityNode::GravityNode()
@@ -560,7 +574,17 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	{
 		parser->ParseConfigFile(config_file_name.c_str());
 	}
-	
+
+    // Setup Logging as soon as config parser is available.
+    Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+    if(local_log_level != Log::NONE)
+        Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+                local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+
+    Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+    if(console_log_level != Log::NONE)
+        Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
     std::string serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
 
@@ -624,16 +648,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
    	}
 	//parser->ParseCmdLine
 
-	//Setup Logging if enabled.
-   	Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
-    if(local_log_level != Log::NONE)
-        Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-                local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-
-    Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
-    if(console_log_level != Log::NONE)
-        Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-
+   	// Setup up network logging now that SD is available
     Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 	if(net_log_level != Log::NONE)
 		Log::initAndAddGravityLogger(this, net_log_level);
