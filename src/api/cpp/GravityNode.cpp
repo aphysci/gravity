@@ -729,7 +729,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
 
-	if(ret!=GravityReturnCode::SUCCESS)
+	if(ret!=GravityReturnCodes::SUCCESS)
 	{
 		cleanup();
 		domainEnabled=false;
