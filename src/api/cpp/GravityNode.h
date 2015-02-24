@@ -124,22 +124,24 @@ private:
     class GravityNodeDomainListener
     {
     public:
-        static GravityNodeDomainListener *getInstance();
         static std::string getDomainUrl();
         static void* start(void* config);
+		static void kill();
 
     private:
         static std::string url;
         static bool timeoutOver;
         static int sock;
+		static bool run;
+		static bool killed;
 
         static Semaphore lock;
-        static Semaphore instanceLock;
 
         //private constructor
         GravityNodeDomainListener();
         //private destructor
         virtual ~GravityNodeDomainListener();
+
     };
 
     typedef struct SubscriptionDetails
@@ -154,6 +156,7 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
 	static bool domainEnabled;
     bool metricsEnabled;
+	bool initialized;
 
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
@@ -202,6 +205,9 @@ private:
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
+
+	void cleanup();
+
 public:
     /**
      * Default Constructor

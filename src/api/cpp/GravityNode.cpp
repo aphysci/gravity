@@ -151,19 +151,6 @@ using namespace std;
 using namespace std::tr1;
 
 Semaphore GravityNode::GravityNodeDomainListener::lock;
-Semaphore GravityNode::GravityNodeDomainListener::instanceLock;
-GravityNode::GravityNodeDomainListener* GravityNode::GravityNodeDomainListener::getInstance()
-{
-	instanceLock.Lock();
-	static GravityNodeDomainListener* instance = 0;
-	if(!instance)
-	{
-		cout << "Creating Domain Listener Instance\n";
-		instance = new GravityNodeDomainListener();
-	}
-	instanceLock.Unlock();
-	return instance;
-}
 
 GravityNode::GravityNodeDomainListener::GravityNodeDomainListener()
 {
@@ -184,8 +171,13 @@ GravityNode::GravityNodeDomainListener::~GravityNodeDomainListener()
 bool GravityNode::GravityNodeDomainListener::timeoutOver=false;
 int GravityNode::GravityNodeDomainListener::sock=0;
 std::string GravityNode::GravityNodeDomainListener::url="";
+bool GravityNode::GravityNodeDomainListener::run=false;
+bool GravityNode::GravityNodeDomainListener::killed=false;
+
 void* GravityNode::GravityNodeDomainListener::start(void * config)
 {
+	//aquire sempahore to hold any url requests
+	lock.Lock();
 
 	std::string domain=((GravityINIConfig*)config)->domain;
 	int port=((GravityINIConfig*)config)->port;
@@ -194,9 +186,11 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 
 	time_t serviceDirectoryStartTime = 0;
 
-	//aquire sempahore to hold any url requests
-	lock.Lock();
 	sock = 0;
+	run = true;
+	killed = false;
+	timeoutOver=false;
+	url="";
 
 	/* Socket */
     struct sockaddr_in broadcastAddr; /* Broadcast Address */
@@ -245,8 +239,7 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
 #endif
 
-
-	while(1)
+	while(run)
 	{
 		//wait for braodcast message to be recieved
 		memset(recvString,0,MAXRECVSTRING+1);
@@ -254,7 +247,6 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 		gettimeofday(&startTime,NULL);
 
 		/* Receive a broadcast message or timeout */
-
 		recvStringLen = recvfrom(sock, recvString, MAXRECVSTRING, 0, NULL, 0);
 
 		gettimeofday(&currTime,NULL);
@@ -351,17 +343,21 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 			}
 		}
 
-				
-		//set new timeout
-		#ifdef _WIN32
-		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
-		#else
-		//set socket to block until the timeout
-		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
-		#endif	
+		//don't set a timeout on the socket if it has already been closed
+		if(run)
+		{
+			//set new timeout
+			#ifdef _WIN32
+			setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
+			#else
+			//set socket to block until the timeout
+			setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
+			#endif	
+		}
 
 	}//end while
 
+	killed = true;
 	return NULL;
 }
 
@@ -381,6 +377,28 @@ std::string GravityNode::GravityNodeDomainListener::getDomainUrl()
 	return retUrl;
 }
 
+void GravityNode::GravityNodeDomainListener::kill()
+{
+	if(run)
+	{
+		lock.Lock();
+
+		//set run to false before closing socket
+		run = false;
+#ifdef _WIN32
+		closesocket(sock);
+#else
+		close(sock);
+#endif
+		lock.Unlock();
+		//wait for receiving thread to end
+		while(!killed)
+		{
+			gravity::sleep(100);
+		}
+	}
+}
+
 GravityNode::GravityNode()
 {
     // Eventually to be read from a config/properties file
@@ -393,6 +411,7 @@ GravityNode::GravityNode()
 
     // Default to no metrics
     metricsEnabled = false;
+	initialized=false;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -407,17 +426,32 @@ GravityNode::GravityNode(std::string componentID)
 
     // Default to no metrics
     metricsEnabled = false;
+	initialized=false;
+
 	init(componentID);
 }
 
 GravityNode::~GravityNode()
 {
 
-    // If metrics are enabled, we need to unregister our metrics data product
+	cleanup();
+
+	// Clean up the zmq context object
+    zmq_term(context);
+
+    delete parser;
+}
+
+void GravityNode::cleanup()
+{
+	// If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
+
+	//kill the domain listener
+	GravityNodeDomainListener::kill();
 
     closeHeartbeatSocket();
 
@@ -437,11 +471,6 @@ GravityNode::~GravityNode()
 
     sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(metricsManagerSocket);
-
-    // Clean up the zmq context object
-    zmq_term(context);
-
-    delete parser;
 }
 
 bool GravityNode::domainEnabled=false;
@@ -462,6 +491,7 @@ GravityReturnCode GravityNode::init()
 	}
 	else
 	{
+		componentID="GravityNode";
 		//Setup Logging if enabled.
    		Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
 		if(local_log_level != Log::NONE)
@@ -479,7 +509,7 @@ GravityReturnCode GravityNode::init()
 		//log an error indicating the componentID was missing
 		Log::critical("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
 
-		return init("GravityNode");
+		return init(componentID);
 	}
 
 }
@@ -490,11 +520,14 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	this->componentID = componentID;
 
     // Setup zmq context
-    context = zmq_init(1);
-    if (!context)
-    {
-        ret = GravityReturnCodes::FAILURE;
-    }
+	if(!initialized)
+	{
+		context = zmq_init(1);
+		if (!context)
+		{
+			ret = GravityReturnCodes::FAILURE;
+		}
+	}
 
 	//GravityNodeDomainListener* domainListener=GravityNodeDomainListener::getInstance();
 
@@ -576,18 +609,22 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	}
 
     // Setup Logging as soon as config parser is available.
-    Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
-    if(local_log_level != Log::NONE)
-        Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-                local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+	if(!initialized)
+	{
+		Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+		if(local_log_level != Log::NONE)
+			Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+					local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
 
-    Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
-    if(console_log_level != Log::NONE)
-        Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+		Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+		if(console_log_level != Log::NONE)
+			Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+	}
 
 	//Set Service Directory URL (because we can't connect to the ConfigService without it).
     std::string serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
 
+	bool domainTimeout=false;
 	bool iniWarning = false;
 	//get the Domain name of the Service Directory to connect to
 	std::string serviceDirectoryDomain = getStringParam("Domain");
@@ -616,31 +653,41 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				pthread_create(&domainListenerThread,NULL,GravityNodeDomainListener::start,&config);			
 			}
 			serviceDirectoryUrl.assign(GravityNodeDomainListener::getDomainUrl());
-			cout.flush();
+			if(serviceDirectoryUrl == "")
+			{
+				domainTimeout=true;
+			}
 		}
 	}
 
-    size_t pos = serviceDirectoryUrl.find_first_of("://");
-    if(pos != std::string::npos)
-    {
-    	serviceDirectoryNode.transport = serviceDirectoryUrl.substr(0, pos);
-    	pos += 3;
-    }
-    else
-    {
-    	serviceDirectoryNode.transport = "tcp";
-    	pos = 0;
-    }
+	if(!domainTimeout)
+	{
+		size_t pos = serviceDirectoryUrl.find_first_of("://");
+		if(pos != std::string::npos)
+		{
+    		serviceDirectoryNode.transport = serviceDirectoryUrl.substr(0, pos);
+    		pos += 3;
+		}
+		else
+		{
+    		serviceDirectoryNode.transport = "tcp";
+    		pos = 0;
+		}
 
-    size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
-    serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1 - pos);
+		size_t pos1 = serviceDirectoryUrl.find_first_of(":", pos);
+		serviceDirectoryNode.ipAddress = serviceDirectoryUrl.substr(pos, pos1 - pos);
 
-	/* The "*" is for the case where they did not define a URL in the Gravity.ini file,
-		So the ServiceDirectory broadcasted a URL with a "*" in it
-	*/
-    if(serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
-    	serviceDirectoryNode.ipAddress = "localhost";
-   	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
+		/* The "*" is for the case where they did not define a URL in the Gravity.ini file,
+			So the ServiceDirectory broadcasted a URL with a "*" in it
+		*/
+		if(serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
+    		serviceDirectoryNode.ipAddress = "localhost";
+   		serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
+	}
+	else
+	{
+		ret=GravityReturnCodes::FAILURE;
+	}
 
    	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
    	{
@@ -681,6 +728,14 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	{
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
+
+	if(ret!=GravityReturnCode::SUCCESS)
+	{
+		cleanup();
+		domainEnabled=false;
+	}
+
+	initialized = true;
 
 	return ret;
 }
