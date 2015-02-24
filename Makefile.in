@@ -86,9 +86,6 @@ test-prep:
 #	cp src/api/cpp/libgravity.a ${prefix}/lib
 #	cp src/api/cpp/libgravity.so ${prefix}/lib
 #	cp src/api/java/libgravity_wrap.so ${prefix}/lib
-	chmod 755 test/components/cpp/ServiceDirectory/test.sh
-	chmod 755 test/components/cpp/ServiceDirectoryReregister/test.sh
-	chmod 755 test/api/java/test.sh
 	chmod 755 test/examples/1-BasicDataProduct/run.sh
 	chmod 755 test/examples/2-ProtobufDataProduct/run.sh
 	chmod 755 test/examples/3-MultipleDataProduct/run.sh

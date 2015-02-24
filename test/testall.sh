@@ -21,6 +21,7 @@ for script in `find . -name test.sh`
 do
     echo Running $script
     echo
+    chmod +x $script
     $script || exit 1
 
     echo
