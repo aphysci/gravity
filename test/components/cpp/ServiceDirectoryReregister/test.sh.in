@@ -37,7 +37,7 @@ testPubSub()
     ./subscriber &
     SUBPID=$!
 
-    sleep 10
+    sleep 15
     kill $SDPID $SUBPID
     sleep 4
 
@@ -61,7 +61,7 @@ testProvReq()
     ./requestor &
     REQPID=$!
 
-    sleep 10
+    sleep 15
     kill $SDPID $REQPID
     sleep 4
 
@@ -80,6 +80,9 @@ make clean || exit 1
 make || exit 1
 
 testPubSub || exit 1
+
+sleep 2
+
 testProvReq || exit 1
 
 popd
