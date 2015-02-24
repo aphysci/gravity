@@ -38,7 +38,7 @@ int main()
 	{
         shared_ptr<GravityDataProduct> countReq = gn.request("Counter", //Service Name
                                                              request, //Request
-                                                             1000); //Timeout in milliseconds
+                                                             3000); //Timeout in milliseconds
         if(countReq == NULL)
         {
             Log::critical("Request Returned NULL!");
