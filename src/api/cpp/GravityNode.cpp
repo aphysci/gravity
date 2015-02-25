@@ -183,6 +183,7 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 	int port=((GravityINIConfig*)config)->port;
 	int timeout=((GravityINIConfig*)config)->timeout;
 	GravityNode* gravityNode = ((GravityINIConfig*)config)->gravityNode;
+	string compId = ((GravityINIConfig*)config)->componentId;
 
 	time_t serviceDirectoryStartTime = 0;
 
@@ -305,7 +306,7 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
-				        gravityNode->ServiceDirectoryReregister();
+				        gravityNode->ServiceDirectoryReregister(compId);
 				    }
 				    serviceDirectoryStartTime = broadcastPB.starttime();
 				}
@@ -642,10 +643,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
 
 			GravityINIConfig config;
-			config.domain=serviceDirectoryDomain;
+			config.domain=serviceDirectoryDomain.c_str(); // force deep copy to send to other thread
 			config.port=port;
 			config.timeout=broadcastTimeout;
 			config.gravityNode = this;
+			config.componentId = componentID.c_str();  // force deep copy to send to other thread
 			//only start the domain listener once
 			if(!domainEnabled)
 			{
@@ -662,6 +664,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 	if(!domainTimeout)
 	{
+	    serviceDirectoryLock.Lock();
 		size_t pos = serviceDirectoryUrl.find_first_of("://");
 		if(pos != std::string::npos)
 		{
@@ -683,6 +686,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if(serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
     		serviceDirectoryNode.ipAddress = "localhost";
    		serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
+   	    serviceDirectoryLock.Unlock();
 	}
 	else
 	{
@@ -827,11 +831,14 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
         GravityDataProduct& response)
 {
 	stringstream ss;
+    serviceDirectoryLock.Lock();
 	ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
 	                ":" << serviceDirectoryNode.port;
 	string serviceDirectoryURL = ss.str();
 
-	return sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
+	GravityReturnCode ret = sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
+    serviceDirectoryLock.Unlock();
+    return ret;
 }
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType)
@@ -1253,7 +1260,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 /**
  * Used to re-register if we see that the ServiceDirectory has restarted.
  */
-GravityReturnCode GravityNode::ServiceDirectoryReregister()
+GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1267,7 +1274,7 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister()
         registration.set_id(iter->first);
         registration.set_url(iter->second);
         registration.set_type(ServiceDirectoryRegistrationPB::DATA);
-        registration.set_component_id(componentID);
+        registration.set_component_id(componentId);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
@@ -1298,7 +1305,7 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister()
         registration.set_id(iter->first);
         registration.set_url(iter->second);
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
-        registration.set_component_id(componentID);
+        registration.set_component_id(componentId);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
@@ -1807,6 +1814,8 @@ string GravityNode::getIP()
 {
     string ip = "127.0.0.1";
 
+    serviceDirectoryLock.Lock();
+
     if (!serviceDirectoryNode.ipAddress.empty() && serviceDirectoryNode.ipAddress != "localhost")
     {
 		//Reads the IP used to connect to the Service Directory.
@@ -1844,6 +1853,8 @@ string GravityNode::getIP()
 
         ip.assign(buffer);
     }
+
+    serviceDirectoryLock.Unlock();
 
     return ip;
 }

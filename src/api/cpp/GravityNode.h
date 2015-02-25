@@ -119,6 +119,7 @@ private:
         int port;
         int timeout;
         GravityNode *gravityNode;
+        std::string componentId;
     } GravityINIConfig;
 
     class GravityNodeDomainListener
@@ -183,6 +184,7 @@ private:
     		int timeout_in_milliseconds);
 
     NetworkNode serviceDirectoryNode;
+    Semaphore serviceDirectoryLock;
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
@@ -192,7 +194,7 @@ private:
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string &domain);
-    GravityReturnCode ServiceDirectoryReregister();
+    GravityReturnCode ServiceDirectoryReregister(std::string componentId);
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
     GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
