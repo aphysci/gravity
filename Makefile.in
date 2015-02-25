@@ -128,6 +128,7 @@ distributable: components
 
 	echo building Gravity tarball...
 	rm -f gravity.tgz 
+	git describe --tag > VERSION.txt
 	tar czf gravity.tgz bin lib include VERSION.txt
 
 	
