@@ -119,27 +119,30 @@ private:
         int port;
         int timeout;
         GravityNode *gravityNode;
+        std::string componentId;
     } GravityINIConfig;
 
     class GravityNodeDomainListener
     {
     public:
-        static GravityNodeDomainListener *getInstance();
         static std::string getDomainUrl();
         static void* start(void* config);
+		static void kill();
 
     private:
         static std::string url;
         static bool timeoutOver;
         static int sock;
+		static bool run;
+		static bool killed;
 
         static Semaphore lock;
-        static Semaphore instanceLock;
 
         //private constructor
         GravityNodeDomainListener();
         //private destructor
         virtual ~GravityNodeDomainListener();
+
     };
 
     typedef struct SubscriptionDetails
@@ -154,6 +157,7 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
 	static bool domainEnabled;
     bool metricsEnabled;
+	bool initialized;
 
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
@@ -180,6 +184,7 @@ private:
     		int timeout_in_milliseconds);
 
     NetworkNode serviceDirectoryNode;
+    Semaphore serviceDirectoryLock;
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
@@ -189,7 +194,7 @@ private:
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string &domain);
-    GravityReturnCode ServiceDirectoryReregister();
+    GravityReturnCode ServiceDirectoryReregister(std::string componentId);
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
     GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
@@ -202,6 +207,9 @@ private:
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
+
+	void cleanup();
+
 public:
     /**
      * Default Constructor
