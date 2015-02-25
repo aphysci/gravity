@@ -96,8 +96,19 @@ typedef struct SocketWithLock
 	Semaphore lock;
 } SocketWithLock;
 
-class GravityConfigParser;
+/*
+typedef struct GravityINIConfig
+{
+	void* context;
+    std::string domain;
+    int port;
+    int timeout;
+    GravityNode *gravityNode;
+    std::string componentId;
+} GravityINIConfig;
+*/
 
+class GravityConfigParser;
 
 /**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
@@ -105,6 +116,33 @@ class GravityConfigParser;
 class GravityNode
 {
 private:
+	class GravityNodeDomainListener
+	{
+	public:
+		std::string getDomainUrl();
+		void start();
+		GravityNodeDomainListener(void *context);
+
+		virtual ~GravityNodeDomainListener();
+
+	private:
+		int sock;
+		bool running;
+		bool ready;
+		void* context;
+		std::string domain;
+		std::string compId;
+		int port;
+		int timeout;
+		GravityNode* gravityNode;
+		void* gravityNodeSocket;
+
+
+		Semaphore lock;
+
+		void readDomainListenerParameters();
+	};
+
     typedef struct NetworkNode
     {
         std::string ipAddress;
@@ -112,38 +150,6 @@ private:
         std::string transport;
         void* socket;
     } NetworkNode;
-
-    typedef struct GravityINIConfig
-    {
-        std::string domain;
-        int port;
-        int timeout;
-        GravityNode *gravityNode;
-        std::string componentId;
-    } GravityINIConfig;
-
-    class GravityNodeDomainListener
-    {
-    public:
-        static std::string getDomainUrl();
-        static void* start(void* config);
-		static void kill();
-
-    private:
-        static std::string url;
-        static bool timeoutOver;
-        static int sock;
-		static bool run;
-		static bool killed;
-
-        static Semaphore lock;
-
-        //private constructor
-        GravityNodeDomainListener();
-        //private destructor
-        virtual ~GravityNodeDomainListener();
-
-    };
 
     typedef struct SubscriptionDetails
     {
@@ -155,9 +161,9 @@ private:
 
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
-	static bool domainEnabled;
     bool metricsEnabled;
 	bool initialized;
+	bool logInitialized;
 
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
@@ -172,6 +178,8 @@ private:
     SocketWithLock publishManagerPublishSWL;
     SocketWithLock serviceManagerSWL;
     SocketWithLock requestManagerSWL;
+	SocketWithLock domainListenerSWL;
+	SocketWithLock domainRecvSWL;
     void* metricsManagerSocket; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
 
@@ -208,7 +216,11 @@ private:
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
 
-	void cleanup();
+	static void* startGravityDomainListener(void* context);
+	
+	void configureNodeDomainListener(std::string domain);
+
+	std::string getDomainUrl(int timeout);
 
 public:
     /**

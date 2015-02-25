@@ -113,7 +113,6 @@ static void* startMetricsManager(void* context)
     return NULL;
 }
 
-
 static int s_interrupted = 0;
 static void (*previousHandlerAbrt)(int); //Function Pointer
 static void (*previousHandlerInt)(int); //Function Pointer
@@ -138,6 +137,15 @@ void s_catch_signals()
 namespace gravity
 {
 
+void* GravityNode::startGravityDomainListener(void* context)
+{
+	//Create and start  the GravityNodeDomainListener
+	GravityNodeDomainListener domainListener(context);
+	domainListener.start();
+
+	return NULL;
+}
+
 //Forward Declarations that we don't want publicly visible (Need to be in gravity namespace).
 bool IsValidFilename(const std::string filename);
 int StringToInt(std::string str, int default_value);
@@ -150,13 +158,11 @@ void* Heartbeat(void* thread_context);
 using namespace std;
 using namespace std::tr1;
 
-Semaphore GravityNode::GravityNodeDomainListener::lock;
-
-GravityNode::GravityNodeDomainListener::GravityNodeDomainListener()
+GravityNode::GravityNodeDomainListener::GravityNodeDomainListener(void* context)
 {
-	// Setup the domain Listener
-    url="";
-	timeoutOver=false;
+	this->context=context;
+	sock = 0;
+	running = false;
 }
 
 GravityNode::GravityNodeDomainListener::~GravityNodeDomainListener()
@@ -168,30 +174,49 @@ GravityNode::GravityNodeDomainListener::~GravityNodeDomainListener()
 	#endif
 }
 
-bool GravityNode::GravityNodeDomainListener::timeoutOver=false;
-int GravityNode::GravityNodeDomainListener::sock=0;
-std::string GravityNode::GravityNodeDomainListener::url="";
-bool GravityNode::GravityNodeDomainListener::run=false;
-bool GravityNode::GravityNodeDomainListener::killed=false;
-
-void* GravityNode::GravityNodeDomainListener::start(void * config)
+void GravityNode::GravityNodeDomainListener::start()
 {
-	//aquire sempahore to hold any url requests
-	lock.Lock();
+	ready=false;
 
-	std::string domain=((GravityINIConfig*)config)->domain;
-	int port=((GravityINIConfig*)config)->port;
-	int timeout=((GravityINIConfig*)config)->timeout;
-	GravityNode* gravityNode = ((GravityINIConfig*)config)->gravityNode;
-	string compId = ((GravityINIConfig*)config)->componentId;
+	gravityNodeSocket = zmq_socket(context,ZMQ_REP);
+	zmq_connect(gravityNodeSocket,"inproc://gravity_domain_listener");
+	zmq_setsockopt(gravityNodeSocket, ZMQ_SUBSCRIBE, NULL, 0);
+
+	void* domainSocket=zmq_socket(context,ZMQ_PUB);
+	zmq_connect(domainSocket,"inproc://gravity_domain_receiver");
+
+	// Poll the gravity node
+	zmq_pollitem_t pollItem;
+	pollItem.socket = gravityNodeSocket;
+	pollItem.events = ZMQ_POLLIN;
+	pollItem.fd = 0;
+	pollItem.revents = 0;
+
+
+	while(!ready)
+	{
+		// Start polling socket(s), blocking while we wait
+		int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+		if (rc == -1 )
+		{
+		    Log::debug("Interrupted, exiting (rc = %d)", rc);
+			// Interrupted
+			break;
+		}
+
+		// Process new subscription requests from the gravity node
+		if (pollItem.revents & ZMQ_POLLIN)
+		{
+			std::string command = readStringMessage(gravityNodeSocket);
+			if(command=="configure")
+			{
+				readDomainListenerParameters();
+				ready=true;
+			}
+		}
+	}
 
 	time_t serviceDirectoryStartTime = 0;
-
-	sock = 0;
-	run = true;
-	killed = false;
-	timeoutOver=false;
-	url="";
 
 	/* Socket */
     struct sockaddr_in broadcastAddr; /* Broadcast Address */
@@ -199,7 +224,7 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
     /* Create a best-effort datagram socket using UDP */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-		return NULL;
+		return;
     }
 
 
@@ -217,21 +242,18 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 	int rc = 0;
     if ((rc == bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
     {
-		return NULL;
+		return;
     }
 
 	char recvString[MAXRECVSTRING+1]; /* Buffer for received string */
     int recvStringLen;                /* Length of received string */
 	ServiceDirectoryBroadcastPB broadcastPB;
 
-	struct timeval startTime;
-	struct timeval currTime;
-
 	struct timeval timetowait;
 	timetowait.tv_sec=timeout;
 	timetowait.tv_usec=0;
 
-	//set socket to block forever initially
+	//set socket to block forever
 #ifdef _WIN32
 	int timeout_int = timevalToMilliSeconds(&timetowait);
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
@@ -240,40 +262,24 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timetowait,sizeof(struct timeval));
 #endif
 
-	while(run)
+
+	running = true;
+
+	while(running)
 	{
 		//wait for braodcast message to be recieved
 		memset(recvString,0,MAXRECVSTRING+1);
 
-		gettimeofday(&startTime,NULL);
-
 		/* Receive a broadcast message or timeout */
 		recvStringLen = recvfrom(sock, recvString, MAXRECVSTRING, 0, NULL, 0);
-
-		gettimeofday(&currTime,NULL);
 		
 		//check for socket error
 		if(recvStringLen < 0)
 		{
-			//if we reached the timeout
+			//if we received some error
 		    int error = errno;
-		    Log::warning("Received error reading domain listener socket: %d", error);
-			if (error == EAGAIN || error == EWOULDBLOCK)
-			{
-				if(timeoutOver==false)
-				{
-					timeoutOver=true;
-					lock.Unlock();
-				}
-				//set timeout to block
-				timetowait.tv_sec=0;
-				timetowait.tv_usec=0;
-#ifdef _WIN32
-				timeout_int = 0;
-#endif
-				//release lock after timeout
+		    Log::message("Received error reading domain listener socket: %d", error);
 
-			}
 		}
 		else //we received a message
 		{
@@ -283,26 +289,15 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 			//if the domains match
 			if(domain.compare(broadcastPB.domain())==0)
 			{
-				//set url to message url
-				if(timeoutOver==false)
-				{
-					timeoutOver=true;
-				}
-				else
-				{
-				    // if timeout is over then we need to re-acquire the lock
-				    lock.Lock();
-				}
-                url.assign(broadcastPB.url());
-                lock.Unlock();
-				//set timeout to block
-				timetowait.tv_sec=0;
-				timetowait.tv_usec=0;
+                sendStringMessage(domainSocket,"connect",ZMQ_SNDMORE);
+				sendStringMessage(domainSocket,domain,ZMQ_SNDMORE);
+				sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
+
 				// if it's a new start time...
 				if (serviceDirectoryStartTime < broadcastPB.starttime())
 				{
 				    Log::debug("Domain listener found update to our domain, orig SD start time = %u, new SD start time = %llu, SD url is now %s",
-				                serviceDirectoryStartTime, broadcastPB.starttime(), url.c_str());
+				                serviceDirectoryStartTime, broadcastPB.starttime(), broadcastPB.url().c_str());
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
@@ -310,42 +305,29 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 				    }
 				    serviceDirectoryStartTime = broadcastPB.starttime();
 				}
-#ifdef _WIN32
-				timeout_int = 0;
-#endif
-			}
-			//wrong message
-			else
-			{
-				struct timeval tvDiff = subtractTime(&currTime,&startTime);
-			
-				//if the time we were asleep is greter then the timeout -- shouldn't happen, but just in case
-				if(timevalcmp(&tvDiff,&timetowait)>=0)
-				{
-					//set timeout to block
-					timetowait.tv_sec=0;
-					timetowait.tv_usec=0;
-#ifdef _WIN32
-					timeout_int = 0;
-#endif
-					//release lock after timeout
-					if(timeoutOver==false)
-					{
-						timeoutOver=true;
-						lock.Unlock();
-					}
-				}
-				else
-				{
-					//calculate new time to wait
-					timetowait = subtractTime(&timetowait,&tvDiff);
-					timevalToMilliSeconds(&timetowait);
-				}
 			}
 		}
 
+		//check for any gravitynode commands
+		rc = zmq_poll(&pollItem, 1, 0);
+		if (pollItem.revents & ZMQ_POLLIN)
+		{
+			std::string command = readStringMessage(gravityNodeSocket);
+			if(command=="kill")
+			{
+				running=false;
+				break;
+			}
+
+		}
+		else
+		{
+			running = false;
+			break;
+		}
+
 		//don't set a timeout on the socket if it has already been closed
-		if(run)
+		if(running)
 		{
 			//set new timeout
 			#ifdef _WIN32
@@ -358,46 +340,46 @@ void* GravityNode::GravityNodeDomainListener::start(void * config)
 
 	}//end while
 
-	killed = true;
-	return NULL;
+	Log::warning("Closing Domain Receiver");
+	#ifdef _WIN32
+	closesocket(sock);
+	#else
+	close(sock);
+	#endif
+	zmq_close(gravityNodeSocket);
+	zmq_close(domainSocket);
 }
 
-std::string GravityNode::GravityNodeDomainListener::getDomainUrl()
+void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 {
-    // retrieving the lock should block until the url is ready or has timed out
-    lock.Lock();
-	while(timeoutOver==false)
-	{
-		// temporarily give up the lock so that the domain listener thread can update
-		lock.Unlock();
-        gravity::sleep(100);
-		lock.Lock();
-	}
-	string retUrl = url;
-	lock.Unlock();
-	return retUrl;
-}
+	//recieve domain
+	domain=readStringMessage(gravityNodeSocket);
 
-void GravityNode::GravityNodeDomainListener::kill()
-{
-	if(run)
-	{
-		lock.Lock();
+	//receive port
+	zmq_msg_t msg;
+	zmq_msg_init(&msg);
+	zmq_recvmsg(gravityNodeSocket,&msg,ZMQ_DONTWAIT);
+	memcpy(&port,zmq_msg_data(&msg),sizeof(unsigned int));
+	zmq_msg_close(&msg);
 
-		//set run to false before closing socket
-		run = false;
-#ifdef _WIN32
-		closesocket(sock);
-#else
-		close(sock);
-#endif
-		lock.Unlock();
-		//wait for receiving thread to end
-		while(!killed)
-		{
-			gravity::sleep(100);
-		}
-	}
+	//receive timeout
+	zmq_msg_t msg2;
+	zmq_msg_init(&msg2);
+	zmq_recvmsg(gravityNodeSocket,&msg2,ZMQ_DONTWAIT);
+	memcpy(&timeout,zmq_msg_data(&msg2),sizeof(unsigned int));
+	zmq_msg_close(&msg2);
+
+	//receive component ID
+	compId=readStringMessage(gravityNodeSocket);
+
+	//receive GravityNode pointer
+	zmq_msg_t msg3;
+	zmq_msg_init(&msg3);
+	zmq_recvmsg(gravityNodeSocket,&msg3,ZMQ_DONTWAIT);
+	memcpy(&gravityNode,zmq_msg_data(&msg3),sizeof(GravityNode*));
+	zmq_msg_close(&msg3);
+
+	sendStringMessage(gravityNodeSocket,"ACK",ZMQ_DONTWAIT);
 }
 
 GravityNode::GravityNode()
@@ -413,6 +395,7 @@ GravityNode::GravityNode()
     // Default to no metrics
     metricsEnabled = false;
 	initialized=false;
+	logInitialized = false;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -428,6 +411,7 @@ GravityNode::GravityNode(std::string componentID)
     // Default to no metrics
     metricsEnabled = false;
 	initialized=false;
+	logInitialized=false;
 
 	init(componentID);
 }
@@ -435,26 +419,16 @@ GravityNode::GravityNode(std::string componentID)
 GravityNode::~GravityNode()
 {
 
-	cleanup();
-
-	// Clean up the zmq context object
-    zmq_term(context);
-
-    delete parser;
-}
-
-void GravityNode::cleanup()
-{
-	// If metrics are enabled, we need to unregister our metrics data product
+		// If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
 
 	//kill the domain listener
-	GravityNodeDomainListener::kill();
-
-    closeHeartbeatSocket();
+	sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
+	zmq_close(domainListenerSWL.socket);
+	zmq_close(domainRecvSWL.socket);
 
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
@@ -472,9 +446,13 @@ void GravityNode::cleanup()
 
     sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(metricsManagerSocket);
-}
 
-bool GravityNode::domainEnabled=false;
+	// Clean up the zmq context object
+    //zmq_term(context);
+
+	delete parser;
+
+}
 
 GravityReturnCode GravityNode::init()
 {
@@ -494,22 +472,26 @@ GravityReturnCode GravityNode::init()
 	{
 		componentID="GravityNode";
 		//Setup Logging if enabled.
-   		Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
-		if(local_log_level != Log::NONE)
-			Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-					local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+		if(!logInitialized)
+		{
+   			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+			if(local_log_level != Log::NONE)
+				Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+						local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
 
-		Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
-		if(console_log_level != Log::NONE)
-			Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+			if(console_log_level != Log::NONE)
+				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
 
-		Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
-		if(net_log_level != Log::NONE)
-			Log::initAndAddGravityLogger(this, net_log_level);
+			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
+			if(net_log_level != Log::NONE)
+				Log::initAndAddGravityLogger(this, net_log_level);
 
-		//log an error indicating the componentID was missing
-		Log::critical("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
+			//log an error indicating the componentID was missing
+			Log::critical("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
 
+			logInitialized=true;
+		}
 		return init(componentID);
 	}
 
@@ -520,6 +502,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 	this->componentID = componentID;
 
+	std::string serviceDirectoryUrl="";
+	bool domainTimeout=false;
+	bool iniWarning = false;
+
     // Setup zmq context
 	if(!initialized)
 	{
@@ -528,140 +514,168 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		{
 			ret = GravityReturnCodes::FAILURE;
 		}
-	}
 
-	//GravityNodeDomainListener* domainListener=GravityNodeDomainListener::getInstance();
+		void* initSocket = zmq_socket(context, ZMQ_REP);
+		zmq_bind(initSocket, "inproc://gravity_init");
+		bindHeartbeatSocket(context);
 
-    void* initSocket = zmq_socket(context, ZMQ_REP);
-    zmq_bind(initSocket, "inproc://gravity_init");
-    bindHeartbeatSocket(context);
+		// Setup up communication channel to subscription manager
+		subscriptionManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
+		zmq_bind(subscriptionManagerSWL.socket, "inproc://gravity_subscription_manager");
 
-    // Setup up communication channel to subscription manager
-    subscriptionManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(subscriptionManagerSWL.socket, "inproc://gravity_subscription_manager");
+		// Setup the metrics control communication channel
+		metricsManagerSocket = zmq_socket(context, ZMQ_PUB);
+		zmq_bind(metricsManagerSocket, GRAVITY_METRICS_CONTROL);
 
-    // Setup the metrics control communication channel
-    metricsManagerSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(metricsManagerSocket, GRAVITY_METRICS_CONTROL);
+		// Setup the subscription manager
+		pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
 
-    // Setup the subscription manager
-    pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
+		// Setup up publish channel to publish manager
+		publishManagerPublishSWL.socket = zmq_socket(context, ZMQ_PUB);
+		zmq_bind(publishManagerPublishSWL.socket, PUB_MGR_PUB_URL);
 
-    // Setup up publish channel to publish manager
-    publishManagerPublishSWL.socket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(publishManagerPublishSWL.socket, PUB_MGR_PUB_URL);
+		// Setup the publish manager
+		pthread_create(&publishManagerThread, NULL, startPublishManager, context);
 
-    // Setup the publish manager
-    pthread_create(&publishManagerThread, NULL, startPublishManager, context);
+		// Setup up communication channel to request manager
+		requestManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
+		zmq_bind(requestManagerSWL.socket, "inproc://gravity_request_manager");
 
-    // Setup up communication channel to request manager
-    requestManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(requestManagerSWL.socket, "inproc://gravity_request_manager");
+		// Setup the request manager
+		pthread_create(&requestManagerThread, NULL, startRequestManager, context);
 
-    // Setup the request manager
-    pthread_create(&requestManagerThread, NULL, startRequestManager, context);
+		// Setup the service manager
+		pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
 
-    // Setup the service manager
-    pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
+		// Start the metrics manager
+		pthread_create(&metricsManagerThread, NULL, startMetricsManager, context);
 
-    // Start the metrics manager
-    pthread_create(&metricsManagerThread, NULL, startMetricsManager, context);
+		// Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
+		s_catch_signals();
 
-    // Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
-    s_catch_signals();
-
-    // wait for the manager threads to signal their readiness
-    string msgText;
-    int numThreadsWaiting = 5;
-    while (numThreadsWaiting && !s_interrupted)
-    {
-    	// Read message
-    	msgText = readStringMessage(initSocket);
-
-    	// respond with ack
-    	sendStringMessage(initSocket, "ack", ZMQ_DONTWAIT);
-
-    	// Decrement counter
-    	numThreadsWaiting--;
-    }
-    zmq_close(initSocket);
-
-	s_restore_signals();
-
-	if(s_interrupted)
-		raise(s_interrupted);
-
-	// connect down here to make sure manager has bound address.
-	publishManagerRequestSWL.socket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(publishManagerRequestSWL.socket, PUB_MGR_REQ_URL);
-
-    serviceManagerSWL.socket = zmq_socket(context, ZMQ_REQ);
-    zmq_connect(serviceManagerSWL.socket, SERVICE_MGR_URL);
-
-	////////////////////////////////////////////////////////
-	//Now that Gravity is set up, get gravity configuration.
-	parser = new GravityConfigParser(componentID);
-
-	parser->ParseConfigFile("Gravity.ini");
-	std::string config_file_name = componentID + ".ini";
-	if(gravity::IsValidFilename(config_file_name))
-	{
-		parser->ParseConfigFile(config_file_name.c_str());
-	}
-
-    // Setup Logging as soon as config parser is available.
-	if(!initialized)
-	{
-		Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
-		if(local_log_level != Log::NONE)
-			Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-					local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-
-		Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
-		if(console_log_level != Log::NONE)
-			Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-	}
-
-	//Set Service Directory URL (because we can't connect to the ConfigService without it).
-    std::string serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
-
-	bool domainTimeout=false;
-	bool iniWarning = false;
-	//get the Domain name of the Service Directory to connect to
-	std::string serviceDirectoryDomain = getStringParam("Domain");
-	if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
-	{
-		//if the config file specifies both domain and url
-		if( serviceDirectoryUrl != "")
+		// wait for the manager threads to signal their readiness
+		string msgText;
+		int numThreadsWaiting = 5;
+		while (numThreadsWaiting && !s_interrupted)
 		{
-			iniWarning=true;
+    		// Read message
+    		msgText = readStringMessage(initSocket);
+
+    		// respond with ack
+    		sendStringMessage(initSocket, "ack", ZMQ_DONTWAIT);
+
+    		// Decrement counter
+    		numThreadsWaiting--;
 		}
-		//retrieve the URL from the Service directory broadcast message
-		else
-		{
-			int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
-			int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+		zmq_close(initSocket);
 
-			GravityINIConfig config;
-			config.domain=serviceDirectoryDomain.c_str(); // force deep copy to send to other thread
-			config.port=port;
-			config.timeout=broadcastTimeout;
-			config.gravityNode = this;
-			config.componentId = componentID.c_str();  // force deep copy to send to other thread
-			//only start the domain listener once
-			if(!domainEnabled)
+		s_restore_signals();
+
+		if(s_interrupted)
+			raise(s_interrupted);
+
+		// connect down here to make sure manager has bound address.
+		publishManagerRequestSWL.socket = zmq_socket(context, ZMQ_REQ);
+		zmq_connect(publishManagerRequestSWL.socket, PUB_MGR_REQ_URL);
+
+		serviceManagerSWL.socket = zmq_socket(context, ZMQ_REQ);
+		zmq_connect(serviceManagerSWL.socket, SERVICE_MGR_URL);
+
+		////////////////////////////////////////////////////////
+		//Now that Gravity is set up, get gravity configuration.
+		parser = new GravityConfigParser(componentID);
+
+		parser->ParseConfigFile("Gravity.ini");
+		std::string config_file_name = componentID + ".ini";
+		if(gravity::IsValidFilename(config_file_name))
+		{
+			parser->ParseConfigFile(config_file_name.c_str());
+		}
+
+		// Setup Logging as soon as config parser is available.
+		if(!logInitialized)
+		{
+			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+			if(local_log_level != Log::NONE)
+				Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+						local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+
+			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+			if(console_log_level != Log::NONE)
+				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+
+			logInitialized=true;
+		}
+
+		//get the Domain name of the Service Directory to connect to
+		std::string serviceDirectoryDomain = getStringParam("Domain");
+
+		//Set Service Directory URL (because we can't connect to the ConfigService without it).
+		serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
+
+		if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
+		{
+			//if the config file specifies both domain and url
+			if( serviceDirectoryUrl != "")
 			{
-				domainEnabled=true;
-				pthread_create(&domainListenerThread,NULL,GravityNodeDomainListener::start,&config);			
+				iniWarning=true;
 			}
-			serviceDirectoryUrl.assign(GravityNodeDomainListener::getDomainUrl());
-			if(serviceDirectoryUrl == "")
+			//setup and start the GravityNodeDomainListener
+			else
 			{
-				domainTimeout=true;
+				// Setup up communication channel to subscription manager
+				domainListenerSWL.socket = zmq_socket(context, ZMQ_REQ);
+				zmq_bind(domainListenerSWL.socket, "inproc://gravity_domain_listener");
+
+				domainRecvSWL.socket = zmq_socket(context,ZMQ_SUB);
+				zmq_bind(domainRecvSWL.socket,"inproc://gravity_domain_receiver");
+				zmq_setsockopt(domainRecvSWL.socket,ZMQ_SUBSCRIBE,NULL,0);
+
+				pthread_create(&domainListenerThread,NULL,startGravityDomainListener,context);			
+
+				configureNodeDomainListener(serviceDirectoryDomain);
+				int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+
+				serviceDirectoryUrl.assign(getDomainUrl(broadcastTimeout));
+				if(serviceDirectoryUrl == "")
+				{
+					domainTimeout=true;
+				}
 			}
 		}
+
+		initialized = true;
+	}
+	//we are already initialzed, just try to read the SD domain and url
+	else
+	{
+		//get the Domain name of the Service Directory to connect to
+		std::string serviceDirectoryDomain = getStringParam("Domain");
+		//Set Service Directory URL (because we can't connect to the ConfigService without it).
+		serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
+
+		if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
+		{
+			//if the config file specifies both domain and url
+			if( serviceDirectoryUrl != "")
+			{
+				iniWarning=true;
+			}
+			else
+			{
+				int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+
+				//read the domain from the domain listener
+				serviceDirectoryUrl.assign(getDomainUrl(broadcastTimeout));
+				if(serviceDirectoryUrl == "")
+				{
+					domainTimeout=true;
+				}
+			}
+		}
 	}
 
+	//If we are able to proceed with trying to connect to the service directory
 	if(!domainTimeout)
 	{
 	    serviceDirectoryLock.Lock();
@@ -687,61 +701,124 @@ GravityReturnCode GravityNode::init(std::string componentID)
     		serviceDirectoryNode.ipAddress = "localhost";
    		serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
    	    serviceDirectoryLock.Unlock();
+
+		// Enable metrics (if configured)
+		metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
+		if (metricsEnabled)
+		{
+			// Register our metrics data product with the service directory
+			registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
+
+			// Command the GravityMetricsManager thread to start collecting metrics
+			sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
+
+			// Get collection parameters from ini file
+			// (default to 10 second sampling, publishing once per min)
+			int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
+			int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
+
+			// Send collection details to the GravityMetricsManager
+			sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
+			sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+
+			// Finally, send our component id & ip address (to be published with metrics)
+			sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
+			sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
+		}
+
+		if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
+   		{
+   			parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
+   		}
+		//parser->ParseCmdLine
+
+   		// Setup up network logging now that SD is available
+		Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
+		if(net_log_level != Log::NONE)
+			Log::initAndAddGravityLogger(this, net_log_level);
+
 	}
 	else
 	{
 		ret=GravityReturnCodes::FAILURE;
 	}
 
-   	if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
-   	{
-   		parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
-   	}
-	//parser->ParseCmdLine
-
-   	// Setup up network logging now that SD is available
-    Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
-	if(net_log_level != Log::NONE)
-		Log::initAndAddGravityLogger(this, net_log_level);
-
-    // Enable metrics (if configured)
-    metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
-    if (metricsEnabled)
-    {
-        // Register our metrics data product with the service directory
-        registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
-
-        // Command the GravityMetricsManager thread to start collecting metrics
-        sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
-
-        // Get collection parameters from ini file
-        // (default to 10 second sampling, publishing once per min)
-        int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
-        int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
-
-        // Send collection details to the GravityMetricsManager
-        sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
-        sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
-
-        // Finally, send our component id & ip address (to be published with metrics)
-        sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
-        sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
-    }
-
 	if (iniWarning)
 	{
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
 
-	if(ret!=GravityReturnCodes::SUCCESS)
-	{
-		cleanup();
-		domainEnabled=false;
-	}
-
-	initialized = true;
-
 	return ret;
+}
+
+void GravityNode::configureNodeDomainListener(std::string domain)
+{
+	sendStringMessage(domainListenerSWL.socket,"configure",ZMQ_SNDMORE);
+	sendStringMessage(domainListenerSWL.socket,domain,ZMQ_SNDMORE);
+
+	int port = getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
+	int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
+
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg,sizeof(port));
+	memcpy(zmq_msg_data(&msg),&port,sizeof(port));
+	zmq_sendmsg(domainListenerSWL.socket,&msg,ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	zmq_msg_t msg2;
+	zmq_msg_init_size(&msg2,sizeof(broadcastTimeout));
+	memcpy(zmq_msg_data(&msg2),&broadcastTimeout,sizeof(broadcastTimeout));
+	zmq_sendmsg(domainListenerSWL.socket,&msg2,ZMQ_SNDMORE);
+	zmq_msg_close(&msg2);
+
+	sendStringMessage(domainListenerSWL.socket,componentID,ZMQ_SNDMORE);
+
+	zmq_msg_t msg3;
+	zmq_msg_init_size(&msg3,sizeof(GravityNode*));
+	memcpy(zmq_msg_data(&msg3),this,sizeof(GravityNode*));
+	zmq_sendmsg(domainListenerSWL.socket,&msg3,ZMQ_DONTWAIT);
+	zmq_msg_close(&msg3);
+
+	Log::warning("Send over");
+}
+
+std::string GravityNode::getDomainUrl(int timeout)
+{
+	int waitTime=0;
+
+	zmq_pollitem_t pollItem;
+	pollItem.socket=domainRecvSWL.socket;
+	pollItem.events=ZMQ_POLLIN;
+	pollItem.fd=0;
+	pollItem.revents=0;
+	std::string url="";
+	while(waitTime < timeout*1000)
+	{
+		 // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&pollItem, 1, 0); // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            // Interrupted
+            break;
+        }
+
+        // Process new subscription requests from the gravity node
+        if (pollItem.revents & ZMQ_POLLIN)
+        {
+			std::string command=readStringMessage(domainRecvSWL.socket);
+			if(command=="connect")
+			{
+				std::string domain = readStringMessage(domainRecvSWL.socket);
+				url=readStringMessage(domainRecvSWL.socket);
+				break;
+			}
+		}
+
+		sleep(100);
+		waitTime+=100;
+	}
+	return url;
+
 }
 
 void GravityNode::waitForExit()
