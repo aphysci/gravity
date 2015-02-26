@@ -315,8 +315,6 @@ void GravitySubscriptionManager::start()
 		}
 	}
 
-	Log::warning("closing subscription manager");
-
 	// Clean up all our open sockets
 	for (map<void*,shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionSocketMap.begin(); iter != subscriptionSocketMap.end(); iter++)
 	{
