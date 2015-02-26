@@ -301,7 +301,7 @@ void GravityNode::GravityNodeDomainListener::start()
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
-				        gravityNode->ServiceDirectoryReregister(compId);
+				     //  gravityNode->ServiceDirectoryReregister(compId);
 				    }
 				    serviceDirectoryStartTime = broadcastPB.starttime();
 				}
@@ -313,17 +313,13 @@ void GravityNode::GravityNodeDomainListener::start()
 		if (pollItem.revents & ZMQ_POLLIN)
 		{
 			std::string command = readStringMessage(gravityNodeSocket);
+			sendStringMessage(gravityNodeSocket,"ACK",ZMQ_DONTWAIT);
 			if(command=="kill")
 			{
 				running=false;
 				break;
 			}
 
-		}
-		else
-		{
-			running = false;
-			break;
 		}
 
 		//don't set a timeout on the socket if it has already been closed
@@ -419,14 +415,17 @@ GravityNode::GravityNode(std::string componentID)
 GravityNode::~GravityNode()
 {
 
-		// If metrics are enabled, we need to unregister our metrics data product
+	// If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
 
+	closeHeartbeatSocket();
+
 	//kill the domain listener
 	sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
+	readStringMessage(domainListenerSWL.socket);
 	zmq_close(domainListenerSWL.socket);
 	zmq_close(domainRecvSWL.socket);
 
@@ -448,7 +447,7 @@ GravityNode::~GravityNode()
     zmq_close(metricsManagerSocket);
 
 	// Clean up the zmq context object
-    //zmq_term(context);
+    zmq_term(context);
 
 	delete parser;
 
@@ -641,6 +640,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				{
 					domainTimeout=true;
 				}
+				
 			}
 		}
 
@@ -671,6 +671,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				{
 					domainTimeout=true;
 				}
+				
 			}
 		}
 	}
@@ -779,7 +780,7 @@ void GravityNode::configureNodeDomainListener(std::string domain)
 	zmq_sendmsg(domainListenerSWL.socket,&msg3,ZMQ_DONTWAIT);
 	zmq_msg_close(&msg3);
 
-	Log::warning("Send over");
+	readStringMessage(domainListenerSWL.socket);
 }
 
 std::string GravityNode::getDomainUrl(int timeout)
