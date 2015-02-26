@@ -301,7 +301,7 @@ void GravityNode::GravityNodeDomainListener::start()
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
-				     //  gravityNode->ServiceDirectoryReregister(compId);
+				       // gravityNode->ServiceDirectoryReregister(compId);
 				    }
 				    serviceDirectoryStartTime = broadcastPB.starttime();
 				}
@@ -776,7 +776,8 @@ void GravityNode::configureNodeDomainListener(std::string domain)
 
 	zmq_msg_t msg3;
 	zmq_msg_init_size(&msg3,sizeof(GravityNode*));
-	memcpy(zmq_msg_data(&msg3),this,sizeof(GravityNode*));
+	GravityNode* tmp = this;
+	memcpy(zmq_msg_data(&msg3),&tmp,sizeof(GravityNode*));
 	zmq_sendmsg(domainListenerSWL.socket,&msg3,ZMQ_DONTWAIT);
 	zmq_msg_close(&msg3);
 
