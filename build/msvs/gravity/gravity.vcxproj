@@ -778,8 +778,7 @@ xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
 copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\VERSION.txt $(OutDir)\..
-git describe --tag &gt; ..\..\..\VERSION.txt</Command>
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
       <Message>Create include director</Message>
       <Outputs>NoOutputGenerated</Outputs>
     </CustomBuildStep>
