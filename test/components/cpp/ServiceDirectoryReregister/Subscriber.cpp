@@ -39,6 +39,12 @@ int main()
 
 	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode ret = gn.init("Subscriber");
+	int numTries = 3;
+	while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
+	{
+	    Log::warning("Error during init, retrying...");
+	    ret = gn.init("Subscriber");
+	}
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::fatal("Could not initialize GravityNode, return code is %d", ret);
@@ -65,7 +71,7 @@ int main()
 	// make sure we finished
 	GRAVITY_TEST(tries < 30);
 
-	gn.unsubscribe("DataProduct", hwSubscriber);
+	gn.unsubscribe(dataProductID, hwSubscriber);
 }
 
 void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)

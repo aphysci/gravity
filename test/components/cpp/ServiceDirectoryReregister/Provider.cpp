@@ -52,7 +52,18 @@ int main()
 {
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
-	gn.init("Provider");
+	GravityReturnCode ret = gn.init("Provider");
+    int numTries = 3;
+    while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
+    {
+        Log::warning("Error during init, retrying...");
+        ret = gn.init("Publisher");
+    }
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        Log::fatal("Could not initialize GravityNode, return code was %d", ret);
+        exit(1);
+    }
 
 	Provider msp;
 	msp.counter = 0;

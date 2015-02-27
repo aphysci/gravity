@@ -31,6 +31,12 @@ int main()
 
 	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode ret = gn.init("Publisher");
+    int numTries = 3;
+    while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
+    {
+        Log::warning("Error during init, retrying...");
+        ret = gn.init("Publisher");
+    }
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::fatal("Could not initialize GravityNode, return code was %d", ret);

@@ -278,7 +278,10 @@ void GravityNode::GravityNodeDomainListener::start()
 		{
 			//if we received some error
 		    int error = errno;
-		    Log::message("Received error reading domain listener socket: %d", error);
+		    if (error == EAGAIN)
+		        Log::trace("Timed out waiting for domain broadcast");
+		    else
+		        Log::warning("Received error reading domain listener socket: %d", error);
 
 		}
 		else //we received a message
@@ -914,6 +917,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
 	                ":" << serviceDirectoryNode.port;
 	string serviceDirectoryURL = ss.str();
+	Log::trace("About to make SD request at URL = %s", serviceDirectoryURL.c_str());
 
 	GravityReturnCode ret = sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
     serviceDirectoryLock.Unlock();
@@ -1364,6 +1368,12 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
 
         // Send request to service directory
         GravityReturnCode pubRet = sendRequestToServiceDirectory(request, response);
+        int numTries = 3;
+        while (pubRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
+        {
+            Log::debug("Error re-registering publisher, retrying...");
+            pubRet = sendRequestToServiceDirectory(request, response);
+        }
         if (pubRet == GravityReturnCodes::SUCCESS)
         {
             Log::message("Successfully re-registered data product %s", iter->first.c_str());
@@ -1395,6 +1405,12 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
 
         // Send request to service directory
         GravityReturnCode servRet = sendRequestToServiceDirectory(request, response);
+        int numTries = 3;
+        while (servRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
+        {
+            Log::debug("Error re-registering service, retrying...");
+            servRet = sendRequestToServiceDirectory(request, response);
+        }
         if (servRet == GravityReturnCodes::SUCCESS)
         {
             Log::message("Successfully re-registered service %s", iter->first.c_str());
@@ -1414,8 +1430,30 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
 
     for (list<SubscriptionDetails>::const_iterator iter = origList.begin(); iter != origList.end(); ++iter)
     {
-        unsubscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
-        subscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+        GravityReturnCode subRet = unsubscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+        int numTries = 3;
+        while (subRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
+        {
+            Log::debug("Error cleaning up old subscription before re-subscribing, retrying...");
+            subRet = unsubscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+        }
+
+        if (subRet == GravityReturnCodes::SUCCESS)
+        {
+            subRet = subscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+            numTries = 3;
+            while (subRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
+            {
+                Log::debug("Error re-subscribing, retrying...");
+                subRet = subscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
+            }
+            Log::message("Successfully re-subscribed %s", iter->dataProductID.c_str());
+        }
+        else
+        {
+            Log::critical("Error re-registering service %s: %s", iter->dataProductID.c_str(), getCodeString(subRet).c_str());
+            ret = subRet;
+        }
     }
     subscriptionManagerSWL.lock.Unlock();
 
