@@ -197,6 +197,7 @@ private:
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
 
+    std::string myDomain;
     std::string componentID;
 	GravityConfigParser* parser;
 

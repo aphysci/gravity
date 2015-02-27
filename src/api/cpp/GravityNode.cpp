@@ -738,6 +738,15 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if(net_log_level != Log::NONE)
 			Log::initAndAddGravityLogger(this, net_log_level);
 
+		// Get our domain
+		GravityDataProduct request("GetDomain");
+		GravityDataProduct response("DomainResponse");
+		sendRequestToServiceDirectory(request, response);
+
+		char* p = (char*)calloc(response.getDataSize(), sizeof(char));
+		response.getData(p, response.getDataSize());
+		myDomain.assign(p, response.getDataSize());
+		delete p;
 	}
 	else
 	{
@@ -1167,7 +1176,6 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-			domain.assign(pb.domain_id());
             for (int i = 0; i < pb.url_size(); i++)
                 urls.push_back(pb.url(i));
             ret = GravityReturnCodes::SUCCESS;
@@ -1196,6 +1204,11 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
 GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
+    if (domain.empty())
+    {
+        domain = myDomain;
+    }
+
     vector<string> url;
 
     GravityReturnCode ret;
@@ -1281,6 +1294,10 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 
 GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
+	if (domain.empty())
+	{
+		domain = myDomain;
+	}
 	// Send unsubscribe details
 	sendStringMessage(subscriptionManagerSWL.socket, "unsubscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
@@ -1458,7 +1475,6 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 
 		if (parserSuccess)
 		{
-			domain.assign(pb.domain_id());
 			if (!pb.url().empty())
 			{
 				url = pb.url();
