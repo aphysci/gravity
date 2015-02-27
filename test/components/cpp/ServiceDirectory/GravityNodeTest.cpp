@@ -338,11 +338,11 @@ void GravityNodeTest::testSubscriptionManager(void)
     clearSubFlag();
 
 	// Unsubscribe & wait a couple secs
-	ret = node.unsubscribe("TEST", *this, "");
+	ret = node.unsubscribe("TEST", *this, "FILT");
 	sleep(2);
 
 	// Resend message
-	ret = node.publish(gdp);
+	ret = node.publish(gdp, "FILT");
 	sleep(2);
 
 	// Check to ensure that nothing was sent

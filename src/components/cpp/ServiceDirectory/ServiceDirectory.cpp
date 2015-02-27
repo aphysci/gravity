@@ -408,6 +408,10 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduc
         Log::trace("Handling unregister");
         handleUnregister(dataProduct, *gdpResponse);
     }
+    else if (requestType == "GetDomain")
+    {
+        gdpResponse->setData(domain.c_str(), domain.length());
+    }
     else
     {
         Log::warning("unknown request type: %s", requestType.c_str());
