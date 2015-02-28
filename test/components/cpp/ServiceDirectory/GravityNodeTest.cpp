@@ -72,6 +72,9 @@ void GravitySyncTest::testSync()
 
     GRAVITY_TEST_EQUALS(gdpcount1, 100);
     GRAVITY_TEST_EQUALS(gdpcount2, 100);
+
+    gravityNode.unsubscribe("SyncTestGDP", *this);
+    gravityNode.unsubscribe("SyncTestGDP2", *this);
 }
 
 void GravitySyncTest::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
@@ -220,6 +223,10 @@ void GravityNodeTest::testSubscribeDomain(void)
     GRAVITY_TEST_EQUALS(badSubscriber.getCount(), 0);
 	GRAVITY_TEST_EQUALS(goodSubscriber1.getCount(), 1);
 	GRAVITY_TEST_EQUALS(goodSubscriber2.getCount(), 1);
+
+    node.unsubscribe("TEST", badSubscriber, "", domain+"_");
+    node.unsubscribe("TEST", goodSubscriber1, "", domain);
+    node.unsubscribe("TEST", goodSubscriber2);
 }
 
 void GravityNodeTest::testRegisterData(void)
@@ -263,6 +270,8 @@ void GravityNodeTest::testRegisterData(void)
 
     ret = node.subscribe("TEST", *this, "");
     GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
+
+    node.unsubscribe("TEST", *this, "");
 }
 
 void GravityNodeTest::testSubscriptionManager(void)
@@ -347,6 +356,9 @@ void GravityNodeTest::testSubscriptionManager(void)
 
 	// Check to ensure that nothing was sent
 	GRAVITY_TEST(!subFilled());
+
+    node.unsubscribe("TEST", preSubscriber, "FILT");
+    node.unsubscribe("TEST", postSubscriber, "FILT");
 }
 
 void GravityNodeTest::testServiceManager(void)
