@@ -118,4 +118,14 @@ bool GravityDataProduct::operator==(const GravityDataProduct &gdp)
     return memcmp(gravityDataProductPB->data().c_str(), gdp.gravityDataProductPB->data().c_str(), getDataSize()) == 0;
 }
 
+std::string GravityDataProduct::getComponentId()
+{
+	return gravityDataProductPB->componentid();
+}
+
+std::string GravityDataProduct::getDomain()
+{
+	return gravityDataProductPB->domain();
+}
+
 } /* namespace gravity */

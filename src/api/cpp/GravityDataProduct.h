@@ -50,9 +50,12 @@ private:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
+	friend class GravityServiceManager;
     friend void* Heartbeat(void*);
     //In Microseconds
     void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); } //Yeah, I'm telling the compiler this is const.
+	void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
+	void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
 public:
     GRAVITY_API GravityDataProduct() {}
     /**
@@ -161,6 +164,18 @@ public:
      * \return true if the two GravityDataProducts are equivalent, false otherwise.
      */
     GRAVITY_API bool operator==(const GravityDataProduct &gdp);
+
+	/**
+	 * Get the componentId of the Gravity Node that produced this data product
+	 * \return componentId of the source Gravity Node
+	 */
+	GRAVITY_API std::string getComponentId();
+
+	/**
+	 * Get the domain of the Gravity Node that produced this data product
+	 * \return domain of the source Gravity Node
+	 */
+	GRAVITY_API std::string getDomain();
 };
 
 } /* namespace gravity */

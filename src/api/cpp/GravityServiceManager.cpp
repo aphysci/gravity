@@ -56,7 +56,50 @@ void GravityServiceManager::start()
 	pollItem.revents = 0;
 	pollItems.push_back(pollItem);
 
+	void* configureSocket=zmq_socket(context,ZMQ_SUB);
+	zmq_connect(configureSocket,"inproc://gravity_service_manager_configure");
+	zmq_setsockopt(configureSocket, ZMQ_SUBSCRIBE, NULL, 0);
+
+	// Always have at least the gravity node to poll
+	zmq_pollitem_t configItem;
+	configItem.socket = configureSocket;
+	configItem.events = ZMQ_POLLIN;
+	configItem.fd = 0;
+	configItem.revents = 0;
+
 	ready();
+
+	string domain="";
+	string componentID="";
+
+	//receive Gravity node parameters
+	bool configured = false;
+	while(!configured)
+	{
+		// Start polling socket(s), blocking while we wait
+		int rc = zmq_poll(&configItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+		if (rc == -1)
+		{
+			// Interrupted
+			break;
+		}
+
+		// Process new subscription requests from the gravity node
+		if (configItem.revents & ZMQ_POLLIN)
+		{
+			string command = readStringMessage(configureSocket);
+			if(command == "configure")
+			{
+				//receive Gravity node details
+				domain.assign(readStringMessage(configureSocket));
+				componentID.assign(readStringMessage(configureSocket));
+
+				configured=true;
+			}
+		}
+	}
+
+	zmq_close(configureSocket);
 
 	// Process forever...
 	while (true)
@@ -109,6 +152,9 @@ void GravityServiceManager::start()
 
 				shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
 				shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+
+				response->setComponentId(componentID);
+				response->setDomain(domain);
 
 				sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
 			}

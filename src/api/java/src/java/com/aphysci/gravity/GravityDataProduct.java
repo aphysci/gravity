@@ -175,5 +175,21 @@ public class GravityDataProduct {
     public byte[] serializeToArray() {
     	return gdp.build().toByteArray();
     }
+	
+	/**
+	 * Gets the componentID of the Gravity Node that produced this data product.
+	 @return ComponentID of the source Gravity Node.
+	 */
+	public String getComponentID() {
+		return gdp.getComponentID();
+	}
+	
+	/**
+	 * Gets the Domain of the Gravity Node that produced this data product.
+	 @return Domain of the source Gravity Node.
+	 */
+	public String getDomain() {
+		return gdp.getDomain();
+	}
 
 }

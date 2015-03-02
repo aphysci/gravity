@@ -28,4 +28,6 @@ message GravityDataProductPB
 	optional string dataProductID = 2;
 	optional string softwareVersion = 3;
 	optional bytes data = 4;
+	optional string componentID = 5;
+	optional string domain = 6;
 }

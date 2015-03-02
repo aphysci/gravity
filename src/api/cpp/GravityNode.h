@@ -177,6 +177,7 @@ private:
     SocketWithLock publishManagerRequestSWL;
     SocketWithLock publishManagerPublishSWL;
     SocketWithLock serviceManagerSWL;
+	SocketWithLock serviceManagerConfigSWL;
     SocketWithLock requestManagerSWL;
 	SocketWithLock domainListenerSWL;
 	SocketWithLock domainRecvSWL;
@@ -220,6 +221,8 @@ private:
 	static void* startGravityDomainListener(void* context);
 	
 	void configureNodeDomainListener(std::string domain);
+	
+	void configureServiceManager();
 
 	std::string getDomainUrl(int timeout);
 
