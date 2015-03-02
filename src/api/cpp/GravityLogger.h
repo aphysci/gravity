@@ -77,12 +77,12 @@ public:
 
     /**
      * You must call this function to initialize the Logger with File logging to the file specified.  May be called multiple times.
-     * \param filename         Local logging filename.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
-     * \param comp_id          ID of the component being logged.
-     * \param log_local_level  The initial local logging level.
-     * \param keep_file_open   Boolean that indicates whether the log file should be kept open between writes.  Defaults to true.
+     * \param filename                 Local logging filename.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
+     * \param comp_id                  ID of the component being logged.
+     * \param log_local_level          The initial local logging level.
+     * \param close_file_after_write   Boolean that indicates whether the log file should be kept open between writes.  Defaults to false.
      */
-    GRAVITY_API static void initAndAddFileLogger(const char* filename, const char* comp_id, LogLevel local_log_level, bool keep_file_open = true);
+    GRAVITY_API static void initAndAddFileLogger(const char* filename, const char* comp_id, LogLevel local_log_level, bool close_file_after_write = false);
 
     /**
      * Adds a console Logger.
