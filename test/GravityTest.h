@@ -20,31 +20,22 @@
 #define __GRAVITYTEST_H
 
 #include <sstream>
-#include <exception>
-
-class GravityAssertFailed : public std::exception
-{
-public:
-    GravityAssertFailed( const char *file, int line )
-    { 
-        std::ostringstream msg;
-        msg << "Gravity assertion failed: " << file << ":" << line;
-        _msg = msg.str();
-    }
-    virtual ~GravityAssertFailed() throw () {}   
-    virtual const char *what() const throw () { return _msg.c_str(); }
-private:
-    std::string _msg;
-};
+#include <ostream>
 
 #define GRAVITY_TEST_EQUALS(a,b) do { \
     if ( !( (a) == (b) ) ) \
-        throw GravityAssertFailed(__FILE__, __LINE__); \
+    { \
+        std::cerr << "Gravity assertion failed, " << a << " != " << b << " at " << __FILE__ << ":" << __LINE__ << std::endl; \
+        exit(1); \
+    } \
 } while (0)
 
 #define GRAVITY_TEST(a) do { \
     if ( !( a ) ) \
-        throw GravityAssertFailed(__FILE__, __LINE__); \
+    { \
+        std::cerr << "Gravity assertion failed at " << __FILE__ << ":" << __LINE__ << std::endl; \
+        exit(1); \
+    } \
 } while (0)
 
 
