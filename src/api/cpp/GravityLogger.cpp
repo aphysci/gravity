@@ -18,6 +18,7 @@
 
 #include "GravityNode.h"
 #include "GravityLogger.h"
+#include "GravitySemaphore.h"
 #include "protobuf/GravityLogMessagePB.pb.h"
 #include <stdarg.h>
 #include <time.h>
@@ -53,6 +54,7 @@ protected:
     FILE* log_file;
     string component_id;
     bool close_file_after_write;
+    Semaphore lock;
 };
 
 FileLogger::FileLogger(const string& log_dir, const string& comp_id, bool close_file)
@@ -109,6 +111,7 @@ void FileLogger::Log(int level, const char* messagestr)
     snprintf(timestr, sizeof timestr, buffer, tv.tv_usec);
 #endif
 
+    lock.Lock();
     if (close_file_after_write)
     {
         log_file = fopen(filename.c_str(), "a");
@@ -135,6 +138,7 @@ void FileLogger::Log(int level, const char* messagestr)
     {
         fclose(log_file);
     }
+    lock.Unlock();
 }
 
 FileLogger::~FileLogger()
