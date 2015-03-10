@@ -304,7 +304,7 @@ void GravityNode::GravityNodeDomainListener::start()
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
-				       // gravityNode->ServiceDirectoryReregister(compId);
+				        gravityNode->ServiceDirectoryReregister(compId);
 				    }
 				    serviceDirectoryStartTime = broadcastPB.starttime();
 				}
