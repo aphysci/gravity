@@ -265,6 +265,8 @@ void ServiceDirectory::start()
 		sendBroadcasterParameters(domain,sdURL,broadcastPort,broadcastRate);
 	}
 
+	SyncInitDetails syncInitDetails;
+
 	//only start the receiver is there is at least one domain to sync to
 	if(numDomains > 0)
 	{
@@ -284,7 +286,6 @@ void ServiceDirectory::start()
 
 		// start the synchronization thread
 		Log::message("Starting ServiceDirectorySynchronization thread");
-		SyncInitDetails syncInitDetails;
 		syncInitDetails.context = context;
 		syncInitDetails.url = sdURL;
 		pthread_create(&synchronizerThread, NULL, startSynchronizer, (void*)&syncInitDetails);
