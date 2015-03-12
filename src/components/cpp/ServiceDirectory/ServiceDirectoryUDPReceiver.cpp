@@ -223,14 +223,18 @@ void ServiceDirectoryUDPReceiver::start()
 				//if we have missed enough messages
 				if(count <=0)
 				{
-					// inform Service Directory to remove domain
-					sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
-					sendStringMessage(domainSocket,iter->first,ZMQ_DONTWAIT);
+					//check whether we have already connected with this domain
+					if(connectedDomainSet.find(iter->first) == connectedDomainSet.end())
+					{
+						// inform Service Directory to remove domain
+						sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
+						sendStringMessage(domainSocket,iter->first,ZMQ_DONTWAIT);
+						connectedDomainSet.erase(iter->first);
+					}
 
 					// remove domain from data sets
 					receivedCountMap.erase(iter->first);
 					broadcastRateMap.erase(iter->first);
-					connectedDomainSet.erase(iter->first);
 					removeSet.insert(iter->first);
 					removed = true;
 				}

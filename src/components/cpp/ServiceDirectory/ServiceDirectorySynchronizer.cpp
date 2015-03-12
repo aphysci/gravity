@@ -158,39 +158,43 @@ void ServiceDirectorySynchronizer::start()
 
 				Log::message("Received Domain Remove command for '%s'", domain.c_str());
 
-				// A domain is no longer available and needs to be removed. Get 
-				// details from map
-				shared_ptr<SyncDomainDetails> details = syncMap[domain];
-
-				// Remove our subscription listener from pollItems vector
-				// (i.e. no longer care to receive updates)
-				pollItems.erase(pollItems.begin() + details->pollItemIndex);
-
-				// Close SUB socket
-				zmq_close(details->socket);				
-
-				// Clear all domain data from Service Directory							
-				for (int i = 0; i < details->providerMap.service_provider_size(); i++)
+				//make sure we have a mapping to the domain
+				if(syncMap.find(domain)!=syncMap.end())
 				{
-					string productID = details->providerMap.service_provider(i).product_id();						
-					for (int j = 0; j < details->providerMap.service_provider(i).url_size(); j++)
-					{
-						string url = details->providerMap.service_provider(i).url(j);						
-						createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
-					}
-				}								
-				for (int i = 0; i < details->providerMap.data_provider_size(); i++)
-				{
-					string productID = details->providerMap.data_provider(i).product_id();
-					for (int j = 0; j < details->providerMap.data_provider(i).url_size(); j++)
-					{
-						string url = details->providerMap.data_provider(i).url(j);						
-						createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
-					}			
-				}				
+					// A domain is no longer available and needs to be removed. Get 
+					// details from map
+					shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
-				// Remove from map
-				syncMap.erase(domain);
+					// Remove our subscription listener from pollItems vector
+					// (i.e. no longer care to receive updates)
+					pollItems.erase(pollItems.begin() + details->pollItemIndex);
+
+					// Close SUB socket
+					zmq_close(details->socket);				
+
+					// Clear all domain data from Service Directory							
+					for (int i = 0; i < details->providerMap.service_provider_size(); i++)
+					{
+						string productID = details->providerMap.service_provider(i).product_id();						
+						for (int j = 0; j < details->providerMap.service_provider(i).url_size(); j++)
+						{
+							string url = details->providerMap.service_provider(i).url(j);						
+							createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
+						}
+					}								
+					for (int i = 0; i < details->providerMap.data_provider_size(); i++)
+					{
+						string productID = details->providerMap.data_provider(i).product_id();
+						for (int j = 0; j < details->providerMap.data_provider(i).url_size(); j++)
+						{
+							string url = details->providerMap.data_provider(i).url(j);						
+							createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
+						}			
+					}				
+
+					// Remove from map
+					syncMap.erase(domain);
+				}
 			}			
 		}
 		else if (pollItems[1].revents & ZMQ_POLLIN)

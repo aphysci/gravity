@@ -184,6 +184,8 @@ void ServiceDirectory::start()
     boost::replace_all(sdURL, "localhost", "127.0.0.1");
     Log::message("running with SD connection string: %s", sdURL.c_str());
 
+	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
+
 	// Get the optional domain for this Service Directory instance
 	domain = gn.getStringParam("Domain", "");
 	
@@ -191,13 +193,16 @@ void ServiceDirectory::start()
 	{
 		domain = "";
 		Log::warning("Invalid Domain (must be alpha-numeric or '.').");
+
+		//don't broadcast if domain is invalid
+		broadcastEnabled = false;
 	}
 	Log::message("Domain set to '%s'", domain.c_str());
 
 
 	unsigned int broadcastPort = gn.getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
 
-	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
+
 
 	string knownDomainCSV = gn.getStringParam("DomainSyncList","");
 	int  numDomains = parseDomainCSV(knownDomainCSV);
