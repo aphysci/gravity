@@ -395,6 +395,7 @@ GravityNode::GravityNode()
     metricsEnabled = false;
 	initialized=false;
 	logInitialized = false;
+	listenerEnabled=false;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -427,10 +428,13 @@ GravityNode::~GravityNode()
 	closeHeartbeatSocket();
 
 	//kill the domain listener
-	sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
-	readStringMessage(domainListenerSWL.socket);
-	zmq_close(domainListenerSWL.socket);
-	zmq_close(domainRecvSWL.socket);
+	if(listenerEnabled)
+	{
+		sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
+		readStringMessage(domainListenerSWL.socket);
+		zmq_close(domainListenerSWL.socket);
+		zmq_close(domainRecvSWL.socket);
+	}
 
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
@@ -646,6 +650,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				{
 					domainTimeout=true;
 				}
+
+				listenerEnabled=true;
 				
 			}
 		}

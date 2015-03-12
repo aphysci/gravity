@@ -164,6 +164,7 @@ private:
     bool metricsEnabled;
 	bool initialized;
 	bool logInitialized;
+	bool listenerEnabled;
 
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
