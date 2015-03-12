@@ -82,14 +82,17 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				lock.Unlock();
 				if(listener.find(mqe.dataproductID)!=listener.end())
 				{
+					//chop off "_GravityHeartbeat" before sending DataProductID to listeners
+					std::string componentId = mqe.dataproductID.substr(0,mqe.dataproductID.find_last_of("_"));
+
 					if(!gotHeartbeat)
 					{
 						int diff = mqe.lastHeartbeatTime == 0 ? -1 : getCurrentTime() - mqe.lastHeartbeatTime;
-						listener[mqe.dataproductID]->MissedHeartbeat(mqe.dataproductID, diff, mqe.timetowaitBetweenHeartbeats);
+						listener[mqe.dataproductID]->MissedHeartbeat(componentId, diff, mqe.timetowaitBetweenHeartbeats);
 					}
 					else
 					{
-						listener[mqe.dataproductID]->ReceivedHeartbeat(mqe.dataproductID, mqe.timetowaitBetweenHeartbeats);
+						listener[mqe.dataproductID]->ReceivedHeartbeat(componentId, mqe.timetowaitBetweenHeartbeats);
 						mqe.lastHeartbeatTime = getCurrentTime();
 					}
 				}
