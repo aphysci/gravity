@@ -33,7 +33,7 @@ CXX            = @CXX@
 DEFS           = @DEFS@
 LIBS           = @LIBS@
 AC_CFLAGS      = @CFLAGS@
-AC_CPPFLAGS    = @CPPFLAGS@
+AC_CPPFLAGS    = @CPPFLAGS@ @BOOST_CPPFLAGS@
 INSTALL        = @INSTALL@
 INSTALL_DATA   = @INSTALL_DATA@
 INSTALL_PROGRAM= @INSTALL_PROGRAM@
@@ -66,7 +66,7 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	BUILD_VARIANT_DIRECTIVE=-DWIN32
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
-	OS_SPECIFIC_LIBS = -lrt
+	OS_SPECIFIC_LIBS = -lrt -lstdc++
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
