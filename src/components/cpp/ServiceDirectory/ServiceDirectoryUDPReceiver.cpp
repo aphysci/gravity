@@ -161,10 +161,14 @@ void ServiceDirectoryUDPReceiver::start()
 		}
 		else //we received a message
 		{
-
 			broadcastPB.ParseFromArray(recvString,recvStringLen);
 			//printByteBuffer(recvString,recvStringLen);
 
+			//Log a warning if we received the same domain from a different url
+			if((ourDomain.compare(broadcastPB.domain())==0) && ourUrl.compare(broadcastPB.url())!=0)
+			{
+				Log::warning("Duplicate Domain: %s, %s",ourDomain.c_str(),broadcastPB.url().c_str());
+			}
 			
 			//ignore messages from our domain name or invalid domains
 			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
@@ -224,7 +228,7 @@ void ServiceDirectoryUDPReceiver::start()
 				if(count <=0)
 				{
 					//check whether we have already connected with this domain
-					if(connectedDomainSet.find(iter->first) == connectedDomainSet.end())
+					if(connectedDomainSet.find(iter->first) != connectedDomainSet.end())
 					{
 						// inform Service Directory to remove domain
 						sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
@@ -289,6 +293,7 @@ void ServiceDirectoryUDPReceiver::start()
 void ServiceDirectoryUDPReceiver::receiveReceiverParameters()
 {
 	ourDomain = readStringMessage(sdSocket);
+	ourUrl = readStringMessage(sdSocket);
 
 	//receive port
 	zmq_msg_t msg;

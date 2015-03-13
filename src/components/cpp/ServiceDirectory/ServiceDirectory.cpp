@@ -287,7 +287,7 @@ void ServiceDirectory::start()
 		pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
 
 		//configure the receiver
-		sendReceiverParameters(domain,broadcastPort,numDomains,knownDomainCSV);
+		sendReceiverParameters(domain,sdURL,broadcastPort,numDomains,knownDomainCSV);
 
 		// start the synchronization thread
 		Log::message("Starting ServiceDirectorySynchronization thread");
@@ -831,12 +831,13 @@ void ServiceDirectory::sendBroadcasterParameters(string sdDomain, string url,uns
 	udpBroadcastSocket.lock.Unlock();
 }
 
-void ServiceDirectory::sendReceiverParameters(string sdDomain, unsigned int port, unsigned int numValidDomains, string validDomains)
+void ServiceDirectory::sendReceiverParameters(string sdDomain, string url, unsigned int port, unsigned int numValidDomains, string validDomains)
 {
 	udpReceiverSocket.lock.Lock();
 
 	sendStringMessage(udpReceiverSocket.socket,"receive",ZMQ_SNDMORE);
 	sendStringMessage(udpReceiverSocket.socket,sdDomain,ZMQ_SNDMORE);
+	sendStringMessage(udpReceiverSocket.socket,url,ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg,sizeof(port));

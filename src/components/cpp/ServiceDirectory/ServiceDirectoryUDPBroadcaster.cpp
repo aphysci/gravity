@@ -169,6 +169,14 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 
 	sendStringMessage(sdSocket,"ACK",ZMQ_DONTWAIT);
 
+#ifdef _WIN32
+	//if windows and broadcasting on loopback
+	if(url.find("127.0.0.1")!=std::string::npos)
+	{
+		Log::warning("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
+	}
+#endif
+
 }
 
 int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
@@ -179,7 +187,15 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	struct sockaddr_in *destAddr = (struct sockaddr_in*) &destStorage;
 	destAddr->sin_family=AF_INET;
 	destAddr->sin_port=htons(port);
-	destAddr->sin_addr.s_addr = inet_addr("255.255.255.255");
+
+	if(url.find("127.0.0.1")!=std::string::npos)
+	{
+		destAddr->sin_addr.s_addr = inet_addr("127.255.255.255");
+	}
+	else
+	{
+		destAddr->sin_addr.s_addr = inet_addr("255.255.255.255");
+	}
 
 	memcpy(&destAddress,destAddr,sizeof(struct sockaddr_in));
 
@@ -191,6 +207,7 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	}
 
 	int broadcastPerm=1;
+
 	if(setsockopt(broadcastSocket,SOL_SOCKET,SO_BROADCAST,(char *)&broadcastPerm,sizeof(broadcastPerm)) != 0)
 	{
 		return -1;
