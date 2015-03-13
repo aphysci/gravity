@@ -290,7 +290,7 @@ public:
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "");
+    GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "", uint64_t timestamp = 0);
 
     /**
      * Make a request against a service provider through the Gravity Service Directory

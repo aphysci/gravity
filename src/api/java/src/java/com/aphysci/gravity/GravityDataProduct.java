@@ -66,6 +66,15 @@ public class GravityDataProduct {
     }
 
     /**
+     * Method to set the timestamp for this GravityDataProduct
+     * @param ts timestamp (epoch microseconds) for this GravityDataProduct
+     */
+    public void setTimestamp(long ts)
+    {
+        gdp.setTimestamp(ts);
+    }
+
+    /**
      * Method to return the data product ID for this data
      * @return data product ID
      */

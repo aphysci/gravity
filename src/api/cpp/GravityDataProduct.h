@@ -52,8 +52,6 @@ private:
     friend class GravityMetricsManager;
 	friend class GravityServiceManager;
     friend void* Heartbeat(void*);
-    //In Microseconds
-    void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); } //Yeah, I'm telling the compiler this is const.
 	void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
 	void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
 public:
@@ -176,6 +174,12 @@ public:
 	 * \return domain of the source Gravity Node
 	 */
 	GRAVITY_API std::string getDomain();
+
+    /**
+     * Set the timestamp on this GravityDataProduct
+     * \param ts Timestamp (epoch microseconds) for this GravityDataProduct
+     */
+    void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
 };
 
 } /* namespace gravity */

@@ -1357,12 +1357,19 @@ GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const G
 	return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText)
+GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText, uint64_t timestamp)
 {
     string dataProductID = dataProduct.getDataProductID();
 
     //Set Timestamp
-    dataProduct.setTimestamp(getCurrentTime());
+    if (timestamp == 0)
+    {
+        dataProduct.setTimestamp(getCurrentTime());
+    }
+    else
+    {
+        dataProduct.setTimestamp(timestamp);
+    }
 
 	//set Component ID
 	dataProduct.setComponentId(componentID);
