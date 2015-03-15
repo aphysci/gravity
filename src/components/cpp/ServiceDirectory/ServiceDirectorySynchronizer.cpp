@@ -147,7 +147,7 @@ void ServiceDirectorySynchronizer::start()
 					zmq_sendmsg(details->socket, &data, ZMQ_DONTWAIT);
 					zmq_msg_close(&data);
 
-					// Save details to out internal map
+					// Save details to our internal map
 					syncMap[domain] = details;
 				}
 			}		
@@ -179,7 +179,7 @@ void ServiceDirectorySynchronizer::start()
 						for (int j = 0; j < details->providerMap.service_provider(i).url_size(); j++)
 						{
 							string url = details->providerMap.service_provider(i).url(j);						
-							createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
+							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type());
 						}
 					}								
 					for (int i = 0; i < details->providerMap.data_provider_size(); i++)
@@ -188,7 +188,7 @@ void ServiceDirectorySynchronizer::start()
 						for (int j = 0; j < details->providerMap.data_provider(i).url_size(); j++)
 						{
 							string url = details->providerMap.data_provider(i).url(j);						
-							createUnregistrationRequest(productID, url, details->providerMap.change().registration_type());
+							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type());
 						}			
 					}				
 
@@ -322,7 +322,7 @@ void ServiceDirectorySynchronizer::start()
 							}
 							else
 							{
-								createUnregistrationRequest(productID, url, providerMap.change().registration_type());								
+								createUnregistrationRequest(productID, url, domain, providerMap.change().registration_type());								
 							}
 						}
 					}				
@@ -375,7 +375,7 @@ void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, s
 }
 
 // Utility to create a UnregistrationRequest message and add it to the queue to be submitted
-void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID, string url, ProductChange_RegistrationType type)
+void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID, string url, string domain, ProductChange_RegistrationType type)
 {
 	ServiceDirectoryUnregistrationPB_RegistrationType rtype = type == ProductChange_RegistrationType_DATA ?
 				ServiceDirectoryUnregistrationPB_RegistrationType_DATA : ServiceDirectoryUnregistrationPB_RegistrationType_SERVICE;
@@ -384,6 +384,7 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 	unregisterRequest.set_id(productID);
 	unregisterRequest.set_url(url);
 	unregisterRequest.set_type(rtype);	
+	unregisterRequest.set_domain(domain);
 
 	shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));							
 	gdp->setData(unregisterRequest);

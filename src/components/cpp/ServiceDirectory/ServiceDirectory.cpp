@@ -629,7 +629,11 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
             purgeObsoletePublishers(registration.id(), registration.url());
 
             // Update any subscribers interested in our providers
-            updateProductLocations(registration.id(), registration.url(), ADD, DATA);
+            if (domain == this->domain)
+            {
+                Log::debug("Sending update of product definitions (resulting from added data for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+                updateProductLocations(registration.id(), registration.url(), ADD, DATA);
+            }
         }
         else
         {
@@ -652,7 +656,11 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
         purgeObsoletePublishers(registration.id(), registration.url());
 
         // Update any subscribers interested in our providers
-        updateProductLocations(registration.id(), registration.url(), ADD, SERVICE);
+        if (domain == this->domain)
+        {
+            Log::debug("Sending update of product definitions (resulting from added service for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+            updateProductLocations(registration.id(), registration.url(), ADD, SERVICE);
+        }
     }
     Log::message("[Register] ID: %s, MessageType: %s, URL: %s, Domain: %s", registration.id().c_str(),
             registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", 
@@ -678,8 +686,11 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 {
     ServiceDirectoryUnregistrationPB unregistration;
     request.populateMessage(unregistration);
-
     bool foundUrl = true;
+
+    // If the registration does not specify a domain, default to our own
+	string domain = unregistration.has_domain() ? unregistration.domain() : this->domain;
+
     if (unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA)
     {
 		map<string, list<string> >& dpMap = dataProductMap[domain];
@@ -705,7 +716,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 			}
 
             // Update any subscribers interested in our providers
-            updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, DATA);
+            if (domain == this->domain)
+            {
+                updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, DATA);
+            }
         }
         else
         {
@@ -721,7 +735,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
             sMap.erase(unregistration.id());
 
             // Update any subscribers interested in our providers
-            updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, SERVICE);
+            if (domain == this->domain)
+            {
+                updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, SERVICE);
+            }
         }
         else
         {
@@ -729,15 +746,17 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         }
     }
 
-    Log::message("[Unregister] ID: %s, MessageType: %s, URL: %s", unregistration.id().c_str(),
-            unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA? "Data Product": "Service", unregistration.url().c_str());
+    Log::message("[Unregister] ID: %s, MessageType: %s, URL: %s, Domain: %s", unregistration.id().c_str(),
+            unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA? "Data Product": "Service", 
+            unregistration.url().c_str(), unregistration.domain().c_str());
 
     ServiceDirectoryResponsePB sdr;
     sdr.set_id(unregistration.id());
     if (!foundUrl)
     {
         sdr.set_returncode(ServiceDirectoryResponsePB::NOT_REGISTERED);
-        Log::warning("Attempt to unregister unregistered %s (%s)", unregistration.id().c_str(), unregistration.url().c_str());
+        Log::warning("Attempt to unregister unregistered %s, %s, %s", unregistration.id().c_str(), 
+            unregistration.url().c_str(), unregistration.domain().c_str());
     }
     else
     {
