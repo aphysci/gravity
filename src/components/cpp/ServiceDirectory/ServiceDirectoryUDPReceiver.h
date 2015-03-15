@@ -42,6 +42,7 @@ private:
 	void* context;
 	void* sdSocket;
 	std::string ourDomain;
+	std::string ourUrl;
 	unsigned int port;
 	int receiveSocket;
 
