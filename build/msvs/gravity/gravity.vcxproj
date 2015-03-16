@@ -350,7 +350,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -393,7 +394,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -477,7 +479,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -519,7 +522,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -648,7 +652,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -691,7 +696,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
@@ -734,7 +740,8 @@ xcopy /i /y $(GRAVITY_HOME)\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h $(Out
 xcopy /i /s /y $(PROTOBUF_HOME)\src\*.h $(OutDir)\..\include
 xcopy /i /s /y $(PTHREADS_HOME)\include\*.h $(OutDir)\..\include
 md $(OutDir)\..\include\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB</Command>
+copy $(GRAVITY_HOME)\src\api\MATLAB\*.m $(OutDir)\..\include\MATLAB
+git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Create include director</Message>
