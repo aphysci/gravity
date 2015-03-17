@@ -1885,7 +1885,7 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	std::string heartbeatName;
-	heartbeatName = componentID.append("_GravityHeartbeat");
+	heartbeatName = componentID+"_GravityHeartbeat";
 
 	this->registerDataProduct(heartbeatName, GravityTransportTypes::TCP);
 
@@ -1920,13 +1920,13 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	}
 
 	std::string heartbeatName;
-	heartbeatName = componentID.append("_GravityHeartbeat");
+	heartbeatName = componentID+"_GravityHeartbeat";
 
 	this->subscribe(heartbeatName, hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, componentID, ZMQ_SNDMORE);
+	sendStringMessage(hbSocket, heartbeatName, ZMQ_SNDMORE);
 
 	//Send the address of the listener
 	zmq_msg_t msg1;
