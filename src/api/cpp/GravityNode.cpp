@@ -758,7 +758,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		char* p = (char*)calloc(response.getDataSize(), sizeof(char));
 		response.getData(p, response.getDataSize());
 		myDomain.assign(p, response.getDataSize());
-		delete p;
+                free(p);
 
 		configureServiceManager();
 	}
@@ -2034,6 +2034,8 @@ string GravityNode::getIP()
 #endif
 
         ip.assign(buffer);
+
+        free(buffer);
     }
 
     serviceDirectoryLock.Unlock();
