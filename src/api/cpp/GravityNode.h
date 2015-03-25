@@ -377,9 +377,11 @@ public:
      * \param interval_in_microseconds interval that heart beats are expected.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
      * \param listener instance of a GravityHeartbeatListener that will be notified when heart beats are received or missed.
+	 * \param domain name of domain for the componentID
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, const GravityHeartbeatListener& listener);
+    GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, 
+			const GravityHeartbeatListener& listener, std::string domain = "");
 
 	/**
      * Unregisters a callback for when we get a heartbeat from another component.

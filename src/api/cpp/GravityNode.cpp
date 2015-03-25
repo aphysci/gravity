@@ -1903,11 +1903,12 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	return gravity::GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int64_t timebetweenMessages, const GravityHeartbeatListener& listener)
+GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int64_t timebetweenMessages, 
+									const GravityHeartbeatListener& listener, string domain)
 {
 	void* HeartbeatListener(void*); //Forward declaration.
 	static class Heartbeat hbSub;
-
+	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 	if(hbSocket == NULL)
 	{
 		//Initialize Heartbeat thread.
@@ -1922,31 +1923,34 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	std::string heartbeatName;
 	heartbeatName = componentID+"_GravityHeartbeat";
 
-	this->subscribe(heartbeatName, hbSub);
+	ret = this->subscribe(heartbeatName, hbSub,"",domain);
 
-	//Send the DataproductID
-	sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, heartbeatName, ZMQ_SNDMORE);
+	if (ret==GravityReturnCodes::SUCCESS)
+	{
+		//Send the DataproductID
+		sendStringMessage(hbSocket, "register", ZMQ_SNDMORE);
+		sendStringMessage(hbSocket, heartbeatName, ZMQ_SNDMORE);
 
-	//Send the address of the listener
-	zmq_msg_t msg1;
-	zmq_msg_init_size(&msg1, sizeof(GravityHeartbeatListener*));
-	intptr_t p = (intptr_t) &listener;
-	memcpy(zmq_msg_data(&msg1), &p, sizeof(GravityHeartbeatListener*));
-	zmq_sendmsg(hbSocket, &msg1, ZMQ_SNDMORE);
-	zmq_msg_close(&msg1);
+		//Send the address of the listener
+		zmq_msg_t msg1;
+		zmq_msg_init_size(&msg1, sizeof(GravityHeartbeatListener*));
+		intptr_t p = (intptr_t) &listener;
+		memcpy(zmq_msg_data(&msg1), &p, sizeof(GravityHeartbeatListener*));
+		zmq_sendmsg(hbSocket, &msg1, ZMQ_SNDMORE);
+		zmq_msg_close(&msg1);
 
-	//Send the Max time between messages
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, 8);
-	memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
-	zmq_sendmsg(hbSocket, &msg, ZMQ_DONTWAIT);
-	zmq_msg_close(&msg);
+		//Send the Max time between messages
+		zmq_msg_t msg;
+		zmq_msg_init_size(&msg, 8);
+		memcpy(zmq_msg_data(&msg), &timebetweenMessages, 8);
+		zmq_sendmsg(hbSocket, &msg, ZMQ_DONTWAIT);
+		zmq_msg_close(&msg);
 
-	// Read the ACK
-	readStringMessage(hbSocket);
+		// Read the ACK
+		readStringMessage(hbSocket);
+	}
 
-	return GravityReturnCodes::SUCCESS;
+	return ret;
 }
 
 GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
