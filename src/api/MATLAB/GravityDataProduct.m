@@ -55,5 +55,13 @@ classdef GravityDataProduct < handle
         function gdp = getGravityDataProduct(this)
             gdp = this.gravityDataProduct;
         end
+
+		function domain = getDomain(this)
+			domain = this.gravityDataProduct.getDomain();
+		end
+
+		function componentID = getComponentID(this)
+			componentID = this.gravityDataProduct.getComponentID();
+		end
     end
 end

@@ -18,6 +18,7 @@ classdef GravitySubscription < handle
     properties (Access = private)
         dataProductID;
         filter;
+		domain;
         subscriber;
     end
     
@@ -30,10 +31,15 @@ classdef GravitySubscription < handle
             this.subscriber = com.aphysci.gravity.matlab.MATLABGravitySubscriber;
             
             this.dataProductID = dataProductID;
-            if (~isempty(varargin))
-                this.filter = varargin{1};
-            else
-                this.filter = '';
+
+			this.filter = '';
+			this.domain = '';
+
+			if (length(varargin) >= 1)
+				this.filter = varargin{1};
+			end	
+			if (length(varargin) >= 2)
+				this.domain = varargin{2};
             end
         end
         
@@ -62,6 +68,10 @@ classdef GravitySubscription < handle
         function filter = getFilter(this)
             filter = this.filter;
         end
+
+		function domain = getDomain(this)
+			domain = this.domain;
+		end
         
         function subscriber = getSubscriber(this)
             subscriber = this.subscriber;

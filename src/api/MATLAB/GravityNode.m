@@ -48,46 +48,55 @@ classdef GravityNode < handle
         
         function subscription = subscribe(this, dataProductID, varargin)
             %import com.aphysci.gravity.matlab.MATLABGravitySubscriber;
-            
-            % Get Filter
-            if (isempty(varargin))
-                filter = '';
-            else
-                filter = varargin{1};
-            end                        
-            
+
+ 			filter = '';
+			domain = '';
+		    if (length(varargin) >= 1)
+				filter = varargin{1};
+			end
+			if (length(varargin) >= 2)
+				domain = varargin{2};
+			end
+
             % Create Subscription
-            subscription = GravitySubscription(dataProductID, filter);
+            subscription = GravitySubscription(dataProductID, filter, domain);
             
             % Store subscriber
-            key = [dataProductID ':' filter];
+            key = [dataProductID ':' filter ':' domain];
             this.subscriptionMap(key) = subscription;
-            
-            if ~isempty(varargin)
+           
+			if (length(varargin) >= 2)
+                ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter, domain);
+			else if (length(varargin) >= 1)
                 ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter);
-            else
+			else
                 ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber());
-            end
+			end	
         end
         
         function ret = unsubscribe(this, dataProductID, varargin)
-            % Get Filter
-            if (isempty(varargin))
-                filter = '';
-            else
-                filter = varargin{1};
-            end 
+            % Get Filter & Domain
+ 			filter = '';
+			domain = '';
+		    if (length(varargin) >= 1)
+				filter = varargin{1};
+			end
+			if (length(varargin) >= 2)
+				domain = varargin{2};
+			end
             
             % Lookup subscriber
-            key = [dataProductID ':' filter];
+            key = [dataProductID ':' filter ':' domain];
             subscription = this.subscriptionMap(key);            
             
             if (~isempty(subscription))
-                if ~isempty(varargin)
+				if (length(varargin) >= 2)
+                	ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter, domain);
+				else if (length(varargin) >= 1)
                     ret = this.gravityNode.unsubscribe(dataProductID, subscription.getSubscriber(), filter);
-                else
-                    ret = this.gravityNode.unsubscribe(dataProductID, subscription.getSubscriber());
-                end
+				else
+                	ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber());
+				end	
             end
         end               
         
@@ -99,11 +108,13 @@ classdef GravityNode < handle
             ret = this.gravityNode.unregisterService(serviceID);
         end
         
-        function ret = request(this, serviceID, gravityDataProduct, requestor, varargin)            
+        function ret = request(this, serviceID, gravityDataProduct, requestor, requestID, timeout, varargin)            
             if ~isempty(varargin)
-                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(), varargin{1});
+                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(), 
+												requestID, timeout, varargin{1});
             else
-                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor());
+                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(),
+												requestID, timeout);
             end
         end
        
@@ -135,5 +146,13 @@ classdef GravityNode < handle
                 ret = this.gravityNode.getIntParam(key, varargin{1});
             end
         end
+
+		function ret = getIP(this)
+			ret = this.gravityNode.getIP();
+		end
+		
+		function ret = getDomain(this)
+			ret = this.gravityNode.getDomain();
+		end
     end
 end
