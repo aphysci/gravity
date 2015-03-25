@@ -399,6 +399,11 @@ public:
 	**/
 	GRAVITY_API std::string getIP();  
 
+	/**
+	 * Returns the domain with which this node is associated
+	 **/
+	GRAVITY_API std::string getDomain();
+
     /** @} */ //Registration Functions
 };
 

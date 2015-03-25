@@ -122,6 +122,7 @@ public:
     double getFloatParam(std::string key, double default_value = 0.0);
     bool getBoolParam(std::string key, bool default_value = false);
 	std::string getIP();
+    std::string getDomain();
 
 };
 

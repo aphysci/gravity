@@ -1992,6 +1992,11 @@ const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
 typedef int socklen_t;
 #endif
 
+string GravityNode::getDomain()
+{
+    return myDomain;
+}
+
 string GravityNode::getIP()
 {
     string ip = "127.0.0.1";
