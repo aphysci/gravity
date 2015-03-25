@@ -67,7 +67,7 @@ classdef GravityNode < handle
            
 			if (length(varargin) >= 2)
                 ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter, domain);
-			else if (length(varargin) >= 1)
+            elseif (length(varargin) >= 1)
                 ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter);
 			else
                 ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber());
@@ -92,7 +92,7 @@ classdef GravityNode < handle
             if (~isempty(subscription))
 				if (length(varargin) >= 2)
                 	ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber(), filter, domain);
-				else if (length(varargin) >= 1)
+                elseif (length(varargin) >= 1)
                     ret = this.gravityNode.unsubscribe(dataProductID, subscription.getSubscriber(), filter);
 				else
                 	ret = this.gravityNode.subscribe(dataProductID, subscription.getSubscriber());
@@ -110,10 +110,10 @@ classdef GravityNode < handle
         
         function ret = request(this, serviceID, gravityDataProduct, requestor, requestID, timeout, varargin)            
             if ~isempty(varargin)
-                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(), 
+                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(), ...
 												requestID, timeout, varargin{1});
             else
-                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(),
+                ret = this.gravityNode.request(serviceID, gravityDataProduct, requestor.getJavaRequestor(),...
 												requestID, timeout);
             end
         end
