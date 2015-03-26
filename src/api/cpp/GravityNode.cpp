@@ -1268,7 +1268,7 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	int tries = 5;
 	while (url.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, domain);
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, myDomain);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
 		if (url.size() > 1)
