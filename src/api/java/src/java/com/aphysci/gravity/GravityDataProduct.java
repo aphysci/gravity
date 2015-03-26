@@ -201,4 +201,21 @@ public class GravityDataProduct {
 		return gdp.getDomain();
 	}
 
+    /**
+     * Method to set the component id for this GravityDataProduct (typically set by infrastructure at publish)
+     * @param componentID id of component associated with this GravityDataProduct (typically producer)
+     */
+    public void setComponentID(String componentID)
+    {
+		gdp.setComponentID(componentID);
+    }
+    
+	/**
+     * Method to set the domain for this GravityDataProduct (typically set by infrastructure at publish)
+     * @param domain associated with this GravityDataProduct (typically producer's domain)
+     */
+    public void setDomain(String domain)
+    {
+		gdp.setDomain(domain);
+    }
 }

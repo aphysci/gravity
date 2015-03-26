@@ -63,5 +63,17 @@ classdef GravityDataProduct < handle
 		function componentID = getComponentID(this)
 			componentID = this.gravityDataProduct.getComponentID();
 		end
+
+		function setTimestamp(this, ts)
+			this.gravityDataProduct.setTimestamp(ts);
+	    end
+		
+		function setDomain(this, domain)
+			this.gravityDataProduct.setDomain(domain);
+	    end
+		
+		function setComponentID(this, componentID)
+			this.gravityDataProduct.setComponentID(componentID);
+	    end
     end
 end

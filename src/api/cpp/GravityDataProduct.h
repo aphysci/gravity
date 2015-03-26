@@ -52,8 +52,6 @@ private:
     friend class GravityMetricsManager;
 	friend class GravityServiceManager;
     friend void* Heartbeat(void*);
-	void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
-	void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
 public:
     GRAVITY_API GravityDataProduct() {}
     /**
@@ -176,10 +174,22 @@ public:
 	GRAVITY_API std::string getDomain();
 
     /**
-     * Set the timestamp on this GravityDataProduct
+     * Set the timestamp on this GravityDataProduct (typically set by infrastructure at publish)
      * \param ts Timestamp (epoch microseconds) for this GravityDataProduct
      */
-    void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
+    GRAVITY_API void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
+
+    /**
+     * Set the component id on this GravityDataProduct (typically set by infrastructure at publish)
+     * \param componentId ID of the component that produces this GravityDataProduct
+     */
+	GRAVITY_API void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
+
+    /**
+     * Set the domain on this GravityDataProduct (typically set by infrastructure at publish)
+     * \param domain name of the domain on which this GravityDataProduct is produced
+     */
+	GRAVITY_API void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
 };
 
 } /* namespace gravity */
