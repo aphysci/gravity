@@ -64,7 +64,7 @@ public class MATLABGravitySubscriber implements GravitySubscriber
 	public synchronized List<GravityDataProduct> getAllDataProducts()
 	{
 		@SuppressWarnings("unchecked")
-		List<GravityDataProduct> ret = (List<GravityDataProduct>)data.clone();
+		List<GravityDataProduct> ret = new ArrayList(data);
 		data.clear();
 		return ret;
 	}
