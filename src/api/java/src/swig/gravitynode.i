@@ -114,7 +114,8 @@ public:
     GravityReturnCode unregisterService(const std::string& serviceID);
 
     GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
-    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, const gravity::GravityHeartbeatListener& listener);
+    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
+		const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 	GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID);
 
     std::string getStringParam(std::string key, std::string default_value = "");
