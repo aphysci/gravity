@@ -290,8 +290,9 @@ void ServiceDirectorySynchronizer::start()
 								for (int j = 0; j < providerMap.service_provider(i).url_size(); j++)
 								{
 									string url = providerMap.service_provider(i).url(j);
-									string componentID = providerMap.service_provider(i).component_id(j);									
-									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type());
+									string componentID = providerMap.service_provider(i).component_id(j);
+									uint64_t timestamp = providerMap.service_provider(i).timestamp(j);
+									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);
 								}
 							}								
 							for (int i = 0; i < providerMap.data_provider_size(); i++)
@@ -300,8 +301,9 @@ void ServiceDirectorySynchronizer::start()
 								for (int j = 0; j < providerMap.data_provider(i).url_size(); j++)
 								{
 									string url = providerMap.data_provider(i).url(j);
-									string componentID = providerMap.data_provider(i).component_id(j);									
-									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type());
+									string componentID = providerMap.data_provider(i).component_id(j);	
+									uint64_t timestamp = providerMap.data_provider(i).timestamp(j);
+									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);
 								}
 							}
 						}
@@ -313,12 +315,13 @@ void ServiceDirectorySynchronizer::start()
 							string change = providerMap.change().change_type() == ProductChange_ChangeType_ADD ? "Add" : "Remove";
 							string type = providerMap.change().registration_type() == ProductChange_RegistrationType_DATA ? "Data" : "Service";	
 							string componentID = providerMap.change().component_id();
+							uint64_t timestamp = providerMap.change().timestamp();
 							Log::message("Incremental Update from domain '%s': %s %s named %s at %s", domain.c_str(), 
 											change.c_str(), type.c_str(), productID.c_str(), url.c_str());							
 
 							if (providerMap.change().change_type() == ProductChange_ChangeType_ADD)
 							{
-								createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type());								
+								createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);								
 							}
 							else
 							{
@@ -357,7 +360,7 @@ void ServiceDirectorySynchronizer::start()
 
 // Utility to create a RegistrationRequest message and add it to the queue to be submitted
 void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, string url, string componentID, 
-															 string domain, ProductChange_RegistrationType type)
+															 string domain, ProductChange_RegistrationType type, uint64_t timestamp)
 {
 	ServiceDirectoryRegistrationPB_RegistrationType rtype = type == ProductChange_RegistrationType_DATA ?
 			ServiceDirectoryRegistrationPB_RegistrationType_DATA : ServiceDirectoryRegistrationPB_RegistrationType_SERVICE;
@@ -368,6 +371,7 @@ void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, s
 	registerRequest.set_type(rtype);	
 	registerRequest.set_component_id(componentID);
 	registerRequest.set_domain(domain);
+	registerRequest.set_timestamp(timestamp);
 
 	shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("RegistrationRequest"));
 	gdp->setData(registerRequest);

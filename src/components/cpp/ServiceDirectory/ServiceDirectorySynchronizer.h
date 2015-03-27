@@ -71,7 +71,7 @@ private:
 	void printMap(ServiceDirectoryMapPB providerMap);
 
 	void createRegistrationRequest(std::string productID, std::string url, std::string componentID, std::string domain, 
-									ProductChange_RegistrationType type);
+									ProductChange_RegistrationType type, uint64_t timestamp);
 	void createUnregistrationRequest(std::string productID, std::string url, std::string domain, ProductChange_RegistrationType type);
 
 public:
