@@ -1017,6 +1017,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
     sendStringMessage(publishManagerRequestSWL.socket, endpoint, ZMQ_DONTWAIT);
 
 	string connectionURL = readStringMessage(publishManagerRequestSWL.socket);
+	uint64_t timestamp = getCurrentTime();
 
 	if (connectionURL.size() == 0)
 	{
@@ -1032,6 +1033,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
             registration.set_url(connectionURL);
             registration.set_type(ServiceDirectoryRegistrationPB::DATA);
             registration.set_component_id(componentID);
+			registration.set_timestamp(timestamp);
 
             // Wrap request in GravityDataProduct
             GravityDataProduct request("RegistrationRequest");
@@ -1093,6 +1095,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 	{
 	    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
         publishMap[dataProductID] = connectionURL;
+		urlInstanceMap[connectionURL] = timestamp;
 	}
 
     publishManagerRequestSWL.lock.Unlock();
@@ -1116,6 +1119,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
         readStringMessage(publishManagerRequestSWL.socket);
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
+		urlInstanceMap.erase(url);
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {
@@ -1412,6 +1416,7 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
         registration.set_url(iter->second);
         registration.set_type(ServiceDirectoryRegistrationPB::DATA);
         registration.set_component_id(componentId);
+		registration.set_timestamp(urlInstanceMap[iter->second]);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
@@ -1449,6 +1454,7 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId)
         registration.set_url(iter->second);
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
         registration.set_component_id(componentId);
+		registration.set_timestamp(urlInstanceMap[iter->second]);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
@@ -1726,6 +1732,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
 	zmq_msg_close(&msg);
 
     string connectionURL = readStringMessage(serviceManagerSWL.socket);
+	uint64_t timestamp = getCurrentTime();
 
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1737,6 +1744,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
         registration.set_url(connectionURL);
         registration.set_type(ServiceDirectoryRegistrationPB::SERVICE);
         registration.set_component_id(componentID);
+		registration.set_timestamp(timestamp);
 
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
@@ -1798,6 +1806,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
     {
         Log::debug("Registered service at address: %s", connectionURL.c_str());
         serviceMap[serviceID] = connectionURL;
+		urlInstanceMap[connectionURL] = timestamp;
     }
     serviceManagerSWL.lock.Unlock();
     return ret;
@@ -1817,6 +1826,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
         string url = serviceMap[serviceID];
         serviceMap.erase(serviceID);
+		urlInstanceMap.erase(url);
 
         string status = readStringMessage(serviceManagerSWL.socket);
 

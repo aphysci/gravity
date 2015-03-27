@@ -67,6 +67,8 @@ private:
 	// mapping from URL to name of publisher/service provider
 	map<string, string> urlToComponentMap;
 
+	map<string, uint64_t> registrationInstanceMap;
+
 	// own GravityNode
     GravityNode gn;
 
@@ -85,7 +87,7 @@ private:
 	void sendBroadcasterParameters(string sdDomain, string url, unsigned int port, unsigned int rate);
 	void sendReceiverParameters(string sdDomain, string url, unsigned int port, unsigned int numValidDomains, string validDomains);
 
-	void updateProductLocations(string productID, string url, ChangeType changeType, RegistrationType registrationType);
+	void updateProductLocations(string productID, string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType);
 	void updateProductLocations();
 	shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
 

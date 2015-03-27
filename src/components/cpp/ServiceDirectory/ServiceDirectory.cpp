@@ -450,6 +450,7 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
 					locs->set_product_id(it2->first); // service ID
 					locs->add_url(it2->second); // url
 					locs->add_component_id(urlToComponentMap[it2->second]); // component id
+					locs->add_timestamp(registrationInstanceMap[it2->second]); //timestamp
 					locs->add_domain_id(domain); // domain
 				}
 			}            
@@ -467,7 +468,8 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
 					for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
 					{
 						locs->add_url(*lit); // url
-						locs->add_component_id(urlToComponentMap[*lit]); // component id					
+						locs->add_component_id(urlToComponentMap[*lit]); // component id	
+						locs->add_timestamp(registrationInstanceMap[*lit]); //timestamp
 					}
 				}
 			}            
@@ -545,7 +547,7 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
     }
 }
 
-void ServiceDirectory::updateProductLocations(string productID, string url, ChangeType changeType, RegistrationType registrationType)
+void ServiceDirectory::updateProductLocations(string productID, string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType)
 {
 	ServiceDirectoryMapPB providerMap;
 	providerMap.set_domain(domain);
@@ -557,6 +559,7 @@ void ServiceDirectory::updateProductLocations(string productID, string url, Chan
 		locs->set_product_id(it2->first); // service ID
 		locs->add_url(it2->second); // url
 		locs->add_component_id(urlToComponentMap[it2->second]); // component id
+		locs->add_timestamp(registrationInstanceMap[it2->second]); //timestamp
 		locs->add_domain_id(domain); // domain
 	}            
             
@@ -571,19 +574,22 @@ void ServiceDirectory::updateProductLocations(string productID, string url, Chan
 		{
 			locs->add_url(*lit); // url
 			locs->add_component_id(urlToComponentMap[*lit]); // component id					
+			locs->add_timestamp(registrationInstanceMap[*lit]); // timestamp
 		}
 	}
 	
 	// Add change to data product
-	Log::debug("Adding Change : %s %s %s", productID.c_str(), url.c_str(), urlToComponentMap[url].c_str()); 
+	Log::debug("Adding Change : %s %s %s %lu", productID.c_str(), url.c_str(), 
+			urlToComponentMap[url].c_str(),0);//urlToComponentMap[url].timestamp); 
 	ProductChange* change = providerMap.mutable_change();
 	change->set_product_id(productID);
 	change->set_url(url);
 	change->set_component_id(urlToComponentMap[url]);
+	change->set_timestamp(timestamp);
     change->set_change_type(changeType == REMOVE ? ProductChange_ChangeType_REMOVE : ProductChange_ChangeType_ADD);
     change->set_registration_type(registrationType == SERVICE ? 
                     ProductChange_RegistrationType_SERVICE : ProductChange_RegistrationType_DATA);
-    
+
 	// Publish update
 	Log::debug("Publishing ServiceDirectory_DomainDetails");
 	GravityDataProduct gdp("ServiceDirectory_DomainDetails");
@@ -600,72 +606,107 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     // If the registration does not specify a domain, default to our own
 	string domain = registration.has_domain() ? registration.domain() : this->domain;
     
-    if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
-    {
-		map<string, list<string> >& dpMap = dataProductMap[domain];
+	boolean update = true;
 
-        if (registration.id() == REGISTERED_PUBLISHERS)
-        {
-            registeredPublishersReady = true;
-        }
-        list<string>* urls = &dpMap[registration.id()];
-        list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
-        if (iter == urls->end())
-        {
-            dpMap[registration.id()].push_back(registration.url());			
-            urlToComponentMap[registration.url()] = registration.component_id();
-            if (registeredPublishersReady)
-            {
-                GravityDataProduct update(REGISTERED_PUBLISHERS);
-                addPublishers(registration.id(), update, domain);
-                gn.publish(update, registration.id());
-            }
-            else
-            {
-                registerUpdatesToSend.insert(registration.id());
-            }
+	// if the request does not have a timestamp
+	if(!registration.has_timestamp())
+	{
+		Log::warning("Received Register for URL: %s with no timestamp. Ignoring Request",registration.url().c_str());
+		update = false;
+	}
+	//if we already have an instance for this URL
+	else if(registrationInstanceMap.find(registration.url())!=registrationInstanceMap.end())
+	{
+		//check if the update for the specified URL is older then our current mapping
+		if(registration.timestamp() < registrationInstanceMap[registration.url()])
+		{
+			Log::warning("Received Register for URL: %s with old timestamp %lu",registration.url().c_str(),registration.timestamp());
+			update = false;
+		}
+	}
 
-            // Remove any previous registrations at this URL as they obviously no longer exist
-            purgeObsoletePublishers(registration.id(), registration.url());
+	if(update)
+	{
+		if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
+		{
+			map<string, list<string> >& dpMap = dataProductMap[domain];
 
-            // Update any subscribers interested in our providers
-            if (domain == this->domain)
-            {
-                Log::debug("Sending update of product definitions (resulting from added data for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
-                updateProductLocations(registration.id(), registration.url(), ADD, DATA);
-            }
-        }
-        else
-        {
-            foundDup = true;
-        }
-    }
-    else
-    {
-		map<string, string>& sMap = serviceMap[domain];
+			if (registration.id() == REGISTERED_PUBLISHERS)
+			{
+				registeredPublishersReady = true;
+			}
+			list<string>* urls = &dpMap[registration.id()];
+			list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
+			if (iter == urls->end())
+			{
+				dpMap[registration.id()].push_back(registration.url());	
+				
+				urlToComponentMap[registration.url()] = registration.component_id();
 
-        if (sMap.find(registration.id()) != sMap.end())
-        {
-            Log::warning("Replacing existing provider for service id '%s'", registration.id().c_str()); 
-        }
-        // Add as service provider, overwriting any existing provider for this service
-        sMap[registration.id()] = registration.url();
-		urlToComponentMap[registration.url()] = registration.component_id();
-            
-        // Remove any previous publisher registrations at this URL as they obviously no longer exist
-        purgeObsoletePublishers(registration.id(), registration.url());
+				if (registeredPublishersReady)
+				{
+					GravityDataProduct update(REGISTERED_PUBLISHERS);
+					addPublishers(registration.id(), update, domain);
+					gn.publish(update, registration.id());
+				}
+				else
+				{
+					registerUpdatesToSend.insert(registration.id());
+				}
 
-        // Update any subscribers interested in our providers
-        if (domain == this->domain)
-        {
-            Log::debug("Sending update of product definitions (resulting from added service for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
-            updateProductLocations(registration.id(), registration.url(), ADD, SERVICE);
-        }
-    }
-    Log::message("[Register] ID: %s, MessageType: %s, URL: %s, Domain: %s", registration.id().c_str(),
-            registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", 
-            registration.url().c_str(), registration.domain().c_str());
+				// Remove any previous registrations at this URL as they obviously no longer exist
+				purgeObsoletePublishers(registration.id(), registration.url());
 
+				//insert new instance mapping for URL
+				registrationInstanceMap[registration.url()] = registration.timestamp();
+
+				// Update any subscribers interested in our providers
+				if (domain == this->domain)
+				{
+					Log::debug("Sending update of product definitions (resulting from added data for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+					updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, DATA);
+				}
+			}
+			else
+			{
+				foundDup = true;
+						
+				//Replace existing timestamp with the new one
+				registrationInstanceMap[registration.url()] = registration.timestamp();
+			}
+		}
+		else
+		{
+			map<string, string>& sMap = serviceMap[domain];
+
+			if (sMap.find(registration.id()) != sMap.end())
+			{
+				Log::warning("Replacing existing provider for service id '%s'", registration.id().c_str()); 
+			}
+			// Add as service provider, overwriting any existing provider for this service
+			sMap[registration.id()] = registration.url();
+			
+			urlToComponentMap[registration.url()] = registration.component_id();
+			
+			// Remove any previous publisher registrations at this URL as they obviously no longer exist
+			purgeObsoletePublishers(registration.id(), registration.url());
+
+			//insert new instance mapping for URL
+			registrationInstanceMap[registration.url()] = registration.timestamp();
+
+
+			// Update any subscribers interested in our providers
+			if (domain == this->domain)
+			{
+				Log::debug("Sending update of product definitions (resulting from added service for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+				updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, SERVICE);
+			}
+		}
+		Log::message("[Register] ID: %s, MessageType: %s, URL: %s, Domain: %s", registration.id().c_str(),
+				registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", 
+				registration.url().c_str(), registration.domain().c_str());
+	
+	}
 
     ServiceDirectoryResponsePB sdr;
     sdr.set_id(registration.id());
@@ -704,6 +745,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 			{
 				dpMap.erase(unregistration.id());
 			}
+
 			if (registeredPublishersReady)
 			{
 			    GravityDataProduct update(REGISTERED_PUBLISHERS);
@@ -718,8 +760,12 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
             // Update any subscribers interested in our providers
             if (domain == this->domain)
             {
-                updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, DATA);
+				updateProductLocations(unregistration.id(), unregistration.url(), 
+						registrationInstanceMap[unregistration.url()], REMOVE, DATA);
             }
+					
+			//remove instance mapping
+			registrationInstanceMap.erase(unregistration.url());
         }
         else
         {
@@ -737,8 +783,12 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
             // Update any subscribers interested in our providers
             if (domain == this->domain)
             {
-                updateProductLocations(unregistration.id(), unregistration.url(), REMOVE, SERVICE);
+                updateProductLocations(unregistration.id(), unregistration.url(), 
+						registrationInstanceMap[unregistration.url()], REMOVE, SERVICE);
             }
+
+			// remove instance mapping
+			registrationInstanceMap.erase(unregistration.url());
         }
         else
         {
@@ -795,7 +845,10 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
                 }
 
                 // Update any subscribers interested in our providers
-                updateProductLocations(iter->first, url, REMOVE, DATA);
+                updateProductLocations(iter->first, url, registrationInstanceMap[url], REMOVE, DATA);
+
+				//remove old Instance Mapping
+				registrationInstanceMap.erase(url);
             }
         }
 

@@ -198,6 +198,7 @@ private:
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
+	std::map<std::string,uint64_t> urlInstanceMap;
 
     std::string myDomain;
     std::string componentID;
