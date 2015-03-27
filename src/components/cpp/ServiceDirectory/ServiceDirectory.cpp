@@ -606,7 +606,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     // If the registration does not specify a domain, default to our own
 	string domain = registration.has_domain() ? registration.domain() : this->domain;
     
-	boolean update = true;
+	bool update = true;
 
 	// if the request does not have a timestamp
 	if(!registration.has_timestamp())
