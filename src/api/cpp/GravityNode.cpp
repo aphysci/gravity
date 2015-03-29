@@ -1895,7 +1895,8 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	std::string heartbeatName;
-	heartbeatName = componentID+"_GravityHeartbeat";
+	//Gravity Heartbeats should be keyed with the domain
+	heartbeatName = componentID+"_GravityHeartbeat_"+myDomain;
 
 	this->registerDataProduct(heartbeatName, GravityTransportTypes::TCP);
 
@@ -1931,7 +1932,9 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	}
 
 	std::string heartbeatName;
-	heartbeatName = componentID+"_GravityHeartbeat";
+
+	//Gravity Heartbeats should be keyed with the domain
+	heartbeatName = componentID+"_GravityHeartbeat_"+domain;
 
 	ret = this->subscribe(heartbeatName, hbSub,"",domain);
 
@@ -1968,13 +1971,13 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
 	static class Heartbeat hbSub;
 	
 	std::string heartbeatName;
-	heartbeatName = componentID.append("_GravityHeartbeat");
+	heartbeatName = componentID+"_GravityHeartbeat_"+myDomain;
 
 	this->unsubscribe(heartbeatName,hbSub);
 
 	//Send the DataproductID
 	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, componentID, ZMQ_DONTWAIT);
+	sendStringMessage(hbSocket, heartbeatName, ZMQ_DONTWAIT);
 
 	// Read the ACK
 	readStringMessage(hbSocket);

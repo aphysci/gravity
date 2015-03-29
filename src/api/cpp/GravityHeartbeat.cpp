@@ -83,7 +83,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				if(listener.find(mqe.dataproductID)!=listener.end())
 				{
 					//chop off "_GravityHeartbeat" before sending DataProductID to listeners
-					std::string componentId = mqe.dataproductID.substr(0,mqe.dataproductID.find_last_of("_"));
+					std::string componentId = mqe.dataproductID.substr(0,mqe.dataproductID.rfind("_GravityHeartbeat"));
 
 					if(!gotHeartbeat)
 					{
