@@ -69,6 +69,9 @@ private:
 
 	map<string, uint64_t> registrationInstanceMap;
 
+	// mapping from Domain to URL
+	map<string, string> domainMap;
+
 	// own GravityNode
     GravityNode gn;
 
@@ -86,6 +89,7 @@ private:
 
 	void sendBroadcasterParameters(string sdDomain, string url, unsigned int port, unsigned int rate);
 	void sendReceiverParameters(string sdDomain, string url, unsigned int port, unsigned int numValidDomains, string validDomains);
+	void publishDomainUpdateMessage(string updateDomain, string url, ChangeType type);
 
 	void updateProductLocations(string productID, string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType);
 	void updateProductLocations();

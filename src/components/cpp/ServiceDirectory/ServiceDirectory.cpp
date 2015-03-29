@@ -37,6 +37,7 @@
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
+#include "protobuf/ServiceDirectoryDomainUpdatePB.pb.h"
 
 //#include "protobuf/ServiceDirectoryBroadcastSetup.pb.h"
 
@@ -80,8 +81,7 @@ static void* registration(void* regData)
     gn->registerService(DIRECTORY_SERVICE, gravity::GravityTransportTypes::TCP, *provider);
 
 	// Register the data products for adding and removing domains
-	gn->registerDataProduct("ServiceDirectory_AddDomain",gravity::GravityTransportTypes::TCP);
-	gn->registerDataProduct("ServiceDirectory_RemoveDomain",gravity::GravityTransportTypes::TCP);	
+	gn->registerDataProduct("ServiceDirectory_DomainUpdate",gravity::GravityTransportTypes::TCP);
 
     return NULL;
 }
@@ -359,11 +359,11 @@ void ServiceDirectory::start()
 				{
 					string domainToAdd = readStringMessage(domainSocket);
 					string url = readStringMessage(domainSocket);
+
+					domainMap[domainToAdd] = url;
 		
-					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_AddDomain"));
-					gdp->setData(&domainToAdd,domainToAdd.length());
-					Log::message("Publishing add domain: %s",domainToAdd.c_str());
-					gn.publish(*gdp);
+					// publish domain added message
+					publishDomainUpdateMessage(domainToAdd,url,ADD);
 
 					// Send Add command to synchronization thread
 					Log::debug("Sending add command to synchronziation thread for %s:%s", domainToAdd.c_str(), url.c_str());
@@ -375,11 +375,12 @@ void ServiceDirectory::start()
 				else if (command == "Remove")
 				{
 					string domainToRemove = readStringMessage(domainSocket);
-				
-					shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("ServiceDirectory_RemoveDomain"));
-					gdp->setData(&domainToRemove,domainToRemove.length());
-					Log::message("Publishing remove domain: %s",domainToRemove.c_str());
-					gn.publish(*gdp);
+					string url = domainMap[domainToRemove];
+
+					domainMap.erase(domainToRemove);
+
+					// publish domain removed message
+					publishDomainUpdateMessage(domainToRemove,url,REMOVE);
 
 					// Send Remove command to synchronization thread
 					Log::debug("Sending remove command to synchronziation thread for %s", domainToRemove.c_str());
@@ -926,6 +927,33 @@ void ServiceDirectory::sendReceiverParameters(string sdDomain, string url, unsig
 	sendStringMessage(udpReceiverSocket.socket,validDomains,ZMQ_DONTWAIT);
 
 	udpReceiverSocket.lock.Unlock();
+}
+
+void ServiceDirectory::publishDomainUpdateMessage(string updateDomain, string url, ChangeType type)
+{
+	ServiceDirectoryDomainUpdatePB updatePB;
+
+	//add all the currently synced domain to the message
+	map<string,string>::iterator iter = domainMap.begin();
+	while (iter != domainMap.end())
+    {	
+		ServiceDirectoryDomainUpdatePB::DomainDetails* knownDomain =  updatePB.add_known_domains();
+		knownDomain->set_domain(iter->first); //domain
+		knownDomain->set_url(iter->second); //url
+		++iter;
+	}
+
+	ServiceDirectoryDomainUpdatePB::DomainDetails *update = updatePB.mutable_update_domain();
+	update->set_domain(updateDomain);
+	update->set_url(url);
+
+	updatePB.set_type(type == ADD? ServiceDirectoryDomainUpdatePB_UpdateType_ADD : 
+		ServiceDirectoryDomainUpdatePB_UpdateType_REMOVE);
+
+	GravityDataProduct gdp("ServiceDirectory_DomainUpdate");
+	gdp.setData(updatePB);
+	gn.publish(gdp);
+
 }
 
 } /* namespace gravity */

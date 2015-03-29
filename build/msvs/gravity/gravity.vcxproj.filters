@@ -241,6 +241,9 @@
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryBroadcastPB.proto">
       <Filter>protobufs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryDomainUpdatePB.proto">
+      <Filter>protobufs</Filter>
+    </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto" />
   </ItemGroup>
   <ItemGroup>
