@@ -674,6 +674,12 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 						
 				//Replace existing timestamp with the new one
 				registrationInstanceMap[registration.url()] = registration.timestamp();
+				
+				// Update any subscribers interested in our providers
+				if(domain == this->domain)
+				{
+					updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, DATA);
+				}
 			}
 		}
 		else
