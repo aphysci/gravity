@@ -1934,7 +1934,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	std::string heartbeatName;
 
 	//Gravity Heartbeats should be keyed with the domain
-	heartbeatName = componentID+"_GravityHeartbeat_"+domain;
+	heartbeatName = componentID+"_GravityHeartbeat_"+(domain.empty()?myDomain:domain);
 
 	ret = this->subscribe(heartbeatName, hbSub,"",domain);
 
@@ -1966,12 +1966,12 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 	return ret;
 }
 
-GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID)
+GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, string domain)
 {
 	static class Heartbeat hbSub;
 	
 	std::string heartbeatName;
-	heartbeatName = componentID+"_GravityHeartbeat_"+myDomain;
+	heartbeatName = componentID+"_GravityHeartbeat_"+(domain.empty()?myDomain:domain);
 
 	this->unsubscribe(heartbeatName,hbSub);
 

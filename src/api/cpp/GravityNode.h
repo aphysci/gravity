@@ -389,7 +389,7 @@ public:
 	 * \param componentID name of component we are currently registered to
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID);
+    GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
 
 
     /**
