@@ -24,11 +24,6 @@ package gravity;
 
 message ServiceDirectoryDomainUpdatePB
 {
-	message DomainDetails
-	{
-		optional string domain = 1;
-		optional string url = 2;
-	}
 	
 	enum UpdateType 
 	{
@@ -36,7 +31,7 @@ message ServiceDirectoryDomainUpdatePB
 		REMOVE = 2;
 	}
 	
-	repeated DomainDetails known_domains = 1;
+	repeated string known_domains = 1;
 	optional UpdateType type = 2;
-	optional DomainDetails update_domain = 3;
+	optional string update_domain = 3;
 }

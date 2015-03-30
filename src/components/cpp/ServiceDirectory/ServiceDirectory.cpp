@@ -937,15 +937,11 @@ void ServiceDirectory::publishDomainUpdateMessage(string updateDomain, string ur
 	map<string,string>::iterator iter = domainMap.begin();
 	while (iter != domainMap.end())
     {	
-		ServiceDirectoryDomainUpdatePB::DomainDetails* knownDomain =  updatePB.add_known_domains();
-		knownDomain->set_domain(iter->first); //domain
-		knownDomain->set_url(iter->second); //url
+		updatePB.add_known_domains(iter->first);
 		++iter;
 	}
 
-	ServiceDirectoryDomainUpdatePB::DomainDetails *update = updatePB.mutable_update_domain();
-	update->set_domain(updateDomain);
-	update->set_url(url);
+	updatePB.set_update_domain(updateDomain);
 
 	updatePB.set_type(type == ADD? ServiceDirectoryDomainUpdatePB_UpdateType_ADD : 
 		ServiceDirectoryDomainUpdatePB_UpdateType_REMOVE);
