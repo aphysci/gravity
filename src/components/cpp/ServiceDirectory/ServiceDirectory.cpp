@@ -71,11 +71,11 @@ static void* registration(void* regData)
     gravity::GravityNode* gn = ((RegistrationData*)regData)->node;
     gravity::GravityServiceProvider* provider = ((RegistrationData*)regData)->provider;
 
-	// Register the data product for domain broadcast details
-	gn->registerDataProduct("ServiceDirectory_DomainDetails", gravity::GravityTransportTypes::TCP);
-
     // Register data product for reporting changes to registered publishers
     gn->registerDataProduct(REGISTERED_PUBLISHERS, gravity::GravityTransportTypes::TCP);
+
+    // Register the data product for domain broadcast details
+	gn->registerDataProduct("ServiceDirectory_DomainDetails", gravity::GravityTransportTypes::TCP);
     
     // Register service for external requests
     gn->registerService(DIRECTORY_SERVICE, gravity::GravityTransportTypes::TCP, *provider);
@@ -662,7 +662,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				registrationInstanceMap[registration.url()] = registration.timestamp();
 
 				// Update any subscribers interested in our providers
-				if (domain == this->domain)
+				if (domain == this->domain && registration.id() != REGISTERED_PUBLISHERS)
 				{
 					Log::debug("Sending update of product definitions (resulting from added data for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
 					updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, DATA);
