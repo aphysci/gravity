@@ -188,7 +188,7 @@ void GravitySubscriptionManager::start()
 
                         // This may be a resend of previous value if a new subscriber was added, so make sure this is new data
                         if (!lastCachedValue ||
-                            lastCachedValue->getGravityTimestamp() <= dataProduct->getGravityTimestamp() ||
+                            lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp() ||
                             // or if timestamps are the same, but GDP's are different
                                (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
                                 && !(*lastCachedValue == *dataProduct)))
