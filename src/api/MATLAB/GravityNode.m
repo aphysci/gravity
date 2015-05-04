@@ -23,17 +23,19 @@ classdef GravityNode < handle
     
     methods (Access = public)
         function this = GravityNode(componentID)
-            % Import the underlying Java classes
-            %import com.aphysci.gravity.swig.GravityNode;            
-
             % Initialize the GravityNode
             this.gravityNode = com.aphysci.gravity.swig.GravityNode;
-            this.gravityNode.init(componentID);
+
+			if (isempty(componentID))
+            	this.gravityNode.init();
+			else
+            	this.gravityNode.init(componentID);
+			end
             
             % Initialize the subscription map
             this.subscriptionMap = containers.Map;
         end
-        
+
         function ret = registerDataProduct(this, dataProductID, protocol)
             ret = this.gravityNode.registerDataProduct(dataProductID, protocol);
         end
