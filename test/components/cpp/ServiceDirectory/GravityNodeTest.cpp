@@ -451,6 +451,14 @@ void GravityNodeTest::testDataProduct(void)
 	delete data2;
 }
 
+void GravityNodeTest::testComponentID(void)
+{
+    GravityNode gn;
+    GRAVITY_TEST_EQUALS(gn.getComponentID(), "");
+    gn.init("TestCompId");
+    GRAVITY_TEST_EQUALS(gn.getComponentID(), "TestCompId");
+}
+
 void GravityNodeTest::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
 {
     pthread_mutex_lock(&mutex);
@@ -544,7 +552,9 @@ int main( int argc, char *argv[] )
     gnTest.testSubscribeDomain();
     printf("\nFinished testSubscribeDomain, about to run testServiceWithDomain.\n\n");
     gnTest.testServiceWithDomain();
-    printf("\nFinished testServiceWithDomain.\n\n");
+    printf("\nFinished testServiceWithDomain, about to run testComponentID.\n\n");
+    gnTest.testComponentID();
+    printf("\nFinished testComponentID.\n\n");
 
     GravitySyncTest syncTest;
     syncTest.testSync();

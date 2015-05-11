@@ -39,8 +39,10 @@ public class GravityJavaTest {
         Log.debug("in main");
 
         GravityNode node = new GravityNode();
+        testAssert(node.getComponentID().equals(""));
         GravityReturnCode ret = node.init("TestNode");
         testAssert(ret == GravityReturnCode.SUCCESS);
+        testAssert(node.getComponentID().equals("TestNode"));
 
         ret = node.registerDataProduct("JavaGDP", GravityTransportType.TCP);
         testAssert(ret == GravityReturnCode.SUCCESS);

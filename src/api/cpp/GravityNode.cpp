@@ -2096,6 +2096,11 @@ bool GravityNode::getBoolParam(std::string key, bool default_value)
 		return false;
 }
 
+std::string GravityNode::getComponentID()
+{
+    return componentID;
+}
+
 static std::map<GravityReturnCode,std::string> code_strings =
   boost::assign::map_list_of
     (GravityReturnCodes::SUCCESS, "SUCCESS")
