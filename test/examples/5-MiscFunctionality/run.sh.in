@@ -38,10 +38,10 @@ trap control_c SIGINT
 
 ServiceDirectory &
 SDPID=$!
-MiscComponent1 &
+./MiscComponent1 &
 PUBPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-MiscComponent2
+./MiscComponent2

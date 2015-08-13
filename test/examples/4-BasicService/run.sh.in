@@ -27,13 +27,13 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 
 ServiceDirectory &
 SDPID=$!
-BasicServiceProvider &
+./BasicServiceProvider &
 BSPPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-BasicServiceRequestor
+./BasicServiceRequestor
 
 kill $SDPID
 kill $BSPPID
