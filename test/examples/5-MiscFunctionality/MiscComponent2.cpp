@@ -61,7 +61,7 @@ void MiscGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<Gra
 		message[size] = 0; // null terminate
 
 		//Output the message
-		Log::message("Got message: %s", message);
+		Log::warning("Got message: %s", message);
 		//Don't forget to free the memory we allocated.
 		delete message;
 	}
@@ -77,7 +77,7 @@ int main()
 
 	//Get a parameter from either the Gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.
 	int interval = gn.getIntParam("HeartbeatInterval", //Param Name
-									1000000); //Default value.
+									500000); //Default value.
 
 	//Get another parameter from gravity.
 	bool listen_for_heartbeat = gn.getBoolParam("HeartbeatListener", true);
