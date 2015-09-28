@@ -148,8 +148,6 @@ void GravityPublishManager::start()
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
 
-			Log::trace("Publish Manager Received: %s",command);
-
 			// message from gravity node should be either a publish or kill request
 			if (command == "publish")
 			{
@@ -419,8 +417,6 @@ void GravityPublishManager::publish(void* requestSocket)
         Log::critical("Unable to process publish for unknown data product %s", dataProduct.getDataProductID().c_str());
         return;
     }
-
-	Log::trace("Publish Manager -> Publishing");
 
     // Serialize data
     int size = dataProduct.getSize();
