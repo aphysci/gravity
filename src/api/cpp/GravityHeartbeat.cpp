@@ -226,23 +226,14 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     return NULL;
 }
 
-void *heartbeatSocket;
-void bindHeartbeatSocket(void* context)
-{
-    heartbeatSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_bind(heartbeatSocket, PUB_MGR_HB_URL);
-}
-
-void closeHeartbeatSocket()
-{
-    zmq_close(heartbeatSocket);
-}
-
 void* Heartbeat(void* thread_context)
 {
 	HBParams* params = (HBParams*) thread_context;
 	GravityDataProduct gdp(params->componentID);
 	gdp.setData((void*)"Good", 5);
+
+	void *heartbeatSocket = zmq_socket(params->zmq_context,ZMQ_PUB);
+	zmq_connect(heartbeatSocket,PUB_MGR_HB_URL);
 
 	while(true)
 	{

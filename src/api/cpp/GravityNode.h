@@ -165,6 +165,7 @@ private:
 	bool initialized;
 	bool logInitialized;
 	bool listenerEnabled;
+	bool heartbeatStarted;
 
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;

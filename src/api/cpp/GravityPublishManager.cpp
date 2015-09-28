@@ -65,7 +65,8 @@ void GravityPublishManager::start()
 
 	gravityNodeSubscribeSocket = zmq_socket(context, ZMQ_SUB);
     zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_PUB_URL);
-    zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_HB_URL);
+	// Create the socket to receive heartbeat publish messages
+	zmq_bind(gravityNodeSubscribeSocket,PUB_MGR_HB_URL);
     zmq_setsockopt(gravityNodeSubscribeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
     // Setup socket to respond to metrics requests
@@ -146,6 +147,8 @@ void GravityPublishManager::start()
 		{
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
+
+			Log::trace("Publish Manager Received: %s",command);
 
 			// message from gravity node should be either a publish or kill request
 			if (command == "publish")
@@ -416,6 +419,8 @@ void GravityPublishManager::publish(void* requestSocket)
         Log::critical("Unable to process publish for unknown data product %s", dataProduct.getDataProductID().c_str());
         return;
     }
+
+	Log::trace("Publish Manager -> Publishing");
 
     // Serialize data
     int size = dataProduct.getSize();

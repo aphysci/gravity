@@ -150,8 +150,6 @@ void* GravityNode::startGravityDomainListener(void* context)
 bool IsValidFilename(const std::string filename);
 int StringToInt(std::string str, int default_value);
 double StringToDouble(std::string str, double default_value);
-void bindHeartbeatSocket(void* context);
-void closeHeartbeatSocket();
 void* Heartbeat(void* thread_context);
 
 
@@ -412,6 +410,7 @@ GravityNode::GravityNode(std::string componentID)
     metricsEnabled = false;
 	initialized=false;
 	logInitialized=false;
+	heartbeatStarted=false;
 
 	init(componentID);
 }
@@ -425,7 +424,7 @@ GravityNode::~GravityNode()
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
 
-	closeHeartbeatSocket();
+	//closeHeartbeatSocket();
 
 	//kill the domain listener
 	if(listenerEnabled)
@@ -524,7 +523,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		void* initSocket = zmq_socket(context, ZMQ_REP);
 		zmq_bind(initSocket, "inproc://gravity_init");
-		bindHeartbeatSocket(context);
 
 		// Setup up communication channel to subscription manager
 		subscriptionManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
@@ -1889,9 +1887,7 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
 
-	static bool started = false;
-
-	if(started)
+	if(heartbeatStarted)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	std::string heartbeatName;
@@ -1910,6 +1906,8 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 
 	pthread_t heartbeatThread;
 	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
+
+	heartbeatStarted=true;
 
 	return gravity::GravityReturnCodes::SUCCESS;
 }
