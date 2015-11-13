@@ -292,7 +292,7 @@ void ServiceDirectorySynchronizer::start()
 									string url = providerMap.service_provider(i).url(j);
 									string componentID = providerMap.service_provider(i).component_id(j);
 									uint64_t timestamp = providerMap.service_provider(i).timestamp(j);
-									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);
+									createRegistrationRequest(productID, url, componentID, domain, ProductChange_RegistrationType_SERVICE,timestamp);
 								}
 							}								
 							for (int i = 0; i < providerMap.data_provider_size(); i++)
@@ -303,7 +303,7 @@ void ServiceDirectorySynchronizer::start()
 									string url = providerMap.data_provider(i).url(j);
 									string componentID = providerMap.data_provider(i).component_id(j);	
 									uint64_t timestamp = providerMap.data_provider(i).timestamp(j);
-									createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);
+									createRegistrationRequest(productID, url, componentID, domain, ProductChange_RegistrationType_DATA,timestamp);
 								}
 							}
 						}
