@@ -394,6 +394,7 @@ GravityNode::GravityNode()
 	initialized=false;
 	logInitialized = false;
 	listenerEnabled=false;
+	heartbeatStarted=false;
 }
 
 GravityNode::GravityNode(std::string componentID)
