@@ -107,6 +107,28 @@ GRAVITY_API uint64_t readUint64Message(void* socket)
     return val;
 }
 
+GRAVITY_API void sendUint32Message(void* socket, uint32_t val, int flags)
+{
+    zmq_msg_t msg;
+    zmq_msg_init_size(&msg, sizeof(uint32_t));
+    memcpy(zmq_msg_data(&msg), &val, sizeof(uint32_t));
+    zmq_sendmsg(socket, &msg, flags);
+    zmq_msg_close(&msg);
+}
+
+GRAVITY_API uint32_t readUint32Message(void* socket)
+{
+    zmq_msg_t msg;
+    zmq_msg_init(&msg);
+    zmq_recvmsg(socket, &msg, 0);
+    int size = zmq_msg_size(&msg);
+    uint32_t val;
+    memcpy(&val, zmq_msg_data(&msg), size);
+    zmq_msg_close(&msg);
+
+    return val;
+}
+
 GRAVITY_API void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
 {
     // Send data product
