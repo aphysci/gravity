@@ -750,14 +750,21 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			Log::initAndAddGravityLogger(this, net_log_level);
 
 		// Get our domain
-		GravityDataProduct request("GetDomain");
-		GravityDataProduct response("DomainResponse");
-		sendRequestToServiceDirectory(request, response);
+		if (componentID != "ServiceDirectory")
+		{
+			GravityDataProduct request("GetDomain");
+			GravityDataProduct response("DomainResponse");
+			sendRequestToServiceDirectory(request, response);
 
-		char* p = (char*)calloc(response.getDataSize(), sizeof(char));
-		response.getData(p, response.getDataSize());
-		myDomain.assign(p, response.getDataSize());
-                free(p);
+			char* p = (char*)calloc(response.getDataSize(), sizeof(char));
+			response.getData(p, response.getDataSize());
+			myDomain.assign(p, response.getDataSize());
+            free(p);
+		}
+		else
+		{
+			myDomain = getStringParam("Domain", "");
+		}
 
 		configureServiceManager();
 	}
