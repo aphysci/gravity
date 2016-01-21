@@ -130,8 +130,10 @@ distributable: components
 	rm -f gravity.tgz 
 	@if [ -d .git ]; then \
 		git describe --tags > VERSION.txt; \
+		tar czf gravity.tgz bin lib include VERSION.txt; \
+	else \
+		tar czf gravity.tgz bin lib include; \
 	fi
-	tar czf gravity.tgz bin lib include VERSION.txt
 
 	
 
