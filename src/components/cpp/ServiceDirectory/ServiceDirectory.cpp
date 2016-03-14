@@ -241,19 +241,6 @@ void ServiceDirectory::start()
     pollItem.revents = 0;
 	pollItems.push_back(pollItem);
 
-	// register the data product & service in another thread so we can process request below
-    struct RegistrationData regData;
-    regData.node = &gn;
-    regData.provider = this;
-    pthread_attr_t attr;
-    if (pthread_attr_init(&attr) == 0)
-    {
-        pthread_t registerThread;
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        pthread_create(&registerThread, &attr, registration, (void*)&regData);
-        pthread_attr_destroy(&attr);
-    }
-
 	//If broadcast was enabled, start the broadcaster
 	if(broadcastEnabled)
 	{
@@ -307,6 +294,31 @@ void ServiceDirectory::start()
 		udpRecvPollItem.revents=0;
 		pollItems.push_back(udpRecvPollItem);
 	}
+
+    /*************
+     * IMPORTANT: The following block of code should be the last thing the SD does before entering the main loop.
+     *
+     * This registration thread will register data products and services using the SD's GravityNode.  After this
+     * registration thread is started, it is assumed that the only actions on the GravityNode in this thread will be calls
+     * to publish.  These calls are all thread safe.
+     *
+     * We cannot synchronize access to the GravityNode here because the registration calls require the SD to service
+     * the registration requests in the loop below.
+     */
+    struct RegistrationData regData;
+    regData.node = &gn;
+    regData.provider = this;
+    pthread_attr_t attr;
+    if (pthread_attr_init(&attr) == 0)
+    {
+        pthread_t registerThread;
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&registerThread, &attr, registration, (void*)&regData);
+        pthread_attr_destroy(&attr);
+    }
+    /****
+     * End last block of code before main loop
+     */
 
     // Process forever...
     while (true)
@@ -636,9 +648,9 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			{
 				registeredPublishersReady = true;
 			}
-			list<string>* urls = &dpMap[registration.id()];
-			list<string>::iterator iter = find(urls->begin(), urls->end(), registration.url());
-			if (iter == urls->end())
+			list<string>& urls = dpMap[registration.id()];
+			list<string>::iterator iter = find(urls.begin(), urls.end(), registration.url());
+			if (iter == urls.end())
 			{
 				dpMap[registration.id()].push_back(registration.url());	
 				
