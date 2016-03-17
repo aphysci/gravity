@@ -242,6 +242,7 @@ AC_CONFIG_FILES([Makefile
                  test/examples/7-JavaBasicService/Makefile
                  test/examples/7-JavaBasicService/run.sh
                  test/examples/8-ConfigFile/Makefile
+                 test/examples/8-ConfigFile/run.sh
                  test/examples/9-Domains/Makefile
                  test/examples/9-Domains/run.sh])
 

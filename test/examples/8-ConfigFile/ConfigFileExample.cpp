@@ -37,7 +37,7 @@ int main()
 	}
 
     Log::message("ServiceDirectoryURL = %s\n", gn.getStringParam( "ServiceDirectoryURL", "Not found" ).c_str() );
-    Log::message("ConfigFileLogLevel = %s\n", gn.getStringParam( "ConfigFileLogLevel", "Not Found" ).c_str() );
+    Log::message("ConfigFileLogLevel = %s\n", gn.getStringParam( "LocalLogLevel", "Not Found" ).c_str() );
     Log::message("bin_ms = %f\n", gn.getFloatParam( "bin_ms", 0. ) );
     Log::message("bin_us = %f\n", gn.getFloatParam( "bin_us", 0. ) );
     Log::message("win_ms = %d\n", gn.getIntParam( "win_ms", 0 ) );

@@ -94,6 +94,7 @@ test-prep:
 	chmod 755 test/examples/5-MiscFunctionality/run.sh
 	chmod 755 test/examples/6-JavaProtobufDataProduct/run.sh
 	chmod 755 test/examples/7-JavaBasicService/run.sh
+	chmod 755 test/examples/8-ConfigFile/run.sh
 	chmod 755 test/examples/9-Domains/run.sh
 
 test: test-prep components
