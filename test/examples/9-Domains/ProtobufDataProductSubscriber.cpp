@@ -38,7 +38,11 @@ int main()
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode grc = gn.init("SimpleGravityComponentID2");
-    while (grc != GravityReturnCodes::SUCCESS)
+
+    // It's possible that the GravityNode fails to initialize when using Domains because
+    // it hasn't heard from the ServiceDirectory.  Looping as we've done here ensures that
+    // the component has connected to the ServiceDirectory before it continues to other tasks.
+	while (grc != GravityReturnCodes::SUCCESS)
     {
         Log::warning("Unable to connect to ServiceDirectory, will try again in 1 second...");
         gravity::sleep(1000);

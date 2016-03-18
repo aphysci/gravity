@@ -30,6 +30,10 @@ int main()
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
 	GravityReturnCode grc = gn.init("ProtobufGravityComponentID");
+
+	// It's possible that the GravityNode fails to initialize when using Domains because
+	// it hasn't heard from the ServiceDirectory.  Looping as we've done here ensures that
+	// the component has connected to the ServiceDirectory before it continues to other tasks.
 	while (grc != GravityReturnCodes::SUCCESS)
 	{
 	    Log::warning("Unable to connect to ServiceDirectory, will try again in 1 second...");
@@ -38,7 +42,7 @@ int main()
 	}
 
 	gn.registerDataProduct(
-							//This identifies the Data Product to the service directory so that others can
+                            //This identifies the Data Product to the service directory so that others can
 							// subscribe to it.  (See BasicDataProductSubscriber.cpp).
 							"BasicCounterDataProduct",
 							//Assign a transport type to the socket (almost always tcp, unless you are only
