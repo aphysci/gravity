@@ -402,26 +402,26 @@ void GravityPublishManager::unregisterDataProduct()
 void GravityPublishManager::publish(void* requestSocket)
 {
     // Read the filter text
-    string filterText = readStringMessage(requestSocket);
+    string dataProductId = readStringMessage(requestSocket);
+    uint64_t timestamp = readUint64Message(requestSocket);
+    string filterText    = readStringMessage(requestSocket);
 
     // Read the data product
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(requestSocket, &msg, -1);
-    GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
+    size_t gdbSize = zmq_msg_size(&msg);
+    // make a copy to hold for new subscribers below
+    char *bytes = new char[gdbSize];
+    memcpy(bytes, zmq_msg_data(&msg), gdbSize);
     zmq_msg_close(&msg);
 
-    shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProduct.getDataProductID()];
+    shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
     if (!publishDetails)
     {
-        Log::critical("Unable to process publish for unknown data product %s", dataProduct.getDataProductID().c_str());
+        Log::critical("Unable to process publish for unknown data product %s", dataProductId.c_str());
         return;
     }
-
-    // Serialize data
-    int size = dataProduct.getSize();
-    char *bytes = new char[size];
-    dataProduct.serializeToArray(bytes);
 
     // delete any old data and ...
     if (publishDetails->lastCachedValues.count(filterText) > 0)
@@ -431,16 +431,16 @@ void GravityPublishManager::publish(void* requestSocket)
     shared_ptr<CacheValue> val = shared_ptr<CacheValue>(new CacheValue);
     val->filterText = filterText;
     val->value = bytes;
-    val->size = size;
-    val->timestamp = dataProduct.getGravityTimestamp();
+    val->size = gdbSize;
+    val->timestamp = timestamp;
     publishDetails->lastCachedValues[filterText] = val;
 
-    publish(publishDetails->socket, filterText, bytes, size);
+    publish(publishDetails->socket, filterText, bytes, gdbSize);
 
     if (metricsEnabled)
     {
-        metricsData.incrementMessageCount(dataProduct.getDataProductID(), 1);
-        metricsData.incrementByteCount(dataProduct.getDataProductID(), dataProduct.getSize());
+        metricsData.incrementMessageCount(dataProductId, 1);
+        metricsData.incrementByteCount(dataProductId, gdbSize);
     }
 }
 
