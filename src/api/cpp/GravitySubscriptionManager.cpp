@@ -229,12 +229,12 @@ void GravitySubscriptionManager::start()
                     ComponentDataLookupResponsePB update;
                     dataProduct->populateMessage(update);
 					string domain = update.domain_id();
-                    Log::debug("Found update to publishers list for data product %s (domain:%s)", dataProductID.c_str(), domain.c_str());
+                    Log::trace("Found update to publishers list for data product %s (domain:%s)", dataProductID.c_str(), domain.c_str());
 
 					// Create the domain/data key for tracking subscriptions
 					DomainDataKey key(domain, dataProductID);
 
-					Log::debug("subscriptionMap.count(key) = %d", subscriptionMap.count(key));
+					Log::trace("subscriptionMap.count(key) = %d", subscriptionMap.count(key));
                     if (subscriptionMap.count(key) != 0)
                     {
                         for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[key].begin();

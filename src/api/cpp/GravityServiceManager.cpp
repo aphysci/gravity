@@ -224,7 +224,7 @@ void GravityServiceManager::addService()
         int port = bindFirstAvailablePort(serverSocket, endpoint, minPort, maxPort);
         if (port < 0)
         {
-            Log::critical("Could not find available port for %s", serviceID.c_str());
+            Log::critical("Could not find available port for %s in range [%d,%d]", serviceID.c_str(), minPort, maxPort);
             zmq_close(serverSocket);
             sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
             return;
