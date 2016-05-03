@@ -241,6 +241,8 @@ void* Heartbeat(void* thread_context)
 		gdp.setTimestamp(getCurrentTime());
 		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
 		sendStringMessage(heartbeatSocket, "publish", ZMQ_SNDMORE);
+		sendStringMessage(heartbeatSocket, gdp.getDataProductID(), ZMQ_SNDMORE);
+		sendUint64Message(heartbeatSocket, gdp.getGravityTimestamp(), ZMQ_SNDMORE);
 		sendStringMessage(heartbeatSocket, "", ZMQ_SNDMORE);
 		zmq_msg_t msg;
 		zmq_msg_init_size(&msg, gdp.getSize());
