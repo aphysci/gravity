@@ -28,6 +28,7 @@
 %javaconst(1);
 %{
 #include "GravityNode.h"
+#include "FutureResponse.h"
 #include "CPPGravitySubscriber.h"
 #include "CPPGravityServiceProvider.h"
 #include "CPPGravityRequestor.h"
@@ -204,6 +205,26 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 	delete $1;
 }
 
+/******
+ * All the required typemaps to allow a FutureResponse to be passed from Java to C++ (being serialized to a byte array in between)
+ *******/
+%typemap(jtype) const gravity::FutureResponse& "byte[]";
+%typemap(jstype) const gravity::FutureResponse& "FutureResponse";
+%typemap(jni)  const gravity::FutureResponse&  "jbyteArray"
+%typemap(javain) const gravity::FutureResponse&  "$javainput.serializeToArray()"
+
+%typemap(in) const gravity::FutureResponse&  {
+    signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
+    int length = JCALL1(GetArrayLength, jenv, $input);
+	$1 = new gravity::FutureResponse((void *)data, length);
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
+}
+
+// this frees the memory allocated in the 'in' typemap above.
+%typemap(freearg) const gravity::FutureResponse&  {
+	delete $1;
+}
+
 /*****
  * Typemaps to handle passing a byte array from C++ into Java.  Conversion between
  * GDP and byte array is handled outside of this interface code (unlike the conversion
@@ -304,6 +325,39 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 %typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
 %typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {}
 
+/*****
+ * typemaps to convert handle return of FutureResponse from java method so that it can travel across jni boundary as a byte[]
+ ******/
+%typemap(directorout) shared_ptr<gravity::FutureResponse> {
+    signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
+    int length = JCALL1(GetArrayLength, jenv, $input);
+	shared_ptr<gravity::FutureResponse> ret(new gravity::FutureResponse((void *)data, length));
+	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
+    $result = ret;
+    (jenv)->DeleteLocalRef(jBYTE);
+}
+%typemap(out) shared_ptr<gravity::FutureResponse> {
+  if ($1 != NULL)
+  {
+	  $result = JCALL1(NewByteArray, jenv, $1->getSize());
+	  char *bytes = new char[$1->getSize()];
+	  result->serializeToArray(bytes);
+	  JCALL4(SetByteArrayRegion, jenv, $result, 0, $1->getSize(), (jbyte*)bytes);
+	  delete bytes;
+  }
+}
+%typemap(javadirectorout) shared_ptr<gravity::FutureResponse> "$javacall"
+%typemap(jni) shared_ptr<gravity::FutureResponse> "jbyteArray"
+%typemap(jtype) shared_ptr<gravity::FutureResponse> "byte[]"
+%typemap(jstype) shared_ptr<gravity::FutureResponse> "byte[]"
+%typemap(javaout) shared_ptr<gravity::FutureResponse> {
+    return $jnicall;
+  }
+
+%typemap(javain) shared_ptr<gravity::FutureResponse> "$javainput"
+%typemap(javadirectorin) shared_ptr<gravity::FutureResponse> "$jniinput"
+%typemap(directorin, descriptor="[B") shared_ptr<gravity::FutureResponse> {}
+
 /******
  * When gravity::GravityNode::request returns shared_ptr<GravityDataProduct> though, we want to
  * convert that to a GravityDataProduct on the java side of the JNI interface so that users
@@ -315,6 +369,19 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
     if (data == null || data.length == 0)
         return null;
     return new GravityDataProduct(data);
+  }
+
+/******
+ * When gravity::GravityNode::createFutureResponse returns shared_ptr<FutureResponse> though, we want to
+ * convert that to a FutureResponse on the java side of the JNI interface so that users
+ * get a FutureResponse rather than a byte[].
+ ******/
+%typemap(jstype) shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse "FutureResponse"
+%typemap(javaout) shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse {
+    byte[] data = $jnicall;
+    if (data == null || data.length == 0)
+        return null;
+    return new FutureResponse(data);
   }
 
 %include "modulecode.i"

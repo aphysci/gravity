@@ -99,10 +99,6 @@
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryDomainUpdateContainer.java">
       <Filter>Source Files</Filter>
     </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryMapContainer.java">
-      <Filter>Source Files</Filter>
-    </None>
+    <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryMapContainer.java" />
   </ItemGroup>
 </Project>

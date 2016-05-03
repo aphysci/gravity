@@ -19,6 +19,7 @@
 
 %typemap(javaimports) gravity::GravityNode %{
 import com.aphysci.gravity.GravityDataProduct;
+import com.aphysci.gravity.FutureResponse;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.GravityServiceProvider;
@@ -126,6 +127,8 @@ public:
 	std::string getIP();
     std::string getDomain();
 
+    shared_ptr<gravity::FutureResponse> createFutureResponse();
+	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 };
 
 };

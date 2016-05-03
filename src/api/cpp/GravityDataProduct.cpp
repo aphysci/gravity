@@ -128,4 +128,14 @@ std::string GravityDataProduct::getDomain()
 	return gravityDataProductPB->domain();
 }
 
+bool GravityDataProduct::isFutureResponse()
+{
+	return gravityDataProductPB->future_response();
+}
+
+std::string GravityDataProduct::getFutureSocketUrl()
+{
+	return gravityDataProductPB->future_socket_url();
+}
+
 } /* namespace gravity */

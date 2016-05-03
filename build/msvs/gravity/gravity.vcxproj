@@ -793,6 +793,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\api\cpp\CommUtil.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\DomainDataKey.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\FutureResponse.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityConfigParser.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityDataProduct.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravityHeartbeat.cpp" />
@@ -819,7 +820,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc" />
-	<ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.cc" />
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.cc" />
@@ -827,7 +828,9 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClCompile Include="..\..\..\src\api\cpp\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\api\cpp\CommUtil.h" />
     <ClInclude Include="..\..\..\src\api\cpp\DomainDataKey.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\FutureResponse.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityConfigParser.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityDataProduct.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityHeartbeat.h" />
@@ -837,6 +840,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClInclude Include="..\..\..\src\api\cpp\GravityMetricsManager.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityMetricsUtil.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityNode.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\GravityPublishManager.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityRequestManager.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravityRequestor.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravitySemaphore.h" />
@@ -853,7 +857,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityMetricsDataPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\GravityLogMessagePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.h" />
-	<ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryRegistrationPB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryResponsePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ServiceDirectoryUnregistrationPB.pb.h" />
@@ -1225,7 +1229,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">false</LinkObjects>
     </CustomBuild>
-	<CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryDomainUpdatePB.proto">
+    <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryDomainUpdatePB.proto">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>

@@ -182,8 +182,31 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
     <OutDir>$(BinDir)</OutDir>
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">
+    <CustomBuildBeforeTargets>PostBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -215,7 +238,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">
@@ -228,7 +262,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">
@@ -241,7 +286,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">
@@ -254,7 +310,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
@@ -267,7 +334,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">
@@ -280,7 +358,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">
@@ -293,7 +382,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
+      <Command>
+					jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+      				pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
+			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">
@@ -306,10 +406,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .</Command>
-    </PostBuildEvent>
-    <CustomBuildStep>
-      <Command>pushd $(GRAVITY_HOME)\src\api\MATLAB
+      <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
+pushd $(GRAVITY_HOME)\src\api\MATLAB
 md build
 javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 jar cf MATLABGravitySubscriber.jar -C build .
@@ -317,8 +415,9 @@ md $(OutDir)\..\lib\MATLAB
 copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
 copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
-popd</Command>
-    </CustomBuildStep>
+popd
+			</Command>
+    </PostBuildEvent>
     <CustomBuildStep>
       <Outputs>NoOutputSpecified</Outputs>
       <Message>Building MATLAB components</Message>
@@ -602,7 +701,7 @@ popd</Command>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">false</LinkObjects>
     </CustomBuild>
-	<CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryDomainUpdateContainer.java">
+    <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\protobuf\ServiceDirectoryDomainUpdateContainer.java">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;." %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;." %(Identity)</Command>

@@ -33,7 +33,7 @@ import com.google.protobuf.Message;
  */
 public class GravityDataProduct {
 
-	private GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
+	protected GravityDataProductPB.Builder gdp = GravityDataProductPB.newBuilder();
 
     /**
      * Constructor
@@ -218,4 +218,22 @@ public class GravityDataProduct {
     {
 		gdp.setDomain(domain);
     }
+
+	/**
+	 * Method to get the future socket url 
+	 * @return url of the future socket url
+	 */
+	public String getFutureSocketUrl()
+	{
+        return gdp.getFutureSocketUrl();
+	}
+
+	/**
+	 * Method to get the boolean indication of whether this is a FutureResponse
+	 * @return boolean flag indicating that this is a FutureResponse
+	 */
+	public boolean isFutureResponse()
+	{
+		return gdp.getFutureResponse();
+	}
 }

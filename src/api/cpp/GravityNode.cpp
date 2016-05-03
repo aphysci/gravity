@@ -57,6 +57,7 @@
 #include "GravityConfigParser.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "FutureResponse.h"
 
 #include "protobuf/ComponentLookupRequestPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
@@ -892,6 +893,8 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
 	// Connect to service provider
+	Log::trace("GravityNode::sendRequestToServiceProvider(%s,%s,%s,%d)", url.c_str(), request.getDataProductID().c_str(), 
+													response.getDataProductID().c_str(), timeout_in_milliseconds);
     void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
 	zmq_connect(socket, url.c_str());
 
@@ -933,7 +936,9 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 			ret = GravityReturnCodes::LINK_ERROR;
 	}
 	else
+	{
 		ret = GravityReturnCodes::NO_SERVICE_PROVIDER;
+	}
 
 	// Close socket
 	zmq_close(socket);
@@ -1643,6 +1648,8 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 	//set Domain
 	request.setDomain(myDomain);
 
+	Log::trace("Synchronous request('%s','%s')", serviceID.c_str(), request.getDataProductID().c_str());
+
 	std::string connectionURL;
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, connectionURL, domain);
 	if(ret != GravityReturnCodes::SUCCESS)
@@ -1659,12 +1666,31 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
+	uint64_t t1 = gravity::getCurrentTime();
 	shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
+	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::warning("service request returned error: %s", getCodeString(ret).c_str());
 		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+	}
+
+	if (response->isFutureResponse())
+	{
+		Log::trace("Synchronous Request: received a future response");
+		if (timeout_milliseconds > 0)
+		{
+			timeout_milliseconds -= (int)((gravity::getCurrentTime() - t1) / 1e3);
+		}
+		Log::trace("Sending request to future response socket (url='%s', timeout=%d)", response->getFutureSocketUrl(), timeout_milliseconds);
+		ret = sendRequestToServiceProvider(response->getFutureSocketUrl(), request, *response, timeout_milliseconds);
+		if(ret != GravityReturnCodes::SUCCESS)
+		{
+			Log::warning("service request returned error: %s", getCodeString(ret).c_str());
+			return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		}
+		Log::trace("Received future response's response");
 	}
 
 	return response;
@@ -2020,6 +2046,84 @@ typedef int socklen_t;
 string GravityNode::getDomain()
 {
     return myDomain;
+}
+
+shared_ptr<FutureResponse> GravityNode::createFutureResponse()
+{
+	// Create the response socket
+	void* responseSocket = zmq_socket(context, ZMQ_REP);
+    string url;
+    
+	string endpoint = getIP();
+	int minPort = getIntParam("MinPort", MIN_PORT);
+    int maxPort = getIntParam("MaxPort", MAX_PORT);
+	
+	int port = bindFirstAvailablePort(responseSocket, endpoint, minPort, maxPort);
+    if (port < 0)
+    {
+        Log::critical("Could not find available port for FutureResponse");
+        zmq_close(responseSocket);
+		return shared_ptr<FutureResponse>((FutureResponse*)NULL);
+    }
+       
+	stringstream ss;
+    ss << "tcp://" << endpoint << ":" << port;
+    url = ss.str();
+
+	futureResponseUrlToSocketMap[url] = responseSocket;
+
+	shared_ptr<FutureResponse> futureResponse(new FutureResponse(url));
+	return futureResponse;
+}
+
+GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureResponse)
+{
+	GravityReturnCode ret = GravityReturnCodes::FAILURE;
+
+	Log::trace("Processing future response");
+	if (futureResponseUrlToSocketMap.find(futureResponse.getUrl()) == futureResponseUrlToSocketMap.end())
+	{
+		Log::warning("Received a future response that is not associated with a REP url ('%s')", futureResponse.getUrl());
+		return ret;
+	}
+
+	void* responseSocket = futureResponseUrlToSocketMap[futureResponse.getUrl()];
+	// Poll socket for pending request
+	zmq_pollitem_t pollItems[] = {{responseSocket, 0, ZMQ_POLLIN, 0}};
+	int rc = zmq_poll(pollItems, 1, 2000); // 2 second timeout - this really should be waiting for us
+	if (rc == -1)
+	{
+		ret = GravityReturnCodes::INTERRUPTED;
+	}
+	else if (rc == 0)
+	{
+		ret = GravityReturnCodes::REQUEST_TIMEOUT;
+	}
+	else if (pollItems[0].revents & ZMQ_POLLIN)
+	{
+		// Don't really care about the specifics of the request, just read and discard
+		zmq_msg_t message;
+		zmq_msg_init(&message);
+		zmq_recvmsg(responseSocket, &message, 0);
+		zmq_msg_close(&message);
+
+		// Respond with the reponse object
+		int size = futureResponse.getDataSize();
+		char *bytes = new char[size];		
+		futureResponse.getData(bytes, size);
+		GravityDataProduct response(bytes, size);
+		response.setComponentId(componentID);
+		response.setDomain(myDomain);
+
+		sendGravityDataProduct(responseSocket, response, ZMQ_DONTWAIT);
+
+		Log::trace("Sent response GDP from future response");
+	}
+
+	futureResponseUrlToSocketMap.erase(futureResponse.getUrl());
+	zmq_close(responseSocket);
+
+	return ret;
 }
 
 string GravityNode::getIP()

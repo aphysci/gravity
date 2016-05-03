@@ -98,24 +98,47 @@ void GravityRequestManager::start()
         // Check for responses
 		while(pollItemIter != pollItems.end())
 		{
-			if (pollItemIter->revents && ZMQ_POLLIN)
+			if (pollItemIter->revents & ZMQ_POLLIN)
 			{
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItemIter->socket, &message, 0);
 				// Create new GravityDataProduct from the incoming message
-				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
+				GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
 				// Clean up message
 				zmq_msg_close(&message);
 
-				// Deliver to requestor
-				shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
-				reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, dataProduct);
-                zmq_close(pollItemIter->socket);
-				requestMap.erase(pollItemIter->socket);
-				pollItemIter = pollItems.erase(pollItemIter);
+				if (response.isFutureResponse())
+				{					
+					Log::trace("Received a future response placeholder (url = %s)", response.getFutureSocketUrl().c_str());
+					// Create REQ socket to interact with future REP socket
+					void* socket = zmq_socket(context, ZMQ_REQ);
+					zmq_connect(socket, response.getFutureSocketUrl().c_str());					
+
+					// Send request to future REP socket
+					Log::trace("Sending empty request on future response socket");
+					sendStringMessage(socket, "", ZMQ_DONTWAIT);
+
+					// Replace polling info for original socket with future socket details
+					requestMap[socket] = requestMap[pollItemIter->socket];
+					requestMap.erase(pollItemIter->socket);
+					pollItemIter->socket = socket;
+					pollItemIter->revents = 0;
+				}
+				else
+				{
+					// Deliver to requestor
+					shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
+					Log::trace("GravityRequestManager: call requestFilled()");
+					reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
+					zmq_close(pollItemIter->socket);
+					requestMap.erase(pollItemIter->socket);
+					pollItemIter = pollItems.erase(pollItemIter);
+				}
 			}
 			else
+			{
 			    pollItemIter++;
+			}
 		}
 	}
 

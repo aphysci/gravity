@@ -16,20 +16,44 @@
  **
  */
 
-option optimize_for = SPEED;
-option java_outer_classname = "GravityDataProductContainer";
-option java_package = "com.aphysci.gravity.protobuf";
+/**
+ *
+ */
+package com.aphysci.gravity;
 
-package gravity;
+import com.aphysci.gravity.GravityDataProduct;
+import java.lang.String;
 
-message GravityDataProductPB
+/**
+ * @author Chris Brundick
+ *
+ */
+public class FutureResponse extends GravityDataProduct
 {
-	optional uint64 timestamp = 1;
-	optional string dataProductID = 2;
-	optional string softwareVersion = 3;
-	optional bytes data = 4;
-	optional string componentID = 5;
-	optional string domain = 6;
-	optional bool future_response = 7;
-	optional string future_socket_url = 8;
+    /**
+     * Constructor (package private)
+     * @param url URL for REP socket on which reponse is provided
+     */
+    FutureResponse(String url) 
+	{
+        super("FutureResponse");
+
+	    gdp.setFutureResponse(true);
+		gdp.setFutureSocketUrl(url);
+    }
+
+	public FutureResponse(byte[] data)
+	{
+        super(data);
+	}
+
+	public String getUrl()
+    {
+        return gdp.getFutureSocketUrl();
+    }
+
+	public void setResponse(GravityDataProduct response)
+	{
+	    setData(response.serializeToArray());
+	}
 }

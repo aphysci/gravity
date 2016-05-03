@@ -109,6 +109,7 @@ typedef struct GravityINIConfig
 */
 
 class GravityConfigParser;
+class FutureResponse;
 
 /**
  * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
@@ -200,6 +201,7 @@ private:
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
 	std::map<std::string,uint64_t> urlInstanceMap;
+	std::map<std::string,void*> futureResponseUrlToSocketMap;
 
     std::string myDomain;
     std::string componentID;
@@ -407,6 +409,16 @@ public:
 	 * Returns the domain with which this node is associated
 	 **/
 	GRAVITY_API std::string getDomain();
+
+	/**
+	 * Creates and returns a FutureReponse pointer for delayed response to requests
+	 */
+	GRAVITY_API shared_ptr<FutureResponse> createFutureResponse();
+
+	/**
+	 * Method to send future response
+	 */
+	GRAVITY_API GravityReturnCode sendFutureResponse(const FutureResponse& futureResponse);
 
     /** @} */ //Registration Functions
 };

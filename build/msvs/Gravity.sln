@@ -12,6 +12,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgravity_wrap", "libgravi
 	ProjectSection(ProjectDependencies) = postProject
 		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{37C8043B-1F3B-42EC-8E9B-D4417C3DE7C6} = {37C8043B-1F3B-42EC-8E9B-D4417C3DE7C6}
+		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "java", "libgravity_wrap\java\java.vcxproj", "{CF526FA5-5EDE-4806-8984-424590796377}"
@@ -20,9 +21,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "java", "libgravity_wrap\jav
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "protobufs", "libgravity_wrap\protobufs\protobufs.vcxproj", "{40304B9B-2A99-4BE9-91CE-1A17F9B5A1E0}"
-	ProjectSection(ProjectDependencies) = postProject
-		{32E6610F-9DDD-4561-A49F-F3A738C7E111} = {32E6610F-9DDD-4561-A49F-F3A738C7E111}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swig", "libgravity_wrap\swig\swig.vcxproj", "{37C8043B-1F3B-42EC-8E9B-D4417C3DE7C6}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -36,21 +34,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceDirectory", "compone
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Archiver", "components\Archiver\Archiver.vcxproj", "{C69882E7-605C-4D75-98F0-02C4685CB0E0}"
 	ProjectSection(ProjectDependencies) = postProject
+		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfigServer", "components\ConfigServer\ConfigServer.vcxproj", "{46F0FCAC-B8BE-4EF2-82AD-F1887CA6D583}"
 	ProjectSection(ProjectDependencies) = postProject
+		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogRecorder", "components\LogRecorder\LogRecorder.vcxproj", "{61BE32CF-9E72-4FB6-AF47-02DFBFB0AD84}"
 	ProjectSection(ProjectDependencies) = postProject
+		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Playback", "components\Playback\Playback.vcxproj", "{5650AD5F-D5DE-4B53-B4D7-033A7A036B14}"
 	ProjectSection(ProjectDependencies) = postProject
+		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject

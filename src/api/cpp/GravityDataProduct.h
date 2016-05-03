@@ -46,7 +46,7 @@ class GravityNode;
  */
 class GravityDataProduct
 {
-private:
+protected:
     shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
@@ -172,6 +172,18 @@ public:
 	 * \return domain of the source Gravity Node
 	 */
 	GRAVITY_API std::string getDomain();
+
+	/**
+	 * Get the flag indicating if this is a "future" reponse
+	 * \return future response flag
+	 */
+	GRAVITY_API bool isFutureResponse();
+
+	/**
+	 * Get the url for the REP socket of a future response
+	 * \return url for REP socket of future response
+	 */
+	GRAVITY_API std::string getFutureSocketUrl();
 
     /**
      * Set the timestamp on this GravityDataProduct (typically set by infrastructure at publish)

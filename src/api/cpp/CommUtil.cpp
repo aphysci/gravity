@@ -129,14 +129,16 @@ GRAVITY_API uint32_t readUint32Message(void* socket)
     return val;
 }
 
-GRAVITY_API void sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
+GRAVITY_API int sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags)
 {
     // Send data product
     zmq_msg_t data;
     zmq_msg_init_size(&data, dataProduct.getSize());
     dataProduct.serializeToArray(zmq_msg_data(&data));
-    zmq_sendmsg(socket, &data, flags);
+    int rc = zmq_sendmsg(socket, &data, flags);
     zmq_msg_close(&data);
+
+	return rc;
 }
 
 
