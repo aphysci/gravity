@@ -1391,6 +1391,8 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     publishManagerPublishSWL.lock.Lock();
 
     sendStringMessage(publishManagerPublishSWL.socket, "publish", ZMQ_SNDMORE);
+    sendStringMessage(publishManagerPublishSWL.socket, dataProductID, ZMQ_SNDMORE);
+    sendUint64Message(publishManagerPublishSWL.socket, dataProduct.getGravityTimestamp(), ZMQ_SNDMORE);
 	sendStringMessage(publishManagerPublishSWL.socket, filterText, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
