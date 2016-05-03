@@ -1683,7 +1683,7 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 		{
 			timeout_milliseconds -= (int)((gravity::getCurrentTime() - t1) / 1e3);
 		}
-		Log::trace("Sending request to future response socket (url='%s', timeout=%d)", response->getFutureSocketUrl(), timeout_milliseconds);
+		Log::trace("Sending request to future response socket (url='%s', timeout=%d)", response->getFutureSocketUrl().c_str(), timeout_milliseconds);
 		ret = sendRequestToServiceProvider(response->getFutureSocketUrl(), request, *response, timeout_milliseconds);
 		if(ret != GravityReturnCodes::SUCCESS)
 		{
@@ -2083,7 +2083,7 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	Log::trace("Processing future response");
 	if (futureResponseUrlToSocketMap.find(futureResponse.getUrl()) == futureResponseUrlToSocketMap.end())
 	{
-		Log::warning("Received a future response that is not associated with a REP url ('%s')", futureResponse.getUrl());
+		Log::warning("Received a future response that is not associated with a REP url ('%s')", futureResponse.getUrl().c_str());
 		return ret;
 	}
 
