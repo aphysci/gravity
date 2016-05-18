@@ -246,6 +246,7 @@ void ServiceDirectory::start()
 	{
 		Log::message("Starting ServiceDirectoryBroadcaster");
 
+		string broadcastIP = gn.getStringParam("ServiceDirectoryBroadcastIP", "");
 		unsigned int broadcastRate = gn.getIntParam("ServiceDirectoryBroadcastRate",DEFAULT_BROADCAST_RATE_SEC);
 
 		//start the udp broadcaster
@@ -254,7 +255,7 @@ void ServiceDirectory::start()
 		pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
 
 		//configure the broadcaster
-		sendBroadcasterParameters(domain,sdURL,broadcastPort,broadcastRate);
+		sendBroadcasterParameters(domain,sdURL,broadcastIP,broadcastPort,broadcastRate);
 	}
 
 	SyncInitDetails syncInitDetails;
@@ -899,13 +900,14 @@ void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataPro
     response.setData(lookupResponse);
 }
 
-void ServiceDirectory::sendBroadcasterParameters(string sdDomain, string url,unsigned int port, unsigned int rate)
+void ServiceDirectory::sendBroadcasterParameters(string sdDomain, string url, string ip, unsigned int port, unsigned int rate)
 {
 	udpBroadcastSocket.lock.Lock();
 
 	sendStringMessage(udpBroadcastSocket.socket,"broadcast",ZMQ_SNDMORE);
 	sendStringMessage(udpBroadcastSocket.socket,sdDomain,ZMQ_SNDMORE);
 	sendStringMessage(udpBroadcastSocket.socket,url,ZMQ_SNDMORE);
+	sendStringMessage(udpBroadcastSocket.socket,ip,ZMQ_SNDMORE);
 	
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg,sizeof(port));

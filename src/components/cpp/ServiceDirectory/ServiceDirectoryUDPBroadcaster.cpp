@@ -152,6 +152,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 {
 	domainName = readStringMessage(sdSocket);
 	url = readStringMessage(sdSocket);
+	broadcastIP = readStringMessage(sdSocket);
 
 	//receive port
 	zmq_msg_t msg;
@@ -188,14 +189,20 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	destAddr->sin_family=AF_INET;
 	destAddr->sin_port=htons(port);
 
-	if(url.find("127.0.0.1")!=std::string::npos)
+	string ip = broadcastIP;
+	if (ip.size() == 0)
 	{
-		destAddr->sin_addr.s_addr = inet_addr("127.255.255.255");
+	    if(url.find("127.0.0.1")!=std::string::npos)
+	    {
+	        ip = "127.255.255.255";
+	    }
+	    else
+	    {
+	        ip = "255.255.255.255";
+	    }
 	}
-	else
-	{
-		destAddr->sin_addr.s_addr = inet_addr("255.255.255.255");
-	}
+	Log::debug("Using broadcast IP %s", ip.c_str());
+	destAddr->sin_addr.s_addr = inet_addr(ip.c_str());
 
 	memcpy(&destAddress,destAddr,sizeof(struct sockaddr_in));
 

@@ -87,7 +87,7 @@ private:
 	pthread_t udpReceiverThread;
 	pthread_t synchronizerThread;
 
-	void sendBroadcasterParameters(string sdDomain, string url, unsigned int port, unsigned int rate);
+	void sendBroadcasterParameters(string sdDomain, string url, string ip, unsigned int port, unsigned int rate);
 	void sendReceiverParameters(string sdDomain, string url, unsigned int port, unsigned int numValidDomains, string validDomains);
 	void publishDomainUpdateMessage(string updateDomain, string url, ChangeType type);
 

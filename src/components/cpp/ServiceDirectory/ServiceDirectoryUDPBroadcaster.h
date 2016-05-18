@@ -47,6 +47,7 @@ private:
 	void* context;
 	std::string domainName;
 	std::string url;
+	std::string broadcastIP;
 	unsigned int port;
 	unsigned int broadcastRate;
 	int broadcastSocket;
