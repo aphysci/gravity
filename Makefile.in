@@ -119,6 +119,7 @@ distributable: components
 	mkdir include/protobuf
 	cp src/api/cpp/protobuf/GravityDataProductPB.pb.h include/protobuf
 	cp src/api/cpp/protobuf/GravityMetricsDataPB.pb.h include/protobuf
+	cp src/api/cpp/protobuf/FileArchiver*.pb.h include/protobuf
 
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
