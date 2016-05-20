@@ -22,6 +22,7 @@
 #include <Utility.h>
 
 #include "../protobuf/BasicCounterDataProduct.pb.h"
+#include "protobuf/FileArchiverControlRequest.pb.h"
 
 int main()
 {
@@ -51,6 +52,7 @@ int main()
 
 	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.
 	int count = 1;
+	bool suspend = true;
 	while(!quit)
 	{
 		//Create a data product to send across the network of type "BasicCounterDataProduct".
@@ -71,6 +73,16 @@ int main()
 		count++;
 		if(count > 50)
 			count = 1;
+
+		if (count % 5 == 0)
+		{
+		    GravityDataProduct gdp("FileArchiverControlRequest");
+		    FileArchiverControlRequestPB request;
+		    request.set_suspend(suspend);
+		    suspend = !suspend;
+		    gdp.setData(request);
+		    gn.request("FileArchiverControlRequest", gdp);
+		}
 
 		//Sleep for 1 second.
 		gravity::sleep(1000);

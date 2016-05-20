@@ -54,14 +54,16 @@ SDPID=$!
 
 ##
 # Start the FileArchiver and the ArchiveTest and run them for a few seconds.  This will
-# put a few BasicCounterDataProduct data products into a file called archive.bin
+# put a few BasicCounterDataProduct data products into a file called archive.bin.  Every
+# 5 seconds, ArchiveTest will toggle the suspend flag on the FileArchiver.  This means
+# that only about half of the published counter values will be archived.
 ##
 FileArchiver &
 FAPID=$!
 ./ArchiveTest &
 ATPID=$!
 
-sleep 10
+sleep 20
 
 kill $ATPID $FAPID
 ATPID=
@@ -71,8 +73,8 @@ sleep 1
 
 ##
 # Now start ReplayTest and FileReplay.  FileReplay will read and publish the values in archive.bin.
-# ReplayTest sees those data products, and prints a message.  Note that the messages are still published
-# once a second - just lits ArchiveTest did originally.
+# ReplayTest sees those data products, and prints a message.  Note the 5 second gaps caused by suspending FileArchiver, 
+# and that the messages that were archived are still published once a second - just like ArchiveTest did originally.
 ##
 echo Starting ReplayTest
 ./ReplayTest &
@@ -80,7 +82,7 @@ RTPID=$!
 FileReplay &
 FRPID=$!
 
-sleep 10
+sleep 20
 
 cleanup
 

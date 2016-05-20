@@ -71,6 +71,8 @@ FileArchiver::FileArchiver()
 	// allow starting suspended
 	suspend = gravityNode.getBoolParam("StartSuspended", false);
 
+	gravityNode.registerService("FileArchiverControlRequest", GravityTransportTypes::TCP, *this);
+
 	// Subscribe to each data product
 	vector<string> dps = split(dpList);
 	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
