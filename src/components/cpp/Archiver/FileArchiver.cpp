@@ -22,6 +22,9 @@
 #include <iostream>
 #include <string>
 
+#include "protobuf/FileArchiverControlRequest.pb.h"
+#include "protobuf/FileArchiverControlResponse.pb.h"
+
 int main(int argc, const char* argv[])
 {
 	gravity::FileArchiver archiver;
@@ -65,6 +68,9 @@ FileArchiver::FileArchiver()
 	// Get list of data products to archive
 	string dpList = gravityNode.getStringParam("DataProductList", "");
 
+	// allow starting suspended
+	suspend = gravityNode.getBoolParam("StartSuspended", false);
+
 	// Subscribe to each data product
 	vector<string> dps = split(dpList);
 	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
@@ -96,22 +102,52 @@ vector<string> FileArchiver::split(string s)
 
 void FileArchiver::subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    for (unsigned int i = 0; i < dataProducts.size(); i++)
+    if (!suspend)
     {
-        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+        for (unsigned int i = 0; i < dataProducts.size(); i++)
+        {
+            shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
 
-        // Write the size of the data product
-        int size = dataProduct->getSize();
-        archiveFile.write((char*)&size, sizeof(size));
+            // Write the size of the data product
+            int size = dataProduct->getSize();
+            archiveFile.write((char*)&size, sizeof(size));
 
-        // Write the data product to the archive file
-        std::vector<char> buffer(size);
-        dataProduct->serializeToArray(&buffer[0]);
-		archiveFile.write(buffer.data(), size);
+            // Write the data product to the archive file
+            std::vector<char> buffer(size);
+            dataProduct->serializeToArray(&buffer[0]);
+            archiveFile.write(buffer.data(), size);
 
-        // Flush file
-        archiveFile.flush();
+            // Flush file
+            archiveFile.flush();
+        }
     }
+}
+
+shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+{
+    Log::debug("Received service request of type '%s'", serviceID.c_str());
+    FileArchiverControlResponsePB faResponse;
+    faResponse.set_status(false);
+
+    if (serviceID == "FileArchiverControlRequest")
+    {
+        FileArchiverControlRequestPB faRequest;
+        if (!dataProduct.populateMessage(faRequest))
+        {
+            Log::critical("Unable to deserialize received FileArchiverControlRequest data");
+            faResponse.set_status(false);
+        }
+        else
+        {
+            suspend = faRequest.suspend();
+            Log::warning("Suspend flag has been set to %s", suspend ? "true" : "false");
+            faResponse.set_status(true);
+        }
+    }
+
+    shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
+    gdpResponse->setData(faResponse);
+    return gdpResponse;
 }
 
 void FileArchiver::waitForExit()

@@ -16,36 +16,13 @@
  **
  */
 
-#ifndef FILEARCHIVER_H_
-#define FILEARCHIVER_H_
+option optimize_for = SPEED;
+option java_outer_classname = "FileArchiverControlRequestContainer";
+option java_package = "com.aphysci.gravity.protobuf";
 
-#include "GravityNode.h"
-#include <string>
-#include <fstream>
-#include <vector>
+package gravity;
 
-namespace gravity {
-
-using namespace gravity;
-using namespace std;
-
-class FileArchiver : public GravitySubscriber, GravityServiceProvider
+message FileArchiverControlRequestPB
 {
-private:
-	static const char* ComponentName;
-	GravityNode gravityNode;
-	ofstream archiveFile;
-	bool suspend;
-
-	vector<string> split(string s);
-public:
-	FileArchiver();
-	virtual ~FileArchiver();
-
-	virtual void subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts);
-    virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
-	void waitForExit();
-};
-
-} /* namespace gravity */
-#endif /* FILEARCHIVER_H_ */
+	required bool suspend = 1;
+}

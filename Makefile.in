@@ -60,6 +60,7 @@ all clean:
 	$(MAKE) -C test/examples/5-MiscFunctionality $@
 	$(MAKE) -C test/examples/8-ConfigFile $@
 	$(MAKE) -C test/examples/9-Domains $@
+	$(MAKE) -C test/examples/10-Archiving $@
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
 		$(MAKE) -C src/api/java $@;\
@@ -96,6 +97,7 @@ test-prep:
 	chmod 755 test/examples/7-JavaBasicService/run.sh
 	chmod 755 test/examples/8-ConfigFile/run.sh
 	chmod 755 test/examples/9-Domains/run.sh
+	chmod 755 test/examples/10-Archiving/run.sh
 
 test: test-prep components
 	./test/testall.sh
