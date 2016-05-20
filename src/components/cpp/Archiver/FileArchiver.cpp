@@ -22,8 +22,8 @@
 #include <iostream>
 #include <string>
 
-#include "protobuf/FileArchiverControlRequest.pb.h"
-#include "protobuf/FileArchiverControlResponse.pb.h"
+#include "protobuf/FileArchiverControlRequestPB.pb.h"
+#include "protobuf/FileArchiverControlResponsePB.pb.h"
 
 int main(int argc, const char* argv[])
 {

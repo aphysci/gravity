@@ -22,7 +22,7 @@
 #include <Utility.h>
 
 #include "../protobuf/BasicCounterDataProduct.pb.h"
-#include "protobuf/FileArchiverControlRequest.pb.h"
+#include "protobuf/FileArchiverControlRequestPB.pb.h"
 
 int main()
 {

@@ -81,7 +81,7 @@ CLASSES=$(patsubst $(GRAVJAVASRC_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(wildcar
 GEN_CLASSES=$(patsubst $(SWIGGENJAVA_DIR)/%.java,$(JAVA_BUILD_DIR)/%.class,$(wildcard $(SWIGGENJAVA_DIR)/*.java))
 
 #Protobuf Source/Generated Java/Objects
-PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto
+PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto $(PROTO_DIR)/FileArchiverControlRequestPB.proto $(PROTO_DIR)/FileArchiverControlResponsePB.proto
 #PROTO_SRC=$(wildcard $(PROTO_DIR)/*PB.proto)
 PROTO_JAVA=$(patsubst $(PROTO_DIR)/%PB.proto,$(PROTOGENJAVA_DIR)/%Container.java,$(PROTO_SRC))
 PROTO_CLASS=$(patsubst $(PROTOGENJAVA_DIR)%.java,$(JAVA_BUILD_DIR)%.class,$(PROTO_JAVA))
