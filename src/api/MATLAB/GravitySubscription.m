@@ -19,28 +19,20 @@ classdef GravitySubscription < handle
         dataProductID;
         filter;
 		domain;
+		maxBufferSize;
         subscriber;
     end
     
     methods (Access = public)
-        function this = GravitySubscription(dataProductID, varargin)
-            % Import the underlying Java subscriber class
-            %import com.aphysci.gravity.matlab.MATLABGravitySubscriber;
-
-            % Initialize the Subscriber
-            this.subscriber = com.aphysci.gravity.matlab.MATLABGravitySubscriber;
-            
+        function this = GravitySubscription(dataProductID, filter, domain, maxBufferSize)
             this.dataProductID = dataProductID;
 
-			this.filter = '';
-			this.domain = '';
+			this.filter = filter;
+			this.domain = domain;
+			this.maxBufferSize = maxBufferSize;
 
-			if (length(varargin) >= 1)
-				this.filter = varargin{1};
-			end	
-			if (length(varargin) >= 2)
-				this.domain = varargin{2};
-            end
+			% Initialize the Subscriber
+            this.subscriber = com.aphysci.gravity.matlab.MATLABGravitySubscriber(int32(maxBufferSize));
         end
         
         function gdp = getDataProduct(this, timeoutMS)
@@ -71,6 +63,10 @@ classdef GravitySubscription < handle
 
 		function domain = getDomain(this)
 			domain = this.domain;
+		end
+
+		function maxBufferSize = getMaxBufferSize(this)
+			maxBufferSize = this.maxBufferSize;
 		end
         
         function subscriber = getSubscriber(this)

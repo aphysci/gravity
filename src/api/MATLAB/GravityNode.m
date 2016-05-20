@@ -49,19 +49,22 @@ classdef GravityNode < handle
         end
         
         function subscription = subscribe(this, dataProductID, varargin)
-            %import com.aphysci.gravity.matlab.MATLABGravitySubscriber;
 
  			filter = '';
 			domain = '';
+			maxBufferSize = 0;
 		    if (length(varargin) >= 1)
 				filter = varargin{1};
 			end
 			if (length(varargin) >= 2)
 				domain = varargin{2};
 			end
+			if (length(varargin) >= 3 && isnumeric(varargin{3}))
+				maxBufferSize = floor(varargin{3});
+			end
 
             % Create Subscription
-            subscription = GravitySubscription(dataProductID, filter, domain);
+            subscription = GravitySubscription(dataProductID, filter, domain, maxBufferSize);
             
             % Store subscriber
             key = [dataProductID ':' filter ':' domain];

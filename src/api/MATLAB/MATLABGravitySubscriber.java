@@ -29,11 +29,30 @@ import com.google.common.primitives.Ints;
 
 public class MATLABGravitySubscriber implements GravitySubscriber
 {
-	private ArrayList<GravityDataProduct> data = new ArrayList<GravityDataProduct>();
+	private int maxBufferSize;
+	private List<GravityDataProduct> data = new ArrayList<GravityDataProduct>();
+
+	public MATLABGravitySubscriber()
+	{
+		this(0);
+	}
+
+	public MATLABGravitySubscriber(int maxBufferSize)
+	{
+		this.maxBufferSize = maxBufferSize;
+	}
 
 	public synchronized void subscriptionFilled(final List<GravityDataProduct> dataProducts)
 	{
 		data.addAll(dataProducts);
+		if (maxBufferSize > 0)
+		{
+			int removeCount = data.size() - maxBufferSize;
+			if (removeCount > 0)
+			{
+				data.subList(0, removeCount).clear();
+			}
+		}
 	}
 
 	public synchronized GravityDataProduct getDataProduct(int timeoutMS)
