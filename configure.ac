@@ -244,7 +244,9 @@ AC_CONFIG_FILES([Makefile
                  test/examples/8-ConfigFile/Makefile
                  test/examples/8-ConfigFile/run.sh
                  test/examples/9-Domains/Makefile
-                 test/examples/9-Domains/run.sh])
+                 test/examples/9-Domains/run.sh
+                 test/examples/10-Archiving/Makefile
+                 test/examples/10-Archiving/run.sh])
 
 AC_OUTPUT
 
