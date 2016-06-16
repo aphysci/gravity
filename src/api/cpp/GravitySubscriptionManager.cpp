@@ -307,7 +307,7 @@ void GravitySubscriptionManager::start()
 		            if (*iter == pollIter->socket)
 		            {
 		                pollItems.erase(pollIter);
-                        Log::message("delete socket from pollitems, size is now %d", pollItems.size());
+                        Log::debug("delete socket from pollitems, size is now %d", pollItems.size());
 		                break;
 		            }
 		    }
