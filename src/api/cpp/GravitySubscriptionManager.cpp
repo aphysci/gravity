@@ -168,7 +168,7 @@ void GravitySubscriptionManager::start()
 		for (unsigned int index = 2; index < pollItems.size(); index++)
 		{
 	        Log::trace("about to check for new poll items, index = %d, size = %d", index, pollItems.size());
-			if (pollItems[index].revents && ZMQ_POLLIN)
+			if (pollItems[index].revents & ZMQ_POLLIN)
 			{
 			    // if it's a regular subscription poll item
 			    if (subscriptionSocketMap.count(pollItems[index].socket) > 0)

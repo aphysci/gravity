@@ -140,7 +140,7 @@ void GravityServiceManager::start()
 		// Check for service requests
 		for (unsigned int i = 1; i < pollItems.size(); i++)
 		{
-			if (pollItems[i].revents && ZMQ_POLLIN)
+			if (pollItems[i].revents & ZMQ_POLLIN)
 			{
 				// Read response data product from socket
 				zmq_msg_init(&message);
