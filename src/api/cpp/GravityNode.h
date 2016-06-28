@@ -182,6 +182,7 @@ private:
     SocketWithLock serviceManagerSWL;
 	SocketWithLock serviceManagerConfigSWL;
     SocketWithLock requestManagerSWL;
+	SocketWithLock requestManagerRepSWL;
 	SocketWithLock domainListenerSWL;
 	SocketWithLock domainRecvSWL;
     void* metricsManagerSocket; // only used in init, no lock needed
@@ -201,7 +202,6 @@ private:
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
 	std::map<std::string,uint64_t> urlInstanceMap;
-	std::map<std::string,void*> futureResponseUrlToSocketMap;
 
     std::string myDomain;
     std::string componentID;

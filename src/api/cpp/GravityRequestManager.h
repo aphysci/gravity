@@ -48,11 +48,13 @@ class GravityRequestManager
 private:
 	void* context;
 	void* gravityNodeSocket;
+	void* gravityResponseSocket;
 	std::map<void*,shared_ptr<RequestDetails> > requestMap;
 	std::vector<zmq_pollitem_t> pollItems;
-	std::string readStringMessage();
-	void sendStringMessage(void* socket, std::string str, int flags);
+	std::map<std::string,void*> futureResponseUrlToSocketMap;
 	void processRequest();
+	void createFutureResponse();
+	void sendFutureResponse();
 	void ready();
 public:
 	/**

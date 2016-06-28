@@ -25,7 +25,9 @@
 
 #include "GravityRequestManager.h"
 #include "GravityLogger.h"
+#include "CommUtil.h"
 #include <iostream>
+#include <sstream>
 
 namespace gravity
 {
@@ -47,6 +49,9 @@ void GravityRequestManager::start()
 	zmq_connect(gravityNodeSocket, "inproc://gravity_request_manager");
 	zmq_setsockopt(gravityNodeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
+	gravityResponseSocket = zmq_socket(context, ZMQ_REP);
+	zmq_connect(gravityResponseSocket, "inproc://gravity_request_rep");
+
 	// Always have at least the gravity node to poll
 	zmq_pollitem_t pollItem;
 	pollItem.socket = gravityNodeSocket;
@@ -54,6 +59,14 @@ void GravityRequestManager::start()
 	pollItem.fd = 0;
 	pollItem.revents = 0;
 	pollItems.push_back(pollItem);
+
+	// And the rep socket
+	zmq_pollitem_t pollItemRep;
+	pollItemRep.socket = gravityResponseSocket;
+	pollItemRep.events = ZMQ_POLLIN;
+	pollItemRep.fd = 0;
+	pollItemRep.revents = 0;
+	pollItems.push_back(pollItemRep);
 
 	ready();
 
@@ -73,7 +86,7 @@ void GravityRequestManager::start()
 		if (pollItems[0].revents & ZMQ_POLLIN)
 		{
 			// Get new GravityNode request
-			string command = readStringMessage();
+			string command = readStringMessage(pollItems[0].socket);
 
 			// message from gravity node should be either a request or kill
 			if (command == "request")
@@ -90,10 +103,25 @@ void GravityRequestManager::start()
 			}
 		}
 
+		if (pollItems[1].revents & ZMQ_POLLIN)
+		{
+			// Get new GravityNode request
+			string command = readStringMessage(pollItems[1].socket);
+
+			if (command == "createFutureResponse")
+			{
+				createFutureResponse();
+			}
+			else if (command == "sendFutureResponse")
+			{
+				sendFutureResponse();
+			}
+		}
+
 		// init an iterator past the first element so that we can check active requests
 		// We can't create the iterator untl here because ProcessRequest may add elements
 		// to pollItems which would invalidate the iterator.
-        vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 1;
+        vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 2;
 
         // Check for responses
 		while(pollItemIter != pollItems.end())
@@ -116,11 +144,12 @@ void GravityRequestManager::start()
 
 					// Send request to future REP socket
 					Log::trace("Sending empty request on future response socket");
-					sendStringMessage(socket, "", ZMQ_DONTWAIT);
+					sendStringMessage(socket, "FUTURE_REQUEST", ZMQ_DONTWAIT);
 
 					// Replace polling info for original socket with future socket details
 					requestMap[socket] = requestMap[pollItemIter->socket];
 					requestMap.erase(pollItemIter->socket);
+					zmq_close(pollItemIter->socket);
 					pollItemIter->socket = socket;
 					pollItemIter->revents = 0;
 				}
@@ -130,8 +159,8 @@ void GravityRequestManager::start()
 					shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
 					Log::trace("GravityRequestManager: call requestFilled()");
 					reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
-					zmq_close(pollItemIter->socket);
 					requestMap.erase(pollItemIter->socket);
+					zmq_close(pollItemIter->socket);
 					pollItemIter = pollItems.erase(pollItemIter);
 				}
 			}
@@ -165,44 +194,101 @@ void GravityRequestManager::ready()
 	zmq_close(initSocket);
 }
 
-string GravityRequestManager::readStringMessage()
+void GravityRequestManager::sendFutureResponse()
 {
-	// Message holder
-	zmq_msg_t msg;
+	int ret = GravityReturnCodes::SUCCESS;
+	string url = readStringMessage(gravityResponseSocket);
 
-	// Read the data product id for this subscription
-	zmq_msg_init(&msg);
-	zmq_recvmsg(gravityNodeSocket, &msg, -1);
-	int size = zmq_msg_size(&msg);
-	char* s = (char*)malloc(size+1);
-	memcpy(s, zmq_msg_data(&msg), size);
-	s[size] = 0;
-	std::string str(s, size);
-	free(s);
-	zmq_msg_close(&msg);
+	zmq_msg_t message;
+	zmq_msg_init(&message);
+    zmq_recvmsg(gravityResponseSocket, &message, 0);
+    // Create new GravityDataProduct from the incoming message
+	GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
+    // Clean up message
+    zmq_msg_close(&message);
 
-	return str;
+	if (futureResponseUrlToSocketMap.find(url) == futureResponseUrlToSocketMap.end())
+	{
+		Log::warning("Received a future response that is not associated with a REP url ('%s')", url.c_str());
+		ret = GravityReturnCodes::FAILURE;
+	}
+	else
+	{
+		void* responseSocket = futureResponseUrlToSocketMap[url];
+		
+		// Poll socket for pending request
+		zmq_pollitem_t pollItems[] = {{responseSocket, 0, ZMQ_POLLIN, 0}};
+		int rc = zmq_poll(pollItems, 1, 2000); // 2 second timeout - this really should be waiting for us
+		if (rc == -1)
+		{
+			ret = GravityReturnCodes::INTERRUPTED;
+		}
+		else if (rc == 0)
+		{
+			ret = GravityReturnCodes::REQUEST_TIMEOUT;
+		}
+		else if (pollItems[0].revents & ZMQ_POLLIN)
+		{
+			// Don't really care about the specifics of the request, just read and discard
+			zmq_msg_init(&message);
+			zmq_recvmsg(responseSocket, &message, 0);
+			zmq_msg_close(&message);
+
+			sendGravityDataProduct(responseSocket, response, ZMQ_DONTWAIT);
+		}
+
+		// Return result
+		sendIntMessage(gravityResponseSocket, ret, ZMQ_DONTWAIT);
+
+		// Clean up the future response socket
+		futureResponseUrlToSocketMap.erase(url);
+		zmq_close(responseSocket);
+	}
 }
 
-void GravityRequestManager::sendStringMessage(void* socket, string str, int flags)
+void GravityRequestManager::createFutureResponse()
 {
-	zmq_msg_t msg;
-	zmq_msg_init_size(&msg, str.length());
-	memcpy(zmq_msg_data(&msg), str.c_str(), str.length());
-	zmq_sendmsg(socket, &msg, flags);
-	zmq_msg_close(&msg);
+	// Read our IP address
+	string ip = readStringMessage(gravityResponseSocket);
+
+	// Read port range
+	int minPort = readIntMessage(gravityResponseSocket);
+	int maxPort = readIntMessage(gravityResponseSocket);
+
+	// Create the response socket
+	void* responseSocket = zmq_socket(context, ZMQ_REP);
+
+	// Bind socket and create URL
+	string url = "";
+	int port = bindFirstAvailablePort(responseSocket, ip, minPort, maxPort);
+    if (port < 0)
+    {
+        Log::critical("Could not find available port for FutureResponse");
+        zmq_close(responseSocket);
+    }
+	else
+	{
+		stringstream ss;
+		ss << "tcp://" << ip << ":" << port;
+		url = ss.str();
+	}
+
+	Log::trace("GravityRequestManager::createFutureResponse(): URL = '%s'", url.c_str());
+	futureResponseUrlToSocketMap[url] = responseSocket;
+
+	sendStringMessage(gravityResponseSocket, url, ZMQ_DONTWAIT);
 }
 
 void GravityRequestManager::processRequest()
 {
 	// Read the service id for this request
-	string serviceID = readStringMessage();
+	string serviceID = readStringMessage(gravityNodeSocket);
 
 	// Read the service url
-	string url = readStringMessage();
+	string url = readStringMessage(gravityNodeSocket);
 
 	// Read the request ID
-	string requestID = readStringMessage();
+	string requestID = readStringMessage(gravityNodeSocket);
 
 	// Read the data product
 	zmq_msg_t msg;
