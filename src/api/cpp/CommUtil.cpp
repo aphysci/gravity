@@ -45,11 +45,16 @@ GRAVITY_API void sendStringMessage(void* socket, string str, int flags)
 
 GRAVITY_API string readStringMessage(void *socket)
 {
+	return readStringMessage(socket, 0);
+}
+
+GRAVITY_API string readStringMessage(void *socket, int flags)
+{
 	// Message holder
 	zmq_msg_t msg;
 
 	zmq_msg_init(&msg);
-	zmq_recvmsg(socket, &msg, 0);
+	zmq_recvmsg(socket, &msg, flags);
 	int size = zmq_msg_size(&msg);
 	char* s = (char*)malloc(size+1);
 	memcpy(s, zmq_msg_data(&msg), size);

@@ -53,6 +53,7 @@ using namespace std;
 using namespace std::tr1;
 
 GRAVITY_API string readStringMessage(void *socket);
+GRAVITY_API string readStringMessage(void *socket, int flags);
 GRAVITY_API void sendStringMessage(void* socket, string str, int flags);
 GRAVITY_API int readIntMessage(void *socket);
 GRAVITY_API void sendIntMessage(void* socket, int val, int flags);
