@@ -216,7 +216,7 @@ void GravityPublishManager::start()
 		// Check for publish updates
 		for (unsigned int i = 4; i < pollItems.size(); i++)
 		{
-			if (pollItems[i].revents && ZMQ_POLLIN)
+			if (pollItems[i].revents & ZMQ_POLLIN)
 			{
 				// Read whether it's a new subscription from socket
 				zmq_msg_init(&event);
