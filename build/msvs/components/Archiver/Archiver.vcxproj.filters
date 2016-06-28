@@ -21,9 +21,21 @@
     <ClCompile Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

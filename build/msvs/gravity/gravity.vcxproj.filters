@@ -266,5 +266,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
+    <None Include="..\..\..\src\api\protobufs\FileArchiverControlRequestPB.proto">
+      <Filter>protobufs</Filter>
+    </None>
+    <None Include="..\..\..\src\api\protobufs\FileArchiverControlResponsePB.proto">
+      <Filter>protobufs</Filter>
+    </None>
   </ItemGroup>
 </Project>

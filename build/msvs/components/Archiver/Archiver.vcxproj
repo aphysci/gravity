@@ -437,7 +437,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(LibDir);$(ThirdPartyLibs)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gravity.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf.lib;gravity.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -446,9 +446,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.cc" />
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.cc" />
     <ClCompile Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.h" />
+    <ClInclude Include="..\..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.h" />
     <ClInclude Include="..\..\..\..\src\components\cpp\Archiver\FileArchiver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
