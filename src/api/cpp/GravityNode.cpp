@@ -619,6 +619,32 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			logInitialized=true;
 		}
 
+		// Configure high water marks
+		int publishHWM = getIntParam("PublishHWM", 1000);
+		if (publishHWM < 0)
+		{
+			Log::warning("Invalid PublishHWM = %d. Ignoring.", publishHWM);
+		}
+		else
+		{
+			// Send HWM (REQ/REP)
+			sendStringMessage(publishManagerRequestSWL.socket, "set_hwm", ZMQ_SNDMORE);
+			sendIntMessage(publishManagerRequestSWL.socket, publishHWM, ZMQ_DONTWAIT);
+			// Read ACK
+			readStringMessage(publishManagerRequestSWL.socket);
+		}
+		int subscribeHWM = getIntParam("SubscribeHWM", 1000);
+		if (subscribeHWM < 0)
+		{
+			Log::warning("Invalid subscribeHWM = %d. Ignoring.", subscribeHWM);
+		}
+		else
+		{
+			// Send HWM (PUB/SUB)
+			sendStringMessage(subscriptionManagerSWL.socket, "set_hwm", ZMQ_SNDMORE);
+			sendIntMessage(subscriptionManagerSWL.socket, subscribeHWM, ZMQ_DONTWAIT);
+		}
+
 		//get the Domain name of the Service Directory to connect to
 		std::string serviceDirectoryDomain = getStringParam("Domain");
 

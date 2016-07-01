@@ -51,6 +51,9 @@ GravitySubscriptionManager::GravitySubscriptionManager(void* context)
 
     // Default to no metrics
     metricsEnabled = false;
+
+	// Default high water mark
+	subscribeHWM = 1000;
 }
 
 GravitySubscriptionManager::~GravitySubscriptionManager() {}
@@ -117,6 +120,10 @@ void GravitySubscriptionManager::start()
 			else if (command == "kill")
 			{
 				break;
+			}
+			else if (command == "set_hwm")
+			{
+				setHWM();
 			}
 			else
 			{
@@ -385,11 +392,14 @@ void *GravitySubscriptionManager::setupSubscription(const string &url, const str
     // Create the socket
     void* subSocket = zmq_socket(context, ZMQ_SUB);
 
-    // Connect to publisher
-    zmq_connect(subSocket, url.c_str());
+	// Configure high water mark
+	zmq_setsockopt(subSocket, ZMQ_RCVHWM, &subscribeHWM, sizeof(subscribeHWM));    
 
     // Configure filter
     zmq_setsockopt(subSocket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
+
+	// Connect to publisher
+    zmq_connect(subSocket, url.c_str());
 
     // set up the poll item for this subscription
     pollItem.socket = subSocket;
@@ -399,6 +409,12 @@ void *GravitySubscriptionManager::setupSubscription(const string &url, const str
     pollItems.push_back(pollItem);
 
     return subSocket;
+}
+
+void GravitySubscriptionManager::setHWM()
+{
+	// Read the high water mark setting
+	subscribeHWM = readIntMessage(gravityNodeSocket);
 }
 
 void GravitySubscriptionManager::addSubscription()

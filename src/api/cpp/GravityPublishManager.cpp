@@ -49,6 +49,9 @@ GravityPublishManager::GravityPublishManager(void* context)
 
     // Default to no metrics
     metricsEnabled = false;
+
+	// Default high water mark
+	publishHWM = 1000;
 }
 
 GravityPublishManager::~GravityPublishManager() {}
@@ -128,7 +131,7 @@ void GravityPublishManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeResponseSocket);
 
-			// message from gravity node on this socket should be only be register or unregister
+			// message from gravity node on this socket
 			if (command == "register")
 			{
 				registerDataProduct();
@@ -136,6 +139,10 @@ void GravityPublishManager::start()
 			else if (command == "unregister")
 			{
 			    unregisterDataProduct();
+			}
+			else if (command == "set_hwm")
+			{
+				setHWM();
 			}
 			else
 			{
@@ -306,6 +313,9 @@ void GravityPublishManager::registerDataProduct()
     int verbose = 1;
     zmq_setsockopt(pubSocket, ZMQ_XPUB_VERBOSE, &verbose, sizeof(verbose));
 
+	// Set high water mark
+	zmq_setsockopt(pubSocket, ZMQ_SNDHWM, &publishHWM, sizeof(publishHWM));
+
     string connectionURL;
     if(transportType == "tcp")
     {
@@ -397,6 +407,15 @@ void GravityPublishManager::unregisterDataProduct()
 			}
 		}
 	}
+}
+
+void GravityPublishManager::setHWM()
+{
+	// Read the high water mark setting
+	publishHWM = readIntMessage(gravityNodeResponseSocket);
+
+	// Send ACK
+	sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::publish(void* requestSocket)

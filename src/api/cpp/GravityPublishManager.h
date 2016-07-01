@@ -82,12 +82,14 @@ private:
     map<string,shared_ptr<PublishDetails> > publishMapByID;
 	vector<zmq_pollitem_t> pollItems;
 
+	void setHWM();
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();
 	void publish(void* requestSocket);
     void publish(void* socket, const string &filterText, const void *data, int size);
 
+	int publishHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
 public:

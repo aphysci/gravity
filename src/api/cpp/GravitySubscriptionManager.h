@@ -70,12 +70,14 @@ private:
     std::map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 
+	void setHWM();
 	void addSubscription();
 	void removeSubscription();
 	int readSubscription(void *socket, std::string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void ready();
 
+	int subscribeHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
     void collectMetrics(std::vector<shared_ptr<GravityDataProduct> > dataProducts);
