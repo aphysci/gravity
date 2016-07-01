@@ -39,7 +39,6 @@ typedef struct RequestDetails
 {
 	std::string serviceID;
 	std::string requestID;
-	zmq_pollitem_t pollItem;
 	GravityRequestor* requestor;
 } RequestDetails;
 

@@ -124,6 +124,7 @@ void GravityRequestManager::start()
         vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 2;
 
         // Check for responses
+		std::vector<zmq_pollitem_t> newPollItems;
 		while(pollItemIter != pollItems.end())
 		{
 			if (pollItemIter->revents & ZMQ_POLLIN)
@@ -143,15 +144,18 @@ void GravityRequestManager::start()
 					zmq_connect(socket, response.getFutureSocketUrl().c_str());					
 
 					// Send request to future REP socket
-					Log::trace("Sending empty request on future response socket");
 					sendStringMessage(socket, "FUTURE_REQUEST", ZMQ_DONTWAIT);
 
-					// Replace polling info for original socket with future socket details
-					requestMap[socket] = requestMap[pollItemIter->socket];
-					requestMap.erase(pollItemIter->socket);
-					zmq_close(pollItemIter->socket);
-					pollItemIter->socket = socket;
-					pollItemIter->revents = 0;
+					// Copy request details from original request socket to future request socket
+					requestMap[socket] = requestMap[pollItemIter->socket];					
+
+					// Add new poll item once we're done with this loop
+					zmq_pollitem_t pollItem;
+					pollItem.socket = socket;
+					pollItem.events = ZMQ_POLLIN;
+					pollItem.fd = 0;
+					pollItem.revents = 0;
+					newPollItems.push_back(pollItem);					
 				}
 				else
 				{
@@ -159,16 +163,19 @@ void GravityRequestManager::start()
 					shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
 					Log::trace("GravityRequestManager: call requestFilled()");
 					reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
-					requestMap.erase(pollItemIter->socket);
-					zmq_close(pollItemIter->socket);
-					pollItemIter = pollItems.erase(pollItemIter);
 				}
+
+				zmq_close(pollItemIter->socket);
+				requestMap.erase(pollItemIter->socket);	
+				pollItemIter = pollItems.erase(pollItemIter);
 			}
 			else
 			{
 			    pollItemIter++;
 			}
 		}
+
+		pollItems.insert(pollItems.end(), newPollItems.begin(), newPollItems.end());
 	}
 
 	// Clean up all our open sockets
@@ -235,14 +242,17 @@ void GravityRequestManager::sendFutureResponse()
 			zmq_msg_close(&message);
 
 			sendGravityDataProduct(responseSocket, response, ZMQ_DONTWAIT);
+
+			// This brief sleep seems to be required to avoid zeromq bug
+			gravity::sleep(100);
 		}
 
 		// Return result
 		sendIntMessage(gravityResponseSocket, ret, ZMQ_DONTWAIT);
 
 		// Clean up the future response socket
-		futureResponseUrlToSocketMap.erase(url);
 		zmq_close(responseSocket);
+		futureResponseUrlToSocketMap.erase(url);		
 	}
 }
 
@@ -271,10 +281,11 @@ void GravityRequestManager::createFutureResponse()
 		stringstream ss;
 		ss << "tcp://" << ip << ":" << port;
 		url = ss.str();
+
+		futureResponseUrlToSocketMap[url] = responseSocket;
 	}
 
 	Log::trace("GravityRequestManager::createFutureResponse(): URL = '%s'", url.c_str());
-	futureResponseUrlToSocketMap[url] = responseSocket;
 
 	sendStringMessage(gravityResponseSocket, url, ZMQ_DONTWAIT);
 }
@@ -331,7 +342,6 @@ void GravityRequestManager::processRequest()
 	reqDetails.reset(new RequestDetails());
 	reqDetails->serviceID = serviceID;
 	reqDetails->requestID = requestID;
-	reqDetails->pollItem = pollItem;
 	reqDetails->requestor = requestor;
 
 	requestMap[reqSocket] = reqDetails;
