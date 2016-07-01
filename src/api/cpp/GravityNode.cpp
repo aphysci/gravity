@@ -239,7 +239,7 @@ void GravityNode::GravityNodeDomainListener::start()
 
     /* Bind to the broadcast port */
 	int rc = 0;
-    if ((rc == bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
+    if ((rc = bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
     {
 		return;
     }
@@ -914,7 +914,7 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 	// Got a Response, now process it.  Process the response
 	else if(items[0].revents & ZMQ_POLLIN)
 	{
-		// Get service directory response
+		// Get response from service
 		zmq_msg_t resp;
 		zmq_msg_init(&resp);
 		zmq_recvmsg(socket, &resp, 0);

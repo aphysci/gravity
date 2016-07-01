@@ -352,7 +352,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 
     /* Bind to the broadcast port */
 	int rc = 0;
-    if ((rc == bind(receiveSocket, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
+    if ((rc = bind(receiveSocket, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
     {
 		Log::fatal("Receiver: bind() failed");
 		return rc;
