@@ -185,6 +185,7 @@ void GravityRequestManager::start()
 		zmq_close(socket);
 	}
 	zmq_close(gravityNodeSocket);
+	zmq_close(gravityResponseSocket);
 }
 
 void GravityRequestManager::ready()
