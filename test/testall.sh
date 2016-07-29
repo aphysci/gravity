@@ -22,7 +22,16 @@ do
     echo Running $script
     echo
     chmod +x $script
-    $script || exit 1
+    timeout 300 $script
+    ret=$?
+    if [ $ret == 124 ]; then
+        echo test timed out
+    fi
+
+    if [ $ret != 0 ]; then
+        echo test failed with error code $ret
+        exit $ret
+    fi
 
     echo
     echo Success!
