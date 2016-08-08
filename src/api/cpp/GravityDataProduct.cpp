@@ -56,6 +56,16 @@ std::string GravityDataProduct::getSoftwareVersion() const
     return gravityDataProductPB->softwareversion();
 }
 
+uint64_t GravityDataProduct::getReceivedTimestamp() const
+{
+	uint64_t receivedTimestamp = 0;
+	if (gravityDataProductPB->has_received_timestamp())
+	{
+		receivedTimestamp = gravityDataProductPB->received_timestamp();
+	}
+    return receivedTimestamp;
+}
+
 uint64_t GravityDataProduct::getGravityTimestamp() const
 {
     return gravityDataProductPB->timestamp();

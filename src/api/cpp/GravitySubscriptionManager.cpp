@@ -200,6 +200,10 @@ void GravitySubscriptionManager::start()
                                (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
                                 && !(*lastCachedValue == *dataProduct)))
                         {
+							// Grab current time now for stamping received_timestamp on received data products
+							dataProduct->setReceivedTimestamp(getCurrentTime());
+
+							// Add data product to vector to be provided to the subscriber
                             dataProducts.push_back(dataProduct);
 
                             // Save most recent value so we can provide it to new subscribers, and to perform check above.

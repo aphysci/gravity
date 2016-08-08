@@ -81,6 +81,13 @@ public:
      */
     GRAVITY_API uint64_t getGravityTimestamp() const;
 
+	/**
+     * Method to return the timestamp associated with the receipt of this data product
+     *  Represents Microseconds since the Unix Epoch
+     * \return received timestamp for data (0 if not received via subscription)
+     */
+    GRAVITY_API uint64_t getReceivedTimestamp() const;
+
     /**
      * Method to return the data product ID for this data
      * \return data product ID
@@ -190,6 +197,12 @@ public:
      * \param ts Timestamp (epoch microseconds) for this GravityDataProduct
      */
     GRAVITY_API void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
+
+	/**
+     * Set the received timestamp on this GravityDataProduct (typically set by infrastructure on receipt)
+     * \param ts Received timestamp (epoch microseconds) for this GravityDataProduct
+     */
+    GRAVITY_API void setReceivedTimestamp(uint64_t ts) const { gravityDataProductPB->set_received_timestamp(ts); }
 
     /**
      * Set the component id on this GravityDataProduct (typically set by infrastructure at publish)

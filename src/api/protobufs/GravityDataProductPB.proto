@@ -32,4 +32,5 @@ message GravityDataProductPB
 	optional string domain = 6;
 	optional bool future_response = 7;
 	optional string future_socket_url = 8;
+	optional uint64 received_timestamp = 9;
 }

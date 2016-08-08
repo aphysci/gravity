@@ -64,6 +64,19 @@ public class GravityDataProduct {
     public long getGravityTimestamp() {
     	return gdp.getTimestamp();
     }
+    
+	/**
+     * Method to return the timestamp associated with receipt of data product
+     * @return received timestamp for data
+     */
+    public long getReceivedTimestamp() {
+		long receivedTimestamp = 0;
+		if (gdp.hasReceivedTimestamp())
+		{
+			receivedTimestamp = gdp.getReceivedTimestamp();
+		}
+    	return receivedTimestamp;
+    }
 
     /**
      * Method to set the timestamp for this GravityDataProduct

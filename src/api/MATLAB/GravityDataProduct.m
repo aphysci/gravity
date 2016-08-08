@@ -28,6 +28,10 @@ classdef GravityDataProduct < handle
             timestamp = this.gravityDataProduct.getGravityTimestamp();
         end
         
+        function receivedTimestamp = getReceivedTimestamp(this)
+            receivedTimestamp = this.gravityDataProduct.getReceivedTimestamp();
+        end
+
         function dataProductID = getDataProductID(this)
             dataProductID = this.gravityDataProduct.getDataProductID();
         end
