@@ -687,7 +687,7 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 		subscriptionMap[key][filter] = subDetails;
 	}
 		
-	for(std::set<shared_ptr<TimeoutMonitor>>::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
+	for(std::set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
 	{
 		// if a reference to this monitor already exists
 		if((*iter)->monitor == monitor)
