@@ -474,6 +474,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\api\java\src\cpp\CPPGravitySubscriptionMonitor.cpp" />
     <ClCompile Include="..\..\..\src\api\java\src\cpp\CPPGravityHeartbeatListener.cpp" />
     <ClCompile Include="..\..\..\src\api\java\src\cpp\CPPGravityLogger.cpp" />
     <ClCompile Include="..\..\..\src\api\java\src\cpp\CPPGravityRequestor.cpp" />
@@ -482,6 +483,7 @@
     <ClCompile Include="..\..\..\src\api\java\src\cpp\gravity_wrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\CPPGravitySubscriptionMonitor.h" />
     <ClInclude Include="..\..\CPPGravityHeartbeatListener.h" />
     <ClInclude Include="..\..\CPPGravityLogger.h" />
     <ClInclude Include="..\..\CPPGravityRequestor.h" />

@@ -93,13 +93,29 @@ void GravitySubscriptionManager::start()
 	// Process forever...
 	while (true)
 	{
-		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
+		calculateTimeout();
+		int rc = zmq_poll(&pollItems[0], pollItems.size(), pollTimeout); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
 		    Log::debug("Interrupted, exiting (rc = %d)", rc);
 			// Interrupted
 			break;
+		}
+
+		// If timeout occured
+		if(rc == 0)
+		{
+			if (currTimeoutMonitor != NULL)
+			{				
+				//calculate time since last subscription
+				int currTime = (int) getCurrentTime()/1000;
+				int timeSinceLast = (currTimeoutMonitor->lastReceived)!=-1?(int)(currTime-currTimeoutMonitor->lastReceived):-1;				
+				(currTimeoutMonitor->monitor)->subscriptionTimeout(currMonitorDetails->dataProductID, timeSinceLast, currMonitorDetails->filter, currMonitorDetails->domain);
+				//reset timeout for the current monitor
+				currTimeoutMonitor->endTime = currTimeoutMonitor->endTime + currTimeoutMonitor->timeout;
+				Log::trace("Subscription Timeout (%s)",currMonitorDetails->dataProductID.c_str());
+			}
+			continue;
 		}
 
 		// Process new subscription requests from the gravity node
@@ -124,6 +140,14 @@ void GravitySubscriptionManager::start()
 			else if (command == "set_hwm")
 			{
 				setHWM();
+			}
+			else if (command == "set_monitor")
+			{
+				setTimeoutMonitor();
+			}
+			else if (command == "clear_monitor")
+			{		
+				clearTimeoutMonitor();
 			}
 			else
 			{
@@ -184,6 +208,7 @@ void GravitySubscriptionManager::start()
                     shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
 
                     vector< shared_ptr<GravityDataProduct> > dataProducts;
+					long lastReceived = -1;
                     while (true)
                     {
                         string filterText;
@@ -200,8 +225,9 @@ void GravitySubscriptionManager::start()
                                (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
                                 && !(*lastCachedValue == *dataProduct)))
                         {
+							lastReceived = getCurrentTime();
 							// Grab current time now for stamping received_timestamp on received data products
-							dataProduct->setReceivedTimestamp(getCurrentTime());
+							dataProduct->setReceivedTimestamp(lastReceived);
 
 							// Add data product to vector to be provided to the subscriber
                             dataProducts.push_back(dataProduct);
@@ -219,6 +245,12 @@ void GravitySubscriptionManager::start()
 						for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
 						{
 							(*iter)->subscriptionFilled(dataProducts);
+						}
+						int64_t currTime = lastReceived/1000;
+						for (set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin(); iter != subDetails->monitors.end(); iter++)
+						{						
+							(*iter)->lastReceived = currTime;
+							(*iter)->endTime = currTime + (*iter)->timeout;
 						}
 
                         if (metricsEnabled)
@@ -259,7 +291,7 @@ void GravitySubscriptionManager::start()
                                 // if we don't already have this url, add it
                                 if (iter->second->pollItemMap.count(update.url(i)) == 0)
                                 {
-                                    zmq_pollitem_t pollItem;
+									zmq_pollitem_t pollItem;
                                     void *subSocket = setupSubscription(update.url(i), iter->first, pollItem);
 
                                     // and by socket for quick lookup as data arrives
@@ -471,6 +503,12 @@ void GravitySubscriptionManager::addSubscription()
 	{
 		// Already have a details for this
 		subDetails = subscriptionMap[key][filter];
+		if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
+		{
+			zmq_pollitem_t pollItem;
+            setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
+            publisherUpdateMap[key] = pollItem;
+		}
 	}
 	else
 	{
@@ -491,7 +529,17 @@ void GravitySubscriptionManager::addSubscription()
 		subDetails->pollItemMap[url] = pollItem;
 
 		// and by socket for quick lookup as data arrives
-		subscriptionSocketMap[subSocket] = subDetails;
+		subscriptionSocketMap[subSocket] = subDetails;			
+	}
+	
+	// if a monitor was registered before the subscription, reset the timeouts
+	if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
+	{
+		long currTime = getCurrentTime()/1000;
+		for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
+		{
+			(*monitorIter)->endTime = currTime + (*monitorIter)->timeout;
+		}
 	}
 
     // Add new subscriber if it isn't already in the list
@@ -565,38 +613,210 @@ void GravitySubscriptionManager::removeSubscription()
 		// If no more subscribers, close the subscription sockets and clear the details
 		if (subDetails->subscribers.empty())
 		{
-            // Remove from details main map
-            subscriptionMap[key].erase(filter);
-            if (subscriptionMap[key].size() == 0)
-                subscriptionMap.erase(key);
+			//if no more monitor references
+			if(subDetails->monitors.empty())
+			{
+				// Remove details from main map
+				subscriptionMap[key].erase(filter);
+				if (subscriptionMap[key].size() == 0)
+				{
+					subscriptionMap.erase(key);
+				}
+			}
 
-            for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
-            {
-                subscriptionSocketMap.erase(iter->second.socket);
+			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
+			{
+				subscriptionSocketMap.erase(iter->second.socket);
 
-                // Unsubscribe
-                zmq_setsockopt(iter->second.socket, ZMQ_UNSUBSCRIBE, filter.c_str(), filter.length());
+				// Unsubscribe
+				zmq_setsockopt(iter->second.socket, ZMQ_UNSUBSCRIBE, filter.c_str(), filter.length());
 
-                // Close the socket
-                zmq_close(iter->second.socket);
+				// Close the socket
+				zmq_close(iter->second.socket);
 
-                // Remove from poll items
-                vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
-                while (pollIter != pollItems.end())
-                {
-                    if (pollIter->socket == iter->second.socket)
-                    {
-                        pollIter = pollItems.erase(pollIter);
-                    }
-                    else
-                    {
-                        pollIter++;
-                    }
-                }
-            }
+				// Remove from poll items
+				vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
+				while (pollIter != pollItems.end())
+				{
+					if (pollIter->socket == iter->second.socket)
+					{
+						pollIter = pollItems.erase(pollIter);
+					}
+					else
+					{
+						pollIter++;
+					}
+				}
+			}				
 		}
 	}
 }
+
+void GravitySubscriptionManager::setTimeoutMonitor()
+{
+	string dataProductID = readStringMessage(gravityNodeSocket);
+
+	zmq_msg_t msg;
+	zmq_msg_init(&msg);
+	zmq_recvmsg(gravityNodeSocket, &msg, -1);
+	GravitySubscriptionMonitor* monitor;
+	memcpy(&monitor, zmq_msg_data(&msg), zmq_msg_size(&msg));
+	zmq_msg_close(&msg);
+
+	int timeout = readIntMessage(gravityNodeSocket);
+	
+	string filter = readStringMessage(gravityNodeSocket);
+	string domain = readStringMessage(gravityNodeSocket);
+	
+	DomainDataKey key(domain, dataProductID);
+		
+	shared_ptr<SubscriptionDetails> subDetails;
+	if (subscriptionMap[key].count(filter) > 0)
+	{
+		// Already have a details for this
+		subDetails = subscriptionMap[key][filter];
+	}
+	else
+	{
+		subDetails.reset(new SubscriptionDetails());
+		subDetails->dataProductID = dataProductID;
+		subDetails->domain = domain;
+		subDetails->filter = filter;
+		map<string, shared_ptr<SubscriptionDetails> > filterMap;
+	    subscriptionMap[key] = filterMap;
+		subscriptionMap[key][filter] = subDetails;
+	}
+		
+	for(std::set<shared_ptr<TimeoutMonitor>>::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
+	{
+		// if a reference to this monitor already exists
+		if((*iter)->monitor == monitor)
+		{
+			
+			(*iter)->timeout=timeout;
+			(*iter)->endTime=(long) (getCurrentTime()/1000+timeout);
+			return;
+		}
+
+	}
+
+	// create and add new monitor
+	shared_ptr<TimeoutMonitor> tm;
+	tm.reset(new TimeoutMonitor());
+
+	tm->monitor = monitor;
+	tm->timeout=timeout;
+	tm->endTime=(long)(getCurrentTime()/1000+timeout);
+	tm->lastReceived=-1l;
+		
+	subDetails->monitors.insert(tm);
+
+}
+
+
+void GravitySubscriptionManager::clearTimeoutMonitor()
+{
+	string dataProductID = readStringMessage(gravityNodeSocket);
+
+	zmq_msg_t msg;
+	zmq_msg_init(&msg);
+	zmq_recvmsg(gravityNodeSocket, &msg, -1);
+	GravitySubscriptionMonitor* monitor;
+	memcpy(&monitor, zmq_msg_data(&msg), zmq_msg_size(&msg));
+	zmq_msg_close(&msg);
+
+	string filter = readStringMessage(gravityNodeSocket);
+	string domain = readStringMessage(gravityNodeSocket);
+	
+
+		
+	DomainDataKey key(domain, dataProductID);		
+		
+	if (subscriptionMap.count(key) > 0 && subscriptionMap[key].count(filter) > 0)
+	{
+		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
+
+		// Find & remove all matching monitors
+		set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();
+		while (iter != subDetails->monitors.end())
+		{
+			if ((*iter)->monitor == monitor)
+			{		
+				//Is This necessary?
+				if((*iter) == currTimeoutMonitor)
+				{
+					currTimeoutMonitor.reset();
+					pollTimeout=-1;
+				}
+				subDetails->monitors.erase(iter);
+				break;
+			}
+			
+			iter++;			
+		}
+
+		//if no more references to this subscription, remove from map
+		if(subDetails->monitors.empty() && subDetails->subscribers.empty())
+		{
+			// Remove from details main map
+			subscriptionMap[key].erase(filter);
+			if (subscriptionMap[key].size() == 0)
+			{
+				subscriptionMap.erase(key);
+			}
+		}
+	}
+}
+	
+void GravitySubscriptionManager::calculateTimeout()
+{
+	int minTime = -1;
+	currTimeoutMonitor.reset();
+	currMonitorDetails.reset();
+	map<DomainDataKey, map<std::string, shared_ptr<SubscriptionDetails> > >::iterator dpIter = subscriptionMap.begin();
+	//go through all domain-dataproduct keys
+	while (dpIter != subscriptionMap.end())
+	{
+		map<string, shared_ptr<SubscriptionDetails> >::iterator filterIter = dpIter->second.begin();
+		while(filterIter != dpIter->second.end())
+		{
+			shared_ptr<SubscriptionDetails> subDetails = filterIter->second;
+			for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
+			{
+				// check if this is an active subscription with a valid timeout
+				if(subDetails->subscribers.size() > 0 && (*monitorIter)->timeout>=0)
+				{
+
+					int currTime = (int) getCurrentTime()/1000;
+					// calculate how much time is left until this monitor times out
+					int timeRemaining =(int) ((*monitorIter)->endTime-currTime);
+					//a subscription timed out during processing
+					if(timeRemaining <= 0)
+					{						
+						int timeSinceLast = (*monitorIter)->lastReceived>0?(int)(currTime-(*monitorIter)->lastReceived):-1;
+						//make call to monitor
+						(*monitorIter)->monitor->subscriptionTimeout(subDetails->dataProductID,timeSinceLast,
+								subDetails->filter,subDetails->domain);
+						//reset next timeout
+						(*monitorIter)->endTime = (*monitorIter)->endTime + (*monitorIter)->timeout;
+						Log::trace("Subscription Timeout (%s)",subDetails->dataProductID.c_str());			
+					}
+					else if(timeRemaining < minTime || minTime == -1)
+					{
+						//set current timeout details
+						minTime = timeRemaining;
+						currTimeoutMonitor = *monitorIter;
+						currMonitorDetails = subDetails;
+					}
+				}
+			}
+			filterIter++;
+		}		
+		dpIter++;
+	}	
+	pollTimeout=minTime;
+}
+
 
 void GravitySubscriptionManager::collectMetrics(vector<shared_ptr<GravityDataProduct> > dataProducts)
 {

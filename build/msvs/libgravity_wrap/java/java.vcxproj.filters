@@ -39,6 +39,9 @@
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\CPPGravitySubscriber.java">
       <Filter>Source Files</Filter>
     </CustomBuild>
+	<CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\CPPGravitySubscriptionMonitor.java">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\gravity.java">
       <Filter>Source Files</Filter>
     </CustomBuild>
@@ -76,6 +79,9 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\GravitySubscriber.java">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+	<CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\GravitySubscriptionMonitor.java">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\GravityTransportType.java">

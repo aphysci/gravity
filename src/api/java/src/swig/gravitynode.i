@@ -24,6 +24,7 @@ import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.GravityServiceProvider;
 import com.aphysci.gravity.GravityHeartbeatListener;
+import com.aphysci.gravity.GravitySubscriptionMonitor;
 %}
 
 // this turns on director features for CPPGravitySubscriber
@@ -31,6 +32,7 @@ import com.aphysci.gravity.GravityHeartbeatListener;
 %feature("director") gravity::CPPGravityRequestor;
 %feature("director") gravity::CPPGravityServiceProvider;
 %feature("director") gravity::CPPGravityHeartbeatListener;
+%feature("director") gravity::CPPGravitySubscriptionMonitor;
 
 // This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
 // sync with the Gravity API.
@@ -61,6 +63,12 @@ namespace gravity {
       virtual int64_t MissedHeartbeatJava(const std::string dataProductID, int64_t microsecond_to_last_heartbeat, int64_t& INOUT);
       virtual int64_t ReceivedHeartbeatJava(const std::string dataProductID, int64_t& INOUT);
 	};
+	
+	class CPPGravitySubscriptionMonitor {
+	public:
+		virtual ~CPPGravitySubscriptionMonitor();
+		virtual void subscriptionTimeoutJava(const std::string& dataProductID, int milliSecondsSinceLast,const std::string& filter, const std::string& domain);
+	};
 
     enum GravityReturnCode {
         SUCCESS = 0,
@@ -71,11 +79,11 @@ namespace gravity {
         REGISTRATION_CONFLICT = -5,
         NOT_REGISTERED = -6,
         NO_SUCH_SERVICE = -7,
-        NO_SUCH_DATA_PRODUCT = -8,
-        LINK_ERROR = -9,
-        INTERRUPTED = -10,
-        NO_SERVICE_PROVIDER = -11,
-        NO_PORTS_AVAILABLE = -12
+        LINK_ERROR = -8,
+        INTERRUPTED = -9,
+        NO_SERVICE_PROVIDER = -10,
+        NO_PORTS_AVAILABLE = -11,
+		INVALID_PARAMETER = -12
     };
 
     enum GravityTransportType {
@@ -129,6 +137,10 @@ public:
 
     shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
+	GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
+			int milliSecondTimeout, std::string& filter="", std::string& domain="");
+	GravityReturnCode clearSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
+			const std::string& filter="", const std::string& domain="");
 };
 
 };

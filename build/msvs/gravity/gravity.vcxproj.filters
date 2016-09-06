@@ -36,6 +36,9 @@
     <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriber.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+	<ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\api\cpp\GravityServiceProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+	<ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\api\cpp\GravityServiceProvider.h">

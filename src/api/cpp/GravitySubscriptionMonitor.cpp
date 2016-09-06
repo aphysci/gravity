@@ -1,4 +1,4 @@
-/** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+/** (C) Copyright 2016, Applied Physical Sciences Corp., A General Dynamics Company
  **
  ** Gravity is free software; you can redistribute it and/or modify
  ** it under the terms of the GNU Lesser General Public License as published by
@@ -17,19 +17,19 @@
  */
 
 /*
- * GravitySubscriber.cpp
+ * GravitySubscriptionMonitor.cpp
  *
- *  Created on: Aug 20, 2012
- *      Author: Chris Brundick
+ *  Created on: Aug 11, 2016
+ *      Author: Joseph Hankin
  */
 
-#include "GravitySubscriber.h"
+#include "GravitySubscriptionMonitor.h"
 
 namespace gravity {
 
-GravitySubscriber::~GravitySubscriber() {}
-//TODO: REMOVE IMPLEMENTATION
-void GravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) {}
+
+GravitySubscriptionMonitor::~GravitySubscriptionMonitor() {}
+void GravitySubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) {}
 }
 
 

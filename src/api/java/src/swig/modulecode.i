@@ -30,6 +30,7 @@ import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.GravityServiceProvider;
 import com.aphysci.gravity.GravityHeartbeatListener;
 import com.aphysci.gravity.Logger;
+import com.aphysci.gravity.GravitySubscriptionMonitor;
 %}
 
 /******
@@ -46,6 +47,8 @@ import com.aphysci.gravity.Logger;
             new WeakHashMap<GravityHeartbeatListener, CPPGravityHeartbeatListenerProxy>();
   private static Map<Logger, CPPGravityLoggerProxy> proxyLoggerMap =
             new WeakHashMap<Logger, CPPGravityLoggerProxy>();
+  private static Map<GravitySubscriptionMonitor, CPPGravitySubscriptionMonitorProxy> proxySubscriptionMonitorMap =
+            new WeakHashMap<GravitySubscriptionMonitor, CPPGravitySubscriptionMonitorProxy>();			
 
   private static class CPPGravitySubscriberProxy extends CPPGravitySubscriber {
     private GravitySubscriber delegate;
@@ -123,6 +126,18 @@ import com.aphysci.gravity.Logger;
       delegate.Log(level, messagestr);
     }
   }
+  
+  private static class CPPGravitySubscriptionMonitorProxy extends CPPGravitySubscriptionMonitor {
+    private GravitySubscriptionMonitor delegate;
+    public CPPGravitySubscriptionMonitorProxy(GravitySubscriptionMonitor i) {
+      delegate = i;
+    }
+
+    @SuppressWarnings("unused")
+    public void subscriptionTimeoutJava(String dataProductID, int milliSecondsSinceLast, String filter, String domain) {
+      delegate.subscriptionTimeout(dataProductID, milliSecondsSinceLast, filter, domain);
+    }
+  }
 
   public static CPPGravitySubscriber makeNativeSubscriber(GravitySubscriber i) {
     if (i instanceof CPPGravitySubscriber) {
@@ -188,4 +203,18 @@ import com.aphysci.gravity.Logger;
     }
     return proxy;
   }
+  
+  public static CPPGravitySubscriptionMonitor makeNativeSubscriptionMonitor(GravitySubscriptionMonitor i) {
+    if (i instanceof CPPGravitySubscriptionMonitor) {
+      // If it already *is* a CPPGravitySubscriptionMonitor don't bother wrapping it again
+      return (CPPGravitySubscriptionMonitor)i;
+    }
+    CPPGravitySubscriptionMonitorProxy proxy = proxySubscriptionMonitorMap.get(i);
+    if (proxy == null) {
+      proxy = new CPPGravitySubscriptionMonitorProxy(i);
+      proxySubscriptionMonitorMap.put(i, proxy);
+    }
+    return proxy;
+  }
+  
 %}

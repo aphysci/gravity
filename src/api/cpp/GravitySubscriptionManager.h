@@ -37,6 +37,7 @@
 #endif
 #include <string>
 #include "GravitySubscriber.h"
+#include "GravitySubscriptionMonitor.h"
 #include "GravityMetrics.h"
 #include "DomainDataKey.h"
 
@@ -52,6 +53,14 @@ using namespace std::tr1;
 class GravitySubscriptionManager
 {
 private:
+	typedef struct TimeoutMonitor
+	{
+		GravitySubscriptionMonitor* monitor;
+		int timeout;
+		long endTime;
+		long lastReceived;
+	} TimeoutMonitor;
+
     typedef struct SubscriptionDetails
     {
         std::string domain;
@@ -59,7 +68,9 @@ private:
         std::string filter;
         std::map<std::string, zmq_pollitem_t> pollItemMap;
         std::set<GravitySubscriber*> subscribers;
+		std::set<shared_ptr<TimeoutMonitor> > monitors;
     } SubscriptionDetails;
+
 
 	void* context;
 	void* gravityNodeSocket;
@@ -76,6 +87,14 @@ private:
 	int readSubscription(void *socket, std::string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void ready();
+	void setTimeoutMonitor();
+	void clearTimeoutMonitor();
+	void calculateTimeout();
+
+	int pollTimeout;
+	shared_ptr<TimeoutMonitor> currTimeoutMonitor;
+	shared_ptr<SubscriptionDetails> currMonitorDetails;
+
 
 	int subscribeHWM;
     bool metricsEnabled;

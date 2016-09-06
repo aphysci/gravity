@@ -48,14 +48,14 @@
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectoryUDPReceiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-	<ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\components\cpp\ServiceDirectory\ServiceDirectorySynchronizer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryBroadcastPB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\api\cpp\protobuf\ServiceDirectoryDomainUpdatePB.pb.cc">
+      <Filter>Source Files\Protobuf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

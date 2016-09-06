@@ -34,6 +34,7 @@
 #include "CPPGravityRequestor.h"
 #include "CPPGravityHeartbeatListener.h"
 #include "CPPGravityLogger.h"
+#include "CPPGravitySubscriptionMonitor.h"
 using namespace std::tr1;
 %}
 
@@ -103,6 +104,16 @@ using namespace std::tr1;
 %typemap(javain,pgcppname="n",
          pre="    CPPGravityHeartbeatListener n = gravity.makeNativeHeartbeatListener($javainput);")
         const gravity::GravityHeartbeatListener&  "CPPGravityHeartbeatListener.getCPtr(n)"
+
+/******
+ * GravitySubscriptionMonitor conversion
+ *******/
+%typemap(jstype) const gravity::GravitySubscriptionMonitor& "GravitySubscriptionMonitor";
+%typemap(javainterfaces) GravitySubscriptionMonitor "GravitySubscriptionMonitor"
+
+%typemap(javain,pgcppname="n",
+         pre="    CPPGravitySubscriptionMonitor n = gravity.makeNativeSubscriptionMonitor($javainput);")
+        const gravity::GravitySubscriptionMonitor&  "CPPGravitySubscriptionMonitor.getCPtr(n)"
 
 /******
  * Logger conversion
@@ -265,6 +276,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 // The below typemap is added just to deallocate the memory for
 // the java byte array allocated above.  Unfortunately there doesn't seem to be a freearg
 // equivalent for directorin typemaps.
+// ***NOTE This will be applied to any director class functions that have integer return values
 %typemap(directorout) int %{
     $result = ($1_ltype)$input;
     (jenv)->DeleteLocalRef(jBYTE);

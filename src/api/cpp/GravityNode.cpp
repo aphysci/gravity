@@ -2137,6 +2137,74 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	return static_cast<GravityReturnCode>(ret);
 }
 
+GravityReturnCode GravityNode::setSubscriptionTimeoutMonitor(string dataProductID, const GravitySubscriptionMonitor& monitor, 
+			int milliSecondTimeout, string filter, string domain)
+{
+	if (domain.empty())
+    {
+        domain = myDomain;
+    }
+
+	if(milliSecondTimeout <= 0)
+	{
+		return GravityReturnCodes::INVALID_PARAMETER;
+	}
+
+	subscriptionManagerSWL.lock.Lock();
+
+	sendStringMessage(subscriptionManagerSWL.socket, "set_monitor", ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
+	
+	//Send the address of the monitor
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, sizeof(GravitySubscriptionMonitor*));
+	intptr_t p = (intptr_t) &monitor;
+	memcpy(zmq_msg_data(&msg), &p, sizeof(GravitySubscriptionMonitor*));
+	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	//Send the Max time between messages
+	sendIntMessage(subscriptionManagerSWL.socket,milliSecondTimeout,ZMQ_SNDMORE);
+
+	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
+
+	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_DONTWAIT);
+
+	//int ret = readIntMessage(subscriptionManagerSWL.socket);
+	
+	subscriptionManagerSWL.lock.Unlock();
+
+	return GravityReturnCodes::SUCCESS;
+
+}
+
+GravityReturnCode GravityNode::clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
+			std::string filter, std::string domain)
+{
+	subscriptionManagerSWL.lock.Lock();
+
+	sendStringMessage(subscriptionManagerSWL.socket, "clear_monitor", ZMQ_SNDMORE);
+	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
+	
+	//Send the address of the monitor
+	zmq_msg_t msg;
+	zmq_msg_init_size(&msg, sizeof(GravitySubscriptionMonitor*));
+	intptr_t p = (intptr_t) &monitor;
+	memcpy(zmq_msg_data(&msg), &p, sizeof(GravitySubscriptionMonitor*));
+	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_SNDMORE);
+	zmq_msg_close(&msg);
+
+	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
+
+	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_DONTWAIT);
+
+	//int ret = readIntMessage(subscriptionManagerSWL.socket);
+	
+	subscriptionManagerSWL.lock.Unlock();
+
+	return GravityReturnCodes::SUCCESS;
+}
+
 string GravityNode::getIP()
 {
     string ip = "127.0.0.1";

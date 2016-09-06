@@ -809,6 +809,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClCompile Include="..\..\..\src\api\cpp\GravityServiceProvider.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriber.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionManager.cpp" />
+    <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.cpp" />
     <ClCompile Include="..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.cc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">false</ExcludedFromBuild>
@@ -850,6 +851,7 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     <ClInclude Include="..\..\..\src\api\cpp\GravityServiceProvider.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriber.h" />
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h" />
+    <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.h" />
     <ClInclude Include="..\..\..\src\api\cpp\IniParserWrap.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentDataLookupResponsePB.pb.h" />
     <ClInclude Include="..\..\..\src\api\cpp\protobuf\ComponentLookupRequestPB.pb.h" />

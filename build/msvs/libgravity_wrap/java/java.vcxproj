@@ -857,6 +857,33 @@ popd
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">false</LinkObjects>
     </CustomBuild>
+	<CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\CPPGravitySubscriptionMonitor.java">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">%(Filename).class</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">false</LinkObjects>
+    </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\swig\gravity.java">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
@@ -1157,6 +1184,33 @@ popd
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">false</LinkObjects>
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\GravitySubscriber.java">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">%(Filename).class</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">%(Filename).class</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">false</LinkObjects>
+    </CustomBuild>
+	<CustomBuild Include="..\..\..\..\src\api\java\src\java\com\aphysci\gravity\GravitySubscriptionMonitor.java">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">javac -d ..\..\..\..\src\api\java\build -cp "$(ThirdPartyLibs)\protobuf-java.jar;.;..\..\..\..\src\api\java\build" -sourcepath ..\..\..\..\src\api\java\src\java %(Identity)</Command>

@@ -31,6 +31,7 @@
 #include "GravityHeartbeatListener.h"
 #include "GravitySemaphore.h"
 #include "GravityServiceProvider.h"
+#include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
 #include <pthread.h>
 #include <list>
@@ -69,7 +70,8 @@ namespace GravityReturnCodes
         LINK_ERROR = -8,
         INTERRUPTED = -9,
         NO_SERVICE_PROVIDER = -10,
-        NO_PORTS_AVAILABLE = -11
+        NO_PORTS_AVAILABLE = -11,
+		INVALID_PARAMETER = -12
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
@@ -419,6 +421,12 @@ public:
 	 * Method to send future response
 	 */
 	GRAVITY_API GravityReturnCode sendFutureResponse(const FutureResponse& futureResponse);
+
+	GRAVITY_API GravityReturnCode setSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
+			int milliSecondTimeout, std::string filter="", std::string domain="");
+
+	GRAVITY_API GravityReturnCode clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
+			std::string filter="", std::string domain="");
 
     /** @} */ //Registration Functions
 };
