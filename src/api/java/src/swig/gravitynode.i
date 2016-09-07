@@ -138,7 +138,7 @@ public:
     shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 	GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
-			int milliSecondTimeout, std::string& filter="", std::string& domain="");
+			int milliSecondTimeout, const std::string& filter="", const std::string& domain="");
 	GravityReturnCode clearSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 			const std::string& filter="", const std::string& domain="");
 };

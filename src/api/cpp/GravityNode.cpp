@@ -2179,7 +2179,7 @@ GravityReturnCode GravityNode::setSubscriptionTimeoutMonitor(string dataProductI
 }
 
 GravityReturnCode GravityNode::clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
-			std::string filter, std::string domain)
+			string filter, string domain)
 {
 	subscriptionManagerSWL.lock.Lock();
 

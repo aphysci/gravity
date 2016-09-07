@@ -109,7 +109,7 @@ void GravitySubscriptionManager::start()
 			{				
 				//calculate time since last subscription
 				int currTime = (int) getCurrentTime()/1000;
-				int timeSinceLast = (currTimeoutMonitor->lastReceived)!=-1?(int)(currTime-currTimeoutMonitor->lastReceived):-1;				
+				int timeSinceLast = (currTimeoutMonitor->lastReceived)!=-1?currTime-currTimeoutMonitor->lastReceived:-1;				
 				(currTimeoutMonitor->monitor)->subscriptionTimeout(currMonitorDetails->dataProductID, timeSinceLast, currMonitorDetails->filter, currMonitorDetails->domain);
 				//reset timeout for the current monitor
 				currTimeoutMonitor->endTime = currTimeoutMonitor->endTime + currTimeoutMonitor->timeout;
@@ -208,7 +208,6 @@ void GravitySubscriptionManager::start()
                     shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
 
                     vector< shared_ptr<GravityDataProduct> > dataProducts;
-					long lastReceived = -1;
                     while (true)
                     {
                         string filterText;
@@ -225,9 +224,8 @@ void GravitySubscriptionManager::start()
                                (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
                                 && !(*lastCachedValue == *dataProduct)))
                         {
-							lastReceived = getCurrentTime();
 							// Grab current time now for stamping received_timestamp on received data products
-							dataProduct->setReceivedTimestamp(lastReceived);
+							dataProduct->setReceivedTimestamp(getCurrentTime());
 
 							// Add data product to vector to be provided to the subscriber
                             dataProducts.push_back(dataProduct);
@@ -246,7 +244,7 @@ void GravitySubscriptionManager::start()
 						{
 							(*iter)->subscriptionFilled(dataProducts);
 						}
-						int64_t currTime = lastReceived/1000;
+						int currTime = (int) getCurrentTime()/1000;
 						for (set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin(); iter != subDetails->monitors.end(); iter++)
 						{						
 							(*iter)->lastReceived = currTime;
@@ -535,7 +533,7 @@ void GravitySubscriptionManager::addSubscription()
 	// if a monitor was registered before the subscription, reset the timeouts
 	if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
 	{
-		long currTime = getCurrentTime()/1000;
+		int currTime = (int) getCurrentTime()/1000;
 		for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
 		{
 			(*monitorIter)->endTime = currTime + (*monitorIter)->timeout;
@@ -694,7 +692,7 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 		{
 			
 			(*iter)->timeout=timeout;
-			(*iter)->endTime=(long) (getCurrentTime()/1000+timeout);
+			(*iter)->endTime=(int) (getCurrentTime()/1000+timeout);
 			return;
 		}
 
@@ -706,7 +704,7 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 
 	tm->monitor = monitor;
 	tm->timeout=timeout;
-	tm->endTime=(long)(getCurrentTime()/1000+timeout);
+	tm->endTime= (int) (getCurrentTime()/1000 + timeout);
 	tm->lastReceived=-1l;
 		
 	subDetails->monitors.insert(tm);
@@ -789,11 +787,18 @@ void GravitySubscriptionManager::calculateTimeout()
 
 					int currTime = (int) getCurrentTime()/1000;
 					// calculate how much time is left until this monitor times out
-					int timeRemaining =(int) ((*monitorIter)->endTime-currTime);
+					int timeRemaining =(*monitorIter)->endTime-currTime;
+
+
+					Log::debug("Curr Time: %d",currTime);
+					Log::debug("End Time: %d",(*monitorIter)->endTime);
+					Log::debug("Time Remaining: %d",timeRemaining);
+
+
 					//a subscription timed out during processing
 					if(timeRemaining <= 0)
 					{						
-						int timeSinceLast = (*monitorIter)->lastReceived>0?(int)(currTime-(*monitorIter)->lastReceived):-1;
+						int timeSinceLast = (*monitorIter)->lastReceived>0?currTime-(*monitorIter)->lastReceived:-1;
 						//make call to monitor
 						(*monitorIter)->monitor->subscriptionTimeout(subDetails->dataProductID,timeSinceLast,
 								subDetails->filter,subDetails->domain);
