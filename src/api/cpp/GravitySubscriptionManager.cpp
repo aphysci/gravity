@@ -789,12 +789,6 @@ void GravitySubscriptionManager::calculateTimeout()
 					// calculate how much time is left until this monitor times out
 					int timeRemaining =(*monitorIter)->endTime-currTime;
 
-
-					Log::debug("Curr Time: %d",currTime);
-					Log::debug("End Time: %d",(*monitorIter)->endTime);
-					Log::debug("Time Remaining: %d",timeRemaining);
-
-
 					//a subscription timed out during processing
 					if(timeRemaining <= 0)
 					{						
