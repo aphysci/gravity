@@ -57,8 +57,8 @@ private:
 	{
 		GravitySubscriptionMonitor* monitor;
 		int timeout;
-		int endTime;
-		int lastReceived;
+		uint64_t endTime;
+		int64_t lastReceived;
 	} TimeoutMonitor;
 
     typedef struct SubscriptionDetails

@@ -108,8 +108,8 @@ void GravitySubscriptionManager::start()
 			if (currTimeoutMonitor != NULL)
 			{				
 				//calculate time since last subscription
-				int currTime = (int) getCurrentTime()/1000;
-				int timeSinceLast = (currTimeoutMonitor->lastReceived)!=-1?currTime-currTimeoutMonitor->lastReceived:-1;				
+				uint64_t currTime =  getCurrentTime()/1000;
+				int timeSinceLast = (currTimeoutMonitor->lastReceived)!=-1l?(int)(currTime-currTimeoutMonitor->lastReceived):-1;				
 				(currTimeoutMonitor->monitor)->subscriptionTimeout(currMonitorDetails->dataProductID, timeSinceLast, currMonitorDetails->filter, currMonitorDetails->domain);
 				//reset timeout for the current monitor
 				currTimeoutMonitor->endTime = currTimeoutMonitor->endTime + currTimeoutMonitor->timeout;
@@ -244,10 +244,10 @@ void GravitySubscriptionManager::start()
 						{
 							(*iter)->subscriptionFilled(dataProducts);
 						}
-						int currTime = (int) getCurrentTime()/1000;
+						uint64_t currTime = getCurrentTime()/1000;
 						for (set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin(); iter != subDetails->monitors.end(); iter++)
 						{						
-							(*iter)->lastReceived = currTime;
+							(*iter)->lastReceived = (int64_t) currTime;
 							(*iter)->endTime = currTime + (*iter)->timeout;
 						}
 
@@ -533,7 +533,7 @@ void GravitySubscriptionManager::addSubscription()
 	// if a monitor was registered before the subscription, reset the timeouts
 	if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
 	{
-		int currTime = (int) getCurrentTime()/1000;
+		uint64_t currTime = getCurrentTime()/1000;
 		for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
 		{
 			(*monitorIter)->endTime = currTime + (*monitorIter)->timeout;
@@ -685,14 +685,16 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 		subscriptionMap[key][filter] = subDetails;
 	}
 		
+	uint64_t currTime = getCurrentTime()/1000;
+
 	for(std::set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
 	{
 		// if a reference to this monitor already exists
 		if((*iter)->monitor == monitor)
 		{
 			
-			(*iter)->timeout=timeout;
-			(*iter)->endTime=(int) (getCurrentTime()/1000+timeout);
+			(*iter)->timeout=timeout;			
+			(*iter)->endTime=currTime+timeout;
 			return;
 		}
 
@@ -704,8 +706,8 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 
 	tm->monitor = monitor;
 	tm->timeout=timeout;
-	tm->endTime= (int) (getCurrentTime()/1000 + timeout);
-	tm->lastReceived=-1l;
+	tm->endTime= currTime + timeout;
+	tm->lastReceived=-1l;		
 		
 	subDetails->monitors.insert(tm);
 
@@ -785,27 +787,33 @@ void GravitySubscriptionManager::calculateTimeout()
 				if(subDetails->subscribers.size() > 0 && (*monitorIter)->timeout>=0)
 				{
 
-					int currTime = (int) getCurrentTime()/1000;
+					uint64_t currTime = getCurrentTime()/1000;
 					// calculate how much time is left until this monitor times out
-					int timeRemaining =(*monitorIter)->endTime-currTime;
+					uint64_t timeRemaining =(*monitorIter)->endTime-currTime;
 
 					//a subscription timed out during processing
 					if(timeRemaining <= 0)
 					{						
-						int timeSinceLast = (*monitorIter)->lastReceived>0?currTime-(*monitorIter)->lastReceived:-1;
+						int timeSinceLast = (*monitorIter)->lastReceived>0?(int)(currTime-(*monitorIter)->lastReceived):-1l;
 						//make call to monitor
 						(*monitorIter)->monitor->subscriptionTimeout(subDetails->dataProductID,timeSinceLast,
 								subDetails->filter,subDetails->domain);
 						//reset next timeout
 						(*monitorIter)->endTime = (*monitorIter)->endTime + (*monitorIter)->timeout;
-						Log::trace("Subscription Timeout (%s)",subDetails->dataProductID.c_str());			
+						
+						Log::trace("Subscription Timeout (%s)",subDetails->dataProductID.c_str());	
+
+						if((*monitorIter)->timeout < minTime || minTime == -1)
+						{
+							minTime = (int) (*monitorIter)->timeout;
+						}
 					}
 					else if(timeRemaining < minTime || minTime == -1)
 					{
 						//set current timeout details
-						minTime = timeRemaining;
+						minTime = (int) timeRemaining;
 						currTimeoutMonitor = *monitorIter;
-						currMonitorDetails = subDetails;
+						currMonitorDetails = subDetails;					
 					}
 				}
 			}
