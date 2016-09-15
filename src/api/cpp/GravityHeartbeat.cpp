@@ -226,6 +226,25 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
     return NULL;
 }
 
+Semaphore Heartbeat::heartbeatLock;
+bool Heartbeat::heartbeatRunning = false;
+
+void Heartbeat::setHeartbeatRunning(bool running)
+{
+	Heartbeat::heartbeatLock.Lock();
+	Heartbeat::heartbeatRunning = running;
+	Heartbeat::heartbeatLock.Unlock();
+}
+
+bool Heartbeat::isHeartbeatRunning()
+{
+	bool running;
+	Heartbeat::heartbeatLock.Lock();
+	running = Heartbeat::heartbeatRunning;
+	Heartbeat::heartbeatLock.Unlock();
+	return running;
+}
+
 void* Heartbeat(void* thread_context)
 {
 	HBParams* params = (HBParams*) thread_context;
@@ -235,7 +254,9 @@ void* Heartbeat(void* thread_context)
 	void *heartbeatSocket = zmq_socket(params->zmq_context,ZMQ_PUB);
 	zmq_connect(heartbeatSocket,PUB_MGR_HB_URL);
 
-	while(true)
+	Heartbeat::setHeartbeatRunning(true);
+
+	while(Heartbeat::isHeartbeatRunning())
 	{
 		// Publish heartbeat (via the GravityPublishManager)
 		gdp.setTimestamp(getCurrentTime());
@@ -259,7 +280,7 @@ void* Heartbeat(void* thread_context)
 #endif
 	}
 
-	//This will never be reached but should be done when the thread ends.
+	// Clean up
 	delete params;
 
 	return NULL;

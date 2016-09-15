@@ -123,6 +123,7 @@ public:
     GravityReturnCode unregisterService(const std::string& serviceID);
 
     GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
+    GravityReturnCode stopHeartbeat();
     GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
 		const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 	GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID, const std::string &domain = "");

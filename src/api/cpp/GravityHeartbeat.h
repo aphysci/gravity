@@ -66,6 +66,9 @@ struct EMQComparator
 
 class Heartbeat : public GravitySubscriber
 {
+private:
+	static Semaphore heartbeatLock;
+	static bool heartbeatRunning;
 public:
     virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
 
@@ -76,7 +79,10 @@ public:
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
     static Semaphore lock;
-    static std::set<std::string> filledHeartbeats;
+    static std::set<std::string> filledHeartbeats;	
+
+	static void setHeartbeatRunning(bool running);
+	static bool isHeartbeatRunning();
 };
 
 } //namespace gravity

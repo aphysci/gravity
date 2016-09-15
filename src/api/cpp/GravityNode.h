@@ -324,11 +324,16 @@ public:
 										int timeout_milliseconds = -1, std::string domain = "");
 
     /**
-     * Starts a heart beat for this gravity process.
+     * Starts a heart beat for this GravityNode.
      * \param interval_in_microseconds interval that heart beats are sent.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
      */
     GRAVITY_API GravityReturnCode startHeartbeat(int64_t interval_in_microseconds);
+
+	/**
+     * Stops the heart beat for this GravityNode.
+	 */
+	GRAVITY_API GravityReturnCode stopHeartbeat();
 
     GRAVITY_API std::string getStringParam(std::string key, std::string default_value = "");
     GRAVITY_API int getIntParam(std::string key, int default_value = -1);

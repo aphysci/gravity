@@ -122,7 +122,11 @@ classdef GravityNode < handle
 												requestID, timeout);
             end
         end
-       
+      
+	   	function stopHeartbeat(this)
+			this.gravityNode.stopHeartbeat();
+		end
+
         function startHeartbeat(this, intervalMicroseconds)
             this.gravityNode.startHeartbeat(intervalMicroseconds);
         end

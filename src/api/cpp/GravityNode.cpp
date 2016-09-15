@@ -1951,6 +1951,24 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     return ret;
 }
 
+GravityReturnCode GravityNode::stopHeartbeat()
+{
+	GravityReturnCode ret = gravity::GravityReturnCodes::SUCCESS;
+	if (heartbeatStarted)
+	{
+		heartbeatStarted = false;
+
+		// Send signal to heartbeat thread to stop
+		Heartbeat::setHeartbeatRunning(false);
+
+		// Unregister heartbeat with Service Directory
+		std::string heartbeatName = componentID + "_GravityHeartbeat_" + myDomain;
+		ret = unregisterDataProduct(heartbeatName);
+	}
+
+	return ret;
+}
+
 GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 {
 	if(interval_in_microseconds < 0)
