@@ -142,6 +142,7 @@ void GravityServiceManager::start()
 		{
 			if (pollItems[i].revents & ZMQ_POLLIN)
 			{
+				Log::trace("Received a service request on %s", serviceMapBySocket[pollItems[i].socket]->url.c_str());
 				// Read response data product from socket
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItems[i].socket, &message, 0);
@@ -151,6 +152,7 @@ void GravityServiceManager::start()
 				zmq_msg_close(&message);
 
 				shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
+				Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
 				shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
 
 				response->setComponentId(componentID);
