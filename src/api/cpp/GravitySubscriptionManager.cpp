@@ -692,7 +692,6 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 		// if a reference to this monitor already exists
 		if((*iter)->monitor == monitor)
 		{
-			
 			(*iter)->timeout=timeout;			
 			(*iter)->endTime=currTime+timeout;
 			return;
@@ -789,7 +788,7 @@ void GravitySubscriptionManager::calculateTimeout()
 
 					uint64_t currTime = getCurrentTime()/1000;
 					// calculate how much time is left until this monitor times out
-					uint64_t timeRemaining =(*monitorIter)->endTime-currTime;
+					int64_t timeRemaining =(*monitorIter)->endTime-currTime;
 
 					//a subscription timed out during processing
 					if(timeRemaining <= 0)
@@ -808,7 +807,7 @@ void GravitySubscriptionManager::calculateTimeout()
 							minTime = (int) (*monitorIter)->timeout;
 						}
 					}
-					else if(timeRemaining < minTime || minTime == -1)
+					else if(timeRemaining < (int64_t) minTime || minTime == -1)
 					{
 						//set current timeout details
 						minTime = (int) timeRemaining;
