@@ -187,6 +187,16 @@ public:
 	GRAVITY_API bool isFutureResponse();
 
 	/**
+	* Get the flag indicated if this was a cached data product.	*
+	*/
+	GRAVITY_API bool isCachedDataproduct();
+	
+	/**
+	* Sets the flag indicating this data product is cached	*
+	*/
+	GRAVITY_API void setIsCachedDataproduct(bool cached);
+
+	/**
 	 * Get the url for the REP socket of a future response
 	 * \return url for REP socket of future response
 	 */

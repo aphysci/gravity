@@ -143,6 +143,17 @@ bool GravityDataProduct::isFutureResponse()
 	return gravityDataProductPB->future_response();
 }
 
+bool GravityDataProduct::isCachedDataproduct()
+{
+	return(gravityDataProductPB->has_is_cached_dataproduct() && gravityDataProductPB->is_cached_dataproduct());	
+}
+
+void GravityDataProduct::setIsCachedDataproduct(bool cached)
+{
+	
+	gravityDataProductPB->set_is_cached_dataproduct(cached);
+	
+}
 std::string GravityDataProduct::getFutureSocketUrl()
 {
 	return gravityDataProductPB->future_socket_url();

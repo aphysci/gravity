@@ -66,6 +66,7 @@ private:
         std::string domain;
         std::string dataProductID;
         std::string filter;
+		bool receiveCachedDataProducts;
         std::map<std::string, zmq_pollitem_t> pollItemMap;
         std::set<GravitySubscriber*> subscribers;
 		std::set<shared_ptr<TimeoutMonitor> > monitors;

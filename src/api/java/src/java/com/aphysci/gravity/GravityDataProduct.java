@@ -249,4 +249,19 @@ public class GravityDataProduct {
 	{
 		return gdp.getFutureResponse();
 	}
+		/**
+	 * Method to get the boolean indication of whether this is a cached data product.
+	 * Unless specified otherwise, publishers cache the last data product sent to 
+	 * send to new subscribers. This flag indicates whether the DP is new or if it was 
+	 * sent from that cache.
+	 * @return boolean flag indicating that this is a cached data product
+	 */
+	public boolean isCachedDataproduct()
+	{
+		return gdp.hasIsCachedDataproduct() && gdp.getIsCachedDataproduct();
+	}
+
+	public void setIsCachedDataproduct(boolean isCached){
+		gdp.setIsCachedDataproduct(isCached);
+	}
 }

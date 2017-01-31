@@ -159,6 +159,7 @@ private:
         std::string domain;
         std::string dataProductID;
         std::string filter;
+		bool receiveLastCachedValue;
         const GravitySubscriber* subscriber;
     } SubscriptionDetails;
 
@@ -170,6 +171,9 @@ private:
 	bool listenerEnabled;
 	bool heartbeatStarted;
 
+	bool defaultCacheLastSentDataprodut;
+	bool defaultReceiveLastSentDataproduct;
+	
     pthread_t subscriptionManagerThread;
     pthread_t publishManagerThread;
     pthread_t requestManagerThread;
@@ -204,7 +208,6 @@ private:
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
 	std::map<std::string,uint64_t> urlInstanceMap;
-
     std::string myDomain;
     std::string componentID;
 	GravityConfigParser* parser;
@@ -215,12 +218,12 @@ private:
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
     GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
-                                            std::string filter, std::string domain);
+                                            std::string filter, std::string domain, bool receiveLastCachedValue = true);
     GravityReturnCode unsubscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
                                                 std::string filter, std::string domain);
 
     GravityReturnCode subscribe(std::string connectionURL, std::string dataProductID,
-            const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "");
+            const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "", bool receiveLastCachedValue = true);
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
@@ -277,8 +280,10 @@ public:
      * \param domain domain of the network components
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
-											std::string filter = "", std::string domain = "");
+	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber);
+	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter);
+	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter, std::string domain);
+	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter, std::string domain, bool receiveLastCachedValue);
 
     /**
      * Un-subscribe to a data product
@@ -359,7 +364,16 @@ public:
      * \param transport type (e.g. 'tcp', 'ipc')
      * \return success flag
      */
-    GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType);
+	GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType);
+	 /**
+     * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
+     * rest of the Gravity-enabled system.
+     * \param dataProductID string ID used to uniquely identify this published data product
+     * \param transport type (e.g. 'tcp', 'ipc')
+	 * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \return success flag
+     */
+    GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType, bool cacheLastValue);
 
     /**
      * Un-register a data product, resulting in its removal from the Gravity Service Directory

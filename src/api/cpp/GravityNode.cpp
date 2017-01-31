@@ -650,7 +650,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		//Set Service Directory URL (because we can't connect to the ConfigService without it).
 		serviceDirectoryUrl = getStringParam("ServiceDirectoryURL");
-
 		if(serviceDirectoryDomain != "" && (componentID != "ServiceDirectory"))
 		{
 			//if the config file specifies both domain and url
@@ -684,6 +683,12 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				
 			}
 		}
+
+		defaultCacheLastSentDataprodut = getBoolParam("CacheLastSentDataproduct", true);
+		Log::trace("Default Setting For CacheLastSentDataproduct: %s", defaultCacheLastSentDataprodut ? "TRUE": "FALSE"); 
+
+		defaultReceiveLastSentDataproduct = getBoolParam("ReceiveLastSentDataproduct", true);			 
+		Log::trace("Default Setting For ReceiveLastSentDataproduct: %s", defaultReceiveLastSentDataproduct ? "TRUE": "FALSE");
 
 		initialized = true;
 	}
@@ -997,10 +1002,15 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
     return ret;
 }
 
-GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType)
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType){
+	return registerDataProduct(dataProductID, transportType, defaultCacheLastSentDataprodut);
+}
+
+GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType, bool cacheLastValue)
 {
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+
 
     // we can't allow multiple threads to make request calls to the pub manager at the same time
     // because the requests will step on each other.  Manage access to publishMap as well.
@@ -1041,11 +1051,12 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
         transportType_str = "epgm";
     	  endpoint = dataProductID;
     }
-
+	
     // Send publish details via the request socket.  This allows us to retrieve
     // register url in response so that we can register with the ServiceDirectory.
 	sendStringMessage(publishManagerRequestSWL.socket, "register", ZMQ_SNDMORE);
 	sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_SNDMORE);
+	sendIntMessage(publishManagerRequestSWL.socket, cacheLastValue, ZMQ_SNDMORE);
     sendStringMessage(publishManagerRequestSWL.socket, transportType_str, ZMQ_SNDMORE);
     if(transportType == GravityTransportTypes::TCP)
     {
@@ -1265,16 +1276,34 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
     return ret;
 }
 
-GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber){
+	subscriptionManagerSWL.lock.Lock();
+	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, "", "", defaultReceiveLastSentDataproduct);
+    subscriptionManagerSWL.lock.Unlock();
+	return ret;
+}
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter){
+	subscriptionManagerSWL.lock.Lock();
+	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, "", defaultReceiveLastSentDataproduct);
+    subscriptionManagerSWL.lock.Unlock();
+	return ret;
+}
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain){
+	subscriptionManagerSWL.lock.Lock();
+	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain, defaultReceiveLastSentDataproduct);
+    subscriptionManagerSWL.lock.Unlock();
+	return ret;
+}
+
+GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
     subscriptionManagerSWL.lock.Lock();
-    GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain);
+    GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain, receiveLastCachedValue);
     subscriptionManagerSWL.lock.Unlock();
-
     return ret;
 }
 
-GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
+GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
     if (domain.empty())
     {
@@ -1290,23 +1319,25 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
     if (url.size() == 0)
     {
-        subscribe("", dataProductID, subscriber, filter, domain);
+        subscribe("", dataProductID, subscriber, filter, domain, receiveLastCachedValue);
     }
     else
     {
         // Subscribe to all published data products
         for (size_t i = 0; i < url.size(); i++)
         {
-            subscribe(url[i], dataProductID, subscriber, filter, domain);
+            subscribe(url[i], dataProductID, subscriber, filter, domain, receiveLastCachedValue);
         }
     }
 
     return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID,
-        const GravitySubscriber& subscriber, string filter, string domain)
+GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
+
+	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID, receiveLastCachedValue);
+	
 	vector<string> url;
 	GravityReturnCode ret;
 	int tries = 5;
@@ -1331,8 +1362,10 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	}
 
 	// Send subscription details
+	Log::trace("Sending subscription details to subscription manager");
 	sendStringMessage(subscriptionManagerSWL.socket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
+	sendIntMessage(subscriptionManagerSWL.socket, receiveLastCachedValue, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
@@ -1349,6 +1382,7 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	details.dataProductID = dataProductID;
 	details.domain = domain;
 	details.filter = filter;
+	details.receiveLastCachedValue = receiveLastCachedValue;
 	details.subscriber = &subscriber;
 	subscriptionList.push_back(details);
 
@@ -1404,8 +1438,8 @@ GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const G
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText, uint64_t timestamp)
 {
     string dataProductID = dataProduct.getDataProductID();
-
-    //Set Timestamp
+	Log::trace("Publishing %s", dataProductID.c_str());
+	//Set Timestamp
     if (timestamp == 0)
     {
         dataProduct.setTimestamp(getCurrentTime());
@@ -1421,6 +1455,8 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	//set Domain
 	dataProduct.setDomain(myDomain);
 
+	
+
 	// Send subscription details
     publishManagerPublishSWL.lock.Lock();
 
@@ -1429,6 +1465,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     sendUint64Message(publishManagerPublishSWL.socket, dataProduct.getGravityTimestamp(), ZMQ_SNDMORE);
 	sendStringMessage(publishManagerPublishSWL.socket, filterText, ZMQ_SNDMORE);
 
+	
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, dataProduct.getSize());
 	dataProduct.serializeToArray(zmq_msg_data(&msg));

@@ -106,10 +106,15 @@ public:
 	GravityReturnCode init();
     GravityReturnCode init(std::string);
     void waitForExit();
-    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
-    GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
+	GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
+    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
+	GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
 
-    GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
+	GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber);
+	GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
+	GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain);
+	GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain, bool receiveLastCachedValue);
+    
     GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 
     GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);

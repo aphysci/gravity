@@ -124,9 +124,12 @@ void GravitySubscriptionManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeSocket);
 
+			Log::trace("Received command [%s]", command);
+
 			// message from gravity node should be either a subscribe or unsubscribe request
 			if (command == "subscribe")
 			{
+				Log::trace("About to add subscription");
 				addSubscription();
 			}
 			else if (command == "unsubscribe")
@@ -214,6 +217,7 @@ void GravitySubscriptionManager::start()
                         shared_ptr<GravityDataProduct> dataProduct;
                         if (readSubscription(pollItems[index].socket, filterText, dataProduct) < 0)
                             break;
+						
 
                         shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
@@ -221,17 +225,25 @@ void GravitySubscriptionManager::start()
                         if (!lastCachedValue ||
                             lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp() ||
                             // or if timestamps are the same, but GDP's are different
-                               (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp()
-                                && !(*lastCachedValue == *dataProduct)))
+                            (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp() && !(*lastCachedValue == *dataProduct)))
                         {
+
 							// Grab current time now for stamping received_timestamp on received data products
 							dataProduct->setReceivedTimestamp(getCurrentTime());
-
-							// Add data product to vector to be provided to the subscriber
-                            dataProducts.push_back(dataProduct);
-
-                            // Save most recent value so we can provide it to new subscribers, and to perform check above.
-                            lastCachedValueMap[pollItems[index].socket] = dataProduct;
+																												
+							if(dataProduct->isCachedDataproduct() && subDetails->receiveCachedDataProducts == false){
+								// if it's cached and we're not receiving cached, do nothing
+								Log::trace("Ignoring cached data product");
+							}
+							else
+							{														
+								// Add data product to vector to be provided to the subscriber								
+								Log::trace(dataProduct->isCachedDataproduct() ? "Accepting cached data product" : "Accepting new data product");
+								dataProducts.push_back(dataProduct);
+							}
+								// Save most recent value so we can provide it to new subscribers, and to perform check above.
+								lastCachedValueMap[pollItems[index].socket] = dataProduct;
+							
                         }
                     }
 
@@ -242,6 +254,7 @@ void GravitySubscriptionManager::start()
 					{
 						for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
 						{
+
 							(*iter)->subscriptionFilled(dataProducts);
 						}
 						uint64_t currTime = getCurrentTime()/1000;
@@ -423,17 +436,22 @@ int GravitySubscriptionManager::readSubscription(void *socket, string &filterTex
 
 void *GravitySubscriptionManager::setupSubscription(const string &url, const string &filter, zmq_pollitem_t &pollItem)
 {
+	Log::trace("Setting up subscription for %s", url.c_str());
     // Create the socket
     void* subSocket = zmq_socket(context, ZMQ_SUB);
+	Log::trace("Created socket");
 
 	// Configure high water mark
 	zmq_setsockopt(subSocket, ZMQ_RCVHWM, &subscribeHWM, sizeof(subscribeHWM));    
+	Log::trace("Configured hwm");
 
     // Configure filter
     zmq_setsockopt(subSocket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
+	Log::trace("Configured filter");
 
 	// Connect to publisher
     zmq_connect(subSocket, url.c_str());
+	Log::trace("connected to publisher");
 
     // set up the poll item for this subscription
     pollItem.socket = subSocket;
@@ -441,6 +459,7 @@ void *GravitySubscriptionManager::setupSubscription(const string &url, const str
     pollItem.fd = 0;
     pollItem.revents = 0;
     pollItems.push_back(pollItem);
+	Log::trace("Added to pollItem");
 
     return subSocket;
 }
@@ -453,9 +472,13 @@ void GravitySubscriptionManager::setHWM()
 
 void GravitySubscriptionManager::addSubscription()
 {
+	Log::trace("Adding subscription");
 	// Read the data product id for this subscription
 	string dataProductID = readStringMessage(gravityNodeSocket);
 	Log::trace("dataProductID = '%s'", dataProductID.c_str());
+
+	bool receiveLastCachedValue = readIntMessage(gravityNodeSocket);
+	Log::trace("receiveLastCachedValue = '%d'", receiveLastCachedValue);
 
 	// Read the subscription url
 	string url = readStringMessage(gravityNodeSocket);
@@ -481,24 +504,34 @@ void GravitySubscriptionManager::addSubscription()
 	memcpy(&subscriber, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
+	
+
+	Log::trace("Set up GravitySubscriber");
+
 	// Create the domain/data key for tracking subscriptions
 	DomainDataKey key(domain, dataProductID);
 
 	if (subscriptionMap.count(key) == 0)
 	{
+		Log::trace("subscriptionMap.count == 0");
 	    map<string, shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[key] = filterMap;
 	    if (publisherUpdateUrl.size() > 0)
 	    {
             zmq_pollitem_t pollItem;
             setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
+			Log::trace("Finished setting up subscription");
             publisherUpdateMap[key] = pollItem;
 	    }
 	}
 
 	shared_ptr<SubscriptionDetails> subDetails;
+	
+	
+	
 	if (subscriptionMap[key].count(filter) > 0)
 	{
+		Log::trace("Alreading have details for this");
 		// Already have a details for this
 		subDetails = subscriptionMap[key][filter];
 		if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
@@ -510,16 +543,19 @@ void GravitySubscriptionManager::addSubscription()
 	}
 	else
 	{
+		Log::trace("Populate new subDetails");
 	    subDetails.reset(new SubscriptionDetails());
         subDetails->dataProductID = dataProductID;
 		subDetails->domain = domain;
         subDetails->filter = filter;
+		subDetails->receiveCachedDataProducts = receiveLastCachedValue;
 	    subscriptionMap[key][filter] = subDetails;
 	}
 
 	// if we have a url and we haven't seen it before, subscribe to it
 	if (url.size() > 0 && subDetails->pollItemMap.count(url) == 0)
 	{
+		Log::trace("Subscribe to new url");
 	    zmq_pollitem_t pollItem;
 	    void *subSocket = setupSubscription(url, filter, pollItem);
 
@@ -543,23 +579,36 @@ void GravitySubscriptionManager::addSubscription()
     // Add new subscriber if it isn't already in the list
     if (subDetails->subscribers.find(subscriber) == subDetails->subscribers.end())
     {
+		Log::trace("Adding new subscriber to list");
         subDetails->subscribers.insert(subscriber);
 
         // If we've already received data on this subscription, send the most recent
-        // value to the new subscriber
-        vector<shared_ptr<GravityDataProduct> > dataProducts;
-        for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
-        {
-            if (lastCachedValueMap[iter->second.socket])
-                dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
-        }
-        if (dataProducts.size() > 0)
-        {
-            Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
-            sort(dataProducts.begin(), dataProducts.end(), sortCacheValues);
-            subscriber->subscriptionFilled(dataProducts);
-        }
-    }
+        // value to the new subscriber, unless the subscriber doesn't want the lastCachedValue
+		if(receiveLastCachedValue)
+		{
+			Log::trace("Sending cached value to subscriber");
+			vector<shared_ptr<GravityDataProduct> > dataProducts;
+			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
+			{
+				if (lastCachedValueMap[iter->second.socket])
+				{
+					dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
+				}
+			}		
+			if (dataProducts.size() > 0)
+			{
+				Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
+				sort(dataProducts.begin(), dataProducts.end(), sortCacheValues);
+				subscriber->subscriptionFilled(dataProducts);
+			}			
+		}else
+		{
+			Log::trace("Not sending cached value to subscriber");
+		}
+    }else
+	{
+		Log::trace("Subscriber already in list");
+	}
 }
 
 void GravitySubscriptionManager::removeSubscription()

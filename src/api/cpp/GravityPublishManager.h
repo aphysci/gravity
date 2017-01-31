@@ -61,6 +61,7 @@ typedef struct PublishDetails
 {
     string url;
     string dataProductID;
+	bool cacheLastValue;
     map<string,shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;

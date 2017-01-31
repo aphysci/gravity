@@ -232,7 +232,7 @@ void GravityPublishManager::start()
 				zmq_msg_close(&event);
 
 				if (newsub)
-				{
+				{					
 				    shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
 				    // can't log here because the network logging uses this code - any logs here will result in an
 				    // infinite loop, or a deadlock.
@@ -243,10 +243,26 @@ void GravityPublishManager::start()
 				    for (map<string,shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
 				        values.push_back(iter->second);
 
+					
 				    // we shouldn't be doing this often, so just sort these when we need it.
                     values.sort(sortCacheValues);
 				    for (list<shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end(); iter++)
-				        publish(pd->socket, (*iter)->filterText, (*iter)->value, (*iter)->size);
+					{
+						//we have a new subscriber and are going to send it the last cached data product value. 
+						char* bytes = (*iter)->value;
+						int size = (*iter)->size;
+						//Deserialize cache bytes to a data product and mark cached
+						GravityDataProduct dataProduct(bytes, size);
+						int oldDataSize = dataProduct.getDataSize();
+						Log::trace("Marking %s as cached...", dataProduct.getDataProductID().c_str());
+						dataProduct.setIsCachedDataproduct(true);
+						int newSize = dataProduct.getSize();
+						//Serialize back to send over socket
+						char* newBytes = new char[newSize];
+						dataProduct.serializeToArray(newBytes);						
+						Log::trace("Publishing data product %S..., Which is cached? %d", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct());
+				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);						
+					}
 				}
 			}
 		}
@@ -290,6 +306,9 @@ void GravityPublishManager::registerDataProduct()
 
 	// Read the data product id for this request
 	string dataProductID = readStringMessage(gravityNodeResponseSocket);
+
+	//Read flag to cache last sent data product or not
+	bool cacheLastValue = readIntMessage(gravityNodeResponseSocket);
 
 	// Read the publish transport type
 	string transportType = readStringMessage(gravityNodeResponseSocket);
@@ -362,6 +381,7 @@ void GravityPublishManager::registerDataProduct()
     publishDetails->dataProductID = dataProductID;
     publishDetails->socket = pubSocket;
 	publishDetails->pollItem = pollItem;
+	publishDetails->cacheLastValue = cacheLastValue;
 
     publishMapByID[dataProductID] = publishDetails;
     publishMapBySocket[pubSocket] = publishDetails;
@@ -435,6 +455,7 @@ void GravityPublishManager::publish(void* requestSocket)
     memcpy(bytes, zmq_msg_data(&msg), gdbSize);
     zmq_msg_close(&msg);
 
+	
     shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
     if (!publishDetails)
     {
@@ -446,14 +467,20 @@ void GravityPublishManager::publish(void* requestSocket)
     if (publishDetails->lastCachedValues.count(filterText) > 0)
         delete [] publishDetails->lastCachedValues[filterText]->value;
 
-    // ... save new data for late subscribers
-    shared_ptr<CacheValue> val = shared_ptr<CacheValue>(new CacheValue);
-    val->filterText = filterText;
-    val->value = bytes;
-    val->size = gdbSize;
-    val->timestamp = timestamp;
-    publishDetails->lastCachedValues[filterText] = val;
-
+	//cache new data unless publisher specified not to
+	if(publishDetails->cacheLastValue){
+		Log::trace("Cache last data product value for %s", dataProductId.c_str());
+		// ... save new data for late subscribers
+		shared_ptr<CacheValue> val = shared_ptr<CacheValue>(new CacheValue);
+		val->filterText = filterText;
+		val->value = bytes;
+		val->size = gdbSize;
+		val->timestamp = timestamp;
+		publishDetails->lastCachedValues[filterText] = val;
+	
+	}else{
+		Log::trace("We are not caching data products");
+	}
     publish(publishDetails->socket, filterText, bytes, gdbSize);
 
     if (metricsEnabled)
