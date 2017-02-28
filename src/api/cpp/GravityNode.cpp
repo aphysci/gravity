@@ -1336,7 +1336,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
 
-	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID, receiveLastCachedValue);
+	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID.c_str(), receiveLastCachedValue);
 	
 	vector<string> url;
 	GravityReturnCode ret;

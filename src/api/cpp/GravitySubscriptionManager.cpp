@@ -124,7 +124,7 @@ void GravitySubscriptionManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeSocket);
 
-			Log::trace("Received command [%s]", command);
+			Log::trace("Received command [%s]", command.c_str());
 
 			// message from gravity node should be either a subscribe or unsubscribe request
 			if (command == "subscribe")
