@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gravity", "gravity\gravity.vcxproj", "{801C7417-B350-410D-A104-58EA611FCF2C}"
 	ProjectSection(ProjectDependencies) = postProject
+		{40304B9B-2A99-4BE9-91CE-1A17F9B5A1E0} = {40304B9B-2A99-4BE9-91CE-1A17F9B5A1E0}
 		{57AF87AB-5E81-4752-88EA-B8352ED67E64} = {57AF87AB-5E81-4752-88EA-B8352ED67E64}
 	EndProjectSection
 EndProject
@@ -29,6 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swig", "libgravity_wrap\swi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceDirectory", "components\ServiceDirectory\ServiceDirectory.vcxproj", "{AA9A6E40-5C88-481A-A4D9-995811944443}"
 	ProjectSection(ProjectDependencies) = postProject
+		{801C7417-B350-410D-A104-58EA611FCF2C} = {801C7417-B350-410D-A104-58EA611FCF2C}
 		{CF526FA5-5EDE-4806-8984-424590796377} = {CF526FA5-5EDE-4806-8984-424590796377}
 	EndProjectSection
 EndProject
