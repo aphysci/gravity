@@ -74,6 +74,6 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<G
 		//Output the message
 		Log::warning("Got message: %s", message);
 		//Don't forget to free the memory we allocated.
-		delete message;
+		delete[] message;
 	}
 }

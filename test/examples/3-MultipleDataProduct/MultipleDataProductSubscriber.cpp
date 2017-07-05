@@ -110,7 +110,7 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< sh
 		//Output the message
 		Log::warning("Subscriber 2: Got message: %s", message);
 		//Don't forget to free the memory we allocated.
-		delete message;
+		delete[] message;
 	}
 }
 

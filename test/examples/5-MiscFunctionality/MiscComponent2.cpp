@@ -63,7 +63,7 @@ void MiscGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<Gra
 		//Output the message
 		Log::warning("Got message: %s", message);
 		//Don't forget to free the memory we allocated.
-		delete message;
+		delete[] message;
 	}
 }
 

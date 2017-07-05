@@ -124,7 +124,7 @@ void GravityNodeTest::testServiceWithDomain(void)
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());
 	domain.assign(p, response->getDataSize());	
-	delete p;	
+	free(p);	
 	GRAVITY_TEST_EQUALS(strcmp(domain.c_str(), "GravityTest"), 0);
 
 	GravityDataProduct gdp("REQUEST");
@@ -188,7 +188,7 @@ void GravityNodeTest::testSubscribeDomain(void)
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());
 	domain.assign(p, response->getDataSize());	
-	delete p;	
+	free(p);	
 	GRAVITY_TEST_EQUALS(strcmp(domain.c_str(), "GravityTest"), 0);
 
 	ret = node.registerDataProduct("TEST", GravityTransportTypes::TCP);
@@ -447,8 +447,8 @@ void GravityNodeTest::testDataProduct(void)
 	gdp2.getData(data2, gdp2.getDataSize());
 	GRAVITY_TEST(strcmp(data2, "TEST_DATA")==0);
 
-	delete data;
-	delete data2;
+	free(data);
+	free(data2);
 }
 
 void GravityNodeTest::testComponentID(void)

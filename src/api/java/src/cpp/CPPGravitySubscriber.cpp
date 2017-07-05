@@ -43,8 +43,8 @@ void CPPGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<Grav
         offset += lengths[index];
     }
     subscriptionFilled((char*)array, arrayLength, lengths, dataProducts.size());
-	delete lengths;
-	delete array;
+	delete[] lengths;
+	delete[] array;
 }
 
 int CPPGravitySubscriber::subscriptionFilled(char* array, int arrayLength, int* lengths, int length)

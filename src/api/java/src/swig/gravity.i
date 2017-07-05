@@ -322,7 +322,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 	  char *bytes = new char[$1->getSize()];
 	  result->serializeToArray(bytes);
 	  JCALL4(SetByteArrayRegion, jenv, $result, 0, $1->getSize(), (jbyte*)bytes);
-	  delete bytes;
+	  delete[] bytes;
   }
 }
 %typemap(javadirectorout) shared_ptr<gravity::GravityDataProduct> "$javacall"
@@ -355,7 +355,7 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 	  char *bytes = new char[$1->getSize()];
 	  result->serializeToArray(bytes);
 	  JCALL4(SetByteArrayRegion, jenv, $result, 0, $1->getSize(), (jbyte*)bytes);
-	  delete bytes;
+	  delete[] bytes;
   }
 }
 %typemap(javadirectorout) shared_ptr<gravity::FutureResponse> "$javacall"

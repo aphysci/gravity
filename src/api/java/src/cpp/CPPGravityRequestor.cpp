@@ -31,7 +31,7 @@ void CPPGravityRequestor::requestFilled(std::string serviceID, std::string reque
     unsigned char* array = new unsigned char[response.getSize()];
     response.serializeToArray(array);
     requestFilled(serviceID, requestID, (char*)array, response.getSize());
-	delete array;
+	delete[] array;
 }
 
 char CPPGravityRequestor::requestFilled(const std::string& serviceID, const std::string& requestID, char* array, int length)
