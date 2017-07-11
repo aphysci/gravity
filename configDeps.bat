@@ -46,12 +46,14 @@ echo 1 - VS2010 32-bit
 echo 2 - VS2010 64-bit
 echo 3 - VS2012 32-bit
 echo 4 - VS2012 64-bit
+echo 5 - VS2013 64-bit
 echo Q - Quit
 
 echo Build Selection:	
-choice /c:1234Q>nul
+choice /c:12345Q>nul
 
-if errorlevel 5 goto done
+if errorlevel 6 goto done
+if errorlevel 5 goto VS201364
 if errorlevel 4 goto VS201264
 if errorlevel 3 goto VS201232
 if errorlevel 2 goto VS201064
@@ -102,6 +104,17 @@ set PTHREAD_LIB=pthreadVC2
 set CONFIGURATION=Release2012
 set DEBUG_CONFIGURATION=Debug2012
 set VERSION=v110
+goto config
+
+:VS201364
+echo ===== Configuring Gravity Dependencies for VS2013 64-bit =====
+echo.
+set PLATFORM=x64
+set PTHREAD_PLATFORM=x64
+set PTHREAD_LIB=pthreadVC2
+set CONFIGURATION=Release2013
+set DEBUG_CONFIGURATION=Debug2013
+set VERSION=v120
 goto config
 
 :config

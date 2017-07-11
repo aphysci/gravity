@@ -17,6 +17,14 @@
       <Configuration>Debug2012</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug2013|Win32">
+      <Configuration>Debug2013</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug2013|x64">
+      <Configuration>Debug2013</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release2010|Win32">
       <Configuration>Release2010</Configuration>
       <Platform>Win32</Platform>
@@ -31,6 +39,14 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release2012|x64">
       <Configuration>Release2012</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release2013|Win32">
+      <Configuration>Release2013</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release2013|x64">
+      <Configuration>Release2013</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -60,6 +76,12 @@
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -72,6 +94,12 @@
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -80,6 +108,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
@@ -107,6 +142,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -125,6 +167,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Gravity.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
@@ -133,11 +179,19 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Gravity.props" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Gravity.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
   </ImportGroup>
@@ -150,6 +204,10 @@
     <Import Project="..\Gravity.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Gravity.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Gravity.props" />
   </ImportGroup>
@@ -170,12 +228,23 @@
     <TargetName>$(ProjectName)_d</TargetName>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">
     <TargetName>$(ProjectName)_d</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">
+    <TargetName>$(ProjectName)_d</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">
     <TargetName>$(ProjectName)_d</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
@@ -190,6 +259,11 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(LibDir)</OutDir>
@@ -199,6 +273,10 @@
     <OutDir>$(BinDir)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
   </PropertyGroup>
@@ -222,6 +300,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBKEYVALUE_PARSER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(BinDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(LibDir)$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -269,6 +363,22 @@
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBKEYVALUE_PARSER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(BinDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(LibDir)$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -289,6 +399,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBKEYVALUE_PARSER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(BinDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(LibDir)$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
@@ -365,6 +494,26 @@
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBKEYVALUE_PARSER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(BinDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(LibDir)$(TargetName).lib</ImportLibrary>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -399,43 +548,59 @@
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(LexCommand) -o $(GravityRoot)\src\keyvalue_parser\lex.yy.c %(FullPath)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(GravityRoot)\src\keyvalue_parser\lex.yy.c</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">$(LexCommand) -o %(RelativeDir)\lex.yy.c %(Identity)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">%(RelativeDir)\lex.yy.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">%(RelativeDir)\lex.yy.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">%(RelativeDir)\lex.yy.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">%(RelativeDir)\lex.yy.c</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\keyvalue_parser\keyvalue.y">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(YaccCommand) -dt %(FullPath) -o $(GravityRoot)\src\keyvalue_parser\y.tab.c</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|Win32'">%(RelativeDir)y.tab.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2013|Win32'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(GravityRoot)\src\keyvalue_parser\y.tab.c;$(GravityRoot)\src\keyvalue_parser\y.tab.h</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">$(YaccCommand) -dt %(Identity) -o %(RelativeDir)y.tab.c</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|Win32'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|Win32'">%(RelativeDir)y.tab.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2013|Win32'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2010|x64'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2012|x64'">%(RelativeDir)y.tab.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug2013|x64'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2010|x64'">%(RelativeDir)y.tab.c</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2012|x64'">%(RelativeDir)y.tab.c</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release2013|x64'">%(RelativeDir)y.tab.c</Outputs>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
