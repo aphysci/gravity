@@ -749,59 +749,66 @@ GravityReturnCode GravityNode::init(std::string componentID)
    		serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
    	    serviceDirectoryLock.Unlock();
 
-		// Enable metrics (if configured)
-		metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
-		if (metricsEnabled)
-		{
-			// Register our metrics data product with the service directory
-			registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
-
-			// Command the GravityMetricsManager thread to start collecting metrics
-			sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
-
-			// Get collection parameters from ini file
-			// (default to 10 second sampling, publishing once per min)
-			int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
-			int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
-
-			// Send collection details to the GravityMetricsManager
-			sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
-			sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
-
-			// Finally, send our component id & ip address (to be published with metrics)
-			sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
-			sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
-		}
-
-		if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
-   		{
-   			parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
-   		}
-		//parser->ParseCmdLine
-
-   		// Setup up network logging now that SD is available
-		Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
-		if(net_log_level != Log::NONE)
-			Log::initAndAddGravityLogger(this, net_log_level);
-
 		// Get our domain
 		if (componentID != "ServiceDirectory")
 		{
 			GravityDataProduct request("GetDomain");
 			GravityDataProduct response("DomainResponse");
-			sendRequestToServiceDirectory(request, response);
+			ret = sendRequestToServiceDirectory(request, response);
 
-			char* p = (char*)calloc(response.getDataSize(), sizeof(char));
-			response.getData(p, response.getDataSize());
-			myDomain.assign(p, response.getDataSize());
-            free(p);
+			if (ret == GravityReturnCodes::SUCCESS)
+			{
+				char* p = (char*)calloc(response.getDataSize(), sizeof(char));
+				response.getData(p, response.getDataSize());
+				myDomain.assign(p, response.getDataSize());
+				free(p);
+			}
 		}
 		else
 		{
 			myDomain = getStringParam("Domain", "");
 		}
 
-		configureServiceManager();
+		if (ret == GravityReturnCode::SUCCESS)
+		{
+
+			// Enable metrics (if configured)
+			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
+			if (metricsEnabled)
+			{
+				// Register our metrics data product with the service directory
+				registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
+
+				// Command the GravityMetricsManager thread to start collecting metrics
+				sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
+
+				// Get collection parameters from ini file
+				// (default to 10 second sampling, publishing once per min)
+				int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
+				int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
+
+				// Send collection details to the GravityMetricsManager
+				sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
+				sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+
+				// Finally, send our component id & ip address (to be published with metrics)
+				sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
+				sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
+			}
+
+			if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
+   			{
+   				parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
+   			}
+			//parser->ParseCmdLine
+
+   			// Setup up network logging now that SD is available
+			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
+			if(net_log_level != Log::NONE)
+				Log::initAndAddGravityLogger(this, net_log_level);
+
+			configureServiceManager();
+		}
 	}
 	else
 	{
