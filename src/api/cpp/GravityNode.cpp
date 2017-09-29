@@ -769,7 +769,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			myDomain = getStringParam("Domain", "");
 		}
 
-		if (ret == GravityReturnCode::SUCCESS)
+		if (ret == GravityReturnCodes::SUCCESS)
 		{
 
 			// Enable metrics (if configured)
