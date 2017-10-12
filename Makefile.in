@@ -103,6 +103,7 @@ test-prep:
 	chmod 755 test/examples/8-ConfigFile/run.sh
 	chmod 755 test/examples/9-Domains/run.sh
 	chmod 755 test/examples/10-Archiving/run.sh
+	chmod 755 test/examples/11-PythonPubSub/run.sh
 
 test: test-prep components
 	./test/testall.sh

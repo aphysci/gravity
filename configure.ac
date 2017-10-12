@@ -280,7 +280,8 @@ AC_CONFIG_FILES([Makefile
                  test/examples/9-Domains/Makefile
                  test/examples/9-Domains/run.sh
                  test/examples/10-Archiving/Makefile
-                 test/examples/10-Archiving/run.sh])
+                 test/examples/10-Archiving/run.sh
+                 test/examples/11-PythonPubSub/run.sh])
 
 AC_OUTPUT
 
