@@ -639,8 +639,7 @@ LIBOBJS
 SWIGPROG
 PYTHON_CONFIG
 PYTHON_INCLUDE
-HAVE_PYTHON_FALSE
-HAVE_PYTHON_TRUE
+WITHOUT_PYTHON
 pkgpyexecdir
 pyexecdir
 pkgpythondir
@@ -5015,12 +5014,10 @@ $as_echo "$am_cv_python_pyexecdir" >&6; }
 
 
 fi
- if test "$PYTHON" != : -a "x$want_python" != "xno"; then
-  HAVE_PYTHON_TRUE=
-  HAVE_PYTHON_FALSE='#'
+if test "$PYTHON" != : -a "x$want_python" != "xno"; then :
+  WITHOUT_PYTHON=no
 else
-  HAVE_PYTHON_TRUE='#'
-  HAVE_PYTHON_FALSE=
+  WITHOUT_PYTHON=yes
 fi
 
 
@@ -6289,10 +6286,6 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
-if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_PYTHON\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0

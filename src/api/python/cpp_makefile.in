@@ -78,7 +78,7 @@ LINK_FLAGS=-shared
 OBJ_EXT=o
 OS_PATH_SEP=/
 
-LIB_NAME=libgravity_wrap
+LIB_NAME=_gravity
 
 #Source/Object/Dependancies (all swig auto generated sources should have been built by now).
 #'wildcard' needs UNIX path seperators

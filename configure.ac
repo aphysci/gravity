@@ -72,7 +72,8 @@ if test "x$want_python" != "xno" ; then
   fi
   AM_PATH_PYTHON(,,[:])
 fi
-AM_CONDITIONAL(HAVE_PYTHON, [test "$PYTHON" != : -a "x$want_python" != "xno"])
+AS_IF([test "$PYTHON" != : -a "x$want_python" != "xno"],[WITHOUT_PYTHON=no],[WITHOUT_PYTHON=yes])
+AC_SUBST([WITHOUT_PYTHON])
 AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
 AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
 AS_IF([test -z "$PYTHON_INCLUDE"], [

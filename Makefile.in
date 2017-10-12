@@ -38,6 +38,7 @@ INSTALL_DATA   = @INSTALL_DATA@
 INSTALL_PROGRAM= @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 WITHOUT_JAVA   = @WITHOUT_JAVA@
+WITHOUT_PYTHON = @WITHOUT_PYTHON@
 
 # VPATH-related substitution variables
 top_builddir   = @top_builddir@
@@ -67,6 +68,10 @@ all clean:
 		$(MAKE) -C src/api/MATLAB $@;\
 		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $@;\
 		$(MAKE) -C test/examples/7-JavaBasicService $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		$(MAKE) -C src/api/python $@;\
 	fi
 
 Makefile: Makefile.in config.status
@@ -130,6 +135,12 @@ distributable: components
 		mkdir lib/MATLAB; \
 		cp src/api/MATLAB/*.jar lib/MATLAB; \
 		cp src/api/MATLAB/LICENSE* lib/MATLAB; \
+	fi
+
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		cp src/api/python/*.so lib; \
+		cp src/api/python/src/python/*.py lib; \
 	fi
 
 	echo building Gravity tarball...
