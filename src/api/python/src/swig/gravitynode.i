@@ -147,5 +147,42 @@ public:
 			const std::string& filter="", const std::string& domain="");
 };
 
+class GravityDataProduct
+{
+public:
+    GravityDataProduct() {}
+    GravityDataProduct(std::string dataProductID);
+    GravityDataProduct(void* arrayPtr, int size);
+    virtual ~GravityDataProduct();
+    uint64_t getGravityTimestamp() const;
+    uint64_t getReceivedTimestamp() const;
+    std::string getDataProductID() const;
+    void setSoftwareVersion(std::string softwareVersion);
+    std::string getSoftwareVersion() const;
+    void setData(const void* data, int size);
+    void setData(const google::protobuf::Message& data);
+    bool getData(void* data, int size) const;
+    int getDataSize() const;
+    bool populateMessage(google::protobuf::Message& data) const;
+    int getSize() const;
+    void parseFromArray(void* arrayPtr, int size);
+    bool serializeToArray(void* arrayPtr) const;
+    bool operator==(const GravityDataProduct &gdp);
+	std::string getComponentId();
+	std::string getDomain();
+	bool isFutureResponse();
+	bool isCachedDataproduct();
+	void setIsCachedDataproduct(bool cached);
+	std::string getFutureSocketUrl();
+    void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
+    void setReceivedTimestamp(uint64_t ts) const { gravityDataProductPB->set_received_timestamp(ts); }
+	void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
+	void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
 };
 
+class GravitySubscriber {
+public:
+    ~GravitySubscriber();
+    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) = 0;
+};
+};
