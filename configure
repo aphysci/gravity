@@ -637,6 +637,19 @@ PROTOBUF_INCDIR
 PROTOBUF_LIBDIR
 LIBOBJS
 SWIGPROG
+PYTHON_CONFIG
+PYTHON_INCLUDE
+HAVE_PYTHON_FALSE
+HAVE_PYTHON_TRUE
+pkgpyexecdir
+pyexecdir
+pkgpythondir
+pythondir
+PYTHON_PLATFORM
+PYTHON_EXEC_PREFIX
+PYTHON_PREFIX
+PYTHON_VERSION
+PYTHON
 WITHOUT_JAVA
 ALLOCA
 EGREP
@@ -703,6 +716,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_java
+with_python
 with_protobuf_libdir
 with_protobuf_incdir
 with_zeromq_libdir
@@ -724,6 +738,9 @@ CFLAGS
 CPP
 YACC
 YFLAGS
+PYTHON
+PYTHON_INCLUDE
+PYTHON_CONFIG
 BOOST_ROOT
 CXXCPP
 JAVAPROTOBUF_DIR
@@ -1337,6 +1354,11 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --without-java          Disable Gravity's support for java.
+
+  --with-python=PATH      Enable Python bindings. PATH is location of python.
+                          Default is to look for python in your PATH
+  --without-python        Disable python bindings
+
   --with-protobuf-libdir=LIB_DIR
                           location of the protocol buffers libraries, defaults
                           to /usr/local/lib
@@ -1370,6 +1392,11 @@ Some influential environment variables:
   YFLAGS      The list of arguments that will be passed by default to $YACC.
               This script will default YFLAGS to the empty string to avoid a
               default value of `-d' given by some make applications.
+  PYTHON      the Python interpreter
+  PYTHON_INCLUDE
+              Include flags for python, bypassing python-config
+  PYTHON_CONFIG
+              Path to python-config
   BOOST_ROOT  Location of Boost installation
   CXXCPP      C++ preprocessor
   JAVAPROTOBUF_DIR
@@ -4767,6 +4794,301 @@ if test "x$WITHOUT_JAVA" != xno; then :
 fi
 
 
+want_python=yes
+
+# Check whether --with-python was given.
+if test "${with_python+set}" = set; then :
+  withval=$with_python;
+   want_python="$withval"
+
+fi
+
+if test "x$want_python" != "xno" ; then
+  if test "$want_python" != "yes"; then
+    PYTHON="$want_python"
+  fi
+
+
+
+
+
+
+        # Find any Python interpreter.
+    if test -z "$PYTHON"; then
+      for ac_prog in python python2 python3 python3.3 python3.2 python3.1 python3.0 python2.7  python2.6 python2.5 python2.4 python2.3 python2.2 python2.1 python2.0
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PYTHON+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PYTHON in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON="$PYTHON" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PYTHON="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PYTHON=$ac_cv_path_PYTHON
+if test -n "$PYTHON"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON" >&5
+$as_echo "$PYTHON" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$PYTHON" && break
+done
+test -n "$PYTHON" || PYTHON=":"
+
+    fi
+    am_display_PYTHON=python
+
+
+  if test "$PYTHON" = :; then
+      :
+  else
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON version" >&5
+$as_echo_n "checking for $am_display_PYTHON version... " >&6; }
+if ${am_cv_python_version+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_version=`$PYTHON -c "import sys; sys.stdout.write(sys.version[:3])"`
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_version" >&5
+$as_echo "$am_cv_python_version" >&6; }
+  PYTHON_VERSION=$am_cv_python_version
+
+
+
+  PYTHON_PREFIX='${prefix}'
+
+  PYTHON_EXEC_PREFIX='${exec_prefix}'
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON platform" >&5
+$as_echo_n "checking for $am_display_PYTHON platform... " >&6; }
+if ${am_cv_python_platform+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_platform=`$PYTHON -c "import sys; sys.stdout.write(sys.platform)"`
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_platform" >&5
+$as_echo "$am_cv_python_platform" >&6; }
+  PYTHON_PLATFORM=$am_cv_python_platform
+
+
+  # Just factor out some code duplication.
+  am_python_setup_sysconfig="\
+import sys
+# Prefer sysconfig over distutils.sysconfig, for better compatibility
+# with python 3.x.  See automake bug#10227.
+try:
+    import sysconfig
+except ImportError:
+    can_use_sysconfig = 0
+else:
+    can_use_sysconfig = 1
+# Can't use sysconfig in CPython 2.7, since it's broken in virtualenvs:
+# <https://github.com/pypa/virtualenv/issues/118>
+try:
+    from platform import python_implementation
+    if python_implementation() == 'CPython' and sys.version[:3] == '2.7':
+        can_use_sysconfig = 0
+except ImportError:
+    pass"
+
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON script directory" >&5
+$as_echo_n "checking for $am_display_PYTHON script directory... " >&6; }
+if ${am_cv_python_pythondir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$prefix" = xNONE
+     then
+       am_py_prefix=$ac_default_prefix
+     else
+       am_py_prefix=$prefix
+     fi
+     am_cv_python_pythondir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+    sitedir = sysconfig.get_path('purelib', vars={'base':'$am_py_prefix'})
+else:
+    from distutils import sysconfig
+    sitedir = sysconfig.get_python_lib(0, 0, prefix='$am_py_prefix')
+sys.stdout.write(sitedir)"`
+     case $am_cv_python_pythondir in
+     $am_py_prefix*)
+       am__strip_prefix=`echo "$am_py_prefix" | sed 's|.|.|g'`
+       am_cv_python_pythondir=`echo "$am_cv_python_pythondir" | sed "s,^$am__strip_prefix,$PYTHON_PREFIX,"`
+       ;;
+     *)
+       case $am_py_prefix in
+         /usr|/System*) ;;
+         *)
+	  am_cv_python_pythondir=$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages
+	  ;;
+       esac
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_pythondir" >&5
+$as_echo "$am_cv_python_pythondir" >&6; }
+  pythondir=$am_cv_python_pythondir
+
+
+
+  pkgpythondir=\${pythondir}/$PACKAGE
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $am_display_PYTHON extension module directory" >&5
+$as_echo_n "checking for $am_display_PYTHON extension module directory... " >&6; }
+if ${am_cv_python_pyexecdir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$exec_prefix" = xNONE
+     then
+       am_py_exec_prefix=$am_py_prefix
+     else
+       am_py_exec_prefix=$exec_prefix
+     fi
+     am_cv_python_pyexecdir=`$PYTHON -c "
+$am_python_setup_sysconfig
+if can_use_sysconfig:
+    sitedir = sysconfig.get_path('platlib', vars={'platbase':'$am_py_prefix'})
+else:
+    from distutils import sysconfig
+    sitedir = sysconfig.get_python_lib(1, 0, prefix='$am_py_prefix')
+sys.stdout.write(sitedir)"`
+     case $am_cv_python_pyexecdir in
+     $am_py_exec_prefix*)
+       am__strip_prefix=`echo "$am_py_exec_prefix" | sed 's|.|.|g'`
+       am_cv_python_pyexecdir=`echo "$am_cv_python_pyexecdir" | sed "s,^$am__strip_prefix,$PYTHON_EXEC_PREFIX,"`
+       ;;
+     *)
+       case $am_py_exec_prefix in
+         /usr|/System*) ;;
+         *)
+	   am_cv_python_pyexecdir=$PYTHON_EXEC_PREFIX/lib/python$PYTHON_VERSION/site-packages
+	   ;;
+       esac
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_python_pyexecdir" >&5
+$as_echo "$am_cv_python_pyexecdir" >&6; }
+  pyexecdir=$am_cv_python_pyexecdir
+
+
+
+  pkgpyexecdir=\${pyexecdir}/$PACKAGE
+
+
+
+  fi
+
+
+fi
+ if test "$PYTHON" != : -a "x$want_python" != "xno"; then
+  HAVE_PYTHON_TRUE=
+  HAVE_PYTHON_FALSE='#'
+else
+  HAVE_PYTHON_TRUE='#'
+  HAVE_PYTHON_FALSE=
+fi
+
+
+
+if test -z "$PYTHON_INCLUDE"; then :
+
+  if test -z "$PYTHON_CONFIG"; then :
+
+    for ac_prog in python$PYTHON_VERSION-config python-config
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PYTHON_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PYTHON_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON_CONFIG="$PYTHON_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in `dirname $PYTHON`
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PYTHON_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PYTHON_CONFIG=$ac_cv_path_PYTHON_CONFIG
+if test -n "$PYTHON_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_CONFIG" >&5
+$as_echo "$PYTHON_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$PYTHON_CONFIG" && break
+done
+test -n "$PYTHON_CONFIG" || PYTHON_CONFIG="no"
+
+    if test "$PYTHON_CONFIG" = no; then :
+  as_fn_error $? "cannot find python-config for $PYTHON." "$LINENO" 5
+fi
+
+fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking python include flags" >&5
+$as_echo_n "checking python include flags... " >&6; }
+  PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PYTHON_INCLUDE" >&5
+$as_echo "$PYTHON_INCLUDE" >&6; }
+
+fi
+
+
 # Check for bison program
 if test "x$ac_cv_prog_YACC" != "xbison -y"; then :
 
@@ -5855,7 +6177,7 @@ fi
 
 CPPFLAGS="$CPPFLAGS -Wall"
 
-ac_config_files="$ac_config_files Makefile src/api/MATLAB/Makefile src/api/cpp/Makefile src/components/cpp/Makefile src/components/cpp/Archiver/Makefile src/components/cpp/ConfigServer/Makefile src/components/cpp/LogRecorder/Makefile src/components/cpp/Playback/Makefile src/components/cpp/ServiceDirectory/Makefile src/keyvalue_parser/Makefile test/components/cpp/Makefile test/components/cpp/ServiceDirectory/Makefile test/components/cpp/ServiceDirectoryReregister/Makefile src/api/java/cpp_makefile src/api/java/java_makefile test/api/java/Makefile test/components/cpp/ServiceDirectory/test.sh test/components/cpp/ServiceDirectoryReregister/test.sh test/api/java/test.sh test/examples/1-BasicDataProduct/Makefile test/examples/1-BasicDataProduct/run.sh test/examples/2-ProtobufDataProduct/Makefile test/examples/2-ProtobufDataProduct/run.sh test/examples/3-MultipleDataProduct/Makefile test/examples/3-MultipleDataProduct/run.sh test/examples/4-BasicService/Makefile test/examples/4-BasicService/run.sh test/examples/5-MiscFunctionality/Makefile test/examples/5-MiscFunctionality/run.sh test/examples/6-JavaProtobufDataProduct/Makefile test/examples/6-JavaProtobufDataProduct/run.sh test/examples/7-JavaBasicService/Makefile test/examples/7-JavaBasicService/run.sh test/examples/8-ConfigFile/Makefile test/examples/8-ConfigFile/run.sh test/examples/9-Domains/Makefile test/examples/9-Domains/run.sh test/examples/10-Archiving/Makefile test/examples/10-Archiving/run.sh"
+ac_config_files="$ac_config_files Makefile src/api/MATLAB/Makefile src/api/cpp/Makefile src/components/cpp/Makefile src/components/cpp/Archiver/Makefile src/components/cpp/ConfigServer/Makefile src/components/cpp/LogRecorder/Makefile src/components/cpp/Playback/Makefile src/components/cpp/ServiceDirectory/Makefile src/keyvalue_parser/Makefile test/components/cpp/Makefile test/components/cpp/ServiceDirectory/Makefile test/components/cpp/ServiceDirectoryReregister/Makefile src/api/java/cpp_makefile src/api/java/java_makefile src/api/python/cpp_makefile src/api/python/Makefile test/api/java/Makefile test/components/cpp/ServiceDirectory/test.sh test/components/cpp/ServiceDirectoryReregister/test.sh test/api/java/test.sh test/examples/1-BasicDataProduct/Makefile test/examples/1-BasicDataProduct/run.sh test/examples/2-ProtobufDataProduct/Makefile test/examples/2-ProtobufDataProduct/run.sh test/examples/3-MultipleDataProduct/Makefile test/examples/3-MultipleDataProduct/run.sh test/examples/4-BasicService/Makefile test/examples/4-BasicService/run.sh test/examples/5-MiscFunctionality/Makefile test/examples/5-MiscFunctionality/run.sh test/examples/6-JavaProtobufDataProduct/Makefile test/examples/6-JavaProtobufDataProduct/run.sh test/examples/7-JavaBasicService/Makefile test/examples/7-JavaBasicService/run.sh test/examples/8-ConfigFile/Makefile test/examples/8-ConfigFile/run.sh test/examples/9-Domains/Makefile test/examples/9-Domains/run.sh test/examples/10-Archiving/Makefile test/examples/10-Archiving/run.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -5967,6 +6289,10 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
@@ -6564,6 +6890,8 @@ do
     "test/components/cpp/ServiceDirectoryReregister/Makefile") CONFIG_FILES="$CONFIG_FILES test/components/cpp/ServiceDirectoryReregister/Makefile" ;;
     "src/api/java/cpp_makefile") CONFIG_FILES="$CONFIG_FILES src/api/java/cpp_makefile" ;;
     "src/api/java/java_makefile") CONFIG_FILES="$CONFIG_FILES src/api/java/java_makefile" ;;
+    "src/api/python/cpp_makefile") CONFIG_FILES="$CONFIG_FILES src/api/python/cpp_makefile" ;;
+    "src/api/python/Makefile") CONFIG_FILES="$CONFIG_FILES src/api/python/Makefile" ;;
     "test/api/java/Makefile") CONFIG_FILES="$CONFIG_FILES test/api/java/Makefile" ;;
     "test/components/cpp/ServiceDirectory/test.sh") CONFIG_FILES="$CONFIG_FILES test/components/cpp/ServiceDirectory/test.sh" ;;
     "test/components/cpp/ServiceDirectoryReregister/test.sh") CONFIG_FILES="$CONFIG_FILES test/components/cpp/ServiceDirectoryReregister/test.sh" ;;

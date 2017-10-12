@@ -1,0 +1,65 @@
+#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#**
+#** Gravity is free software; you can redistribute it and/or modify
+#** it under the terms of the GNU Lesser General Public License as published by
+#** the Free Software Foundation; either version 3 of the License, or
+#** (at your option) any later version.
+#**
+#** This program is distributed in the hope that it will be useful,
+#** but WITHOUT ANY WARRANTY; without even the implied warranty of
+#** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#** GNU Lesser General Public License for more details.
+#**
+#** You should have received a copy of the GNU Lesser General Public
+#** License along with this program;
+#** If not, see <http://www.gnu.org/licenses/>.
+#**
+
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# VPATH-related substitution variables
+top_builddir   = @top_builddir@
+builddir       = @builddir@
+srcdir         = @srcdir@
+VPATH          = @srcdir@ 
+
+#Wrapper Source Dirs
+#Swig source dir
+SWIGSRC_DIR=src/swig
+#C++ Wrapper source dir
+SWIGGENCPP_DIR=src/cpp
+#Java wrapper source dir
+SWIGGENPYTHON_DIR=src/python
+
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring Linux,$(SYSTEM)))
+   BUILD_VARIANT_DIRECTIVE=-DLINUX
+else ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+   BUILD_VARIANT_DIRECTIVE=-DWIN32
+else
+   BUILD_VARIANT_DIRECTIVE=
+endif
+
+all: libgravity_wrap
+
+swig: $(SWIGSRC_DIR)/gravity.i $(wildcard $(SWIGSRC_DIR)/*.i)
+	@echo "Executing swig"
+	@swig $(BUILD_VARIANT_DIRECTIVE) -c++ -o $(SWIGGENCPP_DIR)/gravity_wrap.cpp -outdir $(SWIGGENPYTHON_DIR) -python $<
+	@touch swig
+
+libgravity_wrap: swig
+	make -f cpp_makefile
+
+clean:
+	rm -rf $(SWIGGENPYTHON_DIR)/* $(SWIGGENCPP_DIR)/gravity_wrap.* ./swig
+	make -f cpp_makefile clean

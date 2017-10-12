@@ -1,0 +1,116 @@
+#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#**
+#** Gravity is free software; you can redistribute it and/or modify
+#** it under the terms of the GNU Lesser General Public License as published by
+#** the Free Software Foundation; either version 3 of the License, or
+#** (at your option) any later version.
+#**
+#** This program is distributed in the hope that it will be useful,
+#** but WITHOUT ANY WARRANTY; without even the implied warranty of
+#** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#** GNU Lesser General Public License for more details.
+#**
+#** You should have received a copy of the GNU Lesser General Public
+#** License along with this program;
+#** If not, see <http://www.gnu.org/licenses/>.
+#**
+
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# Tool-related substitution variables
+CC             = @CC@
+CXX            = @CXX@
+DEFS           = @DEFS@
+LIBS           = @LIBS@
+AC_CFLAGS      = @CFLAGS@
+AC_CPPFLAGS    = @CPPFLAGS@
+INSTALL        = @INSTALL@
+INSTALL_DATA   = @INSTALL_DATA@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+AC_LDFLAGS     = @LDFLAGS@
+LEX            = @LEX@
+PROTOC         = @PROTOC@
+YACC           = @YACC@
+PYTHON_INCLUDE = @PYTHON_INCLUDE@
+
+# VPATH-related substitution variables
+top_builddir   = @top_builddir@
+builddir       = @builddir@
+srcdir         = @srcdir@
+VPATH          = @srcdir@ 
+
+#C++ Include Locations
+JAVAINCLUDE_DIR=$(JAVA_HOME)$(OS_PATH_SEP)include
+GRAVLIB_DIR=..$(OS_PATH_SEP)cpp
+GRAV_HOME=..$(OS_PATH_SEP)..$(OS_PATH_SEP)..$(OS_PATH_SEP)
+KEYVALUE_PARSER_DIR=$(GRAV_HOME)src$(OS_PATH_SEP)keyvalue_parser
+
+#C++ Wrapper source dir
+CPPSRC_DIR_MAKE=src/cpp/
+CPPSRC_DIR_OS=src$(OS_PATH_SEP)cpp$(OS_PATH_SEP)
+
+#Tools
+LINK=$(CXX)
+
+#Default C++ Compiler Options (g++)
+INCLUDES=-I../cpp -I$(JAVAINCLUDE_DIR) $(OS_SPECIFIC_INCS) $(AC_CPPFLAGS) $(PYTHON_INCLUDE)
+LIBDIRS=-L$(GRAVLIB_DIR) -L$(KEYVALUE_PARSER_DIR) $(AC_LDFLAGS) $(AC_CFLAGS) 
+
+LIBS=$(COMPILER_SPECIFIC_LIBS)
+COMPILER_SPECIFIC_LIBS=$(GCC_LIBS) $(OS_SPECIFIC_LIBS)
+GCC_LIBS=-lgravity -lprotobuf -lkeyvalue_parser -lzmq
+COMPILE_FLAG=-c
+COUTPUT_FLAG=-o
+OUTPUT_FLAG=-o
+LINK_FLAGS=-shared
+
+OBJ_EXT=o
+OS_PATH_SEP=/
+
+LIB_NAME=libgravity_wrap
+
+#Source/Object/Dependancies (all swig auto generated sources should have been built by now).
+#'wildcard' needs UNIX path seperators
+CPP_SRC=$(wildcard $(CPPSRC_DIR_MAKE)*.cpp)
+#but Microsoft tools need Windows path separators... so substitute them here!
+CPP_OBJ=$(patsubst $(CPPSRC_DIR_MAKE)%.cpp,$(CPPSRC_DIR_OS)%.$(OBJ_EXT),$(CPP_SRC))
+
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring CYGWIN_NT,$(SYSTEM)))
+	-include makefile.vs
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+	OS_SPECIFIC_LIBS = -lrt
+	OS_SPECIFIC_INCS=-I$(JAVAINCLUDE_DIR)/linux
+	OS_SPECIFIC_FLAGS=-fPIC
+	LIB_EXT=so
+linux: all;
+else
+	ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
+
+all: $(LIB_NAME).$(LIB_EXT)
+
+%.$(OBJ_EXT): %.cpp
+	@echo $(CC) $<
+	$(warning COMPILE_FLAG is $(COMPILE_FLAG))
+	@$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(INCLUDES) $(COUTPUT_FLAG)$@ $<
+
+$(LIB_NAME).$(LIB_EXT): $(CPP_OBJ)
+	@echo building $(LIB_NAME).$(LIB_EXT)
+
+	@$(LINK) $(LINK_FLAGS) $(LIBDIRS) $(OUTPUT_FLAG)$@ $(CPP_OBJ) $(LIBS) 
+
+clean:
+	rm -rf $(CPPSRC_DIR_MAKE)*.$(OBJ_EXT) *.so *.dll *.exp *.lib *.$(OBJ_EXT)

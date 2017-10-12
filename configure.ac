@@ -58,6 +58,37 @@ AC_ARG_WITH([java],
 AS_IF([test "x$WITHOUT_JAVA" != xno],[WITHOUT_JAVA=yes])
 AC_SUBST([WITHOUT_JAVA])
 
+want_python=yes
+AC_ARG_WITH(python, [
+  --with-python=PATH      Enable Python bindings. PATH is location of python.
+                          Default is to look for python in your PATH
+  --without-python        Disable python bindings
+],[
+   want_python="$withval"
+])
+if test "x$want_python" != "xno" ; then
+  if test "$want_python" != "yes"; then
+    PYTHON="$want_python"
+  fi
+  AM_PATH_PYTHON(,,[:])
+fi
+AM_CONDITIONAL(HAVE_PYTHON, [test "$PYTHON" != : -a "x$want_python" != "xno"])
+AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+AS_IF([test -z "$PYTHON_INCLUDE"], [
+  AS_IF([test -z "$PYTHON_CONFIG"], [
+    AC_PATH_PROGS([PYTHON_CONFIG],
+                  [python$PYTHON_VERSION-config python-config],
+                  [no],
+                  [`dirname $PYTHON`])
+    AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+  ])
+  AC_MSG_CHECKING([python include flags])
+  PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+  AC_MSG_RESULT([$PYTHON_INCLUDE])
+])
+
+
 # Check for bison program
 AS_IF([test "x$ac_cv_prog_YACC" != "xbison -y"],[
        AC_MSG_ERROR([Bison is required to compile Gravity. Make sure it is installed and in the PATH.])
@@ -223,6 +254,8 @@ AC_CONFIG_FILES([Makefile
                  test/components/cpp/ServiceDirectoryReregister/Makefile
                  src/api/java/cpp_makefile
                  src/api/java/java_makefile
+                 src/api/python/cpp_makefile
+                 src/api/python/Makefile
                  test/api/java/Makefile
                  test/components/cpp/ServiceDirectory/test.sh
                  test/components/cpp/ServiceDirectoryReregister/test.sh

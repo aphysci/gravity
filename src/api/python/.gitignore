@@ -1,0 +1,10 @@
+*.class
+*.so
+*.o
+*.mk
+*.cxx
+*.jar
+bin
+cpp_makefile
+Makefile
+swig
