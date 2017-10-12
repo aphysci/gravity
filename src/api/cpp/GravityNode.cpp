@@ -396,6 +396,8 @@ GravityNode::GravityNode()
 	logInitialized = false;
 	listenerEnabled=false;
 	heartbeatStarted=false;
+
+	parser = NULL;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -413,6 +415,8 @@ GravityNode::GravityNode(std::string componentID)
 	initialized=false;
 	logInitialized=false;
 	heartbeatStarted=false;
+
+	parser = NULL;
 
 	init(componentID);
 }
@@ -459,7 +463,8 @@ GravityNode::~GravityNode()
 	// Clean up the zmq context object
     zmq_term(context);
 
-	delete parser;
+    if (parser != NULL)
+        delete parser;
 
 }
 
