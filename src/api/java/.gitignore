@@ -6,3 +6,4 @@
 *.jar
 SWIGTYPE*.java
 bin
+*_makefile
