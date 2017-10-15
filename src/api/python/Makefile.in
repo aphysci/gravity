@@ -33,13 +33,23 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
+# Tool related substitution variables
+PROTOC         = @PROTOC@
+
 #Wrapper Source Dirs
 #Swig source dir
 SWIGSRC_DIR=src/swig
 #C++ Wrapper source dir
 SWIGGENCPP_DIR=src/cpp
-#Java wrapper source dir
-SWIGGENPYTHON_DIR=src/python
+#Python wrapper source dir
+PYTHONSRC_DIR=src/python
+
+#Protobuf sources (.proto)
+PROTO_DIR=../protobufs
+
+PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto $(PROTO_DIR)/FileArchiverControlRequestPB.proto $(PROTO_DIR)/FileArchiverControlResponsePB.proto
+PROTO_PYTHON=$(patsubst $(PROTO_DIR)/%PB.proto,$(PYTHONSRC_DIR)/%Container.py,$(PROTO_SRC))
+
 
 SYSTEM:=$(strip $(shell uname -s))
 ifneq (,$(findstring Linux,$(SYSTEM)))
@@ -50,16 +60,20 @@ else
    BUILD_VARIANT_DIRECTIVE=
 endif
 
-all: libgravity_wrap
+all: libgravity_wrap $(PROTO_PYTHON)
+
+$(PYTHONSRC_DIR)/%Container.py: $(PROTO_DIR)/%PB.proto
+	@echo $<
+	@$(PROTOC) --proto_path=$(PROTO_DIR) --python_out=$(PYTHONSRC_DIR) $<
 
 swig: $(SWIGSRC_DIR)/gravity.i $(wildcard $(SWIGSRC_DIR)/*.i)
 	@echo "Executing swig"
-	@swig $(BUILD_VARIANT_DIRECTIVE) -c++ -o $(SWIGGENCPP_DIR)/gravity_wrap.cpp -outdir $(SWIGGENPYTHON_DIR) -python $<
+	@swig $(BUILD_VARIANT_DIRECTIVE) -c++ -o $(SWIGGENCPP_DIR)/gravity_wrap.cpp -outdir $(PYTHONSRC_DIR) -python $<
 	@touch swig
 
 libgravity_wrap: swig
 	make -f cpp_makefile
 
 clean:
-	rm -rf $(SWIGGENPYTHON_DIR)/* $(SWIGGENCPP_DIR)/gravity_wrap.* ./swig
+	rm -rf $(PYTHONSRC_DIR)/* $(SWIGGENCPP_DIR)/gravity_wrap.* ./swig
 	make -f cpp_makefile clean
