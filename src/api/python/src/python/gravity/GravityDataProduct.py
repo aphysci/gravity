@@ -17,6 +17,7 @@
  
 import traceback
 
+from google.protobuf import message
 from GravityDataProductPB_pb2 import GravityDataProductPB
 
 class GravityDataProduct:
@@ -30,7 +31,7 @@ class GravityDataProduct:
             try:
                 self.__gdp.MergeFromString(data)
             except Exception as e:
-                raise AttributeError("Error loading data from given GravityDataProduct; \nCaused by:\n {}".format(traceback.format_exc(e)))
+                raise AttributeError("Error loading GravityDataProduct from given data; \nCaused by:\n {}".format(traceback.format_exc(e)))
         
     def getGravityTimestamp(self):
         return self.__gdp.timestamp
@@ -44,8 +45,73 @@ class GravityDataProduct:
     def setTimestamp(self, ts):
         self.__gdp.timestamp = ts
         
+    def getDataProductID(self):
+        return self.__gdp.dataProductID
     
+    def setSoftwareVersion(self, sv):
+        self.__gdp.softwareVersion = sv
+        
+    def getSoftwareVersion(self):
+        return self.__gdp.softwareVersion
     
+    def setData(self, data):
+        if isinstance(data, message.Message):
+            self.__gdp.data = data.SerializeToString()
+        elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
+            self.__gdp.data = str(data)
+        else:
+            raise AttributeError("Invalid type for data ({}) - must be a Protobuf or a bytearray/bytes/str".format(type(data)))
+        
+    def getData(self):
+        if self.__gdp.data is None:
+            return None
+        return str(self.__gdp.data)
     
+    def getDataSize(self):
+        if self.__gdp.data is None:
+            return 0
+        return len(self.__gdp.data)
+    
+    def populateMessage(self, data):
+        try:
+            data.MergeFrom(self.__gdp.data)
+        except Exception as e:
+            raise AttributeError("Error populating given Protobuf; \nCaused by:\n {}".format(traceback.format_exc(e)))
+        
+    def getSize(self):
+        return len(self.__gdp.SerializeToString())
+        
+    def parseFromArray(self, data):
+        try:
+            self.__gdp.MergeFromString(data)
+        except Exception as e:
+            raise AttributeError("Error loading GravityDataProduct from given data; \nCaused by:\n {}".format(traceback.format_exc(e)))
+
+    def serializeToArray(self):
+        return self.__gdp.SerializeToString()
+    
+    def setComponentID(self, componentID):
+        self.__gdp.componentID = componentID
+        
+    def getComponentID(self):
+        return self.__gdp.componentID
+    
+    def setDomain(self, domain):
+        self.__gdp.domain = domain
+        
+    def getDomain(self):
+        return self.__gdp.domain
+    
+    def getFutureSocketUrl(self):
+        return self.__gdp.future_socket_url
+    
+    def isFutureResponse(self):
+        return self.__gdp.future_response
+    
+    def isCachedDataproduct(self):
+        return self.__gdp.HasField('is_cached_dataproduct') and self.__gdp.is_cached_dataproduct
+    
+    def setIsCachedDataproduct(self, isCachedDataproduct):
+        self.__gdp.is_cached_dataproduct = isCachedDataproduct
     
     

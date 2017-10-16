@@ -44,7 +44,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 	   virtual ~CPPGravityServiceProvider();
-	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
+//	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener
@@ -115,11 +115,11 @@ namespace gravity {
 	    
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 	
-	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
+//	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
 	
-	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
-		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
-	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+//	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
+//		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
+//	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 	
 	    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
 	    		const gravity::GravityServiceProvider& server);
@@ -146,10 +146,11 @@ namespace gravity {
 		GravityReturnCode clearSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				const std::string& filter="", const std::string& domain="");
 	};
-	
+/*	
 	class GravitySubscriber {
 	public:
 	    ~GravitySubscriber();
 	    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) = 0;
 	};
+*/	
 };
