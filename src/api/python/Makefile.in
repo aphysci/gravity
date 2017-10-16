@@ -42,7 +42,7 @@ SWIGSRC_DIR=src/swig
 #C++ Wrapper source dir
 SWIGGENCPP_DIR=src/cpp
 #Python wrapper source dir
-PYTHONSRC_DIR=src/python
+PYTHONSRC_DIR=src/python/gravity
 
 #Protobuf sources (.proto)
 PROTO_DIR=../protobufs
@@ -75,5 +75,5 @@ libgravity_wrap: swig
 	make -f cpp_makefile
 
 clean:
-	rm -rf $(PYTHONSRC_DIR)/* $(SWIGGENCPP_DIR)/gravity_wrap.* ./swig
+	rm -rf $(PYTHONSRC_DIR)/gravity.py $(PYTHONSRC_DIR)/*_pb2.py $(SWIGGENCPP_DIR)/gravity_wrap.* ./swig
 	make -f cpp_makefile clean
