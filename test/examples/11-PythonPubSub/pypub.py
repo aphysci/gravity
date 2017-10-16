@@ -2,6 +2,7 @@
 import time
 import gravity
 from gravity import GravityNode, GravityDataProduct, gravity
+from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
 gn = GravityNode()
 while gn.init("PyPub") != gravity.SUCCESS:
@@ -9,8 +10,11 @@ while gn.init("PyPub") != gravity.SUCCESS:
     time.sleep(1)
 gn.registerDataProduct("PythonGDP", gravity.TCP)
 
+counterPB = BasicCounterDataProductPB()
+counterPB.count = 1
+
 gdp = GravityDataProduct("PythonGDP")
-gdp.setData(bytearray("12345"))
+gdp.setData(counterPB)
 gn.publish(gdp)
 
 gn.waitForExit()

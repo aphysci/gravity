@@ -29,7 +29,7 @@ then
 
    export PATH=$PATH:../../../src/components/cpp/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
-   export PYTHONPATH=$PYTHONPATH:../../../lib
+   export PYTHONPATH=$PYTHONPATH:../../../lib:../protobuf
 
    ServiceDirectory &
    SDPID=$!
