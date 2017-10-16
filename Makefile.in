@@ -140,8 +140,8 @@ distributable: components
 
 	@if test ${WITHOUT_PYTHON} = no;\
 	then \
-		cp src/api/python/*.so lib; \
 		cp -r src/api/python/src/python/gravity lib; \
+		cp src/api/python/*.so lib/gravity; \
 	fi
 
 	echo building Gravity tarball...
