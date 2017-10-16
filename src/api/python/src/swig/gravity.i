@@ -19,9 +19,10 @@
 
 %include "std_string.i" // for std::string typemaps
 
-%module(directors="1") gravity
+%module(directors="1", naturalvar="1") gravity
 
 %{
+#include <iostream>
 #include "GravityNode.h"
 #include "FutureResponse.h"
 //#include "CPPGravitySubscriber.h"
