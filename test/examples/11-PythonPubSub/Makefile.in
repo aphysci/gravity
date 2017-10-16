@@ -1,0 +1,73 @@
+#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#**
+#** Gravity is free software; you can redistribute it and/or modify
+#** it under the terms of the GNU Lesser General Public License as published by
+#** the Free Software Foundation; either version 3 of the License, or
+#** (at your option) any later version.
+#**
+#** This program is distributed in the hope that it will be useful,
+#** but WITHOUT ANY WARRANTY; without even the implied warranty of
+#** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#** GNU Lesser General Public License for more details.
+#**
+#** You should have received a copy of the GNU Lesser General Public
+#** License along with this program;
+#** If not, see <http://www.gnu.org/licenses/>.
+#**
+
+# @configure_input@
+
+# Package-related substitution variables
+package          = @PACKAGE_NAME@
+version          = @PACKAGE_VERSION@
+tarname          = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix           = @prefix@
+exec_prefix      = @exec_prefix@
+bindir           = @bindir@
+
+# Tool-related substitution variables
+CC               = @CC@
+CXX              = @CXX@
+DEFS             = @DEFS@
+LIBS             = @LIBS@
+AC_CFLAGS        = @CFLAGS@
+AC_CPPFLAGS      = @CPPFLAGS@
+INSTALL          = @INSTALL@
+INSTALL_DATA     = @INSTALL_DATA@
+INSTALL_PROGRAM  = @INSTALL_PROGRAM@
+INSTALL_SCRIPT   = @INSTALL_SCRIPT@
+JAVAPROTOBUF_DIR = @JAVAPROTOBUF_DIR@
+AC_LDFLAGS       = @LDFLAGS@
+LEX              = @LEX@
+PROTOC           = @PROTOC@
+YACC             = @YACC@
+ZMQ_LIB_DIR      = @ZEROMQ_LIBDIR@
+
+GRAVITY_ROOT_DIR=../../..
+
+PROTOBUF_SRC_DIR=../protobuf
+PROTO_SRC=$(wildcard $(PROTOBUF_SRC_DIR)/*.proto)
+PROTO_PYTHON=$(patsubst $(PROTOBUF_SRC_DIR)/%.proto,$(PROTOBUF_SRC_DIR)/%.py,$(PROTO_SRC))
+
+SYSTEM:=$(strip $(shell uname -s))
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+linux: all;
+else
+        ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
+
+$(PROTOBUF_SRC_DIR)/%.py:$(PROTOBUF_SRC_DIR)/%.proto
+	@echo "Building " $<
+	@$(PROTOC) --proto_path=$(PROTOBUF_SRC_DIR) --python_out=$(PROTOBUF_SRC_DIR) $<
+
+all: $(PROTO_PYTHON)
+
+run: all
+	./run.sh
+
+clean:
+	rm -rf $(PROTO_PYTHON)
