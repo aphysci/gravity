@@ -81,13 +81,13 @@ class GravityDataProduct:
     def getSize(self):
         return len(self.__gdp.SerializeToString())
         
-    def parseFromArray(self, data):
+    def parseFromString(self, data):
         try:
             self.__gdp.MergeFromString(data)
         except Exception as e:
             raise AttributeError("Error loading GravityDataProduct from given data; \nCaused by:\n {}".format(traceback.format_exc(e)))
 
-    def serializeToArray(self):
+    def serializeToString(self):
         return self.__gdp.SerializeToString()
     
     def setComponentID(self, componentID):

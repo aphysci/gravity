@@ -15,6 +15,8 @@ counterPB.count = 1
 
 gdp = GravityDataProduct("PythonGDP")
 gdp.setData(counterPB)
+print "gdp = " + str(gdp)
+
 gn.publish(gdp)
 
 gn.waitForExit()

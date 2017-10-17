@@ -24,6 +24,24 @@
 //%feature("director") gravity::CPPGravityHeartbeatListener;
 //%feature("director") gravity::CPPGravitySubscriptionMonitor;
 
+// We need to defer the type check here.  It will be handled by the typemap(in)
+%typemap(typecheck) const gravity::GravityDataProduct&  {
+	$1 = 1;
+}
+
+// This is where the conversion from Python GDP to C++ occurs
+%typemap(in) const gravity::GravityDataProduct&  {
+	PyObject* pyStr = PyObject_CallMethod($input, (char*)"serializeToString", NULL);
+	char* data = PyString_AsString(pyStr);
+    int length = (int) PyString_Size(pyStr);
+	$1 = new gravity::GravityDataProduct((void *)data, length);
+}
+
+// delete the GDP allocated above 
+%typemap(freearg) const gravity::GravityDataProduct&  {
+    if ($1 != 0) delete $1;
+}
+
 // This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
 // sync with the Gravity API.
 namespace gravity {
@@ -44,7 +62,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 	   virtual ~CPPGravityServiceProvider();
-//	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
+	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener
@@ -115,7 +133,7 @@ namespace gravity {
 	    
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 	
-//	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
+	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
 	
 //	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 //		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
