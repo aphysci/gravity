@@ -18,6 +18,7 @@
 
 
 // this turns on director features for CPPGravitySubscriber
+%feature("director") gravity::GravitySubscriber;
 //%feature("director") gravity::CPPGravitySubscriber;
 //%feature("director") gravity::CPPGravityRequestor;
 //%feature("director") gravity::CPPGravityServiceProvider;
@@ -164,11 +165,11 @@ namespace gravity {
 		GravityReturnCode clearSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				const std::string& filter="", const std::string& domain="");
 	};
-/*	
+
 	class GravitySubscriber {
 	public:
 	    ~GravitySubscriber();
-	    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) = 0;
+	    virtual void subscriptionFilled(const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts) = 0;
 	};
-*/	
+	
 };

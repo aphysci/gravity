@@ -15,5 +15,5 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gravity import GravityNode
+from gravity import GravityNode, GravitySubscriber
 from GravityDataProduct import GravityDataProduct 
