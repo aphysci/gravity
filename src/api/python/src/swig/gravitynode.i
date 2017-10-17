@@ -16,6 +16,8 @@
  **
  */
 
+//%include "boost_shared_ptr.i"
+//%include "std_vector.i"
 
 // this turns on director features for CPPGravitySubscriber
 %feature("director") gravity::GravitySubscriber;
@@ -41,6 +43,35 @@
 // delete the GDP allocated above 
 %typemap(freearg) const gravity::GravityDataProduct&  {
     if ($1 != 0) delete $1;
+}
+
+
+%typemap(directorout) const std::vector< shared_ptr<gravity::GravityDataProduct> >& {
+    int directorout = 0;
+}
+
+
+%typemap(directorin) const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts {
+    $input = PyList_New(dataProducts.size());
+    size_t maxSize = 0;
+    for (unsigned int i = 0; i < dataProducts.size(); i++)
+    {
+        size_t s = dataProducts.at(i)->getSize();
+        if (s > maxSize) maxSize = s;
+    }
+    char* buffer = new char[maxSize];
+    for (unsigned int i = 0; i < dataProducts.size(); i++)
+    {
+        shared_ptr<gravity::GravityDataProduct> dataProduct = dataProducts.at(i);
+        dataProduct->serializeToArray(buffer);
+        PyObject* pyStr = PyString_FromStringAndSize(buffer, dataProduct->getSize());
+        PyList_SetItem($input, i, pyStr);
+    }
+    delete[] buffer;
+}
+
+%typemap(directorargout) const std::vector< shared_ptr<gravity::GravityDataProduct> >& {
+    int directorargout = 0;
 }
 
 // This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in

@@ -5,8 +5,19 @@ from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
 class MySubscriber(GravitySubscriber):
+    # Don't need to declare your own __init__, but make sure to call 
+    # GravitySubscriber.__init__ (super) - therein lies magical SWIG code
+    def __init__(self):
+        super(MySubscriber, self).__init__()
+
     def subscriptionFilled(self, *args):
         print "in my sub filled!"
+        gdpStrs = args[0]
+        for gdpStr in gdpStrs:
+            print type(gdpStr)
+            print gdpStr
+            gdpSub = GravityDataProduct(data=gdpStr)
+            print gdpSub.getDataProductID()
 
 
 mySub = MySubscriber()
@@ -23,7 +34,6 @@ counterPB.count = 1
 
 gdp = GravityDataProduct("PythonGDP")
 gdp.setData(counterPB)
-print "gdp = " + str(gdp)
 
 gn.publish(gdp)
 
