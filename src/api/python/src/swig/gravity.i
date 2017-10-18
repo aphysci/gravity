@@ -24,6 +24,7 @@
 %{
 // not required, but helpful for debugging SWIG C++ code
 #include <iostream>
+
 #include "GravityNode.h"
 #include "FutureResponse.h"
 using namespace std::tr1;
