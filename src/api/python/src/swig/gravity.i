@@ -22,18 +22,12 @@
 %module(directors="1", naturalvar="1") gravity
 
 %{
+// not required, but helpful for debugging SWIG C++ code
 #include <iostream>
 #include "GravityNode.h"
 #include "FutureResponse.h"
-//#include "CPPGravitySubscriber.h"
-//#include "CPPGravityServiceProvider.h"
-//#include "CPPGravityRequestor.h"
-//#include "CPPGravityHeartbeatListener.h"
-//#include "CPPGravityLogger.h"
-//#include "CPPGravitySubscriptionMonitor.h"
 using namespace std::tr1;
 %}
 
-//%include "modulecode.i"
-//%include "logger.i"
 %include "gravitynode.i"
+%include "gravitysubscriber.i"

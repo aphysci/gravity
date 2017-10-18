@@ -7,4 +7,4 @@
 bin
 cpp_makefile
 Makefile
-swig
+/swig
