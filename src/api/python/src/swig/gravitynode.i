@@ -19,20 +19,25 @@
 //%include "boost_shared_ptr.i"
 //%include "std_vector.i"
 
-// this turns on director features for CPPGravitySubscriber
+// this turns on director features for GravitySubscriber
 %feature("director") gravity::GravitySubscriber;
-//%feature("director") gravity::CPPGravitySubscriber;
 //%feature("director") gravity::CPPGravityRequestor;
 //%feature("director") gravity::CPPGravityServiceProvider;
 //%feature("director") gravity::CPPGravityHeartbeatListener;
 //%feature("director") gravity::CPPGravitySubscriptionMonitor;
+
+// all imports required in the generated Python SWIG code
+%pythonbegin %{
+import abc, logging
+from GravityDataProduct import GravityDataProduct 
+%}
 
 // We need to defer the type check here.  It will be handled by the typemap(in)
 %typemap(typecheck) const gravity::GravityDataProduct&  {
 	$1 = 1;
 }
 
-// This is where the conversion from Python GDP to C++ occurs
+// This is where the conversion from Python GDP to C++ GDP occurs
 %typemap(in) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"serializeToString", NULL);
 	char* data = PyString_AsString(pyStr);
@@ -40,41 +45,12 @@
 	$1 = new gravity::GravityDataProduct((void *)data, length);
 }
 
-// delete the GDP allocated above 
+// delete the C++ GDP allocated above 
 %typemap(freearg) const gravity::GravityDataProduct&  {
     if ($1 != 0) delete $1;
 }
 
-
-%typemap(directorout) const std::vector< shared_ptr<gravity::GravityDataProduct> >& {
-    int directorout = 0;
-}
-
-
-%typemap(directorin) const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts {
-    $input = PyList_New(dataProducts.size());
-    size_t maxSize = 0;
-    for (unsigned int i = 0; i < dataProducts.size(); i++)
-    {
-        size_t s = dataProducts.at(i)->getSize();
-        if (s > maxSize) maxSize = s;
-    }
-    char* buffer = new char[maxSize];
-    for (unsigned int i = 0; i < dataProducts.size(); i++)
-    {
-        shared_ptr<gravity::GravityDataProduct> dataProduct = dataProducts.at(i);
-        dataProduct->serializeToArray(buffer);
-        PyObject* pyStr = PyString_FromStringAndSize(buffer, dataProduct->getSize());
-        PyList_SetItem($input, i, pyStr);
-    }
-    delete[] buffer;
-}
-
-%typemap(directorargout) const std::vector< shared_ptr<gravity::GravityDataProduct> >& {
-    int directorargout = 0;
-}
-
-// This is where we actually declare the types and methods that will be made available in Java.  This section must be kept in
+// This is where we actually declare the types and methods that will be made available in Python.  This section must be kept in
 // sync with the Gravity API.
 namespace gravity {
 
@@ -197,10 +173,62 @@ namespace gravity {
 				const std::string& filter="", const std::string& domain="");
 	};
 
+    // This does most of the work to convert the C++ Vector of GDP's to Python objects.  Instead of trying to instantiate a
+    // Python GravityDataProduct in this C++ code, it seemed cleaner to leave that to the Python code (defined below).  This C++
+    // code will create a Python list of Python string objects containing a binary serialization of the GDP protobuf.  
+	%typemap(directorin) const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts {
+	    $input = PyList_New(dataProducts.size());
+	    size_t maxSize = 0;
+	    for (unsigned int i = 0; i < dataProducts.size(); i++)
+	    {
+	        size_t s = dataProducts.at(i)->getSize();
+	        if (s > maxSize) maxSize = s;
+	    }
+	    char* buffer = new char[maxSize];
+	    for (unsigned int i = 0; i < dataProducts.size(); i++)
+	    {
+	        shared_ptr<gravity::GravityDataProduct> dataProduct = dataProducts.at(i);
+	        dataProduct->serializeToArray(buffer);
+	        PyObject* pyStr = PyString_FromStringAndSize(buffer, dataProduct->getSize());
+	        PyList_SetItem($input, i, pyStr);
+	    }
+	    delete[] buffer;
+	}
+
+    // rename the method defined in the C++ GravitySubscriber so that the callback from C++ will invoke the subscriptionFilledBinary defined below
+    %rename(subscriptionFilledBinary) GravitySubscriber::subscriptionFilled;
+    
+    // This says subscriptionFilled, but it will show up as subscriptionFilledBinary in the generated code due to the rename above.  This
+    // defines the method that will be invoked by the C++ callback.  The C++ code (defined above) converts everything to Python objects, but
+    // I think this is the cleanest way to generate GravityDataProduct objects from the binary strings created in the C++ code.
+    %feature("shadow") GravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts) %{
+    
+        # DO NOT override or alter this method. It is here to convert between a list of serialized, binary Python strings 
+        # representing GravityDataProduct's to a list of GravityDataProduct Python objects.
+        def subscriptionFilledBinary(self, *args):
+            gdpList = []
+            for byteStr in args[0]:
+                try:
+                    gdpList.append(GravityDataProduct(data=byteStr))
+                except Exception as e:
+                    logging.exception("Error creating GDP from byte array")
+            try:
+                self.subscriptionFilled(gdpList)
+            except Exception as e:
+                logging.exception("Exception caught calling client subscriptionFilled")
+    %}
 	class GravitySubscriber {
 	public:
-	    ~GravitySubscriber();
+	    virtual ~GravitySubscriber();
 	    virtual void subscriptionFilled(const std::vector< shared_ptr<gravity::GravityDataProduct> >& dataProducts) = 0;
+	    
+	%pythoncode %{
+	    # The above subscriptionFilled will be renamed as subscriptionFilledBinary, and will be invoked from C++ when data is available.
+	    # Python GravitySubscriber child classes should only override the abstract method below, which will be called with a list of
+	    # GravityDataProduct objects.
+	    @abc.abstractmethod
+	    def subscriptionFilled(self, dataProducts): pass
+    %}
 	};
 	
 };

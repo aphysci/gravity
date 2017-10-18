@@ -10,14 +10,12 @@ class MySubscriber(GravitySubscriber):
     def __init__(self):
         super(MySubscriber, self).__init__()
 
-    def subscriptionFilled(self, *args):
+    def subscriptionFilled(self, dataProducts):
         print "in my sub filled!"
-        gdpStrs = args[0]
-        for gdpStr in gdpStrs:
-            print type(gdpStr)
-            print gdpStr
-            gdpSub = GravityDataProduct(data=gdpStr)
-            print gdpSub.getDataProductID()
+        for gdp in dataProducts:
+            print type(gdp)
+            print gdp
+            print gdp.getDataProductID()
 
 
 mySub = MySubscriber()
