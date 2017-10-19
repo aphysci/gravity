@@ -26,7 +26,7 @@ class GravityDataProduct:
         if (dataProductID is not None and data is not None) or (dataProductID is None and data is None):
             raise AttributeError("Exactly one of [dataProductID, data] must be specified")
         if dataProductID is not None:
-            self.__gdp.dataProductID = dataProductID
+            self.__gdp.dataProductID = str(dataProductID)
         else:
             try:
                 self.__gdp.MergeFromString(data)
@@ -46,13 +46,13 @@ class GravityDataProduct:
         self.__gdp.timestamp = ts
         
     def getDataProductID(self):
-        return self.__gdp.dataProductID
+        return str(self.__gdp.dataProductID)
     
     def setSoftwareVersion(self, sv):
-        self.__gdp.softwareVersion = sv
+        self.__gdp.softwareVersion = str(sv)
         
     def getSoftwareVersion(self):
-        return self.__gdp.softwareVersion
+        return str(self.__gdp.softwareVersion)
     
     def setData(self, data):
         if isinstance(data, message.Message):
@@ -91,19 +91,19 @@ class GravityDataProduct:
         return self.__gdp.SerializeToString()
     
     def setComponentID(self, componentID):
-        self.__gdp.componentID = componentID
+        self.__gdp.componentID = str(componentID)
         
     def getComponentID(self):
-        return self.__gdp.componentID
+        return str(self.__gdp.componentID)
     
     def setDomain(self, domain):
-        self.__gdp.domain = domain
+        self.__gdp.domain = str(domain)
         
     def getDomain(self):
-        return self.__gdp.domain
+        return str(self.__gdp.domain)
     
     def getFutureSocketUrl(self):
-        return self.__gdp.future_socket_url
+        return str(self.__gdp.future_socket_url)
     
     def isFutureResponse(self):
         return self.__gdp.future_response

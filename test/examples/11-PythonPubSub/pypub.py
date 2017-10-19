@@ -1,7 +1,7 @@
 
 import time
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
 class MySubscriber(GravitySubscriber):
@@ -11,18 +11,19 @@ class MySubscriber(GravitySubscriber):
         super(MySubscriber, self).__init__()
 
     def subscriptionFilled(self, dataProducts):
-        print "in my sub filled!"
+        Log.message("in my sub filled!")
         for gdp in dataProducts:
-            print type(gdp)
-            print gdp
-            print gdp.getDataProductID()
+            Log.message(str(type(gdp)))
+            Log.message(str(gdp))
+            Log.message(str(type(gdp.getDataProductID())))
+            Log.message(gdp.getDataProductID())
 
 
 mySub = MySubscriber()
 
 gn = GravityNode()
 while gn.init("PyPub") != gravity.SUCCESS:
-    print "failed to init, retrying..."
+    Log.warning("failed to init, retrying...")
     time.sleep(1)
 gn.registerDataProduct("PythonGDP", gravity.TCP)
 gn.subscribe("PythonGDP", mySub)
