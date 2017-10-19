@@ -15,5 +15,5 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gravity import GravityNode, GravitySubscriber, Log, Logger
+from gravity import GravityNode, GravitySubscriber, GravityRequestor, Log, Logger
 from GravityDataProduct import GravityDataProduct 

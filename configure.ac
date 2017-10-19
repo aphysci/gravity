@@ -282,7 +282,9 @@ AC_CONFIG_FILES([Makefile
                  test/examples/10-Archiving/Makefile
                  test/examples/10-Archiving/run.sh
                  test/examples/11-PythonPubSub/run.sh
-                 test/examples/11-PythonPubSub/Makefile])
+                 test/examples/11-PythonPubSub/Makefile
+                 test/examples/12-PythonBasicService/run.sh
+                 test/examples/12-PythonBasicService/Makefile])
 
 AC_OUTPUT
 

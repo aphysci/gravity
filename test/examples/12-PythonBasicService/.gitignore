@@ -1,0 +1,4 @@
+run.sh
+*.log
+Makefile
+*~

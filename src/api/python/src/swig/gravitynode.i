@@ -100,8 +100,8 @@ namespace gravity {
 	
 	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
 	
-//	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
-//		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
+	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
+		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
 //	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 	
 	    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
