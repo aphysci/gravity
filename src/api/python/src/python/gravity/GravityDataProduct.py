@@ -58,14 +58,14 @@ class GravityDataProduct:
         if isinstance(data, message.Message):
             self.__gdp.data = data.SerializeToString()
         elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
-            self.__gdp.data = str(data)
+            self.__gdp.data = data
         else:
             raise AttributeError("Invalid type for data ({}) - must be a Protobuf or a bytearray/bytes/str".format(type(data)))
         
     def getData(self):
         if self.__gdp.data is None:
             return None
-        return str(self.__gdp.data)
+        return self.__gdp.data
     
     def getDataSize(self):
         if self.__gdp.data is None:
@@ -74,7 +74,7 @@ class GravityDataProduct:
     
     def populateMessage(self, data):
         try:
-            data.MergeFrom(self.__gdp.data)
+            data.MergeFromString(self.__gdp.data)
         except Exception as e:
             raise AttributeError("Error populating given Protobuf; \nCaused by:\n {}".format(traceback.format_exc(e)))
         

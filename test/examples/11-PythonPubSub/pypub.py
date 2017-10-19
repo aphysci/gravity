@@ -12,11 +12,14 @@ class MySubscriber(GravitySubscriber):
 
     def subscriptionFilled(self, dataProducts):
         Log.message("in my sub filled!")
+        counterPB = BasicCounterDataProductPB()
         for gdp in dataProducts:
             Log.message(str(type(gdp)))
             Log.message(str(gdp))
             Log.message(str(type(gdp.getDataProductID())))
             Log.message(gdp.getDataProductID())
+            gdp.populateMessage(counterPB)
+            Log.message("receive counter with value = "+str(counterPB.count))
 
 
 mySub = MySubscriber()
@@ -29,11 +32,11 @@ gn.registerDataProduct("PythonGDP", gravity.TCP)
 gn.subscribe("PythonGDP", mySub)
 
 counterPB = BasicCounterDataProductPB()
-counterPB.count = 1
-
 gdp = GravityDataProduct("PythonGDP")
-gdp.setData(counterPB)
-
-gn.publish(gdp)
+for i in range (1, 50):
+    counterPB.count = i
+    gdp.setData(counterPB)
+    gn.publish(gdp)
+    time.sleep(1)
 
 gn.waitForExit()

@@ -37,7 +37,7 @@ then
    $PYTHON pypub.py &
    PUBPID=$!
 
-   sleep 2
+   sleep 20
 
    kill $SDPID
    kill $PUBPID

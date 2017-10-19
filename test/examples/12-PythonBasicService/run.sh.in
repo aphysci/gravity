@@ -34,12 +34,8 @@ then
    ServiceDirectory &
    SDPID=$!
    
-   $PYTHON requestor.py &
-   REQPID=$!
-
-   sleep 2
+   $PYTHON requestor.py
 
    kill $SDPID
-   kill $REQPID
 fi
 

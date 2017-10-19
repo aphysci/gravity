@@ -34,3 +34,4 @@ using namespace std::tr1;
 %include "gravitylogger.i"
 %include "gravitysubscriber.i"
 %include "gravityrequestor.i"
+%include "gravityprovider.i"

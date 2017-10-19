@@ -1,21 +1,48 @@
 
 import time
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, Log
-from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
+from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, GravityServiceProvider, Log
+from Multiplication_pb2 import MultiplicationOperandsPB, MultiplicationResultPB
 
+done = False
 class MyRequestor(GravityRequestor):
-    def requestFilled(self, serviceID, requestID, dataProducts):
-        Log.message("made it to request filled!")
+    def requestFilled(self, serviceID, requestID, response):
+        multResponse = MultiplicationResultPB()
+        response.populateMessage(multResponse)
+        Log.message("made it to request filled with request GDP ID = "+response.getDataProductID() +" and response = " + str(multResponse.result))
+        done = True
+
+class MyProvider(GravityServiceProvider):
+    def request(self, serviceID, dataProduct):
+        Log.message("made it to my request!")
+        Log.message("for serviceID = "+serviceID)
+        operands = MultiplicationOperandsPB()
+        Log.message(str(type(operands)))
+        dataProduct.populateMessage(operands)
+        Log.message("have operands = "+str([operands.multiplicand_a, operands.multiplicand_b]))
+
+        multResponse = MultiplicationResultPB()
+        multResponse.result = operands.multiplicand_a * operands.multiplicand_b
+        gdp = GravityDataProduct("MultResponse")
+        gdp.setData(multResponse)
+        Log.message("returning response with result = "+str(multResponse.result))
+        return gdp
 
 gn = GravityNode()
 while gn.init("PyPub") != gravity.SUCCESS:
     Log.warning("failed to init, retrying...")
     time.sleep(1)
 
+myProv = MyProvider()
+gn.registerService("Multiplication", gravity.TCP, myProv)
+
+operands = MultiplicationOperandsPB()
+operands.multiplicand_a = 3
+operands.multiplicand_b = 4
+gdp = GravityDataProduct("MultRequest")
+gdp.setData(operands)
 myReq = MyRequestor()
+gn.request("Multiplication", gdp, myReq)
 
-gdp = GravityDataProduct("MyRequest")
-gn.request("MyService", gdp, myReq)
-
-gn.waitForExit()
+while not done:
+    time.sleep(1)
