@@ -10,6 +10,7 @@ class MyRequestor(GravityRequestor):
         multResponse = MultiplicationResultPB()
         response.populateMessage(multResponse)
         Log.message("made it to request filled with request GDP ID = "+response.getDataProductID() +" and response = " + str(multResponse.result))
+        global done
         done = True
 
 class MyProvider(GravityServiceProvider):
@@ -29,7 +30,7 @@ class MyProvider(GravityServiceProvider):
         return gdp
 
 gn = GravityNode()
-while gn.init("PyPub") != gravity.SUCCESS:
+while gn.init("PyRequest") != gravity.SUCCESS:
     Log.warning("failed to init, retrying...")
     time.sleep(1)
 
