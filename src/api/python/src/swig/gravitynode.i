@@ -23,13 +23,16 @@ from GravityDataProduct import GravityDataProduct
 %}
 
 // We need to defer the type check here.  It will be handled by the typemap(in) below
-%typemap(typecheck) const gravity::GravityDataProduct&  {
-	$1 = 1;
+// give this type the highest precedence for comparison purposes
+%typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const gravity::GravityDataProduct&  {
+	PyObject* pyStr = PyObject_CallMethod($input, (char*)"getDataProductID", NULL);
+	$1 = pyStr ? 1 : 0;
 }
 
 // This is where the conversion from Python GDP to C++ GDP occurs
 %typemap(in) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"serializeToString", NULL);
+	if (!pyStr) SWIG_fail;
 	char* data = PyString_AsString(pyStr);
     int length = (int) PyString_Size(pyStr);
 	$1 = new gravity::GravityDataProduct((void *)data, length);
