@@ -27,6 +27,7 @@ from GravityDataProduct import GravityDataProduct
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"getDataProductID", NULL);
 	$1 = pyStr ? 1 : 0;
+	Py_XDECREF(pyStr);
 }
 
 // This is where the conversion from Python GDP to C++ GDP occurs
@@ -36,6 +37,7 @@ from GravityDataProduct import GravityDataProduct
 	char* data = PyString_AsString(pyStr);
     int length = (int) PyString_Size(pyStr);
 	$1 = new gravity::GravityDataProduct((void *)data, length);
+	Py_XDECREF(pyStr);
 }
 
 // delete the C++ GDP allocated above 
