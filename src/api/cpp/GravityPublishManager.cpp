@@ -253,14 +253,13 @@ void GravityPublishManager::start()
 						int size = (*iter)->size;
 						//Deserialize cache bytes to a data product and mark cached
 						GravityDataProduct dataProduct(bytes, size);
-						int oldDataSize = dataProduct.getDataSize();
 						Log::trace("Marking %s as cached...", dataProduct.getDataProductID().c_str());
 						dataProduct.setIsCachedDataproduct(true);
 						int newSize = dataProduct.getSize();
 						//Serialize back to send over socket
 						char* newBytes = new char[newSize];
 						dataProduct.serializeToArray(newBytes);						
-						Log::trace("Publishing data product %S..., Which is cached? %d", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct());
+						Log::trace("Publishing data product %s..., Which is cached? %s", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct() ? "true" : "false");
 				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);						
 					}
 				}
