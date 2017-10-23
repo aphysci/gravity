@@ -105,18 +105,22 @@ namespace gravity {
 	
 	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
-//	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+
+/*  Not yet implemented
+	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+*/
 	
 	    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
 	    		const gravity::GravityServiceProvider& server);
 	    GravityReturnCode unregisterService(const std::string& serviceID);
-	
+
+/*	Not yet implemented
 	    GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
 	    GravityReturnCode stopHeartbeat();
 	    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
 			const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 		GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID, const std::string &domain = "");
-	
+*/	
 	    std::string getStringParam(std::string key, std::string default_value = "");
 	    int getIntParam(std::string key, int default_value = -1);
 	    double getFloatParam(std::string key, double default_value = 0.0);
@@ -124,12 +128,14 @@ namespace gravity {
 	    std::string getComponentID();
 		std::string getIP();
 	    std::string getDomain();
-	
+
+/*	Not yet implemented
 	    shared_ptr<gravity::FutureResponse> createFutureResponse();
 		GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 		GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				int milliSecondTimeout, const std::string& filter="", const std::string& domain="");
 		GravityReturnCode clearSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				const std::string& filter="", const std::string& domain="");
+*/
 	};
 };

@@ -37,6 +37,7 @@ while gn.init("PyRequest") != gravity.SUCCESS:
 myProv = MyProvider()
 gn.registerService("Multiplication", gravity.TCP, myProv)
 
+# Async request
 operands = MultiplicationOperandsPB()
 operands.multiplicand_a = 3
 operands.multiplicand_b = 4
@@ -47,3 +48,19 @@ gn.request("Multiplication", gdp, myReq)
 
 while not done:
     time.sleep(1)
+
+# Sync request
+# This functionality is not yet supported
+#
+#operands.multiplicand_a = 5
+#operands.multiplicand_b = 6
+#gdp.setData(operands)
+#gdpResp = gn.request("Multiplication", gdp)
+#Log.message("received GDP response")
+#multResponse = MultiplicationResultPB()
+#gdpResp.populateMessage(multResponse)
+#Log.message("made it to request filled with request GDP ID = "+gdpResp.getDataProductID() +" and response = " + str(gdpResp.result))
+
+
+
+
