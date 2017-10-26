@@ -260,7 +260,8 @@ void GravityPublishManager::start()
 						char* newBytes = new char[newSize];
 						dataProduct.serializeToArray(newBytes);						
 						Log::trace("Publishing data product %s..., Which is cached? %s", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct() ? "true" : "false");
-				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);						
+				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
+				        delete[] newBytes;
 					}
 				}
 			}
