@@ -22,7 +22,6 @@ import abc, logging
 from GravityDataProduct import GravityDataProduct 
 %}
 
-// We need to defer the type check here.  It will be handled by the typemap(in) below
 // give this type the highest precedence for comparison purposes
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"getDataProductID", NULL);
