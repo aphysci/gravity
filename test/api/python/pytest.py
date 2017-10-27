@@ -3,7 +3,7 @@ import gc
 import time
 import gravity
 from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
-from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
+from PythonTestPB_pb2 import PythonTestPB
 
 class MySubscriber(GravitySubscriber):
     # Don't need to declare your own __init__, but make sure to call 
@@ -27,18 +27,4 @@ while gn.init("PyPub") != gravity.SUCCESS:
 gn.registerDataProduct("PythonGDP", gravity.TCP)
 gn.subscribe("PythonGDP", mySub)
 
-counterPB = BasicCounterDataProductPB()
-gdp = GravityDataProduct("PythonGDP")
-for i in range (1, 5):
-    counterPB.count = i
-    gdp.setData(counterPB)
-    gn.publish(gdp)
-    gc.collect()
-    time.sleep(1)
 
-del counterPB
-del mySub
-del gn
-
-print "deleted objects"
-time.sleep(20)
