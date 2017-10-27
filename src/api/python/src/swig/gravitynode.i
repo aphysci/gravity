@@ -44,6 +44,13 @@ from GravityDataProduct import GravityDataProduct
     if ($1 != 0) delete $1;
 }
 
+%typemap(out) shared_ptr<gravity::GravityDataProduct> {
+    char* buffer = new char[$1->getSize()];
+    $1->serializeToArray(buffer);
+    $result = PyString_FromStringAndSize(buffer, $1->getSize());
+    delete[] buffer;
+}
+
 // This is where we actually declare GravityNode and the basic enums that will be made available in Python.  This section must be kept in
 // sync with the Gravity API.
 namespace gravity {
@@ -82,7 +89,9 @@ namespace gravity {
     };
 	typedef GravityTransportTypes::Types GravityTransportType;
 
-
+    // rename the request methods so that we can wrap the call in %pythoncode (below) 
+	%rename(requestBinary) GravityNode::request;
+	
 	class GravityNode {
 	public:
 	    GravityNode();
@@ -107,9 +116,22 @@ namespace gravity {
 	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
 
-/*  Not yet implemented
 	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
-*/
+	    %pythoncode %{
+            # The above request methods will both be renamed as requestBinary.  This provides a request method in the Python API that wraps the requestBinary
+            # call and converts the serialized GDP into a Python GDP in the case of the synchronous request.
+            def request(self, *args):
+                ret = self.requestBinary(*args)
+                
+                # We only need to convert the return value in the synchronous case, which means no GravityRequestor arg
+                synchronous = True
+                for arg in args:
+                    if isinstance(arg, GravityRequestor):
+                        synchronous = False
+                if synchronous:
+                    ret = GravityDataProduct(data=ret)
+                return ret
+        %}
 	
 	    GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
 	    		const gravity::GravityServiceProvider& server);
