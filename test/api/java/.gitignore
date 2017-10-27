@@ -1,2 +1,4 @@
 *.jar
 *ini
+Makefile
+test.sh
