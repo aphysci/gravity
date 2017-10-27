@@ -258,9 +258,11 @@ AC_CONFIG_FILES([Makefile
                  src/api/python/cpp_makefile
                  src/api/python/Makefile
                  test/api/java/Makefile
+                 test/api/python/Makefile
                  test/components/cpp/ServiceDirectory/test.sh
                  test/components/cpp/ServiceDirectoryReregister/test.sh
                  test/api/java/test.sh
+                 test/api/python/test.sh
                  test/examples/1-BasicDataProduct/Makefile
                  test/examples/1-BasicDataProduct/run.sh
                  test/examples/2-ProtobufDataProduct/Makefile
