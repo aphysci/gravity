@@ -460,6 +460,13 @@ GravityNode::~GravityNode()
     sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(metricsManagerSocket);
 
+    if (hbSocket != NULL)
+    {
+        stopHeartbeat();
+        sendStringMessage(hbSocket, "kill", ZMQ_DONTWAIT);
+        zmq_close(hbSocket);
+    }
+
 	// Clean up the zmq context object
     zmq_term(context);
 

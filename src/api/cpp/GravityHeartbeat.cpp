@@ -201,7 +201,11 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 					
 					lock.Unlock();
 				}
-				
+	            else if (command == "kill")
+	            {
+	                break;
+	            }
+
 				// Send ACK
 				sendStringMessage(hbSocket, "ACK", ZMQ_DONTWAIT);
     	    }
@@ -211,6 +215,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				if (errnum != EAGAIN)
 				{
 					Log::critical("Heartbeat Message Error: %s",zmq_strerror(errnum));
+					break;
 				}
 			}
 
@@ -220,7 +225,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
     }//while(true)
 
-	//This will never be reached but should be done when the thread ends.
+    zmq_close(hbSocket);
     delete params;
 
     return NULL;
@@ -280,6 +285,7 @@ void* Heartbeat(void* thread_context)
 #endif
 	}
 
+    zmq_close(heartbeatSocket);
 	// Clean up
 	delete params;
 
