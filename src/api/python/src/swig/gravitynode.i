@@ -51,6 +51,10 @@ from GravityDataProduct import GravityDataProduct
     delete[] buffer;
 }
 
+// this turns on director features for GravityHeartbeatListener
+%feature("director") gravity::GravityHeartbeatListener;
+	
+
 // This is where we actually declare GravityNode and the basic enums that will be made available in Python.  This section must be kept in
 // sync with the Gravity API.
 namespace gravity {
@@ -137,13 +141,12 @@ namespace gravity {
 	    		const gravity::GravityServiceProvider& server);
 	    GravityReturnCode unregisterService(const std::string& serviceID);
 
-/*	Not yet implemented
 	    GravityReturnCode startHeartbeat(unsigned long interval_in_microseconds);
 	    GravityReturnCode stopHeartbeat();
 	    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
 			const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 		GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID, const std::string &domain = "");
-*/	
+	
 	    std::string getStringParam(std::string key, std::string default_value = "");
 	    int getIntParam(std::string key, int default_value = -1);
 	    double getFloatParam(std::string key, double default_value = 0.0);
@@ -161,4 +164,13 @@ namespace gravity {
 				const std::string& filter="", const std::string& domain="");
 */
 	};
+	
+	class GravityHeartbeatListener
+	{
+	public:
+		virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds) = 0;
+		virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) = 0;
+		virtual ~GravityHeartbeatListener();
+	};
+	
 };

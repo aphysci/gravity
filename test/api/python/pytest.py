@@ -2,7 +2,7 @@
 import gc, sys
 import time
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, GravityRequestor, GravityServiceProvider, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log
 from PythonTestPB_pb2 import PythonTestPB
 
 ###
@@ -45,6 +45,20 @@ class TestProvider(GravityServiceProvider):
         gdp.setData(reqPB)
         return gdp
 
+class TestHBListener(GravityHeartbeatListener):
+    def __init__(self):
+        super(TestHBListener, self).__init__()
+        self.missedCount = 0
+        self.receivedCount = 0
+        
+    def MissedHeartbeat(self, componentID, microsecond_to_last_heartbeat, interval_in_microseconds):
+        Log.message("HB Listener MissedHeartbeat called")
+        self.missedCount += 1
+    
+    def ReceivedHeartbeat(self, componentID, interval_in_microseconds):
+        Log.message("HB Listener ReceivedHeartbeat called")
+        self.receivedCount += 1
+    
 
 ###
 ### Test functions
@@ -62,7 +76,7 @@ def testPubSub(gravityNode):
         pubPB.count += 1
         gdp.setData(pubPB)
         gravityNode.publish(gdp)
-        time.sleep(1)
+        time.sleep(.1)
         
     if mySub.subCount < 5:
         Log.critical("Pub/Sub failed")
@@ -105,6 +119,35 @@ def testService(gravityNode):
         testPB.count += 1
         gdp.setData(testPB)
     
+    return 0
+    
+def testHB(gravityNode):
+    hbListener = TestHBListener()
+    gravityNode.registerHeartbeatListener("PythonTest", 100000, hbListener)
+    gravityNode.startHeartbeat(100000) # .1 seconds
+    count = 0
+    while count < 10 and hbListener.receivedCount < 5:
+        count += 1
+        time.sleep(.1)
+    if hbListener.receivedCount < 5:
+        Log.critical("didn't receive enough heartbeats. Expected {}, but received {}".format(5, hbListener.receivedCount))
+        return 1
+    else:
+        Log.message("Received {} heartbeats (needed {}, but more is OK)".format(hbListener.receivedCount, 5))
+    gravityNode.stopHeartbeat()
+
+    count = 0
+    while count < 10 and hbListener.missedCount < 5:
+        count += 1
+        time.sleep(.1)
+    if hbListener.missedCount < 5:
+        Log.critical("didn't miss enough heartbeats. Expected {}, but received {}".format(5, hbListener.missedCount))
+        return 1
+    else:
+        Log.message("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
+    
+    return 0
+
 def main():
     gravityNode = GravityNode()
     count = 0
@@ -116,13 +159,17 @@ def main():
         Log.critical("Could not connect to ServiceDirectory")
         return 1
     
-    ret = testPubSub(gravityNode)
-    if ret != 0:
-        return ret
-    ret = testService(gravityNode)
+#     ret = testPubSub(gravityNode)
+#     if ret != 0:
+#         return ret
+#     ret = testService(gravityNode)
+#     if ret != 0:
+#         return ret
+    ret = testHB(gravityNode)
     if ret != 0:
         return ret
          
+    Log.message("Python tests successful!")
     return 0
 
 if __name__ == "__main__":
