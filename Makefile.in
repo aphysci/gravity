@@ -108,10 +108,10 @@ test-prep:
 	chmod 755 test/examples/11-PythonPubSub/run.sh
 	chmod 755 test/examples/12-PythonBasicService/run.sh
 
-test: test-prep components
+test: distributable test-prep components
 	./test/testall.sh
 
-distributable: components
+distributable: all components
 
 	rm -rf bin lib include
 	mkdir bin
