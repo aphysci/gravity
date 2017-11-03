@@ -74,20 +74,22 @@ if test "x$want_python" != "xno" ; then
 fi
 AS_IF([test "$PYTHON" != : -a "x$want_python" != "xno"],[WITHOUT_PYTHON=no],[WITHOUT_PYTHON=yes])
 AC_SUBST([WITHOUT_PYTHON])
-AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
-AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
-AS_IF([test -z "$PYTHON_INCLUDE"], [
-  AS_IF([test -z "$PYTHON_CONFIG"], [
-    AC_PATH_PROGS([PYTHON_CONFIG],
-                  [python$PYTHON_VERSION-config python-config],
-                  [no],
-                  [`dirname $PYTHON`])
-    AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+if test "x$want_python" != "xno" ; then
+  AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+  AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+  AS_IF([test -z "$PYTHON_INCLUDE"], [
+    AS_IF([test -z "$PYTHON_CONFIG"], [
+      AC_PATH_PROGS([PYTHON_CONFIG],
+                    [python$PYTHON_VERSION-config python-config],
+                    [no],
+                    [`dirname $PYTHON`])
+      AS_IF([test "$PYTHON_CONFIG" = no], [AC_MSG_ERROR([cannot find python-config for $PYTHON.])])
+    ])
+    AC_MSG_CHECKING([python include flags])
+    PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+    AC_MSG_RESULT([$PYTHON_INCLUDE])
   ])
-  AC_MSG_CHECKING([python include flags])
-  PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
-  AC_MSG_RESULT([$PYTHON_INCLUDE])
-])
+fi
 
 
 # Check for bison program
