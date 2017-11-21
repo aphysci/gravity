@@ -99,7 +99,7 @@ shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID
 	shared_ptr<GravityDataProduct> response(new GravityDataProduct("ConfigResponsePB"));
 	response->setData(message);
 
-	return response; //Returing the message will send it.
+	return response; //Returning the message will send it.
 }
 
 int main(int argc, const char** argv)
@@ -107,7 +107,12 @@ int main(int argc, const char** argv)
 	ConfigServer server;
 
 	GravityNode gn;
-	gn.init("ConfigServer");
+	GravityReturnCode ret = gn.init("ConfigServer");
+	while (ret != GravityReturnCodes::SUCCESS)
+	{
+	    cerr << "Failed to initialize ConfigServer, retrying..." << endl;
+	    ret = gn.init("ConfigServer");
+	}
 
 	gn.registerService("ConfigService", GravityTransportTypes::TCP, server);
 

@@ -81,8 +81,9 @@ void GravityConfigParser::ParseConfigService(GravityNode &gn)
 	int config_len = std::min(responseMessage.key_size(), responseMessage.value_size());
 	for(int i = 0; i < config_len; i++)
 	{
-		//if(key_value_map.find(responseMessage.key(i)) == key_value_map.end()) //Don't overwrite keys.
-			key_value_map[responseMessage.key(i)] = responseMessage.value(i);
+	    std::string key_lower = StringCopyToLowerCase(responseMessage.key(i));
+		if(key_value_map.find(key_lower) == key_value_map.end()) //Don't overwrite keys.
+			key_value_map[key_lower] = responseMessage.value(i);
 	}
 }
 

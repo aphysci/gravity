@@ -22,13 +22,14 @@
 PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
 ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
 
-export PATH=$PATH:../../../src/components/cpp/bin
+export PATH=$PATH:../../../src/components/cpp/ConfigServer:../../../src/components/cpp/ServiceDirectory
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
  cleanup()
 # run if user hits control-c
 {
   kill -9 $SDPID
+  kill -9 $CSPID
   exit $?
 }
 
@@ -37,6 +38,11 @@ trap cleanup SIGINT
 
 ServiceDirectory &
 SDPID=$!
+ConfigServer &
+CSPID=$!
+
+# ConfigServer needs to be up and registered before client code calls init
+sleep 20
 
 ./ConfigFileExample
 
