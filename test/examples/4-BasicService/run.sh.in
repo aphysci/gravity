@@ -25,6 +25,17 @@ ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
 export PATH=$PATH:../../../src/components/cpp/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
+ cleanup()
+# run if user hits control-c
+{
+  kill -9 $SDPID
+  kill -9 $BSPPID
+  exit $?
+}
+
+# trap keyboard interrupt (control-c)
+trap cleanup SIGINT
+
 ServiceDirectory &
 SDPID=$!
 ./BasicServiceProvider &
@@ -35,5 +46,4 @@ sleep 1
 
 ./BasicServiceRequestor
 
-kill $SDPID
-kill $BSPPID
+cleanup

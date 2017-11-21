@@ -51,7 +51,12 @@ int main()
 {
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
-	gn.init("MultiplicationRequestor");
+	GravityReturnCode ret = gn.init("MultiplicationRequestor");
+	while (ret != GravityReturnCodes::SUCCESS)
+	{
+	    Log::warning("Unable to init component, retrying...");
+	    ret = gn.init("MultiplicationRequestor");
+	}
 
 	/////////////////////////////
 	// Set up the first multiplication request
@@ -64,10 +69,20 @@ int main()
 	multRequest1.setData(params1);
 
 	// Make an Asynchronous request for multiplication
-	gn.request("Multiplication", //Service Name
-				multRequest1, //Request
-				requestor, //Object containing callback that will get the result.
-				"8 x 2"); //A string that identifies which request this is.
+	do
+	{
+        ret = gn.request("Multiplication", //Service Name
+                         multRequest1, //Request
+                         requestor, //Object containing callback that will get the result.
+                         "8 x 2"); //A string that identifies which request this is.
+        // Service may not be registered yet
+        if (ret != GravityReturnCodes::SUCCESS)
+        {
+            Log::warning("request to Multiplication service failed, retrying...");
+            gravity::sleep(1000);
+        }
+	}
+    while (ret != GravityReturnCodes::SUCCESS);
 
 	/////////////////////////////////////////
 	//Set up the second multiplication request
