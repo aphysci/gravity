@@ -19,8 +19,8 @@
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.swig.GravityNode;
+import com.aphysci.gravity.swig.GravityReturnCode;
 import com.aphysci.gravity.swig.Log;
-import com.aphysci.gravity.swig.Log.LogLevel;
 
 
 //After multiplication is requested, this class may be called with the result.
@@ -54,7 +54,11 @@ public class BasicServiceRequestor {
 	public static void main(String[] args) throws InterruptedException {
 		GravityNode gn = new GravityNode();
 		//Initialize gravity, giving this node a componentID.
-		gn.init("MultiplicationRequestor");
+		GravityReturnCode ret = gn.init("MultiplicationRequestor");
+		while (ret != GravityReturnCode.SUCCESS) {
+			Log.warning("Unable to initialize component, retrying...");
+			ret = gn.init("MultiplicationRequestor");
+		}
 
 		/////////////////////////////
 		// Set up the first multiplication request
@@ -66,11 +70,19 @@ public class BasicServiceRequestor {
 		params1.setMultiplicandB(2);
 		multRequest1.setData(params1);
 
-		// Make an Asyncronous request for multiplication
-		gn.request("Multiplication", //Service Name
-					multRequest1, //Request
-					requestor, //Object containing callback that will get the result.
-					"8 x 2"); //A string that identifies which request this is.
+		// Make an Asynchronous request for multiplication
+		do {
+			ret = gn.request("Multiplication", //Service Name
+					    	 multRequest1, //Request
+						     requestor, //Object containing callback that will get the result.
+						     "8 x 2"); //A string that identifies which request this is.
+			// Service may not be registered yet
+			if (ret != GravityReturnCode.SUCCESS)
+			{
+				Log.warning("Failed request to Multiplication, retrying...");
+				Thread.sleep(1000);
+			}
+		} while (ret != GravityReturnCode.SUCCESS);
 
 		/////////////////////////////////////////
 		//Set up the second multiplication request
