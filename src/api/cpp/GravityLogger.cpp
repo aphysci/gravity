@@ -18,7 +18,6 @@
 
 #include "GravityNode.h"
 #include "GravityLogger.h"
-#include "GravitySemaphore.h"
 #include "protobuf/GravityLogMessagePB.pb.h"
 #include <stdarg.h>
 #include <time.h>
@@ -54,7 +53,6 @@ protected:
     FILE* log_file;
     string component_id;
     bool close_file_after_write;
-    Semaphore lock;
 };
 
 FileLogger::FileLogger(const string& log_dir, const string& comp_id, bool close_file)
@@ -111,7 +109,6 @@ void FileLogger::Log(int level, const char* messagestr)
     snprintf(timestr, sizeof timestr, buffer, tv.tv_usec);
 #endif
 
-    lock.Lock();
     if (close_file_after_write)
     {
         log_file = fopen(filename.c_str(), "a");
@@ -138,11 +135,11 @@ void FileLogger::Log(int level, const char* messagestr)
     {
         fclose(log_file);
     }
-    lock.Unlock();
 }
 
 FileLogger::~FileLogger()
 {
+    Log::RemoveLogger(this);
     fclose(log_file);
 }
 
@@ -209,6 +206,7 @@ void GravityLogger::Log(int level, const char* messagestr)
 
 GravityLogger::~GravityLogger()
 {
+    Log::RemoveLogger(this);
 }
 
 
@@ -221,22 +219,33 @@ void Log::initAndAddGravityLogger(GravityNode *gn, LogLevel net_log_level)
 // Main Log Functions
 //
 
-std::list< std::pair<Logger*, int> > Log::loggers; //Initialize
+//Initialize
+std::list< std::pair<Logger*, int> > Log::loggers;
+Semaphore Log::lock;
 
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 {
+    lock.Lock();
 	loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
+    lock.Unlock();
 }
 
 void Log::RemoveLogger(Logger* logger)
 {
-
-	for(std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
-			i != loggers.end(); i++)
+    lock.Lock();
+    std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+	while(i != loggers.end())
 	{
 		if(i->first == logger)
-			loggers.erase(i);
+		{
+			i = loggers.erase(i);
+		}
+		else
+		{
+		    i++;
+		}
 	}
+    lock.Unlock();
 }
 
 const char* Log::LogLevelToString(LogLevel level)
@@ -253,7 +262,7 @@ const char* Log::LogLevelToString(LogLevel level)
         return "DEBUG";
     else if(level == Log::TRACE)
         return "TRACE";
-    return ""; //Get Rid of Wanring.
+    return ""; //Get Rid of Warning.
 }
 
 Log::LogLevel Log::LogStringToLevel(const char* level)
@@ -279,6 +288,7 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
 
 void Log::vLog(int level, const char* format, va_list args)
 {
+    lock.Lock();
     std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
     if(i != l_end)
@@ -293,8 +303,7 @@ void Log::vLog(int level, const char* format, va_list args)
             i++;
         } while(i != l_end);
     }
-
-    return;
+    lock.Unlock();
 }
 
 int Log::LevelToInt(LogLevel level)
@@ -334,6 +343,7 @@ int Log::LevelToInt(LogLevel level)
 
 void Log::CloseLoggers()
 {
+    lock.Lock();
     std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
 
@@ -346,7 +356,7 @@ void Log::CloseLoggers()
 
     //Remove all References
     loggers.erase(loggers.begin(), loggers.end());
-
+    lock.Unlock();
 }
 
 //Using functions instead of macros so we can use namespaces.

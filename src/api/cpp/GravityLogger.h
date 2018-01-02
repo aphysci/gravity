@@ -19,6 +19,7 @@
 #ifndef GRAV_LOGGER_23459
 #define GRAV_LOGGER_23459
 #include "GravityNode.h"
+#include "GravitySemaphore.h"
 #include <string>
 #include <stdarg.h>
 #include <stdio.h>
@@ -135,6 +136,7 @@ private:
     static int LevelToInt(LogLevel level);
 
     static std::list< std::pair<Logger*, int> > loggers;
+    static Semaphore lock;
 };
 
 } //Namespace
