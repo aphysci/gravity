@@ -23,6 +23,7 @@
 #include "GravityTest.h"
 
 using namespace gravity;
+using namespace std::tr1;
 
 int main()
 {

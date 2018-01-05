@@ -37,8 +37,6 @@
 namespace gravity
 {
 
-using namespace std::tr1;
-
 class GravityNode;
 
 /**
@@ -47,7 +45,7 @@ class GravityNode;
 class GravityDataProduct
 {
 protected:
-    shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
+    std::tr1::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
 	friend class GravityServiceManager;

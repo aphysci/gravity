@@ -53,10 +53,7 @@
 #include "GravityDataProduct.h"
 #include "Utility.h"
 
-using namespace std;
-using namespace gravity;
-
-class GravityNodeTest: public GravitySubscriber, GravityServiceProvider, GravityRequestor
+class GravityNodeTest: public gravity::GravitySubscriber, gravity::GravityServiceProvider, gravity::GravityRequestor
 {
 public:
     void setUp();
@@ -68,9 +65,9 @@ public:
 	void testSubscribeDomain(void);
 	void testServiceWithDomain(void);
 	void testComponentID(void);
-    void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
-    void requestFilled(string serviceID, string requestID, const GravityDataProduct& response);
-    shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    void subscriptionFilled(const std::vector< std::tr1::shared_ptr<gravity::GravityDataProduct> >& dataProducts);
+    void requestFilled(std::string serviceID, std::string requestID, const gravity::GravityDataProduct& response);
+    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct);
 
 private:
     pthread_mutex_t mutex;

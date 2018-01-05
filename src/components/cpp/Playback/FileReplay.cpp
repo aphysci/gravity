@@ -27,6 +27,9 @@
 #include <sys/unistd.h>
 #endif
 
+using namespace std;
+using namespace std::tr1;
+
 int main(int argc, const char* argv[])
 {
 	gravity::FileReplay replay;

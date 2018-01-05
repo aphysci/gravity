@@ -24,7 +24,8 @@
 #include "../protobuf/Multiplication.pb.h"
 
 using namespace gravity;
-
+using namespace std;
+using namespace std::tr1;
 
 bool gotAsyncMessage = false;
 

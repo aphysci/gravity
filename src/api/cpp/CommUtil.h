@@ -49,12 +49,9 @@
 namespace gravity
 {
 
-using namespace std;
-using namespace std::tr1;
-
-GRAVITY_API string readStringMessage(void *socket);
-GRAVITY_API string readStringMessage(void *socket, int flags);
-GRAVITY_API void sendStringMessage(void* socket, string str, int flags);
+GRAVITY_API std::string readStringMessage(void *socket);
+GRAVITY_API std::string readStringMessage(void *socket, int flags);
+GRAVITY_API void sendStringMessage(void* socket, std::string str, int flags);
 GRAVITY_API int readIntMessage(void *socket);
 GRAVITY_API void sendIntMessage(void* socket, int val, int flags);
 GRAVITY_API uint64_t readUint64Message(void* socket);
@@ -62,7 +59,7 @@ GRAVITY_API void sendUint64Message(void* socket, uint64_t val, int flags);
 GRAVITY_API uint32_t readUint32Message(void* socket);
 GRAVITY_API void sendUint32Message(void* socket, uint32_t val, int flags);
 GRAVITY_API int sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags);
-GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort);
+GRAVITY_API int bindFirstAvailablePort(void *socket, std::string ipAddr, int minPort, int maxPort);
 #ifdef _WIN32
 GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp);
 #endif

@@ -26,30 +26,27 @@
 
 namespace gravity {
 
-using namespace gravity;
-using namespace std;
-
 class FileReader
 {
 private:
-	ifstream archiveFile;
-	vector<shared_ptr<GravityDataProduct> > dataProducts;
-	vector<string> dpList;
+	std::ifstream archiveFile;
+	std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts;
+	std::vector<std::string> dpList;
 	pthread_mutex_t mutex;
 	void processArchive();
-	shared_ptr<GravityDataProduct> popGravityDataProduct();
+	std::tr1::shared_ptr<GravityDataProduct> popGravityDataProduct();
 	bool hasData();
-	vector<string> split(string s);
+	std::vector<std::string> split(std::string s);
 	int readNextDataProduct();
 
 	bool swapEndian;
 	void endian_swap(int& i);
 public:
 	FileReader();
-	void init(const string& filename, const string& dataProductList);
+	void init(const std::string& filename, const std::string& dataProductList);
 	virtual ~FileReader();
 	static void* start(void* context);
-	shared_ptr<GravityDataProduct> getNextDataProduct();
+	std::tr1::shared_ptr<GravityDataProduct> getNextDataProduct();
 };
 
 } /* namespace gravity */

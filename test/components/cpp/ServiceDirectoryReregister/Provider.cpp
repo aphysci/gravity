@@ -22,6 +22,8 @@
 #include <Utility.h>
 
 using namespace gravity;
+using namespace std;
+using namespace std::tr1;
 
 class Provider : public GravityServiceProvider
 {

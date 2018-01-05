@@ -42,9 +42,6 @@
 namespace gravity
 {
 
-using namespace std;
-using namespace std::tr1;
-
 /**
  * The GravityMetricsManager is a component used internally by the GravityNode to
  * track messages and message size sent and received
@@ -57,7 +54,7 @@ private:
 	void* pubMetricsSocket;
 	void* subMetricsSocket;
 	void* metricsPubSocket;
-	vector<zmq_pollitem_t> pollItems;
+	std::vector<zmq_pollitem_t> pollItems;
 
 	void ready();
 	void publishMetricsReport();
@@ -65,9 +62,9 @@ private:
 	bool metricsEnabled;
 	int samplePeriod;
 	int samplesPerPublish;
-	string componentID;
-	string ipAddr;
-	map<std::pair<std::string,GravityMetricsPB_MessageType>,  GravityMetricsPB> metricsData;
+	std::string componentID;
+	std::string ipAddr;
+	std::map<std::pair<std::string,GravityMetricsPB_MessageType>,  GravityMetricsPB> metricsData;
 
 	void collectMetrics(void* socket, GravityMetricsPB_MessageType type);
 	void publishMetrics();

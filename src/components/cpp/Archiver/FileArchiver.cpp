@@ -25,6 +25,9 @@
 #include "protobuf/FileArchiverControlRequestPB.pb.h"
 #include "protobuf/FileArchiverControlResponsePB.pb.h"
 
+using namespace std;
+using namespace std::tr1;
+
 int main(int argc, const char* argv[])
 {
 	gravity::FileArchiver archiver;

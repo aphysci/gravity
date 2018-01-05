@@ -29,7 +29,7 @@ namespace gravity {
 
 GravitySubscriber::~GravitySubscriber() {}
 //TODO: REMOVE IMPLEMENTATION
-void GravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) {}
+void GravitySubscriber::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts) {}
 }
 
 

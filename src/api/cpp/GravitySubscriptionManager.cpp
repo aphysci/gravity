@@ -35,13 +35,14 @@
 namespace gravity
 {
 
+using namespace std;
+using namespace std::tr1;
+
 bool sortCacheValues (const shared_ptr<GravityDataProduct> &i, const shared_ptr<GravityDataProduct> &j)
 {
     return i->getGravityTimestamp() < j->getGravityTimestamp();
 }
 
-
-using namespace std;
 
 GravitySubscriptionManager::GravitySubscriptionManager(void* context)
 {

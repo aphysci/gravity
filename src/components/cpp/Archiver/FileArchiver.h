@@ -26,24 +26,21 @@
 
 namespace gravity {
 
-using namespace gravity;
-using namespace std;
-
 class FileArchiver : public GravitySubscriber, GravityServiceProvider
 {
 private:
 	static const char* ComponentName;
 	GravityNode gravityNode;
-	ofstream archiveFile;
+	std::ofstream archiveFile;
 	bool suspend;
 
-	vector<string> split(string s);
+	std::vector<std::string> split(std::string s);
 public:
 	FileArchiver();
 	virtual ~FileArchiver();
 
-	virtual void subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts);
-    virtual shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+	virtual void subscriptionFilled(const std::vector<std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual std::tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 	void waitForExit();
 };
 

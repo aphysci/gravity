@@ -70,7 +70,7 @@ void GravityConfigParser::ParseConfigService(GravityNode &gn)
 	dataproduct.setData(crpb);
 
 	//Send Request/Get Response
-	shared_ptr<GravityDataProduct> response = gn.request("ConfigService", dataproduct, CONFIG_REQUEST_TIMEOUT);
+	std::tr1::shared_ptr<GravityDataProduct> response = gn.request("ConfigService", dataproduct, CONFIG_REQUEST_TIMEOUT);
 	if(response == NULL)
 		return;
 

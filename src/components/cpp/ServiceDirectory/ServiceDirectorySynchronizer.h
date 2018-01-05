@@ -64,8 +64,8 @@ private:
 	void* commandSocket;
 	void* requestSocket;
 	std::vector<zmq_pollitem_t> pollItems;
-	std::map<std::string, shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
-	std::queue<shared_ptr<GravityDataProduct> > registrationUpdates;
+	std::map<std::string, std::tr1::shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
+	std::queue<std::tr1::shared_ptr<GravityDataProduct> > registrationUpdates;
 	bool pendingResponse;
 
 	void printMap(ServiceDirectoryMapPB providerMap);

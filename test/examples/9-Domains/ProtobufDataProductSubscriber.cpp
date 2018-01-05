@@ -25,6 +25,8 @@
 #include "../protobuf/BasicCounterDataProduct.pb.h"
 
 using namespace gravity;
+using namespace std;
+using namespace std::tr1;
 
 //Declare class for receiving Published messages.
 class SimpleGravityCounterSubscriber : public GravitySubscriber

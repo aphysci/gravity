@@ -46,12 +46,9 @@
 namespace gravity
 {
 
-using namespace std;
-using namespace std::tr1;
-
 typedef struct CacheValue
 {
-    string filterText;
+    std::string filterText;
     char *value;
     int size;
     uint64_t timestamp;
@@ -59,10 +56,10 @@ typedef struct CacheValue
 
 typedef struct PublishDetails
 {
-    string url;
-    string dataProductID;
+    std::string url;
+    std::string dataProductID;
 	bool cacheLastValue;
-    map<string,shared_ptr<CacheValue> > lastCachedValues;
+	std::map<std::string,std::tr1::shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;
 } PublishDetails;
@@ -79,16 +76,16 @@ private:
     void* metricsPublishSocket;
 	void* gravityNodeResponseSocket;
     void* gravityNodeSubscribeSocket;
-    map<void*,shared_ptr<PublishDetails> > publishMapBySocket;
-    map<string,shared_ptr<PublishDetails> > publishMapByID;
-	vector<zmq_pollitem_t> pollItems;
+    std::map<void*,std::tr1::shared_ptr<PublishDetails> > publishMapBySocket;
+    std::map<std::string,std::tr1::shared_ptr<PublishDetails> > publishMapByID;
+    std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();
 	void publish(void* requestSocket);
-    void publish(void* socket, const string &filterText, const void *data, int size);
+    void publish(void* socket, const std::string &filterText, const void *data, int size);
 
 	int publishHWM;
     bool metricsEnabled;
