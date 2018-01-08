@@ -31,6 +31,7 @@
 namespace gravity {
 
 using namespace std;
+using namespace std::tr1;
 
 GravityServiceManager::GravityServiceManager(void* context)
 {

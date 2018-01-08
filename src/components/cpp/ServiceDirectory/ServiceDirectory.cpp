@@ -53,6 +53,9 @@
 #define REGISTERED_PUBLISHERS "RegisteredPublishers"
 #define DIRECTORY_SERVICE "DirectoryService"
 
+using namespace std;
+using namespace std::tr1;
+
 struct RegistrationData
 {
     gravity::GravityNode* node;

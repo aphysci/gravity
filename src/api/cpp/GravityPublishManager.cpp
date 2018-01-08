@@ -35,6 +35,7 @@ namespace gravity
 {
 
 using namespace std;
+using namespace std::tr1;
 
 bool sortCacheValues (const shared_ptr<CacheValue> &i, const shared_ptr<CacheValue> &j)
 {

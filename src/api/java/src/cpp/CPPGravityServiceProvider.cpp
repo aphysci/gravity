@@ -20,6 +20,7 @@
 #include <iostream>
 
 using namespace gravity;
+using namespace std::tr1;
 
 CPPGravityServiceProvider::~CPPGravityServiceProvider()
 {}

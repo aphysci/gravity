@@ -36,6 +36,7 @@ namespace gravity
 {
 
 using namespace std;
+using namespace std::tr1;
 
 std::list<ExpectedMessageQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
 std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> Heartbeat::messageTimes;

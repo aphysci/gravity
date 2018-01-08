@@ -20,6 +20,8 @@
 #include <iostream>
 #include "GravityLogger.h"
 
+using namespace std;
+
 int main()
 {
   using namespace gravity;

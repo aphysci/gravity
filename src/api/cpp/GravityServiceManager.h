@@ -35,8 +35,6 @@
 namespace gravity
 {
 
-using namespace std::tr1;
-
 typedef struct ServiceDetails
 {
 	std::string serviceID;
@@ -50,8 +48,8 @@ class GravityServiceManager
 private:
 	void* context;
 	void* gravityNodeSocket;
-	std::map<void*,shared_ptr<ServiceDetails> > serviceMapBySocket;
-	std::map<std::string, shared_ptr<ServiceDetails> > serviceMapByServiceID;
+	std::map<void*,std::tr1::shared_ptr<ServiceDetails> > serviceMapBySocket;
+	std::map<std::string, std::tr1::shared_ptr<ServiceDetails> > serviceMapByServiceID;
 	std::vector<zmq_pollitem_t> pollItems;
 	void addService();
 	void removeService();

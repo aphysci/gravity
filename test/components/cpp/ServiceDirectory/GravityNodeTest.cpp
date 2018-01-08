@@ -19,6 +19,10 @@
 #include "GravityNodeTest.h"
 #include "GravityTest.h"
 
+using namespace gravity;
+using namespace std;
+using namespace std::tr1;
+
 class Subscriber : public GravitySubscriber
 {
     int count;

@@ -325,7 +325,7 @@ public:
      * \param domain domain of the network components
      * \return shared_ptr<GravityDataProduct> NULL upon failure.
      */
-    GRAVITY_API shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request, 
+    GRAVITY_API std::tr1::shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request,
 										int timeout_milliseconds = -1, std::string domain = "");
 
     /**
@@ -434,7 +434,7 @@ public:
 	/**
 	 * Creates and returns a FutureReponse pointer for delayed response to requests
 	 */
-	GRAVITY_API shared_ptr<FutureResponse> createFutureResponse();
+	GRAVITY_API std::tr1::shared_ptr<FutureResponse> createFutureResponse();
 
 	/**
 	 * Method to send future response

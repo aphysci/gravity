@@ -32,8 +32,6 @@ using namespace std::tr1;
 
 namespace gravity {
 
-using namespace std;
-
 const string LogRecorder::logDataProductID("GRAVITY_LOGGER"); //Needs to be the same as gravity::Log::log_dataProductID.
 
 //Note: Out filename is assumed to be 512 bytes long.

@@ -44,8 +44,6 @@
 namespace gravity
 {
 
-using namespace std::tr1;
-
 /**
  * The GravitySubscriptionManager is a component used internally by the GravityNode to manage
  * subscriptions in its own thread.
@@ -69,23 +67,23 @@ private:
 		bool receiveCachedDataProducts;
         std::map<std::string, zmq_pollitem_t> pollItemMap;
         std::set<GravitySubscriber*> subscribers;
-		std::set<shared_ptr<TimeoutMonitor> > monitors;
+		std::set<std::tr1::shared_ptr<TimeoutMonitor> > monitors;
     } SubscriptionDetails;
 
 
 	void* context;
 	void* gravityNodeSocket;
     void* gravityMetricsSocket;
-	std::map<DomainDataKey, std::map<std::string, shared_ptr<SubscriptionDetails> > > subscriptionMap;	
-    std::map<void*,shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+	std::map<DomainDataKey, std::map<std::string, std::tr1::shared_ptr<SubscriptionDetails> > > subscriptionMap;
+    std::map<void*,std::tr1::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
 	std::map<DomainDataKey, zmq_pollitem_t> publisherUpdateMap;
-    std::map<void*,shared_ptr<GravityDataProduct> > lastCachedValueMap;
+    std::map<void*,std::tr1::shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();
 	void addSubscription();
 	void removeSubscription();
-	int readSubscription(void *socket, std::string &filterText, shared_ptr<GravityDataProduct> &dataProduct);
+	int readSubscription(void *socket, std::string &filterText, std::tr1::shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void ready();
 	void setTimeoutMonitor();
@@ -93,14 +91,14 @@ private:
 	void calculateTimeout();
 
 	int pollTimeout;
-	shared_ptr<TimeoutMonitor> currTimeoutMonitor;
-	shared_ptr<SubscriptionDetails> currMonitorDetails;
+	std::tr1::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
+	std::tr1::shared_ptr<SubscriptionDetails> currMonitorDetails;
 
 
 	int subscribeHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
-    void collectMetrics(std::vector<shared_ptr<GravityDataProduct> > dataProducts);
+    void collectMetrics(std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts);
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

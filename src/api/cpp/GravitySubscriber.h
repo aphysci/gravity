@@ -31,8 +31,6 @@
 namespace gravity
 {
 
-using namespace std::tr1;
-
 /**
  * Interface specification for an object that will respond to subscriptions
  */
@@ -48,7 +46,7 @@ public:
      * Called on implementing object when a registered subscription is filled with 1 or more GravityDataProducts
      * \param dataProducts the data products that fill the registered subscription
      */
-    virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts) = 0;
+    virtual void subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts) = 0;
 };
 
 } /* namespace gravity */
