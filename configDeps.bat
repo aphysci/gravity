@@ -122,6 +122,7 @@ echo ===== Configuring Gravity Dependencies =====
 echo.
 
 set GRAVITY_DEPS=%PLATFORM%\%CONFIGURATION%\deps
+rd /s /q %GRAVITY_DEPS%
 md %GRAVITY_DEPS%
 
 echo ===== Copying ZMQ libs =====
