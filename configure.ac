@@ -250,6 +250,7 @@ AC_CONFIG_FILES([Makefile
                  src/components/cpp/ConfigServer/Makefile
                  src/components/cpp/LogRecorder/Makefile
                  src/components/cpp/Playback/Makefile
+                 src/components/cpp/Relay/Makefile
                  src/components/cpp/ServiceDirectory/Makefile
                  src/keyvalue_parser/Makefile
                  test/components/cpp/Makefile
