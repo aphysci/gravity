@@ -160,7 +160,7 @@ pushd %PROTOBUF_HOME%\java
 copy /y %PROTOBUF_HOME%\protoc.exe ..\src
 call mvn package
 popd
-copy /y %PROTOBUF_HOME%\java\target\protobuf-java-*.jar %GRAVITY_DEPS%\protobuf-java.jar
+copy /y /b %PROTOBUF_HOME%\java\target\protobuf-java-*.jar %GRAVITY_DEPS%\protobuf-java.jar
 
 echo ===== Copy to Debug configuration =====
 echo.
