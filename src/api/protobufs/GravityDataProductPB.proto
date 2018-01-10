@@ -34,4 +34,5 @@ message GravityDataProductPB
 	optional string future_socket_url = 8;
 	optional uint64 received_timestamp = 9;
 	optional bool is_cached_dataproduct = 10;
+	optional bool is_relayed_dataproduct = 11 [default = false];
 }

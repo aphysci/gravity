@@ -88,6 +88,7 @@ void Relay::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDa
     {
         shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
         Log::debug("Republishing %s", dataProduct->getDataProductID().c_str());
+        dataProduct->setIsRelayedDataproduct(true);
         gravityNode.publish(*dataProduct);
     }
 }

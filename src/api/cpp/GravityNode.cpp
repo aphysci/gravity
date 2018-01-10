@@ -1458,23 +1458,26 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 {
     string dataProductID = dataProduct.getDataProductID();
 	Log::trace("Publishing %s", dataProductID.c_str());
-	//Set Timestamp
-    if (timestamp == 0)
-    {
-        dataProduct.setTimestamp(getCurrentTime());
-    }
-    else
-    {
-        dataProduct.setTimestamp(timestamp);
-    }
 
-	//set Component ID
-	dataProduct.setComponentId(componentID);
+	// keep original info if this message has been relayed from somewhere else
+	if (!dataProduct.isRelayedDataproduct())
+	{
+		//Set Timestamp
+		if (timestamp == 0)
+		{
+			dataProduct.setTimestamp(getCurrentTime());
+		}
+		else
+		{
+			dataProduct.setTimestamp(timestamp);
+		}
 
-	//set Domain
-	dataProduct.setDomain(myDomain);
+		//set Component ID
+		dataProduct.setComponentId(componentID);
 
-	
+		//set Domain
+		dataProduct.setDomain(myDomain);
+	}
 
 	// Send subscription details
     publishManagerPublishSWL.lock.Lock();

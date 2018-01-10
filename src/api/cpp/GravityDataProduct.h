@@ -164,30 +164,30 @@ public:
      * \param gdp GravityDataProduct to compare with this one.
      * \return true if the two GravityDataProducts are equivalent, false otherwise.
      */
-    GRAVITY_API bool operator==(const GravityDataProduct &gdp);
+    GRAVITY_API bool operator==(const GravityDataProduct &gdp) const;
 
 	/**
 	 * Get the componentId of the Gravity Node that produced this data product
 	 * \return componentId of the source Gravity Node
 	 */
-	GRAVITY_API std::string getComponentId();
+	GRAVITY_API std::string getComponentId() const;
 
 	/**
 	 * Get the domain of the Gravity Node that produced this data product
 	 * \return domain of the source Gravity Node
 	 */
-	GRAVITY_API std::string getDomain();
+	GRAVITY_API std::string getDomain() const;
 
 	/**
 	 * Get the flag indicating if this is a "future" reponse
 	 * \return future response flag
 	 */
-	GRAVITY_API bool isFutureResponse();
+	GRAVITY_API bool isFutureResponse() const;
 
 	/**
 	* Get the flag indicated if this was a cached data product.	*
 	*/
-	GRAVITY_API bool isCachedDataproduct();
+	GRAVITY_API bool isCachedDataproduct() const;
 	
 	/**
 	* Sets the flag indicating this data product is cached	*
@@ -198,7 +198,7 @@ public:
 	 * Get the url for the REP socket of a future response
 	 * \return url for REP socket of future response
 	 */
-	GRAVITY_API std::string getFutureSocketUrl();
+	GRAVITY_API std::string getFutureSocketUrl() const;
 
     /**
      * Set the timestamp on this GravityDataProduct (typically set by infrastructure at publish)
@@ -223,6 +223,16 @@ public:
      * \param domain name of the domain on which this GravityDataProduct is produced
      */
 	GRAVITY_API void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
+
+	/**
+	 * Get the flag indicating if this message has been relayed by a Relay component
+	 */
+	GRAVITY_API bool isRelayedDataproduct() const;
+
+	/**
+	 * Set the flag indicating that this message has been relayed, and is not coming from the original source
+	 */
+	GRAVITY_API void setIsRelayedDataproduct(bool relayed);
 };
 
 } /* namespace gravity */
