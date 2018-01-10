@@ -87,6 +87,12 @@ public class GravityJavaTest {
 
         ret = node.publish(gdp, "Java");
 
+        // Workaround potential issue where unregister may be handled before previous publish
+        try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+		}
+        
         ret = node.unregisterDataProduct("JavaGDP");
         testAssert(ret == GravityReturnCode.SUCCESS);
 
