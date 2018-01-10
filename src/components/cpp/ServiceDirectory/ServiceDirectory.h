@@ -76,6 +76,9 @@ private:
     bool registeredPublishersReady, registeredPublishersProcessed;
     std::set<std::string> registerUpdatesToSend;
 
+    // needed to manage objects accessed from ServiceProvider thread
+    Semaphore lock;
+
 	void* context;
 	SocketWithLock udpBroadcastSocket;
 	SocketWithLock udpReceiverSocket;

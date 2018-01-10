@@ -308,6 +308,9 @@ void ServiceDirectory::start()
      *
      * We cannot synchronize access to the GravityNode here because the registration calls require the SD to service
      * the registration requests in the loop below.
+     *
+     * Calls FROM the GravityNode (i.e. ServiceProvider::request below) won't cause deadlock as long as we don't publish, etc,
+     * but because it is a separate thread, we need to manage data access.
      */
     struct RegistrationData regData;
     regData.node = &gn;
@@ -345,6 +348,13 @@ void ServiceDirectory::start()
             GravityDataProduct req(zmq_msg_data(&msg), zmq_msg_size(&msg));
             zmq_msg_close(&msg);
 
+            /**
+             * Most of the methods in this class are called on the main thread, and are invoked from within
+             * this locked block.  If that changes, additional locked blocks may be needed.  Currently the only
+             * other locked block needed is in the ServiceProvider::request method defined below which runs
+             * on a separate thread provided by the GravityNode.
+             */
+            lock.Lock();
             shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
@@ -358,6 +368,7 @@ void ServiceDirectory::start()
                 registerUpdatesToSend.clear();
                 registeredPublishersProcessed = true;
             }
+            lock.Unlock();
 
             sendGravityDataProduct(pollItem.socket, *response, ZMQ_DONTWAIT);
         }
@@ -443,13 +454,18 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduc
     return gdpResponse;
 }
 
+/**
+ * Because the lock in this method blocks the main SD loop above, we can't issue any GravityNode calls
+ * here that require SD support (e.g. register, etc).
+ */
 shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
 	shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
-    if (serviceID == "DirectoryService") 
+    if (serviceID == DIRECTORY_SERVICE)
     {
+        lock.Lock();
         string requestType = request.getDataProductID();
         if (requestType == "GetProviders")
         {
@@ -498,6 +514,7 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
         {
 			gdpResponse->setData(domain.c_str(), domain.length());
 		}
+        lock.Unlock();
     }
 
     return gdpResponse;
@@ -650,6 +667,8 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 
 			if (registration.id() == REGISTERED_PUBLISHERS)
 			{
+				// When this request is received here, this product ID has already been registered with our GravityNode, so
+				// it's safe to start publishing to it (cached values will be sent to new subscribers).
 				registeredPublishersReady = true;
 			}
 			list<string>& urls = dpMap[registration.id()];
