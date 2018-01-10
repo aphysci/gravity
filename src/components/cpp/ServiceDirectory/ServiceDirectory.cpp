@@ -139,7 +139,7 @@ static bool validateDomainName(string domain)
 static int parseDomainCSV(string &csv)
 {
 	int prevPos=0;
-	int pos = csv.find(",",0);
+	unsigned int pos = csv.find(",",0);
 	int commaCount = 0;
 
 	if(csv.length()==0)
