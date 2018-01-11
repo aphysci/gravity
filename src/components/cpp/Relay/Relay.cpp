@@ -18,6 +18,7 @@
 
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <protobuf/RegisterRelay.pb.h>
 
 #include <iostream>
 #include <sstream>
@@ -28,34 +29,33 @@ using namespace gravity;
 using namespace std;
 using namespace std::tr1;
 
+#define COMPONENT_ID "Relay"
+
 class Relay : public GravitySubscriber
 {
 private:
     GravityNode gravityNode;
 
 public:
-    Relay();
-    virtual ~Relay();
+    Relay() {};
+    virtual ~Relay() {};
 
     int run();
     void subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
-Relay::Relay()
-{
-}
-
-Relay::~Relay()
-{}
-
 int Relay::run()
 {
-    GravityReturnCode ret = gravityNode.init("Relay");
+    GravityReturnCode ret = gravityNode.init(COMPONENT_ID);
     while (ret != GravityReturnCodes::SUCCESS)
     {
-        cerr << "Failed to initialize Relay, retrying..." << endl;
-        ret = gravityNode.init("Relay");
+        cerr << "Failed to initialize " << COMPONENT_ID << ", retrying..." << endl;
+        ret = gravityNode.init(COMPONENT_ID);
     }
+
+    RegisterRelayPB registerRelay;
+    registerRelay.set_ipaddress(gravityNode.getIP());
+    registerRelay.set_componentid(COMPONENT_ID);
 
     // Get list of data products to archive
     string dpList = gravityNode.getStringParam("DataProductList", "");
@@ -70,7 +70,17 @@ int Relay::run()
         token.erase(0, token.find_first_not_of(" "));
 
         Log::debug("Configured to relay: %s", token.c_str());
-        gravityNode.subscribe(token, *this);
+        registerRelay.add_dataproductids(token);
+    }
+
+    GravityDataProduct gdp("RegisterRelay");
+    gdp.setData(registerRelay);
+    shared_ptr<GravityDataProduct> retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
+
+    // need this?
+    for (int i = 0; i < registerRelay.dataproductids_size(); i++)
+    {
+        gravityNode.subscribe(registerRelay.dataproductids(i), *this);
     }
 
     gravityNode.waitForExit();

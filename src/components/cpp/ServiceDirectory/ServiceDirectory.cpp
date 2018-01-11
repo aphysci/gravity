@@ -38,6 +38,7 @@
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/ComponentServiceLookupResponsePB.pb.h"
 #include "protobuf/ServiceDirectoryDomainUpdatePB.pb.h"
+#include "protobuf/RegisterRelay.pb.h"
 
 //#include "protobuf/ServiceDirectoryBroadcastSetup.pb.h"
 
@@ -52,6 +53,7 @@
 
 #define REGISTERED_PUBLISHERS "RegisteredPublishers"
 #define DIRECTORY_SERVICE "DirectoryService"
+#define REGISTER_RELAY "RegisterRelay"
 
 using namespace std;
 using namespace std::tr1;
@@ -82,6 +84,9 @@ static void* registration(void* regData)
     
     // Register service for external requests
     gn->registerService(DIRECTORY_SERVICE, gravity::GravityTransportTypes::TCP, *provider);
+
+    // Register service for external requests
+    gn->registerService(REGISTER_RELAY, gravity::GravityTransportTypes::TCP, *provider);
 
 	// Register the data products for adding and removing domains
 	gn->registerDataProduct("ServiceDirectory_DomainUpdate",gravity::GravityTransportTypes::TCP);
@@ -515,6 +520,18 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
 			gdpResponse->setData(domain.c_str(), domain.length());
 		}
         lock.Unlock();
+    }
+    else if (serviceID == REGISTER_RELAY)
+    {
+    	RegisterRelayPB registerRelay;
+    	request.populateMessage(registerRelay);
+    	lock.Lock();
+    	for(int i = 0; i < registerRelay.dataproductids_size(); i++)
+    	{
+    		Log::debug("register relay %s on %s for Product ID %s",
+    				   registerRelay.componentid().c_str(), registerRelay.ipaddress().c_str(), registerRelay.dataproductids(i).c_str());
+    	}
+    	lock.Unlock();
     }
 
     return gdpResponse;
