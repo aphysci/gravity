@@ -526,10 +526,21 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
     	RegisterRelayPB registerRelay;
     	request.populateMessage(registerRelay);
     	lock.Lock();
-    	for(int i = 0; i < registerRelay.dataproductids_size(); i++)
+    	if (registerRelay.has_ipaddress())
     	{
-    		Log::debug("register relay %s on %s for Product ID %s",
-    				   registerRelay.componentid().c_str(), registerRelay.ipaddress().c_str(), registerRelay.dataproductids(i).c_str());
+			for(int i = 0; i < registerRelay.dataproductids_size(); i++)
+			{
+				Log::debug("register relay %s on %s for Product ID %s",
+						   registerRelay.componentid().c_str(), registerRelay.ipaddress().c_str(), registerRelay.dataproductids(i).c_str());
+			}
+    	}
+    	else
+    	{
+			for(int i = 0; i < registerRelay.dataproductids_size(); i++)
+			{
+				Log::debug("register relay %s for all hosts for Product ID %s",
+						   registerRelay.componentid().c_str(), registerRelay.dataproductids(i).c_str());
+			}
     	}
     	lock.Unlock();
     }

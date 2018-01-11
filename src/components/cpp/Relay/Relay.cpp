@@ -54,8 +54,12 @@ int Relay::run()
     }
 
     RegisterRelayPB registerRelay;
-    registerRelay.set_ipaddress(gravityNode.getIP());
     registerRelay.set_componentid(COMPONENT_ID);
+
+    if (gravityNode.getBoolParam("ProvideLocalOnly", true))
+    {
+    	registerRelay.set_ipaddress(gravityNode.getIP());
+    }
 
     // Get list of data products to archive
     string dpList = gravityNode.getStringParam("DataProductList", "");
@@ -76,10 +80,15 @@ int Relay::run()
     GravityDataProduct gdp("RegisterRelay");
     gdp.setData(registerRelay);
     shared_ptr<GravityDataProduct> retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
+    while (retGDP == NULL)
+    {
+    	Log::warning("Service request to register relay failed, retrying...");
+    	retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
+    }
 
-    // need this?
     for (int i = 0; i < registerRelay.dataproductids_size(); i++)
     {
+        gravityNode.registerDataProduct(registerRelay.dataproductids(i), GravityTransportTypes::TCP);
         gravityNode.subscribe(registerRelay.dataproductids(i), *this);
     }
 
