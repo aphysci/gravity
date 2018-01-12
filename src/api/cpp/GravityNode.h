@@ -183,6 +183,7 @@ private:
 
     void* context;
     SocketWithLock subscriptionManagerSWL;
+    SocketWithLock subscriptionManagerConfigSWL;
     SocketWithLock publishManagerRequestSWL;
     SocketWithLock publishManagerPublishSWL;
     SocketWithLock serviceManagerSWL;
@@ -236,6 +237,7 @@ private:
 	void configureNodeDomainListener(std::string domain);
 	
 	void configureServiceManager();
+	void configureSubscriptionManager();
 
 	std::string getDomainUrl(int timeout);
 

@@ -444,6 +444,7 @@ GravityNode::~GravityNode()
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
 	zmq_close(subscriptionManagerSWL.socket);
+	zmq_close(subscriptionManagerConfigSWL.socket);
 
 	sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
 	zmq_close(requestManagerSWL.socket);
@@ -542,6 +543,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		// Setup up communication channel to subscription manager
 		subscriptionManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
 		zmq_bind(subscriptionManagerSWL.socket, "inproc://gravity_subscription_manager");
+		subscriptionManagerConfigSWL.socket = zmq_socket(context,ZMQ_PUB);
+		zmq_bind(subscriptionManagerConfigSWL.socket,"inproc://gravity_subscription_manager_configure");
 
 		// Setup the metrics control communication channel
 		metricsManagerSocket = zmq_socket(context, ZMQ_PUB);
@@ -820,6 +823,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				Log::initAndAddGravityLogger(this, net_log_level);
 
 			configureServiceManager();
+			configureSubscriptionManager();
 		}
 	}
 	else
@@ -878,6 +882,20 @@ void GravityNode::configureServiceManager()
 	//Send component ID
 	sendStringMessage(serviceManagerConfigSWL.socket,componentID,ZMQ_DONTWAIT);
 
+}
+
+void GravityNode::configureSubscriptionManager()
+{
+	sendStringMessage(subscriptionManagerConfigSWL.socket,"configure",ZMQ_SNDMORE);
+
+	//send Domain
+	sendStringMessage(subscriptionManagerConfigSWL.socket,myDomain,ZMQ_SNDMORE);
+
+	//Send component ID
+	sendStringMessage(subscriptionManagerConfigSWL.socket,componentID,ZMQ_DONTWAIT);
+
+	//Send ip address
+	sendStringMessage(subscriptionManagerConfigSWL.socket,getIP(),ZMQ_DONTWAIT);
 }
 
 std::string GravityNode::getDomainUrl(int timeout)

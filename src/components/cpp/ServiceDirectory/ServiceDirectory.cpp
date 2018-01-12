@@ -682,11 +682,11 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			{
 				PublisherInfoPB infoPB;
 				infoPB.set_url(registration.url());
+				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
+				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
+				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+
 				dpMap[registration.id()].push_back(infoPB);
-				if (registration.is_relay())
-				{
-					Log::debug("Registering relay for %s", registration.id().c_str());
-				}
 				
 				urlToComponentMap[registration.url()] = registration.component_id();
 

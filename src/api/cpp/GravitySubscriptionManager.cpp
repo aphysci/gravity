@@ -89,7 +89,48 @@ void GravitySubscriptionManager::start()
     metricsRequestPollItem.revents = 0;
     pollItems.push_back(metricsRequestPollItem);
 
+	void* configureSocket=zmq_socket(context,ZMQ_SUB);
+	zmq_connect(configureSocket,"inproc://gravity_subscription_manager_configure");
+	zmq_setsockopt(configureSocket, ZMQ_SUBSCRIBE, NULL, 0);
+
+	// Always have at least the gravity node to poll
+	zmq_pollitem_t configItem;
+	configItem.socket = configureSocket;
+	configItem.events = ZMQ_POLLIN;
+	configItem.fd = 0;
+	configItem.revents = 0;
+
 	ready();
+
+	//receive Gravity node parameters
+	bool configured = false;
+	while(!configured)
+	{
+		// Start polling socket(s), blocking while we wait
+		int rc = zmq_poll(&configItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+		if (rc == -1)
+		{
+			// Interrupted
+			break;
+		}
+
+		// Process new subscription requests from the gravity node
+		if (configItem.revents & ZMQ_POLLIN)
+		{
+			string command = readStringMessage(configureSocket);
+			if(command == "configure")
+			{
+				//receive Gravity node details
+				domain = readStringMessage(configureSocket);
+				componentID = readStringMessage(configureSocket);
+				ipAddress = readStringMessage(configureSocket);
+
+				configured=true;
+			}
+		}
+	}
+
+	zmq_close(configureSocket);
 
 	// Process forever...
 	while (true)

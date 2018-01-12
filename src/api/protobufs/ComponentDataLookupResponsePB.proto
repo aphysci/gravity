@@ -26,7 +26,8 @@ message PublisherInfoPB
 {
 	required string url         = 1;
 	optional bool isRelay       = 2;
-	optional string relayCompID = 3;
+	optional string componentID = 3;
+	optional string ipAddress   = 4;
 }
 
 message ComponentDataLookupResponsePB

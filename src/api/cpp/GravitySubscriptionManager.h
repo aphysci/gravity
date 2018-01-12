@@ -80,6 +80,11 @@ private:
     std::map<void*,std::tr1::shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 
+	// Info for this node - not subscription specific
+	std::string domain;
+	std::string componentID;
+	std::string ipAddress;
+
 	void setHWM();
 	void addSubscription();
 	void removeSubscription();
