@@ -314,7 +314,7 @@ void ServiceDirectory::start()
      * We cannot synchronize access to the GravityNode here because the registration calls require the SD to service
      * the registration requests in the loop below.
      *
-     * Calls FROM the GravityNode (i.e. ServiceProvider::request below) won't cause deadlock as long as we don't publish, etc,
+     * Calls FROM the GravityNode (i.e. ServiceProvider::request below) won't cause deadlock as long as we don't make calls to GravityNode,
      * but because it is a separate thread, we need to manage data access.
      */
     struct RegistrationData regData;
@@ -526,21 +526,18 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
     	RegisterRelayPB registerRelay;
     	request.populateMessage(registerRelay);
     	lock.Lock();
-    	if (registerRelay.has_ipaddress())
+    	for(int i = 0; i < registerRelay.dataproductids_size(); i++)
     	{
-			for(int i = 0; i < registerRelay.dataproductids_size(); i++)
-			{
-				Log::debug("register relay %s on %s for Product ID %s",
-						   registerRelay.componentid().c_str(), registerRelay.ipaddress().c_str(), registerRelay.dataproductids(i).c_str());
-			}
-    	}
-    	else
-    	{
-			for(int i = 0; i < registerRelay.dataproductids_size(); i++)
-			{
-				Log::debug("register relay %s for all hosts for Product ID %s",
-						   registerRelay.componentid().c_str(), registerRelay.dataproductids(i).c_str());
-			}
+    		if (registerRelay.has_ipaddress())
+    		{
+    			Log::debug("register relay %s on %s for Product ID %s",
+    					registerRelay.componentid().c_str(), registerRelay.ipaddress().c_str(), registerRelay.dataproductids(i).c_str());
+    		}
+    		else
+    		{
+    			Log::debug("register relay %s for all hosts for Product ID %s",
+    					registerRelay.componentid().c_str(), registerRelay.dataproductids(i).c_str());
+    		}
     	}
     	lock.Unlock();
     }
@@ -944,7 +941,8 @@ void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataPro
 		list<string>* urls = &dpMap[dataProductID];
 		for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
 		{
-			lookupResponse.add_url(*iter);
+			PublisherInfoPB* infoPB = lookupResponse.add_publishers();
+			infoPB->set_url(*iter);
 		}
 	}
     response.setData(lookupResponse);

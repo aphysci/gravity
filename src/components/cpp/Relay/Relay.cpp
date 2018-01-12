@@ -55,6 +55,7 @@ int Relay::run()
 
     RegisterRelayPB registerRelay;
     registerRelay.set_componentid(COMPONENT_ID);
+    registerRelay.set_domain(gravityNode.getDomain());
 
     if (gravityNode.getBoolParam("ProvideLocalOnly", true))
     {
@@ -79,12 +80,13 @@ int Relay::run()
 
     GravityDataProduct gdp("RegisterRelay");
     gdp.setData(registerRelay);
-    shared_ptr<GravityDataProduct> retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
-    while (retGDP == NULL)
+    shared_ptr<GravityDataProduct> retGDP;
+    do
     {
     	Log::warning("Service request to register relay failed, retrying...");
     	retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
     }
+    while (retGDP == NULL);
 
     for (int i = 0; i < registerRelay.dataproductids_size(); i++)
     {

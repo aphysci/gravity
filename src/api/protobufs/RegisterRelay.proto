@@ -22,7 +22,8 @@ package gravity;
 message RegisterRelayPB
 {
 	required string componentID    = 1;
-	optional string ipAddress      = 2;
-	repeated string dataProductIDs = 3;
+	required string domain         = 2;
+	optional string ipAddress      = 3;
+	repeated string dataProductIDs = 4;
 }
 

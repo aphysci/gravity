@@ -296,21 +296,21 @@ void GravitySubscriptionManager::start()
                              iter != subscriptionMap[key].end();
                              iter++)
                         {
-                            for (int i = 0; i < update.url_size(); i++)
+                            for (int i = 0; i < update.publishers_size(); i++)
                             {
-                                Log::trace("url: %s", update.url(i).c_str());
+                                Log::trace("url: %s", update.publishers(i).url().c_str());
 
                                 // if we don't already have this url, add it
-                                if (iter->second->pollItemMap.count(update.url(i)) == 0)
+                                if (iter->second->pollItemMap.count(update.publishers(i).url()) == 0)
                                 {
 									zmq_pollitem_t pollItem;
-                                    void *subSocket = setupSubscription(update.url(i), iter->first, pollItem);
+                                    void *subSocket = setupSubscription(update.publishers(i).url(), iter->first, pollItem);
 
                                     // and by socket for quick lookup as data arrives
                                     subscriptionSocketMap[subSocket] = iter->second;
 
                                     // Add url & poll item to subscription details
-                                    iter->second->pollItemMap[update.url(i)] = pollItem;
+                                    iter->second->pollItemMap[update.publishers(i).url()] = pollItem;
                                 }
                             }
 
@@ -320,9 +320,9 @@ void GravitySubscriptionManager::start()
                             {
                                 bool found = false;
                                 // there doesn't seem to be a good way to check containment in a protobuf set...
-                                for (int i = 0; i < update.url_size(); i++)
+                                for (int i = 0; i < update.publishers_size(); i++)
                                 {
-                                    if (socketIter->first == update.url(i))
+                                    if (socketIter->first == update.publishers(i).url())
                                     {
                                         found = true;
                                         break;

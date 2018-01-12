@@ -1278,8 +1278,8 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-            for (int i = 0; i < pb.url_size(); i++)
-                urls.push_back(pb.url(i));
+            for (int i = 0; i < pb.publishers_size(); i++)
+                urls.push_back(pb.publishers(i).url());
             ret = GravityReturnCodes::SUCCESS;
         }
         else
