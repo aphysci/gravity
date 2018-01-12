@@ -1027,6 +1027,12 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType, bool cacheLastValue)
 {
+	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
+}
+
+GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
+		                                                    bool cacheLastValue, bool isRelay, bool localOnly)
+{
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1104,6 +1110,11 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
             registration.set_type(ServiceDirectoryRegistrationPB::DATA);
             registration.set_component_id(componentID);
 			registration.set_timestamp(timestamp);
+			registration.set_is_relay(isRelay);
+			if (localOnly)
+			{
+				registration.set_ip_address(getIP());
+			}
 
             // Wrap request in GravityDataProduct
             GravityDataProduct request("RegistrationRequest");
@@ -2127,6 +2138,19 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
+{
+	return registerRelay(dataProductID, subscriber, localOnly, transportType, defaultCacheLastSentDataprodut);
+}
+
+GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue)
+{
+	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
+	if (ret != GravityReturnCodes::SUCCESS)
+		return ret;
+	return subscribe(dataProductID, subscriber);
 }
 
 #ifdef WIN32

@@ -239,7 +239,7 @@ void ServiceDirectorySynchronizer::start()
 						ComponentDataLookupResponsePB resp;
 						response.populateMessage(resp);
 						string domain = resp.domain_id();
-						string url = resp.url(0);
+						string url = resp.publishers(0).url();
 
 						Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
 

@@ -33,6 +33,7 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
 #include "protobuf/ServiceDirectoryMapPB.pb.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
 
 namespace gravity
 {
@@ -57,7 +58,7 @@ private:
 	std::string domain;
 
 	// dataProductMap <domain, map<dataProductID, list<publishers> > >
-	std::map<std::string, std::map<std::string, std::list<std::string> > > dataProductMap;
+	std::map<std::string, std::map<std::string, std::list<gravity::PublisherInfoPB> > > dataProductMap;
 
 	// serviceMap <domain, map<serviceID, serviceProvider> >
 	std::map<std::string, std::map<std::string, std::string> > serviceMap;

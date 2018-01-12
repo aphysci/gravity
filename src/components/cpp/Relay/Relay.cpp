@@ -18,7 +18,6 @@
 
 #include <GravityNode.h>
 #include <GravityLogger.h>
-#include <protobuf/RegisterRelay.pb.h>
 
 #include <iostream>
 #include <sstream>
@@ -53,14 +52,7 @@ int Relay::run()
         ret = gravityNode.init(COMPONENT_ID);
     }
 
-    RegisterRelayPB registerRelay;
-    registerRelay.set_componentid(COMPONENT_ID);
-    registerRelay.set_domain(gravityNode.getDomain());
-
-    if (gravityNode.getBoolParam("ProvideLocalOnly", true))
-    {
-    	registerRelay.set_ipaddress(gravityNode.getIP());
-    }
+    bool localOnly = gravityNode.getBoolParam("ProvideLocalOnly", true);
 
     // Get list of data products to archive
     string dpList = gravityNode.getStringParam("DataProductList", "");
@@ -75,23 +67,7 @@ int Relay::run()
         token.erase(0, token.find_first_not_of(" "));
 
         Log::debug("Configured to relay: %s", token.c_str());
-        registerRelay.add_dataproductids(token);
-    }
-
-    GravityDataProduct gdp("RegisterRelay");
-    gdp.setData(registerRelay);
-    shared_ptr<GravityDataProduct> retGDP;
-    do
-    {
-    	Log::warning("Service request to register relay failed, retrying...");
-    	retGDP = gravityNode.request("RegisterRelay", gdp, 2000);
-    }
-    while (retGDP == NULL);
-
-    for (int i = 0; i < registerRelay.dataproductids_size(); i++)
-    {
-        gravityNode.registerDataProduct(registerRelay.dataproductids(i), GravityTransportTypes::TCP);
-        gravityNode.subscribe(registerRelay.dataproductids(i), *this);
+        gravityNode.registerRelay(token, *this, localOnly, GravityTransportTypes::TCP);
     }
 
     gravityNode.waitForExit();

@@ -228,6 +228,9 @@ private:
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
 
+    GRAVITY_API GravityReturnCode registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
+    		                                                  bool cacheLastValue, bool isRelay, bool localOnly);
+
 	static void* startGravityDomainListener(void* context);
 	
 	void configureNodeDomainListener(std::string domain);
@@ -415,6 +418,15 @@ public:
      */
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
 
+    /**
+     *
+     */
+    GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType);
+
+    /**
+     *
+     */
+    GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue);
 
     /**
      * Returns a string representation of the provided error code.
