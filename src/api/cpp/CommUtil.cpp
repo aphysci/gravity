@@ -146,6 +146,18 @@ GRAVITY_API int sendGravityDataProduct(void* socket, const GravityDataProduct& d
 	return rc;
 }
 
+GRAVITY_API int sendProtobufMessage(void* socket, const google::protobuf::Message& pb, int flags)
+{
+    // Send data product
+    zmq_msg_t data;
+    zmq_msg_init_size(&data, pb.ByteSize());
+    pb.SerializeToArray(zmq_msg_data(&data), pb.ByteSize());
+    int rc = zmq_sendmsg(socket, &data, flags);
+    zmq_msg_close(&data);
+
+	return rc;
+}
+
 
 GRAVITY_API int bindFirstAvailablePort(void *socket, string ipAddr, int minPort, int maxPort)
 {

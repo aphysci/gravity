@@ -522,9 +522,20 @@ void GravitySubscriptionManager::addSubscription()
 	bool receiveLastCachedValue = readIntMessage(gravityNodeSocket);
 	Log::trace("receiveLastCachedValue = '%d'", receiveLastCachedValue);
 
-	// Read the subscription url
-	string url = readStringMessage(gravityNodeSocket);
-	Log::trace("url = '%s'", url.c_str());
+	// Read all the publisher infos
+	uint32_t numPubInfoPBs = readUint32Message(gravityNodeSocket);
+	list<PublisherInfoPB> pubInfoPBs;
+	for (uint32_t i = 0; i < numPubInfoPBs; i++)
+	{
+        zmq_msg_t msg;
+        zmq_msg_init(&msg);
+        zmq_recvmsg(gravityNodeSocket, &msg, -1);
+        PublisherInfoPB pb;
+        pb.ParseFromArray(zmq_msg_data(&msg), zmq_msg_size(&msg));
+        zmq_msg_close(&msg);
+        pubInfoPBs.push_back(pb);
+		Log::trace("url = '%s'", pb.url().c_str());
+	}
 
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
@@ -594,18 +605,21 @@ void GravitySubscriptionManager::addSubscription()
 	    subscriptionMap[key][filter] = subDetails;
 	}
 
-	// if we have a url and we haven't seen it before, subscribe to it
-	if (url.size() > 0 && subDetails->pollItemMap.count(url) == 0)
+	for (list<PublisherInfoPB>::iterator iter = pubInfoPBs.begin(); iter != pubInfoPBs.end(); iter++)
 	{
-		Log::trace("Subscribe to new url");
-	    zmq_pollitem_t pollItem;
-	    void *subSocket = setupSubscription(url, filter, pollItem);
+		// if we have a url and we haven't seen it before, subscribe to it
+		if (iter->url().size() > 0 && subDetails->pollItemMap.count(iter->url()) == 0)
+		{
+			Log::trace("Subscribe to new url");
+			zmq_pollitem_t pollItem;
+			void *subSocket = setupSubscription(iter->url(), filter, pollItem);
 
-		// Create subscription details
-		subDetails->pollItemMap[url] = pollItem;
+			// Create subscription details
+			subDetails->pollItemMap[iter->url()] = pollItem;
 
-		// and by socket for quick lookup as data arrives
-		subscriptionSocketMap[subSocket] = subDetails;			
+			// and by socket for quick lookup as data arrives
+			subscriptionSocketMap[subSocket] = subDetails;
+		}
 	}
 	
 	// if a monitor was registered before the subscription, reset the timeouts

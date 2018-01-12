@@ -1274,7 +1274,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     return ret;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls, string& domain)
+GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<PublisherInfoPB> &urls, string& domain)
 {
     // Create the object describing the data product to lookup
     ComponentLookupRequestPB lookup;
@@ -1308,7 +1308,7 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
         if (parserSuccess)
         {
             for (int i = 0; i < pb.publishers_size(); i++)
-                urls.push_back(pb.publishers(i).url());
+                urls.push_back(pb.publishers(i));
             ret = GravityReturnCodes::SUCCESS;
         }
         else
@@ -1358,52 +1358,32 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
         domain = myDomain;
     }
 
-    vector<string> url;
+    vector<PublisherInfoPB> publisherInfoPBs;
 
     GravityReturnCode ret;
-    ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
+    ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
     if(ret != GravityReturnCodes::SUCCESS)
         return ret;
 
-    if (url.size() == 0)
-    {
-        subscribe("", dataProductID, subscriber, filter, domain, receiveLastCachedValue);
-    }
-    else
-    {
-        // Subscribe to all published data products
-        for (size_t i = 0; i < url.size(); i++)
-        {
-            subscribe(url[i], dataProductID, subscriber, filter, domain, receiveLastCachedValue);
-        }
-    }
-
-    return GravityReturnCodes::SUCCESS;
-}
-
-GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
-{
-
 	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID.c_str(), receiveLastCachedValue);
 	
-	vector<string> url;
-	GravityReturnCode ret;
+	vector<PublisherInfoPB> registeredPublishersInfo;
 	int tries = 5;
-	while (url.size() == 0 && tries-- > 0)
+	while (registeredPublishersInfo.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, myDomain);
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", registeredPublishersInfo, myDomain);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
-		if (url.size() > 1)
-			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
-		else if (url.size() == 1)
+		if (registeredPublishersInfo.size() > 1)
+			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", registeredPublishersInfo.size());
+		else if (registeredPublishersInfo.size() == 1)
 			break;
 
 		if (tries > 0)
 			gravity::sleep(500);
 	}
 
-	if (url.size() == 0)
+	if (registeredPublishersInfo.size() == 0)
 	{
 		Log::critical("Service Directory has not finished initialization (RegisteredPublishers not available)");
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
@@ -1414,10 +1394,14 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	sendStringMessage(subscriptionManagerSWL.socket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendIntMessage(subscriptionManagerSWL.socket, receiveLastCachedValue, ZMQ_SNDMORE);
-	sendStringMessage(subscriptionManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
+	sendUint32Message(subscriptionManagerSWL.socket, publisherInfoPBs.size(), ZMQ_SNDMORE);
+	for (unsigned int i = 0; i < publisherInfoPBs.size(); i++)
+	{
+		sendProtobufMessage(subscriptionManagerSWL.socket, publisherInfoPBs[i], ZMQ_SNDMORE);
+	}
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
-    sendStringMessage(subscriptionManagerSWL.socket, url[0], ZMQ_SNDMORE);
+    sendStringMessage(subscriptionManagerSWL.socket, registeredPublishersInfo[0].url(), ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, sizeof(&subscriber));

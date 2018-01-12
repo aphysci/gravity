@@ -33,6 +33,7 @@
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include <pthread.h>
 #include <list>
 
@@ -214,7 +215,7 @@ private:
 	GravityConfigParser* parser;
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
-	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<std::string> &urls, std::string &domain);
+	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
     GravityReturnCode ServiceDirectoryReregister(std::string componentId);
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
@@ -222,9 +223,6 @@ private:
                                             std::string filter, std::string domain, bool receiveLastCachedValue = true);
     GravityReturnCode unsubscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
                                                 std::string filter, std::string domain);
-
-    GravityReturnCode subscribe(std::string connectionURL, std::string dataProductID,
-            const GravitySubscriber& subscriber, std::string filter = "", std::string domain = "", bool receiveLastCachedValue = true);
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
             const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
