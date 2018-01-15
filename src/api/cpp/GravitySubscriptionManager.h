@@ -36,10 +36,12 @@
 #include <tr1/memory>
 #endif
 #include <string>
+#include <list>
 #include "GravitySubscriber.h"
 #include "GravitySubscriptionMonitor.h"
 #include "GravityMetrics.h"
 #include "DomainDataKey.h"
+#include "protobuf/ComponentDataLookupResponsePB.pb.h"
 
 namespace gravity
 {
@@ -94,6 +96,7 @@ private:
 	void setTimeoutMonitor();
 	void clearTimeoutMonitor();
 	void calculateTimeout();
+	void trimPublishers(const std::list<gravity::PublisherInfoPB>& fullList, std::list<gravity::PublisherInfoPB>& trimmedList);
 
 	int pollTimeout;
 	std::tr1::shared_ptr<TimeoutMonitor> currTimeoutMonitor;

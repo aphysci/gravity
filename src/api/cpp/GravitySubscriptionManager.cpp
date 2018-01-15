@@ -329,29 +329,37 @@ void GravitySubscriptionManager::start()
 
 					// Create the domain/data key for tracking subscriptions
 					DomainDataKey key(domain, dataProductID);
-
 					Log::trace("subscriptionMap.count(key) = %d", subscriptionMap.count(key));
+
+					list<PublisherInfoPB> allPublishers, trimmedPublishers;
+                    for (int i = 0; i < update.publishers_size(); i++)
+                    {
+                    	allPublishers.push_back(update.publishers(i));
+                    }
+					trimPublishers(allPublishers, trimmedPublishers);
+
                     if (subscriptionMap.count(key) != 0)
                     {
                         for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[key].begin();
                              iter != subscriptionMap[key].end();
                              iter++)
                         {
-                            for (int i = 0; i < update.publishers_size(); i++)
+                            for (list<PublisherInfoPB>::const_iterator trimmedIter = trimmedPublishers.begin();
+                            		trimmedIter != trimmedPublishers.end(); trimmedIter++)
                             {
-                                Log::trace("url: %s", update.publishers(i).url().c_str());
+                                Log::trace("url: %s", trimmedIter->url().c_str());
 
                                 // if we don't already have this url, add it
-                                if (iter->second->pollItemMap.count(update.publishers(i).url()) == 0)
+                                if (iter->second->pollItemMap.count(trimmedIter->url()) == 0)
                                 {
 									zmq_pollitem_t pollItem;
-                                    void *subSocket = setupSubscription(update.publishers(i).url(), iter->first, pollItem);
+                                    void *subSocket = setupSubscription(trimmedIter->url(), iter->first, pollItem);
 
                                     // and by socket for quick lookup as data arrives
                                     subscriptionSocketMap[subSocket] = iter->second;
 
                                     // Add url & poll item to subscription details
-                                    iter->second->pollItemMap[update.publishers(i).url()] = pollItem;
+                                    iter->second->pollItemMap[trimmedIter->url()] = pollItem;
                                 }
                             }
 
@@ -361,9 +369,10 @@ void GravitySubscriptionManager::start()
                             {
                                 bool found = false;
                                 // there doesn't seem to be a good way to check containment in a protobuf set...
-                                for (int i = 0; i < update.publishers_size(); i++)
+                                for (list<PublisherInfoPB>::const_iterator trimmedIter = trimmedPublishers.begin();
+                                		trimmedIter != trimmedPublishers.end(); trimmedIter++)
                                 {
-                                    if (socketIter->first == update.publishers(i).url())
+                                    if (socketIter->first == trimmedIter->url())
                                     {
                                         found = true;
                                         break;
@@ -605,7 +614,9 @@ void GravitySubscriptionManager::addSubscription()
 	    subscriptionMap[key][filter] = subDetails;
 	}
 
-	for (list<PublisherInfoPB>::iterator iter = pubInfoPBs.begin(); iter != pubInfoPBs.end(); iter++)
+	list<PublisherInfoPB> trimmedPublishers;
+	trimPublishers(pubInfoPBs, trimmedPublishers);
+	for (list<PublisherInfoPB>::iterator iter = trimmedPublishers.begin(); iter != trimmedPublishers.end(); iter++)
 	{
 		// if we have a url and we haven't seen it before, subscribe to it
 		if (iter->url().size() > 0 && subDetails->pollItemMap.count(iter->url()) == 0)
@@ -939,6 +950,53 @@ void GravitySubscriptionManager::collectMetrics(vector<shared_ptr<GravityDataPro
         metricsData.incrementMessageCount(gdp->getDataProductID(), 1);
         metricsData.incrementByteCount(gdp->getDataProductID(), gdp->getSize());
     }
+}
+
+/**
+ * This assumes publishers are already for the same data product id and domain
+ */
+void GravitySubscriptionManager::trimPublishers(const std::list<gravity::PublisherInfoPB>& fullList, std::list<gravity::PublisherInfoPB>& trimmedList)
+{
+	bool iAmRelay = false;
+	for (list<PublisherInfoPB>::const_iterator iter = fullList.begin(); iter != fullList.end(); iter++)
+	{
+		// if we are a relay, then don't want to subscribe to one
+		if (iter->isrelay() && iter->componentid() == componentID)
+		{
+			iAmRelay = true;
+			Log::debug("%s is a relay", iter->componentid().c_str());
+		}
+	}
+
+	trimmedList.clear();
+	bool foundGlobalRelay = false;
+	for (list<PublisherInfoPB>::const_iterator iter = fullList.begin(); iter != fullList.end(); iter++)
+	{
+		if (iAmRelay)
+		{
+			if (!iter->isrelay())
+				trimmedList.push_back(*iter);
+		}
+		else if (iter->isrelay() &&  // if it's a relay for any IP or our IP
+		           (!iter->has_ipaddress() || iter->ipaddress() == ipAddress))
+		{
+			trimmedList.clear();
+			trimmedList.push_back(*iter);
+			if (!iter->has_ipaddress())
+				// we'll keep looking for a local relay if we've found a global one
+				foundGlobalRelay = true;
+			else
+				// we have a local relay, so we're done here
+				break;
+		}
+
+		// The normal case
+		if (!iAmRelay && !foundGlobalRelay)
+		{
+			trimmedList.push_back(*iter);
+		}
+	}
+	Log::debug("added %u elements to trimmed pub list", trimmedList.size());
 }
 
 } /* namespace gravity */
