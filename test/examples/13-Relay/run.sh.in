@@ -25,12 +25,13 @@ ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
 export PATH=$PATH:../../../src/components/cpp/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
- control_c()
+cleanup()
 # run if user hits control-c
 {
   kill -9 $SDPID
   kill -9 $RPID
   kill -9 $PUBPID
+  kill -9 $SUBPID
   exit $?
 }
 
@@ -39,13 +40,18 @@ trap control_c SIGINT
 
 ServiceDirectory &
 SDPID=$!
-Relay &
-RPID=$!
 
 ./ProtobufDataProductPublisher &
 PUBPID=$!
 
-# sleep for a second to give the publisher a chance to register its data product
-sleep 1
+./ProtobufDataProductSubscriber &
+SUBPID=$!
 
-./ProtobufDataProductSubscriber
+sleep 3
+
+Relay &
+RPID=$!
+
+sleep 5
+
+cleanup
