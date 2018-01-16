@@ -39,7 +39,7 @@ int main()
 {
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
-	gn.init("SimpleGravityComponentID2");
+	gn.init("Subscriber");
 
 	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).
 	SimpleGravityCounterSubscriber counterSubscriber;

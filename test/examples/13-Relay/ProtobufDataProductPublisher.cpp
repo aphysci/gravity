@@ -31,7 +31,7 @@ int main()
 
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.
-	gn.init("ProtobufGravityComponentID");
+	gn.init("Publisher");
 
 	gn.registerDataProduct(
 							//This identifies the Data Product to the service directory so that others can
