@@ -260,14 +260,35 @@ void GravitySubscriptionManager::start()
                         if (readSubscription(pollItems[index].socket, filterText, dataProduct) < 0)
                             break;
 						
-
                         shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
+                        // if it's been relayed, it will come in on a different socket than the original.  Look at all cached values
+                        // to try to filter out duplicates.
+                        // This is just to handle the transition when the Relay is first inserted - after that, normal subscribers
+                        // will only be subscribed to the relay (if one exists).
+                        bool cachedRelay = false;
+                        if (!lastCachedValue && dataProduct->isRelayedDataproduct())
+                        {
+                            for (map<void*, shared_ptr<GravityDataProduct> >::const_iterator mapIter = lastCachedValueMap.begin();
+                                    mapIter != lastCachedValueMap.end(); mapIter++)
+                            {
+                                if (mapIter->second &&
+                                        mapIter->second->getGravityTimestamp() == dataProduct->getGravityTimestamp() &&
+                                        mapIter->second->getComponentId() == dataProduct->getComponentId() &&
+                                        *(mapIter->second) == *dataProduct) // only compares product id and data
+                                {
+                                    cachedRelay = true;
+                                    break;
+                                }
+                            }
+                        }
+
                         // This may be a resend of previous value if a new subscriber was added, so make sure this is new data
-                        if (!lastCachedValue ||
-                            lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp() ||
-                            // or if timestamps are the same, but GDP's are different
-                            (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp() && !(*lastCachedValue == *dataProduct)))
+                        if (!cachedRelay &&
+                              (!lastCachedValue ||
+                               lastCachedValue->getGravityTimestamp() < dataProduct->getGravityTimestamp() ||
+                               // or if timestamps are the same, but GDP's are different
+                               (lastCachedValue->getGravityTimestamp() == dataProduct->getGravityTimestamp() && !(*lastCachedValue == *dataProduct))))
                         {
 
 							// Grab current time now for stamping received_timestamp on received data products
@@ -661,7 +682,7 @@ void GravitySubscriptionManager::addSubscription()
 				{
 					dataProducts.push_back(lastCachedValueMap[iter->second.socket]);
 				}
-			}		
+			}
 			if (dataProducts.size() > 0)
 			{
 				Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
