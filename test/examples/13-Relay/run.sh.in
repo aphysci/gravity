@@ -28,10 +28,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 cleanup()
 # run if user hits control-c
 {
-  kill -9 $SDPID
-  kill -9 $RPID
-  kill -9 $PUBPID
-  kill -9 $SUBPID
+  kill $SDPID
+  kill $RPID
+  kill $PUBPID
+  kill $SUBPID
   exit $?
 }
 

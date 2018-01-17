@@ -24,11 +24,28 @@
 #include <vector>
 #include <map>
 
+bool quit = false;
+#ifdef WIN32
+BOOL WINAPI consoleHandler(DWORD sig) {
+
+    if (sig == CTRL_C_EVENT)
+        quit = true;
+
+    return TRUE;
+}
+#else
+#include <signal.h>
+void handler(int sig)
+{
+    quit = true;
+}
+#endif
+
+#define COMPONENT_ID "Relay"
+
 using namespace gravity;
 using namespace std;
 using namespace std::tr1;
-
-#define COMPONENT_ID "Relay"
 
 class Relay : public GravitySubscriber
 {
@@ -60,6 +77,7 @@ int Relay::run()
     // Subscribe to each data product
     std::istringstream tokenStream(dpList);
     string token;
+    list<string> dataProducts;
     while (getline(tokenStream, token, ','))
     {
         // trim any spaces from the ends
@@ -68,9 +86,33 @@ int Relay::run()
 
         Log::debug("Configured to relay: %s", token.c_str());
         gravityNode.registerRelay(token, *this, localOnly, GravityTransportTypes::TCP);
+        dataProducts.push_back(token);
     }
 
-    gravityNode.waitForExit();
+#ifdef WIN32
+    // TODO: implement termination signal handling for windows
+#else
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGTERM, &sigIntHandler, NULL);
+#endif
+
+    while (!quit)
+    {
+        gravity::sleep(1000);
+    }
+
+    Log::warning("Exiting, but cleaning up registrations first...");
+    for (list<string>::iterator iter = dataProducts.begin(); iter != dataProducts.end(); iter++)
+    {
+        gravityNode.unregisterRelay(*iter, *this);
+    }
+    Log::warning("...done");
 
     return 0;
 }

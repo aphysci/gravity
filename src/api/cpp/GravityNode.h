@@ -161,6 +161,7 @@ private:
         std::string dataProductID;
         std::string filter;
 		bool receiveLastCachedValue;
+		bool isRelay;
         const GravitySubscriber* subscriber;
     } SubscriptionDetails;
 
@@ -419,14 +420,43 @@ public:
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
 
     /**
+     * Register a Relay that will act as a pass-through for the given dataProductID.  It will be a publisher and subscriber
+     * for the given dataProductID, but other components will only subscribe to this data if they are on the same host (localOnly == true), or
+     * if it is acting as a global relay (localOnly == false).  The Gravity infrastructure automatically handles which components should
+     * receive relayed or non-relayed data.
      *
+     * \param dataProductID string ID used to uniquely identify this published data product
+     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
+     * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
+     * \param transport type (e.g. 'tcp', 'ipc')
+     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType);
 
     /**
+     * Register a Relay that will act as a pass-through for the given dataProductID.  It will be a publisher and subscriber
+     * for the given dataProductID, but other components will only subscribe to this data if they are on the same host (localOnly == true), or
+     * if it is acting as a global relay (localOnly == false).  The Gravity infrastructure automatically handles which components should
+     * receive relayed or non-relayed data.
      *
+     * \param dataProductID string ID used to uniquely identify this published data product
+     * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
+     * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
+     * \param transport type (e.g. 'tcp', 'ipc')
+     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue);
+
+    /**
+     * Unregister a relay for the given dataProductID.  Handles unregistering as a publisher and subscriber.
+     *
+     * \param dataProductID ID of data product for which the relay is to be removed as a publisher and subscriber
+     * \param subscriber the subscriber that will be removed from the notification list for this subscription
+     * \return success flag
+     */
+    GRAVITY_API GravityReturnCode unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber);
 
     /**
      * Returns a string representation of the provided error code.

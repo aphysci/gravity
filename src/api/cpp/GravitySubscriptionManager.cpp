@@ -985,7 +985,6 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 		if (iter->isrelay() && iter->componentid() == componentID)
 		{
 			iAmRelay = true;
-			Log::debug("%s is a relay", iter->componentid().c_str());
 		}
 	}
 
@@ -1000,6 +999,14 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 		}
 		else if (iter->isrelay())
 		{
+            if (iter->has_ipaddress())
+            {
+                Log::trace("found valid relay with ip = %s, my ip = %s", iter->ipaddress().c_str(), ipAddress.c_str());
+            }
+            else
+            {
+                Log::trace("Found valid global relay");
+            }
             // if it's a relay for any IP or our IP
             if(!iter->has_ipaddress() || iter->ipaddress() == ipAddress)
             {

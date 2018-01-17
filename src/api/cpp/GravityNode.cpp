@@ -2155,6 +2155,18 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
 	return subscribe(dataProductID, subscriber);
 }
 
+GravityReturnCode GravityNode::unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber)
+{
+    GravityReturnCode ret = unregisterDataProduct(dataProductID);
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        // try to unsubscribe in any case
+        unsubscribe(dataProductID, subscriber);
+        return ret; // but return unregister error
+    }
+    return unsubscribe(dataProductID, subscriber);
+}
+
 #ifdef WIN32
 //convert binary address to string.
 const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
