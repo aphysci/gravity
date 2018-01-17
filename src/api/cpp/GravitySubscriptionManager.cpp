@@ -998,17 +998,24 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 			if (!iter->isrelay())
 				trimmedList.push_back(*iter);
 		}
-		else if (iter->isrelay() &&  // if it's a relay for any IP or our IP
-		           (!iter->has_ipaddress() || iter->ipaddress() == ipAddress))
+		else if (iter->isrelay())
 		{
-			trimmedList.clear();
-			trimmedList.push_back(*iter);
-			if (!iter->has_ipaddress())
-				// we'll keep looking for a local relay if we've found a global one
-				foundGlobalRelay = true;
-			else
-				// we have a local relay, so we're done here
-				break;
+            // if it's a relay for any IP or our IP
+            if(!iter->has_ipaddress() || iter->ipaddress() == ipAddress)
+            {
+                trimmedList.clear();
+                trimmedList.push_back(*iter);
+                if (!iter->has_ipaddress())
+                    // we'll keep looking for a local relay if we've found a global one
+                    foundGlobalRelay = true;
+                else
+                    // we have a local relay, so we're done here
+                    break;
+            }
+            else // ignore it
+            {
+                continue;
+            }
 		}
 
 		// The normal case
