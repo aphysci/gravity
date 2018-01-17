@@ -1017,7 +1017,7 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 			trimmedList.push_back(*iter);
 		}
 	}
-	Log::debug("added %u elements to trimmed pub list", trimmedList.size());
+	Log::trace("added %u elements to trimmed pub list", trimmedList.size());
 }
 
 } /* namespace gravity */
