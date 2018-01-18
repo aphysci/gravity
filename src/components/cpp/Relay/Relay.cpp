@@ -135,5 +135,8 @@ void Relay::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDa
 int main(int argc, const char** argv)
 {
 	Relay relay;
-	return relay.run();
+
+	// Need to explicitly call exit here since we're capturing SIGINT and SIGTERM.  Otherwise, if the SD
+	// goes away while we're trying to unregister, this could hang indefinitely.
+	exit(relay.run());
 }
