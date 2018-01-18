@@ -52,6 +52,10 @@ sleep 3
 Relay &
 RPID=$!
 
-sleep 5
+sleep 10
+
+kill $RPID
+
+sleep 10
 
 cleanup
