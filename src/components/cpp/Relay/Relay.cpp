@@ -26,6 +26,7 @@
 
 bool quit = false;
 #ifdef WIN32
+#include <windows.h> 
 BOOL WINAPI consoleHandler(DWORD sig) {
 
     if (sig == CTRL_C_EVENT)
@@ -33,6 +34,7 @@ BOOL WINAPI consoleHandler(DWORD sig) {
 
     return TRUE;
 }
+
 #else
 #include <signal.h>
 void handler(int sig)
@@ -90,7 +92,9 @@ int Relay::run()
     }
 
 #ifdef WIN32
-    // TODO: implement termination signal handling for windows
+	if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
+		Log::critical("ERROR: Could not set control handler - Relay will not be able to unregister when terminated"); 
+	}
 #else
     struct sigaction sigIntHandler;
 
