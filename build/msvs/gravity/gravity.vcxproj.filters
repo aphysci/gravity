@@ -36,7 +36,7 @@
     <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriber.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-	<ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.cpp">
+    <ClCompile Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\api\cpp\GravityServiceProvider.cpp">
@@ -123,6 +123,12 @@
     <ClCompile Include="..\..\..\src\api\cpp\FutureResponse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionManager.h">
@@ -131,7 +137,7 @@
     <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-	<ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.h">
+    <ClInclude Include="..\..\..\src\api\cpp\GravitySubscriptionMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\api\cpp\GravityServiceProvider.h">
@@ -230,6 +236,12 @@
     <ClInclude Include="..\..\..\src\api\cpp\FutureResponse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\FileArchiverControlRequestPB.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\api\cpp\protobuf\FileArchiverControlResponsePB.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\api\protobufs\ComponentDataLookupResponsePB.proto">
@@ -269,6 +281,8 @@
       <Filter>protobufs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\FileArchiverControlRequestPB.proto" />
+    <CustomBuild Include="..\..\..\src\api\protobufs\FileArchiverControlResponsePB.proto" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
