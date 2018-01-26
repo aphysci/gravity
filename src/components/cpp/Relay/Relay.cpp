@@ -24,13 +24,20 @@
 #include <vector>
 #include <map>
 
+
+gravity::Semaphore lock;
 bool quit = false;
+
 #ifdef WIN32
 #include <windows.h> 
 BOOL WINAPI consoleHandler(DWORD sig) {
 
     if (sig == CTRL_C_EVENT)
+    {
+        lock.Lock();
         quit = true;
+        lock.Unlock();
+    }
 
     return TRUE;
 }
@@ -39,7 +46,9 @@ BOOL WINAPI consoleHandler(DWORD sig) {
 #include <signal.h>
 void handler(int sig)
 {
+    lock.Lock();
     quit = true;
+    lock.Unlock();
 }
 #endif
 
@@ -106,9 +115,13 @@ int Relay::run()
     sigaction(SIGTERM, &sigIntHandler, NULL);
 #endif
 
-    while (!quit)
+    while (true)
     {
         gravity::sleep(1000);
+        lock.Lock();
+        if (quit)
+            break;
+        lock.Unlock();
     }
 
     Log::warning("Exiting, but cleaning up registrations first...");
