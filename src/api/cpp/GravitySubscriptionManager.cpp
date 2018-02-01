@@ -373,7 +373,7 @@ void GravitySubscriptionManager::start()
                                 // if we don't already have this url, add it
                                 if (iter->second->pollItemMap.count(trimmedIter->url()) == 0)
                                 {
-									zmq_pollitem_t pollItem;
+                                    zmq_pollitem_t pollItem;
                                     void *subSocket = setupSubscription(trimmedIter->url(), iter->first, pollItem);
 
                                     // and by socket for quick lookup as data arrives
@@ -564,7 +564,8 @@ void GravitySubscriptionManager::addSubscription()
         pb.ParseFromArray(zmq_msg_data(&msg), zmq_msg_size(&msg));
         zmq_msg_close(&msg);
         pubInfoPBs.push_back(pb);
-		Log::trace("url = '%s'", pb.url().c_str());
+        if (pb.has_url())
+            Log::trace("url = '%s'", pb.url().c_str());
 	}
 
 	// Read the subscription filter
@@ -640,7 +641,7 @@ void GravitySubscriptionManager::addSubscription()
 	for (list<PublisherInfoPB>::iterator iter = trimmedPublishers.begin(); iter != trimmedPublishers.end(); iter++)
 	{
 		// if we have a url and we haven't seen it before, subscribe to it
-		if (iter->url().size() > 0 && subDetails->pollItemMap.count(iter->url()) == 0)
+		if (iter->has_url() && subDetails->pollItemMap.count(iter->url()) == 0)
 		{
 			Log::trace("Subscribe to new url");
 			zmq_pollitem_t pollItem;
@@ -981,8 +982,8 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 	bool iAmRelay = false;
 	for (list<PublisherInfoPB>::const_iterator iter = fullList.begin(); iter != fullList.end(); iter++)
 	{
-		// if we are a relay, then don't want to subscribe to one
-		if (iter->isrelay() && iter->componentid() == componentID)
+		// if this is a valid publisher and we are a relay, then don't want to subscribe to one
+		if (iter->has_url() && iter->isrelay() && iter->componentid() == componentID)
 		{
 			iAmRelay = true;
 		}
@@ -992,7 +993,12 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 	bool foundGlobalRelay = false;
 	for (list<PublisherInfoPB>::const_iterator iter = fullList.begin(); iter != fullList.end(); iter++)
 	{
-		if (iAmRelay)
+	    if (!iter->has_url())  // if invalid publisher - should never happen
+	    {
+	        Log::warning("Found publisher with no url??  Skipping...");
+	        continue;
+	    }
+	    else if (iAmRelay)
 		{
 			if (!iter->isrelay())
 				trimmedList.push_back(*iter);

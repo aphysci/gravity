@@ -1383,7 +1383,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 			gravity::sleep(500);
 	}
 
-	if (registeredPublishersInfo.size() == 0)
+	if (registeredPublishersInfo.size() == 0 || !registeredPublishersInfo[0].has_url())
 	{
 		Log::critical("Service Directory has not finished initialization (RegisteredPublishers not available)");
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;

@@ -24,7 +24,7 @@ package gravity;
 
 message PublisherInfoPB
 {
-	required string url         = 1;
+	optional string url         = 1;
 	optional bool isRelay       = 2;
 	optional string componentID = 3;
 	optional string ipAddress   = 4;
@@ -32,7 +32,7 @@ message PublisherInfoPB
 
 message ComponentDataLookupResponsePB
 {
-	required string lookupID            = 1;
+	optional string lookupID            = 1;
 	repeated PublisherInfoPB publishers = 2;
-	optional string domain_id           = 3;
+	optional string domain_id           = 3 [default = ""];
 }

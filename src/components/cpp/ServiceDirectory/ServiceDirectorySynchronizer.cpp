@@ -238,30 +238,37 @@ void ServiceDirectorySynchronizer::start()
 						// updates from the "remote" service directory
 						ComponentDataLookupResponsePB resp;
 						response.populateMessage(resp);
-						string domain = resp.domain_id();
-						string url = resp.publishers(0).url();
+						if (resp.publishers_size() == 0 || !resp.publishers(0).has_url())
+						{
+						    Log::warning("Received empty response to request for subscription updates from remote service directory, ignoring...");
+						}
+						else
+						{
+                            string domain = resp.domain_id();
+                            string url = resp.publishers(0).url();
 
-						Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
+                            Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
 
-						// Get the details for the domain that is providing an update
-						shared_ptr<SyncDomainDetails> details = syncMap[domain];
+                            // Get the details for the domain that is providing an update
+                            shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
-						// Clean up the request socket (to be replaced with a SUB socket)
-						zmq_close(details->socket);
+                            // Clean up the request socket (to be replaced with a SUB socket)
+                            zmq_close(details->socket);
 
-						// Set up subscription socket for updates from the "remote" service directory
-						details->socket = zmq_socket(context, ZMQ_SUB);
-						details->initialized = false;
+                            // Set up subscription socket for updates from the "remote" service directory
+                            details->socket = zmq_socket(context, ZMQ_SUB);
+                            details->initialized = false;
 
-						// Update poll item with new subscription socket
-						// (replace REP socket with new SUB socket)
-						(*pollItemIter).socket = details->socket;
-						(*pollItemIter).fd = 0;
-						(*pollItemIter).revents = 0;					
+                            // Update poll item with new subscription socket
+                            // (replace REP socket with new SUB socket)
+                            (*pollItemIter).socket = details->socket;
+                            (*pollItemIter).fd = 0;
+                            (*pollItemIter).revents = 0;
 
-						// Connect to publisher
-						zmq_connect(details->socket, url.c_str());
-						zmq_setsockopt(details->socket, ZMQ_SUBSCRIBE, NULL, 0);					
+                            // Connect to publisher
+                            zmq_connect(details->socket, url.c_str());
+                            zmq_setsockopt(details->socket, ZMQ_SUBSCRIBE, NULL, 0);
+						}
 					}
 					else if (response.getDataProductID() == "ServiceDirectory_DomainDetails")
 					{
