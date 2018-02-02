@@ -118,7 +118,7 @@ bool GravityDataProduct::serializeToArray(void* arrayPtr) const
     return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSize());
 }
 
-bool GravityDataProduct::operator==(const GravityDataProduct &gdp)
+bool GravityDataProduct::operator==(const GravityDataProduct &gdp) const
 {
     // fastest test first...
     if (getDataSize() != gdp.getDataSize())
@@ -128,22 +128,22 @@ bool GravityDataProduct::operator==(const GravityDataProduct &gdp)
     return memcmp(gravityDataProductPB->data().c_str(), gdp.gravityDataProductPB->data().c_str(), getDataSize()) == 0;
 }
 
-std::string GravityDataProduct::getComponentId()
+std::string GravityDataProduct::getComponentId() const
 {
 	return gravityDataProductPB->componentid();
 }
 
-std::string GravityDataProduct::getDomain()
+std::string GravityDataProduct::getDomain() const
 {
 	return gravityDataProductPB->domain();
 }
 
-bool GravityDataProduct::isFutureResponse()
+bool GravityDataProduct::isFutureResponse() const
 {
 	return gravityDataProductPB->future_response();
 }
 
-bool GravityDataProduct::isCachedDataproduct()
+bool GravityDataProduct::isCachedDataproduct() const
 {
 	return(gravityDataProductPB->has_is_cached_dataproduct() && gravityDataProductPB->is_cached_dataproduct());	
 }
@@ -154,9 +154,20 @@ void GravityDataProduct::setIsCachedDataproduct(bool cached)
 	gravityDataProductPB->set_is_cached_dataproduct(cached);
 	
 }
-std::string GravityDataProduct::getFutureSocketUrl()
+std::string GravityDataProduct::getFutureSocketUrl() const
 {
 	return gravityDataProductPB->future_socket_url();
 }
+
+bool GravityDataProduct::isRelayedDataproduct() const
+{
+	return(gravityDataProductPB->has_is_relayed_dataproduct() && gravityDataProductPB->is_relayed_dataproduct());
+}
+
+void GravityDataProduct::setIsRelayedDataproduct(bool relayed)
+{
+	gravityDataProductPB->set_is_relayed_dataproduct(relayed);
+}
+
 
 } /* namespace gravity */

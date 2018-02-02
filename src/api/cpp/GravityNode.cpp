@@ -444,6 +444,7 @@ GravityNode::~GravityNode()
 	// Close the inproc sockets
 	sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
 	zmq_close(subscriptionManagerSWL.socket);
+	zmq_close(subscriptionManagerConfigSWL.socket);
 
 	sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
 	zmq_close(requestManagerSWL.socket);
@@ -542,6 +543,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		// Setup up communication channel to subscription manager
 		subscriptionManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
 		zmq_bind(subscriptionManagerSWL.socket, "inproc://gravity_subscription_manager");
+		subscriptionManagerConfigSWL.socket = zmq_socket(context,ZMQ_PUB);
+		zmq_bind(subscriptionManagerConfigSWL.socket,"inproc://gravity_subscription_manager_configure");
 
 		// Setup the metrics control communication channel
 		metricsManagerSocket = zmq_socket(context, ZMQ_PUB);
@@ -820,6 +823,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				Log::initAndAddGravityLogger(this, net_log_level);
 
 			configureServiceManager();
+			configureSubscriptionManager();
 		}
 	}
 	else
@@ -878,6 +882,20 @@ void GravityNode::configureServiceManager()
 	//Send component ID
 	sendStringMessage(serviceManagerConfigSWL.socket,componentID,ZMQ_DONTWAIT);
 
+}
+
+void GravityNode::configureSubscriptionManager()
+{
+	sendStringMessage(subscriptionManagerConfigSWL.socket,"configure",ZMQ_SNDMORE);
+
+	//send Domain
+	sendStringMessage(subscriptionManagerConfigSWL.socket,myDomain,ZMQ_SNDMORE);
+
+	//Send component ID
+	sendStringMessage(subscriptionManagerConfigSWL.socket,componentID,ZMQ_DONTWAIT);
+
+	//Send ip address
+	sendStringMessage(subscriptionManagerConfigSWL.socket,getIP(),ZMQ_DONTWAIT);
 }
 
 std::string GravityNode::getDomainUrl(int timeout)
@@ -1027,6 +1045,12 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType, bool cacheLastValue)
 {
+	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
+}
+
+GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
+		                                                    bool cacheLastValue, bool isRelay, bool localOnly)
+{
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1104,6 +1128,11 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
             registration.set_type(ServiceDirectoryRegistrationPB::DATA);
             registration.set_component_id(componentID);
 			registration.set_timestamp(timestamp);
+			registration.set_is_relay(isRelay);
+			if (localOnly)
+			{
+				registration.set_ip_address(getIP());
+			}
 
             // Wrap request in GravityDataProduct
             GravityDataProduct request("RegistrationRequest");
@@ -1245,7 +1274,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     return ret;
 }
 
-GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<std::string> &urls, string& domain)
+GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dataProductID, vector<PublisherInfoPB> &urls, string& domain)
 {
     // Create the object describing the data product to lookup
     ComponentLookupRequestPB lookup;
@@ -1278,8 +1307,8 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
         if (parserSuccess)
         {
-            for (int i = 0; i < pb.url_size(); i++)
-                urls.push_back(pb.url(i));
+            for (int i = 0; i < pb.publishers_size(); i++)
+                urls.push_back(pb.publishers(i));
             ret = GravityReturnCodes::SUCCESS;
         }
         else
@@ -1329,52 +1358,32 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
         domain = myDomain;
     }
 
-    vector<string> url;
+    vector<PublisherInfoPB> publisherInfoPBs;
 
     GravityReturnCode ret;
-    ret = ServiceDirectoryDataProductLookup(dataProductID, url, domain);
+    ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
     if(ret != GravityReturnCodes::SUCCESS)
         return ret;
 
-    if (url.size() == 0)
-    {
-        subscribe("", dataProductID, subscriber, filter, domain, receiveLastCachedValue);
-    }
-    else
-    {
-        // Subscribe to all published data products
-        for (size_t i = 0; i < url.size(); i++)
-        {
-            subscribe(url[i], dataProductID, subscriber, filter, domain, receiveLastCachedValue);
-        }
-    }
-
-    return GravityReturnCodes::SUCCESS;
-}
-
-GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
-{
-
 	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID.c_str(), receiveLastCachedValue);
 	
-	vector<string> url;
-	GravityReturnCode ret;
+	vector<PublisherInfoPB> registeredPublishersInfo;
 	int tries = 5;
-	while (url.size() == 0 && tries-- > 0)
+	while (registeredPublishersInfo.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", url, myDomain);
+		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", registeredPublishersInfo, myDomain);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
-		if (url.size() > 1)
-			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", url.size());
-		else if (url.size() == 1)
+		if (registeredPublishersInfo.size() > 1)
+			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", registeredPublishersInfo.size());
+		else if (registeredPublishersInfo.size() == 1)
 			break;
 
 		if (tries > 0)
 			gravity::sleep(500);
 	}
 
-	if (url.size() == 0)
+	if (registeredPublishersInfo.size() == 0 || !registeredPublishersInfo[0].has_url())
 	{
 		Log::critical("Service Directory has not finished initialization (RegisteredPublishers not available)");
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
@@ -1385,10 +1394,14 @@ GravityReturnCode GravityNode::subscribe(string connectionURL, string dataProduc
 	sendStringMessage(subscriptionManagerSWL.socket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendIntMessage(subscriptionManagerSWL.socket, receiveLastCachedValue, ZMQ_SNDMORE);
-	sendStringMessage(subscriptionManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
+	sendUint32Message(subscriptionManagerSWL.socket, publisherInfoPBs.size(), ZMQ_SNDMORE);
+	for (unsigned int i = 0; i < publisherInfoPBs.size(); i++)
+	{
+		sendProtobufMessage(subscriptionManagerSWL.socket, publisherInfoPBs[i], ZMQ_SNDMORE);
+	}
 	sendStringMessage(subscriptionManagerSWL.socket, filter, ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, domain, ZMQ_SNDMORE);
-    sendStringMessage(subscriptionManagerSWL.socket, url[0], ZMQ_SNDMORE);
+    sendStringMessage(subscriptionManagerSWL.socket, registeredPublishersInfo[0].url(), ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, sizeof(&subscriber));
@@ -1458,23 +1471,26 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 {
     string dataProductID = dataProduct.getDataProductID();
 	Log::trace("Publishing %s", dataProductID.c_str());
-	//Set Timestamp
-    if (timestamp == 0)
-    {
-        dataProduct.setTimestamp(getCurrentTime());
-    }
-    else
-    {
-        dataProduct.setTimestamp(timestamp);
-    }
 
-	//set Component ID
-	dataProduct.setComponentId(componentID);
+	// keep original info if this message has been relayed from somewhere else
+	if (!dataProduct.isRelayedDataproduct())
+	{
+		//Set Timestamp
+		if (timestamp == 0)
+		{
+			dataProduct.setTimestamp(getCurrentTime());
+		}
+		else
+		{
+			dataProduct.setTimestamp(timestamp);
+		}
 
-	//set Domain
-	dataProduct.setDomain(myDomain);
+		//set Component ID
+		dataProduct.setComponentId(componentID);
 
-	
+		//set Domain
+		dataProduct.setDomain(myDomain);
+	}
 
 	// Send subscription details
     publishManagerPublishSWL.lock.Lock();
@@ -2124,6 +2140,31 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
+{
+	return registerRelay(dataProductID, subscriber, localOnly, transportType, defaultCacheLastSentDataprodut);
+}
+
+GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue)
+{
+	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
+	if (ret != GravityReturnCodes::SUCCESS)
+		return ret;
+	return subscribe(dataProductID, subscriber);
+}
+
+GravityReturnCode GravityNode::unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber)
+{
+    GravityReturnCode ret = unregisterDataProduct(dataProductID);
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        // try to unsubscribe in any case
+        unsubscribe(dataProductID, subscriber);
+        return ret; // but return unregister error
+    }
+    return unsubscribe(dataProductID, subscriber);
 }
 
 #ifdef WIN32

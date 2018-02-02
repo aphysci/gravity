@@ -59,6 +59,7 @@ GRAVITY_API void sendUint64Message(void* socket, uint64_t val, int flags);
 GRAVITY_API uint32_t readUint32Message(void* socket);
 GRAVITY_API void sendUint32Message(void* socket, uint32_t val, int flags);
 GRAVITY_API int sendGravityDataProduct(void* socket, const GravityDataProduct& dataProduct, int flags);
+GRAVITY_API int sendProtobufMessage(void* socket, const google::protobuf::Message& pb, int flags);
 GRAVITY_API int bindFirstAvailablePort(void *socket, std::string ipAddr, int minPort, int maxPort);
 #ifdef _WIN32
 GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp);

@@ -22,9 +22,17 @@ option java_package = "com.aphysci.gravity.protobuf";
 
 package gravity;
 
+message PublisherInfoPB
+{
+	optional string url         = 1;
+	optional bool isRelay       = 2;
+	optional string componentID = 3;
+	optional string ipAddress   = 4;
+}
+
 message ComponentDataLookupResponsePB
 {
-	required string lookupID = 1;
-	repeated string url = 2;
-	optional string domain_id = 3;
+	optional string lookupID            = 1;
+	repeated PublisherInfoPB publishers = 2;
+	optional string domain_id           = 3 [default = ""];
 }

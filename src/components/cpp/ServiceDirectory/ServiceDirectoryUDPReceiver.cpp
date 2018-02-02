@@ -366,7 +366,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString,unsigned int numDomains)
 {
 	int start=0;
-	int end = domainString.find(",",start);
+	unsigned int end = domainString.find(",",start);
 
 	for(unsigned int i = 0; i < numDomains; i++)
 	{

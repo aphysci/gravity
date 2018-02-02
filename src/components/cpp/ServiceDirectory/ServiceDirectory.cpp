@@ -139,7 +139,7 @@ static bool validateDomainName(string domain)
 static int parseDomainCSV(string &csv)
 {
 	int prevPos=0;
-	int pos = csv.find(",",0);
+	unsigned int pos = csv.find(",",0);
 	int commaCount = 0;
 
 	if(csv.length()==0)
@@ -308,6 +308,9 @@ void ServiceDirectory::start()
      *
      * We cannot synchronize access to the GravityNode here because the registration calls require the SD to service
      * the registration requests in the loop below.
+     *
+     * Calls FROM the GravityNode (i.e. ServiceProvider::request below) won't cause deadlock as long as we don't make calls to GravityNode,
+     * but because it is a separate thread, we need to manage data access.
      */
     struct RegistrationData regData;
     regData.node = &gn;
@@ -345,6 +348,13 @@ void ServiceDirectory::start()
             GravityDataProduct req(zmq_msg_data(&msg), zmq_msg_size(&msg));
             zmq_msg_close(&msg);
 
+            /**
+             * Most of the methods in this class are called on the main thread, and are invoked from within
+             * this locked block.  If that changes, additional locked blocks may be needed.  Currently the only
+             * other locked block needed is in the ServiceProvider::request method defined below which runs
+             * on a separate thread provided by the GravityNode.
+             */
+            lock.Lock();
             shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
@@ -358,6 +368,7 @@ void ServiceDirectory::start()
                 registerUpdatesToSend.clear();
                 registeredPublishersProcessed = true;
             }
+            lock.Unlock();
 
             sendGravityDataProduct(pollItem.socket, *response, ZMQ_DONTWAIT);
         }
@@ -443,13 +454,18 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduc
     return gdpResponse;
 }
 
+/**
+ * Because the lock in this method blocks the main SD loop above, we can't issue any GravityNode calls
+ * here that require SD support (e.g. register, etc).
+ */
 shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
 	shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
-    if (serviceID == "DirectoryService") 
+    if (serviceID == DIRECTORY_SERVICE)
     {
+        lock.Lock();
         string requestType = request.getDataProductID();
         if (requestType == "GetProviders")
         {
@@ -472,21 +488,21 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
 				}
 			}            
             
-			for (map<string, map<string, list<string> > >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++)
+			for (map<string, map<string, list<PublisherInfoPB> > >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++)
 			{
 				string domain = it->first;
-				map<string, list<string> > dpMap = it->second;
-				for(map<string, list<string> >::iterator it = dpMap.begin(); it != dpMap.end(); it++) 
+				map<string, list<PublisherInfoPB> > dpMap = it->second;
+				for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); it++)
 				{
 					ProductLocations* locs = providerMap.add_data_provider();
 					locs->set_product_id(it->first); // data product ID
 					locs->add_domain_id(domain); // domain
-					list<string> urls = it->second;
-					for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
+					list<PublisherInfoPB> urls = it->second;
+					for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); lit++)
 					{
-						locs->add_url(*lit); // url
-						locs->add_component_id(urlToComponentMap[*lit]); // component id	
-						locs->add_timestamp(registrationInstanceMap[*lit]); //timestamp
+						locs->add_url(lit->url()); // url
+						locs->add_component_id(urlToComponentMap[lit->url()]); // component id
+						locs->add_timestamp(registrationInstanceMap[lit->url()]); //timestamp
 					}
 				}
 			}            
@@ -498,6 +514,7 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string servi
         {
 			gdpResponse->setData(domain.c_str(), domain.length());
 		}
+        lock.Unlock();
     }
 
     return gdpResponse;
@@ -521,13 +538,13 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 		// Get data product map for requested domain (defaulting to our own)
 		if (dataProductMap.count(lookupDomain) > 0)
 		{
-			map<string, list<string> > dpMap = dataProductMap[lookupDomain];		
+			map<string, list<PublisherInfoPB> > dpMap = dataProductMap[lookupDomain];
 
 			Log::message("[Lookup Request] ID: %s, Domain: %s, MessageType: Data Product, First Server: %s", 
 					 lookupRequest.lookupid().c_str(),
 					 lookupDomain.c_str(),
                      dpMap.count(lookupRequest.lookupid()) != 0 ?
-                     dpMap[lookupRequest.lookupid()].front().c_str(): "");			
+                     dpMap[lookupRequest.lookupid()].front().url().c_str(): "");
 		}
 		else
 		{
@@ -580,18 +597,18 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 		locs->add_domain_id(domain); // domain
 	}            
             
-	map<string, list<string> > dpMap = dataProductMap[domain];
-	for(map<string, list<string> >::iterator it = dpMap.begin(); it != dpMap.end(); it++) 
+	map<string, list<PublisherInfoPB> > dpMap = dataProductMap[domain];
+	for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); it++)
 	{
 		ProductLocations* locs = providerMap.add_data_provider();
 		locs->set_product_id(it->first); // data product ID
 		locs->add_domain_id(domain); // domain
-		list<string> urls = it->second;
-		for(list<string>::iterator lit = urls.begin(); lit != urls.end(); lit++) 
+		list<PublisherInfoPB> urls = it->second;
+		for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); lit++)
 		{
-			locs->add_url(*lit); // url
-			locs->add_component_id(urlToComponentMap[*lit]); // component id					
-			locs->add_timestamp(registrationInstanceMap[*lit]); // timestamp
+			locs->add_url(lit->url()); // url
+			locs->add_component_id(urlToComponentMap[lit->url()]); // component id
+			locs->add_timestamp(registrationInstanceMap[lit->url()]); // timestamp
 		}
 	}
 	
@@ -646,17 +663,30 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 	{
 		if (registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA)
 		{
-			map<string, list<string> >& dpMap = dataProductMap[domain];
+			map<string, list<PublisherInfoPB> >& dpMap = dataProductMap[domain];
 
 			if (registration.id() == REGISTERED_PUBLISHERS)
 			{
+				// When this request is received here, this product ID has already been registered with our GravityNode, so
+				// it's safe to start publishing to it (cached values will be sent to new subscribers).
 				registeredPublishersReady = true;
 			}
-			list<string>& urls = dpMap[registration.id()];
-			list<string>::iterator iter = find(urls.begin(), urls.end(), registration.url());
+			list<PublisherInfoPB>& urls = dpMap[registration.id()];
+			list<PublisherInfoPB>::iterator iter = urls.begin();
+			for (;iter != urls.end();iter++)
+			{
+				if (iter->url() == registration.url())
+					break;
+			}
 			if (iter == urls.end())
 			{
-				dpMap[registration.id()].push_back(registration.url());	
+				PublisherInfoPB infoPB;
+				infoPB.set_url(registration.url());
+				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
+				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
+				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+
+				dpMap[registration.id()].push_back(infoPB);
 				
 				urlToComponentMap[registration.url()] = registration.component_id();
 
@@ -757,11 +787,16 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
     if (unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA)
     {
-		map<string, list<string> >& dpMap = dataProductMap[domain];
+		map<string, list<PublisherInfoPB> >& dpMap = dataProductMap[domain];
 
-        list<string>* urls = &dpMap[unregistration.id()];
-        list<string>::iterator iter = find(urls->begin(), urls->end(), unregistration.url());
-        if (iter != urls->end())
+        list<PublisherInfoPB>* infoPBs = &dpMap[unregistration.id()];
+        list<PublisherInfoPB>::iterator iter = infoPBs->begin();
+        for (;iter != infoPBs->end(); iter++)
+        {
+        	if (iter->url() == unregistration.url())
+        		break;
+        }
+        if (iter != infoPBs->end())
         {
             dpMap[unregistration.id()].erase(iter);
 			if (dpMap[unregistration.id()].empty())
@@ -841,20 +876,25 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
 void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, const string &url)
 {
-	map<string, list<string> >& dpMap = dataProductMap[domain];
-	map<string,list<string> >::iterator iter = dpMap.begin();
+	map<string, list<PublisherInfoPB> >& dpMap = dataProductMap[domain];
+	map<string,list<PublisherInfoPB> >::iterator iter = dpMap.begin();
 	while (iter != dpMap.end())
     {		
         if (iter->first != dataProductID)
         {
-            list<string>& urls = iter->second;
-            list<string>::iterator it = find(urls.begin(), urls.end(), url);
-            if (it != urls.end())
+            list<PublisherInfoPB>& infoPBs = iter->second;
+            list<PublisherInfoPB>::iterator it = infoPBs.begin();
+            for (;it != infoPBs.end(); it++)
+            {
+            	if (it->url() == url)
+            		break;
+            }
+            if (it != infoPBs.end())
             {
                 // We need to remove/"unregister" this one
                 Log::message("[Auto-Unregister] ID: %s, MessageType: Data Product, URL: %s",
                                 iter->first.c_str(), url.c_str());
-                urls.erase(it);
+                infoPBs.erase(it);
 
                 if (registeredPublishersReady)
                 {
@@ -888,16 +928,17 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
 
 void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataProduct &response, const string &domain)
 {
-	map<string, list<string> > dpMap = dataProductMap[domain];
+	map<string, list<PublisherInfoPB> > dpMap = dataProductMap[domain];
     ComponentDataLookupResponsePB lookupResponse;
     lookupResponse.set_lookupid(dataProductID);
 	lookupResponse.set_domain_id(domain);
 	if (dpMap.count(dataProductID) != 0)
 	{
-		list<string>* urls = &dpMap[dataProductID];
-		for (list<string>::iterator iter = urls->begin(); iter != urls->end(); iter++)
+		list<PublisherInfoPB>* infoPBs = &dpMap[dataProductID];
+		for (list<PublisherInfoPB>::iterator iter = infoPBs->begin(); iter != infoPBs->end(); iter++)
 		{
-			lookupResponse.add_url(*iter);
+			PublisherInfoPB* lookupInfoPB = lookupResponse.add_publishers();
+			lookupInfoPB->CopyFrom(*iter);
 		}
 	}
     response.setData(lookupResponse);

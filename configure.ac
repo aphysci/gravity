@@ -250,6 +250,7 @@ AC_CONFIG_FILES([Makefile
                  src/components/cpp/ConfigServer/Makefile
                  src/components/cpp/LogRecorder/Makefile
                  src/components/cpp/Playback/Makefile
+                 src/components/cpp/Relay/Makefile
                  src/components/cpp/ServiceDirectory/Makefile
                  src/keyvalue_parser/Makefile
                  test/components/cpp/Makefile
@@ -288,7 +289,9 @@ AC_CONFIG_FILES([Makefile
                  test/examples/11-PythonPubSub/run.sh
                  test/examples/11-PythonPubSub/Makefile
                  test/examples/12-PythonBasicService/run.sh
-                 test/examples/12-PythonBasicService/Makefile])
+                 test/examples/12-PythonBasicService/Makefile
+                 test/examples/13-Relay/Makefile
+                 test/examples/13-Relay/run.sh])
 
 AC_OUTPUT
 

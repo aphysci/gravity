@@ -131,6 +131,7 @@ void GravityPublishManager::start()
 		{
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeResponseSocket);
+			Log::trace("GravityPublishManager, pollItems[0], command = %s", command.c_str());
 
 			// message from gravity node on this socket
 			if (command == "register")
@@ -155,6 +156,7 @@ void GravityPublishManager::start()
 		{
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
+            Log::trace("GravityPublishManager, pollItems[1], command = %s", command.c_str());
 
 			// message from gravity node should be either a publish or kill request
 			if (command == "publish")
@@ -176,6 +178,7 @@ void GravityPublishManager::start()
             // Received a command from the metrics control
             void* socket = pollItems[2].socket;
             string command = readStringMessage(socket);
+            Log::trace("GravityPublishManager, pollItems[2], command = %s", command.c_str());
 
             if (command == "MetricsEnable")
             {
@@ -214,6 +217,7 @@ void GravityPublishManager::start()
         if (pollItems[3].revents & ZMQ_POLLIN)
         {
             string command = readStringMessage(pollItems[3].socket);
+            Log::trace("GravityPublishManager, pollItems[3], command = %s", command.c_str());
             if (command == "publish")
             {
                 // This is an instruction to publish the attached metrics data

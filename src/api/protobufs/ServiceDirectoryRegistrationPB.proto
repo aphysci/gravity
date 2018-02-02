@@ -36,4 +36,6 @@ message ServiceDirectoryRegistrationPB
 	optional string component_id = 4;
 	optional string domain = 5;
 	optional uint64 timestamp = 6;
+	optional bool is_relay     = 7;
+	optional string ip_address = 8;
 }
