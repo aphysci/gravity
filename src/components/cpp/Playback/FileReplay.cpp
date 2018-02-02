@@ -82,7 +82,11 @@ void FileReplay::processArchive()
         }
 
         // Wait the appropriate amount of time and then publish this data product
-        uint64_t timestamp = gdp->getGravityTimestamp();
+        uint64_t timestamp = gdp->getReceivedTimestamp();
+        if (timestamp == 0)
+        {
+            timestamp = gdp->getGravityTimestamp();
+        }
         if (firstPublishTime == 0)
         {
             // This is the first one
