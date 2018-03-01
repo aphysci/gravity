@@ -17,6 +17,7 @@
  */
 
 %include "std_string.i" // for std::string typemaps
+%include "stdint.i" // for std::string typemaps
 
 %module(directors="1", naturalvar="1") gravity
 
