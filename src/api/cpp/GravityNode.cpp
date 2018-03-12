@@ -2137,7 +2137,7 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	sendStringMessage(hbSocket, heartbeatName, ZMQ_DONTWAIT);
 
 	// Read the ACK
-	readStringMessage(hbSocket);
+	readStringMessage(hbSocket, ZMQ_DONTWAIT);
 
 	return GravityReturnCodes::SUCCESS;
 }
