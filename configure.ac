@@ -43,6 +43,7 @@ AC_CHECK_LIB([pthread], [main])
 AC_CHECK_LIB([rt], [main])
 AC_CHECK_LIB([wsock32], [main])
 AC_CHECK_LIB([zmq], [main])
+AC_CHECK_LIB([sodium], [main])
 
 # Checks for header files.
 AC_FUNC_ALLOCA

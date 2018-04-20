@@ -67,7 +67,11 @@ ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
 	OS_EXE_EXT=.exe
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
+ifneq (,$(findstring lsodium,$(LIBS)))
+	OS_SPECIFIC_LIBS = -lzmq -lsodium -Wl,-Bdynamic -lrt -lpthread
+else
 	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt -lpthread
+endif
 	OS_EXE_EXT=
 linux: all;
 else
