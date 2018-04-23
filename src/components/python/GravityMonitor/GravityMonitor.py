@@ -1,38 +1,151 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+A simple real-time Gravity publication monitor.
+"""
+
 import sys
 import time
-import uuid
+import Queue as queue
 import datetime
+import collections
+from itertools import islice, izip
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 import gravity
 from gravity import gravity as GRAVITY
 from gravity.ServiceDirectoryMapPB_pb2 import ServiceDirectoryMapPB
 
-# Something like this needs to be in python bindings, this is obnoxious.
-class FunctionWrappingSubscriber(gravity.GravitySubscriber):
-  def __init__(self, function, *args, **kwargs):
-    self.function = function
-    self.args = args
-    self.kwargs = kwargs
-    super(FunctionWrappingSubscriber, self).__init__()
+class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.GravityRequestor):
+    """ListStore containing four fields, and a dict with other metadata.
 
-  def subscriptionFilled(self, dataProducts):
-    self.function(dataProducts, *self.args, **self.kwargs)
+    Periodically polls the gravity ServiceDirectory for a list of publications, and subscribes
+    to every known publication.  Column List:
+       [0]: Data Product ID (str)
+       [1]: Publisher Component ID (str)
+       [2]: Last Publication Time (str / iso8601)
+       [3]: Frequency (float / Hz)
+       [4]: dictionary of other metadata (dict)
+    """
+    def __init__(self, gravity_node):
+        # super() doesn't work, likely due to bugs in one or both C extensions...
+        Gtk.ListStore.__init__(self, str, str, str, float, object)
+        gravity.GravitySubscriber.__init__(self)
+        gravity.GravityRequestor.__init__(self)
 
-#### BUG: Today, if a Subscriber goes out of scope, it will cause segfaults.
+        self.node = gravity_node
+        self.index = {}
+
+        # FIFO Queue to pass data products into the GTK/Main thread from Gravity.
+        self.queue = queue.Queue()
+
+        self.update_registry()
+        GLib.timeout_add_seconds(10, self.update_registry)
+        GLib.timeout_add_seconds(1, self.update_frequency)
+
+    def subscriptionFilled(self, data_products):
+        """Gravity Subscription callback - can't touch model directly due to multithreading"""
+        self.queue.put(('SUB', data_products))
+        GLib.idle_add(self.handle_gravity_events)
+
+    # pylint: disable=unused-argument
+    def requestFilled(self, service_id, request_id, data_product):
+        """Gravity Service Directory updated - can't touch model directly due to multithreading."""
+        service_directory = ServiceDirectoryMapPB()
+        data_product.populateMessage(service_directory)
+        self.queue.put(('DIR', service_directory))
+        GLib.idle_add(self.handle_gravity_events)
+
+    def handle_gravity_events(self):
+        """Handle any recently received publications."""
+        while True:
+            try:
+                event_type, data = self.queue.get_nowait()
+
+            except queue.Empty:
+                return False
+
+            if event_type == 'DIR':
+                # pylint: disable=no-member
+                for provider in data.data_provider:
+                    if provider.product_id in self.index.keys():
+                        continue
+
+                    self.index[provider.product_id] = self[self.append([
+                        provider.product_id, provider.component_id[0], "", 0,
+                        {'history': collections.deque(maxlen=10)}
+                    ])]
+
+                    self.node.subscribe(provider.product_id.encode('utf-8'), self)
+
+            elif event_type == 'SUB':
+                for data_product in data:
+                    row = self.index[data_product.getDataProductID()]
+                    row[1] = data_product.getComponentID()
+                    stamp = data_product.getGravityTimestamp() / 1000000.0
+                    row[2] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
+                    # Let frequency get updated by the periodic callback, otherwise it is spastic
+                    # for 10Hz+ data as it bounces all around.
+                    row[4]['last_data'] = data_product.getData()
+                    row[4]['history'].append(stamp)
+
+    def update_frequency(self):
+        """Update the estimate of publication frequency."""
+        for row in self:
+            history = row[4]['history']
+            if len(history) < 2:
+                row[3] = 0.0
+                continue
+
+            differences = [x-y for x, y in izip(islice(history, 1, None), islice(history, 0, None))]
+            average_difference = sum(differences) / len(differences)
+
+            # If it's been an abnormally long time (3x frequency...) then display zero.
+            time_since_last = time.time() - history[-1]
+            if time_since_last > 3 * average_difference:
+                row[3] = 0.0
+            else:
+                row[3] = 1.0 / average_difference
+        return True
+
+    def update_registry(self):
+        """Check for any new publications."""
+        gdp = gravity.GravityDataProduct("GetProviders")
+        self.node.request("DirectoryService", gdp, self, "")
+        return True # Or periodic updates won't work.
+
+class GravityMonitorView(Gtk.TreeView):
+    """A GTK TreeView to monitor Gravity publications."""
+    def __init__(self, model):
+        super(GravityMonitorView, self).__init__(model)
+        self.model = model
+
+        renderer = Gtk.CellRendererText()
+
+        self.add_column("Data Product", renderer, 0)
+        self.add_column("Publisher", renderer, 1)
+        self.add_column("Last Time", renderer, 2)
+        col = self.add_column("Frequency", renderer, 3)
+        fmt_float = lambda c, cell, model, it, X: cell.set_property('text', "%0.1f" % model[it][3])
+        col.set_cell_data_func(renderer, fmt_float)
+
+    def add_column(self, field_name, renderer, model_column):
+        """Add a column for a given field, setting options appropriately."""
+        column = Gtk.TreeViewColumn(field_name, renderer, text=model_column)
+        column.set_sort_column_id(model_column)
+        column.set_resizable(True)
+        self.append_column(column)
+        return column
 
 class GravityMonitorWindow(Gtk.Window):
+    """Window for monitoring Gravity publications in realtime."""
     def __init__(self):
         super(GravityMonitorWindow, self).__init__(title="Gravity Monitor")
 
         self.node = gravity.GravityNode()
-        self.subs = []# Just until bug #21 is fixed...
 
         attempts = 0
         while self.node.init("GravityMonitor") != GRAVITY.SUCCESS and attempts < 5:
@@ -44,61 +157,16 @@ class GravityMonitorWindow(Gtk.Window):
             print "Unable to initialize Gravity, quitting."
             sys.exit(1)
 
-        #product_id, last_publisher, last_time_fmted, last_time, hertz
-        self.store = Gtk.ListStore(str, str, str, float, float)
-        self.store_index = {}
-        self.treeview = Gtk.TreeView(self.store)
+        self.store = GravityMonitorModel(self.node)
+        self.treeview = GravityMonitorView(self.store)
         self.add(self.treeview)
 
-        renderer = Gtk.CellRendererText()
-        for colnum, field in [
-          (0, "Data Product"),
-          (1, "Publisher"),
-          (2, "Last Time"), # Skipping 3 b/c it's last time as a float.
-          (4, "Frequency")]:
-            column = Gtk.TreeViewColumn(field, renderer, text=colnum)
-            column.set_sort_column_id(colnum)
-            column.set_resizable(True)
-            self.treeview.append_column(column)
-
-        self.update_registry()
-
-        GLib.timeout_add_seconds(10, self.update_registry)        
-
-    def data_received(self, data_products):
-        for data_product in data_products:
-            idx = self.store_index[data_product.getDataProductID()]
-            self.store[idx][1] = data_product.getComponentID()
-            stamp = data_product.getGravityTimestamp() / 1000000.0
-            last_stamp = self.store[idx][3]
-            self.store[idx][2] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
-            self.store[idx][3] = stamp
-            self.store[idx][4] = 1.0 / (stamp - last_stamp)
-
-    def update_registry(self):
-        gdp = gravity.GravityDataProduct("GetProviders")
-        response = self.node.request("DirectoryService", gdp)
-        serviceDirectory = ServiceDirectoryMapPB()
-        response.populateMessage(serviceDirectory)
-
-        for provider in serviceDirectory.data_provider:
-            if provider.product_id in self.store_index.keys():
-              continue
-
-            sub = FunctionWrappingSubscriber(self.data_received)
-            self.subs.append(sub)
-            self.node.subscribe(provider.product_id.encode('utf-8'), sub)
-
-            self.store_index[provider.product_id] = self.store.append([
-              provider.product_id, provider.component_id[0], "", 0, 0
-            ])
-        return True # Or periodic updates won't work.
-
-def main(argv):
+def main():
+    """Create and run a single GravityMonitorWindow."""
     gmw = GravityMonitorWindow()
     gmw.connect("destroy", Gtk.main_quit)
     gmw.show_all()
     Gtk.main()
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
