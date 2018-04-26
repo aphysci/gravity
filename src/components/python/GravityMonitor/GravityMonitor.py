@@ -26,13 +26,14 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
     to every known publication.  Column List:
        [0]: Data Product ID (str)
        [1]: Publisher Component ID (str)
-       [2]: Last Publication Time (str / iso8601)
-       [3]: Frequency (float / Hz)
-       [4]: dictionary of other metadata (dict)
+       [2]: Publisher Domain (str)
+       [3]: Last Publication Time (str / iso8601)
+       [4]: Frequency (float / Hz)
+       [5]: dictionary of other metadata (dict)
     """
     def __init__(self, gravity_node):
         # super() doesn't work, likely due to bugs in one or both C extensions...
-        Gtk.ListStore.__init__(self, str, str, str, float, object)
+        Gtk.ListStore.__init__(self, str, str, str, str, float, object)
         gravity.GravitySubscriber.__init__(self)
         gravity.GravityRequestor.__init__(self)
 
@@ -75,7 +76,7 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
                         continue
 
                     self.index[provider.product_id] = self[self.append([
-                        provider.product_id, provider.component_id[0], "", 0,
+                        provider.product_id, provider.component_id[0], provider.domain_id[0], "", 0,
                         {'history': collections.deque(maxlen=10)}
                     ])]
 
@@ -85,19 +86,20 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
                 for data_product in data:
                     row = self.index[data_product.getDataProductID()]
                     row[1] = data_product.getComponentID()
+                    row[2] = data_product.getDomain()
                     stamp = data_product.getGravityTimestamp() / 1000000.0
-                    row[2] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
+                    row[3] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
                     # Let frequency get updated by the periodic callback, otherwise it is spastic
                     # for 10Hz+ data as it bounces all around.
-                    row[4]['last_data'] = data_product.getData()
-                    row[4]['history'].append(stamp)
+                    row[5]['last_data'] = data_product.getData()
+                    row[5]['history'].append(stamp)
 
     def update_frequency(self):
         """Update the estimate of publication frequency."""
         for row in self:
-            history = row[4]['history']
+            history = row[5]['history']
             if len(history) < 2:
-                row[3] = 0.0
+                row[4] = 0.0
                 continue
 
             differences = [x-y for x, y in izip(islice(history, 1, None), islice(history, 0, None))]
@@ -106,9 +108,9 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
             # If it's been an abnormally long time (3x frequency...) then display zero.
             time_since_last = time.time() - history[-1]
             if time_since_last > 3 * average_difference:
-                row[3] = 0.0
+                row[4] = 0.0
             else:
-                row[3] = 1.0 / average_difference
+                row[4] = 1.0 / average_difference
         return True
 
     def update_registry(self):
@@ -127,9 +129,10 @@ class GravityMonitorView(Gtk.TreeView):
 
         self.add_column("Data Product", renderer, 0)
         self.add_column("Publisher", renderer, 1)
-        self.add_column("Last Time", renderer, 2)
-        col = self.add_column("Frequency", renderer, 3)
-        fmt_float = lambda c, cell, model, it, X: cell.set_property('text', "%0.1f" % model[it][3])
+        self.add_column("Domain", renderer, 2)
+        self.add_column("Last Time", renderer, 3)
+        col = self.add_column("Frequency", renderer, 4)
+        fmt_float = lambda c, cell, model, it, X: cell.set_property('text', "%0.1f" % model[it][4])
         col.set_cell_data_func(renderer, fmt_float)
 
     def add_column(self, field_name, renderer, model_column):

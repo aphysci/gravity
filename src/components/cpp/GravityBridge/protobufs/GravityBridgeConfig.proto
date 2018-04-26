@@ -1,0 +1,41 @@
+/** (C) Copyright 2018, Applied Physical Sciences Corp., A General Dynamics Company
+ **
+ ** Gravity is free software; you can redistribute it and/or modify
+ ** it under the terms of the GNU Lesser General Public License as published by
+ ** the Free Software Foundation; either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU Lesser General Public License for more details.
+ **
+ ** You should have received a copy of the GNU Lesser General Public
+ ** License along with this program;
+ ** If not, see <http://www.gnu.org/licenses/>.
+ **
+ */
+
+option optimize_for = SPEED;
+option java_package = "com.aphysci.gravity.protobuf";
+
+package gravity;
+
+message GravityBridgeConfig {
+    // MOOS connection
+    optional string moos_server       = 1  [default="localhost"];
+    optional int32  moos_port         = 2  [default=9000];
+    optional int32  moos_frequency    = 3  [default=10];
+
+    // For messages going from Gravity to MOOS.
+    optional string moospb_prefix     = 4  [default="GRV_"];
+    repeated string gravity_to_moospb = 5;
+
+    // For messages going from MOOS to Gravity.
+    optional string gravity_prefix    = 6  [default=""];
+    optional string gravity_domain    = 7  [default="MOOS"]; // "" will use the node's domain.
+    repeated string moospb_to_gravity = 8;
+    
+    extensions 80 to 199;
+}
+
