@@ -114,4 +114,19 @@ class GravityDataProduct:
     def setIsCachedDataproduct(self, isCachedDataproduct):
         self.__gdp.is_cached_dataproduct = isCachedDataproduct
     
+    @property
+    def protocol(self):
+        return str(self.__gdp.protocol)
     
+    @protocol.setter
+    def protocol(self, protocol):
+        self.__gdp.protocol = str(protocol)
+    
+    @property
+    def dataType(self):
+        return str(self.__gdp.dataType)
+    
+    @dataType.setter
+    def dataType(self, dataType):
+        self.__gdp.data_type = str(dataType)
+
