@@ -19,23 +19,18 @@
 option optimize_for = SPEED;
 option java_package = "com.aphysci.gravity.protobuf";
 
-package gravity;
+package gravity.protobuf;
 
-message GravityBridgeConfig {
-    // MOOS connection
-    optional string moos_server       = 1  [default="localhost"];
-    optional int32  moos_port         = 2  [default=9000];
-    optional int32  moos_frequency    = 3  [default=10];
-
-    // For messages going from Gravity to MOOS.
-    optional string moospb_prefix     = 4  [default="GRV_"];
-    repeated string gravity_to_moospb = 5;
-
-    // For messages going from MOOS to Gravity.
-    optional string gravity_prefix    = 6  [default=""];
-    optional string gravity_domain    = 7  [default="MOOS"]; // "" will use the node's domain.
-    repeated string moospb_to_gravity = 8;
+message GravityMOOSConfig {
+    optional string gravity_name        = 1;
+    optional double heartbeat_frequency = 2 [default=0.5];
     
-    extensions 80 to 199;
+    optional string moos_server = 3 [default="localhost"];
+    optional uint32 moos_port   = 4 [default=9000];
+    
+    repeated string gravity_publications = 5;
+    repeated string moospbt_publications = 6;
+
+    //repeated goby.moos.TranslatorEntry custom_mappings = 7;
 }
 

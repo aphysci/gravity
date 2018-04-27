@@ -16,53 +16,48 @@
  **
  */
 
-#ifndef _GRAVITY__GRAVITYBRIDGE_H_
-#define _GRAVITY__GRAVITYBRIDGE_H_
+#ifndef _GRAVITY__GRAVITY_MOOS_BRIDGE_H_
+#define _GRAVITY__GRAVITY_MOOS_BRIDGE_H_
 
 #include "GravityNode.h"
 #include "GravitySubscriber.h"
-#include "protobufs/GravityBridgeConfig.pb.h"
+#include "protobufs/GravityMOOSConfig.pb.h"
 
 #include <MOOS/libMOOS/Comms/MOOSAsyncCommClient.h>
 
 #include <set>
 #include <string>
-#include <tr1/functional>
 #include <tr1/memory>
+
+#include <cstdio>
 
 namespace gravity {
 
-typedef std::tr1::function<bool()> MOOSVoidFunc;
 typedef std::vector<std::tr1::shared_ptr<GravityDataProduct> > DataProductVec;
 
-class GravityBridge : public GravitySubscriber {
+class GravityMOOS : public GravitySubscriber {
 public:
-    GravityBridge();
-    virtual ~GravityBridge();
-
+    GravityMOOS();
+    virtual ~GravityMOOS();
+    
     int run();
     
+    // public to work around MOOS's inadequacies...
+    bool moosConnected();
+        
 protected:
     static const char *ComponentName;
 
-    // Sets of all the publications that can be republished simply by converting PB to Gravity.
-    std::set<std::string> _moospbToRepublish;
-    std::set<std::string> _gravityToRepublish;
-
-    GravityBridgeConfig _cfg;
+    protobuf::GravityMOOSConfig _cfg;
+    
     GravityNode _gravityNode;
-    MOOS::MOOSAsyncCommClient _moosComm;
+    void subscriptionFilled(const DataProductVec& gdp);
 
-    void subscriptionFilled(const DataProductVec& dataProducts);
+    MOOS::MOOSAsyncCommClient _moosComm;
     bool moosMessageReceived(CMOOSMsg& msg);
 
-    bool moosConnected();
-
-    void sendHeartbeats();
-    
-    // MOOS Connected Callback Wrapper
-    std::tr1::shared_ptr<MOOSVoidFunc> _connectedCb;
+    void sendHeartbeat();
 };
 
 } /* namespace gravity */
-#endif /* _GRAVITY__GRAVITYBRIDGE_H_ */
+#endif /* _GRAVITY__GRAVITY_MOOS_BRIDGE_H_ */

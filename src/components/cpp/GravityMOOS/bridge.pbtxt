@@ -1,0 +1,8 @@
+translators {
+  name: "MOOSPB"
+  [moospb_cfg] {
+    gravity_to_moospb: "SampleData"
+    moospb_to_gravity: "TEST_PUBLICATION"
+  }
+}
+
