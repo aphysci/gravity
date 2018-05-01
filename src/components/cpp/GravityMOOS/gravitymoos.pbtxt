@@ -1,8 +1,6 @@
-translators {
-  name: "MOOSPB"
-  [moospb_cfg] {
-    gravity_to_moospb: "SampleData"
-    moospb_to_gravity: "TEST_PUBLICATION"
-  }
-}
+gravity_publications: "Foo"
+gravity_publications: "Fum"
+moospbt_publications: "BAR"
+moospbt_publications: "BAZ"
 
+protobuf_path: "/home/chrismurf/programs/teac/sample_gravity_log/"

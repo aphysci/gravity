@@ -49,7 +49,7 @@ srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
 ADDITIONAL_INCLUDES = -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Comms/include -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Utils/include -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Thirdparty/PocoBits/include/
-ADDITIONAL_LIBS = -L/home/chrismurf/lib/moos/core-moos/build/lib -lMOOS
+ADDITIONAL_LIBS = -L/home/chrismurf/lib/moos/core-moos/build/lib -lMOOS -lboost_filesystem
 
 EXE_NAME = GravityMOOS
 

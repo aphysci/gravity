@@ -22,15 +22,14 @@ option java_package = "com.aphysci.gravity.protobuf";
 package gravity.protobuf;
 
 message GravityMOOSConfig {
-    optional string gravity_name        = 1;
-    optional double heartbeat_frequency = 2 [default=0.5];
+    optional string moos_server = 1 [default = "localhost"];
+    optional uint32 moos_port   = 2 [default = 9000];
     
-    optional string moos_server = 3 [default="localhost"];
-    optional uint32 moos_port   = 4 [default=9000];
+    optional string protobuf_path = 3 [default = "type_registry"];
     
-    repeated string gravity_publications = 5;
-    repeated string moospbt_publications = 6;
+    repeated string gravity_publications = 10;
+    repeated string moospbt_publications = 11;
 
-    //repeated goby.moos.TranslatorEntry custom_mappings = 7;
+    //repeated goby.moos.TranslatorEntry custom_mappings = 12;
 }
 

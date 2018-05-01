@@ -24,49 +24,50 @@
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/dynamic_message.h>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor_database.h>
+#include <google/protobuf/compiler/importer.h>
 namespace gp = google::protobuf;
 #include <string>
+#include <vector>
 #include <fcntl.h>
 #include <sys/unistd.h>
+#include <tr1/memory>
 
 namespace gravity {
-    class PBErrorCollector : public gp::io::ErrorCollector {
+    class ProtobufRegistry {
     public:
-        std::string _context;
-        bool errors;
-        bool warnings;
+        ProtobufRegistry();
+        virtual ~ProtobufRegistry();
         
-        PBErrorCollector(std::string context) : _context(context) { }
-        ~PBErrorCollector() {}
+        void setProtobufPath(const std::string& path);
+        std::tr1::shared_ptr<gp::Message> createMessageByName(const std::string& name);
 
-        void AddError(int line, int column, const std::string& message) {
-            errors += 1;
-            Log::critical("In '%s' [%d,%d]: %s", _context.c_str(), line, column, message.c_str());
-        }
-        void AddWarning(int line, int column, const std::string& message) {
-            warnings += 1;
-            Log::warning("In '%s' [%d,%d]: %s", _context.c_str(), line, column, message.c_str());
-        }
+    private:
+        gp::compiler::DiskSourceTree _tree;
+        gp::compiler::SourceTreeDescriptorDatabase _db;
+        gp::DescriptorPool _pool;
+        gp::DynamicMessageFactory _factory;
     };
 
-    template <class T>
-    static bool parseTextPB(const char* filename, T& output) {
-        int fd = open(filename, O_RDONLY);
-        if (fd == -1) {
-            Log::critical("Failed to open '%s'", filename);
-            return false;
-        }
-        gp::io::FileInputStream reader(fd);
-        gp::TextFormat::Parser parser;
-        PBErrorCollector errorCollector(filename);
-        parser.RecordErrorsTo(&errorCollector);
-        parser.Parse(&reader, &output);
-        close(fd);
+    class PBErrorCollector : public gp::io::ErrorCollector {
+    public:
+        const std::string context;
+        int errors;
+        int warnings;
         
-        return (errorCollector.errors == 0);
-    }
-    
-    
- 
+        PBErrorCollector(std::string filename_or_typename);
+        ~PBErrorCollector();
+
+        void AddError(int line, int column, const std::string& message);
+        void AddWarning(int line, int column, const std::string& message);
+    };
+
+    bool protobufToText(const gp::Message& input, std::string& output);
+    bool textToProtobuf(const std::string& input, gp::Message& output,
+                        const std::string& context="");
+    bool textFileToProtobuf(const char *filename, gp::Message& output);
+
 } /* namespace gravity */
 #endif /* _GRAVITY__PROTOBUF_UTILITIES_H_ */

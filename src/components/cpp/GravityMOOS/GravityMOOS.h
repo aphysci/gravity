@@ -22,6 +22,7 @@
 #include "GravityNode.h"
 #include "GravitySubscriber.h"
 #include "protobufs/GravityMOOSConfig.pb.h"
+#include "ProtobufUtilities.h"
 
 #include <MOOS/libMOOS/Comms/MOOSAsyncCommClient.h>
 
@@ -49,8 +50,9 @@ protected:
     static const char *ComponentName;
 
     protobuf::GravityMOOSConfig _cfg;
+    ProtobufRegistry _registry;
     
-    GravityNode _gravityNode;
+    GravityNode _node;
     void subscriptionFilled(const DataProductVec& gdp);
 
     MOOS::MOOSAsyncCommClient _moosComm;
