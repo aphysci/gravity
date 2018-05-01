@@ -177,12 +177,12 @@ const std::string& GravityDataProduct::getProtocol() {
 	return gravityDataProductPB->protocol();
 }
 
-void GravityDataProduct::setDataType(const std::string& dataType) {
-	gravityDataProductPB->set_data_type(dataType);
+void GravityDataProduct::setTypeName(const std::string& dataType) {
+	gravityDataProductPB->set_type_name(dataType);
 }
 
-const std::string& GravityDataProduct::getDataType() {
-	return gravityDataProductPB->data_type();
+const std::string& GravityDataProduct::getTypeName() {
+	return gravityDataProductPB->type_name();
 }
 
 

@@ -247,12 +247,12 @@ public:
 	/**
 	 * Set the type of data in this data product (for instance, the full protobuf type name)
 	 */
-	GRAVITY_API void setDataType(const std::string& dataType);
+	GRAVITY_API void setTypeName(const std::string& dataType);
 
 	/**
 	 * Get the type of data in this data product (for instance, the full protobuf type name)
 	 */
-	GRAVITY_API const std::string& getDataType();
+	GRAVITY_API const std::string& getTypeName();
 };
 
 } /* namespace gravity */
