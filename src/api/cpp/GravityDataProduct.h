@@ -233,6 +233,26 @@ public:
 	 * Set the flag indicating that this message has been relayed, and is not coming from the original source
 	 */
 	GRAVITY_API void setIsRelayedDataproduct(bool relayed);
+
+	/**
+	 * Set the data protocol in this data product (for instance, protobuf2)
+	 */
+	GRAVITY_API void setProtocol(const std::string& protocol);
+
+	/**
+	 * Get the data protocol in this data product (for instance, protobuf2)
+	 */
+	GRAVITY_API const std::string& getProtocol();
+
+	/**
+	 * Set the type of data in this data product (for instance, the full protobuf type name)
+	 */
+	GRAVITY_API void setDataType(const std::string& dataType);
+
+	/**
+	 * Get the type of data in this data product (for instance, the full protobuf type name)
+	 */
+	GRAVITY_API const std::string& getDataType();
 };
 
 } /* namespace gravity */

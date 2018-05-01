@@ -169,5 +169,21 @@ void GravityDataProduct::setIsRelayedDataproduct(bool relayed)
 	gravityDataProductPB->set_is_relayed_dataproduct(relayed);
 }
 
+void GravityDataProduct::setProtocol(const std::string& protocol) {
+	gravityDataProductPB->set_protocol(protocol);
+}
+
+const std::string& GravityDataProduct::getProtocol() {
+	return gravityDataProductPB->protocol();
+}
+
+void GravityDataProduct::setDataType(const std::string& dataType) {
+	gravityDataProductPB->set_data_type(dataType);
+}
+
+const std::string& GravityDataProduct::getDataType() {
+	return gravityDataProductPB->data_type();
+}
+
 
 } /* namespace gravity */
