@@ -139,10 +139,10 @@ class GravityDataProduct:
         self.__gdp.protocol = str(protocol)
     
     @property
-    def dataType(self):
+    def typeName(self):
         return str(self.__gdp.data_type)
     
-    @dataType.setter
-    def dataType(self, dataType):
+    @typeName.setter
+    def typeName(self, dataType):
         self.__gdp.data_type = str(dataType)
 
