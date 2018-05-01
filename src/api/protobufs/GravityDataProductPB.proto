@@ -36,6 +36,6 @@ message GravityDataProductPB
 	optional bool is_cached_dataproduct = 10;
 	optional bool is_relayed_dataproduct = 11 [default = false];
 	optional string protocol = 12 [default="protobuf2"];
-	optional string data_type = 13; // e.g.: gravity.GravityDataProductPB
+	optional string data_type = 13 [default=""]; // e.g.: gravity.GravityDataProductPB
 }
 

@@ -33,40 +33,6 @@ class GravityDataProduct:
             except Exception as e:
                 raise AttributeError("Error loading GravityDataProduct from given data; \nCaused by:\n {}".format(traceback.format_exc(e)))
         
-    def getGravityTimestamp(self):
-        return self.__gdp.timestamp
-
-    def getReceivedTimestamp(self):
-        if self.__gdp.HasField('received_timestamp'):
-            return self.__gdp.received_timestamp
-        else:
-            return 0
-        
-    def setTimestamp(self, ts):
-        self.__gdp.timestamp = ts
-        
-    def getDataProductID(self):
-        return str(self.__gdp.dataProductID)
-    
-    def setSoftwareVersion(self, sv):
-        self.__gdp.softwareVersion = str(sv)
-        
-    def getSoftwareVersion(self):
-        return str(self.__gdp.softwareVersion)
-    
-    def setData(self, data):
-        if isinstance(data, message.Message):
-            self.__gdp.data = data.SerializeToString()
-        elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
-            self.__gdp.data = data
-        else:
-            raise AttributeError("Invalid type for data ({}) - must be a Protobuf or a bytearray/bytes/str".format(type(data)))
-        
-    def getData(self):
-        if self.__gdp.data is None:
-            return None
-        return self.__gdp.data
-    
     def getDataSize(self):
         if self.__gdp.data is None:
             return 0
@@ -77,7 +43,7 @@ class GravityDataProduct:
             data.MergeFromString(self.__gdp.data)
         except Exception as e:
             raise AttributeError("Error populating given Protobuf; \nCaused by:\n {}".format(traceback.format_exc(e)))
-        
+
     def getSize(self):
         return len(self.__gdp.SerializeToString())
         
@@ -89,29 +55,79 @@ class GravityDataProduct:
 
     def serializeToString(self):
         return self.__gdp.SerializeToString()
-    
-    def setComponentID(self, componentID):
-        self.__gdp.componentID = str(componentID)
+
+    @property
+    def data(self):
+        if self.__gdp.data is None:
+            return None
+        return self.__gdp.data
+
+    @data.setter
+    def data(self, data):
+        if isinstance(data, message.Message):
+            self.__gdp.data = data.SerializeToString()
+        elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
+            self.__gdp.data = data
+        else:
+            raise AttributeError("Invalid type for data ({}) - must be a Protobuf or a bytearray/bytes/str".format(type(data)))
+
+    @property
+    def timestamp(self):
+        return self.__gdp.timestamp
+
+    @timestamp.setter
+    def timestamp(self, ts):
+        self.__gdp.timestamp = ts
+
+    @property
+    def receivedTimestamp(self):
+        if self.__gdp.HasField('received_timestamp'):
+            return self.__gdp.received_timestamp
+        else:
+            return 0
         
-    def getComponentID(self):
+    @property        
+    def dataProductID(self):
+        return str(self.__gdp.dataProductID)
+
+    @property
+    def softwareVersion(self):
+        return str(self.__gdp.softwareVersion)
+
+    @softwareVersion.setter
+    def softwareVersion(self, sv):
+        self.__gdp.softwareVersion = str(sv)
+    
+    @property
+    def componentID(self):
         return str(self.__gdp.componentID)
-    
-    def setDomain(self, domain):
-        self.__gdp.domain = str(domain)
         
-    def getDomain(self):
-        return str(self.__gdp.domain)
+    @componentID.setter
+    def componentID(self, componentID):
+        self.__gdp.componentID = str(componentID)
     
-    def getFutureSocketUrl(self):
+    @property
+    def futureSocketUrl(self):
         return str(self.__gdp.future_socket_url)
-    
+
+    @property    
     def isFutureResponse(self):
         return self.__gdp.future_response
     
+    @property            
+    def domain(self):
+        return str(self.__gdp.domain)
+
+    @domain.setter
+    def domain(self, domain):
+        self.__gdp.domain = str(domain)
+    
+    @property
     def isCachedDataproduct(self):
         return self.__gdp.HasField('is_cached_dataproduct') and self.__gdp.is_cached_dataproduct
     
-    def setIsCachedDataproduct(self, isCachedDataproduct):
+    @isCachedDataproduct.setter
+    def isCachedDataproduct(self, isCachedDataproduct):
         self.__gdp.is_cached_dataproduct = isCachedDataproduct
     
     @property
@@ -124,7 +140,7 @@ class GravityDataProduct:
     
     @property
     def dataType(self):
-        return str(self.__gdp.dataType)
+        return str(self.__gdp.data_type)
     
     @dataType.setter
     def dataType(self, dataType):
