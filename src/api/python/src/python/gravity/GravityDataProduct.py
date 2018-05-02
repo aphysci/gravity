@@ -20,7 +20,7 @@ import traceback
 from google.protobuf import message
 from GravityDataProductPB_pb2 import GravityDataProductPB
 
-class GravityDataProduct:
+class GravityDataProduct(object):
     def __init__(self, dataProductID=None, data=None):
         self.__gdp = GravityDataProductPB()
         if (dataProductID is not None and data is not None) or (dataProductID is None and data is None):
@@ -65,6 +65,8 @@ class GravityDataProduct:
     @data.setter
     def data(self, data):
         if isinstance(data, message.Message):
+            self.__gdp.protocol = "protobuf2"
+            self.__gdp.type_name = data.DESCRIPTOR.full_name
             self.__gdp.data = data.SerializeToString()
         elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
             self.__gdp.data = data
@@ -140,9 +142,9 @@ class GravityDataProduct:
     
     @property
     def typeName(self):
-        return str(self.__gdp.data_type)
+        return str(self.__gdp.type_name)
     
     @typeName.setter
-    def typeName(self, dataType):
-        self.__gdp.data_type = str(dataType)
+    def typeName(self, typeName):
+        self.__gdp.type_name = str(typeName)
 
