@@ -65,6 +65,8 @@ class GravityDataProduct(object):
     @data.setter
     def data(self, data):
         if isinstance(data, message.Message):
+            self.__gdp.protocol = "protobuf2"
+            self.__gdp.type_name = data.DESCRIPTOR.full_name
             self.__gdp.data = data.SerializeToString()
         elif isinstance(data, bytearray) or isinstance(data, bytes) or isinstance(data, str):
             self.__gdp.data = data
@@ -140,9 +142,9 @@ class GravityDataProduct(object):
     
     @property
     def typeName(self):
-        return str(self.__gdp.data_type)
+        return str(self.__gdp.type_name)
     
     @typeName.setter
-    def typeName(self, dataType):
-        self.__gdp.data_type = str(dataType)
+    def typeName(self, typeName):
+        self.__gdp.type_name = str(typeName)
 

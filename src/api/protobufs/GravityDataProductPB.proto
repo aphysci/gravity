@@ -35,7 +35,7 @@ message GravityDataProductPB
 	optional uint64 received_timestamp = 9;
 	optional bool is_cached_dataproduct = 10;
 	optional bool is_relayed_dataproduct = 11 [default = false];
-	optional string protocol = 12 [default="protobuf2"];
+	optional string protocol = 12 [default=""]; // typically 'protobuf2', all lowercase.
 	optional string type_name = 13 [default=""]; // e.g.: gravity.GravityDataProductPB
 }
 

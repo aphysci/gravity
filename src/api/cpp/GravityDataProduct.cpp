@@ -84,6 +84,9 @@ void GravityDataProduct::setData(const google::protobuf::Message& data)
     delete gravityDataProductPB->release_data(); //Looking at the protobuf, this seems necessary.
     gravityDataProductPB->set_data(vdata, data.ByteSize());
     free(vdata);
+    // Also implicitly set the message protocol and data_type.
+    gravityDataProductPB->set_protocol("protobuf2");
+    gravityDataProductPB->set_type_name(data.GetTypeName());
 }
 
 bool GravityDataProduct::getData(void* data, int size) const
