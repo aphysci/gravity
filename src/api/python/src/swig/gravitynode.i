@@ -24,9 +24,7 @@ from GravityDataProduct import GravityDataProduct
 
 // give this type the highest precedence for comparison purposes
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const gravity::GravityDataProduct&  {
-	PyObject* pyStr = PyObject_CallMethod($input, (char*)"getDataProductID", NULL);
-	$1 = pyStr ? 1 : 0;
-	Py_XDECREF(pyStr);
+    $1 = PyObject_HasAttrString($input, (char*)"dataProductID");
 }
 
 // This is where the conversion from Python GDP to C++ GDP occurs

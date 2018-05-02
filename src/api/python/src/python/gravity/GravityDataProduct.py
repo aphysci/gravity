@@ -20,7 +20,7 @@ import traceback
 from google.protobuf import message
 from GravityDataProductPB_pb2 import GravityDataProductPB
 
-class GravityDataProduct:
+class GravityDataProduct(object):
     def __init__(self, dataProductID=None, data=None):
         self.__gdp = GravityDataProductPB()
         if (dataProductID is not None and data is not None) or (dataProductID is None and data is None):
