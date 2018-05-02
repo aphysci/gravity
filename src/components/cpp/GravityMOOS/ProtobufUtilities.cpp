@@ -17,18 +17,41 @@
  */
 
 #include "ProtobufUtilities.h"
-using namespace std;
-using namespace std::tr1;
+#include "GravityLogger.h"
+
+#include <google/protobuf/text_format.h>
+#include <google/protobuf/io/tokenizer.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/descriptor.h>
+namespace gp = google::protobuf;
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 namespace fs = boost::filesystem;
 
+#include <fcntl.h>
+#include <sys/unistd.h>
+using namespace std;
+using namespace std::tr1;
+
 namespace gravity {
+
+
+MultiPBErrorCollector::MultiPBErrorCollector() { }
+MultiPBErrorCollector::~MultiPBErrorCollector() { }
+
+void MultiPBErrorCollector::AddError(const std::string& filename, int line,
+                                     int column, const std::string& message) {
+    Log::critical("In '%s' [%d,%d]: %s", filename.c_str(), line, column, message.c_str());
+}
+void MultiPBErrorCollector::AddWarning(const std::string& filename, int line,
+                                       int column, const std::string& message) {
+    Log::warning("In '%s' [%d,%d]: %s", filename.c_str(), line, column, message.c_str());
+}
 
 ProtobufRegistry::ProtobufRegistry() : _db(&_tree), _pool(&_db) {
     _factory.SetDelegateToGeneratedFactory(true);
-    //_db.RecordErrorsTo(MYERRORCOLLECTOR);
+    _db.RecordErrorsTo(&_errors);
 }
 
 ProtobufRegistry::~ProtobufRegistry() { }

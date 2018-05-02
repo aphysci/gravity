@@ -1,4 +1,4 @@
-#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#** (C) Copyright 2018, Applied Physical Sciences Corp., A General Dynamics Company
 #**
 #** Gravity is free software; you can redistribute it and/or modify
 #** it under the terms of the GNU Lesser General Public License as published by
@@ -48,8 +48,8 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
-ADDITIONAL_INCLUDES = -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Comms/include -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Utils/include -I/home/chrismurf/lib/moos/core-moos/src/Core/libMOOS/Thirdparty/PocoBits/include/
-ADDITIONAL_LIBS = -L/home/chrismurf/lib/moos/core-moos/build/lib -lMOOS -lboost_filesystem
+ADDITIONAL_INCLUDES = -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Comms/include -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Utils/include -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Thirdparty/PocoBits/include/
+ADDITIONAL_LIBS = -L${MOOS_DIR}/core-moos/build/lib -lMOOS -lboost_filesystem -lboost_system
 
 EXE_NAME = GravityMOOS
 

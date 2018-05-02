@@ -20,54 +20,57 @@
 #ifndef _GRAVITY__PROTOBUF_UTILITIES_H_
 #define _GRAVITY__PROTOBUF_UTILITIES_H_
 
-#include "GravityLogger.h"
-#include <google/protobuf/text_format.h>
-#include <google/protobuf/io/tokenizer.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/dynamic_message.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/descriptor_database.h>
 #include <google/protobuf/compiler/importer.h>
-namespace gp = google::protobuf;
+
 #include <string>
-#include <vector>
-#include <fcntl.h>
-#include <sys/unistd.h>
 #include <tr1/memory>
 
 namespace gravity {
-    class ProtobufRegistry {
-    public:
-        ProtobufRegistry();
-        virtual ~ProtobufRegistry();
-        
-        void setProtobufPath(const std::string& path);
-        std::tr1::shared_ptr<gp::Message> createMessageByName(const std::string& name);
 
-    private:
-        gp::compiler::DiskSourceTree _tree;
-        gp::compiler::SourceTreeDescriptorDatabase _db;
-        gp::DescriptorPool _pool;
-        gp::DynamicMessageFactory _factory;
-    };
+bool protobufToText(const google::protobuf::Message& input, std::string& output);
+bool textToProtobuf(const std::string& input, google::protobuf::Message& output,
+                    const std::string& context="");
+bool textFileToProtobuf(const char *filename, google::protobuf::Message& output);
 
-    class PBErrorCollector : public gp::io::ErrorCollector {
-    public:
-        const std::string context;
-        int errors;
-        int warnings;
-        
-        PBErrorCollector(std::string filename_or_typename);
-        ~PBErrorCollector();
+class MultiPBErrorCollector : public google::protobuf::compiler::MultiFileErrorCollector {
+public:
+    MultiPBErrorCollector();
+    ~MultiPBErrorCollector();
 
-        void AddError(int line, int column, const std::string& message);
-        void AddWarning(int line, int column, const std::string& message);
-    };
+    void AddError(const std::string& filename, int line, int column, const std::string& message);
+    void AddWarning(const std::string& filename, int line, int column, const std::string& message);
+};
 
-    bool protobufToText(const gp::Message& input, std::string& output);
-    bool textToProtobuf(const std::string& input, gp::Message& output,
-                        const std::string& context="");
-    bool textFileToProtobuf(const char *filename, gp::Message& output);
+class PBErrorCollector : public google::protobuf::io::ErrorCollector {
+public:
+    const std::string context;
+    int errors;
+    int warnings;
+    
+    PBErrorCollector(std::string filename_or_typename);
+    ~PBErrorCollector();
+
+    void AddError(int line, int column, const std::string& message);
+    void AddWarning(int line, int column, const std::string& message);
+};
+
+class ProtobufRegistry {
+public:
+    ProtobufRegistry();
+    virtual ~ProtobufRegistry();
+    
+    void setProtobufPath(const std::string& path);
+    std::tr1::shared_ptr<google::protobuf::Message> createMessageByName(const std::string& name);
+
+private:
+    google::protobuf::compiler::DiskSourceTree _tree;
+    google::protobuf::compiler::SourceTreeDescriptorDatabase _db;
+    google::protobuf::DescriptorPool _pool;
+    google::protobuf::DynamicMessageFactory _factory;
+    
+    MultiPBErrorCollector _errors;
+};
 
 } /* namespace gravity */
 #endif /* _GRAVITY__PROTOBUF_UTILITIES_H_ */

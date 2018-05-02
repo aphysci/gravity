@@ -22,14 +22,17 @@ option java_package = "com.aphysci.gravity.protobuf";
 package gravity.protobuf;
 
 message GravityMOOSConfig {
+    // Configure the connection to the MOOS Server
     optional string moos_server = 1 [default = "localhost"];
     optional uint32 moos_port   = 2 [default = 9000];
-    
+
+    // Should point at a folder hierarchy containing *all* protobuf types that will be relayed
     optional string protobuf_path = 3 [default = "type_registry"];
     
+    // List of publications from each universe that should be published on the other
     repeated string gravity_publications = 10;
     repeated string moospbt_publications = 11;
-
+    
     //repeated goby.moos.TranslatorEntry custom_mappings = 12;
 }
 

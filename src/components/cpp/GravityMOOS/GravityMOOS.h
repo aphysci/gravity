@@ -21,16 +21,12 @@
 
 #include "GravityNode.h"
 #include "GravitySubscriber.h"
-#include "protobufs/GravityMOOSConfig.pb.h"
 #include "ProtobufUtilities.h"
+#include "protobufs/GravityMOOSConfig.pb.h"
 
 #include <MOOS/libMOOS/Comms/MOOSAsyncCommClient.h>
 
-#include <set>
-#include <string>
 #include <tr1/memory>
-
-#include <cstdio>
 
 namespace gravity {
 
@@ -43,7 +39,7 @@ public:
     
     int run();
     
-    // public to work around MOOS's inadequacies...
+    // public to work around MOOS's callback limitations, but not meant to be called externally.
     bool moosConnected();
         
 protected:

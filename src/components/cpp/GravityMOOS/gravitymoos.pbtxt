@@ -1,6 +1,5 @@
-gravity_publications: "Foo"
-gravity_publications: "Fum"
-moospbt_publications: "BAR"
-moospbt_publications: "BAZ"
+gravity_publications: "ssdte.GpsDataMsgPB"
+gravity_publications: "ssdte.InsDataMsgPB"
+moospbt_publications: "TESTING_1"
+moospbt_publications: "TESTING_2"
 
-protobuf_path: "/home/chrismurf/programs/teac/sample_gravity_log/"
