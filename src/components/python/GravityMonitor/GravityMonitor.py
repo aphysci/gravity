@@ -84,14 +84,14 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
 
             elif event_type == 'SUB':
                 for data_product in data:
-                    row = self.index[data_product.getDataProductID()]
-                    row[1] = data_product.getComponentID()
-                    row[2] = data_product.getDomain()
-                    stamp = data_product.getGravityTimestamp() / 1000000.0
+                    row = self.index[data_product.dataProductID]
+                    row[1] = data_product.componentID
+                    row[2] = data_product.domain
+                    stamp = data_product.timestamp / 1000000.0
                     row[3] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
                     # Let frequency get updated by the periodic callback, otherwise it is spastic
                     # for 10Hz+ data as it bounces all around.
-                    row[5]['last_data'] = data_product.getData()
+                    row[5]['last_data'] = data_product.data
                     row[5]['history'].append(stamp)
 
     def update_frequency(self):

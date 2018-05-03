@@ -12,7 +12,7 @@ gn.registerDataProduct("SampleData", gravity.TCP)
 
 gdp = GravityDataProduct("SampleData")
 for i in range (1, 601):
-    gdp.setData("TEST %d" % i)
+    gdp.data = "TEST %d" % i
     gn.publish(gdp)
     time.sleep(1)
 
