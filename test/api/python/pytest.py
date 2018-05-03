@@ -29,11 +29,11 @@ class MyRequestHandler(GravityRequestor):
     def requestFilled(self, serviceID, requestID, response):
         testPB = PythonTestPB()
         response.populateMessage(testPB)
-        Log.message("made it to request filled with request GDP ID = "+response.getDataProductID() +" and count = " + str(testPB.count))
+        Log.message("made it to request filled with request GDP ID = "+response.dataProductID +" and count = " + str(testPB.count))
         self.reqCount = testPB.count
         if self.reqCount < 5:
             gdp = GravityDataProduct("ServiceRequest")
-            gdp.setData(testPB)
+            gdp.data = testPB
             self.gravityNode.request("ServiceTest", gdp, self)
             
 class TestProvider(GravityServiceProvider):
@@ -42,7 +42,7 @@ class TestProvider(GravityServiceProvider):
         dataProduct.populateMessage(reqPB)
         reqPB.count += 1
         gdp = GravityDataProduct("ServiceTestResponse")
-        gdp.setData(reqPB)
+        gdp.data = reqPB
         return gdp
 
 class TestHBListener(GravityHeartbeatListener):
@@ -74,7 +74,7 @@ def testPubSub(gravityNode):
     gdp = GravityDataProduct("PubTest")
     while mySub.subCount < 5 and pubPB.count < 10:
         pubPB.count += 1
-        gdp.setData(pubPB)
+        gdp.data = pubPB
         gravityNode.publish(gdp)
         time.sleep(.1)
         
@@ -91,7 +91,7 @@ def testService(gravityNode):
     testPB = PythonTestPB()
     testPB.count = 0
     gdp = GravityDataProduct("ServiceRequest")
-    gdp.setData(testPB)
+    gdp.data = testPB
     gravityNode.request("ServiceTest", gdp, myReq)
 
     # test async
@@ -106,7 +106,7 @@ def testService(gravityNode):
     
     # test sync
     testPB.count = 0
-    gdp.setData(testPB)
+    gdp.data = testPB
     responsePB = PythonTestPB()
     for i in range(0, 5):
         responseGDP = gravityNode.request("ServiceTest", gdp)
@@ -117,7 +117,7 @@ def testService(gravityNode):
         else:
             Log.message("Received return value {} on synchronous request".format(responsePB.count))
         testPB.count += 1
-        gdp.setData(testPB)
+        gdp.data = testPB
     
     return 0
     
@@ -159,16 +159,16 @@ def main():
         Log.critical("Could not connect to ServiceDirectory")
         return 1
     
-#     ret = testPubSub(gravityNode)
-#     if ret != 0:
-#         return ret
-#     ret = testService(gravityNode)
-#     if ret != 0:
-#         return ret
+    ret = testPubSub(gravityNode)
+    if ret != 0:
+        return ret
+    ret = testService(gravityNode)
+    if ret != 0:
+        return ret
     ret = testHB(gravityNode)
     if ret != 0:
         return ret
-         
+        
     Log.message("Python tests successful!")
     return 0
 

@@ -84,6 +84,9 @@ void GravityDataProduct::setData(const google::protobuf::Message& data)
     delete gravityDataProductPB->release_data(); //Looking at the protobuf, this seems necessary.
     gravityDataProductPB->set_data(vdata, data.ByteSize());
     free(vdata);
+    // Also implicitly set the message protocol and data_type.
+    gravityDataProductPB->set_protocol("protobuf2");
+    gravityDataProductPB->set_type_name(data.GetTypeName());
 }
 
 bool GravityDataProduct::getData(void* data, int size) const
@@ -167,6 +170,22 @@ bool GravityDataProduct::isRelayedDataproduct() const
 void GravityDataProduct::setIsRelayedDataproduct(bool relayed)
 {
 	gravityDataProductPB->set_is_relayed_dataproduct(relayed);
+}
+
+void GravityDataProduct::setProtocol(const std::string& protocol) {
+	gravityDataProductPB->set_protocol(protocol);
+}
+
+const std::string& GravityDataProduct::getProtocol() {
+	return gravityDataProductPB->protocol();
+}
+
+void GravityDataProduct::setTypeName(const std::string& dataType) {
+	gravityDataProductPB->set_type_name(dataType);
+}
+
+const std::string& GravityDataProduct::getTypeName() {
+	return gravityDataProductPB->type_name();
 }
 
 
