@@ -47,7 +47,7 @@ PYTHONSRC_DIR=src/python/gravity
 #Protobuf sources (.proto)
 PROTO_DIR=../protobufs
 
-PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto $(PROTO_DIR)/FileArchiverControlRequestPB.proto $(PROTO_DIR)/FileArchiverControlResponsePB.proto
+PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto $(PROTO_DIR)/FileArchiverControlRequestPB.proto $(PROTO_DIR)/FileArchiverControlResponsePB.proto $(PROTO_DIR)/ServiceDirectoryMapPB.proto
 PROTO_PYTHON=$(patsubst $(PROTO_DIR)/%PB.proto,$(PYTHONSRC_DIR)/%Container.py,$(PROTO_SRC))
 
 
