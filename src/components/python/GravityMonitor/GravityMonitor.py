@@ -11,13 +11,13 @@ import datetime
 import collections
 from itertools import islice, izip
 
-import gi
-gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk
-
 import gravity
 from gravity import gravity as GRAVITY
 from gravity.ServiceDirectoryMapPB_pb2 import ServiceDirectoryMapPB
+
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib, Gtk
 
 class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.GravityRequestor):
     """ListStore containing four fields, and a dict with other metadata.
@@ -27,13 +27,15 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
        [0]: Data Product ID (str)
        [1]: Publisher Component ID (str)
        [2]: Publisher Domain (str)
-       [3]: Last Publication Time (str / iso8601)
-       [4]: Frequency (float / Hz)
-       [5]: dictionary of other metadata (dict)
+       [3]: Protocol (str)
+       [4]: Type Name (str)
+       [5]: Last Publication Time (str / iso8601)
+       [6]: Frequency (float / Hz)
+       [7]: dictionary of other metadata (dict)
     """
     def __init__(self, gravity_node):
         # super() doesn't work, likely due to bugs in one or both C extensions...
-        Gtk.ListStore.__init__(self, str, str, str, str, float, object)
+        Gtk.ListStore.__init__(self, str, str, str, str, str, str, float, object)
         gravity.GravitySubscriber.__init__(self)
         gravity.GravityRequestor.__init__(self)
 
@@ -76,7 +78,7 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
                         continue
 
                     self.index[provider.product_id] = self[self.append([
-                        provider.product_id, provider.component_id[0], provider.domain_id[0], "", 0,
+                        provider.product_id, provider.component_id[0], provider.domain_id[0], "", "", "", 0,
                         {'history': collections.deque(maxlen=10)}
                     ])]
 
@@ -87,19 +89,21 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
                     row = self.index[data_product.dataProductID]
                     row[1] = data_product.componentID
                     row[2] = data_product.domain
+                    row[3] = data_product.protocol
+                    row[4] = data_product.typeName
                     stamp = data_product.timestamp / 1000000.0
-                    row[3] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
+                    row[5] = datetime.datetime.utcfromtimestamp(stamp).strftime("%Y%m%dT%H%M%S.%fZ")
                     # Let frequency get updated by the periodic callback, otherwise it is spastic
                     # for 10Hz+ data as it bounces all around.
-                    row[5]['last_data'] = data_product.data
-                    row[5]['history'].append(stamp)
+                    row[7]['last_data'] = data_product.data
+                    row[7]['history'].append(stamp)
 
     def update_frequency(self):
         """Update the estimate of publication frequency."""
         for row in self:
-            history = row[5]['history']
+            history = row[7]['history']
             if len(history) < 2:
-                row[4] = 0.0
+                row[6] = 0.0
                 continue
 
             differences = [x-y for x, y in izip(islice(history, 1, None), islice(history, 0, None))]
@@ -108,9 +112,9 @@ class GravityMonitorModel(Gtk.ListStore, gravity.GravitySubscriber, gravity.Grav
             # If it's been an abnormally long time (3x frequency...) then display zero.
             time_since_last = time.time() - history[-1]
             if time_since_last > 3 * average_difference:
-                row[4] = 0.0
+                row[6] = 0.0
             else:
-                row[4] = 1.0 / average_difference
+                row[6] = 1.0 / average_difference
         return True
 
     def update_registry(self):
@@ -130,9 +134,11 @@ class GravityMonitorView(Gtk.TreeView):
         self.add_column("Data Product", renderer, 0)
         self.add_column("Publisher", renderer, 1)
         self.add_column("Domain", renderer, 2)
-        self.add_column("Last Time", renderer, 3)
-        col = self.add_column("Frequency", renderer, 4)
-        fmt_float = lambda c, cell, model, it, X: cell.set_property('text', "%0.1f" % model[it][4])
+        self.add_column("Protocol", renderer, 3)
+        self.add_column("Data Type", renderer, 4)
+        self.add_column("Last Time", renderer, 5)
+        col = self.add_column("Frequency", renderer, 6)
+        fmt_float = lambda c, cell, model, it, X: cell.set_property('text', "%0.1f" % model[it][6])
         col.set_cell_data_func(renderer, fmt_float)
 
     def add_column(self, field_name, renderer, model_column):
