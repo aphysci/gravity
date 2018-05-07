@@ -91,22 +91,6 @@ std::tr1::shared_ptr<gp::Message> ProtobufRegistry::createMessageByName(const st
     return std::tr1::shared_ptr<gp::Message>(prototype->New());
 }
 
-bool parseTextPB(const char* filename, gp::Message& output) {
-    int fd = open(filename, O_RDONLY);
-    if (fd == -1) {
-        Log::critical("Failed to open '%s'", filename);
-        return false;
-    }
-    gp::io::FileInputStream reader(fd);
-    gp::TextFormat::Parser parser;
-    PBErrorCollector errorCollector(filename);
-    parser.RecordErrorsTo(&errorCollector);
-    parser.Parse(&reader, &output);
-    close(fd);
-    
-    return (errorCollector.errors == 0);
-}
-
 PBErrorCollector::PBErrorCollector(string filename_or_typename) : context(filename_or_typename) { }
 PBErrorCollector::~PBErrorCollector() { }
 
