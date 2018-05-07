@@ -106,10 +106,27 @@ namespace gravity {
 	    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
 	
+%typemap(in) const gravity::GravitySubscriber& subscriber {
+    // Increment the refcount on the subscriber object
+    int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravitySubscriber, 0);
+    if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "GravityNode_subscribe" "', argument " "3"" of type '" "gravity::GravitySubscriber const &""'"); 
+    };
+    Py_XINCREF($input);
+}
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain, bool receiveLastCachedValue);
+
+%typemap(in) const gravity::GravitySubscriber& subscriber {
+    int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravitySubscriber, 0);
+    if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "GravityNode_subscribe" "', argument " "3"" of type '" "gravity::GravitySubscriber const &""'"); 
+    };
+    // Decrement the refcount on the subscriber object
+    Py_XDECREF($input);
+}
 	    
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 	
