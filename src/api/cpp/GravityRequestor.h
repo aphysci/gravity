@@ -49,6 +49,8 @@ public:
      * \param response GravityDataProduct containing the data of the response
      */
     virtual void requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response) = 0;
+
+    GRAVITY_API virtual void requestTimeout(std::string serviceID, std::string requestID);
 };
 
 } /* namespace gravity */

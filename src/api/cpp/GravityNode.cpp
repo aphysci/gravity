@@ -968,6 +968,9 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 													response.getDataProductID().c_str(), timeout_in_milliseconds);
     void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
 	zmq_connect(socket, url.c_str());
+	int linger = 0;
+    zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+
 
 	// Send message to service provider
 	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
@@ -1721,6 +1724,7 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 	sendStringMessage(requestManagerSWL.socket, serviceID, ZMQ_SNDMORE);
 	sendStringMessage(requestManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(requestManagerSWL.socket, requestID, ZMQ_SNDMORE);
+	sendIntMessage(requestManagerSWL.socket, timeout_milliseconds, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, dataProduct.getSize());

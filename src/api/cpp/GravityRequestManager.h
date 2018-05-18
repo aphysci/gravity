@@ -37,6 +37,7 @@ typedef struct RequestDetails
 {
 	std::string serviceID;
 	std::string requestID;
+	uint64_t timeoutTimeMilliseconds;
 	GravityRequestor* requestor;
 } RequestDetails;
 
