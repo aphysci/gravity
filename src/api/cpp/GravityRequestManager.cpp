@@ -93,15 +93,18 @@ void GravityRequestManager::start()
                     map<void*,shared_ptr<RequestDetails> >::iterator delIter = iter++;
 	                requestMap.erase(delIter);
 	            }
-	            else if (nextTimeout < 0 || t < nextTimeout)
-	            {
-	                nextTimeout = t - currentTime;
-	                iter++;
-	            }
 	            else
 	            {
+	                if (nextTimeout < 0 || t < nextTimeout)
+	                {
+	                    nextTimeout = t - currentTime;
+	                }
 	                iter++;
 	            }
+	        }
+	        else
+	        {
+	            iter++;
 	        }
 	    }
 
@@ -334,7 +337,7 @@ void GravityRequestManager::processRequest()
 	string requestID = readStringMessage(gravityNodeSocket);
 
 	int timeout_milliseconds = readIntMessage(gravityNodeSocket);
-	uint64_t timeoutTimeMilliseconds = -1;
+	long timeoutTimeMilliseconds = -1;
 	// calculate an actual time in milliseconds
 	if (timeout_milliseconds > 0)
 	{
