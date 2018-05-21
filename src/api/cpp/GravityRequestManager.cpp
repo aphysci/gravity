@@ -89,6 +89,15 @@ void GravityRequestManager::start()
                     shared_ptr<RequestDetails> reqDetails = iter->second;
                     reqDetails->requestor->requestTimeout(reqDetails->serviceID, reqDetails->requestID);
                     void* socket = iter->first;
+                    vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 2;  // start after internal framework sockets
+                    while(pollItemIter != pollItems.end())
+                    {
+                        if (socket == pollItemIter->socket)
+                        {
+                            pollItems.erase(pollItemIter);
+                            break;
+                        }
+                    }
                     zmq_close(socket);
                     map<void*,shared_ptr<RequestDetails> >::iterator delIter = iter++;
 	                requestMap.erase(delIter);
