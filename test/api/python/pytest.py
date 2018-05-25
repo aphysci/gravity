@@ -25,6 +25,7 @@ class MyRequestHandler(GravityRequestor):
         super(MyRequestHandler, self).__init__()
         self.gravityNode = gravityNode 
         self.reqCount = 0
+        self.timeoutCount = 0
 
     def requestFilled(self, serviceID, requestID, response):
         testPB = PythonTestPB()
@@ -35,6 +36,10 @@ class MyRequestHandler(GravityRequestor):
             gdp = GravityDataProduct("ServiceRequest")
             gdp.data = testPB
             self.gravityNode.request("ServiceTest", gdp, self)
+            
+    def requestTimeout(self, serviceID, requestID):
+        Log.message("Service request timed out")
+        self.timeoutCount += 1
             
 class TestProvider(GravityServiceProvider):
     def request(self, serviceID, dataProduct):
@@ -145,9 +150,44 @@ def testHB(gravityNode):
         return 1
     else:
         Log.message("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
+
+    gravityNode.unregisterHeartbeatListener("PythonTest")
     
     return 0
 
+def createTempService():
+    tempGravityNode = GravityNode()
+    count = 0
+    while tempGravityNode.init("TempNode") != gravity.SUCCESS and count < 5:
+        Log.warning("failed to init, retrying...")
+        time.sleep(1)
+        count += 1
+    if count == 5:
+        Log.critical("Could not connect to ServiceDirectory")
+        return 1
+    testProv = TestProvider()
+    tempGravityNode.registerService("TempService", gravity.TCP, testProv)
+
+    time.sleep(2) # give the registration time to complete
+    
+    return 0
+
+def testServiceTimeout(gravityNode):
+    createTempService()
+    
+    myReq = MyRequestHandler(gravityNode)
+    testPB = PythonTestPB()
+    testPB.count = 0
+    gdp = GravityDataProduct("ServiceRequest")
+    gdp.data = testPB
+    gravityNode.request("TempService", gdp, myReq, "", 2000)
+    
+    time.sleep(3)
+    
+    if myReq.timeoutCount == 0:
+        return 1
+    return 0
+    
 def main():
     gravityNode = GravityNode()
     count = 0
@@ -166,6 +206,9 @@ def main():
     if ret != 0:
         return ret
     ret = testHB(gravityNode)
+    if ret != 0:
+        return ret
+    ret = testServiceTimeout(gravityNode)
     if ret != 0:
         return ret
         
