@@ -77,6 +77,8 @@ namespace gravity {
 	    @abc.abstractmethod
 	    def requestFilled(self, serviceID, requestID, response): pass
     %}
+
+	    virtual void requestTimeout(std::string serviceID, std::string requestID);
 	    
 	};
 
