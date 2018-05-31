@@ -56,7 +56,6 @@ void handler(int sig)
 
 using namespace gravity;
 using namespace std;
-using namespace std::tr1;
 
 class Relay : public GravitySubscriber
 {
@@ -68,7 +67,7 @@ public:
     virtual ~Relay() {};
 
     int run();
-    void subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
+    void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int Relay::run()
@@ -138,11 +137,11 @@ int Relay::run()
  * Not much happens here, it just passes along the GDP's that it receives.  The main work is done in the ServiceDirectory
  * where it recognizes subscribers that are collocated with the Relay and just provides data from there.
  */
-void Relay::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void Relay::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
-        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+        tr1::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
         Log::debug("Republishing %s", dataProduct->getDataProductID().c_str());
         dataProduct->setIsRelayedDataproduct(true);
         gravityNode.publish(*dataProduct);

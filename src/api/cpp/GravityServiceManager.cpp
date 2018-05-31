@@ -31,7 +31,6 @@
 namespace gravity {
 
 using namespace std;
-using namespace std::tr1;
 
 GravityServiceManager::GravityServiceManager(void* context)
 {
@@ -152,9 +151,9 @@ void GravityServiceManager::start()
 				// Clean up message
 				zmq_msg_close(&message);
 
-				shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
+				tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
 				Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
-				shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+				tr1::shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
 
 				response->setComponentId(componentID);
 				response->setDomain(domain);
@@ -165,7 +164,7 @@ void GravityServiceManager::start()
 	}
 
 	// Clean up all our open sockets
-	for (map<void*,shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin(); iter != serviceMapBySocket.end(); iter++)
+	for (map<void*,tr1::shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin(); iter != serviceMapBySocket.end(); iter++)
 	{
 		void* socket = iter->first;
 		zmq_close(socket);
@@ -217,7 +216,7 @@ void GravityServiceManager::addService()
 	memcpy(&server, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	shared_ptr<ServiceDetails> serviceDetails;
+	tr1::shared_ptr<ServiceDetails> serviceDetails;
 
 	// Create the response socket
 	void* serverSocket = zmq_socket(context, ZMQ_REP);
@@ -280,7 +279,7 @@ void GravityServiceManager::removeService()
 	// If service ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
 	if (serviceMapByServiceID.count(serviceID))
 	{
-		shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
+		tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
 		void* socket = serviceDetails->pollItem.socket;
 		serviceMapBySocket.erase(socket);
 		serviceMapByServiceID.erase(serviceID);

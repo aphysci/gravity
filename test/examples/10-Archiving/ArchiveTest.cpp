@@ -28,7 +28,7 @@ int main()
 {
 	using namespace gravity;
     using namespace std;
-    using namespace std::tr1;
+    
 
 	GravityNode gn;
 	//Initialize gravity, giving this node a componentID.

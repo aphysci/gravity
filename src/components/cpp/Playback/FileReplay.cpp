@@ -28,7 +28,6 @@
 #endif
 
 using namespace std;
-using namespace std::tr1;
 
 int main(int argc, const char* argv[])
 {
@@ -70,7 +69,7 @@ FileReplay::~FileReplay() {}
 
 void FileReplay::processArchive()
 {
-    shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
+    tr1::shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
     while (gdp)
     {
         // Ensure that we've registered this data product
