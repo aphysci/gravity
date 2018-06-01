@@ -78,7 +78,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(AC_CPPFLAGS)
 CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
-LIBS=-Wl,-Bstatic -lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
+LIBS=-lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
 PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
