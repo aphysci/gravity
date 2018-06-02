@@ -28,7 +28,6 @@
 #include <algorithm>
 
 using namespace std;
-using namespace std::tr1;
 
 namespace gravity {
 
@@ -81,13 +80,13 @@ void LogRecorder::start()
 }
 
 
-void LogRecorder::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void LogRecorder::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    //shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
-    //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
-    for(vector<shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    //tr1::shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
+    //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (tr1::shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
+    for(vector<tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
     {
-        shared_ptr<GravityDataProduct> dataProduct = *i;
+        tr1::shared_ptr<GravityDataProduct> dataProduct = *i;
         num_logs++;
 
         GravityLogMessagePB message;
