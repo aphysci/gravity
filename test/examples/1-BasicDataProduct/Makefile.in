@@ -76,7 +76,7 @@ endif
 
 INCLUDES=-I$(GRAVLIB_DIR) $(AC_CPPFLAGS)
 CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
-LIBS=-Wl,-Bstatic -lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS)
+LIBS=-lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS)
 
 all: BasicDataProductPublisher$(OS_EXE_EXT) BasicDataProductSubscriber$(OS_EXE_EXT)
 
