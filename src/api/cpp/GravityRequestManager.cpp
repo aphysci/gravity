@@ -75,8 +75,50 @@ void GravityRequestManager::start()
 	zmq_msg_t message;
 	while (true)
 	{
+	    // before we poll, determine when the next timeout is (if any)
+	    // and handle any expired requests.
+	    long nextTimeout = -1;
+	    for (map<void*,shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); )
+	    {
+	        long t = iter->second->timeoutTimeMilliseconds;
+	        if (t > 0)
+	        {
+	            long currentTime = getCurrentTime() / 1e3;
+	            if (t <= currentTime)
+	            {
+                    shared_ptr<RequestDetails> reqDetails = iter->second;
+                    reqDetails->requestor->requestTimeout(reqDetails->serviceID, reqDetails->requestID);
+                    void* socket = iter->first;
+                    vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 2;  // start after internal framework sockets
+                    while(pollItemIter != pollItems.end())
+                    {
+                        if (socket == pollItemIter->socket)
+                        {
+                            pollItems.erase(pollItemIter);
+                            break;
+                        }
+                    }
+                    zmq_close(socket);
+                    map<void*,shared_ptr<RequestDetails> >::iterator delIter = iter++;
+	                requestMap.erase(delIter);
+	            }
+	            else
+	            {
+	                if (nextTimeout < 0 || t < nextTimeout)
+	                {
+	                    nextTimeout = t - currentTime;
+	                }
+	                iter++;
+	            }
+	        }
+	        else
+	        {
+	            iter++;
+	        }
+	    }
+
 		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
+		int rc = zmq_poll(&pollItems[0], pollItems.size(), nextTimeout); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
 			// Interrupted
@@ -303,6 +345,14 @@ void GravityRequestManager::processRequest()
 	// Read the request ID
 	string requestID = readStringMessage(gravityNodeSocket);
 
+	int timeout_milliseconds = readIntMessage(gravityNodeSocket);
+	long timeoutTimeMilliseconds = -1;
+	// calculate an actual time in milliseconds
+	if (timeout_milliseconds > 0)
+	{
+	    timeoutTimeMilliseconds = getCurrentTime() / 1e3 + timeout_milliseconds;
+	}
+
 	// Read the data product
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
@@ -324,6 +374,8 @@ void GravityRequestManager::processRequest()
 
 	// Connect to service
 	zmq_connect(reqSocket, url.c_str());
+    int linger = 0;
+    zmq_setsockopt(reqSocket, ZMQ_LINGER, &linger, sizeof(linger));
 
 	// Send data product
 	zmq_msg_t data;
@@ -345,6 +397,7 @@ void GravityRequestManager::processRequest()
 	reqDetails->serviceID = serviceID;
 	reqDetails->requestID = requestID;
 	reqDetails->requestor = requestor;
+	reqDetails->timeoutTimeMilliseconds = timeoutTimeMilliseconds;
 
 	requestMap[reqSocket] = reqDetails;
 }
