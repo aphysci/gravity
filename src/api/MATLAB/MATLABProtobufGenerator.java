@@ -103,7 +103,7 @@ public class MATLABProtobufGenerator
 						continue;
 					}					
 					if ((method.getName().startsWith("set") || method.getName().startsWith("add")) &&  
-							method.getParameterTypes()[method.getParameterCount() - 1].getName().endsWith("$Builder"))
+							method.getParameterTypes()[method.getParameterTypes().length - 1].getName().endsWith("$Builder"))
 					{
 						continue;
 					}
@@ -144,7 +144,7 @@ public class MATLABProtobufGenerator
 	private void writeMethod(PrintStream writer, Method method) throws Exception
 	{
 		String methodName = method.getName();
-		int numArgs = method.getParameterCount();
+		int numArgs = method.getParameterTypes().length;
 		String returnType = method.getReturnType().getName();
 		
 		if (methodName.startsWith("add") && numArgs == 2)
@@ -165,7 +165,7 @@ public class MATLABProtobufGenerator
 		List<String> args = new ArrayList<String>();
 		for (int i = 0; i < numArgs; i++)
 		{
-			String typeName = method.getGenericParameterTypes()[i].getTypeName();
+			String typeName = method.getGenericParameterTypes()[i].toString();
 			Class<?> argClass = null;
 			try
 			{
@@ -226,7 +226,9 @@ public class MATLABProtobufGenerator
 		}
 		
 		// Write the call to the underlying Java protobuf builder
-		String argsString = String.join(",", args);
+		String argsString = args.toString();
+		argsString = argsString.substring(1, argsString.length()-1);
+		argsString = argsString.replaceAll("\\s","");
 		writer.println("         ret = this.builder." + methodName + "(" + argsString + ");");
 		
 		// Process the return type
@@ -238,7 +240,7 @@ public class MATLABProtobufGenerator
 		if (returnType.equals("java.util.List"))
 		{
 			// This method returns a list. Determine listed type.
-			String fullTypeName = method.getGenericReturnType().getTypeName();
+			String fullTypeName = method.getGenericReturnType().toString();
 			String listedType = fullTypeName.substring(fullTypeName.indexOf("<") + 1, fullTypeName.indexOf(">"));
 			Class<?> listedClass = classLoader.loadClass(listedType);
 			if (Number.class.isAssignableFrom(listedClass))
