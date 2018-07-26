@@ -64,17 +64,35 @@ all clean:
 	$(MAKE) -C test/examples/9-Domains $@
 	$(MAKE) -C test/examples/10-Archiving $@
 	$(MAKE) -C test/examples/13-Relay $@
+
+	# Perform each of the following in their own if block, otherwise a failure in the below make commands
+	# won't cause the overall build to fail.
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
 		$(MAKE) -C src/api/java $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
 		$(MAKE) -C src/api/MATLAB $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
 		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
 		$(MAKE) -C test/examples/7-JavaBasicService $@;\
 	fi
 	@if test ${WITHOUT_PYTHON} = no;\
 	then \
 		$(MAKE) -C src/api/python $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
 		$(MAKE) -C test/examples/11-PythonPubSub $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
 		$(MAKE) -C test/examples/12-PythonBasicService $@;\
 	fi
 
