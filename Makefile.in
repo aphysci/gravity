@@ -64,6 +64,9 @@ all clean:
 	$(MAKE) -C test/examples/9-Domains $@
 	$(MAKE) -C test/examples/10-Archiving $@
 	$(MAKE) -C test/examples/13-Relay $@
+
+	# Perform each of the following in their own if block, otherwise a failure in the below make commands
+	# won't cause the overall build to fail.
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
 		$(MAKE) -C src/api/java $@;\
