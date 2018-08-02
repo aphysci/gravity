@@ -32,7 +32,8 @@ public class MATLABProtobufGenerator
 															   "getInitializationErrorString", "getClass", "clear", "clearField", "hasField",
 															   "clone", "build", "buildPartial", "mergeFrom", "isInitialized", "mergeTest", 
 															   "mergeUnknownFields", "findInitializationErrors", "mergeDelimitedFrom",
-															   "wait", "equals", "toString", "hashCode", "notify", "notifyAll");
+															   "wait", "equals", "toString", "hashCode", "notify", "notifyAll",
+															   "getOneofFieldDescriptor", "clearOneof", "hasOneof");
 	
 	private static final String numListToArrayFcn = "com.aphysci.gravity.matlab.MATLABGravitySubscriber.convertNumberListToDoubleArray";
 	private static final String numArrayToListFcn = "com.aphysci.gravity.matlab.MATLABGravitySubscriber.convertNumberArrayToNumberList";
