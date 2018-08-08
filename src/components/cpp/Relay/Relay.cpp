@@ -56,7 +56,6 @@ void handler(int sig)
 
 using namespace gravity;
 using namespace std;
-using namespace std::tr1;
 
 class Relay : public GravitySubscriber
 {
@@ -142,7 +141,7 @@ void Relay::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDa
 {
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
-        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+        tr1::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
         Log::debug("Republishing %s", dataProduct->getDataProductID().c_str());
         dataProduct->setIsRelayedDataproduct(true);
         gravityNode.publish(*dataProduct);
