@@ -35,7 +35,6 @@
 #include "CPPGravityHeartbeatListener.h"
 #include "CPPGravityLogger.h"
 #include "CPPGravitySubscriptionMonitor.h"
-using namespace std::tr1;
 %}
 
 // load the shared lib in the generated code
@@ -307,15 +306,15 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 /*****
  * typemaps to convert handle return of GDP from java method so that it can travel across jni boundary as a byte[]
  ******/
-%typemap(directorout) shared_ptr<gravity::GravityDataProduct> {
+%typemap(directorout) std::tr1::shared_ptr<gravity::GravityDataProduct> {
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
     int length = JCALL1(GetArrayLength, jenv, $input);
-	shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct((void *)data, length));
+	std::tr1::shared_ptr<gravity::GravityDataProduct> ret(new gravity::GravityDataProduct((void *)data, length));
 	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
     $result = ret;
     (jenv)->DeleteLocalRef(jBYTE);
 }
-%typemap(out) shared_ptr<gravity::GravityDataProduct> {
+%typemap(out) std::tr1::shared_ptr<gravity::GravityDataProduct> {
   if ($1 != NULL)
   {
 	  $result = JCALL1(NewByteArray, jenv, $1->getSize());
@@ -325,30 +324,30 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 	  delete[] bytes;
   }
 }
-%typemap(javadirectorout) shared_ptr<gravity::GravityDataProduct> "$javacall"
-%typemap(jni) shared_ptr<gravity::GravityDataProduct> "jbyteArray"
-%typemap(jtype) shared_ptr<gravity::GravityDataProduct> "byte[]"
-%typemap(jstype) shared_ptr<gravity::GravityDataProduct> "byte[]"
-%typemap(javaout) shared_ptr<gravity::GravityDataProduct> {
+%typemap(javadirectorout) std::tr1::shared_ptr<gravity::GravityDataProduct> "$javacall"
+%typemap(jni) std::tr1::shared_ptr<gravity::GravityDataProduct> "jbyteArray"
+%typemap(jtype) std::tr1::shared_ptr<gravity::GravityDataProduct> "byte[]"
+%typemap(jstype) std::tr1::shared_ptr<gravity::GravityDataProduct> "byte[]"
+%typemap(javaout) std::tr1::shared_ptr<gravity::GravityDataProduct> {
     return $jnicall;
   }
 
-%typemap(javain) shared_ptr<gravity::GravityDataProduct> "$javainput"
-%typemap(javadirectorin) shared_ptr<gravity::GravityDataProduct> "$jniinput"
-%typemap(directorin, descriptor="[B") shared_ptr<gravity::GravityDataProduct> {}
+%typemap(javain) std::tr1::shared_ptr<gravity::GravityDataProduct> "$javainput"
+%typemap(javadirectorin) std::tr1::shared_ptr<gravity::GravityDataProduct> "$jniinput"
+%typemap(directorin, descriptor="[B") std::tr1::shared_ptr<gravity::GravityDataProduct> {}
 
 /*****
  * typemaps to convert handle return of FutureResponse from java method so that it can travel across jni boundary as a byte[]
  ******/
-%typemap(directorout) shared_ptr<gravity::FutureResponse> {
+%typemap(directorout) std::tr1::shared_ptr<gravity::FutureResponse> {
     signed char* data = JCALL2(GetByteArrayElements, jenv, $input, NULL);
     int length = JCALL1(GetArrayLength, jenv, $input);
-	shared_ptr<gravity::FutureResponse> ret(new gravity::FutureResponse((void *)data, length));
+	std::tr1::shared_ptr<gravity::FutureResponse> ret(new gravity::FutureResponse((void *)data, length));
 	JCALL3(ReleaseByteArrayElements, jenv, $input, data, JNI_ABORT);
     $result = ret;
     (jenv)->DeleteLocalRef(jBYTE);
 }
-%typemap(out) shared_ptr<gravity::FutureResponse> {
+%typemap(out) std::tr1::shared_ptr<gravity::FutureResponse> {
   if ($1 != NULL)
   {
 	  $result = JCALL1(NewByteArray, jenv, $1->getSize());
@@ -358,25 +357,25 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 	  delete[] bytes;
   }
 }
-%typemap(javadirectorout) shared_ptr<gravity::FutureResponse> "$javacall"
-%typemap(jni) shared_ptr<gravity::FutureResponse> "jbyteArray"
-%typemap(jtype) shared_ptr<gravity::FutureResponse> "byte[]"
-%typemap(jstype) shared_ptr<gravity::FutureResponse> "byte[]"
-%typemap(javaout) shared_ptr<gravity::FutureResponse> {
+%typemap(javadirectorout) std::tr1::shared_ptr<gravity::FutureResponse> "$javacall"
+%typemap(jni) std::tr1::shared_ptr<gravity::FutureResponse> "jbyteArray"
+%typemap(jtype) std::tr1::shared_ptr<gravity::FutureResponse> "byte[]"
+%typemap(jstype) std::tr1::shared_ptr<gravity::FutureResponse> "byte[]"
+%typemap(javaout) std::tr1::shared_ptr<gravity::FutureResponse> {
     return $jnicall;
   }
 
-%typemap(javain) shared_ptr<gravity::FutureResponse> "$javainput"
-%typemap(javadirectorin) shared_ptr<gravity::FutureResponse> "$jniinput"
-%typemap(directorin, descriptor="[B") shared_ptr<gravity::FutureResponse> {}
+%typemap(javain) std::tr1::shared_ptr<gravity::FutureResponse> "$javainput"
+%typemap(javadirectorin) std::tr1::shared_ptr<gravity::FutureResponse> "$jniinput"
+%typemap(directorin, descriptor="[B") std::tr1::shared_ptr<gravity::FutureResponse> {}
 
 /******
- * When gravity::GravityNode::request returns shared_ptr<GravityDataProduct> though, we want to
+ * When gravity::GravityNode::request returns std::tr1::shared_ptr<GravityDataProduct> though, we want to
  * convert that to a GravityDataProduct on the java side of the JNI interface so that users
  * get a GDP rather than a byte[].
  ******/
-%typemap(jstype) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request "GravityDataProduct"
-%typemap(javaout) shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request {
+%typemap(jstype) std::tr1::shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request "GravityDataProduct"
+%typemap(javaout) std::tr1::shared_ptr<gravity::GravityDataProduct> gravity::GravityNode::request {
     byte[] data = $jnicall;
     if (data == null || data.length == 0)
         return null;
@@ -384,12 +383,12 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
   }
 
 /******
- * When gravity::GravityNode::createFutureResponse returns shared_ptr<FutureResponse> though, we want to
+ * When gravity::GravityNode::createFutureResponse returns std::tr1::shared_ptr<FutureResponse> though, we want to
  * convert that to a FutureResponse on the java side of the JNI interface so that users
  * get a FutureResponse rather than a byte[].
  ******/
-%typemap(jstype) shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse "FutureResponse"
-%typemap(javaout) shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse {
+%typemap(jstype) std::tr1::shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse "FutureResponse"
+%typemap(javaout) std::tr1::shared_ptr<gravity::FutureResponse> gravity::GravityNode::createFutureResponse {
     byte[] data = $jnicall;
     if (data == null || data.length == 0)
         return null;
