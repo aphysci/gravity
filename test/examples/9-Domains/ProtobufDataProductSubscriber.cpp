@@ -26,13 +26,12 @@
 
 using namespace gravity;
 using namespace std;
-using namespace std::tr1;
 
 //Declare class for receiving Published messages.
 class SimpleGravityCounterSubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int main()
@@ -64,9 +63,9 @@ int main()
 	gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);
 }
 
-void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Get the protobuf object from the message

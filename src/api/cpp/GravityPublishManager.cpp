@@ -35,9 +35,8 @@ namespace gravity
 {
 
 using namespace std;
-using namespace std::tr1;
 
-bool sortCacheValues (const shared_ptr<CacheValue> &i, const shared_ptr<CacheValue> &j)
+bool sortCacheValues (const tr1::shared_ptr<CacheValue> &i, const tr1::shared_ptr<CacheValue> &j)
 {
     return i->timestamp < j->timestamp;
 }
@@ -238,20 +237,20 @@ void GravityPublishManager::start()
 
 				if (newsub)
 				{					
-				    shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
+				    tr1::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
 				    // can't log here because the network logging uses this code - any logs here will result in an
 				    // infinite loop, or a deadlock.
 				    // This message can be useful though, so leaving it in, but commented out.
 //				    Log::debug("got a new subscriber for %s, resending %d values", pd->dataProductID.c_str(), pd->lastCachedValues.size());
 
-				    list<shared_ptr<CacheValue> > values;
-				    for (map<string,shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
+				    list<tr1::shared_ptr<CacheValue> > values;
+				    for (map<string,tr1::shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
 				        values.push_back(iter->second);
 
 					
 				    // we shouldn't be doing this often, so just sort these when we need it.
                     values.sort(sortCacheValues);
-				    for (list<shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end(); iter++)
+				    for (list<tr1::shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end(); iter++)
 					{
 						//we have a new subscriber and are going to send it the last cached data product value. 
 						char* bytes = (*iter)->value;
@@ -274,11 +273,11 @@ void GravityPublishManager::start()
 	}
 
 	// Clean up any pub sockets
-	for (map<void*,shared_ptr<PublishDetails> >::iterator iter = publishMapBySocket.begin(); iter != publishMapBySocket.end(); iter++)
+	for (map<void*,tr1::shared_ptr<PublishDetails> >::iterator iter = publishMapBySocket.begin(); iter != publishMapBySocket.end(); iter++)
 	{
-		shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
+	    tr1::shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
 		zmq_close(pubDetails->pollItem.socket);
-        for (map<string,shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin(); valIter != pubDetails->lastCachedValues.end(); valIter++)
+        for (map<string,tr1::shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin(); valIter != pubDetails->lastCachedValues.end(); valIter++)
             delete [] valIter->second->value;
         pubDetails->lastCachedValues.clear();
 	}
@@ -381,7 +380,7 @@ void GravityPublishManager::registerDataProduct()
 	pollItems.push_back(pollItem);
 
     // Track dataProductID->socket mapping
-    shared_ptr<PublishDetails> publishDetails = shared_ptr<PublishDetails>(new PublishDetails);
+	tr1::shared_ptr<PublishDetails> publishDetails = tr1::shared_ptr<PublishDetails>(new PublishDetails);
     publishDetails->url = connectionURL;
     publishDetails->dataProductID = dataProductID;
     publishDetails->socket = pubSocket;
@@ -406,7 +405,7 @@ void GravityPublishManager::unregisterDataProduct()
 	// If data product ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
 	if (publishMapByID.count(dataProductID))
 	{
-		shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
+	    tr1::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
 		void* socket = publishDetails->pollItem.socket;
 		publishMapBySocket.erase(socket);
 		publishMapByID.erase(dataProductID);
@@ -414,7 +413,7 @@ void GravityPublishManager::unregisterDataProduct()
 		zmq_close(socket);
 
 		// delete any cached values.
-        for (map<string,shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin(); iter != publishDetails->lastCachedValues.end(); iter++)
+        for (map<string,tr1::shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin(); iter != publishDetails->lastCachedValues.end(); iter++)
 		    delete [] iter->second->value;
         publishDetails->lastCachedValues.clear();
 
@@ -461,7 +460,7 @@ void GravityPublishManager::publish(void* requestSocket)
     zmq_msg_close(&msg);
 
 	
-    shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
+    tr1::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
     if (!publishDetails)
     {
         Log::critical("Unable to process publish for unknown data product %s", dataProductId.c_str());
@@ -476,7 +475,7 @@ void GravityPublishManager::publish(void* requestSocket)
 	if(publishDetails->cacheLastValue){
 		Log::trace("Cache last data product value for %s", dataProductId.c_str());
 		// ... save new data for late subscribers
-		shared_ptr<CacheValue> val = shared_ptr<CacheValue>(new CacheValue);
+		tr1::shared_ptr<CacheValue> val = tr1::shared_ptr<CacheValue>(new CacheValue);
 		val->filterText = filterText;
 		val->value = bytes;
 		val->size = gdbSize;

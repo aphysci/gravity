@@ -42,7 +42,7 @@ from GravityDataProduct import GravityDataProduct
     if ($1 != 0) delete $1;
 }
 
-%typemap(out) shared_ptr<gravity::GravityDataProduct> {
+%typemap(out) std::tr1::shared_ptr<gravity::GravityDataProduct> {
     char* buffer = new char[$1->getSize()];
     $1->serializeToArray(buffer);
     $result = PyString_FromStringAndSize(buffer, $1->getSize());
@@ -135,7 +135,7 @@ namespace gravity {
 	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
 
-	    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+	    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 	    %pythoncode %{
             # The above request methods will both be renamed as requestBinary.  This provides a request method in the Python API that wraps the requestBinary
             # call and converts the serialized GDP into a Python GDP in the case of the synchronous request.
@@ -171,7 +171,7 @@ namespace gravity {
 	    std::string getDomain();
 
 /*	Not yet implemented
-	    shared_ptr<gravity::FutureResponse> createFutureResponse();
+	    std::tr1::shared_ptr<gravity::FutureResponse> createFutureResponse();
 		GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 		GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				int milliSecondTimeout, const std::string& filter="", const std::string& domain="");

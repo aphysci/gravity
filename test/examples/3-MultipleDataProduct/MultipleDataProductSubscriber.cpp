@@ -25,13 +25,12 @@
 
 using namespace gravity;
 using namespace std;
-using namespace std::tr1;
 
 //Declare a class for receiving Published messages.
 class SimpleGravitySubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 //Declare another class for receiving Published messages.
@@ -39,7 +38,7 @@ class SimpleGravityCounterSubscriber : public GravitySubscriber
 {
 public:
 	SimpleGravityCounterSubscriber();
-	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 private:
 	int countTotals; //Declare a variable to keep track of the sum of all counts received.
 };
@@ -54,7 +53,7 @@ SimpleGravityCounterSubscriber::SimpleGravityCounterSubscriber()
 class SimpleGravityHelloWorldSubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 
@@ -82,9 +81,9 @@ int main()
 	gn.waitForExit();
 }
 
-void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Get the protobuf object from the message
@@ -98,9 +97,9 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< share
 	}
 }
 
-void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Get a raw message
@@ -116,9 +115,9 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< sh
 	}
 }
 
-void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravitySubscriber::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Process Message

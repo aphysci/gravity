@@ -36,7 +36,6 @@ namespace gravity
 {
 
 using namespace std;
-using namespace std::tr1;
 
 std::list<ExpectedMessageQueueElement> Heartbeat::queueElements; //This is so we can reuse these guys.
 std::priority_queue<ExpectedMessageQueueElement*, vector<ExpectedMessageQueueElement*>, EMQComparator> Heartbeat::messageTimes;
@@ -46,7 +45,7 @@ Semaphore Heartbeat::lock;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 
-void Heartbeat::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void Heartbeat::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
 	lock.Lock();
 	for(size_t i = 0; i < dataProducts.size(); i++)
