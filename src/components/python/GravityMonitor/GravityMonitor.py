@@ -153,6 +153,9 @@ class GravityMonitorWindow(Gtk.Window):
     """Window for monitoring Gravity publications in realtime."""
     def __init__(self):
         super(GravityMonitorWindow, self).__init__(title="Gravity Monitor")
+        self.set_wmclass ("Gravity Monitor", "Gravity Monitor")
+        icon = Gtk.IconTheme.get_default().load_icon("utilities-system-monitor", 128, 0)
+        self.set_icon(icon)
 
         self.node = gravity.GravityNode()
 
