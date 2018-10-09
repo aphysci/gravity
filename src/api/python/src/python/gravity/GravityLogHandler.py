@@ -15,6 +15,26 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger
-from GravityDataProduct import GravityDataProduct 
-from GravityLogHandler import GravityLogHandler
+import logging
+from logging import Handler
+
+from gravity import Log
+
+class GravityLogHandler(Handler):
+
+    def emit(self, record):
+        logFunc = None
+        if record.levelno == logging.DEBUG:
+            logFunc = Log.debug
+        elif record.levelno == logging.INFO:
+            logFunc = Log.message
+        elif record.levelno == logging.WARNING:
+            logFunc = Log.warning
+        elif record.levelno == logging.ERROR:
+            logFunc = Log.critical
+        elif record.levelno == logging.CRITICAL:
+            logFunc = Log.fatal
+            
+        logMessage = self.format(record)
+        logFunc(logMessage)
+        
