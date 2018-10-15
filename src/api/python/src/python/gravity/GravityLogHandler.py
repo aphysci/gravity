@@ -21,6 +21,9 @@ from logging import Handler
 from gravity import Log
 
 class GravityLogHandler(Handler):
+    def __init__(self, splitlines=False):
+        super(GravityLogHandler, self).__init__()
+        self.__splitlines = splitlines
 
     def emit(self, record):
         logFunc = None
@@ -36,5 +39,10 @@ class GravityLogHandler(Handler):
             logFunc = Log.fatal
             
         logMessage = self.format(record)
-        logFunc(logMessage)
+        # Ensures we can get a full stack trace in gravity log
+        if self.__splitlines:
+            for line in logMessage.splitlines():
+                logFunc(line)
+        else:
+            logFunc(logMessage)            
         
