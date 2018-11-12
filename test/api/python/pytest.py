@@ -97,6 +97,9 @@ def testService(gravityNode):
     testPB.count = 0
     gdp = GravityDataProduct("ServiceRequest")
     gdp.data = testPB
+    if gravityNode.request("jaskhf", gdp, 2) is not None:
+        Log.critical("Request to non-existing service should return None")
+        return 1
     gravityNode.request("ServiceTest", gdp, myReq)
 
     # test async

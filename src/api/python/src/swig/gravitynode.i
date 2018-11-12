@@ -43,10 +43,19 @@ from GravityDataProduct import GravityDataProduct
 }
 
 %typemap(out) std::tr1::shared_ptr<gravity::GravityDataProduct> {
-    char* buffer = new char[$1->getSize()];
-    $1->serializeToArray(buffer);
-    $result = PyString_FromStringAndSize(buffer, $1->getSize());
-    delete[] buffer;
+    if ($1 != NULL)
+    {
+        char* buffer = new char[$1->getSize()];
+        $1->serializeToArray(buffer);
+        $result = PyString_FromStringAndSize(buffer, $1->getSize());
+        delete[] buffer;
+    }   
+    else
+    {
+        char buffer[] = "";
+        $result = PyString_FromStringAndSize(buffer, 0);
+    }
+    
 }
 
 // this turns on director features for GravityHeartbeatListener
@@ -148,7 +157,10 @@ namespace gravity {
                     if isinstance(arg, GravityRequestor):
                         synchronous = False
                 if synchronous:
-                    ret = GravityDataProduct(data=ret)
+                    if len(ret) == 0:
+                        ret = None
+                    else:
+                        ret = GravityDataProduct(data=ret)
                 return ret
         %}
 	
