@@ -483,6 +483,7 @@ void GravityPublishManager::publish(void* requestSocket)
 		publishDetails->lastCachedValues[filterText] = val;
 	
 	}else{
+	    delete [] bytes;
 		Log::trace("We are not caching data products");
 	}
     publish(publishDetails->socket, filterText, bytes, gdbSize);
