@@ -141,6 +141,14 @@ namespace gravity {
 	
 	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
 	
+%typemap(in) const gravity::GravityRequestor& requestor {
+    int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravityRequestor, 0);
+    if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "GravityNode_request" "', argument " "3"" of type '" "gravity::GravityRequestor const &""'"); 
+    };
+    // Increment the refcount on the requestor object 
+    Py_XINCREF($input);
+}
 	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
 
