@@ -22,6 +22,51 @@ import abc, logging
 from GravityDataProduct import GravityDataProduct 
 %}
 
+%header %{
+    #include <map>
+    typedef struct RefKey
+    {
+        PyObject* subscriber;
+        std::string filter;
+        std::string domain;
+        
+        bool operator== (const RefKey& otherKey) const
+        {
+            return subscriber == otherKey.subscriber && filter == otherKey.filter && domain == otherKey.domain;
+        }
+
+        bool operator< (const RefKey& otherKey) const
+        {
+            if (subscriber > otherKey.subscriber)
+                return false;
+            else if (subscriber < otherKey.subscriber)
+                return true;
+            else if (filter > otherKey.filter)
+                return false;
+            else if (filter < otherKey.filter)
+                return true;
+            else if (domain >= otherKey.domain)
+                return false;
+            return true;
+        }
+    } RefKey;        
+    
+    std::map<RefKey, uint32_t> refMap;
+    gravity::Semaphore semaphore;
+    
+    void incSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
+    {
+        Py_XINCREF(subscriber);
+        std::cout << "inc: filter = " << filter << ", domain = " << domain << std::endl; 
+    }
+    void decSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
+    {
+        Py_XDECREF(subscriber);
+        std::cout << "dec: filter = " << filter << ", domain = " << domain << std::endl; 
+    }
+    
+%}
+
 // give this type the highest precedence for comparison purposes
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) const gravity::GravityDataProduct&  {
     $1 = PyObject_HasAttrString($input, (char*)"dataProductID");
@@ -60,7 +105,6 @@ from GravityDataProduct import GravityDataProduct
 
 // this turns on director features for GravityHeartbeatListener
 %feature("director") gravity::GravityHeartbeatListener;
-	
 
 // This is where we actually declare GravityNode and the basic enums that will be made available in Python.  This section must be kept in
 // sync with the Gravity API.
@@ -114,29 +158,31 @@ namespace gravity {
 		GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
 	    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
-	
-%typemap(in) const gravity::GravitySubscriber& subscriber {
-    // Increment the refcount on the subscriber object
-    int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravitySubscriber, 0);
-    if (!SWIG_IsOK(res)) {
-        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "GravityNode_subscribe" "', argument " "3"" of type '" "gravity::GravitySubscriber const &""'"); 
-    };
-    Py_XINCREF($input);
+
+%typemap(argout) (const gravity::GravitySubscriber& subscriber) {
+    incSubscriberRefCount($input, "", ""); 
+}
+%typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter) {
+    incSubscriberRefCount($input, *$2, ""); 
+}
+%typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain) {
+    incSubscriberRefCount($input, *$2, *$3); 
 }
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain, bool receiveLastCachedValue);
 
-%typemap(in) const gravity::GravitySubscriber& subscriber {
-    int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravitySubscriber, 0);
-    if (!SWIG_IsOK(res)) {
-        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "GravityNode_subscribe" "', argument " "3"" of type '" "gravity::GravitySubscriber const &""'"); 
-    };
-    // Decrement the refcount on the subscriber object
-    Py_XDECREF($input);
+%typemap(argout) (const gravity::GravitySubscriber& subscriber) {
+    decSubscriberRefCount($input, "", ""); 
 }
-	    
+%typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter) {
+    decSubscriberRefCount($input, *$2, ""); 
+}
+%typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain) {
+    decSubscriberRefCount($input, *$2, *$3); 
+}
+
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 	
 	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
