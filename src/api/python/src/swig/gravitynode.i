@@ -26,20 +26,20 @@ from GravityDataProduct import GravityDataProduct
     #include <set>
     typedef struct RefKey
     {
-        PyObject* subscriber;
+        PyObject* gravityObject;
         std::string filter;
         std::string domain;
         
         bool operator== (const RefKey& otherKey) const
         {
-            return subscriber == otherKey.subscriber && filter == otherKey.filter && domain == otherKey.domain;
+            return gravityObject == otherKey.gravityObject && filter == otherKey.filter && domain == otherKey.domain;
         }
 
         bool operator< (const RefKey& otherKey) const
         {
-            if (subscriber > otherKey.subscriber)
+            if (gravityObject > otherKey.gravityObject)
                 return false;
-            else if (subscriber < otherKey.subscriber)
+            else if (gravityObject < otherKey.gravityObject)
                 return true;
             else if (filter > otherKey.filter)
                 return false;
@@ -54,42 +54,32 @@ from GravityDataProduct import GravityDataProduct
     std::set<RefKey> refSet;
     gravity::Semaphore semaphore;
     
-    void incSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
+    void incGravityRefCount(PyObject* gravityObject, std::string filter = "", std::string domain = "")
     {
         RefKey refKey;
-        refKey.subscriber = subscriber;
+        refKey.gravityObject = gravityObject;
         refKey.filter = filter;
         refKey.domain = domain;
         semaphore.Lock();
         if (refSet.count(refKey) == 0)
         {
-            Py_XINCREF(subscriber);
+            Py_XINCREF(gravityObject);
             refSet.insert(refKey);
-            std::cout << "inc added key to set: filter = " << filter << ", domain = " << domain << std::endl;
         } 
-        else
-        {
-            std::cout << "inc found key in set: filter = " << filter << ", domain = " << domain << std::endl;    
-        }
         semaphore.Unlock();
     }
-    void decSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
+    void decGravityRefCount(PyObject* gravityObject, std::string filter = "", std::string domain = "")
     {
         RefKey refKey;
-        refKey.subscriber = subscriber;
+        refKey.gravityObject = gravityObject;
         refKey.filter = filter;
         refKey.domain = domain;
         semaphore.Lock();
         if (refSet.count(refKey) > 0)
         {
-            std::cout << "dec found key in set: filter = " << filter << ", domain = " << domain << std::endl;    
             refSet.erase(refKey);
-            Py_XDECREF(subscriber);
+            Py_XDECREF(gravityObject);
         } 
-        else
-        {
-            std::cout << "dec key not found in set: filter = " << filter << ", domain = " << domain << std::endl;
-        }
         semaphore.Unlock();
     }
     
@@ -188,13 +178,13 @@ namespace gravity {
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
 
 %typemap(argout) (const gravity::GravitySubscriber& subscriber) {
-    incSubscriberRefCount($input, "", ""); 
+    incGravityRefCount($input, "", ""); 
 }
 %typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter) {
-    incSubscriberRefCount($input, *$2, ""); 
+    incGravityRefCount($input, *$2, ""); 
 }
 %typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain) {
-    incSubscriberRefCount($input, *$2, *$3); 
+    incGravityRefCount($input, *$2, *$3); 
 }
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber);
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter);
@@ -202,13 +192,13 @@ namespace gravity {
 		GravityReturnCode subscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain, bool receiveLastCachedValue);
 
 %typemap(argout) (const gravity::GravitySubscriber& subscriber) {
-    decSubscriberRefCount($input, "", ""); 
+    decGravityRefCount($input, "", ""); 
 }
 %typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter) {
-    decSubscriberRefCount($input, *$2, ""); 
+    decGravityRefCount($input, *$2, ""); 
 }
 %typemap(argout) (const gravity::GravitySubscriber& subscriber, const std::string& filter, const std::string& domain) {
-    decSubscriberRefCount($input, *$2, *$3); 
+    decGravityRefCount($input, *$2, *$3); 
 }
 
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");

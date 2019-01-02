@@ -72,6 +72,9 @@ def testPubSub(gravityNode):
     gravityNode.registerDataProduct("PubTest", gravity.TCP)
     mySub = MySubscriber()
     gravityNode.subscribe("PubTest", mySub)
+    Log.warning("ref count = {}".format(sys.getrefcount(mySub)))
+    if sys.getrefcount(mySub) != 2+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't increment properly on subscribe")
     
     pubPB = PythonTestPB()
     pubPB.count = 0
@@ -86,6 +89,19 @@ def testPubSub(gravityNode):
     if mySub.subCount < 5:
         Log.critical("Pub/Sub failed")
         return 1
+    # make sure ref count doesn't change when unsubscribe called with params we didn't use for subscribe
+    gravityNode.unsubscribe("PubTest", mySub, "aFilterNotUsedAbove")
+    if sys.getrefcount(mySub) != 2+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on unsubscribe with different params")
+    # make sure ref count decrements when unsubscribe with same params 
+    gravityNode.unsubscribe("PubTest", mySub)
+    if sys.getrefcount(mySub) != 1+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on unsubscribe with same different params")
+    # make sure ref count doesn't dec a second time
+    gravityNode.unsubscribe("PubTest", mySub)
+    if sys.getrefcount(mySub) != 1+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on second unsubscribe call")
+     
     return 0
 
 def testService(gravityNode):
