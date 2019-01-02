@@ -23,7 +23,7 @@ from GravityDataProduct import GravityDataProduct
 %}
 
 %header %{
-    #include <map>
+    #include <set>
     typedef struct RefKey
     {
         PyObject* subscriber;
@@ -51,18 +51,46 @@ from GravityDataProduct import GravityDataProduct
         }
     } RefKey;        
     
-    std::map<RefKey, uint32_t> refMap;
+    std::set<RefKey> refSet;
     gravity::Semaphore semaphore;
     
     void incSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
     {
-        Py_XINCREF(subscriber);
-        std::cout << "inc: filter = " << filter << ", domain = " << domain << std::endl; 
+        RefKey refKey;
+        refKey.subscriber = subscriber;
+        refKey.filter = filter;
+        refKey.domain = domain;
+        semaphore.Lock();
+        if (refSet.count(refKey) == 0)
+        {
+            Py_XINCREF(subscriber);
+            refSet.insert(refKey);
+            std::cout << "inc added key to set: filter = " << filter << ", domain = " << domain << std::endl;
+        } 
+        else
+        {
+            std::cout << "inc found key in set: filter = " << filter << ", domain = " << domain << std::endl;    
+        }
+        semaphore.Unlock();
     }
     void decSubscriberRefCount(PyObject* subscriber, std::string filter = "", std::string domain = "")
     {
-        Py_XDECREF(subscriber);
-        std::cout << "dec: filter = " << filter << ", domain = " << domain << std::endl; 
+        RefKey refKey;
+        refKey.subscriber = subscriber;
+        refKey.filter = filter;
+        refKey.domain = domain;
+        semaphore.Lock();
+        if (refSet.count(refKey) > 0)
+        {
+            std::cout << "dec found key in set: filter = " << filter << ", domain = " << domain << std::endl;    
+            refSet.erase(refKey);
+            Py_XDECREF(subscriber);
+        } 
+        else
+        {
+            std::cout << "dec key not found in set: filter = " << filter << ", domain = " << domain << std::endl;
+        }
+        semaphore.Unlock();
     }
     
 %}
