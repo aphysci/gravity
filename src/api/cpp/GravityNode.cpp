@@ -2245,7 +2245,7 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	response.setComponentId(componentID);
 	response.setDomain(myDomain);
 	sendGravityDataProduct(requestManagerRepSWL.socket, response, ZMQ_DONTWAIT);
-	delete bytes;
+	delete [] bytes;
 
 	// Get results back from GravityRequestManager
 	int ret = readIntMessage(requestManagerRepSWL.socket);
