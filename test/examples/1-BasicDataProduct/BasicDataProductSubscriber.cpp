@@ -22,13 +22,12 @@
 #include <Utility.h>
 
 using namespace gravity;
-using namespace std::tr1;
 
 //Declare a class for receiving Published messages.
 class SimpleGravitySubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int main()
@@ -61,9 +60,9 @@ int main()
 	gn.unsubscribe("HelloWorldDataProduct", hwSubscriber);
 }
 
-void SimpleGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravitySubscriber::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< std::tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Get a raw message

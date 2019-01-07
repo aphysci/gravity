@@ -28,7 +28,6 @@
 #include "GravityNode.h"
 #include "GravityLogger.h"
 #include "FutureResponse.h"
-using namespace std::tr1;
 %}
 
 %include "gravitynode.i"

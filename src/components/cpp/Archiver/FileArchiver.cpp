@@ -26,7 +26,6 @@
 #include "protobuf/FileArchiverControlResponsePB.pb.h"
 
 using namespace std;
-using namespace std::tr1;
 
 int main(int argc, const char* argv[])
 {
@@ -105,13 +104,13 @@ vector<string> FileArchiver::split(string s)
 	return tokens;
 }
 
-void FileArchiver::subscriptionFilled(const vector<shared_ptr<GravityDataProduct> >& dataProducts)
+void FileArchiver::subscriptionFilled(const vector<tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     if (!suspend)
     {
         for (unsigned int i = 0; i < dataProducts.size(); i++)
         {
-            shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+            tr1::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
 
             // Write the size of the data product
             int size = dataProduct->getSize();
@@ -128,7 +127,7 @@ void FileArchiver::subscriptionFilled(const vector<shared_ptr<GravityDataProduct
     }
 }
 
-shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+tr1::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
     FileArchiverControlResponsePB faResponse;
@@ -150,7 +149,7 @@ shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID
         }
     }
 
-    shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
+    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
     gdpResponse->setData(faResponse);
     return gdpResponse;
 }

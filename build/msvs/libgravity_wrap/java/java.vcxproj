@@ -314,8 +314,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -338,8 +341,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -362,8 +368,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -386,8 +395,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -410,8 +422,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -434,8 +449,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -458,8 +476,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -482,8 +503,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -506,8 +530,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -530,8 +557,11 @@
 					md build
 					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
 					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
 					md $(OutDir)\..\lib\MATLAB
 					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
 					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
 					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
 					popd
@@ -549,15 +579,18 @@
     </Link>
     <PostBuildEvent>
       <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
-pushd $(GRAVITY_HOME)\src\api\MATLAB
-md build
-javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
-jar cf MATLABGravitySubscriber.jar -C build .
-md $(OutDir)\..\lib\MATLAB
-copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
-copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
-popd
+					pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
 			</Command>
     </PostBuildEvent>
     <CustomBuildStep>
@@ -576,15 +609,18 @@ popd
     </Link>
     <PostBuildEvent>
       <Command>jar cf $(LibDir)\gravity.jar -C ..\..\..\..\src\api\java\build .
-pushd $(GRAVITY_HOME)\src\api\MATLAB
-md build
-javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
-jar cf MATLABGravitySubscriber.jar -C build .
-md $(OutDir)\..\lib\MATLAB
-copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
-copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
-copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
-popd
+					pushd $(GRAVITY_HOME)\src\api\MATLAB
+					md build
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABGravitySubscriber.java
+					jar cf MATLABGravitySubscriber.jar -C build .
+					javac -d build -cp $(OutDir)\..\lib\gravity.jar;$(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar MATLABProtobufGenerator.java
+					jar cf MATLABProtobufGenerator.jar -C build .
+					md $(OutDir)\..\lib\MATLAB
+					copy MATLABGravitySubscriber.jar $(OutDir)\..\lib\MATLAB
+					copy MATLABProtobufGenerator.jar $(OutDir)\..\lib\MATLAB
+					copy $(GRAVITY_HOME)\src\api\MATLAB\guava-13.0.1.jar $(OutDir)\..\lib\MATLAB
+					copy LICENSE-2.0.txt $(OutDir)\..\lib\MATLAB
+					popd
 			</Command>
     </PostBuildEvent>
     <CustomBuildStep>

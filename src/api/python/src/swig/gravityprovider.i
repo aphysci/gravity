@@ -30,10 +30,10 @@
     delete[] buffer;
 }
 
-%typemap(directorout) shared_ptr<gravity::GravityDataProduct> {
+%typemap(directorout) std::tr1::shared_ptr<gravity::GravityDataProduct> {
     char* buffer = PyString_AsString($input);
     Py_ssize_t bufferLen = PyString_Size($input);
-    shared_ptr<gravity::GravityDataProduct> resultDP(new gravity::GravityDataProduct(buffer, bufferLen));
+    std::tr1::shared_ptr<gravity::GravityDataProduct> resultDP(new gravity::GravityDataProduct(buffer, bufferLen));
     $result = resultDP;
 }
 
@@ -76,7 +76,7 @@ namespace gravity {
      * \param dataProduct GravityDataProduct with request data
      * \returns the response
      */
-    virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct) = 0;
+    virtual std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct) = 0;
 	    
     %pythoncode %{
 	    # The above request will be renamed as requestBinary, and will be invoked from C++ when a service request is made.

@@ -51,26 +51,26 @@ VPATH          = @srcdir@
 #CC=g++
 CC=$(CXX)
 
-KEYVALUE_PARSER_DIR=../../../../src/keyvalue_parser
-GRAVLIB_DIR=../../../../src/api/cpp
-COMPONENTS_BIN_DIR=../../../../src/components/cpp/bin
+GRAVLIB_DIR=../../../../lib
+GRAVINC_DIR=../../../../include
+GRAVBIN_DIR=../../../../bin
 GRAVTEST_DIR=../../../
 PROG_NAME=$(notdir $(shell pwd) )
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(GRAVTEST_DIR) $(AC_CPPFLAGS)
-CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) -L$(KEYVALUE_PARSER_DIR) $(AC_LDFLAGS) $(AC_CFLAGS) 
+INCLUDES=-I$(GRAVINC_DIR) -I$(GRAVTEST_DIR) $(AC_CPPFLAGS)
+CFLAGS=$(INCLUDES) -L$(GRAVLIB_DIR) $(AC_LDFLAGS) $(AC_CFLAGS) 
 
 SYSTEM:=$(strip $(shell uname -s))
 
 ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lwsock32 -lpthread
         TEST_NAME=$(PROG_NAME)Test.exe
-	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
+	PATH:=${PATH}:$(GRAVBIN_DIR)
 windows: all;
 else ifneq (,$(findstring Linux,$(SYSTEM)))
         OS_SPECIFIC_LIBS = -lrt
         TEST_NAME=$(PROG_NAME)Test
-	PATH:=${PATH}:$(COMPONENTS_BIN_DIR)
+	PATH:=${PATH}:$(GRAVBIN_DIR)
 linux: all;
 else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);

@@ -17,3 +17,4 @@
 
 from gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger
 from GravityDataProduct import GravityDataProduct 
+from GravityLogHandler import GravityLogHandler

@@ -34,7 +34,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace std::tr1;
 
 namespace gravity
 {
@@ -111,7 +110,7 @@ void ServiceDirectorySynchronizer::start()
 				if (syncMap.find(domain) == syncMap.end())
 				{					
 					// Create details
-					shared_ptr<SyncDomainDetails> details(new SyncDomainDetails());					
+				    tr1::shared_ptr<SyncDomainDetails> details(new SyncDomainDetails());
 					details->domain = domain;
 					details->ipAddress = domainIP;
 					details->pollItemIndex = pollItems.size();
@@ -164,7 +163,7 @@ void ServiceDirectorySynchronizer::start()
 				{
 					// A domain is no longer available and needs to be removed. Get 
 					// details from map
-					shared_ptr<SyncDomainDetails> details = syncMap[domain];
+				    tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
 					// Remove our subscription listener from pollItems vector
 					// (i.e. no longer care to receive updates)
@@ -250,7 +249,7 @@ void ServiceDirectorySynchronizer::start()
                             Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
 
                             // Get the details for the domain that is providing an update
-                            shared_ptr<SyncDomainDetails> details = syncMap[domain];
+                            tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
                             // Clean up the request socket (to be replaced with a SUB socket)
                             zmq_close(details->socket);
@@ -279,7 +278,7 @@ void ServiceDirectorySynchronizer::start()
 
 						Log::message("Received update from ServiceDirectory for domain: '%s'", domain.c_str());
 
-						shared_ptr<SyncDomainDetails> details = syncMap[domain];
+						tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 						details->providerMap.Clear();
 						response.populateMessage(details->providerMap);					
 						if (!details->initialized)
@@ -350,7 +349,7 @@ void ServiceDirectorySynchronizer::start()
 		if (!pendingResponse && !registrationUpdates.empty())
 		{
 			// Pop the next update to send from the queue
-			shared_ptr<GravityDataProduct> gdp = registrationUpdates.front();
+		    tr1::shared_ptr<GravityDataProduct> gdp = registrationUpdates.front();
 			registrationUpdates.pop();
 
 			// Send data product
@@ -381,7 +380,7 @@ void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, s
 	registerRequest.set_domain(domain);
 	registerRequest.set_timestamp(timestamp);
 
-	shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("RegistrationRequest"));
+	tr1::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("RegistrationRequest"));
 	gdp->setData(registerRequest);
 	registrationUpdates.push(gdp);
 }
@@ -398,7 +397,7 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 	unregisterRequest.set_type(rtype);	
 	unregisterRequest.set_domain(domain);
 
-	shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));							
+	tr1::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));
 	gdp->setData(unregisterRequest);
 	registrationUpdates.push(gdp);
 }
