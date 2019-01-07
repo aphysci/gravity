@@ -51,7 +51,7 @@ void FutureResponse::setResponse(const GravityDataProduct& response)
 	char* data = new char[size];
 	response.serializeToArray(data);
 	setData(data, size);
-	delete data;
+	delete [] data;
 }
 
 } /* namespace gravity */
