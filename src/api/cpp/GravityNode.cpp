@@ -1182,6 +1182,10 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
                 }
             }
         }
+        else
+        {
+            ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
+        }
 	}
 
 	if (ret != GravityReturnCodes::SUCCESS)
