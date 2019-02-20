@@ -19,6 +19,8 @@ classdef GravityNode < handle
         gravityNode;
         
         subscriptionMap;
+        
+        initStatus;
     end
     
     methods (Access = public)
@@ -27,9 +29,9 @@ classdef GravityNode < handle
             this.gravityNode = com.aphysci.gravity.swig.GravityNode;
 
 			if (isempty(componentID))
-            	this.gravityNode.init();
+            	this.initStatus = this.gravityNode.init();
 			else
-            	this.gravityNode.init(componentID);
+            	this.initStatus = this.gravityNode.init(componentID);
 			end
             
             % Initialize the subscription map
@@ -162,6 +164,10 @@ classdef GravityNode < handle
 		
 		function ret = getDomain(this)
 			ret = this.gravityNode.getDomain();
-		end
+        end
+        
+        function ret = getInitStatus(this)
+            ret = this.initStatus;
+        end
     end
 end
