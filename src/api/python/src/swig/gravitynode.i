@@ -203,7 +203,7 @@ namespace gravity {
 
 	    GravityReturnCode unsubscribe(const std::string& dataProductID, const gravity::GravitySubscriber& subscriber, const std::string& filter = "", const std::string& domain = "");
 	
-	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", unsigned long timestamp = 0);
+	    GravityReturnCode publish(const gravity::GravityDataProduct& dataProduct, const std::string& filter = "", uint64_t timestamp = 0);
 	
 %typemap(in) const gravity::GravityRequestor& requestor {
     int res = SWIG_ConvertPtr($input, (void**)(&$1), SWIGTYPE_p_gravity__GravityRequestor, 0);
