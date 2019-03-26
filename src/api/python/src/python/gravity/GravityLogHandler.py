@@ -38,7 +38,7 @@ class GravityLogHandler(Handler):
         elif record.levelno == logging.CRITICAL:
             logFunc = Log.fatal
             
-        logMessage = self.format(record)
+        logMessage = str(self.format(record))
         # Ensures we can get a full stack trace in gravity log
         if self.__splitlines:
             for line in logMessage.splitlines():

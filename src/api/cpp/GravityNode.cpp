@@ -1182,6 +1182,10 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
                 }
             }
         }
+        else
+        {
+            ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
+        }
 	}
 
 	if (ret != GravityReturnCodes::SUCCESS)
@@ -2245,7 +2249,7 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	response.setComponentId(componentID);
 	response.setDomain(myDomain);
 	sendGravityDataProduct(requestManagerRepSWL.socket, response, ZMQ_DONTWAIT);
-	delete bytes;
+	delete [] bytes;
 
 	// Get results back from GravityRequestManager
 	int ret = readIntMessage(requestManagerRepSWL.socket);
