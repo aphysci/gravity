@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 package gravity;
 

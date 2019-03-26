@@ -468,8 +468,9 @@ void GravityPublishManager::publish(void* requestSocket)
     }
 
     // delete any old data and ...
-    if (publishDetails->lastCachedValues.count(filterText) > 0)
+    if (publishDetails->lastCachedValues.count(filterText) > 0) {
         delete [] publishDetails->lastCachedValues[filterText]->value;
+    }
 
 	//cache new data unless publisher specified not to
 	if(publishDetails->cacheLastValue){

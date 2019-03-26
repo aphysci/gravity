@@ -348,7 +348,7 @@ void Log::CloseLoggers()
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
 
     //Delete all Loggers
-    while(i != l_end);
+    while(i != l_end)
     {
         delete i->first;
         i++;

@@ -10,3 +10,8 @@ include
 *.suo
 Debug
 Release
+bin/**
+lib/**
+**/Makefile
+*_pb2.py
+

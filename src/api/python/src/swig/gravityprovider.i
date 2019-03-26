@@ -26,13 +26,13 @@
 %typemap(directorin) const gravity::GravityDataProduct& dataProduct {
     char* buffer = new char[dataProduct.getSize()];
     dataProduct.serializeToArray(buffer);
-    $input = PyString_FromStringAndSize(buffer, dataProduct.getSize());
+    $input = PyBytes_FromStringAndSize(buffer, dataProduct.getSize());
     delete[] buffer;
 }
 
 %typemap(directorout) std::tr1::shared_ptr<gravity::GravityDataProduct> {
-    char* buffer = PyString_AsString($input);
-    Py_ssize_t bufferLen = PyString_Size($input);
+    char* buffer = PyBytes_AsString($input);
+    Py_ssize_t bufferLen = PyBytes_Size($input);
     std::tr1::shared_ptr<gravity::GravityDataProduct> resultDP(new gravity::GravityDataProduct(buffer, bufferLen));
     $result = resultDP;
 }

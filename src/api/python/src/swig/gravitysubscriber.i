@@ -36,7 +36,7 @@
     {
         std::tr1::shared_ptr<gravity::GravityDataProduct> dataProduct = dataProducts.at(i);
         dataProduct->serializeToArray(buffer);
-        PyObject* pyStr = PyString_FromStringAndSize(buffer, dataProduct->getSize());
+        PyObject* pyStr = PyBytes_FromStringAndSize(buffer, dataProduct->getSize());
         PyList_SetItem($input, i, pyStr);
     }
     delete[] buffer;

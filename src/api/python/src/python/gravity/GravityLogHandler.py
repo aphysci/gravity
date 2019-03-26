@@ -18,7 +18,7 @@
 import logging
 from logging import Handler
 
-from gravity import Log
+from .gravity import Log
 
 class GravityLogHandler(Handler):
     def __init__(self, splitlines=False):
