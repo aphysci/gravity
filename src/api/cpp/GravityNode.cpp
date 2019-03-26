@@ -155,7 +155,6 @@ void* Heartbeat(void* thread_context);
 
 
 using namespace std;
-using namespace std::tr1;
 
 GravityNode::GravityNodeDomainListener::GravityNodeDomainListener(void* context)
 {
@@ -968,6 +967,9 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 													response.getDataProductID().c_str(), timeout_in_milliseconds);
     void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
 	zmq_connect(socket, url.c_str());
+	int linger = 0;
+    zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+
 
 	// Send message to service provider
 	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
@@ -1179,6 +1181,10 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
                     ret = GravityReturnCodes::LINK_ERROR;
                 }
             }
+        }
+        else
+        {
+            ret = GravityReturnCodes::NO_SERVICE_DIRECTORY;
         }
 	}
 
@@ -1721,6 +1727,7 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 	sendStringMessage(requestManagerSWL.socket, serviceID, ZMQ_SNDMORE);
 	sendStringMessage(requestManagerSWL.socket, connectionURL, ZMQ_SNDMORE);
 	sendStringMessage(requestManagerSWL.socket, requestID, ZMQ_SNDMORE);
+	sendIntMessage(requestManagerSWL.socket, timeout_milliseconds, ZMQ_SNDMORE);
 
 	zmq_msg_t msg;
 	zmq_msg_init_size(&msg, dataProduct.getSize());
@@ -1740,7 +1747,7 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 }
 
 //Synchronous Request
-shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request, 
+tr1::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request,
 													int timeout_milliseconds, string domain)
 {
 	//set Component ID
@@ -1764,17 +1771,17 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 		{
 			Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
 		}
-		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	uint64_t t1 = gravity::getCurrentTime();
-	shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
+	tr1::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::warning("service request returned error: %s", getCodeString(ret).c_str());
-		return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	if (response->isFutureResponse())
@@ -1793,7 +1800,7 @@ shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const Grav
 		if(ret != GravityReturnCodes::SUCCESS)
 		{
 			Log::warning("service request returned error: %s", getCodeString(ret).c_str());
-			return shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+			return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 		}
 		Log::trace("Received future response's response");
 	}
@@ -2196,7 +2203,7 @@ string GravityNode::getDomain()
     return myDomain;
 }
 
-shared_ptr<FutureResponse> GravityNode::createFutureResponse()
+tr1::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 {
 	// Send request to create future response
     requestManagerRepSWL.lock.Lock();
@@ -2218,12 +2225,12 @@ shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 	if (url.empty())
 	{
 		Log::critical("Could not find available port for FutureResponse");
-		return shared_ptr<FutureResponse>((FutureResponse*)NULL);
+		return tr1::shared_ptr<FutureResponse>((FutureResponse*)NULL);
 	}
 
 	requestManagerRepSWL.lock.Unlock();
 
-	shared_ptr<FutureResponse> futureResponse(new FutureResponse(url));
+	tr1::shared_ptr<FutureResponse> futureResponse(new FutureResponse(url));
 	return futureResponse;
 }
 
@@ -2242,7 +2249,7 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	response.setComponentId(componentID);
 	response.setDomain(myDomain);
 	sendGravityDataProduct(requestManagerRepSWL.socket, response, ZMQ_DONTWAIT);
-	delete bytes;
+	delete [] bytes;
 
 	// Get results back from GravityRequestManager
 	int ret = readIntMessage(requestManagerRepSWL.socket);

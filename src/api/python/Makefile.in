@@ -42,13 +42,14 @@ SWIGSRC_DIR=src/swig
 #C++ Wrapper source dir
 SWIGGENCPP_DIR=src/cpp
 #Python wrapper source dir
+PYTHONSRC_ROOT=src/python
 PYTHONSRC_DIR=src/python/gravity
 
 #Protobuf sources (.proto)
-PROTO_DIR=../protobufs
+PROTO_DIR=src/proto
 
-PROTO_SRC=$(PROTO_DIR)/GravityDataProductPB.proto $(PROTO_DIR)/GravityMetricsDataPB.proto $(PROTO_DIR)/FileArchiverControlRequestPB.proto $(PROTO_DIR)/FileArchiverControlResponsePB.proto $(PROTO_DIR)/ServiceDirectoryMapPB.proto
-PROTO_PYTHON=$(patsubst $(PROTO_DIR)/%PB.proto,$(PYTHONSRC_DIR)/%Container.py,$(PROTO_SRC))
+PROTO_SRC=$(PROTO_DIR)/gravity/GravityDataProductPB.proto $(PROTO_DIR)/gravity/GravityMetricsDataPB.proto $(PROTO_DIR)/gravity/FileArchiverControlRequestPB.proto $(PROTO_DIR)/gravity/FileArchiverControlResponsePB.proto $(PROTO_DIR)/gravity/ServiceDirectoryMapPB.proto $(PROTO_DIR)/gravity/ServiceDirectoryDomainUpdatePB.proto
+PROTO_PYTHON=$(patsubst $(PROTO_DIR)/gravity/%PB.proto,$(PYTHONSRC_DIR)/%Container.py,$(PROTO_SRC))
 
 
 SYSTEM:=$(strip $(shell uname -s))
@@ -62,9 +63,9 @@ endif
 
 all: libgravity_wrap $(PROTO_PYTHON)
 
-$(PYTHONSRC_DIR)/%Container.py: $(PROTO_DIR)/%PB.proto
+$(PYTHONSRC_DIR)/%Container.py: $(PROTO_DIR)/gravity/%PB.proto
 	@echo $<
-	@$(PROTOC) --proto_path=$(PROTO_DIR) --python_out=$(PYTHONSRC_DIR) $<
+	@$(PROTOC) --proto_path=$(PROTO_DIR) --python_out=$(PYTHONSRC_ROOT) $<
 
 swig: $(SWIGSRC_DIR)/gravity.i $(wildcard $(SWIGSRC_DIR)/*.i)
 	@echo "Executing swig"

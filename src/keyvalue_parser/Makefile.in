@@ -109,7 +109,7 @@ $(OBJ_DIR)/%.o:%.c
 -include $(MAKE_INC)
 
 $(PROG): $(OBJS) keyvalue.y keyvalue.l
-	$(LD) -static -o $@ $(OBJS) $(LDFLAGS) -lkeyvalue_parser
+	$(LD) -o $@ $(OBJS) $(LDFLAGS) -lkeyvalue_parser
 
 $(LIB): $(LIB_OBJS) keyvalue.y keyvalue.l
 	$(AR) rcs $@ $(LIB_OBJS)

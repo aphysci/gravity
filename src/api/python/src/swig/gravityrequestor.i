@@ -55,6 +55,18 @@ namespace gravity {
                 logging.exception("Error creating GDP from byte array")
     %}
 
+// This injects code at the end of both director methods generated for the GravityRequestor.  Once either of these callbacks are invoked,
+// Gravity is done with this object, so we can safely decrement the refcount.
+%typemap(directorargout) (std::string serviceID, std::string requestID) {
+
+// SWIG_PYTHON_DIRECTOR_VTABLE should never be defined in our case, but include the check because swig_get_self is invalid if that's set.
+%#if !defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+
+    // Decrement the refcount on the requestor object now that callback has been invoked
+    Py_XDECREF(swig_get_self());
+%#endif
+}
+
 	class GravityRequestor
 	{
 	public:
@@ -77,6 +89,8 @@ namespace gravity {
 	    @abc.abstractmethod
 	    def requestFilled(self, serviceID, requestID, response): pass
     %}
+
+	    virtual void requestTimeout(std::string serviceID, std::string requestID);
 	    
 	};
 

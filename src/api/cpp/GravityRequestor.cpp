@@ -24,12 +24,18 @@
  */
 
 #include "GravityRequestor.h"
+#include "GravityLogger.h"
 
 namespace gravity {
 
 using namespace std;
 
 GRAVITY_API GravityRequestor::~GravityRequestor() {}
+
+GRAVITY_API void GravityRequestor::requestTimeout(std::string serviceID, std::string requestID)
+{
+    Log::warning("Request timed out: service id = %s, request id = %s", serviceID.c_str(), requestID.c_str());
+}
 
 }
 

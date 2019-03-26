@@ -9,7 +9,7 @@ class MyRequestor(GravityRequestor):
     def requestFilled(self, serviceID, requestID, response):
         multResponse = MultiplicationResultPB()
         response.populateMessage(multResponse)
-        Log.message("made it to request filled with request GDP ID = "+response.getDataProductID() +" and response = " + str(multResponse.result))
+        Log.message("made it to request filled with request GDP ID = "+response.dataProductID +" and response = " + str(multResponse.result))
         global done
         done = True
 
@@ -25,7 +25,7 @@ class MyProvider(GravityServiceProvider):
         multResponse = MultiplicationResultPB()
         multResponse.result = operands.multiplicand_a * operands.multiplicand_b
         gdp = GravityDataProduct("MultResponse")
-        gdp.setData(multResponse)
+        gdp.data = multResponse
         Log.message("returning response with result = "+str(multResponse.result))
         return gdp
 
@@ -42,7 +42,7 @@ operands = MultiplicationOperandsPB()
 operands.multiplicand_a = 3
 operands.multiplicand_b = 4
 gdp = GravityDataProduct("MultRequest")
-gdp.setData(operands)
+gdp.data = operands
 myReq = MyRequestor()
 gn.request("Multiplication", gdp, myReq)
 
@@ -52,12 +52,12 @@ while not done:
 # Sync request
 operands.multiplicand_a = 5
 operands.multiplicand_b = 6
-gdp.setData(operands)
+gdp.data=operands
 gdpResp = gn.request("Multiplication", gdp)
 Log.message("received GDP response")
 multResponse = MultiplicationResultPB()
 gdpResp.populateMessage(multResponse)
-Log.message("made it to request filled with request GDP ID = "+gdpResp.getDataProductID() +" and response = " + str(multResponse.result))
+Log.message("made it to request filled with request GDP ID = "+gdpResp.dataProductID +" and response = " + str(multResponse.result))
 
 
 

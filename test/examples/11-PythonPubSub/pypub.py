@@ -30,7 +30,7 @@ counterPB = BasicCounterDataProductPB()
 gdp = GravityDataProduct("PythonGDP")
 for i in range (1, 50):
     counterPB.count = i
-    gdp.setData(counterPB)
+    gdp.data=counterPB
     gn.publish(gdp)
     time.sleep(1)
 

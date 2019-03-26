@@ -27,9 +27,6 @@
 #include "GravityLogger.h"
 #include "CommUtil.h"
 #include <cstdlib>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <cstring>
 #include <iostream>
 #include <errno.h>

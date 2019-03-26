@@ -26,7 +26,6 @@
 #endif
 
 using namespace std;
-using namespace std::tr1;
 
 namespace gravity {
 
@@ -105,7 +104,7 @@ int FileReader::readNextDataProduct()
         	}
 
         	// Convert to GravityDataProduct
-		shared_ptr<GravityDataProduct> gdp = shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
+        tr1::shared_ptr<GravityDataProduct> gdp = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
 		//gdp->parseFromArray(buffer, size);
 
 		// Make sure this is a data product we care about
@@ -149,18 +148,18 @@ bool FileReader::hasData()
 	return ret;
 }
 
-shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
+tr1::shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
 {
 	pthread_mutex_lock(&mutex);
-	shared_ptr<GravityDataProduct> gdp = dataProducts[0];
+	tr1::shared_ptr<GravityDataProduct> gdp = dataProducts[0];
 	dataProducts.erase(dataProducts.begin());
 	pthread_mutex_unlock(&mutex);
 	return gdp;
 }
 
-shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
+tr1::shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
 {
-	shared_ptr<GravityDataProduct> gdp;
+    tr1::shared_ptr<GravityDataProduct> gdp;
 	if (!hasData() && !readNextDataProduct())
 	{
 	}

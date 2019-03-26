@@ -25,6 +25,7 @@ class MyRequestHandler(GravityRequestor):
         super(MyRequestHandler, self).__init__()
         self.gravityNode = gravityNode 
         self.reqCount = 0
+        self.timeoutCount = 0
 
     def requestFilled(self, serviceID, requestID, response):
         testPB = PythonTestPB()
@@ -35,6 +36,10 @@ class MyRequestHandler(GravityRequestor):
             gdp = GravityDataProduct("ServiceRequest")
             gdp.data = testPB
             self.gravityNode.request("ServiceTest", gdp, self)
+            
+    def requestTimeout(self, serviceID, requestID):
+        Log.message("Service request timed out")
+        self.timeoutCount += 1
             
 class TestProvider(GravityServiceProvider):
     def request(self, serviceID, dataProduct):
@@ -67,6 +72,9 @@ def testPubSub(gravityNode):
     gravityNode.registerDataProduct("PubTest", gravity.TCP)
     mySub = MySubscriber()
     gravityNode.subscribe("PubTest", mySub)
+    Log.warning("ref count = {}".format(sys.getrefcount(mySub)))
+    if sys.getrefcount(mySub) != 2+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't increment properly on subscribe")
     
     pubPB = PythonTestPB()
     pubPB.count = 0
@@ -81,6 +89,19 @@ def testPubSub(gravityNode):
     if mySub.subCount < 5:
         Log.critical("Pub/Sub failed")
         return 1
+    # make sure ref count doesn't change when unsubscribe called with params we didn't use for subscribe
+    gravityNode.unsubscribe("PubTest", mySub, "aFilterNotUsedAbove")
+    if sys.getrefcount(mySub) != 2+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on unsubscribe with different params")
+    # make sure ref count decrements when unsubscribe with same params 
+    gravityNode.unsubscribe("PubTest", mySub)
+    if sys.getrefcount(mySub) != 1+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on unsubscribe with same different params")
+    # make sure ref count doesn't dec a second time
+    gravityNode.unsubscribe("PubTest", mySub)
+    if sys.getrefcount(mySub) != 1+1:   # +1 for temp reference in call
+        raise AssertionError("Ref count didn't decrement properly on second unsubscribe call")
+     
     return 0
 
 def testService(gravityNode):
@@ -92,6 +113,9 @@ def testService(gravityNode):
     testPB.count = 0
     gdp = GravityDataProduct("ServiceRequest")
     gdp.data = testPB
+    if gravityNode.request("jaskhf", gdp, 2) is not None:
+        Log.critical("Request to non-existing service should return None")
+        return 1
     gravityNode.request("ServiceTest", gdp, myReq)
 
     # test async
@@ -145,9 +169,44 @@ def testHB(gravityNode):
         return 1
     else:
         Log.message("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
+
+    gravityNode.unregisterHeartbeatListener("PythonTest")
     
     return 0
 
+def createTempService():
+    tempGravityNode = GravityNode()
+    count = 0
+    while tempGravityNode.init("TempNode") != gravity.SUCCESS and count < 5:
+        Log.warning("failed to init, retrying...")
+        time.sleep(1)
+        count += 1
+    if count == 5:
+        Log.critical("Could not connect to ServiceDirectory")
+        return 1
+    testProv = TestProvider()
+    tempGravityNode.registerService("TempService", gravity.TCP, testProv)
+
+    time.sleep(2) # give the registration time to complete
+    
+    return 0
+
+def testServiceTimeout(gravityNode):
+    createTempService()
+    
+    myReq = MyRequestHandler(gravityNode)
+    testPB = PythonTestPB()
+    testPB.count = 0
+    gdp = GravityDataProduct("ServiceRequest")
+    gdp.data = testPB
+    gravityNode.request("TempService", gdp, myReq, "", 2000)
+    
+    time.sleep(3)
+    
+    if myReq.timeoutCount == 0:
+        return 1
+    return 0
+    
 def main():
     gravityNode = GravityNode()
     count = 0
@@ -166,6 +225,9 @@ def main():
     if ret != 0:
         return ret
     ret = testHB(gravityNode)
+    if ret != 0:
+        return ret
+    ret = testServiceTimeout(gravityNode)
     if ret != 0:
         return ret
         

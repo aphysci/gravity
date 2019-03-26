@@ -53,7 +53,7 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 	   virtual ~CPPGravityServiceProvider();
-	   virtual shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
+	   virtual std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
 	class CPPGravityHeartbeatListener
@@ -121,7 +121,7 @@ public:
 
     GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
-    shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 
     GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
     		const gravity::GravityServiceProvider& server);
@@ -141,7 +141,7 @@ public:
 	std::string getIP();
     std::string getDomain();
 
-    shared_ptr<gravity::FutureResponse> createFutureResponse();
+    std::tr1::shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 	GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 			int milliSecondTimeout, const std::string& filter="", const std::string& domain="");

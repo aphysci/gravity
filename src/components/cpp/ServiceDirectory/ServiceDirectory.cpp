@@ -54,7 +54,6 @@
 #define DIRECTORY_SERVICE "DirectoryService"
 
 using namespace std;
-using namespace std::tr1;
 
 struct RegistrationData
 {
@@ -139,9 +138,8 @@ static bool validateDomainName(string domain)
 static int parseDomainCSV(string &csv)
 {
 	int prevPos=0;
-	unsigned int pos = csv.find(",",0);
+	size_t pos = csv.find(",",0);
 	int commaCount = 0;
-
 	if(csv.length()==0)
 	{
 		return 0;
@@ -355,7 +353,7 @@ void ServiceDirectory::start()
              * on a separate thread provided by the GravityNode.
              */
             lock.Lock();
-            shared_ptr<GravityDataProduct> response = request(req);
+            tr1::shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
@@ -419,9 +417,9 @@ void ServiceDirectory::start()
     }
 }
 
-shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
+tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
 {
-	shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
+    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
     string requestType = dataProduct.getDataProductID();
 
     ///////////////////////////////////
@@ -458,10 +456,10 @@ shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduc
  * Because the lock in this method blocks the main SD loop above, we can't issue any GravityNode calls
  * here that require SD support (e.g. register, etc).
  */
-shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
+tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
-	shared_ptr<GravityDataProduct> gdpResponse = shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
+    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
     if (serviceID == DIRECTORY_SERVICE)
     {
@@ -1013,7 +1011,6 @@ void ServiceDirectory::publishDomainUpdateMessage(string updateDomain, string ur
 	GravityDataProduct gdp("ServiceDirectory_DomainUpdate");
 	gdp.setData(updatePB);
 	gn.publish(gdp);
-
 }
 
 } /* namespace gravity */

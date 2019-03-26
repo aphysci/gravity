@@ -25,7 +25,7 @@
 #include <map>
 
 
-gravity::Semaphore lock;
+gravity::Semaphore relayLock;
 bool quit = false;
 
 #ifdef WIN32
@@ -34,9 +34,9 @@ BOOL WINAPI consoleHandler(DWORD sig) {
 
     if (sig == CTRL_C_EVENT)
     {
-        lock.Lock();
+        relayLock.Lock();
         quit = true;
-        lock.Unlock();
+        relayLock.Unlock();
     }
 
     return TRUE;
@@ -46,9 +46,9 @@ BOOL WINAPI consoleHandler(DWORD sig) {
 #include <signal.h>
 void handler(int sig)
 {
-    lock.Lock();
+    relayLock.Lock();
     quit = true;
-    lock.Unlock();
+    relayLock.Unlock();
 }
 #endif
 
@@ -56,7 +56,6 @@ void handler(int sig)
 
 using namespace gravity;
 using namespace std;
-using namespace std::tr1;
 
 class Relay : public GravitySubscriber
 {
@@ -118,10 +117,10 @@ int Relay::run()
     while (true)
     {
         gravity::sleep(1000);
-        lock.Lock();
+        relayLock.Lock();
         if (quit)
             break;
-        lock.Unlock();
+        relayLock.Unlock();
     }
 
     Log::warning("Exiting, but cleaning up registrations first...");
@@ -142,7 +141,7 @@ void Relay::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDa
 {
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
-        shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+        tr1::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
         Log::debug("Republishing %s", dataProduct->getDataProductID().c_str());
         dataProduct->setIsRelayedDataproduct(true);
         gravityNode.publish(*dataProduct);

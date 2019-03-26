@@ -36,9 +36,8 @@ namespace gravity
 {
 
 using namespace std;
-using namespace std::tr1;
 
-bool sortCacheValues (const shared_ptr<GravityDataProduct> &i, const shared_ptr<GravityDataProduct> &j)
+bool sortCacheValues (const tr1::shared_ptr<GravityDataProduct> &i, const tr1::shared_ptr<GravityDataProduct> &j)
 {
     return i->getGravityTimestamp() < j->getGravityTimestamp();
 }
@@ -250,17 +249,17 @@ void GravitySubscriptionManager::start()
 			    if (subscriptionSocketMap.count(pollItems[index].socket) > 0)
 			    {
                     // Deliver to subscriber(s)
-                    shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
+			        tr1::shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
 
-                    vector< shared_ptr<GravityDataProduct> > dataProducts;
+                    vector< tr1::shared_ptr<GravityDataProduct> > dataProducts;
                     while (true)
                     {
                         string filterText;
-                        shared_ptr<GravityDataProduct> dataProduct;
+                        tr1::shared_ptr<GravityDataProduct> dataProduct;
                         if (readSubscription(pollItems[index].socket, filterText, dataProduct) < 0)
                             break;
 						
-                        shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
+                        tr1::shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
                         // if it's been relayed, it will come in on a different socket than the original.  Look at all cached values
                         // to try to filter out duplicates.
@@ -269,7 +268,7 @@ void GravitySubscriptionManager::start()
                         bool cachedRelay = false;
                         if (!lastCachedValue && dataProduct->isRelayedDataproduct())
                         {
-                            for (map<void*, shared_ptr<GravityDataProduct> >::const_iterator mapIter = lastCachedValueMap.begin();
+                            for (map<void*, tr1::shared_ptr<GravityDataProduct> >::const_iterator mapIter = lastCachedValueMap.begin();
                                     mapIter != lastCachedValueMap.end(); mapIter++)
                             {
                                 if (mapIter->second &&
@@ -321,7 +320,7 @@ void GravitySubscriptionManager::start()
 							(*iter)->subscriptionFilled(dataProducts);
 						}
 						uint64_t currTime = getCurrentTime()/1000;
-						for (set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin(); iter != subDetails->monitors.end(); iter++)
+						for (set<tr1::shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin(); iter != subDetails->monitors.end(); iter++)
 						{						
 							(*iter)->lastReceived = (int64_t) currTime;
 							(*iter)->endTime = currTime + (*iter)->timeout;
@@ -335,7 +334,7 @@ void GravitySubscriptionManager::start()
                 }
 			    else // it's a publisher update list from the SD
 			    {
-                    shared_ptr<GravityDataProduct> dataProduct;
+			        tr1::shared_ptr<GravityDataProduct> dataProduct;
                     string dataProductID;
                     readSubscription(pollItems[index].socket, dataProductID, dataProduct);
                     if (dataProductID.empty())
@@ -361,7 +360,7 @@ void GravitySubscriptionManager::start()
 
                     if (subscriptionMap.count(key) != 0)
                     {
-                        for (map<string, shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[key].begin();
+                        for (map<string, tr1::shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionMap[key].begin();
                              iter != subscriptionMap[key].end();
                              iter++)
                         {
@@ -442,7 +441,7 @@ void GravitySubscriptionManager::start()
 	}
 
 	// Clean up all our open sockets
-	for (map<void*,shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionSocketMap.begin(); iter != subscriptionSocketMap.end(); iter++)
+	for (map<void*,tr1::shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionSocketMap.begin(); iter != subscriptionSocketMap.end(); iter++)
 	{
 		zmq_close(iter->first);
 	}
@@ -473,7 +472,7 @@ void GravitySubscriptionManager::ready()
 	zmq_close(initSocket);
 }
 
-int GravitySubscriptionManager::readSubscription(void *socket, string &filterText, shared_ptr<GravityDataProduct> &dataProduct)
+int GravitySubscriptionManager::readSubscription(void *socket, string &filterText, tr1::shared_ptr<GravityDataProduct> &dataProduct)
 {
     // Messages
     zmq_msg_t filter, message;
@@ -499,7 +498,7 @@ int GravitySubscriptionManager::readSubscription(void *socket, string &filterTex
     zmq_msg_init(&message);
     zmq_recvmsg(socket, &message, 0);
     // Create new GravityDataProduct from the incoming message
-    dataProduct = shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
+    dataProduct = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct(zmq_msg_data(&message), zmq_msg_size(&message)));
     // Clean up message
     zmq_msg_close(&message);
 
@@ -598,7 +597,7 @@ void GravitySubscriptionManager::addSubscription()
 	if (subscriptionMap.count(key) == 0)
 	{
 		Log::trace("subscriptionMap.count == 0");
-	    map<string, shared_ptr<SubscriptionDetails> > filterMap;
+	    map<string, tr1::shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[key] = filterMap;
 	    if (publisherUpdateUrl.size() > 0)
 	    {
@@ -609,7 +608,7 @@ void GravitySubscriptionManager::addSubscription()
 	    }
 	}
 
-	shared_ptr<SubscriptionDetails> subDetails;
+	tr1::shared_ptr<SubscriptionDetails> subDetails;
 	
 	
 	
@@ -659,7 +658,7 @@ void GravitySubscriptionManager::addSubscription()
 	if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
 	{
 		uint64_t currTime = getCurrentTime()/1000;
-		for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
+		for(set<tr1::shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
 		{
 			(*monitorIter)->endTime = currTime + (*monitorIter)->timeout;
 		}
@@ -676,7 +675,7 @@ void GravitySubscriptionManager::addSubscription()
 		if(receiveLastCachedValue)
 		{
 			Log::trace("Sending cached value to subscriber");
-			vector<shared_ptr<GravityDataProduct> > dataProducts;
+			vector<tr1::shared_ptr<GravityDataProduct> > dataProducts;
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
 			{
 				if (lastCachedValueMap[iter->second.socket])
@@ -728,7 +727,7 @@ void GravitySubscriptionManager::removeSubscription()
 	if (subscriptionMap.count(key) > 0 && subscriptionMap[key].count(filter) > 0)
 	{
 		// Get subscription details
-		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
+	    tr1::shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
 
 		// Find & remove subscriber from our list of subscribers for this data product
 		set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin();
@@ -806,7 +805,7 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 	
 	DomainDataKey key(domain, dataProductID);
 		
-	shared_ptr<SubscriptionDetails> subDetails;
+	tr1::shared_ptr<SubscriptionDetails> subDetails;
 	if (subscriptionMap[key].count(filter) > 0)
 	{
 		// Already have a details for this
@@ -818,14 +817,14 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 		subDetails->dataProductID = dataProductID;
 		subDetails->domain = domain;
 		subDetails->filter = filter;
-		map<string, shared_ptr<SubscriptionDetails> > filterMap;
+		map<string, tr1::shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[key] = filterMap;
 		subscriptionMap[key][filter] = subDetails;
 	}
 		
 	uint64_t currTime = getCurrentTime()/1000;
 
-	for(std::set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
+	for(std::set<tr1::shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();iter != subDetails->monitors.end();iter++)
 	{
 		// if a reference to this monitor already exists
 		if((*iter)->monitor == monitor)
@@ -838,7 +837,7 @@ void GravitySubscriptionManager::setTimeoutMonitor()
 	}
 
 	// create and add new monitor
-	shared_ptr<TimeoutMonitor> tm;
+	tr1::shared_ptr<TimeoutMonitor> tm;
 	tm.reset(new TimeoutMonitor());
 
 	tm->monitor = monitor;
@@ -871,10 +870,10 @@ void GravitySubscriptionManager::clearTimeoutMonitor()
 		
 	if (subscriptionMap.count(key) > 0 && subscriptionMap[key].count(filter) > 0)
 	{
-		shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
+	    tr1::shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
 
 		// Find & remove all matching monitors
-		set<shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();
+		set<tr1::shared_ptr<TimeoutMonitor> >::iterator iter = subDetails->monitors.begin();
 		while (iter != subDetails->monitors.end())
 		{
 			if ((*iter)->monitor == monitor)
@@ -910,15 +909,15 @@ void GravitySubscriptionManager::calculateTimeout()
 	int minTime = -1;
 	currTimeoutMonitor.reset();
 	currMonitorDetails.reset();
-	map<DomainDataKey, map<std::string, shared_ptr<SubscriptionDetails> > >::iterator dpIter = subscriptionMap.begin();
+	map<DomainDataKey, map<std::string, tr1::shared_ptr<SubscriptionDetails> > >::iterator dpIter = subscriptionMap.begin();
 	//go through all domain-dataproduct keys
 	while (dpIter != subscriptionMap.end())
 	{
-		map<string, shared_ptr<SubscriptionDetails> >::iterator filterIter = dpIter->second.begin();
+		map<string, tr1::shared_ptr<SubscriptionDetails> >::iterator filterIter = dpIter->second.begin();
 		while(filterIter != dpIter->second.end())
 		{
-			shared_ptr<SubscriptionDetails> subDetails = filterIter->second;
-			for(set<shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
+		    tr1::shared_ptr<SubscriptionDetails> subDetails = filterIter->second;
+			for(set<tr1::shared_ptr<TimeoutMonitor> >::iterator monitorIter = subDetails->monitors.begin(); monitorIter != subDetails->monitors.end(); monitorIter++)
 			{
 				// check if this is an active subscription with a valid timeout
 				if(subDetails->subscribers.size() > 0 && (*monitorIter)->timeout>=0)
@@ -962,13 +961,13 @@ void GravitySubscriptionManager::calculateTimeout()
 }
 
 
-void GravitySubscriptionManager::collectMetrics(vector<shared_ptr<GravityDataProduct> > dataProducts)
+void GravitySubscriptionManager::collectMetrics(vector<tr1::shared_ptr<GravityDataProduct> > dataProducts)
 {
     // Iterate over all the data products
-    vector<shared_ptr<GravityDataProduct> >::iterator gdpIter;
+    vector<tr1::shared_ptr<GravityDataProduct> >::iterator gdpIter;
     for (gdpIter = dataProducts.begin(); gdpIter != dataProducts.end(); gdpIter++)
     {
-        shared_ptr<GravityDataProduct> gdp = *gdpIter;
+        tr1::shared_ptr<GravityDataProduct> gdp = *gdpIter;
         metricsData.incrementMessageCount(gdp->getDataProductID(), 1);
         metricsData.incrementByteCount(gdp->getDataProductID(), gdp->getSize());
     }

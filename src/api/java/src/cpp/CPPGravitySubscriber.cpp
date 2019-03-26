@@ -22,12 +22,11 @@
 #include <iostream>
 
 using namespace gravity;
-using namespace std::tr1;
 
 CPPGravitySubscriber::~CPPGravitySubscriber()
 {}
 
-void CPPGravitySubscriber::subscriptionFilled(const std::vector< shared_ptr<GravityDataProduct> >& dataProducts)
+void CPPGravitySubscriber::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     int* lengths = new int[dataProducts.size()];
     int arrayLength = 0;
