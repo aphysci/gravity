@@ -26,7 +26,7 @@
 %typemap(directorin) const gravity::GravityDataProduct& response {
     char* buffer = new char[response.getSize()];
     response.serializeToArray(buffer);
-    $input = PyString_FromStringAndSize(buffer, response.getSize());
+    $input = PyBytes_FromStringAndSize(buffer, response.getSize());
     delete[] buffer;
 }
 

@@ -19,7 +19,7 @@
 // all imports required in the generated Python SWIG code
 %pythonbegin %{
 import abc, logging
-from GravityDataProduct import GravityDataProduct 
+from .GravityDataProduct import GravityDataProduct 
 %}
 
 %header %{
@@ -94,8 +94,8 @@ from GravityDataProduct import GravityDataProduct
 %typemap(in) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"serializeToString", NULL);
 	if (!pyStr) SWIG_fail;
-	char* data = PyString_AsString(pyStr);
-    int length = (int) PyString_Size(pyStr);
+	char* data = PyBytes_AsString(pyStr);
+    int length = (int) PyBytes_Size(pyStr);
 	$1 = new gravity::GravityDataProduct((void *)data, length);
 	Py_XDECREF(pyStr);
 }
@@ -110,13 +110,13 @@ from GravityDataProduct import GravityDataProduct
     {
         char* buffer = new char[$1->getSize()];
         $1->serializeToArray(buffer);
-        $result = PyString_FromStringAndSize(buffer, $1->getSize());
+        $result = PyBytes_FromStringAndSize(buffer, $1->getSize());
         delete[] buffer;
     }   
     else
     {
         char buffer[] = "";
-        $result = PyString_FromStringAndSize(buffer, 0);
+        $result = PyBytes_FromStringAndSize(buffer, 0);
     }
     
 }

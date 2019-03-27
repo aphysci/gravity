@@ -1368,8 +1368,9 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
     GravityReturnCode ret;
     ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
-    if(ret != GravityReturnCodes::SUCCESS)
+    if(ret != GravityReturnCodes::SUCCESS) {
         return ret;
+    }
 
 	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID.c_str(), receiveLastCachedValue);
 	

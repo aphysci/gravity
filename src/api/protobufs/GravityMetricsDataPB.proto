@@ -16,8 +16,8 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
-
 option java_outer_classname = "GravityMetricsDataContainer";
 option java_package = "com.aphysci.gravity.protobuf";
 
