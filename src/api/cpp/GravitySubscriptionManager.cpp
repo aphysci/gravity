@@ -535,6 +535,23 @@ void *GravitySubscriptionManager::setupSubscription(const string &url, const str
     return subSocket;
 }
 
+void GravitySubscriptionManager::removePollItem(zmq_pollitem_t &pollItem)
+{
+    // Remove from poll items
+    vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
+    while (pollIter != pollItems.end())
+    {
+        if (pollIter->socket == pollItem.socket)
+        {
+            pollIter = pollItems.erase(pollIter);
+        }
+        else
+        {
+            pollIter++;
+        }
+    }
+}
+
 void GravitySubscriptionManager::setHWM()
 {
 	// Read the high water mark setting
@@ -614,7 +631,7 @@ void GravitySubscriptionManager::addSubscription()
 	
 	if (subscriptionMap[key].count(filter) > 0)
 	{
-		Log::trace("Alreading have details for this");
+		Log::trace("Already have details for this");
 		// Already have a details for this
 		subDetails = subscriptionMap[key][filter];
 		if(subDetails->subscribers.empty() && !subDetails->monitors.empty())
@@ -757,6 +774,15 @@ void GravitySubscriptionManager::removeSubscription()
 				{
 					subscriptionMap.erase(key);
 				}
+				// If we no longer have subscriptions for this domain/dataProductID combo, then stop
+				// subscribing for updates from the SD on this as well
+				if (publisherUpdateMap.find(key) != publisherUpdateMap.end())
+				{
+				    removePollItem(publisherUpdateMap[key]);
+				    zmq_setsockopt(publisherUpdateMap[key].socket, ZMQ_UNSUBSCRIBE, dataProductID.c_str(), dataProductID.length());
+				    zmq_close(publisherUpdateMap[key].socket);
+				    publisherUpdateMap.erase(key);
+				}
 			}
 
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
@@ -770,18 +796,7 @@ void GravitySubscriptionManager::removeSubscription()
 				zmq_close(iter->second.socket);
 
 				// Remove from poll items
-				vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
-				while (pollIter != pollItems.end())
-				{
-					if (pollIter->socket == iter->second.socket)
-					{
-						pollIter = pollItems.erase(pollIter);
-					}
-					else
-					{
-						pollIter++;
-					}
-				}
+				removePollItem(iter->second);
 			}				
 		}
 	}
@@ -899,6 +914,15 @@ void GravitySubscriptionManager::clearTimeoutMonitor()
 			if (subscriptionMap[key].size() == 0)
 			{
 				subscriptionMap.erase(key);
+			}
+			// If we no longer have subscriptions for this domain/dataProductID combo, then stop
+			// subscribing for updates from the SD on this as well
+			if (publisherUpdateMap.find(key) != publisherUpdateMap.end())
+			{
+			    removePollItem(publisherUpdateMap[key]);
+			    zmq_setsockopt(publisherUpdateMap[key].socket, ZMQ_UNSUBSCRIBE, dataProductID.c_str(), dataProductID.length());
+			    zmq_close(publisherUpdateMap[key].socket);
+			    publisherUpdateMap.erase(key);
 			}
 		}
 	}
