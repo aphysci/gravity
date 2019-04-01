@@ -51,7 +51,6 @@ typedef struct SyncDomainDetails
 	std::string domain;
 	std::string ipAddress;
 	void* socket;
-	int pollItemIndex;
 	bool initialized;
 	ServiceDirectoryMapPB providerMap;
 } SyncDomainDetails;
