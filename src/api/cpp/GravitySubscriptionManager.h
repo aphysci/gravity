@@ -92,6 +92,7 @@ private:
 	void removeSubscription();
 	int readSubscription(void *socket, std::string &filterText, std::tr1::shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
+	void removePollItem(zmq_pollitem_t &pollItem);
 	void ready();
 	void setTimeoutMonitor();
 	void clearTimeoutMonitor();
