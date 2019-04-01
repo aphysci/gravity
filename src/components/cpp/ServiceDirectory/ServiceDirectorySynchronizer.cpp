@@ -113,7 +113,6 @@ void ServiceDirectorySynchronizer::start()
 				    tr1::shared_ptr<SyncDomainDetails> details(new SyncDomainDetails());
 					details->domain = domain;
 					details->ipAddress = domainIP;
-					details->pollItemIndex = pollItems.size();
 					details->initialized = false;
 
 					// Create the request socket to the other Service Directory
@@ -165,9 +164,21 @@ void ServiceDirectorySynchronizer::start()
 					// details from map
 				    tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
-					// Remove our subscription listener from pollItems vector
-					// (i.e. no longer care to receive updates)
-					pollItems.erase(pollItems.begin() + details->pollItemIndex);
+				    // Remove our subscription listener from pollItems vector
+				    // (i.e. no longer care to receive updates)
+				    vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
+				    while (pollIter != pollItems.end())
+				    {
+				        if (pollIter->socket == details->socket)
+				        {
+				            pollIter = pollItems.erase(pollIter);
+				        }
+				        else
+				        {
+				            pollIter++;
+				        }
+				    }
+				    Log::message("deleted from Synchronizer pollItems: pollItems len = %u", pollItems.size());
 
 					// Close SUB socket
 					zmq_close(details->socket);				
@@ -285,9 +296,10 @@ void ServiceDirectorySynchronizer::start()
 						{
 							// First update from this Service Directory
 							details->initialized = true;
-                            Log::message("Initial Update from domain '%s'", domain.c_str());
+							Log::message("Initial Update from domain '%s'", domain.c_str());
 
 							// Test code
+							//Log::debug("Received new providerMap: ");
 							//printMap(providerMap);
 
 							// Send all content as updates to our service directory
@@ -334,6 +346,9 @@ void ServiceDirectorySynchronizer::start()
 							{
 								createUnregistrationRequest(productID, url, domain, providerMap.change().registration_type());								
 							}
+							// Test code
+							//Log::debug("Received updated providerMap: ");
+							//printMap(providerMap);
 						}
 					}				
 
@@ -405,38 +420,48 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 // test function
 void ServiceDirectorySynchronizer::printMap(ServiceDirectoryMapPB providerMap)
 {
-	cout << "Services:" << endl;
-	for (int i = 0; i < providerMap.service_provider_size(); i++)
-	{
-		string providerID = providerMap.service_provider(i).product_id();
-		cout << "   provider: " << providerID << endl;
-		for (int j = 0; j < providerMap.service_provider(i).url_size(); j++)
-		{
-			string url = providerMap.service_provider(i).url(j);
-			cout << "      url: " << url << endl;
-			string componentID = providerMap.service_provider(i).component_id(j);
-			cout << "      componentID: " << componentID << endl;
-			string domainID = providerMap.service_provider(i).domain_id(j);
-			cout << "      domainID: " << domainID << endl;
-		}
-	}			
+    Log::debug("Services:");
+    for (int i = 0; i < providerMap.service_provider_size(); i++)
+    {
+        string providerID = providerMap.service_provider(i).product_id();
+        Log::debug("   provider: %s", providerID.c_str());
+        for (int j = 0; j < providerMap.service_provider(i).url_size(); j++)
+        {
+            string url = providerMap.service_provider(i).url(j);
+            Log::debug("      url: %s", url.c_str());
+            string componentID = providerMap.service_provider(i).component_id(j);
+            Log::debug("      componentID: %s", componentID.c_str());
+            string domainID = providerMap.service_provider(i).domain_id(j);
+            Log::debug("      domainID: %s", domainID.c_str());
+        }
+    }
 
-	cout << "Data:" << endl;
-	for (int i = 0; i < providerMap.data_provider_size(); i++)
-	{
-		string providerID = providerMap.data_provider(i).product_id();
-		cout << "   provider: " << providerID << endl;
-		for (int j = 0; j < providerMap.data_provider(i).url_size(); j++)
-		{
-			string url = providerMap.data_provider(i).url(j);
-			cout << "      url: " << url << endl;
-			string componentID = providerMap.data_provider(i).component_id(j);
-			cout << "      componentID: " << componentID << endl;
-			string domainID = providerMap.data_provider(i).domain_id(j);
-			cout << "      domainID: " << domainID << endl;
-		}
-	}
-	cout << endl;
+    Log::debug("Data:");
+    for (int i = 0; i < providerMap.data_provider_size(); i++)
+    {
+        string providerID = providerMap.data_provider(i).product_id();
+        Log::debug("   provider: %s", providerID.c_str());
+        for (int j = 0; j < providerMap.data_provider(i).url_size(); j++)
+        {
+            string url = providerMap.data_provider(i).url(j);
+            Log::debug("      url: %s", url.c_str());
+        }
+        for (int j = 0; j < providerMap.data_provider(i).component_id_size(); j++)
+        {
+            string componentID = providerMap.data_provider(i).component_id(j);
+            Log::debug("      componentID: %s", componentID.c_str());
+        }
+        for (int j = 0; j < providerMap.data_provider(i).timestamp_size(); j++)
+        {
+            uint64_t timestamp = providerMap.data_provider(i).timestamp(j);
+            Log::debug("      timestamp: %llu", timestamp);
+        }
+        for (int j = 0; j < providerMap.data_provider(i).domain_id_size(); j++)
+        {
+            string domainID = providerMap.data_provider(i).domain_id(j);
+            Log::debug("      domainID: %s", domainID.c_str());
+        }
+    }
 }
 
 }/*namespace gravity*/
