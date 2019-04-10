@@ -133,7 +133,7 @@ namespace gravity
                 }
                 else
                 {
-                    Log::critical("Received unknown request command %s", command.c_str());
+					Log::warning("GravityMetricsManager received unknown command '%s' from GravityNode", command.c_str());
                 }
             }
 

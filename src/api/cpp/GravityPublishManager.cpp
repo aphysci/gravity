@@ -147,7 +147,7 @@ void GravityPublishManager::start()
 			}
 			else
 			{
-			    Log::critical("Received unknown request command %s", command.c_str());
+				Log::warning("GravityPublishManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 

@@ -133,7 +133,7 @@ void GravityServiceManager::start()
 			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+				Log::warning("GravityServiceManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
