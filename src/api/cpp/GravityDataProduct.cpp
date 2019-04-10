@@ -188,5 +188,14 @@ const std::string& GravityDataProduct::getTypeName() {
 	return gravityDataProductPB->type_name();
 }
 
+uint32_t GravityDataProduct::getRegistrationTime() const
+{
+	uint64_t registrationTime = 0;
+	if (gravityDataProductPB->has_registration_time())
+	{
+		registrationTime = gravityDataProductPB->registration_time();
+	}
+	return registrationTime;
+}
 
 } /* namespace gravity */

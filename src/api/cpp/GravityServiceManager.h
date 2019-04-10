@@ -50,6 +50,7 @@ private:
 	void* gravityNodeSocket;
 	std::map<void*,std::tr1::shared_ptr<ServiceDetails> > serviceMapBySocket;
 	std::map<std::string, std::tr1::shared_ptr<ServiceDetails> > serviceMapByServiceID;
+	std::map<std::string, uint32_t> serviceRegistrationTimeMap;
 	std::vector<zmq_pollitem_t> pollItems;
 	void addService();
 	void removeService();

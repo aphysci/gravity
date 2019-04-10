@@ -572,6 +572,9 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
 				lookupResponse.set_url(sMap[lookupRequest.lookupid()]);
+
+				uint32_t regTime = static_cast<uint32_t>(registrationInstanceMap[sMap[lookupRequest.lookupid()]] / 1e6);
+				lookupResponse.set_registration_time(regTime);
 			}
 		}
 
@@ -676,13 +679,14 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				if (iter->url() == registration.url())
 					break;
 			}
-			if (iter == urls.end())
+			if (iter == urls.end() || iter->registration_time() != registration.timestamp())
 			{
 				PublisherInfoPB infoPB;
 				infoPB.set_url(registration.url());
 				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
 				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
 				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+				if (registration.has_timestamp()) infoPB.set_registration_time(static_cast<uint32_t>(registration.timestamp()/1e6));
 
 				dpMap[registration.id()].push_back(infoPB);
 				

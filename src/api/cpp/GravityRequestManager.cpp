@@ -29,6 +29,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+
 namespace gravity
 {
 
@@ -139,9 +141,13 @@ void GravityRequestManager::start()
 			{
 				break;
 			}
+			else if (command == "set_service_dir_url")
+			{
+				serviceDirectoryUrl = readStringMessage(gravityNodeSocket);
+			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+				Log::warning("GravityRequestManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
@@ -201,10 +207,24 @@ void GravityRequestManager::start()
 				}
 				else
 				{
-					// Deliver to requestor
-				    tr1::shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
-					Log::trace("GravityRequestManager: call requestFilled()");
-					reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
+					// Get request details
+					tr1::shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
+
+					// Verify the service provider
+					if (response.getRegistrationTime() != reqDetails->registrationTime)
+					{
+						Log::critical("Received service (%s) response from invalid service [%u != %u]. Aborting.",
+							reqDetails->serviceID, response.getRegistrationTime(), reqDetails->registrationTime);
+
+						// Send notification of stale data to ServiceDirectory
+						notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url);
+					}
+					else
+					{
+						// Deliver to requestor
+						Log::trace("GravityRequestManager: call requestFilled()");
+						reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
+					}
 				}
 
 				zmq_close(pollItemIter->socket);
@@ -228,6 +248,28 @@ void GravityRequestManager::start()
 	}
 	zmq_close(gravityNodeSocket);
 	zmq_close(gravityResponseSocket);
+}
+
+void GravityRequestManager::notifyServiceDirectoryOfStaleEntry(string serviceId, string url)
+{
+	Log::debug("Notifying ServiceDirectory of stale service: [%s @ %s]", serviceId.c_str(), url.c_str());
+	ServiceDirectoryUnregistrationPB unregistration;
+	unregistration.set_id(serviceId);
+	unregistration.set_url(url);
+	unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
+
+	GravityDataProduct request("UnregistrationRequest");
+	request.setData(unregistration);
+
+	void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
+	zmq_connect(socket, serviceDirectoryUrl.c_str());
+	int linger = -1;
+	zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+
+	// Send message to service provider
+	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
+
+	zmq_close(socket);
 }
 
 void GravityRequestManager::ready()
@@ -352,12 +394,15 @@ void GravityRequestManager::processRequest()
 	    timeoutTimeMilliseconds = getCurrentTime() / 1e3 + timeout_milliseconds;
 	}
 
+	uint32_t regTime = readUint32Message(gravityNodeSocket);
+
 	// Read the data product
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
 	zmq_recvmsg(gravityNodeSocket, &msg, -1);
 	GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
+	dataProduct.setRegistrationTime(regTime);
 
 	// Read the data product
 	zmq_msg_init(&msg);
@@ -397,7 +442,9 @@ void GravityRequestManager::processRequest()
 	reqDetails->requestID = requestID;
 	reqDetails->requestor = requestor;
 	reqDetails->timeoutTimeMilliseconds = timeoutTimeMilliseconds;
-
+	reqDetails->registrationTime = regTime;
+	reqDetails->url = url;
+	
 	requestMap[reqSocket] = reqDetails;
 }
 

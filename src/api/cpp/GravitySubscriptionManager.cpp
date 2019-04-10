@@ -28,6 +28,7 @@
 #include "CommUtil.h"
 #include "GravityMetricsUtil.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 
 #include <memory>
 #include <algorithm>
@@ -193,9 +194,13 @@ void GravitySubscriptionManager::start()
 			{		
 				clearTimeoutMonitor();
 			}
+			else if (command == "set_service_dir_url")
+			{
+				serviceDirectoryUrl = readStringMessage(gravityNodeSocket);
+			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+				Log::warning("GravitySubscriptionManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
@@ -258,7 +263,27 @@ void GravitySubscriptionManager::start()
                         tr1::shared_ptr<GravityDataProduct> dataProduct;
                         if (readSubscription(pollItems[index].socket, filterText, dataProduct) < 0)
                             break;
-						
+
+						// Verify publisher
+						if (socketVerificationMap.find(pollItems[index].socket) == socketVerificationMap.end() ||
+							socketVerificationMap[pollItems[index].socket] != dataProduct->getRegistrationTime())
+						{
+							// Published data does not match publisher
+							Log::critical("Received data product (%s) from publisher different from registered with ServiceDirectory [%u != %u].",
+											dataProduct->getDataProductID().c_str(), socketVerificationMap[pollItems[index].socket], 
+											dataProduct->getRegistrationTime());								
+
+							// Unsubscribe
+							unsubscribeFromPollItem(pollItems[index], filterText);
+							
+							// Notify Service Directory of stale entry
+							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->socketToUrlMap[pollItems[index].socket]);
+
+							index--;
+
+							break;
+						}
+
                         tr1::shared_ptr<GravityDataProduct> lastCachedValue = lastCachedValueMap[pollItems[index].socket];
 
                         // if it's been relayed, it will come in on a different socket than the original.  Look at all cached values
@@ -380,7 +405,13 @@ void GravitySubscriptionManager::start()
 
                                     // Add url & poll item to subscription details
                                     iter->second->pollItemMap[trimmedIter->url()] = pollItem;
+
+									// Add loopup from socket to url
+									iter->second->socketToUrlMap[subSocket] = trimmedIter->url();
                                 }
+
+								// Insert/Update map to manage publisher verification
+								socketVerificationMap[iter->second->pollItemMap[trimmedIter->url()].socket] = trimmedIter->registration_time();
                             }
 
                             // loop through the existing urls/sockets to see if any have disappeared.
@@ -403,6 +434,7 @@ void GravitySubscriptionManager::start()
                                     Log::debug("url %s is gone, removing from list", socketIter->first.c_str());
 
                                     subscriptionSocketMap.erase(socketIter->second.socket);
+									socketVerificationMap.erase(socketIter->second.socket);
                                     deleteList.push_back(socketIter->second.socket);
 
                                     // Unsubscribe
@@ -412,6 +444,7 @@ void GravitySubscriptionManager::start()
                                     zmq_close(socketIter->second.socket);
 
                                     iter->second->pollItemMap.erase(socketIter++);
+									iter->second->socketToUrlMap.erase(socketIter->second.socket);
 
                                 } else
                                     ++socketIter;
@@ -453,6 +486,7 @@ void GravitySubscriptionManager::start()
 
 	subscriptionMap.clear();
 	subscriptionSocketMap.clear();
+	socketVerificationMap.clear();
 	publisherUpdateMap.clear();
 	zmq_close(gravityNodeSocket);
     zmq_close(gravityMetricsSocket);
@@ -666,8 +700,14 @@ void GravitySubscriptionManager::addSubscription()
 			// Create subscription details
 			subDetails->pollItemMap[iter->url()] = pollItem;
 
+			// Add lookup from socket to URL
+			subDetails->socketToUrlMap[subSocket] = iter->url();
+
 			// and by socket for quick lookup as data arrives
 			subscriptionSocketMap[subSocket] = subDetails;
+
+			// Map to manage publisher verification
+			socketVerificationMap[subSocket] = iter->registration_time();
 		}
 	}
 	
@@ -787,16 +827,7 @@ void GravitySubscriptionManager::removeSubscription()
 
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
 			{
-				subscriptionSocketMap.erase(iter->second.socket);
-
-				// Unsubscribe
-				zmq_setsockopt(iter->second.socket, ZMQ_UNSUBSCRIBE, filter.c_str(), filter.length());
-
-				// Close the socket
-				zmq_close(iter->second.socket);
-
-				// Remove from poll items
-				removePollItem(iter->second);
+				unsubscribeFromPollItem(iter->second, filter);
 			}				
 		}
 	}
@@ -927,6 +958,22 @@ void GravitySubscriptionManager::clearTimeoutMonitor()
 		}
 	}
 }
+
+void GravitySubscriptionManager::unsubscribeFromPollItem(zmq_pollitem_t pollItem, string filterText)
+{
+	// Clean-up/Subscribe from this subscription
+	subscriptionSocketMap.erase(pollItem.socket);
+	socketVerificationMap.erase(pollItem.socket);
+
+	// Unsubscribe
+	zmq_setsockopt(pollItem.socket, ZMQ_UNSUBSCRIBE, filterText.c_str(), filterText.length());
+
+	// Close the socket
+	zmq_close(pollItem.socket);
+
+	// Remove from poll items
+	removePollItem(pollItem);
+}
 	
 void GravitySubscriptionManager::calculateTimeout()
 {
@@ -984,6 +1031,27 @@ void GravitySubscriptionManager::calculateTimeout()
 	pollTimeout=minTime;
 }
 
+void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string url)
+{
+	Log::debug("Notifying ServiceDirectory of stale publisher: [%s @ %s]", dataProductId.c_str(), url.c_str());
+	ServiceDirectoryUnregistrationPB unregistration;
+	unregistration.set_id(dataProductId);
+	unregistration.set_url(url);
+	unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
+
+	GravityDataProduct request("UnregistrationRequest");
+	request.setData(unregistration);
+
+	void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
+	zmq_connect(socket, serviceDirectoryUrl.c_str());
+	int linger = -1;
+	zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+
+	// Send message to service provider
+	sendGravityDataProduct(socket, request, ZMQ_DONTWAIT);
+
+	zmq_close(socket);
+}
 
 void GravitySubscriptionManager::collectMetrics(vector<tr1::shared_ptr<GravityDataProduct> > dataProducts)
 {

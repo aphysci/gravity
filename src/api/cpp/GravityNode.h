@@ -141,7 +141,6 @@ private:
 		GravityNode* gravityNode;
 		void* gravityNodeSocket;
 
-
 		Semaphore lock;
 
 		void readDomainListenerParameters();
@@ -213,11 +212,14 @@ private:
 	std::map<std::string,uint64_t> urlInstanceMap;
     std::string myDomain;
     std::string componentID;
+	std::map<std::string, uint32_t> dataRegistrationTimeMap; // Maps data product id to registration time
 	GravityConfigParser* parser;
 
-	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
+	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
-    GravityReturnCode ServiceDirectoryReregister(std::string componentId);
+    GravityReturnCode ServiceDirectoryReregister(std::string componentId, std::string url);
+
+	void updateServiceDirectoryUrl(std::string serviceDirectoryUrl);
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
     GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
@@ -226,7 +228,7 @@ private:
                                                 std::string filter, std::string domain);
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
+		const GravityRequestor& requestor, uint32_t regTime, std::string requestID = "", int timeout_milliseconds = -1);
 
     GRAVITY_API GravityReturnCode registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
     		                                                  bool cacheLastValue, bool isRelay, bool localOnly);

@@ -68,16 +68,17 @@ private:
         std::string filter;
 		bool receiveCachedDataProducts;
         std::map<std::string, zmq_pollitem_t> pollItemMap;
+		std::map<void*, std::string> socketToUrlMap;
         std::set<GravitySubscriber*> subscribers;
 		std::set<std::tr1::shared_ptr<TimeoutMonitor> > monitors;
-    } SubscriptionDetails;
-
+	} SubscriptionDetails;
 
 	void* context;
 	void* gravityNodeSocket;
     void* gravityMetricsSocket;
 	std::map<DomainDataKey, std::map<std::string, std::tr1::shared_ptr<SubscriptionDetails> > > subscriptionMap;
     std::map<void*,std::tr1::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+	std::map<void*,uint32_t> socketVerificationMap;
 	std::map<DomainDataKey, zmq_pollitem_t> publisherUpdateMap;
     std::map<void*,std::tr1::shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
@@ -86,6 +87,9 @@ private:
 	std::string domain;
 	std::string componentID;
 	std::string ipAddress;
+
+	// Service Directory Location
+	std::string serviceDirectoryUrl;
 
 	void setHWM();
 	void addSubscription();
@@ -98,6 +102,8 @@ private:
 	void clearTimeoutMonitor();
 	void calculateTimeout();
 	void trimPublishers(const std::list<gravity::PublisherInfoPB>& fullList, std::list<gravity::PublisherInfoPB>& trimmedList);
+	void unsubscribeFromPollItem(zmq_pollitem_t pollItem, std::string filterText);
+	void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string url);
 
 	int pollTimeout;
 	std::tr1::shared_ptr<TimeoutMonitor> currTimeoutMonitor;

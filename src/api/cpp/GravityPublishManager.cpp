@@ -327,6 +327,9 @@ void GravityPublishManager::registerDataProduct()
     // Read the publish transport type
     string endpoint = readStringMessage(gravityNodeResponseSocket);
 
+	// Read the registration timestamp
+	uint32_t timestamp = readUint32Message(gravityNodeResponseSocket);
+
     // Create the publish socket
     void* pubSocket = zmq_socket(context, ZMQ_XPUB);
     if (!pubSocket)

@@ -253,6 +253,19 @@ public:
 	 * Get the type of data in this data product (for instance, the full protobuf type name)
 	 */
 	GRAVITY_API const std::string& getTypeName();
+
+	/**
+	* Method to return the time associated with the registration of this data product
+	*  Represents Seconds since the Unix Epoch
+	* \return registration time for data (0 if not set)
+	*/
+	GRAVITY_API uint32_t getRegistrationTime() const;
+
+	/**
+	* Set the registration time on this GravityDataProduct (typically set by infrastructure when created)
+	* \param ts Registration time (epoch seconds) for this GravityDataProduct
+	*/
+	GRAVITY_API void setRegistrationTime(uint32_t ts) const { gravityDataProductPB->set_registration_time(ts); }
 };
 
 } /* namespace gravity */
