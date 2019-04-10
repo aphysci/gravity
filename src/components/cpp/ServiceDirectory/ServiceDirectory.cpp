@@ -686,7 +686,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
 				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
 				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
-				if (registration.has_timestamp()) infoPB.set_registration_time(static_cast<uint32_t>(registration.timestamp()/1e6));
+				infoPB.set_registration_time(static_cast<uint32_t>(registration.timestamp()/1e6));
 
 				dpMap[registration.id()].push_back(infoPB);
 				
