@@ -1133,7 +1133,6 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
         sendIntMessage(publishManagerRequestSWL.socket, maxPort, ZMQ_SNDMORE);
     }
 	sendStringMessage(publishManagerRequestSWL.socket, endpoint, ZMQ_SNDMORE);
-	sendUint32Message(publishManagerRequestSWL.socket, static_cast<uint32_t>(timestamp/1e6), ZMQ_DONTWAIT);
 
 	string connectionURL = readStringMessage(publishManagerRequestSWL.socket);
 
