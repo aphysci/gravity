@@ -54,7 +54,7 @@ namespace gravity
 map<string,unsigned int> receivedCountMap;
 map<string,unsigned int> broadcastRateMap;
 map<string,struct timeval> expectedMsgTimeMap;
-set<string> connectedDomainSet;
+map<string, string> connectedDomainMap;
 
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
@@ -191,10 +191,11 @@ void ServiceDirectoryUDPReceiver::start()
 						count = MAX_RECEIVE_COUNT;
 
 						//check whether we have already connected with this domain
-						if(connectedDomainSet.find(broadcastPB.domain()) == connectedDomainSet.end())
+						if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end() ||
+							connectedDomainMap[broadcastPB.domain()] != broadcastPB.url())
 						{
 							// add domain to the connected list
-							connectedDomainSet.insert(broadcastPB.domain());
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.url();
 							// Inform SD of new connection
 							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
@@ -226,12 +227,12 @@ void ServiceDirectoryUDPReceiver::start()
 				if(count <=0)
 				{
 					//check whether we have already connected with this domain
-					if(connectedDomainSet.find(iter->first) != connectedDomainSet.end())
+					if (connectedDomainMap.find(iter->first) != connectedDomainMap.end())
 					{
 						// inform Service Directory to remove domain
 						sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
 						sendStringMessage(domainSocket,iter->first,ZMQ_DONTWAIT);
-						connectedDomainSet.erase(iter->first);
+						connectedDomainMap.erase(iter->first);
 					}
 
 					// remove domain from data sets

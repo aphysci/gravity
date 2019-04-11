@@ -205,6 +205,7 @@ void ServiceDirectorySynchronizer::start()
 
 					// Remove from map
 					syncMap.erase(domain);
+					socketToDomainDetailsMap.erase(details->socket);
 				}
 			}			
 		}
@@ -242,7 +243,20 @@ void ServiceDirectorySynchronizer::start()
 					// Create new GravityDataProduct from the incoming message
 					GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
 
-					if (response.getDataProductID() == "DataProductRegistrationResponse")
+					if (socketToDomainDetailsMap.find(pollItemIter->socket) != socketToDomainDetailsMap.end() &&
+						socketToDomainDetailsMap[pollItemIter->socket]->registrationTime != response.getRegistrationTime())
+					{
+						// Invalid socket connection. This is not the socket to which we originally connected.
+						// Send message to ourself to remove on next pass.
+						void* socket = zmq_socket(context, ZMQ_PUB);
+						int linger = -1;
+						zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+						zmq_bind(socket, "inproc://service_directory_synchronizer");
+						sendStringMessage(socket, "Remove", ZMQ_SNDMORE);
+						sendStringMessage(socket, socketToDomainDetailsMap[pollItemIter->socket]->domain, ZMQ_DONTWAIT);
+						zmq_close(socket);
+					}
+					else if (response.getDataProductID() == "DataProductRegistrationResponse")
 					{					
 						// This is a response to our request for a subscription to
 						// updates from the "remote" service directory
@@ -268,6 +282,8 @@ void ServiceDirectorySynchronizer::start()
                             // Set up subscription socket for updates from the "remote" service directory
                             details->socket = zmq_socket(context, ZMQ_SUB);
                             details->initialized = false;
+							details->registrationTime = resp.publishers(0).has_registration_time() ? resp.publishers(0).registration_time() : 0;
+							socketToDomainDetailsMap[details->socket] = details;
 
                             // Update poll item with new subscription socket
                             // (replace REP socket with new SUB socket)
