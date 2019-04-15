@@ -54,7 +54,7 @@ namespace gravity
 map<string,unsigned int> receivedCountMap;
 map<string,unsigned int> broadcastRateMap;
 map<string,struct timeval> expectedMsgTimeMap;
-map<string, string> connectedDomainMap;
+map<string, int64_t> connectedDomainMap;
 
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
@@ -171,7 +171,7 @@ void ServiceDirectoryUDPReceiver::start()
 			//ignore messages from our domain name or invalid domains
 			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
 			{
-				Log::debug("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
+				Log::trace("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
 
 				//if first time seeing domain
 				if(receivedCountMap.find(broadcastPB.domain())==receivedCountMap.end())
@@ -191,16 +191,25 @@ void ServiceDirectoryUDPReceiver::start()
 						count = MAX_RECEIVE_COUNT;
 
 						//check whether we have already connected with this domain
-						if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end() ||
-							connectedDomainMap[broadcastPB.domain()] != broadcastPB.url())
+						if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end())
 						{
 							// add domain to the connected list
-							connectedDomainMap[broadcastPB.domain()] = broadcastPB.url();
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
+							
 							// Inform SD of new connection
 							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
+						}
+						else if (connectedDomainMap[broadcastPB.domain()] != broadcastPB.starttime())
+						{
+							// update domain time
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
+							// Inform SD of updated connection
+							sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
 						}
 					}
 					//update count for domain

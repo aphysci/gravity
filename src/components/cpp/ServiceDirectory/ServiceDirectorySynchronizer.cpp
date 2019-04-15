@@ -150,6 +150,76 @@ void ServiceDirectorySynchronizer::start()
 					syncMap[domain] = details;
 				}
 			}		
+			else if (command == "Update")
+			{
+				// Get Domain from message 
+				string domain = readStringMessage(commandSocket);
+
+				// Get URL from message
+				string domainIP = readStringMessage(commandSocket);
+
+				Log::message("Received Domain Update command for %s:%s", domain.c_str(), domainIP.c_str());
+
+				// A domain has been update and should be reset. 
+				tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
+
+				// Remove our subscription listener from pollItems vector
+				vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
+				while (pollIter != pollItems.end())
+				{
+					if (pollIter->socket == details->socket)
+					{
+						pollIter = pollItems.erase(pollIter);
+					}
+					else
+					{
+						pollIter++;
+					}
+				}
+				Log::message("deleted from Synchronizer pollItems: pollItems len = %u", pollItems.size());
+
+				// Close SUB socket
+				zmq_close(details->socket);
+
+				// Update details
+				details->domain = domain;
+				details->ipAddress = domainIP;
+				details->initialized = false;
+
+				// Create the request socket to the other Service Directory
+				details->socket = zmq_socket(context, ZMQ_REQ);
+
+				// Create poll item for response to this request and add to vector
+				// we're listening to
+				zmq_pollitem_t pollItem;
+				pollItem.socket = details->socket;
+				pollItem.events = ZMQ_POLLIN;
+				pollItem.fd = 0;
+				pollItem.revents = 0;
+				pollItems.push_back(pollItem);
+
+				// Connect to service
+				zmq_connect(details->socket, domainIP.c_str());
+
+				// Construct lookup request. This will register us as a 
+				// subscriber to updates from the "remote" service directory
+				GravityDataProduct request("ComponentLookupRequest");
+				ComponentLookupRequestPB lookup;
+				lookup.set_lookupid("ServiceDirectory_DomainDetails");
+				lookup.set_type(gravity::ComponentLookupRequestPB_RegistrationType_DATA);
+				lookup.set_domain_id(domain);
+				request.setData(lookup);
+
+				// Submit request
+				zmq_msg_t data;
+				zmq_msg_init_size(&data, request.getSize());
+				request.serializeToArray(zmq_msg_data(&data));
+				zmq_sendmsg(details->socket, &data, ZMQ_DONTWAIT);
+				zmq_msg_close(&data);
+
+				// Save details to our internal map
+				syncMap[domain] = details;
+			}
 			else if (command == "Remove")
 			{
 				// Get Domain from message 
@@ -264,7 +334,25 @@ void ServiceDirectorySynchronizer::start()
 						response.populateMessage(resp);
 						if (resp.publishers_size() == 0 || !resp.publishers(0).has_url())
 						{
-						    Log::warning("Received empty response to request for subscription updates from remote service directory, ignoring...");
+						    Log::warning("Received empty response to request for subscription updates from remote service directory, trying again...");
+
+							gravity::sleep(500);
+
+							// Construct lookup request. This will register us as a 
+							// subscriber to updates from the "remote" service directory
+							GravityDataProduct request("ComponentLookupRequest");
+							ComponentLookupRequestPB lookup;
+							lookup.set_lookupid("ServiceDirectory_DomainDetails");
+							lookup.set_type(gravity::ComponentLookupRequestPB_RegistrationType_DATA);
+							lookup.set_domain_id(response.getDomain());
+							request.setData(lookup);
+
+							// Submit request
+							zmq_msg_t data;
+							zmq_msg_init_size(&data, request.getSize());
+							request.serializeToArray(zmq_msg_data(&data));
+							zmq_sendmsg(pollItemIter->socket, &data, ZMQ_DONTWAIT);
+							zmq_msg_close(&data);
 						}
 						else
 						{

@@ -397,6 +397,20 @@ void ServiceDirectory::start()
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
 
 				}
+				if (command == "Update")
+				{
+					string domainToUpdate = readStringMessage(domainSocket);
+					string url = readStringMessage(domainSocket);
+
+					domainMap[domainToUpdate] = url;
+
+					// Send Add command to synchronization thread
+					Log::debug("Sending update command to synchronziation thread for %s:%s", domainToUpdate.c_str(), url.c_str());
+					sendStringMessage(synchronizerSocket, "Update", ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, domainToUpdate, ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
+
+				}
 				else if (command == "Remove")
 				{
 					string domainToRemove = readStringMessage(domainSocket);
