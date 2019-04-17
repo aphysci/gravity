@@ -46,7 +46,7 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
-all clean:
+all:
 	$(MAKE) -C src/keyvalue_parser $@
 	$(MAKE) -C src/api/cpp $@
 	$(MAKE) -C src/components/cpp/Archiver $@
@@ -95,6 +95,112 @@ all clean:
 	then \
 		$(MAKE) -C test/examples/12-PythonBasicService $@;\
 	fi
+	
+	rm -rf src/components/cpp/bin
+	mkdir src/components/cpp/bin
+	cp src/components/cpp/Archiver/FileArchiver src/components/cpp/bin
+	cp src/components/cpp/LogRecorder/LogRecorder src/components/cpp/bin
+	cp src/components/cpp/Playback/FileReplay src/components/cpp/bin
+	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
+	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
+	cp src/components/cpp/Relay/Relay src/components/cpp/bin
+	
+	rm -rf bin lib include
+	mkdir bin
+	cp src/components/cpp/bin/* bin
+
+	mkdir lib
+	cp src/keyvalue_parser/*.a lib
+	cp src/keyvalue_parser/*.so lib
+	cp src/api/cpp/*.a lib
+	cp src/api/cpp/*.so lib
+
+	mkdir include
+	cp -r src/api/cpp/*.h include
+	mkdir include/protobuf
+	cp src/api/cpp/protobuf/*.h include/protobuf
+
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		cp src/api/java/*.so lib; \
+		cp src/api/java/*.jar lib; \
+		mkdir include/MATLAB; \
+		cp src/api/MATLAB/*.m include/MATLAB; \
+		mkdir lib/MATLAB; \
+		cp src/api/MATLAB/*.jar lib/MATLAB; \
+		cp src/api/MATLAB/LICENSE* lib/MATLAB; \
+	fi
+
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		cp -r src/api/python/src/python/gravity lib; \
+		cp src/api/python/*.so lib/gravity; \
+	fi
+
+	rm -f gravity.tgz 
+	echo building Gravity tarball...	
+	@if [ -d .git ]; then \
+		git describe --tags > VERSION.txt; \
+		tar czf gravity.tgz bin lib include VERSION.txt; \
+	else \
+		tar czf gravity.tgz bin lib include; \
+	fi
+	
+clean:
+	$(MAKE) -C src/keyvalue_parser $@
+	$(MAKE) -C src/api/cpp $@
+	$(MAKE) -C src/components/cpp/Archiver $@
+	$(MAKE) -C src/components/cpp/LogRecorder $@
+	$(MAKE) -C src/components/cpp/Playback $@
+	$(MAKE) -C src/components/cpp/ServiceDirectory $@
+	$(MAKE) -C src/components/cpp/ConfigServer $@
+	$(MAKE) -C src/components/cpp/Relay $@
+	$(MAKE) -C test/examples/1-BasicDataProduct $@
+	$(MAKE) -C test/examples/2-ProtobufDataProduct $@
+	$(MAKE) -C test/examples/3-MultipleDataProduct $@
+	$(MAKE) -C test/examples/4-BasicService $@
+	$(MAKE) -C test/examples/5-MiscFunctionality $@
+	$(MAKE) -C test/examples/8-ConfigFile $@
+	$(MAKE) -C test/examples/9-Domains $@
+	$(MAKE) -C test/examples/10-Archiving $@
+	$(MAKE) -C test/examples/13-Relay $@
+
+	# Perform each of the following in their own if block, otherwise a failure in the below make commands
+	# won't cause the overall build to fail.
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		$(MAKE) -C src/api/java $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		$(MAKE) -C src/api/MATLAB $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $@;\
+	fi
+	@if test ${WITHOUT_JAVA} = no;\
+	then \
+		$(MAKE) -C test/examples/7-JavaBasicService $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		$(MAKE) -C src/api/python $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		$(MAKE) -C test/examples/11-PythonPubSub $@;\
+	fi
+	@if test ${WITHOUT_PYTHON} = no;\
+	then \
+		$(MAKE) -C test/examples/12-PythonBasicService $@;\
+	fi
+	
+	rm -rf src/components/cpp/bin
+	
+	rm -rf bin lib include
+	
+	rm -f gravity.tgz 
 
 Makefile: Makefile.in config.status
 	./config.status $@
@@ -166,9 +272,9 @@ distributable: all components
 		cp -r src/api/python/src/python/gravity lib; \
 		cp src/api/python/*.so lib/gravity; \
 	fi
-
-	echo building Gravity tarball...
+	
 	rm -f gravity.tgz 
+	echo building Gravity tarball...
 	@if [ -d .git ]; then \
 		git describe --tags > VERSION.txt; \
 		tar czf gravity.tgz bin lib include VERSION.txt; \

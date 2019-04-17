@@ -2125,7 +2125,7 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 		zmq_msg_close(&msg);
 
 		// Read the ACK
-		readStringMessage(hbSocket);
+		readStringMessage(hbSocket, ZMQ_DONTWAIT);
 	}
 
 	return ret;
@@ -2140,12 +2140,16 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 
 	this->unsubscribe(heartbeatName,hbSub);
 
-	//Send the DataproductID
-	sendStringMessage(hbSocket,"unregister",ZMQ_SNDMORE);
-	sendStringMessage(hbSocket, heartbeatName, ZMQ_DONTWAIT);
+	// Only send the unregister request if we have started the Heartbeat thread
+	if (hbSocket != NULL)
+	{
+		//Send the DataproductID
+		sendStringMessage(hbSocket, "unregister", ZMQ_SNDMORE);
+		sendStringMessage(hbSocket, heartbeatName, ZMQ_DONTWAIT);
 
-	// Read the ACK
-	readStringMessage(hbSocket);
+		// Read the ACK
+		readStringMessage(hbSocket, ZMQ_DONTWAIT);
+	}
 
 	return GravityReturnCodes::SUCCESS;
 }

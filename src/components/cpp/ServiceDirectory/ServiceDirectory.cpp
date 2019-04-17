@@ -183,12 +183,22 @@ void ServiceDirectory::start()
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
     boost::replace_all(sdURL, "localhost", "127.0.0.1");
-    Log::message("running with SD connection string: %s", sdURL.c_str());
-
-	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
+    Log::message("running with SD connection string: %s", sdURL.c_str());	
 
 	// Get the optional domain for this Service Directory instance
 	domain = gn.getStringParam("Domain", "");
+
+	bool broadcastEnabled;
+
+	//if domain is specified, default broadcastEnabled to true
+	if (domain.empty())
+	{
+		broadcastEnabled = gn.getBoolParam("BroadcastEnabled", false);
+	}
+	else
+	{
+		broadcastEnabled = gn.getBoolParam("BroadcastEnabled", true);
+	}
 	
 	if (!validateDomainName(domain))
 	{
