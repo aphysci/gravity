@@ -46,6 +46,12 @@ builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
 
+INTERNAL_TARGET = 
+
+ifneq (,$(findstring clean,$(MAKECMDGOALS)))
+    INTERNAL_TARGET=clean
+endif
+
 all: internal	
 	
 	rm -rf src/components/cpp/bin
@@ -113,53 +119,53 @@ config.status: configure
 	./config.status --recheck
 	
 internal:
-	$(MAKE) -C src/keyvalue_parser $(MAKECMDGOALS)
-	$(MAKE) -C src/api/cpp $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/Archiver $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/LogRecorder $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/Playback $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/ServiceDirectory $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/ConfigServer $(MAKECMDGOALS)
-	$(MAKE) -C src/components/cpp/Relay $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/1-BasicDataProduct $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/2-ProtobufDataProduct $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/3-MultipleDataProduct $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/4-BasicService $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/5-MiscFunctionality $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/8-ConfigFile $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/9-Domains $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/10-Archiving $(MAKECMDGOALS)
-	$(MAKE) -C test/examples/13-Relay $(MAKECMDGOALS)
+	$(MAKE) -C src/keyvalue_parser $(INTERNAL_TARGET)
+	$(MAKE) -C src/api/cpp $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/Archiver $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/LogRecorder $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/Playback $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/ServiceDirectory $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/ConfigServer $(INTERNAL_TARGET)
+	$(MAKE) -C src/components/cpp/Relay $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/1-BasicDataProduct $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/2-ProtobufDataProduct $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/3-MultipleDataProduct $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/4-BasicService $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/5-MiscFunctionality $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/8-ConfigFile $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/9-Domains $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/10-Archiving $(INTERNAL_TARGET)
+	$(MAKE) -C test/examples/13-Relay $(INTERNAL_TARGET)
 
 	# Perform each of the following in their own if block, otherwise a failure in the below make commands
 	# won't cause the overall build to fail.
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
-		$(MAKE) -C src/api/java $(MAKECMDGOALS);\
+		$(MAKE) -C src/api/java $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
-		$(MAKE) -C src/api/MATLAB $(MAKECMDGOALS);\
+		$(MAKE) -C src/api/MATLAB $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
-		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $(MAKECMDGOALS);\
+		$(MAKE) -C test/examples/6-JavaProtobufDataProduct $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
-		$(MAKE) -C test/examples/7-JavaBasicService $(MAKECMDGOALS);\
+		$(MAKE) -C test/examples/7-JavaBasicService $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_PYTHON} = no;\
 	then \
-		$(MAKE) -C src/api/python $(MAKECMDGOALS);\
+		$(MAKE) -C src/api/python $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_PYTHON} = no;\
 	then \
-		$(MAKE) -C test/examples/11-PythonPubSub $(MAKECMDGOALS);\
+		$(MAKE) -C test/examples/11-PythonPubSub $(INTERNAL_TARGET);\
 	fi
 	@if test ${WITHOUT_PYTHON} = no;\
 	then \
-		$(MAKE) -C test/examples/12-PythonBasicService $(MAKECMDGOALS);\
+		$(MAKE) -C test/examples/12-PythonBasicService $(INTERNAL_TARGET);\
 	fi
 
 components:
