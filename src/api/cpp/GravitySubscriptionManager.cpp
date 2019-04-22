@@ -272,12 +272,12 @@ void GravitySubscriptionManager::start()
 							Log::critical("Received data product (%s) from publisher different from registered with ServiceDirectory [%u != %u].",
 											dataProduct->getDataProductID().c_str(), socketVerificationMap[pollItems[index].socket], 
 											dataProduct->getRegistrationTime());								
-
-							// Unsubscribe
-							unsubscribeFromPollItem(pollItems[index], filterText);
 							
 							// Notify Service Directory of stale entry
 							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->socketToUrlMap[pollItems[index].socket]);
+
+							// Unsubscribe
+							unsubscribeFromPollItem(pollItems[index], filterText);
 
 							index--;
 

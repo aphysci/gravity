@@ -197,6 +197,7 @@ void ServiceDirectoryUDPReceiver::start()
 							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 							
 							// Inform SD of new connection
+							Log::trace("Sending domain Add command to synchronizer thread");
 							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
@@ -207,6 +208,7 @@ void ServiceDirectoryUDPReceiver::start()
 							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
 							// Inform SD of updated connection
+							Log::trace("Sending domain Update command to synchronizer thread");
 							sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
 							sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
 							sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
