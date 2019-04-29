@@ -405,7 +405,7 @@ void ServiceDirectory::start()
 					domainMap[domainToUpdate] = url;
 
 					// Send Add command to synchronization thread
-					Log::debug("Sending update command to synchronziation thread for %s:%s", domainToUpdate.c_str(), url.c_str());
+					Log::debug("Sending update command to synchronization thread for %s:%s", domainToUpdate.c_str(), url.c_str());
 					sendStringMessage(synchronizerSocket, "Update", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToUpdate, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
@@ -809,7 +809,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         list<PublisherInfoPB>::iterator iter = infoPBs->begin();
         for (;iter != infoPBs->end(); iter++)
         {
-        	if (iter->url() == unregistration.url())
+        	if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
         		break;
         }
         if (iter != infoPBs->end())

@@ -274,12 +274,14 @@ void GravitySubscriptionManager::start()
 											dataProduct->getRegistrationTime());								
 							
 							// Notify Service Directory of stale entry
-							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->socketToUrlMap[pollItems[index].socket]);
+							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->socketToUrlMap[pollItems[index].socket],
+																socketVerificationMap[pollItems[index].socket]);
 
 							// Unsubscribe
 							unsubscribeFromPollItem(pollItems[index], filterText);
 
-							index--;
+							// Add this socket to be deleted list
+							deleteList.push_back(pollItems[index].socket);
 
 							break;
 						}
@@ -828,6 +830,9 @@ void GravitySubscriptionManager::removeSubscription()
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
 			{
 				unsubscribeFromPollItem(iter->second, filter);
+
+				// Remove from poll items
+				removePollItem(iter->second);
 			}				
 		}
 	}
@@ -970,9 +975,6 @@ void GravitySubscriptionManager::unsubscribeFromPollItem(zmq_pollitem_t pollItem
 
 	// Close the socket
 	zmq_close(pollItem.socket);
-
-	// Remove from poll items
-	removePollItem(pollItem);
 }
 	
 void GravitySubscriptionManager::calculateTimeout()
@@ -1031,12 +1033,13 @@ void GravitySubscriptionManager::calculateTimeout()
 	pollTimeout=minTime;
 }
 
-void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string url)
+void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string url, uint32_t regTime)
 {
 	Log::debug("Notifying ServiceDirectory of stale publisher: [%s @ %s]", dataProductId.c_str(), url.c_str());
 	ServiceDirectoryUnregistrationPB unregistration;
 	unregistration.set_id(dataProductId);
 	unregistration.set_url(url);
+	unregistration.set_registration_time(regTime);
 	unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
 
 	GravityDataProduct request("UnregistrationRequest");
