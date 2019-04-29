@@ -394,11 +394,11 @@ void GravitySubscriptionManager::start()
                             for (list<PublisherInfoPB>::const_iterator trimmedIter = trimmedPublishers.begin();
                             		trimmedIter != trimmedPublishers.end(); trimmedIter++)
                             {
-                                Log::trace("url: %s", trimmedIter->url().c_str());
-
                                 // if we don't already have this url, add it
                                 if (iter->second->pollItemMap.count(trimmedIter->url()) == 0)
                                 {
+                                    Log::trace("New url: %s", trimmedIter->url().c_str());
+
                                     zmq_pollitem_t pollItem;
                                     void *subSocket = setupSubscription(trimmedIter->url(), iter->first, pollItem);
 
@@ -410,6 +410,10 @@ void GravitySubscriptionManager::start()
 
 									// Add loopup from socket to url
 									iter->second->socketToUrlMap[subSocket] = trimmedIter->url();
+                                }
+                                else
+                                {
+                                    Log::trace("skipped adding subscription for url: %s", trimmedIter->url().c_str());
                                 }
 
 								// Insert/Update map to manage publisher verification
