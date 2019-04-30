@@ -408,9 +408,40 @@ void GravitySubscriptionManager::start()
                                     // Add url & poll item to subscription details
                                     iter->second->pollItemMap[trimmedIter->url()] = pollItem;
 
-									// Add loopup from socket to url
+									// Add lookup from socket to url
 									iter->second->socketToUrlMap[subSocket] = trimmedIter->url();
                                 }
+								else if (socketVerificationMap[iter->second->pollItemMap[trimmedIter->url()].socket] != trimmedIter->registration_time())
+								{
+									Log::trace("Updated publisher at url: %s", trimmedIter->url().c_str());
+
+									//// Remove old URL
+									subscriptionSocketMap.erase(iter->second->pollItemMap[trimmedIter->url()].socket);
+									socketVerificationMap.erase(iter->second->pollItemMap[trimmedIter->url()].socket);
+									deleteList.push_back(iter->second->pollItemMap[trimmedIter->url()].socket);
+
+									// Unsubscribe
+									zmq_setsockopt(iter->second->pollItemMap[trimmedIter->url()].socket, ZMQ_UNSUBSCRIBE, iter->second->filter.c_str(), iter->second->filter.length());
+
+									// Close the socket
+									zmq_close(iter->second->pollItemMap[trimmedIter->url()].socket);
+
+									iter->second->pollItemMap.erase(trimmedIter->url());
+									iter->second->socketToUrlMap.erase(iter->second->pollItemMap[trimmedIter->url()].socket);
+
+									//// Add new URL
+									zmq_pollitem_t pollItem;
+									void *subSocket = setupSubscription(trimmedIter->url(), iter->first, pollItem);
+
+									// and by socket for quick lookup as data arrives
+									subscriptionSocketMap[subSocket] = iter->second;
+
+									// Add url & poll item to subscription details
+									iter->second->pollItemMap[trimmedIter->url()] = pollItem;
+
+									// Add lookup from socket to url
+									iter->second->socketToUrlMap[subSocket] = trimmedIter->url();
+								}
                                 else
                                 {
                                     Log::trace("skipped adding subscription for url: %s", trimmedIter->url().c_str());
