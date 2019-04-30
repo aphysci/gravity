@@ -274,7 +274,7 @@ void GravitySubscriptionManager::start()
 											dataProduct->getRegistrationTime());								
 							
 							// Notify Service Directory of stale entry
-							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->socketToUrlMap[pollItems[index].socket],
+							notifyServiceDirectoryOfStaleEntry(subDetails->dataProductID, subDetails->domain, subDetails->socketToUrlMap[pollItems[index].socket],
 																socketVerificationMap[pollItems[index].socket]);
 
 							// Unsubscribe
@@ -1068,12 +1068,13 @@ void GravitySubscriptionManager::calculateTimeout()
 	pollTimeout=minTime;
 }
 
-void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string url, uint32_t regTime)
+void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string domain, string url, uint32_t regTime)
 {
 	Log::debug("Notifying ServiceDirectory of stale publisher: [%s @ %s]", dataProductId.c_str(), url.c_str());
 	ServiceDirectoryUnregistrationPB unregistration;
 	unregistration.set_id(dataProductId);
 	unregistration.set_url(url);
+	unregistration.set_domain(domain);
 	unregistration.set_registration_time(regTime);
 	unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
 

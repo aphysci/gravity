@@ -103,7 +103,7 @@ private:
 	void calculateTimeout();
 	void trimPublishers(const std::list<gravity::PublisherInfoPB>& fullList, std::list<gravity::PublisherInfoPB>& trimmedList);
 	void unsubscribeFromPollItem(zmq_pollitem_t pollItem, std::string filterText);
-	void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string url, uint32_t regTime);
+	void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string domain, std::string url, uint32_t regTime);
 
 	int pollTimeout;
 	std::tr1::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
