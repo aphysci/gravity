@@ -72,8 +72,8 @@ else
 ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
-INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(KEYVALUE_PARSER_INCLUDE_DIR)$(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS)
-CFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) $(AC_LDFLAGS) $(AC_CFLAGS)
+CFLAGS=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) -I$(KEYVALUE_PARSER_INCLUDE_DIR)$(ADDITIONAL_INCLUDES) $(AC_CPPFLAGS) $(AC_CFLAGS)
+LDFLAGS=-L../../../keyvalue_parser -L$(GRAVLIB_DIR) $(AC_LDFLAGS)
 
 LIBS=-lkeyvalue_parser -lgravity -lprotobuf -lzmq -lpthread $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
@@ -91,13 +91,13 @@ all: $(PROG_NAME)
 	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
 
 %.pb.o:%.pb.cc
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -c -o $@ $< $(CFLAGS)
 
 %.o:%.cpp $(DEPS)
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -g -c -o $@ $< $(INCLUDES)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -c -o $@ $< $(CFLAGS)
 
 $(PROG_NAME): $(PROTO_OBJ) $(OBJECTS) $(GRAVLIB_DIR)/libgravity.a
-	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $(EXE_NAME) $(PROTO_OBJ) $(OBJECTS) $(CFLAGS) $(LIBS)
+	$(CC) $(BUILD_VARIANT_DIRECTIVE) -o $(EXE_NAME) $(PROTO_OBJ) $(OBJECTS) $(LDFLAGS) $(LIBS)
 
 clean:
 	@rm -rf *.o $(MYPROTO_DIR)/*.o $(MYPROTO_DIR)/*.h $(MYPROTO_DIR)/*.cc $(PROG_NAME)
