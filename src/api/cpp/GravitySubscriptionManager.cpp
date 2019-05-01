@@ -699,7 +699,7 @@ void GravitySubscriptionManager::addSubscription()
 		Log::trace("subscriptionMap.count == 0");
 	    map<string, tr1::shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[key] = filterMap;
-		if (publisherUpdateUrl.size() > 0 && !registeredForPublisherUpdates)
+		if (publisherUpdateUrl.size() > 0 /*&& !registeredForPublisherUpdates*/)
 	    {
             zmq_pollitem_t pollItem;
             setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
