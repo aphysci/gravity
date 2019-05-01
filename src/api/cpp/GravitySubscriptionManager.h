@@ -114,6 +114,8 @@ private:
     bool metricsEnabled;
     GravityMetrics metricsData;
     void collectMetrics(std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts);
+
+	bool registeredForPublisherUpdates;
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

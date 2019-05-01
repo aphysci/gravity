@@ -55,6 +55,8 @@ GravitySubscriptionManager::GravitySubscriptionManager(void* context)
 
 	// Default high water mark
 	subscribeHWM = 1000;
+
+	registeredForPublisherUpdates = false;
 }
 
 GravitySubscriptionManager::~GravitySubscriptionManager() {}
@@ -247,7 +249,12 @@ void GravitySubscriptionManager::start()
 		// Check for subscription updates
 		for (unsigned int index = 2; index < pollItems.size(); index++)
 		{
-	        Log::trace("about to check for new poll items, index = %d, size = %d", index, pollItems.size());
+			string url = "";
+			if (subscriptionSocketMap.find(pollItems[index].socket) != subscriptionSocketMap.end())
+			{
+				url = subscriptionSocketMap[pollItems[index].socket]->socketToUrlMap[pollItems[index].socket];
+			}
+	        Log::trace("about to check for new poll items, index = %d, size = %d, url=%s", index, pollItems.size(), url.c_str());
 			if (pollItems[index].revents & ZMQ_POLLIN)
 			{
 			    // if it's a regular subscription poll item
@@ -418,7 +425,7 @@ void GravitySubscriptionManager::start()
 									//// Remove old URL
 									subscriptionSocketMap.erase(iter->second->pollItemMap[trimmedIter->url()].socket);
 									socketVerificationMap.erase(iter->second->pollItemMap[trimmedIter->url()].socket);
-									deleteList.push_back(iter->second->pollItemMap[trimmedIter->url()].socket);
+									//deleteList.push_back(iter->second->pollItemMap[trimmedIter->url()].socket);
 
 									// Unsubscribe
 									zmq_setsockopt(iter->second->pollItemMap[trimmedIter->url()].socket, ZMQ_UNSUBSCRIBE, iter->second->filter.c_str(), iter->second->filter.length());
@@ -441,6 +448,11 @@ void GravitySubscriptionManager::start()
 
 									// Add lookup from socket to url
 									iter->second->socketToUrlMap[subSocket] = trimmedIter->url();
+
+									if (subSocket != iter->second->pollItemMap[trimmedIter->url()].socket)
+									{
+										deleteList.push_back(iter->second->pollItemMap[trimmedIter->url()].socket);
+									}
 								}
                                 else
                                 {
@@ -687,12 +699,13 @@ void GravitySubscriptionManager::addSubscription()
 		Log::trace("subscriptionMap.count == 0");
 	    map<string, tr1::shared_ptr<SubscriptionDetails> > filterMap;
 	    subscriptionMap[key] = filterMap;
-	    if (publisherUpdateUrl.size() > 0)
+		if (publisherUpdateUrl.size() > 0 && !registeredForPublisherUpdates)
 	    {
             zmq_pollitem_t pollItem;
             setupSubscription(publisherUpdateUrl, dataProductID, pollItem);
 			Log::trace("Finished setting up subscription");
             publisherUpdateMap[key] = pollItem;
+			registeredForPublisherUpdates = true;
 	    }
 	}
 
