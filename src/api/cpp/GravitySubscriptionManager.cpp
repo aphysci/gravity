@@ -61,7 +61,7 @@ GravitySubscriptionManager::~GravitySubscriptionManager() {}
 
 void GravitySubscriptionManager::start()
 {
-	vector<pair<tr1::shared_ptr<SubscriptionDetails>, void*>> deleteList;
+	vector<pair<tr1::shared_ptr<SubscriptionDetails>, void*> > deleteList;
 
     // Set up the inproc socket to subscribe to subscribe and unsubscribe messages from
 	// the GravityNode
@@ -466,7 +466,7 @@ void GravitySubscriptionManager::start()
 		}
 
 		
-		for (vector<pair<tr1::shared_ptr<SubscriptionDetails>, void*>>::iterator iter = deleteList.begin(); iter != deleteList.end(); iter++)
+		for (vector<pair<tr1::shared_ptr<SubscriptionDetails>, void*> >::iterator iter = deleteList.begin(); iter != deleteList.end(); iter++)
 		{
 			tr1::shared_ptr<SubscriptionDetails> subDetails = iter->first;
 			void* socket = iter->second;
