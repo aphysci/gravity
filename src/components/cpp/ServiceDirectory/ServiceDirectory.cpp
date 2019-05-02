@@ -697,8 +697,8 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			// Insert new instance mapping for URL
 			registrationInstanceMap[registration.url()] = registration.timestamp();
 
-			uint32_t regTimeMillis = static_cast<uint32_t>(registration.timestamp() / 1e6);
-			if (iter == urls.end() || iter->registration_time() != regTimeMillis)
+			uint32_t regTimeSecs = static_cast<uint32_t>(registration.timestamp() / 1e6);
+			if (iter == urls.end() || iter->registration_time() != regTimeSecs)
 			{
 				if (iter == urls.end())
 				{
@@ -707,7 +707,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 					if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
 					if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
 					if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
-					infoPB.set_registration_time(regTimeMillis);
+					infoPB.set_registration_time(regTimeSecs);
 
 					dpMap[registration.id()].push_back(infoPB);
 				}
@@ -716,7 +716,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 					if (registration.has_is_relay()) iter->set_isrelay(registration.is_relay());
 					if (registration.has_component_id()) iter->set_componentid(registration.component_id());
 					if (registration.has_ip_address()) iter->set_ipaddress(registration.ip_address());
-					iter->set_registration_time(regTimeMillis);
+					iter->set_registration_time(regTimeSecs);
 				}				
 				
 				urlToComponentMap[registration.url()] = registration.component_id();
@@ -818,8 +818,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         list<PublisherInfoPB>::iterator iter = infoPBs->begin();
         for (;iter != infoPBs->end(); iter++)
         {
-        	if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
-        		break;
+			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
+			{
+				break;
+			}			
         }
         if (iter != infoPBs->end())
         {

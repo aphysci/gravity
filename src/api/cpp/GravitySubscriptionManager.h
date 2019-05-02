@@ -71,6 +71,7 @@ private:
 		std::map<void*, std::string> socketToUrlMap;
         std::set<GravitySubscriber*> subscribers;
 		std::set<std::tr1::shared_ptr<TimeoutMonitor> > monitors;
+		zmq_pollitem_t publisherUpdatePollItem;
 	} SubscriptionDetails;
 
 	void* context;
@@ -79,7 +80,7 @@ private:
 	std::map<DomainDataKey, std::map<std::string, std::tr1::shared_ptr<SubscriptionDetails> > > subscriptionMap;
     std::map<void*,std::tr1::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
 	std::map<void*,uint32_t> socketVerificationMap;
-	std::map<DomainDataKey, zmq_pollitem_t> publisherUpdateMap;
+	//std::map<DomainDataKey, std::map<std::string, zmq_pollitem_t> > publisherUpdateMap;
     std::map<void*,std::tr1::shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 
@@ -114,8 +115,6 @@ private:
     bool metricsEnabled;
     GravityMetrics metricsData;
     void collectMetrics(std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts);
-
-	bool registeredForPublisherUpdates;
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

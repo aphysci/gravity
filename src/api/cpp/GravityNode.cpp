@@ -285,7 +285,7 @@ void GravityNode::GravityNodeDomainListener::start()
 		else //we received a message
 		{
 			broadcastPB.ParseFromArray(recvString,recvStringLen);
-			Log::trace("Domain listener received message from domain '%s'", broadcastPB.domain().c_str());
+			//Log::trace("Domain listener received message from domain '%s'", broadcastPB.domain().c_str());
 
 			//if the domains match
 			if(domain.compare(broadcastPB.domain())==0)
@@ -1247,6 +1247,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
 		urlInstanceMap.erase(url);
+		uint32_t regTime = dataRegistrationTimeMap[dataProductID];
 		dataRegistrationTimeMap.erase(dataProductID);
 
         if (!serviceDirectoryNode.ipAddress.empty())
@@ -1255,6 +1256,7 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
             unregistration.set_id(dataProductID);
             unregistration.set_url(url);
             unregistration.set_type(ServiceDirectoryUnregistrationPB::DATA);
+			unregistration.set_registration_time(regTime);
 
             GravityDataProduct request("UnregistrationRequest");
             request.setData(unregistration);
