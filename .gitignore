@@ -13,5 +13,9 @@ Release
 bin/**
 lib/**
 **/Makefile
+*jar
+*pyc
 *_pb2.py
-
+VERSION.txt
+config.h
+config.status
