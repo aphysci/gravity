@@ -171,7 +171,7 @@ void ServiceDirectoryUDPReceiver::start()
 			//ignore messages from our domain name or invalid domains
 			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
 			{
-				Log::trace("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
+				//Log::trace("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
 
 				//if first time seeing domain
 				if(receivedCountMap.find(broadcastPB.domain())==receivedCountMap.end())

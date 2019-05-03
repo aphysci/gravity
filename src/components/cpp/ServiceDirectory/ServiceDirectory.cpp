@@ -821,7 +821,12 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
 			{
 				break;
-			}			
+			}		
+			else
+			{
+				Log::trace("CSB: [%s,%s] : [%u,%u]", iter->url().c_str(), unregistration.url().c_str(),
+					iter->registration_time(), unregistration.registration_time());
+			}
         }
         if (iter != infoPBs->end())
         {

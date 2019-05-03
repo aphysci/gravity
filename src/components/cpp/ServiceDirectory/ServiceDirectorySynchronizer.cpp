@@ -260,7 +260,7 @@ void ServiceDirectorySynchronizer::start()
 						for (int j = 0; j < details->providerMap.service_provider(i).url_size(); j++)
 						{
 							string url = details->providerMap.service_provider(i).url(j);						
-							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type());
+							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type(), details->registrationTime);
 						}
 					}								
 					for (int i = 0; i < details->providerMap.data_provider_size(); i++)
@@ -269,7 +269,7 @@ void ServiceDirectorySynchronizer::start()
 						for (int j = 0; j < details->providerMap.data_provider(i).url_size(); j++)
 						{
 							string url = details->providerMap.data_provider(i).url(j);						
-							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type());
+							createUnregistrationRequest(productID, url, domain, details->providerMap.change().registration_type(), details->registrationTime);
 						}			
 					}				
 
@@ -439,16 +439,18 @@ void ServiceDirectorySynchronizer::start()
 							string type = providerMap.change().registration_type() == ProductChange_RegistrationType_DATA ? "Data" : "Service";	
 							string componentID = providerMap.change().component_id();
 							uint64_t timestamp = providerMap.change().timestamp();
+
 							Log::message("Incremental Update from domain '%s': %s %s named %s at %s", domain.c_str(), 
 											change.c_str(), type.c_str(), productID.c_str(), url.c_str());							
 
 							if (providerMap.change().change_type() == ProductChange_ChangeType_ADD)
 							{
-								createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type(),timestamp);								
+								createRegistrationRequest(productID, url, componentID, domain, providerMap.change().registration_type() ,timestamp);								
 							}
 							else
 							{
-								createUnregistrationRequest(productID, url, domain, providerMap.change().registration_type());								
+								uint32_t regTimeSecs = static_cast<uint32_t>(timestamp/1e6);
+								createUnregistrationRequest(productID, url, domain, providerMap.change().registration_type(), regTimeSecs);
 							}
 							// Test code
 							//Log::debug("Received updated providerMap: ");
@@ -505,7 +507,7 @@ void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, s
 }
 
 // Utility to create a UnregistrationRequest message and add it to the queue to be submitted
-void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID, string url, string domain, ProductChange_RegistrationType type)
+void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID, string url, string domain, ProductChange_RegistrationType type, uint32_t regTime)
 {
 	ServiceDirectoryUnregistrationPB_RegistrationType rtype = type == ProductChange_RegistrationType_DATA ?
 				ServiceDirectoryUnregistrationPB_RegistrationType_DATA : ServiceDirectoryUnregistrationPB_RegistrationType_SERVICE;
@@ -515,6 +517,7 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 	unregisterRequest.set_url(url);
 	unregisterRequest.set_type(rtype);	
 	unregisterRequest.set_domain(domain);
+	unregisterRequest.set_registration_time(regTime);
 
 	tr1::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));
 	gdp->setData(unregisterRequest);

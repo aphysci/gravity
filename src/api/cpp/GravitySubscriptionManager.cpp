@@ -260,7 +260,6 @@ void GravitySubscriptionManager::start()
 			    {
                     // Deliver to subscriber(s)
 			        tr1::shared_ptr<SubscriptionDetails> subDetails = subscriptionSocketMap[pollItems[index].socket];
-					string url = subDetails->socketToUrlMap[pollItems[index].socket];
 
                     vector< tr1::shared_ptr<GravityDataProduct> > dataProducts;
                     while (true)
@@ -406,13 +405,16 @@ void GravitySubscriptionManager::start()
                                 // If we don't already have this publisher url, add it OR if it is an updated publisher url based on a new registration timestamp
 								if (subDetails->pollItemMap.count(trimmedIter->url()) == 0 ||
 									socketVerificationMap[subDetails->pollItemMap[trimmedIter->url()].socket] != trimmedIter->registration_time())
-                                {
-                                    Log::trace("New/Updated url: %s", trimmedIter->url().c_str());									
-
+                                {                                    
 									if (socketVerificationMap[subDetails->pollItemMap[trimmedIter->url()].socket] != trimmedIter->registration_time())
 									{
+										Log::trace("Updated url: %s", trimmedIter->url().c_str());
 										// This is an updated publisher location. Remove the old one.
 										deleteList.push_back(std::make_pair(subDetails, subDetails->pollItemMap[trimmedIter->url()].socket));
+									}
+									else
+									{
+										Log::trace("New url: %s", trimmedIter->url().c_str());
 									}
 
                                     zmq_pollitem_t pollItem;
@@ -483,7 +485,11 @@ void GravitySubscriptionManager::start()
 			// Close the socket
 			zmq_close(socket);
 
-			subDetails->pollItemMap.erase(url);
+			// If the socket for this url hasn't been updated, remove it
+			if (subDetails->pollItemMap[url].socket == socket)
+			{
+				subDetails->pollItemMap.erase(url);
+			}
 			subDetails->socketToUrlMap.erase(socket);
 			
 			for (vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin(); pollIter != pollItems.end(); ++pollIter)
