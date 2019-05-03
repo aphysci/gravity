@@ -123,7 +123,7 @@ void GravityServiceManager::start()
 			{
 				addService();
 			}
-			if (command == "unregister")
+			else if (command == "unregister")
 			{
 				removeService();
 			}
