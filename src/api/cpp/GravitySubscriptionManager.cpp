@@ -536,10 +536,17 @@ void GravitySubscriptionManager::start()
 	}
 
 	// Clean up all our open sockets
-	for (map<void*,tr1::shared_ptr<SubscriptionDetails> >::iterator iter = subscriptionSocketMap.begin(); iter != subscriptionSocketMap.end(); iter++)
+	for (map<DomainDataKey, map<std::string, std::tr1::shared_ptr<SubscriptionDetails> > >::iterator iter = subscriptionMap.begin();
+	     iter != subscriptionMap.end(); iter++)
 	{
-		zmq_close(iter->first);
-		zmq_close(iter->second->publisherUpdatePollItem.socket);
+	    for (map<std::string, std::tr1::shared_ptr<SubscriptionDetails> >::iterator detIter = iter->second.begin(); detIter != iter->second.end(); detIter++)
+	    {
+	        for (std::map<std::string, zmq_pollitem_t>::iterator piIter = detIter->second->pollItemMap.begin(); piIter != detIter->second->pollItemMap.end(); piIter++)
+	        {
+	            zmq_close(piIter->second.socket);
+	        }
+	        zmq_close(detIter->second->publisherUpdatePollItem.socket);
+	    }
 	}
 
 	subscriptionMap.clear();
@@ -872,7 +879,7 @@ void GravitySubscriptionManager::removeSubscription()
 				Log::trace("Removing subscription to RegisteredPublishers");
 				removePollItem(subDetails->publisherUpdatePollItem);
 				zmq_setsockopt(subDetails->publisherUpdatePollItem.socket, ZMQ_UNSUBSCRIBE, dataProductID.c_str(), dataProductID.length());
-				zmq_close(subDetails->publisherUpdatePollItem.socket);				
+				zmq_close(subDetails->publisherUpdatePollItem.socket);
 			}
 
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
