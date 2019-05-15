@@ -431,6 +431,10 @@ void ServiceDirectory::start()
     }
 }
 
+/**
+ * Even though this looks like a normal Gravity request callback, this method is only called locally, not from
+ * the GravityNode.
+ */
 tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
 {
     tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));

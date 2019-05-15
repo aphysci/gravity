@@ -179,6 +179,8 @@ void ServiceDirectorySynchronizer::start()
 				Log::message("deleted from Synchronizer pollItems: pollItems len = %u", pollItems.size());
 
 				// Close SUB socket
+				socketToDomainDetailsMap.erase(details->socket);
+				Log::trace("deleted from Synchronizer socketToDomainDetailsMap: socketToDomainDetailsMap len = %u", socketToDomainDetailsMap.size());
 				zmq_close(details->socket);
 
 				// Update details
@@ -308,23 +310,32 @@ void ServiceDirectorySynchronizer::start()
 					// Process response from ServiceDirectory
 					zmq_msg_t message;
 					zmq_msg_init(&message);
-					zmq_recvmsg(pollItemIter->socket, &message, 0);
+					int ret = zmq_recvmsg(pollItemIter->socket, &message, 0);
+					if (ret < 0)
+					{
+					    Log::warning("Received error from zmq_recvmsg, errno = %d", errno);
+					}
 
 					// Create new GravityDataProduct from the incoming message
 					GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
 
-					if (socketToDomainDetailsMap.find(pollItemIter->socket) != socketToDomainDetailsMap.end() &&
-						socketToDomainDetailsMap[pollItemIter->socket]->registrationTime != response.getRegistrationTime())
+					Log::trace("Response domain:reg time = %s:%u, pollItemIter->socket = %u, socketToDomainDetailsMap size = %u",
+					        response.getDomain().c_str(),
+					        response.getRegistrationTime(),
+					        pollItemIter->socket,
+					        socketToDomainDetailsMap.size());
+
+					if (zmq_msg_size(&message) > 0 &&
+					        socketToDomainDetailsMap.find(pollItemIter->socket) != socketToDomainDetailsMap.end() &&
+					        socketToDomainDetailsMap[pollItemIter->socket]->registrationTime != response.getRegistrationTime())
 					{
-						// Invalid socket connection. This is not the socket to which we originally connected.
-						// Send message to ourself to remove on next pass.
-						void* socket = zmq_socket(context, ZMQ_PUB);
-						int linger = -1;
-						zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
-						zmq_bind(socket, "inproc://service_directory_synchronizer");
-						sendStringMessage(socket, "Remove", ZMQ_SNDMORE);
-						sendStringMessage(socket, socketToDomainDetailsMap[pollItemIter->socket]->domain, ZMQ_DONTWAIT);
-						zmq_close(socket);
+					    Log::debug("Found invalid socket - expecting domain:time %s:%u, but found %s:%u with GDP id = %s and msg size = %u, ignoring",
+					            socketToDomainDetailsMap[pollItemIter->socket]->domain.c_str(),
+					            socketToDomainDetailsMap[pollItemIter->socket]->registrationTime,
+					            response.getDomain().c_str(),
+					            response.getRegistrationTime(),
+					            response.getDataProductID().c_str(),
+					            zmq_msg_size(&message));
 					}
 					else if (response.getDataProductID() == "DataProductRegistrationResponse")
 					{					
@@ -365,6 +376,7 @@ void ServiceDirectorySynchronizer::start()
                             tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
                             // Clean up the request socket (to be replaced with a SUB socket)
+                            socketToDomainDetailsMap.erase(details->socket);
                             zmq_close(details->socket);
 
                             // Set up subscription socket for updates from the "remote" service directory
