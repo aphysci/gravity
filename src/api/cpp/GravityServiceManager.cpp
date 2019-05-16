@@ -123,7 +123,7 @@ void GravityServiceManager::start()
 			{
 				addService();
 			}
-			if (command == "unregister")
+			else if (command == "unregister")
 			{
 				removeService();
 			}
@@ -133,7 +133,7 @@ void GravityServiceManager::start()
 			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+				Log::warning("GravityServiceManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
@@ -150,13 +150,23 @@ void GravityServiceManager::start()
 				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
 				// Clean up message
 				zmq_msg_close(&message);
-
-				tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
-				Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
-				tr1::shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+				
+				tr1::shared_ptr<GravityDataProduct> response;
+				tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];				
+				if (dataProduct.getRegistrationTime() != 0 && dataProduct.getRegistrationTime() != serviceRegistrationTimeMap[serviceDetails->serviceID])
+				{
+					// Invalid request - likely due to a stale service directory entry
+					response = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct(serviceDetails->serviceID));
+				}
+				else
+				{
+					Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
+					response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+				}
 
 				response->setComponentId(componentID);
 				response->setDomain(domain);
+				response->setRegistrationTime(serviceRegistrationTimeMap[serviceDetails->serviceID]);
 
 				sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
 			}
@@ -207,6 +217,9 @@ void GravityServiceManager::addService()
 
     // Read the publish transport type
     string endpoint = readStringMessage(gravityNodeSocket);
+
+	// Read the registration time
+	uint32_t registrationTime = readUint32Message(gravityNodeSocket);
 
 	// Read the server pointer
 	zmq_msg_t msg;
@@ -269,6 +282,7 @@ void GravityServiceManager::addService()
 
 	serviceMapBySocket[serverSocket] = serviceDetails;
 	serviceMapByServiceID[serviceID] = serviceDetails;
+	serviceRegistrationTimeMap[serviceID] = registrationTime;
 }
 
 void GravityServiceManager::removeService()
@@ -283,6 +297,7 @@ void GravityServiceManager::removeService()
 		void* socket = serviceDetails->pollItem.socket;
 		serviceMapBySocket.erase(socket);
 		serviceMapByServiceID.erase(serviceID);
+		serviceRegistrationTimeMap.erase(serviceID);
 		zmq_unbind(socket, serviceDetails->url.c_str());
 		zmq_close(socket);
 

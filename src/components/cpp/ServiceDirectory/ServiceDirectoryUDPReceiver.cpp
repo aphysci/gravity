@@ -54,7 +54,7 @@ namespace gravity
 map<string,unsigned int> receivedCountMap;
 map<string,unsigned int> broadcastRateMap;
 map<string,struct timeval> expectedMsgTimeMap;
-set<string> connectedDomainSet;
+map<string, int64_t> connectedDomainMap;
 
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
@@ -171,7 +171,7 @@ void ServiceDirectoryUDPReceiver::start()
 			//ignore messages from our domain name or invalid domains
 			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
 			{
-				Log::debug("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
+				//Log::trace("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
 
 				//if first time seeing domain
 				if(receivedCountMap.find(broadcastPB.domain())==receivedCountMap.end())
@@ -191,15 +191,27 @@ void ServiceDirectoryUDPReceiver::start()
 						count = MAX_RECEIVE_COUNT;
 
 						//check whether we have already connected with this domain
-						if(connectedDomainSet.find(broadcastPB.domain()) == connectedDomainSet.end())
+						if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end())
 						{
 							// add domain to the connected list
-							connectedDomainSet.insert(broadcastPB.domain());
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
+							
 							// Inform SD of new connection
+							Log::trace("Sending domain Add command to synchronizer thread");
 							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
+						}
+						else if (connectedDomainMap[broadcastPB.domain()] != broadcastPB.starttime())
+						{
+							// update domain time
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
+							// Inform SD of updated connection
+							Log::trace("Sending domain Update command to synchronizer thread");
+							sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
 						}
 					}
 					//update count for domain
@@ -226,12 +238,12 @@ void ServiceDirectoryUDPReceiver::start()
 				if(count <=0)
 				{
 					//check whether we have already connected with this domain
-					if(connectedDomainSet.find(iter->first) != connectedDomainSet.end())
+					if (connectedDomainMap.find(iter->first) != connectedDomainMap.end())
 					{
 						// inform Service Directory to remove domain
 						sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
 						sendStringMessage(domainSocket,iter->first,ZMQ_DONTWAIT);
-						connectedDomainSet.erase(iter->first);
+						connectedDomainMap.erase(iter->first);
 					}
 
 					// remove domain from data sets

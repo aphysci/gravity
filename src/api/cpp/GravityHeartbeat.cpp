@@ -265,6 +265,7 @@ void* Heartbeat(void* thread_context)
 	{
 		// Publish heartbeat (via the GravityPublishManager)
 		gdp.setTimestamp(getCurrentTime());
+		gdp.setRegistrationTime(params->registrationTime);
 		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
 		sendStringMessage(heartbeatSocket, "publish", ZMQ_SNDMORE);
 		sendStringMessage(heartbeatSocket, gdp.getDataProductID(), ZMQ_SNDMORE);

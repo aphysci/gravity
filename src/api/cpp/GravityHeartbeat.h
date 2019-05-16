@@ -42,6 +42,7 @@ struct HBParams {
 	std::string endpoint;
 	int minPort;
 	int maxPort;
+	uint32_t registrationTime;
 };
 
 struct HBListenerContext {

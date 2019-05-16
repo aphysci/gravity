@@ -28,4 +28,5 @@ message ComponentServiceLookupResponsePB
 	required string lookupID = 1;
 	required string url = 2;
 	optional string domain_id = 3;
+	optional uint32 registration_time = 4;
 }

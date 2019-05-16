@@ -147,7 +147,7 @@ void GravityPublishManager::start()
 			}
 			else
 			{
-			    Log::critical("Received unknown request command %s", command.c_str());
+				Log::warning("GravityPublishManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
@@ -257,13 +257,13 @@ void GravityPublishManager::start()
 						int size = (*iter)->size;
 						//Deserialize cache bytes to a data product and mark cached
 						GravityDataProduct dataProduct(bytes, size);
-						Log::trace("Marking %s as cached...", dataProduct.getDataProductID().c_str());
 						dataProduct.setIsCachedDataproduct(true);
 						int newSize = dataProduct.getSize();
 						//Serialize back to send over socket
 						char* newBytes = new char[newSize];
-						dataProduct.serializeToArray(newBytes);						
-						Log::trace("Publishing data product %s..., Which is cached? %s", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct() ? "true" : "false");
+						dataProduct.serializeToArray(newBytes);		
+						// See comment above re the use of log statements in this section of code
+						//Log::trace("Publishing data product %s..., Which is cached? %s", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct() ? "true" : "false");
 				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
 				        delete[] newBytes;
 					}

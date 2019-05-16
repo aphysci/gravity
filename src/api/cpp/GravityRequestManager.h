@@ -39,6 +39,8 @@ typedef struct RequestDetails
 	std::string requestID;
 	long timeoutTimeMilliseconds;
 	GravityRequestor* requestor;
+	uint32_t registrationTime;
+	std::string url;
 } RequestDetails;
 
 class GravityRequestManager
@@ -54,6 +56,9 @@ private:
 	void createFutureResponse();
 	void sendFutureResponse();
 	void ready();
+
+	std::string serviceDirectoryUrl;
+	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url);
 public:
 	/**
 	 * Constructor GravityRequestManager

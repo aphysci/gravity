@@ -35,4 +35,5 @@ message ServiceDirectoryUnregistrationPB
 	}
 	optional RegistrationType type = 3;
 	optional string domain = 4;
+	optional uint32 registration_time = 5;
 }

@@ -391,9 +391,23 @@ void ServiceDirectory::start()
 					publishDomainUpdateMessage(domainToAdd,url,ADD);
 
 					// Send Add command to synchronization thread
-					Log::debug("Sending add command to synchronziation thread for %s:%s", domainToAdd.c_str(), url.c_str());
+					Log::debug("Sending add command to synchronization thread for %s:%s", domainToAdd.c_str(), url.c_str());
 					sendStringMessage(synchronizerSocket, "Add", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToAdd, ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
+
+				}
+				if (command == "Update")
+				{
+					string domainToUpdate = readStringMessage(domainSocket);
+					string url = readStringMessage(domainSocket);
+
+					domainMap[domainToUpdate] = url;
+
+					// Send Add command to synchronization thread
+					Log::debug("Sending update command to synchronization thread for %s:%s", domainToUpdate.c_str(), url.c_str());
+					sendStringMessage(synchronizerSocket, "Update", ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, domainToUpdate, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
 
 				}
@@ -417,6 +431,10 @@ void ServiceDirectory::start()
     }
 }
 
+/**
+ * Even though this looks like a normal Gravity request callback, this method is only called locally, not from
+ * the GravityNode.
+ */
 tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
 {
     tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
@@ -572,6 +590,9 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
 				lookupResponse.set_url(sMap[lookupRequest.lookupid()]);
+
+				uint32_t regTime = static_cast<uint32_t>(registrationInstanceMap[sMap[lookupRequest.lookupid()]] / 1e6);
+				lookupResponse.set_registration_time(regTime);
 			}
 		}
 
@@ -611,8 +632,8 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	}
 	
 	// Add change to data product
-	Log::debug("Adding Change : %s %s %s %lu", productID.c_str(), url.c_str(), 
-			urlToComponentMap[url].c_str(),0);//urlToComponentMap[url].timestamp); 
+	Log::debug("Adding Change : %s %s %s %llu", productID.c_str(), url.c_str(), 
+			urlToComponentMap[url].c_str(), timestamp);
 	ProductChange* change = providerMap.mutable_change();
 	change->set_product_id(productID);
 	change->set_url(url);
@@ -676,15 +697,31 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				if (iter->url() == registration.url())
 					break;
 			}
-			if (iter == urls.end())
-			{
-				PublisherInfoPB infoPB;
-				infoPB.set_url(registration.url());
-				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
-				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
-				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+			
+			// Insert new instance mapping for URL
+			registrationInstanceMap[registration.url()] = registration.timestamp();
 
-				dpMap[registration.id()].push_back(infoPB);
+			uint32_t regTimeSecs = static_cast<uint32_t>(registration.timestamp() / 1e6);
+			if (iter == urls.end() || iter->registration_time() != regTimeSecs)
+			{
+				if (iter == urls.end())
+				{
+					PublisherInfoPB infoPB;
+					infoPB.set_url(registration.url());
+					if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
+					if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
+					if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+					infoPB.set_registration_time(regTimeSecs);
+
+					dpMap[registration.id()].push_back(infoPB);
+				}
+				else
+				{
+					if (registration.has_is_relay()) iter->set_isrelay(registration.is_relay());
+					if (registration.has_component_id()) iter->set_componentid(registration.component_id());
+					if (registration.has_ip_address()) iter->set_ipaddress(registration.ip_address());
+					iter->set_registration_time(regTimeSecs);
+				}				
 				
 				urlToComponentMap[registration.url()] = registration.component_id();
 
@@ -702,9 +739,6 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				// Remove any previous registrations at this URL as they obviously no longer exist
 				purgeObsoletePublishers(registration.id(), registration.url());
 
-				//insert new instance mapping for URL
-				registrationInstanceMap[registration.url()] = registration.timestamp();
-
 				// Update any subscribers interested in our providers
 				if (domain == this->domain && registration.id() != REGISTERED_PUBLISHERS)
 				{
@@ -715,9 +749,6 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			else
 			{
 				foundDup = true;
-						
-				//Replace existing timestamp with the new one
-				registrationInstanceMap[registration.url()] = registration.timestamp();
 				
 				// Update any subscribers interested in our providers
 				if(domain == this->domain)
@@ -791,8 +822,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         list<PublisherInfoPB>::iterator iter = infoPBs->begin();
         for (;iter != infoPBs->end(); iter++)
         {
-        	if (iter->url() == unregistration.url())
-        		break;
+			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
+			{
+				break;
+			}
         }
         if (iter != infoPBs->end())
         {
