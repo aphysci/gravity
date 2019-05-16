@@ -1805,7 +1805,7 @@ tr1::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 	}
 	if (response->getRegistrationTime() != regTime)
 	{
-		Log::warning("Received service (%s) response from invalid service [%u != %u]", serviceID, response->getRegistrationTime(), regTime);
+		Log::warning("Received service (%s) response from invalid service [%u != %u]", serviceID.c_str(), response->getRegistrationTime(), regTime);
 		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 

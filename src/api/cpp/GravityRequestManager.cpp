@@ -214,7 +214,7 @@ void GravityRequestManager::start()
 					if (response.getRegistrationTime() != reqDetails->registrationTime)
 					{
 						Log::critical("Received service (%s) response from invalid service [%u != %u]. Aborting.",
-							reqDetails->serviceID, response.getRegistrationTime(), reqDetails->registrationTime);
+							reqDetails->serviceID.c_str(), response.getRegistrationTime(), reqDetails->registrationTime);
 
 						// Send notification of stale data to ServiceDirectory
 						notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url);
