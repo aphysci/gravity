@@ -319,11 +319,12 @@ void ServiceDirectorySynchronizer::start()
 					// Create new GravityDataProduct from the incoming message
 					GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
 
-					Log::trace("Response domain:reg time = %s:%u, pollItemIter->socket = %u, socketToDomainDetailsMap size = %u",
+					Log::trace("Response domain:reg time = %s:%u, pollItemIter->socket = %u, socketToDomainDetailsMap size = %u, msg id = %s",
 					        response.getDomain().c_str(),
 					        response.getRegistrationTime(),
 					        pollItemIter->socket,
-					        socketToDomainDetailsMap.size());
+					        socketToDomainDetailsMap.size(),
+							response.getDataProductID().c_str());
 
 					if (zmq_msg_size(&message) > 0 &&
 					        socketToDomainDetailsMap.find(pollItemIter->socket) != socketToDomainDetailsMap.end() &&

@@ -632,8 +632,8 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	}
 	
 	// Add change to data product
-	Log::debug("Adding Change : %s %s %s %lu", productID.c_str(), url.c_str(), 
-			urlToComponentMap[url].c_str(),0);//urlToComponentMap[url].timestamp); 
+	Log::debug("Adding Change : %s %s %s %llu", productID.c_str(), url.c_str(), 
+			urlToComponentMap[url].c_str(), timestamp);
 	ProductChange* change = providerMap.mutable_change();
 	change->set_product_id(productID);
 	change->set_url(url);
@@ -825,11 +825,6 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
 			{
 				break;
-			}		
-			else
-			{
-				Log::trace("CSB: [%s,%s] : [%u,%u]", iter->url().c_str(), unregistration.url().c_str(),
-					iter->registration_time(), unregistration.registration_time());
 			}
         }
         if (iter != infoPBs->end())
