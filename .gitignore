@@ -19,3 +19,6 @@ lib/**
 VERSION.txt
 config.h
 config.status
+tags
+.tags
+
