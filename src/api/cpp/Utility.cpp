@@ -222,4 +222,14 @@ GRAVITY_API unsigned int sleep(int milliseconds)
 #endif
 }
 
+GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
+{
+  auto pos = target.find(oldValue);
+  while(pos != std::string::npos) {
+    target.replace(pos, oldValue.size(), newValue);
+    pos = target.find(oldValue);
+  }
+}
+
+
 }

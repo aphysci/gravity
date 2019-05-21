@@ -18,6 +18,7 @@
 
 #ifndef GRAVITY_UTILITY_H__
 #define GRAVITY_UTILITY_H__
+#include <cstdint>
 #include <string>
 
 #ifdef _WIN32
@@ -33,8 +34,6 @@
 #else
 #define GRAVITY_API
 #endif
-
-#include <stdint.h>
 
 namespace gravity {
 
@@ -52,6 +51,7 @@ GRAVITY_API uint64_t getCurrentTime();  ///< Utility method to get the current s
 GRAVITY_API unsigned int sleep(int milliseconds);
 GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
 
+GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue);
 
 }
 
