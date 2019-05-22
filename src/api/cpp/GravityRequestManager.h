@@ -49,7 +49,7 @@ private:
 	void* context;
 	void* gravityNodeSocket;
 	void* gravityResponseSocket;
-	std::map<void*,std::tr1::shared_ptr<RequestDetails> > requestMap;
+	std::map<void*,std::shared_ptr<RequestDetails> > requestMap;
 	std::vector<zmq_pollitem_t> pollItems;
 	std::map<std::string,void*> futureResponseUrlToSocketMap;
 	void processRequest();

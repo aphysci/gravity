@@ -104,7 +104,7 @@ int FileReader::readNextDataProduct()
         	}
 
         	// Convert to GravityDataProduct
-        tr1::shared_ptr<GravityDataProduct> gdp = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
+        std::shared_ptr<GravityDataProduct> gdp = std::shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
 		//gdp->parseFromArray(buffer, size);
 
 		// Make sure this is a data product we care about
@@ -148,18 +148,18 @@ bool FileReader::hasData()
 	return ret;
 }
 
-tr1::shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
+std::shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
 {
 	pthread_mutex_lock(&mutex);
-	tr1::shared_ptr<GravityDataProduct> gdp = dataProducts[0];
+	std::shared_ptr<GravityDataProduct> gdp = dataProducts[0];
 	dataProducts.erase(dataProducts.begin());
 	pthread_mutex_unlock(&mutex);
 	return gdp;
 }
 
-tr1::shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
+std::shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
 {
-    tr1::shared_ptr<GravityDataProduct> gdp;
+    std::shared_ptr<GravityDataProduct> gdp;
 	if (!hasData() && !readNextDataProduct())
 	{
 	}

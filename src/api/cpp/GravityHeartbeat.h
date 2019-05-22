@@ -71,7 +71,7 @@ private:
 	static Semaphore heartbeatLock;
 	static bool heartbeatRunning;
 public:
-    virtual void subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 
     static void* HeartbeatListenerThrFunc(void* thread_context);
 

@@ -110,7 +110,7 @@ void ServiceDirectorySynchronizer::start()
 				if (syncMap.find(domain) == syncMap.end())
 				{					
 					// Create details
-				    tr1::shared_ptr<SyncDomainDetails> details(new SyncDomainDetails());
+				    std::shared_ptr<SyncDomainDetails> details(new SyncDomainDetails());
 					details->domain = domain;
 					details->ipAddress = domainIP;
 					details->initialized = false;
@@ -161,7 +161,7 @@ void ServiceDirectorySynchronizer::start()
 				Log::message("Received Domain Update command for %s:%s", domain.c_str(), domainIP.c_str());
 
 				// A domain has been update and should be reset. 
-				tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
+				std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
 				// Remove our subscription listener from pollItems vector
 				vector<zmq_pollitem_t>::iterator pollIter = pollItems.begin();
@@ -234,7 +234,7 @@ void ServiceDirectorySynchronizer::start()
 				{
 					// A domain is no longer available and needs to be removed. Get 
 					// details from map
-				    tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
+				    std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
 				    // Remove our subscription listener from pollItems vector
 				    // (i.e. no longer care to receive updates)
@@ -374,7 +374,7 @@ void ServiceDirectorySynchronizer::start()
                             Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
 
                             // Get the details for the domain that is providing an update
-                            tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
+                            std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 
                             // Clean up the request socket (to be replaced with a SUB socket)
                             socketToDomainDetailsMap.erase(details->socket);
@@ -406,7 +406,7 @@ void ServiceDirectorySynchronizer::start()
 
 						Log::message("Received update from ServiceDirectory for domain: '%s'", domain.c_str());
 
-						tr1::shared_ptr<SyncDomainDetails> details = syncMap[domain];
+						std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 						details->providerMap.Clear();
 						response.populateMessage(details->providerMap);					
 						if (!details->initialized)
@@ -483,7 +483,7 @@ void ServiceDirectorySynchronizer::start()
 		if (!pendingResponse && !registrationUpdates.empty())
 		{
 			// Pop the next update to send from the queue
-		    tr1::shared_ptr<GravityDataProduct> gdp = registrationUpdates.front();
+		    std::shared_ptr<GravityDataProduct> gdp = registrationUpdates.front();
 			registrationUpdates.pop();
 
 			// Send data product
@@ -514,7 +514,7 @@ void ServiceDirectorySynchronizer::createRegistrationRequest(string productID, s
 	registerRequest.set_domain(domain);
 	registerRequest.set_timestamp(timestamp);
 
-	tr1::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("RegistrationRequest"));
+	std::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("RegistrationRequest"));
 	gdp->setData(registerRequest);
 	registrationUpdates.push(gdp);
 }
@@ -532,7 +532,7 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 	unregisterRequest.set_domain(domain);
 	unregisterRequest.set_registration_time(regTime);
 
-	tr1::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));
+	std::shared_ptr<GravityDataProduct> gdp(new GravityDataProduct("UnregistrationRequest"));
 	gdp->setData(unregisterRequest);
 	registrationUpdates.push(gdp);
 }

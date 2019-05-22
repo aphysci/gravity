@@ -45,11 +45,11 @@ class ConfigServer : public GravityServiceProvider
 {
 public:
 	ConfigServer() {}
-    virtual tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
 };
 
-tr1::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
 	ConfigRequestPB cfpb;
 	dataProduct.populateMessage(cfpb);
@@ -82,7 +82,7 @@ tr1::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
     if(!key_value_map.size())
 	{
 		cout << "Critical Error: Could not open config file: config_file.ini" << endl;
-		return tr1::shared_ptr<GravityDataProduct>();
+		return std::shared_ptr<GravityDataProduct>();
 	}
 
 	//Populate Response Message and Send it
@@ -96,7 +96,7 @@ tr1::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 		message.add_value(i->second);
 	}
 
-	tr1::shared_ptr<GravityDataProduct> response(new GravityDataProduct("ConfigResponsePB"));
+	std::shared_ptr<GravityDataProduct> response(new GravityDataProduct("ConfigResponsePB"));
 	response->setData(message);
 
 	return response; //Returning the message will send it.

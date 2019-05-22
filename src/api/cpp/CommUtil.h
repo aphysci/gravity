@@ -29,7 +29,7 @@
 #include "GravityDataProduct.h"
 
 #ifdef __GNUC__
-#include <tr1/memory>
+#include <memory>
 #include <sys/time.h>
 #else
 #include <WinSock2.h>

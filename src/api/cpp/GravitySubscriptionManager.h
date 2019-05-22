@@ -33,7 +33,7 @@
 #ifndef __GNUC__
 #include <memory>
 #else
-#include <tr1/memory>
+#include <memory>
 #endif
 #include <string>
 #include <list>
@@ -70,18 +70,18 @@ private:
         std::map<std::string, zmq_pollitem_t> pollItemMap;
 		std::map<void*, std::string> socketToUrlMap;
         std::set<GravitySubscriber*> subscribers;
-		std::set<std::tr1::shared_ptr<TimeoutMonitor> > monitors;
+		std::set<std::shared_ptr<TimeoutMonitor> > monitors;
 		zmq_pollitem_t publisherUpdatePollItem;
 	} SubscriptionDetails;
 
 	void* context;
 	void* gravityNodeSocket;
     void* gravityMetricsSocket;
-	std::map<DomainDataKey, std::map<std::string, std::tr1::shared_ptr<SubscriptionDetails> > > subscriptionMap;
-    std::map<void*,std::tr1::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+	std::map<DomainDataKey, std::map<std::string, std::shared_ptr<SubscriptionDetails> > > subscriptionMap;
+    std::map<void*,std::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
 	std::map<void*,uint32_t> socketVerificationMap;
 	//std::map<DomainDataKey, std::map<std::string, zmq_pollitem_t> > publisherUpdateMap;
-    std::map<void*,std::tr1::shared_ptr<GravityDataProduct> > lastCachedValueMap;
+    std::map<void*,std::shared_ptr<GravityDataProduct> > lastCachedValueMap;
 	std::vector<zmq_pollitem_t> pollItems;
 
 	// Info for this node - not subscription specific
@@ -95,7 +95,7 @@ private:
 	void setHWM();
 	void addSubscription();
 	void removeSubscription();
-	int readSubscription(void *socket, std::string &filterText, std::tr1::shared_ptr<GravityDataProduct> &dataProduct);
+	int readSubscription(void *socket, std::string &filterText, std::shared_ptr<GravityDataProduct> &dataProduct);
 	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
 	void removePollItem(zmq_pollitem_t &pollItem);
 	void ready();
@@ -107,14 +107,14 @@ private:
 	void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string domain, std::string url, uint32_t regTime);
 
 	int pollTimeout;
-	std::tr1::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
-	std::tr1::shared_ptr<SubscriptionDetails> currMonitorDetails;
+	std::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
+	std::shared_ptr<SubscriptionDetails> currMonitorDetails;
 
 
 	int subscribeHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
-    void collectMetrics(std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts);
+    void collectMetrics(std::vector<std::shared_ptr<GravityDataProduct> > dataProducts);
 public:
 	/**
 	 * Constructor GravitySubscriptionManager
