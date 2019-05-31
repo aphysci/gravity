@@ -29,7 +29,9 @@ cleanup()
 # run if user hits control-c
 {
   kill $SDPID
-  kill $RPID
+  if [ ! -z "${RPID}" ]; then
+    kill -9 $RPID > /dev/null 2>&1 
+  fi
   kill $PUBPID
   kill $SUBPID
   exit $?
@@ -54,7 +56,8 @@ RPID=$!
 
 sleep 10
 
-kill $RPID
+echo "Killing Relay"
+kill -9 $RPID
 
 sleep 10
 
