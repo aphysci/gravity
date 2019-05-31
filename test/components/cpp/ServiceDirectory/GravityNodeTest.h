@@ -70,7 +70,6 @@ public:
     std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct);
 
 private:
-    pthread_mutex_t mutex;
     bool gotResponse();
     bool gotRequest();
     void clearServiceFlags();

@@ -19,6 +19,12 @@
 #include "GravityNodeTest.h"
 #include "GravityTest.h"
 
+#include <mutex>
+
+namespace {
+  std::mutex mtx;
+} //end anonymous namespace
+
 using namespace gravity;
 using namespace std;
 
@@ -107,7 +113,6 @@ void GravitySyncTest::subscriptionFilled(const std::vector< tr1::shared_ptr<Grav
 
 void GravityNodeTest::setUp()
 {
-    pthread_mutex_init(&mutex, NULL);
     subFilledFlag = false;
     gotRequestFlag = false;
     gotResponseFlag = false;
@@ -464,50 +469,44 @@ void GravityNodeTest::testComponentID(void)
 
 void GravityNodeTest::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
     subFilledFlag = true;
-    pthread_mutex_unlock(&mutex);
 }
 
 bool GravityNodeTest::subFilled()
 {
 	bool ret;
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	ret = subFilledFlag;
-	pthread_mutex_unlock(&mutex);
 	return ret;
 }
 
 void GravityNodeTest::clearSubFlag()
 {
-   	pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
    	subFilledFlag = false;
-   	pthread_mutex_unlock(&mutex);
 }
 
 void GravityNodeTest::clearServiceFlags()
 {
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	gotResponseFlag = false;
 	gotRequestFlag = false;
-	pthread_mutex_unlock(&mutex);
 }
 
 bool GravityNodeTest::gotRequest()
 {
 	bool ret = false;
-  	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
    	ret = gotRequestFlag;
-   	pthread_mutex_unlock(&mutex);
    	return ret;
 }
 
 bool GravityNodeTest::gotResponse()
 {
   	bool ret = false;
-  	pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
    	ret = gotResponseFlag;
-  	pthread_mutex_unlock(&mutex);
    	return ret;
 }
 
@@ -516,24 +515,22 @@ tr1::shared_ptr<GravityDataProduct> GravityNodeTest::request(const std::string s
     tr1::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
 	ret->setData("RESP_DATA", 10);
 
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	char* data = (char*)malloc(dataProduct.getDataSize());
 	dataProduct.getData(data, dataProduct.getDataSize());
 	gotRequestFlag = (strcmp(dataProduct.getDataProductID().c_str(), "REQUEST")==0 &&
 	    						strcmp(data, "REQ_DATA")==0);
-	pthread_mutex_unlock(&mutex);
 
 	return ret;
 }
 
 void GravityNodeTest::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
 {
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	char* data = (char*)malloc(response.getDataSize());
 	response.getData(data, response.getDataSize());
 	gotResponseFlag = (strcmp(response.getDataProductID().c_str(), "RESPONSE")==0 &&
 						strcmp(data, "RESP_DATA")==0);
-	pthread_mutex_unlock(&mutex);
 }
 
 int main( int argc, char *argv[] )

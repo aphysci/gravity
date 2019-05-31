@@ -85,10 +85,6 @@ private:
 	SocketWithLock udpReceiverSocket;
 	void* synchronizerSocket;
 
-	pthread_t udpBroadcasterThread;
-	pthread_t udpReceiverThread;
-	pthread_t synchronizerThread;
-
 	void sendBroadcasterParameters(std::string sdDomain, std::string url, std::string ip, unsigned int port, unsigned int rate);
 	void sendReceiverParameters(std::string sdDomain, std::string url, unsigned int port, unsigned int numValidDomains, std::string validDomains);
 	void publishDomainUpdateMessage(std::string updateDomain, std::string url, ChangeType type);

@@ -34,7 +34,7 @@
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
-#include <pthread.h>
+#include <thread>
 #include <list>
 
 //This is defined in Windows for NetBIOS in nb30.h
@@ -175,12 +175,7 @@ private:
 	bool defaultCacheLastSentDataprodut;
 	bool defaultReceiveLastSentDataproduct;
 	
-    pthread_t subscriptionManagerThread;
-    pthread_t publishManagerThread;
-    pthread_t requestManagerThread;
-    pthread_t serviceManagerThread;
-    pthread_t metricsManagerThread;
-	pthread_t domainListenerThread;
+  std::thread subscriptionManagerThread;
 
     void* context;
     SocketWithLock subscriptionManagerSWL;
