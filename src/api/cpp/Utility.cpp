@@ -31,10 +31,7 @@
 
 namespace gravity {
 
-////////////////////////////
-// String Helpers
-
-//In Place case conversion.
+// String Conversions
 GRAVITY_API std::string StringToLowerCase(std::string str)
 {
 	std::use_facet< std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + str.length()); //Convert to lowercase.
@@ -47,14 +44,12 @@ GRAVITY_API char* StringToLowerCase(char* str, int leng)
 	return str;
 }
 
-//Copying case conversion
 GRAVITY_API std::string StringCopyToLowerCase(const std::string &str)
 {
 	std::string copy = str;
 	return StringToLowerCase(copy);
 }
 
-//Conversions
 GRAVITY_API int StringToInt(std::string str, int default_value)
 {
 	int ret_val;
@@ -76,14 +71,14 @@ GRAVITY_API double StringToDouble(std::string str, double default_value)
 }
 
 //Trimming
-GRAVITY_API std::string& trim_right_inplace(
+std::string& trim_right_inplace( //TODO confirm removal from GRAVITY_API
   std::string&       s,
   const std::string& delimiters = " \f\n\r\t\v" )
 {
   return s.erase( s.find_last_not_of( delimiters ) + 1 );
 }
 
-GRAVITY_API std::string& trim_left_inplace(
+std::string& trim_left_inplace(//TODO confirm removal from GRAVITY_API
   std::string&       s,
   const std::string& delimiters = " \f\n\r\t\v" )
 {
@@ -204,12 +199,11 @@ clock_gettime(int X, struct timespec *tv)
 }
 #endif
 
-//In Microseconds
 GRAVITY_API uint64_t getCurrentTime()
 {
     timespec ts;
     clock_gettime(0, &ts);
-    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;
+    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL; //in microseconds
 }
 
 GRAVITY_API unsigned int sleep(int milliseconds)

@@ -33,7 +33,7 @@
 
 namespace gravity
 {
-//For passing Data to the HB threads.
+/** For passing Data to the HB threads. */
 struct HBParams {
 	void* zmq_context;
 	uint64_t interval_in_microseconds;
@@ -65,6 +65,9 @@ struct EMQComparator
 	}
 };
 
+/**
+ * Class that monitors the subscription status (heartbeats) of subscribed data products.
+ */
 class Heartbeat : public GravitySubscriber
 {
 private:
@@ -80,6 +83,10 @@ public:
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
     static Semaphore lock;
+
+    /**
+     * Set of data product IDs that we have received subscriptions (heartbeats) for
+     */
     static std::set<std::string> filledHeartbeats;	
 
 	static void setHeartbeatRunning(bool running);

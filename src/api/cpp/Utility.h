@@ -1,4 +1,4 @@
-/** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+/* (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
  **
  ** Gravity is free software; you can redistribute it and/or modify
  ** it under the terms of the GNU Lesser General Public License as published by
@@ -19,39 +19,59 @@
 #ifndef GRAVITY_UTILITY_H__
 #define GRAVITY_UTILITY_H__
 #include <string>
+#include <stdint.h>
 
+/**
+ * Mark functions that are part of the public API.
+ */
 #ifdef _WIN32
-#if _WIN32 != __MINGW32__
-#    ifdef GRAVITY_EXPORTS
-#        define GRAVITY_API __declspec(dllexport)
+#    if _WIN32 != __MINGW32__
+#        ifdef GRAVITY_EXPORTS
+#            define GRAVITY_API __declspec(dllexport)
+#        else
+#            define GRAVITY_API __declspec(dllimport)
+#        endif
 #    else
-#        define GRAVITY_API __declspec(dllimport)
+#        define GRAVITY_API
 #    endif
 #else
 #    define GRAVITY_API
 #endif
-#else
-#define GRAVITY_API
-#endif
-
-#include <stdint.h>
 
 namespace gravity {
 
-GRAVITY_API std::string StringToLowerCase(std::string str);
-GRAVITY_API char* StringToLowerCase(char* str, int leng);
-GRAVITY_API std::string StringCopyToLowerCase(const std::string &str);
+/**
+ * @name String conversion and helper functions
+ * @{
+ */ 
+GRAVITY_API std::string StringToLowerCase(std::string str); ///< Return lowercase string
+GRAVITY_API char* StringToLowerCase(char* str, int leng); ///< In-place modification and returns ptr to string
+GRAVITY_API std::string StringCopyToLowerCase(const std::string &str); ///< \TODO remove, same as StringToLowerCase
+GRAVITY_API int StringToInt(std::string str, int default_value); ///< Return an integer.
+GRAVITY_API double StringToDouble(std::string str, int default_value); ///< Return a double
+/**
+ * Trim a string.
+ * \param s string that will be modified
+ * \param delimiters characters to remove from the right and left of the string
+ * \return also return a reference to the modified string
+ */
+GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
+/** @} */ //String conversion and helper functions
 
-GRAVITY_API int StringToInt(std::string str, int default_value);
-GRAVITY_API double StringToDouble(std::string str, int default_value);
+GRAVITY_API bool IsValidFilename(const std::string filename); ///< Return if filename is valid, which is OS dependent
 
-GRAVITY_API bool IsValidFilename(const std::string filename);
-
-GRAVITY_API uint64_t getCurrentTime();  ///< Utility method to get the current system time in epoch microseconds
+/**
+ * @name Time functions
+ */
+/**
+ * Get the current system time in Unix epoch microseconds.
+ * Only works on Unix systems.
+ * \TODO place an ifdef around this
+ */
+GRAVITY_API uint64_t getCurrentTime();
+/** @} */ //Time functions
 
 GRAVITY_API unsigned int sleep(int milliseconds);
-GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
-
 
 }
 

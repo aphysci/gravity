@@ -32,7 +32,7 @@ namespace gravity
 {
 
 /**
- * Interface specification for an object that will respond to subscriptions
+ * Interface specification for an object that will respond to subscription timeouts
  */
 class GravitySubscriptionMonitor
 {
@@ -49,7 +49,7 @@ public:
 	 * \param filter the name of the filter registered for this data product
 	 * \param domain the name of the domain for this data product
      */
-	virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) = 0;
+	GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) = 0;
 };
 
 } /* namespace gravity */

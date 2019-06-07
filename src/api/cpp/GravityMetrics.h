@@ -34,10 +34,9 @@
 namespace gravity
 {
 
-class GravityMetrics;
-
 /**
- * Generic Metrics Data for the Gravity Infrastructure
+ * Generic metrics data for the Gravity Infrastructure.
+ * Contains general metrics data and metrics data specific to each data product.
  */
 class GravityMetrics
 {
@@ -53,14 +52,14 @@ private:
     uint64_t endTime;
 public:
     /**
-     * Default Constructor. Creates and empty GravityMetrics object
+     * Creates an empty GravityMetrics object
      */
     GRAVITY_API GravityMetrics();
 
     /**
-     * Constructor. Creates a GravityMetrics object and populates it from
-     * and incoming message on the provided socket
-     * \param socket zmq_socket on which is an incoming GravityMetrics obj
+     * Creates a GravityMetrics object and populates it from
+     * incoming messages on the provided socket
+     * \param socket zmq_socket on which there is an incoming metrics information 
      */
     GRAVITY_API GravityMetrics(void* socket);
 
@@ -69,16 +68,15 @@ public:
      */
     GRAVITY_API virtual ~GravityMetrics();
 
-
     /**
-     * Increment the message count metric
+     * Increment the message count metric for the given data product ID.
      * \param dataProductID data product ID for which the message count is to be incremented
      * \param count amount by which to increment the message count
      */
     GRAVITY_API void incrementMessageCount(std::string dataProductID, int count);
 
     /**
-     * Increment the byte count metric
+     * Increment the byte count metric for the given data product ID.
      * \param dataProductID data product ID for which the byte count is to be incremented
      * \param count amount by which to increment the byte count
      */
@@ -106,14 +104,14 @@ public:
      * \param dataProductID data product ID for which message count is returned
      * \return message count
      */
-    GRAVITY_API int getMessageCount(std::string);
+    GRAVITY_API int getMessageCount(std::string dataProductID);
 
     /**
      * Method to return the byte count for the given data product ID
      * \param dataProductID data product ID for which byte count is returned
      * \return byte count
      */
-    GRAVITY_API int getByteCount(std::string);
+    GRAVITY_API int getByteCount(std::string dataProductID);
 
     /**
      * Method to return the sample period start time
@@ -139,21 +137,21 @@ public:
     GRAVITY_API double getSamplePeriodSeconds();
 
     /**
-     * Method to send this MetricsData object on zmq socket
-     * \param zmq_socket over which to send this MetricsData object
+     * Method to send this MetricsData object on a zmq socket
+     * \param socket zmq_socket over which to send this MetricsData object
      */
     GRAVITY_API void sendAsMessage(void* socket);
 
     /**
      * Method to populate this MetricsData object from zmq socket
-     * \param zmq_socket from which to populate this MetricsData object
+     * \param socket zmq_socket from which to populate this MetricsData object
      */
     GRAVITY_API void populateFromMessage(void* socket);
 
     /**
      * Method to get the list of data product ID for which this
      * MetricsData has metrics
-     * \return std::vector<std::string> vector of data product IDs
+     * \return vector of data product IDs
      */
     GRAVITY_API std::vector<std::string> getDataProductIDs();
 };

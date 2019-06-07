@@ -25,6 +25,9 @@
 namespace gravity
 {
 
+/**
+ * Used to process synchronization in this multi-processing environment.
+ */
 class Semaphore
 {
 public:

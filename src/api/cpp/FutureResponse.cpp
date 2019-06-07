@@ -36,7 +36,7 @@ FutureResponse::FutureResponse(string url) : GravityDataProduct("FutureResponse"
 	gravityDataProductPB->set_future_socket_url(url);
 }
 
-FutureResponse::FutureResponse(void* arrayPtr, int size) : GravityDataProduct(arrayPtr, size) {}
+FutureResponse::FutureResponse(const void* arrayPtr, int size) : GravityDataProduct(arrayPtr, size) {}
 
 FutureResponse::~FutureResponse() {}
 
