@@ -2267,7 +2267,7 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 	sendStringMessage(requestManagerRepSWL.socket, "sendFutureResponse", ZMQ_SNDMORE);
 	sendStringMessage(requestManagerRepSWL.socket, futureResponse.getUrl(), ZMQ_SNDMORE);
 	
-	// Send the reponse object
+	// Send the response object
 	int size = futureResponse.getDataSize();
 	char *bytes = new char[size];		
 	futureResponse.getData(bytes, size);

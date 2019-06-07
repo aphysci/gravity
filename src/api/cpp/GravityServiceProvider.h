@@ -46,7 +46,7 @@ public:
      * Called when a request is made through the Gravity infrastructure
      * \param serviceID service ID of the requesting service
      * \param dataProduct GravityDataProduct with request data
-     * \returns the response
+     * \returns GravityDataProduct with the response
      */
     virtual std::tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct) = 0;
 };

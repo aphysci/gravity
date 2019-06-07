@@ -36,7 +36,7 @@ using namespace gravity;
 // Logger Classes
 //
 
-/*
+/**
  * Logs to a file
  */
 class FileLogger : public Logger {
@@ -148,7 +148,9 @@ void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLeve
     Log::initAndAddLogger(new FileLogger(log_dir, comp_id, close_file_after_write), local_log_level);
 }
 
-
+/**
+ * Logs to the console.
+ */
 class ConsoleLogger : public FileLogger
 {
 public:
@@ -166,7 +168,7 @@ void Log::initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level)
     Log::initAndAddLogger(new ConsoleLogger(comp_id), local_log_level);
 }
 
-/*
+/**
  * Logs to a GravityLogRecorder on the Network.
  */
 class GravityLogger : public Logger
