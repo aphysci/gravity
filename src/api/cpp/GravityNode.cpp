@@ -27,7 +27,6 @@
 #include <iostream>
 #include <pthread.h>
 #include <assert.h>
-#include <boost/assign.hpp>
 #ifdef WIN32
 #include <winsock2.h>
 #include <WinBase.h>
@@ -2441,19 +2440,21 @@ std::string GravityNode::getComponentID()
 }
 
 static std::map<GravityReturnCode,std::string> code_strings =
-  boost::assign::map_list_of
-    (GravityReturnCodes::SUCCESS, "SUCCESS")
-    (GravityReturnCodes::FAILURE, "FAILURE")
-    (GravityReturnCodes::NO_SERVICE_DIRECTORY, "NO_SERVICE_DIRECTORY")
-    (GravityReturnCodes::REQUEST_TIMEOUT, "REQUEST_TIMEOUT")
-    (GravityReturnCodes::DUPLICATE, "DUPLICATE")
-    (GravityReturnCodes::REGISTRATION_CONFLICT, "REGISTRATION_CONFLICT")
-    (GravityReturnCodes::NOT_REGISTERED, "NOT_REGISTERED")
-    (GravityReturnCodes::NO_SUCH_SERVICE, "NO_SUCH_SERVICE")
-    (GravityReturnCodes::LINK_ERROR, "LINK_ERROR")
-    (GravityReturnCodes::INTERRUPTED, "INTERRUPTED")
-    (GravityReturnCodes::NO_SERVICE_PROVIDER, "NO_SERVICE_PROVIDER")
-    (GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE");
+  {
+    {GravityReturnCodes::SUCCESS, "SUCCESS"},
+    {GravityReturnCodes::FAILURE, "FAILURE"},
+    {GravityReturnCodes::NO_SERVICE_DIRECTORY, "NO_SERVICE_DIRECTORY"},
+    {GravityReturnCodes::REQUEST_TIMEOUT, "REQUEST_TIMEOUT"},
+    {GravityReturnCodes::DUPLICATE, "DUPLICATE"},
+    {GravityReturnCodes::REGISTRATION_CONFLICT, "REGISTRATION_CONFLICT"},
+    {GravityReturnCodes::NOT_REGISTERED, "NOT_REGISTERED"},
+    {GravityReturnCodes::NO_SUCH_SERVICE, "NO_SUCH_SERVICE"},
+    {GravityReturnCodes::LINK_ERROR, "LINK_ERROR"},
+    {GravityReturnCodes::INTERRUPTED, "INTERRUPTED"},
+    {GravityReturnCodes::NO_SERVICE_PROVIDER, "NO_SERVICE_PROVIDER"},
+    {GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE"}
+  };
+
 
 string GravityNode::getCodeString(GravityReturnCode code) {
     std::string s;
