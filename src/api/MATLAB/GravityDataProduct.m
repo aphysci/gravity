@@ -48,6 +48,10 @@ classdef GravityDataProduct < handle
             this.gravityDataProduct.setData(protobuf.getProtobufBuilder());
         end
         
+        function parseFromArray(this, bytes)
+            this.gravityDataProduct.parseFromArray(bytes);
+        end
+
         function populateMessage(this, protobuf)
             this.gravityDataProduct.populateMessage(protobuf.getProtobufBuilder());
         end
