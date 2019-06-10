@@ -42,7 +42,6 @@
 //#include "protobuf/ServiceDirectoryBroadcastSetup.pb.h"
 
 #include <zmq.h>
-#include <boost/algorithm/string.hpp>
 
 #include <stdlib.h>
 #include <string>
@@ -178,12 +177,12 @@ void ServiceDirectory::start()
 		return;
 	}
 	
-    registeredPublishersReady = registeredPublishersProcessed = false;
-    gn.init("ServiceDirectory");
+  registeredPublishersReady = registeredPublishersProcessed = false;
+  gn.init("ServiceDirectory");
 
-    std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
-    boost::replace_all(sdURL, "localhost", "127.0.0.1");
-    Log::message("running with SD connection string: %s", sdURL.c_str());
+  std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
+  replaceAll(sdURL, "localhost", "127.0.0.1");
+  Log::message("running with SD connection string: %s", sdURL.c_str());
 
 	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
 
