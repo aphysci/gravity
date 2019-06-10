@@ -28,6 +28,7 @@
 
 #include <string>
 #include <stdint.h>
+#include "Utility.h"
 
 namespace gravity
 {
