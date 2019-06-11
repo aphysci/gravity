@@ -79,7 +79,7 @@ endif()
 find_package(Doxygen)
 
 add_subdirectory(src/keyvalue_parser)
-add_subdirectory(src/api/protobufs src/api/cpp/protobuf)
+#add_subdirectory(src/api/protobufs src/api/cpp/protobuf)
 add_subdirectory(src/api/cpp)
 
 ################################################################################
