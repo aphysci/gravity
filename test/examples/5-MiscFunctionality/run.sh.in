@@ -38,6 +38,10 @@ trap control_c SIGINT
 
 ServiceDirectory &
 SDPID=$!
+
+# sleep for a second to give the service directory a chance to start up
+sleep 1
+
 ./MiscComponent1 &
 PUBPID=$!
 

@@ -18,7 +18,6 @@
 
 #ifndef ZMQ_SEMEPHORE_H__
 #define ZMQ_SEMEPHORE_H__
-#include <pthread.h>
 #include <semaphore.h>
 #include "Utility.h"
 

@@ -49,6 +49,7 @@
 #include <cstring>
 #include <iostream>
 #include <algorithm>
+#include <thread>
 
 #define REGISTERED_PUBLISHERS "RegisteredPublishers"
 #define DIRECTORY_SERVICE "DirectoryService"
@@ -90,7 +91,6 @@ static void* registration(void* regData)
 
 static void* startUDPBroadcastManager(void* context)
 {
-
 	// Create and start the UDP Broadcaster thread
 	gravity::ServiceDirectoryUDPBroadcaster udpBroadcaster(context);
 	udpBroadcaster.start();
@@ -168,7 +168,12 @@ ServiceDirectory::~ServiceDirectory()
 
 void ServiceDirectory::start()
 {
-	//set up zmq context
+  //Declare threads to be spawned
+  std::thread udpBroadcasterThread;
+  std::thread udpReceiverThread;
+  std::thread synchronizerThread;
+	
+  //set up zmq context
 	context = zmq_init(1);
 
 	//set up broadcast and recieve managers
@@ -253,7 +258,7 @@ void ServiceDirectory::start()
 		//start the udp broadcaster
 		udpBroadcastSocket.socket = zmq_socket(context,ZMQ_REQ);
 		zmq_bind(udpBroadcastSocket.socket,"inproc://service_directory_udp_broadcast");
-		pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
+    udpBroadcasterThread = std::thread(&startUDPBroadcastManager,context);
 
 		//configure the broadcaster
 		sendBroadcasterParameters(domain,sdURL,broadcastIP,broadcastPort,broadcastRate);
@@ -273,7 +278,7 @@ void ServiceDirectory::start()
 		//start the udp receiver
 		udpReceiverSocket.socket = zmq_socket(context,ZMQ_REQ);
 		zmq_bind(udpReceiverSocket.socket,"inproc://service_directory_udp_receive");
-		pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
+    udpReceiverThread = std::thread(startUDPReceiveManager,context);
 
 		//configure the receiver
 		sendReceiverParameters(domain,sdURL,broadcastPort,numDomains,knownDomainCSV);
@@ -282,8 +287,8 @@ void ServiceDirectory::start()
 		Log::message("Starting ServiceDirectorySynchronization thread");
 		syncInitDetails.context = context;
 		syncInitDetails.url = sdURL;
-		pthread_create(&synchronizerThread, NULL, startSynchronizer, (void*)&syncInitDetails);
-		
+    synchronizerThread = std::thread(startSynchronizer, (void*)&syncInitDetails);
+
 		// Configure the comms channel to direct the synchronizer thread
 		synchronizerSocket = zmq_socket(context, ZMQ_PUB);
 		zmq_bind(synchronizerSocket, "inproc://service_directory_synchronizer");			
@@ -313,14 +318,9 @@ void ServiceDirectory::start()
     struct RegistrationData regData;
     regData.node = &gn;
     regData.provider = this;
-    pthread_attr_t attr;
-    if (pthread_attr_init(&attr) == 0)
-    {
-        pthread_t registerThread;
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        pthread_create(&registerThread, &attr, registration, (void*)&regData);
-        pthread_attr_destroy(&attr);
-    }
+    std::thread registerThread(registration, (void*)&regData);
+    registerThread.detach();
+        
     /****
      * End last block of code before main loop
      */
@@ -429,6 +429,10 @@ void ServiceDirectory::start()
 			}
 		}
     }
+    //join the threads that were spawned before exiting loop
+    udpBroadcasterThread.join();
+    udpReceiverThread.join();
+		synchronizerThread.join();
 }
 
 /**

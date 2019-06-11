@@ -25,7 +25,7 @@
 
 #include <zmq.h>
 #include <iostream>
-#include <pthread.h>
+#include <thread>
 #include <assert.h>
 #include <boost/assign.hpp>
 #ifdef WIN32
@@ -338,6 +338,7 @@ void GravityNode::GravityNodeDomainListener::start()
 	}//end while
 
 	Log::warning("Closing Domain Receiver");
+
 	#ifdef _WIN32
 	closesocket(sock);
 	#else
@@ -422,8 +423,7 @@ GravityNode::GravityNode(std::string componentID)
 
 GravityNode::~GravityNode()
 {
-
-	// If metrics are enabled, we need to unregister our metrics data product
+    // If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
@@ -473,6 +473,8 @@ GravityNode::~GravityNode()
     if (parser != NULL)
         delete parser;
 
+  //Do not destroy object until sub manager thread is joined
+  subscriptionManagerThread.join();
 }
 
 GravityReturnCode GravityNode::init()
@@ -550,14 +552,15 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		zmq_bind(metricsManagerSocket, GRAVITY_METRICS_CONTROL);
 
 		// Setup the subscription manager
-		pthread_create(&subscriptionManagerThread, NULL, startSubscriptionManager, context);
+    subscriptionManagerThread = std::thread(startSubscriptionManager, context);
 
 		// Setup up publish channel to publish manager
 		publishManagerPublishSWL.socket = zmq_socket(context, ZMQ_PUB);
 		zmq_bind(publishManagerPublishSWL.socket, PUB_MGR_PUB_URL);
 
 		// Setup the publish manager
-		pthread_create(&publishManagerThread, NULL, startPublishManager, context);
+    std::thread publishManagerThread(startPublishManager, context);
+    publishManagerThread.detach();
 
 		// Setup up communication channel to request manager
 		requestManagerSWL.socket = zmq_socket(context, ZMQ_PUB);
@@ -565,16 +568,19 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		requestManagerRepSWL.socket = zmq_socket(context, ZMQ_REQ);
 		zmq_bind(requestManagerRepSWL.socket, "inproc://gravity_request_rep");
 		// Setup the request manager
-		pthread_create(&requestManagerThread, NULL, startRequestManager, context);
+    std::thread requestManagerThread(startRequestManager, context);
+    requestManagerThread.detach();
 
 		serviceManagerConfigSWL.socket = zmq_socket(context,ZMQ_PUB);
 		zmq_bind(serviceManagerConfigSWL.socket,"inproc://gravity_service_manager_configure");
 
 		// Setup the service manager
-		pthread_create(&serviceManagerThread, NULL, startServiceManager, context);
+    std::thread serviceManagerThread(startServiceManager, context);
+    serviceManagerThread.detach();
 
 		// Start the metrics manager
-		pthread_create(&metricsManagerThread, NULL, startMetricsManager, context);
+    std::thread metricsManagerThread(startMetricsManager, context);
+    metricsManagerThread.detach();
 
 		// Configure to trap Ctrl-C (SIGINT) and SIGTERM signals
 		s_catch_signals();
@@ -682,7 +688,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				zmq_bind(domainRecvSWL.socket,"inproc://gravity_domain_receiver");
 				zmq_setsockopt(domainRecvSWL.socket,ZMQ_SUBSCRIBE,NULL,0);
 
-				pthread_create(&domainListenerThread,NULL,startGravityDomainListener,context);			
+        std::thread domainListenerThread(startGravityDomainListener,context);
+        domainListenerThread.detach();
 
 				configureNodeDomainListener(serviceDirectoryDomain);
 				int broadcastTimeout = getIntParam("ServiceDirectoryBroadcastTimeout",DEFAULT_BROADCAST_TIMEOUT_SEC);
@@ -957,8 +964,10 @@ std::string GravityNode::getDomainUrl(int timeout)
 
 void GravityNode::waitForExit()
 {
-	// Wait on the subscription manager thread
-	pthread_join(subscriptionManagerThread, NULL);
+  while(subscriptionManagerThread.joinable())
+  {
+    sleep(10000);
+  }
 }
 
 GravityReturnCode GravityNode::sendRequestsToServiceProvider(string url, const GravityDataProduct& request,
@@ -2096,9 +2105,8 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	params->endpoint = getIP();
 	params->registrationTime = dataRegistrationTimeMap[heartbeatName];
 
-	pthread_t heartbeatThread;
-	pthread_create(&heartbeatThread, NULL, Heartbeat, (void*)params);
-
+  std::thread heartbeatThread(Heartbeat, (void*)params);
+  heartbeatThread.detach();
 	heartbeatStarted=true;
 
 	return gravity::GravityReturnCodes::SUCCESS;
@@ -2117,9 +2125,9 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 		zmq_bind(hbSocket, "inproc://heartbeat_listener");
 		HBListenerContext* thread_context = new HBListenerContext();
 		thread_context->zmq_context = this->context;
-		pthread_t heartbeatListenerThread;
-		pthread_create(&heartbeatListenerThread, NULL, Heartbeat::HeartbeatListenerThrFunc, thread_context);
-	}
+    std::thread heartbeatListenerThread(Heartbeat::HeartbeatListenerThrFunc, thread_context);
+    heartbeatListenerThread.detach();
+  }
 
 	std::string heartbeatName;
 

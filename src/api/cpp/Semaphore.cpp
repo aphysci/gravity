@@ -19,7 +19,6 @@
 #include "GravitySemaphore.h"
 #include <zmq.h>
 #include <sstream>
-#include <pthread.h>
 
 using namespace std;
 

@@ -18,7 +18,6 @@
 
 #include <string>
 #include <sstream>
-#include <pthread.h>
 
 #include "Utility.h"
 
