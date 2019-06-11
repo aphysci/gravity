@@ -232,8 +232,12 @@ void GravityNode::GravityNodeDomainListener::start()
 	setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char*)&one,sizeof(one));
 
     /* Bind to the broadcast port */
-	int rc = 0;
-    if ((rc = bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr))) < 0)
+#ifdef _WIN32
+	int rc = bind((SOCKET)sock, (const struct sockaddr *) &broadcastAddr, (int)sizeof(broadcastAddr));
+#else
+	int rc = bind(sock, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr));
+#endif
+    if (rc < 0)
     {
 		return;
     }

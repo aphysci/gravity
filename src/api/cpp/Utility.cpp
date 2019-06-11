@@ -23,6 +23,14 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <time.h>
+#ifndef _CRT_NO_TIME_T
+struct timespec
+{
+	time_t tv_sec; // Seconds - >= 0
+	long tv_nsec; // Nanoseconds - [0, 999999999]
+};
+#endif
 #else
 #include <stdint.h>
 #include <sys/unistd.h>

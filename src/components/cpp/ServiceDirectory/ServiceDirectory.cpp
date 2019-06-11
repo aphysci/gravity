@@ -49,6 +49,7 @@
 #include <iostream>
 #include <algorithm>
 #include <thread>
+#include <locale>
 
 #define REGISTERED_PUBLISHERS "RegisteredPublishers"
 #define DIRECTORY_SERVICE "DirectoryService"
