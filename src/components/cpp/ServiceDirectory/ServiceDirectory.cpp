@@ -352,7 +352,7 @@ void ServiceDirectory::start()
              * on a separate thread provided by the GravityNode.
              */
             lock.Lock();
-            tr1::shared_ptr<GravityDataProduct> response = request(req);
+            std::shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
@@ -438,9 +438,9 @@ void ServiceDirectory::start()
  * Even though this looks like a normal Gravity request callback, this method is only called locally, not from
  * the GravityNode.
  */
-tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
 {
-    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
     string requestType = dataProduct.getDataProductID();
 
     ///////////////////////////////////
@@ -477,10 +477,10 @@ tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataP
  * Because the lock in this method blocks the main SD loop above, we can't issue any GravityNode calls
  * here that require SD support (e.g. register, etc).
  */
-tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
+std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
-    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
     if (serviceID == DIRECTORY_SERVICE)
     {

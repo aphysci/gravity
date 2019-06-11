@@ -29,16 +29,16 @@ using namespace std;
 class MultiplicationServiceProvider : public GravityServiceProvider
 {
 public:
-	virtual tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+	virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 };
 
 
-tr1::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
 	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
 	if(dataProduct.getDataProductID() != "Multiplication") {
 		Log::critical("Request is not for multiplication!");
-		return tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
+		return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
 	}
 
 	//Get the parameters for this request.
@@ -54,7 +54,7 @@ tr1::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const
 	MultiplicationResultPB resultPB;
 	resultPB.set_result(result);
 
-	tr1::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
+	std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
 	resultDP->setData(resultPB);
 
 	return resultDP;

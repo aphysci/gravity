@@ -91,13 +91,13 @@ private:
 
 	void updateProductLocations(std::string productID, std::string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType);
 	void updateProductLocations();
-	std::tr1::shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
+	std::shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
 
 public:
     virtual ~ServiceDirectory();
     void start();
-    std::tr1::shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
-    std::tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    std::shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
+    std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 
 private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);

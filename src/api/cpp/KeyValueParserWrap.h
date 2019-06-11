@@ -24,7 +24,7 @@
 #ifndef __GNUC__
 #include <memory>
 #else
-#include <tr1/memory>
+#include <memory>
 #endif
 
 #include "keyvalue_parser.h"
@@ -70,7 +70,7 @@ public:
     }
 
 protected:
-    std::tr1::shared_ptr< keyvalue_type_t > spKeyValueHandle;
+    std::shared_ptr< keyvalue_type_t > spKeyValueHandle;
 };
 
 #endif //_KEYVALUE_PARSERWRAP_H

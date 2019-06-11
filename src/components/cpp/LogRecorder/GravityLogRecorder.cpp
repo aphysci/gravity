@@ -80,13 +80,13 @@ void LogRecorder::start()
 }
 
 
-void LogRecorder::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void LogRecorder::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    //tr1::shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
-    //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (tr1::shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
-    for(vector<tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    //std::shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
+    //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (std::shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
+    for(vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
     {
-        tr1::shared_ptr<GravityDataProduct> dataProduct = *i;
+        std::shared_ptr<GravityDataProduct> dataProduct = *i;
         num_logs++;
 
         GravityLogMessagePB message;

@@ -65,9 +65,9 @@ public:
 	void testSubscribeDomain(void);
 	void testServiceWithDomain(void);
 	void testComponentID(void);
-    void subscriptionFilled(const std::vector< std::tr1::shared_ptr<gravity::GravityDataProduct> >& dataProducts);
+    void subscriptionFilled(const std::vector< std::shared_ptr<gravity::GravityDataProduct> >& dataProducts);
     void requestFilled(std::string serviceID, std::string requestID, const gravity::GravityDataProduct& response);
-    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct);
+    std::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct);
 
 private:
     bool gotResponse();
