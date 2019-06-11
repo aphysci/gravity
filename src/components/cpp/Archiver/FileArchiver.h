@@ -39,8 +39,8 @@ public:
 	FileArchiver();
 	virtual ~FileArchiver();
 
-	virtual void subscriptionFilled(const std::vector<std::tr1::shared_ptr<GravityDataProduct> >& dataProducts);
-    virtual std::tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+	virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 	void waitForExit();
 };
 

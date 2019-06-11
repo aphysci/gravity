@@ -21,6 +21,7 @@
 #include <GravityLogger.h>
 #include <Utility.h>
 #include "GravityTest.h"
+#include <memory>
 
 using namespace gravity;
 
@@ -48,7 +49,7 @@ int main()
     int tries = 0;
 	while(counter < 20 && tries++ < 30)
 	{
-	    std::tr1::shared_ptr<GravityDataProduct> countReq = gn.request("Counter", //Service Name
+	    std::shared_ptr<GravityDataProduct> countReq = gn.request("Counter", //Service Name
                                                              request, //Request
                                                              3000); //Timeout in milliseconds
         if(countReq == NULL)

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.google.protobuf.DescriptorsTest
+-------------------------------------------------------------------------------
+Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.287 s - in com.google.protobuf.DescriptorsTest

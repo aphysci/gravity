@@ -79,7 +79,7 @@ void GravityRequestManager::start()
 	    // before we poll, determine when the next timeout is (if any)
 	    // and handle any expired requests.
 	    long nextTimeout = -1;
-	    for (map<void*,tr1::shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); )
+	    for (map<void*,std::shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); )
 	    {
 	        long t = iter->second->timeoutTimeMilliseconds;
 	        if (t > 0)
@@ -87,7 +87,7 @@ void GravityRequestManager::start()
 	            long currentTime = getCurrentTime() / 1e3;
 	            if (t <= currentTime)
 	            {
-	                tr1::shared_ptr<RequestDetails> reqDetails = iter->second;
+	                std::shared_ptr<RequestDetails> reqDetails = iter->second;
                     reqDetails->requestor->requestTimeout(reqDetails->serviceID, reqDetails->requestID);
                     void* socket = iter->first;
                     vector<zmq_pollitem_t>::iterator pollItemIter = pollItems.begin() + 2;  // start after internal framework sockets
@@ -100,7 +100,7 @@ void GravityRequestManager::start()
                         }
                     }
                     zmq_close(socket);
-                    map<void*,tr1::shared_ptr<RequestDetails> >::iterator delIter = iter++;
+                    map<void*,std::shared_ptr<RequestDetails> >::iterator delIter = iter++;
 	                requestMap.erase(delIter);
 	            }
 	            else
@@ -208,7 +208,7 @@ void GravityRequestManager::start()
 				else
 				{
 					// Get request details
-					tr1::shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
+					std::shared_ptr<RequestDetails> reqDetails = requestMap[pollItemIter->socket];
 
 					// Verify the service provider
 					if (response.getRegistrationTime() != reqDetails->registrationTime)
@@ -241,7 +241,7 @@ void GravityRequestManager::start()
 	}
 
 	// Clean up all our open sockets
-	for (map<void*,tr1::shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); iter++)
+	for (map<void*,std::shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); iter++)
 	{
 		void* socket = iter->first;
 		zmq_close(socket);
@@ -411,7 +411,7 @@ void GravityRequestManager::processRequest()
 	memcpy(&requestor, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	tr1::shared_ptr<RequestDetails> reqDetails;
+	std::shared_ptr<RequestDetails> reqDetails;
 
 	// Create the request socket
 	void* reqSocket = zmq_socket(context, ZMQ_REQ);

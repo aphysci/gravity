@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.google.protobuf.IsValidUtf8Test
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.086 s - in com.google.protobuf.IsValidUtf8Test

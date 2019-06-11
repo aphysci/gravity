@@ -70,7 +70,7 @@ FileReplay::~FileReplay() {}
 
 void FileReplay::processArchive()
 {
-    tr1::shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
+    std::shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
     while (gdp)
     {
         // Ensure that we've registered this data product

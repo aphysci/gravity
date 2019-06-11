@@ -45,7 +45,7 @@ Semaphore Heartbeat::lock;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 
-void Heartbeat::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void Heartbeat::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
 	lock.Lock();
 	for(size_t i = 0; i < dataProducts.size(); i++)

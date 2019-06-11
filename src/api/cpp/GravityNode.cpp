@@ -39,11 +39,7 @@
 #endif
 #include <sstream>
 #include <signal.h>
-#ifndef __GNUC__
 #include <memory>
-#else
-#include <tr1/memory>
-#endif
 
 #include "GravityMetricsUtil.h"
 #include "GravityMetricsManager.h"
@@ -1774,7 +1770,7 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 }
 
 //Synchronous Request
-tr1::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request,
+std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request,
 													int timeout_milliseconds, string domain)
 {
 	//set Component ID
@@ -1799,22 +1795,22 @@ tr1::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		{
 			Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
 		}
-		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	uint64_t t1 = gravity::getCurrentTime();
-	tr1::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
+	std::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
 		Log::warning("service request returned error: %s", getCodeString(ret).c_str());
-		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 	if (response->getRegistrationTime() != regTime)
 	{
 		Log::warning("Received service (%s) response from invalid service [%u != %u]", serviceID.c_str(), response->getRegistrationTime(), regTime);
-		return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	if (response->isFutureResponse())
@@ -1833,7 +1829,7 @@ tr1::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		if(ret != GravityReturnCodes::SUCCESS)
 		{
 			Log::warning("service request returned error: %s", getCodeString(ret).c_str());
-			return tr1::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+			return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 		}
 		Log::trace("Received future response's response");
 	}
@@ -2236,7 +2232,7 @@ string GravityNode::getDomain()
     return myDomain;
 }
 
-tr1::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
+std::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 {
 	// Send request to create future response
     requestManagerRepSWL.lock.Lock();
@@ -2258,12 +2254,12 @@ tr1::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 	if (url.empty())
 	{
 		Log::critical("Could not find available port for FutureResponse");
-		return tr1::shared_ptr<FutureResponse>((FutureResponse*)NULL);
+		return std::shared_ptr<FutureResponse>((FutureResponse*)NULL);
 	}
 
 	requestManagerRepSWL.lock.Unlock();
 
-	tr1::shared_ptr<FutureResponse> futureResponse(new FutureResponse(url));
+	std::shared_ptr<FutureResponse> futureResponse(new FutureResponse(url));
 	return futureResponse;
 }
 

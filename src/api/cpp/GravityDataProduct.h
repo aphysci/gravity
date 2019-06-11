@@ -27,7 +27,7 @@
 #define GRAVITYDATAPRODUCT_H_
 
 #ifdef __GNUC__
-#include <tr1/memory>
+#include <memory>
 #else
 #include <memory>
 #endif
@@ -45,7 +45,7 @@ class GravityNode;
 class GravityDataProduct
 {
 protected:
-    std::tr1::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
+    std::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
 	friend class GravityServiceManager;
