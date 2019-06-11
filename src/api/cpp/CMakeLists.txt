@@ -1,0 +1,113 @@
+# (C) Copyright 2019, Applied Physical Sciences Corp., A General Dynamics Company
+#
+# Gravity is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program;
+# If not, see <http://www.gnu.org/licenses/>.
+
+cmake_minimum_required(VERSION 3.1...3.14)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.12)
+  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+endif()
+
+project(libgravity VERSION 1.0 LANGUAGES CXX)
+
+set (HEADERS 
+  CommUtil.h
+  DomainDataKey.h
+  FutureResponse.h
+  GravityConfigParser.h
+  GravityDataProduct.h
+  GravityHeartbeat.h
+  GravityHeartbeatListener.h
+  GravityLogger.h
+  GravityMetrics.h
+  GravityMetricsManager.h
+  GravityMetricsUtil.h
+  GravityNode.h
+  GravityPublishManager.h
+  GravityRequestManager.h
+  GravityRequestor.h
+  GravitySemaphore.h
+  GravityServiceManager.h
+  GravityServiceProvider.h
+  GravitySubscriber.h
+  GravitySubscriptionManager.h
+  GravitySubscriptionMonitor.h
+  KeyValueParserWrap.h
+  Utility.h)
+
+set (SOURCES
+  CommUtil.cpp
+  DomainDataKey.cpp
+  FutureResponse.cpp
+  GravityConfigParser.cpp
+  GravityDataProduct.cpp
+  GravityHeartbeat.cpp
+  GravityLogger.cpp
+  GravityMetrics.cpp
+  GravityMetricsManager.cpp
+  GravityMetricsUtil.cpp
+  GravityNode.cpp
+  GravityPublishManager.cpp
+  GravityRequestManager.cpp
+  GravityRequestor.cpp
+  GravityServiceManager.cpp
+  GravityServiceProvider.cpp
+  GravitySubscriber.cpp
+  GravitySubscriptionManager.cpp
+  GravitySubscriptionMonitor.cpp
+  Semaphore.cpp
+  Utility.cpp)
+
+set(LIBSRC ${HEADERS} ${SOURCES})
+
+#add_library(gravitylib OBJECT ${LIBSRC} ${PROTO_SOURCES} ${PROTO_HEADERS})
+add_library(gravitylib OBJECT ${LIBSRC})
+target_include_directories(gravitylib PUBLIC 
+  ${libkeyvalue_parser_SOURCE_DIR}
+  ${PROTOBUF_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
+# shared libraries need PIC
+set_property(TARGET gravitylib PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# shared and static libraries built from the same object files
+add_library(gravity STATIC $<TARGET_OBJECTS:gravitylib>)
+target_link_libraries(gravity PRIVATE 
+  keyvalue_parser
+  ${PROTOBUF_LIBRARIES})
+
+add_library(gravity_shared SHARED $<TARGET_OBJECTS:gravitylib>)
+set_target_properties(gravity_shared PROPERTIES OUTPUT_NAME "gravity")
+target_link_libraries(gravity_shared PRIVATE 
+  keyvalue_parser
+  ${PROTOBUF_LIBRARIES})
+
+# 'make install' to the locations provided by GNUInstallDirs
+install(TARGETS gravity gravity_shared EXPORT GravityConfig
+  ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+#install(FILES ${PROTO_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protobuf)
+
+# This makes the project importable from the install directory
+install(EXPORT GravityConfig DESTINATION cmake)
+# and importable from the build directory
+export(TARGETS gravity gravity_shared FILE GravityConfig.cmake)
+
+
+
