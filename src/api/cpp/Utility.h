@@ -56,6 +56,14 @@ GRAVITY_API double StringToDouble(std::string str, int default_value); ///< Retu
  * \return also return a reference to the modified string
  */
 GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
+
+/**
+ * Replace substrings in a string.
+ * \param target string that will be modified
+ * \param oldValue source substring to search for in target
+ * \param newValue replacement substring
+ */
+GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue);
 /** @} */ //String conversion and helper functions
 
 GRAVITY_API bool IsValidFilename(const std::string filename); ///< Return if filename is valid, which is OS dependent

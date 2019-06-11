@@ -91,6 +91,16 @@ GRAVITY_API std::string& trim(
   return trim_left_inplace( trim_right_inplace( s, delimiters ), delimiters );
 }
 
+GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
+{
+    auto pos = target.find(oldValue);
+    while(pos != std::string::npos) {
+      target.replace(pos, oldValue.size(), newValue);
+      pos = target.find(oldValue);
+    }
+}
+
+
 // OS
 GRAVITY_API bool IsValidFilename(const std::string filename)
 {
