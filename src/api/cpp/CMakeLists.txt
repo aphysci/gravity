@@ -72,13 +72,37 @@ set (SOURCES
 
 set(LIBSRC ${HEADERS} ${SOURCES})
 
-#add_library(gravitylib OBJECT ${LIBSRC} ${PROTO_SOURCES} ${PROTO_HEADERS})
-add_library(gravitylib OBJECT ${LIBSRC})
+#set(MESAGES_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../protobufs" )
+set(PROTOBUF_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../protobufs" )
+set (GRAVITY_MESSAGES
+  ${PROTOBUF_IMPORT_DIRS}/ComponentDataLookupResponsePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ComponentLookupRequestPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ComponentServiceLookupResponsePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ConfigRequest.proto
+  ${PROTOBUF_IMPORT_DIRS}/FileArchiverControlRequestPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/FileArchiverControlResponsePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/GravityDataProductPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/GravityLogMessagePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/GravityMetricsDataPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryBroadcastPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryDomainUpdatePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryMapPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryRegistrationPB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryResponsePB.proto
+  ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryUnregistrationPB.proto)
+
+protobuf_generate_cpp(PROTO_SOURCES PROTO_HEADERS ${GRAVITY_MESSAGES})
+
+
+add_library(gravitylib OBJECT ${LIBSRC} ${PROTO_SOURCES} ${PROTO_HEADERS})
+#add_library(gravitylib OBJECT ${LIBSRC})
 target_include_directories(gravitylib PUBLIC 
   ${libkeyvalue_parser_SOURCE_DIR}
   ${PROTOBUF_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}/..
   )
 
 # shared libraries need PIC
@@ -86,6 +110,12 @@ set_property(TARGET gravitylib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # shared and static libraries built from the same object files
 add_library(gravity STATIC $<TARGET_OBJECTS:gravitylib>)
+
+add_custom_command(TARGET gravity PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROTO_HEADERS} protobuf
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROTO_SOURCES} protobuf)
+
+
 target_link_libraries(gravity PRIVATE 
   keyvalue_parser
   ${PROTOBUF_LIBRARIES})
@@ -108,6 +138,5 @@ install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT GravityConfig DESTINATION cmake)
 # and importable from the build directory
 export(TARGETS gravity gravity_shared FILE GravityConfig.cmake)
-
 
 
