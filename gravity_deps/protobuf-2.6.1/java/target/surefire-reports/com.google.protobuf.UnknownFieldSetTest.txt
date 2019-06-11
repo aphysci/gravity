@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.google.protobuf.UnknownFieldSetTest
--------------------------------------------------------------------------------
-Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.17 s - in com.google.protobuf.UnknownFieldSetTest

@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.google.protobuf.RopeByteStringTest
--------------------------------------------------------------------------------
-Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s - in com.google.protobuf.RopeByteStringTest
