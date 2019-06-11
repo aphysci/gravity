@@ -241,7 +241,7 @@ then
    fi
 fi
 
-CPPFLAGS="$CPPFLAGS -Wall -std=c++11"
+CPPFLAGS="$CPPFLAGS -Wall"
 
 AC_CONFIG_FILES([Makefile
                  src/api/MATLAB/Makefile
