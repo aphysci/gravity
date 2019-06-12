@@ -24,7 +24,7 @@ include (cmake/GravityVersion.cmake)
 gravity_version(GRAVITY_VERSION)
 
 project(gravity VERSION ${GRAVITY_VERSION}
-                LANGUAGES CXX)
+                LANGUAGES C CXX)
 
 file(GENERATE OUTPUT "VERSION.txt" 
   CONTENT "v${GRAVITY_VERSION}")
@@ -40,14 +40,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(WITH_JAVA   "Enable Java bindings " ON)
 option(WITH_PYTHON "Enable Python bindings " ON)
 
-add_subdirectory(src/keyvalue_parser)
-add_subdirectory(src/api/cpp)
-
-
 ################
 #  Dependencies
 ################
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 find_package(ZeroMQ 3.2.3 REQUIRED)
 if(ZeroMQ_FOUND)
@@ -87,6 +85,15 @@ if(WITH_JAVA)
 endif()
 
 find_package(Doxygen)
+
+###########################
+# Build subdirectories
+###########################
+
+add_subdirectory(src/keyvalue_parser)
+add_subdirectory(src/api/cpp)
+add_subdirectory(src/components/cpp/Archiver)
+
 
 ###########################
 # Install Configuration
