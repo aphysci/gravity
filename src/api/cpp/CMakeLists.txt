@@ -124,11 +124,14 @@ install(TARGETS gravity gravity_shared EXPORT GravityConfig
   LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-#install(FILES ${PROTO_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protobuf)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlResponsePB.pb.h
+              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlRequestPB.pb.h
+              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityDataProductPB.pb.h
+              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityMetricsDataPB.pb.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protobuf)
 
 # This makes the project importable from the install directory
 install(EXPORT GravityConfig DESTINATION cmake)
 # and importable from the build directory
 export(TARGETS gravity gravity_shared FILE GravityConfig.cmake)
-
 
