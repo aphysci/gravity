@@ -29,7 +29,7 @@ project(gravity VERSION ${GRAVITY_VERSION}
 file(GENERATE OUTPUT "VERSION.txt" 
   CONTENT "v${GRAVITY_VERSION}")
 install(FILES "${gravity_BINARY_DIR}/VERSION.txt" 
-        DESTINATION ${CMAKE_INSTALL_PREFIX})
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -39,6 +39,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(WITH_JAVA   "Enable Java bindings " ON)
 option(WITH_PYTHON "Enable Python bindings " ON)
+
+add_subdirectory(src/keyvalue_parser)
+add_subdirectory(src/api/cpp)
+
+
+################
+#  Dependencies
+################
+
 
 find_package(ZeroMQ 3.2.3 REQUIRED)
 if(ZeroMQ_FOUND)
@@ -79,12 +88,9 @@ endif()
 
 find_package(Doxygen)
 
-add_subdirectory(src/keyvalue_parser)
-add_subdirectory(src/api/cpp)
-
-################################################################################
-# INSTALL CONFIGURATION
-
+###########################
+# Install Configuration
+###########################
 
 message(STATUS ""                                                      )
 message(STATUS "Gravity version          = ${GRAVITY_VERSION}"    )
@@ -94,13 +100,21 @@ message(STATUS "CMAKE_INSTALL_INCLUDEDIR = ${CMAKE_INSTALL_INCLUDEDIR}")
 message(STATUS "CMAKE_INSTALL_DATADIR    = ${CMAKE_INSTALL_DATADIR}"   )
 message(STATUS "CMAKE_INSTALL_BINDIR     = ${CMAKE_INSTALL_BINDIR}"    )
 
+################
+#   Packaging
+################
+
 set(CPACK_PACKAGE_VENDOR "Applied Physical Sciences, Corp.")
-set(CPACK_GENERATOR "ZIP;TGZ")
+set(CPACK_GENERATOR "ZIP;TGZ;${CPACK_GENERATOR}")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_ZIP "ON")
 set(CPACK_PACKAGE_VERSION_MAJOR ${GRAVITY_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${GRAVITY_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${GRAVITY_VERSION_PATCH})
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/build/GravityLGPLHeader_cpp_java.txt")
+
+set(CPACK_SOURCE_IGNORE_FILES "${CMAKE_SOURCE_DIR}/.git/")
 
 include (CPack)
 
