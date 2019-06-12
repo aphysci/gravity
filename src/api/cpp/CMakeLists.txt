@@ -72,7 +72,6 @@ set (SOURCES
 
 set(LIBSRC ${HEADERS} ${SOURCES})
 
-#set(MESAGES_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../protobufs" )
 set(PROTOBUF_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../protobufs" )
 set (GRAVITY_MESSAGES
   ${PROTOBUF_IMPORT_DIRS}/ComponentDataLookupResponsePB.proto
@@ -91,18 +90,16 @@ set (GRAVITY_MESSAGES
   ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryResponsePB.proto
   ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryUnregistrationPB.proto)
 
-protobuf_generate_cpp(PROTO_SOURCES PROTO_HEADERS ${GRAVITY_MESSAGES})
-
+include(${gravity_SOURCE_DIR}/cmake/GravityProtobuf.cmake)
+gravity_protobuf_generate_cpp(protobuf PROTO_SOURCES PROTO_HEADERS ${GRAVITY_MESSAGES})
 
 add_library(gravitylib OBJECT ${LIBSRC} ${PROTO_SOURCES} ${PROTO_HEADERS})
-#add_library(gravitylib OBJECT ${LIBSRC})
 target_include_directories(gravitylib PUBLIC 
   ${libkeyvalue_parser_SOURCE_DIR}
   ${PROTOBUF_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf
   ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE
-  ${CMAKE_CURRENT_BINARY_DIR}/..
   )
 
 # shared libraries need PIC
@@ -110,11 +107,6 @@ set_property(TARGET gravitylib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # shared and static libraries built from the same object files
 add_library(gravity STATIC $<TARGET_OBJECTS:gravitylib>)
-
-add_custom_command(TARGET gravity PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROTO_HEADERS} protobuf
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROTO_SOURCES} protobuf)
-
 
 target_link_libraries(gravity PRIVATE 
   keyvalue_parser
