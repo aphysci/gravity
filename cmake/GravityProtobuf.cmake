@@ -91,7 +91,7 @@ function(gravity_protobuf_generate_cpp DEST SRCS HDRS)
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS --cpp_out  ${CMAKE_CURRENT_BINARY_DIR}/${DEST} ${_protobuf_include_path} ${ABS_FIL}
       DEPENDS ${ABS_FIL}
-      COMMENT "Generating C++ from protocol buffer input ${FIL}"
+      COMMENT "Generating C++ from protocol buffer input ${FIL_WE}.proto"
       VERBATIM )
   endforeach()
 
