@@ -74,6 +74,7 @@ if(Protobuf_FOUND)
     IMPORTED_LOCATION "${PROTOBUF_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES ${PROTOBUF_INCLUDE_DIR}
   )
+  get_filename_component(PROTOBUF_LIBRARY_PATH ${PROTOBUF_LIBRARY} DIRECTORY CACHE)
 endif()
 
 if(WITH_PYTHON)
@@ -108,6 +109,7 @@ add_subdirectory(src/components/cpp/LogRecorder)
 add_subdirectory(src/components/cpp/Playback)
 add_subdirectory(src/components/cpp/Relay)
 add_subdirectory(src/components/cpp/ServiceDirectory)
+add_subdirectory(test/examples/1-BasicDataProduct)
 
 
 ###########################
