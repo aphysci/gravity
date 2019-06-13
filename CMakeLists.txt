@@ -103,6 +103,11 @@ find_package(Doxygen)
 add_subdirectory(src/keyvalue_parser)
 add_subdirectory(src/api/cpp)
 add_subdirectory(src/components/cpp/Archiver)
+add_subdirectory(src/components/cpp/ConfigServer)
+add_subdirectory(src/components/cpp/LogRecorder)
+add_subdirectory(src/components/cpp/Playback)
+add_subdirectory(src/components/cpp/Relay)
+add_subdirectory(src/components/cpp/ServiceDirectory)
 
 
 ###########################
