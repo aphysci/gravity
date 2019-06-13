@@ -24,20 +24,12 @@ project(FileArchiver VERSION 1.0 LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} FileArchiver.h FileArchiver.cpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE 
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${libkeyvalue_parser_SOURCE_DIR}
-  ${ZeroMQ_INCLUDE_DIR}
-  ${PROTOBUF_INCLUDE_DIRS}
-  ${gravitylib_SOURCE_DIR}
-  ${gravitylib_BINARY_DIR}/protobuf
-  )
-
 target_link_libraries(${PROJECT_NAME} PRIVATE 
+  gravity
+  keyvalue_parser
+  zmq
+  protobuf
   Threads::Threads
-  ${ZeroMQ_LIBRARY}
-  ${PROTOBUF_LIBRARIES}
-  gravity_shared
 )
 
 # 'make install' to the locations provided by GNUInstallDirs
