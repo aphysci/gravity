@@ -40,6 +40,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(WITH_JAVA   "Enable Java bindings " ON)
 option(WITH_PYTHON "Enable Python bindings " ON)
 
+# set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+# set(LINK_SEARCH_START_STATIC TRUE)
+# set(LINK_SEARCH_END_STATIC TRUE)
+
+
 ################
 #  Dependencies
 ################
@@ -48,22 +53,27 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 find_package(ZeroMQ 3.2.3 REQUIRED)
+
 if(ZeroMQ_FOUND)
-  add_library(zmq INTERFACE IMPORTED)
-  set_property(TARGET zmq PROPERTY
-    INTERFACE_INCLUDE_DIRECTORIES ${ZeroMQ_INCLUDE_DIR})
+  add_library(zmq SHARED IMPORTED)
+  set_target_properties(zmq PROPERTIES
+    IMPORTED_LOCATION "${ZeroMQ_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES ${ZeroMQ_INCLUDE_DIR}
+  )
 endif()
 
 find_package(Protobuf 2.6.1 REQUIRED)
 # NOTE:
 # These variables change to mixed case 'Protobuf_' at cmake version 3.7
 if(Protobuf_FOUND)
-  message(STATUS "PROTOBUF_PROTOC_EXECUTABLE:   ${PROTOBUF_PROTOC_EXECUTABLE}")
-  message(STATUS "PROTOBUF_INCLUDE_DIRS:        ${PROTOBUF_INCLUDE_DIRS}")
-  message(STATUS "PROTOBUF_LIBRARIES:           ${PROTOBUF_LIBRARIES}")
-  add_library(protobuf INTERFACE IMPORTED)
-  set_property(TARGET protobuf PROPERTY
-    INTERFACE_INCLUDE_DIRECTORIES ${PROTOBUF_INCLUDE_DIRS})
+  # message(STATUS "PROTOBUF_PROTOC_EXECUTABLE:   ${PROTOBUF_PROTOC_EXECUTABLE}")
+  # message(STATUS "PROTOBUF_INCLUDE_DIRS:        ${PROTOBUF_INCLUDE_DIR}")
+  # message(STATUS "PROTOBUF_LIBRARIES:           ${PROTOBUF_LIBRARY}")
+  add_library(protobuf SHARED IMPORTED)
+  set_target_properties(protobuf PROPERTIES
+    IMPORTED_LOCATION "${PROTOBUF_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES ${PROTOBUF_INCLUDE_DIR}
+  )
 endif()
 
 if(WITH_PYTHON)
