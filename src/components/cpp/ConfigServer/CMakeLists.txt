@@ -20,9 +20,9 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(FileArchiver VERSION 1.0 LANGUAGES CXX)
+project(ConfigServer VERSION 1.0 LANGUAGES CXX)
 
-add_executable(${PROJECT_NAME} FileArchiver.h FileArchiver.cpp)
+add_executable(${PROJECT_NAME} ConfigServer.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
   gravity
@@ -30,6 +30,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   zmq
   protobuf
   Threads::Threads
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+  $<BUILD_INTERFACE:${libkeyvalue_parser_SOURCE_DIR}>
 )
 
 # 'make install' to the locations provided by GNUInstallDirs

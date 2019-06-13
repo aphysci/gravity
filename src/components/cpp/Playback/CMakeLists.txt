@@ -20,9 +20,14 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(FileArchiver VERSION 1.0 LANGUAGES CXX)
+project(FileReplay VERSION 1.0 LANGUAGES CXX)
 
-add_executable(${PROJECT_NAME} FileArchiver.h FileArchiver.cpp)
+add_executable(${PROJECT_NAME} 
+  FileReader.cpp
+  FileReader.h
+  FileReplay.cpp
+  FileReplay.h
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
   gravity
@@ -35,4 +40,3 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # 'make install' to the locations provided by GNUInstallDirs
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
-
