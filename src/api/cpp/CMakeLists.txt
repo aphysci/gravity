@@ -22,6 +22,10 @@ endif()
 
 project(libgravity VERSION 1.0 LANGUAGES CXX)
 
+#####################
+#  Source files
+#####################
+
 set (HEADERS 
   CommUtil.h
   DomainDataKey.h
@@ -90,44 +94,78 @@ set (GRAVITY_MESSAGES
   ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryResponsePB.proto
   ${PROTOBUF_IMPORT_DIRS}/ServiceDirectoryUnregistrationPB.proto)
 
+
+#####################
+#  Targets
+#####################
+
 include(${gravity_SOURCE_DIR}/cmake/GravityProtobuf.cmake)
 gravity_protobuf_generate_cpp(protobuf PROTO_SOURCES PROTO_HEADERS ${GRAVITY_MESSAGES})
 
 add_library(gravitylib OBJECT ${LIBSRC} ${PROTO_SOURCES} ${PROTO_HEADERS})
-target_include_directories(gravitylib PUBLIC 
-  ${libkeyvalue_parser_SOURCE_DIR}
-  ${PROTOBUF_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/protobuf
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  )
+
+# shared and static libraries built from the same object files
+add_library(gravity STATIC $<TARGET_OBJECTS:gravitylib>)
+add_library(gravity_shared SHARED $<TARGET_OBJECTS:gravitylib>)
+
+#####################
+#  Properties
+#####################
 
 # shared libraries need PIC
 set_property(TARGET gravitylib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-# shared and static libraries built from the same object files
-add_library(gravity STATIC $<TARGET_OBJECTS:gravitylib>)
+set_target_properties(gravity_shared PROPERTIES OUTPUT_NAME "gravity")
+
+#####################
+#  Dependencies
+#####################
+
+target_link_libraries(gravity_shared PRIVATE 
+  keyvalue_parser
+  zmq
+  protobuf
+  Threads::Threads)
 
 target_link_libraries(gravity PRIVATE 
   keyvalue_parser
-  ${PROTOBUF_LIBRARIES})
+  zmq
+  protobuf
+  Threads::Threads)
 
-add_library(gravity_shared SHARED $<TARGET_OBJECTS:gravitylib>)
-set_target_properties(gravity_shared PROPERTIES OUTPUT_NAME "gravity")
-target_link_libraries(gravity_shared PRIVATE 
-  keyvalue_parser
-  ${PROTOBUF_LIBRARIES})
+target_include_directories(gravitylib
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${libkeyvalue_parser_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/protobuf>
+)
+
+target_include_directories(gravity
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/protobuf>
+)
+
+target_include_directories(gravity_shared
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/protobuf>
+)
 
 # 'make install' to the locations provided by GNUInstallDirs
 install(TARGETS gravity gravity_shared EXPORT GravityConfig
   ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlResponsePB.pb.h
-              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlRequestPB.pb.h
-              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityDataProductPB.pb.h
-              ${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityMetricsDataPB.pb.h
+install(FILES ${HEADERS} 
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${PROTO_HEADERS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/protobuf)
 
 # This makes the project importable from the install directory
