@@ -26,6 +26,7 @@
 #
 #  ZeroMQ_FOUND              System has ZeroMQ libs/headers
 #  ZeroMQ_LIBRARIES          The ZeroMQ libraries
+#  ZeroMQ_LIBRARY_PATH       Full path to the zmq library used
 #  ZeroMQ_INCLUDE_DIR        The location of ZeroMQ headers
 #  ZeroMQ_VERSION            The version of ZeroMQ
 
@@ -127,6 +128,7 @@ find_package_handle_standard_args(
 set(ZeroMQ_FOUND ${ZEROMQ_FOUND})
 set(ZeroMQ_INCLUDE_DIRS ${ZeroMQ_INCLUDE_DIR})
 set(ZeroMQ_LIBRARIES ${ZeroMQ_LIBRARY})
+get_filename_component(ZeroMQ_LIBRARY_PATH ${ZeroMQ_LIBRARY} DIRECTORY CACHE)
 set(ZeroMQ_VERSION ${ZeroMQ_VER})
 
 mark_as_advanced(
