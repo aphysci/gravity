@@ -109,7 +109,9 @@ add_subdirectory(src/components/cpp/LogRecorder)
 add_subdirectory(src/components/cpp/Playback)
 add_subdirectory(src/components/cpp/Relay)
 add_subdirectory(src/components/cpp/ServiceDirectory)
+add_subdirectory(test/examples/protobuf)
 add_subdirectory(test/examples/1-BasicDataProduct)
+add_subdirectory(test/examples/2-ProtobufDataProduct)
 
 
 ###########################
