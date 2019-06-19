@@ -20,16 +20,17 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct VERSION 1.0 LANGUAGES CXX)
+project(MiscFunctionality VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
 
-add_executable(${PROJECT_NAME}Publisher 
-  ${PROJECT_NAME}Publisher.cpp 
+add_executable(MiscComponent1
+  MiscComponent1.cpp 
 )
-add_executable(${PROJECT_NAME}Subscriber 
-  ${PROJECT_NAME}Subscriber.cpp
+
+add_executable(MiscComponent2
+  MiscComponent2.cpp 
 )
 
 add_custom_target (${PROJECT_NAME}_example 
@@ -37,10 +38,10 @@ add_custom_target (${PROJECT_NAME}_example
   SOURCES run.sh.cmake
 )
 
-add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
-add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)
+add_dependencies(MiscComponent1 ServiceDirectory)
+add_dependencies(MiscComponent2 ServiceDirectory)
 
-target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
+target_link_libraries(MiscComponent1 PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -49,7 +50,7 @@ target_link_libraries(${PROJECT_NAME}Publisher PRIVATE
   Threads::Threads
 )
 
-target_link_libraries(${PROJECT_NAME}Subscriber PRIVATE 
+target_link_libraries(MiscComponent2 PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -60,7 +61,7 @@ target_link_libraries(${PROJECT_NAME}Subscriber PRIVATE
 
 
 # 'make install' to the locations provided by GNUInstallDirs
-install(TARGETS ${PROJECT_NAME}Publisher ${PROJECT_NAME}Subscriber
+install(TARGETS MiscComponent1 MiscComponent2
         EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 
