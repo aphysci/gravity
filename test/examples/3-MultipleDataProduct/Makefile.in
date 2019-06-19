@@ -78,7 +78,7 @@ ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
 endif
 
 INCLUDES=-I$(GRAVLIB_DIR) -I$(MYPROTO_DIR) $(AC_CPPFLAGS)
-CFLAGS=-L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
+CFLAGS=-std=c++11 -L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
 LIBS=-lgravity -lprotobuf -lkeyvalue_parser $(OS_SPECIFIC_LIBS) $(ADDITIONAL_LIBS)
 
 PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
