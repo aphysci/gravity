@@ -20,16 +20,15 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct VERSION 1.0 LANGUAGES CXX)
+project(ConfigFile VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
+configure_file(config_file.ini ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(${PROJECT_NAME}Publisher 
-  ${PROJECT_NAME}Publisher.cpp 
-)
-add_executable(${PROJECT_NAME}Subscriber 
-  ${PROJECT_NAME}Subscriber.cpp
+add_executable(${PROJECT_NAME}Example 
+  ${PROJECT_NAME}Example.cpp 
 )
 
 add_custom_target (${PROJECT_NAME}_example 
@@ -37,10 +36,9 @@ add_custom_target (${PROJECT_NAME}_example
   SOURCES run.sh.cmake
 )
 
-add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
-add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)
+add_dependencies(${PROJECT_NAME}Example ConfigServer ServiceDirectory)
 
-target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
+target_link_libraries(${PROJECT_NAME}Example PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -48,19 +46,9 @@ target_link_libraries(${PROJECT_NAME}Publisher PRIVATE
   protobuf
   Threads::Threads
 )
-
-target_link_libraries(${PROJECT_NAME}Subscriber PRIVATE 
-  gravity
-  examplemessages
-  keyvalue_parser
-  zmq
-  protobuf
-  Threads::Threads
-)
-
 
 # 'make install' to the locations provided by GNUInstallDirs
-install(TARGETS ${PROJECT_NAME}Publisher ${PROJECT_NAME}Subscriber
+install(TARGETS ${PROJECT_NAME}Example
         EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 
