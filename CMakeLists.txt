@@ -112,6 +112,11 @@ add_subdirectory(src/components/cpp/ServiceDirectory)
 add_subdirectory(test/examples/protobuf)
 add_subdirectory(test/examples/1-BasicDataProduct)
 add_subdirectory(test/examples/2-ProtobufDataProduct)
+add_subdirectory(test/examples/3-MultipleDataProduct)
+add_subdirectory(test/examples/4-BasicService)
+add_subdirectory(test/examples/5-MiscFunctionality)
+add_subdirectory(test/examples/8-ConfigFile)
+add_subdirectory(test/examples/9-Domains)
 
 
 ###########################

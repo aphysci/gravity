@@ -20,22 +20,25 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct VERSION 1.0 LANGUAGES CXX)
+project(Domains VERSION 1.0 LANGUAGES CXX)
 
-# Linux example runner
 configure_file(run.sh.cmake run.sh)
+configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(${PROJECT_NAME}Publisher 
-  ${PROJECT_NAME}Publisher.cpp 
+  ProtobufDataProductPublisher.cpp 
 )
 add_executable(${PROJECT_NAME}Subscriber 
-  ${PROJECT_NAME}Subscriber.cpp
+  ProtobufDataProductSubscriber.cpp
 )
 
 add_custom_target (${PROJECT_NAME}_example 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/run.sh
   SOURCES run.sh.cmake
 )
+
+set_target_properties(${PROJECT_NAME}Publisher PROPERTIES OUTPUT_NAME "ProtobufDataProductPublisher")
+set_target_properties(${PROJECT_NAME}Subscriber PROPERTIES OUTPUT_NAME "ProtobufDataProductSubscriber")
 
 add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
 add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)
@@ -57,7 +60,6 @@ target_link_libraries(${PROJECT_NAME}Subscriber PRIVATE
   protobuf
   Threads::Threads
 )
-
 
 # 'make install' to the locations provided by GNUInstallDirs
 install(TARGETS ${PROJECT_NAME}Publisher ${PROJECT_NAME}Subscriber

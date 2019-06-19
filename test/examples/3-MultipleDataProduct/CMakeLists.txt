@@ -20,7 +20,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct VERSION 1.0 LANGUAGES CXX)
+project(MultipleDataProduct VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
@@ -39,6 +39,7 @@ add_custom_target (${PROJECT_NAME}_example
 
 add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
 add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)
+
 
 target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
   gravity
