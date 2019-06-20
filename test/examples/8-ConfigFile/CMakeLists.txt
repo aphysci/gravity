@@ -37,6 +37,11 @@ add_custom_target (${PROJECT_NAME}_run
 )
 
 add_dependencies(ConfigFileExample ConfigServer ServiceDirectory)
+add_dependencies(${PROJECT_NAME}_run
+  ConfigServer 
+  ServiceDirectory
+  ConfigFileExample
+)
 
 target_link_libraries(ConfigFileExample PRIVATE 
   gravity

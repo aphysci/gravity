@@ -39,6 +39,11 @@ add_custom_target (${PROJECT_NAME}_run
 
 add_dependencies(BasicServiceProvider ServiceDirectory)
 add_dependencies(BasicServiceRequestor ServiceDirectory)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory
+  BasicServiceProvider
+  BasicServiceRequestor
+)
 
 target_link_libraries(BasicServiceProvider PRIVATE 
   gravity

@@ -33,6 +33,13 @@ add_custom_target (${PROJECT_NAME}_run
   SOURCES run.sh.cmake
 )
 
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory 
+  BasicDataProductPublisher 
+  BasicDataProductSubscriber
+)
+
+
 target_link_libraries(BasicDataProductPublisher PRIVATE 
   gravity
   keyvalue_parser

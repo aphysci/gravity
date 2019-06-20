@@ -42,6 +42,11 @@ set_target_properties(${PROJECT_NAME}Subscriber PROPERTIES OUTPUT_NAME "Multiple
 
 add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
 add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory
+  ${PROJECT_NAME}Publisher
+  ${PROJECT_NAME}Subscriber
+)
 
 
 target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
