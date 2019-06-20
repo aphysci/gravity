@@ -20,7 +20,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(MiscFunctionality VERSION 1.0 LANGUAGES CXX)
+project(MiscFunctionality_example VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
@@ -33,7 +33,7 @@ add_executable(MiscComponent2
   MiscComponent2.cpp 
 )
 
-add_custom_target (${PROJECT_NAME}_example 
+add_custom_target (${PROJECT_NAME}_run 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/run.sh
   SOURCES run.sh.cmake
 )

@@ -20,7 +20,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(Domains VERSION 1.0 LANGUAGES CXX)
+project(Domains_example VERSION 1.0 LANGUAGES CXX)
 
 configure_file(run.sh.cmake run.sh)
 configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
@@ -32,7 +32,7 @@ add_executable(${PROJECT_NAME}Subscriber
   ProtobufDataProductSubscriber.cpp
 )
 
-add_custom_target (${PROJECT_NAME}_example 
+add_custom_target (${PROJECT_NAME}_run 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/run.sh
   SOURCES run.sh.cmake
 )

@@ -20,16 +20,16 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct_example VERSION 1.0 LANGUAGES CXX)
+project(Archiving_example VERSION 1.0 LANGUAGES CXX)
 
-# Linux example runner
 configure_file(run.sh.cmake run.sh)
+configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(ProtobufDataProductPublisher 
-  ProtobufDataProductPublisher.cpp 
+add_executable(ArchiveTest 
+  ArchiveTest.cpp 
 )
-add_executable(ProtobufDataProductSubscriber 
-  ProtobufDataProductSubscriber.cpp
+add_executable(ReplayTest 
+  ReplayTest.cpp
 )
 
 add_custom_target (${PROJECT_NAME}_run 
@@ -37,10 +37,10 @@ add_custom_target (${PROJECT_NAME}_run
   SOURCES run.sh.cmake
 )
 
-add_dependencies(ProtobufDataProductPublisher ServiceDirectory)
-add_dependencies(ProtobufDataProductSubscriber ServiceDirectory)
+add_dependencies(ArchiveTest ServiceDirectory Archiver Playback)
+add_dependencies(ReplayTest ServiceDirectory Archiver Playback)
 
-target_link_libraries(ProtobufDataProductPublisher PRIVATE 
+target_link_libraries(ArchiveTest PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -49,7 +49,7 @@ target_link_libraries(ProtobufDataProductPublisher PRIVATE
   Threads::Threads
 )
 
-target_link_libraries(ProtobufDataProductSubscriber PRIVATE 
+target_link_libraries(ReplayTest PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -57,10 +57,9 @@ target_link_libraries(ProtobufDataProductSubscriber PRIVATE
   protobuf
   Threads::Threads
 )
-
 
 # 'make install' to the locations provided by GNUInstallDirs
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber
+install(TARGETS ArchiveTest ReplayTest
         EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 
