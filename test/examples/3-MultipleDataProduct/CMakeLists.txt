@@ -20,22 +20,25 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(MultipleDataProduct VERSION 1.0 LANGUAGES CXX)
+project(MultipleDataProduct_example VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
 
 add_executable(${PROJECT_NAME}Publisher 
-  ${PROJECT_NAME}Publisher.cpp 
+  MultipleDataProductPublisher.cpp 
 )
 add_executable(${PROJECT_NAME}Subscriber 
-  ${PROJECT_NAME}Subscriber.cpp
+  MultipleDataProductSubscriber.cpp
 )
 
-add_custom_target (${PROJECT_NAME}_example 
+add_custom_target (${PROJECT_NAME}_run 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/run.sh
   SOURCES run.sh.cmake
 )
+
+set_target_properties(${PROJECT_NAME}Publisher PROPERTIES OUTPUT_NAME "MultipleDataProductPublisher")
+set_target_properties(${PROJECT_NAME}Subscriber PROPERTIES OUTPUT_NAME "MultipleDataProductSubscriber")
 
 add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory)
 add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory)

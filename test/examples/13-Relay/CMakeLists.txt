@@ -20,15 +20,15 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ProtobufDataProduct_example VERSION 1.0 LANGUAGES CXX)
+project(Relay_example VERSION 1.0 LANGUAGES CXX)
 
-# Linux example runner
 configure_file(run.sh.cmake run.sh)
+configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(ProtobufDataProductPublisher 
+add_executable(${PROJECT_NAME}Publisher 
   ProtobufDataProductPublisher.cpp 
 )
-add_executable(ProtobufDataProductSubscriber 
+add_executable(${PROJECT_NAME}Subscriber 
   ProtobufDataProductSubscriber.cpp
 )
 
@@ -37,10 +37,13 @@ add_custom_target (${PROJECT_NAME}_run
   SOURCES run.sh.cmake
 )
 
-add_dependencies(ProtobufDataProductPublisher ServiceDirectory)
-add_dependencies(ProtobufDataProductSubscriber ServiceDirectory)
+set_target_properties(${PROJECT_NAME}Publisher PROPERTIES OUTPUT_NAME "ProtobufDataProductPublisher")
+set_target_properties(${PROJECT_NAME}Subscriber PROPERTIES OUTPUT_NAME "ProtobufDataProductSubscriber")
 
-target_link_libraries(ProtobufDataProductPublisher PRIVATE 
+add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory Relay)
+add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory Relay)
+
+target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -49,7 +52,7 @@ target_link_libraries(ProtobufDataProductPublisher PRIVATE
   Threads::Threads
 )
 
-target_link_libraries(ProtobufDataProductSubscriber PRIVATE 
+target_link_libraries(${PROJECT_NAME}Subscriber PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -57,10 +60,9 @@ target_link_libraries(ProtobufDataProductSubscriber PRIVATE
   protobuf
   Threads::Threads
 )
-
 
 # 'make install' to the locations provided by GNUInstallDirs
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber
+install(TARGETS ${PROJECT_NAME}Publisher ${PROJECT_NAME}Subscriber
         EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 

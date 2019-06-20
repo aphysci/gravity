@@ -117,6 +117,8 @@ add_subdirectory(test/examples/4-BasicService)
 add_subdirectory(test/examples/5-MiscFunctionality)
 add_subdirectory(test/examples/8-ConfigFile)
 add_subdirectory(test/examples/9-Domains)
+add_subdirectory(test/examples/10-Archiving)
+add_subdirectory(test/examples/13-Relay)
 
 
 ###########################

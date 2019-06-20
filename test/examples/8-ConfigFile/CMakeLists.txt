@@ -20,25 +20,25 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(ConfigFile VERSION 1.0 LANGUAGES CXX)
+project(ConfigFile_example VERSION 1.0 LANGUAGES CXX)
 
 # Linux example runner
 configure_file(run.sh.cmake run.sh)
 configure_file(config_file.ini ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(Gravity.ini ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(${PROJECT_NAME}Example 
-  ${PROJECT_NAME}Example.cpp 
+add_executable(ConfigFileExample 
+  ConfigFileExample.cpp 
 )
 
-add_custom_target (${PROJECT_NAME}_example 
+add_custom_target (${PROJECT_NAME}_run 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/run.sh
   SOURCES run.sh.cmake
 )
 
-add_dependencies(${PROJECT_NAME}Example ConfigServer ServiceDirectory)
+add_dependencies(ConfigFileExample ConfigServer ServiceDirectory)
 
-target_link_libraries(${PROJECT_NAME}Example PRIVATE 
+target_link_libraries(ConfigFileExample PRIVATE 
   gravity
   examplemessages
   keyvalue_parser
@@ -48,7 +48,7 @@ target_link_libraries(${PROJECT_NAME}Example PRIVATE
 )
 
 # 'make install' to the locations provided by GNUInstallDirs
-install(TARGETS ${PROJECT_NAME}Example
+install(TARGETS ConfigFileExample
         EXPORT ${PROJECT_NAME}Config
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # Windows only
 
