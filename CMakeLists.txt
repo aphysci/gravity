@@ -119,6 +119,29 @@ add_subdirectory(test/examples/8-ConfigFile)
 add_subdirectory(test/examples/9-Domains)
 add_subdirectory(test/examples/10-Archiving)
 add_subdirectory(test/examples/13-Relay)
+add_subdirectory(test/components/cpp/ServiceDirectory)
+add_subdirectory(test/components/cpp/ServiceDirectoryReregister)
+
+add_custom_target(functional_test_cpp
+  COMMAND cmake --build test/components/cpp/ServiceDirectory 
+                --target ServiceDirectory_test_run
+                --clean-first
+  COMMAND cmake --build test/components/cpp/ServiceDirectoryReregister
+                --target ServiceDirectoryReregister_test_run
+                --clean-first
+)
+
+if(WITH_JAVA)
+  # add_custom_target(functional_test_java . . . 
+endif()
+
+if(WITH_PYTHON)
+  # add_custom_target(functional_test_python . . . 
+endif()
+
+add_custom_target(functional_tests DEPENDS functional_test_cpp)
+add_custom_target(functional_test DEPENDS functional_tests)
+
 
 
 ###########################
