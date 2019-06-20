@@ -40,6 +40,11 @@ add_custom_target (${PROJECT_NAME}_run
 
 add_dependencies(MiscComponent1 ServiceDirectory)
 add_dependencies(MiscComponent2 ServiceDirectory)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory
+  MiscComponent1
+  MiscComponent2
+)
 
 target_link_libraries(MiscComponent1 PRIVATE 
   gravity

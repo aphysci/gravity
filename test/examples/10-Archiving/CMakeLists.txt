@@ -39,6 +39,13 @@ add_custom_target (${PROJECT_NAME}_run
 
 add_dependencies(ArchiveTest ServiceDirectory Archiver Playback)
 add_dependencies(ReplayTest ServiceDirectory Archiver Playback)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory 
+  Archiver 
+  Playback
+  ArchiveTest
+  ReplayTest
+)
 
 target_link_libraries(ArchiveTest PRIVATE 
   gravity

@@ -39,6 +39,12 @@ add_custom_target (${PROJECT_NAME}_run
 
 add_dependencies(ProtobufDataProductPublisher ServiceDirectory)
 add_dependencies(ProtobufDataProductSubscriber ServiceDirectory)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory
+  ProtobufDataProductPublisher
+  ProtobufDataProductSubscriber
+)
+
 
 target_link_libraries(ProtobufDataProductPublisher PRIVATE 
   gravity

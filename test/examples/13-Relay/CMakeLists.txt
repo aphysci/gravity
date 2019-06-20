@@ -42,6 +42,12 @@ set_target_properties(${PROJECT_NAME}Subscriber PROPERTIES OUTPUT_NAME "Protobuf
 
 add_dependencies(${PROJECT_NAME}Publisher ServiceDirectory Relay)
 add_dependencies(${PROJECT_NAME}Subscriber ServiceDirectory Relay)
+add_dependencies(${PROJECT_NAME}_run 
+  ServiceDirectory 
+  Relay
+  ${PROJECT_NAME}Publisher
+  ${PROJECT_NAME}Subscriber
+)
 
 target_link_libraries(${PROJECT_NAME}Publisher PRIVATE 
   gravity
