@@ -20,7 +20,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
-project(FileArchiver VERSION 1.0 LANGUAGES CXX)
+project(Archiver VERSION 1.0 LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} FileArchiver.h FileArchiver.cpp)
 
