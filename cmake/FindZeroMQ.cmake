@@ -18,21 +18,29 @@
 # Variables used by this module, they can change the default behaviour and need
 # to be set before calling find_package:
 #
-#  ZeroMQ_ROOT_DIR  Set this variable to the root installation of
+#  ZeroMQ_ROOT               Set this variable to the root installation of
 #                            ZeroMQ if the module has problems finding
 #                            the proper installation path.
 #
 # Variables defined by this module:
 #
-#  ZeroMQ_FOUND              System has ZeroMQ libs/headers
+#  ZeroMQ_FOUND              True if ZeroMQ libs/headers found
 #  ZeroMQ_LIBRARIES          The ZeroMQ libraries
 #  ZeroMQ_LIBRARY_PATH       Full path to the zmq library used
 #  ZeroMQ_INCLUDE_DIR        The location of ZeroMQ headers
 #  ZeroMQ_VERSION            The version of ZeroMQ
 
-find_path(ZeroMQ_ROOT_DIR
-  NAMES include/zmq.h
-  )
+if (NOT ZeroMQ_ROOT)
+  set(ZeroMQ_ROOT "$ENV{ZeroMQ_ROOT}")
+endif()
+
+if (NOT ZeroMQ_ROOT)
+  find_path(_ZeroMQ_ROOT NAMES include/zmq.h)
+else()
+  set(_ZeroMQ_ROOT "${ZMQ_ROOT}")
+endif()
+
+find_path(ZeroMQ_INCLUDE_DIR NAMES zmq.h HINTS ${_ZeroMQ_ROOT}/include)
 
 if(MSVC)
   #add in all the names it can have on windows
@@ -67,14 +75,14 @@ if(MSVC)
   #now try to find the release and debug version
   find_library(ZeroMQ_LIBRARY_RELEASE
     NAMES ${_zmq_release_names} zmq libzmq
-    HINTS ${ZeroMQ_ROOT_DIR}/bin
-    ${ZeroMQ_ROOT_DIR}/lib
+    HINTS ${_ZeroMQ_ROOT}/bin
+    ${_ZeroMQ_ROOT}/lib
     )
 
   find_library(ZeroMQ_LIBRARY_DEBUG
     NAMES ${_zmq_debug_names} zmq libzmq
-    HINTS ${ZeroMQ_ROOT_DIR}/bin
-    ${ZeroMQ_ROOT_DIR}/lib
+    HINTS ${_ZeroMQ_ROOT}/bin
+    ${_ZeroMQ_ROOT}/lib
     )
 
   if(ZeroMQ_LIBRARY_RELEASE AND ZeroMQ_LIBRARY_DEBUG)
@@ -91,14 +99,9 @@ if(MSVC)
 else()
   find_library(ZeroMQ_LIBRARY
     NAMES zmq libzmq
-    HINTS ${ZeroMQ_ROOT_DIR}/lib
+    HINTS ${_ZeroMQ_ROOT}/lib
     )
 endif()
-
-find_path(ZeroMQ_INCLUDE_DIR
-  NAMES zmq.h
-  HINTS ${ZeroMQ_ROOT_DIR}/include
-  )
 
 function(extract_version_value value_name file_name value)
   file(STRINGS ${file_name} val REGEX "${value_name} .")
@@ -132,7 +135,7 @@ get_filename_component(ZeroMQ_LIBRARY_PATH ${ZeroMQ_LIBRARY} DIRECTORY CACHE)
 set(ZeroMQ_VERSION ${ZeroMQ_VER})
 
 mark_as_advanced(
-  ZeroMQ_ROOT_DIR
+  ZeroMQ_ROOT
   ZeroMQ_LIBRARY
   ZeroMQ_LIBRARY_DEBUG
   ZeroMQ_LIBRARY_RELEASE
