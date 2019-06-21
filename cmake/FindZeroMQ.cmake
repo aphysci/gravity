@@ -1,15 +1,24 @@
-##=============================================================================
-##
-##  Copyright (c) Kitware, Inc.
-##  All rights reserved.
-##  See LICENSE.txt for details.
-##
-##  This software is distributed WITHOUT ANY WARRANTY; without even
-##  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-##  PURPOSE.  See the above copyright notice for more information.
-##
-##=============================================================================
+#================================================
+# Copyright (c) Applied Physcical Sciences, Corp.
+#================================================
+#
+# Gravity is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program;
+# If not, see <http://www.gnu.org/licenses/>.
+#
 # - Try to find ZeroMQ headers and libraries
+# 
+# module adapted from https://github.com/zeromq/czmq/
 #
 # Usage of this module as follows:
 #
@@ -27,119 +36,100 @@
 #  ZeroMQ_FOUND              True if ZeroMQ libs/headers found
 #  ZeroMQ_LIBRARIES          The ZeroMQ libraries
 #  ZeroMQ_LIBRARY_PATH       Full path to the zmq library used
-#  ZeroMQ_INCLUDE_DIR        The location of ZeroMQ headers
+#  ZeroMQ_INCLUDE_DIRS       The location of ZeroMQ headers
 #  ZeroMQ_VERSION            The version of ZeroMQ
 
 if (NOT ZeroMQ_ROOT)
   set(ZeroMQ_ROOT "$ENV{ZeroMQ_ROOT}")
 endif()
 
-if (NOT ZeroMQ_ROOT)
-  find_path(_ZeroMQ_ROOT NAMES include/zmq.h)
-else()
-  set(_ZeroMQ_ROOT "${ZMQ_ROOT}")
-endif()
+if (NOT MSVC)
+  include(FindPkgConfig)
+  pkg_check_modules(PC_ZeroMQ "libzmq")
+  if (PC_ZeroMQ_FOUND)
+    # add CFLAGS from pkg-config file, e.g. draft api.
+    add_definitions(${PC_ZeroMQ_CFLAGS} ${PC_ZeroMQ_CFLAGS_OTHER})
+    # some libraries install the headers is a subdirectory of the include dir
+    # returned by pkg-config, so use a wildcard match to improve chances of finding
+    # headers and SOs.
+    set(PC_ZeroMQ_INCLUDE_HINTS ${PC_ZeroMQ_INCLUDE_DIRS} ${PC_ZeroMQ_INCLUDE_DIRS}/*)
+    set(PC_ZeroMQ_LIBRARY_HINTS ${PC_ZeroMQ_LIBRARY_DIRS} ${PC_ZeroMQ_LIBRARY_DIRS}/*)
+  endif(PC_ZeroMQ_FOUND)
+endif (NOT MSVC)
 
-find_path(ZeroMQ_INCLUDE_DIR NAMES zmq.h HINTS ${_ZeroMQ_ROOT}/include)
+find_path (
+  ZeroMQ_INCLUDE_DIRS
+  NAMES zmq.h
+  HINTS 
+    ${ZeroMQ_ROOT}/include
+    ${PC_ZeroMQ_INCLUDE_HINTS}
+    include
+  )
 
-if(MSVC)
-  #add in all the names it can have on windows
-  if(CMAKE_GENERATOR_TOOLSET MATCHES "v140" OR MSVC14)
-    set(_zmq_TOOLSET "-v140")
-  elseif(CMAKE_GENERATOR_TOOLSET MATCHES "v120" OR MSVC12)
-    set(_zmq_TOOLSET "-v120")
-  elseif(CMAKE_GENERATOR_TOOLSET MATCHES "v110_xp")
-    set(_zmq_TOOLSET "-v110_xp")
-  elseif(CMAKE_GENERATOR_TOOLSET MATCHES "v110" OR MSVC11)
-    set(_zmq_TOOLSET "-v110")
-  elseif(CMAKE_GENERATOR_TOOLSET MATCHES "v100" OR MSVC10)
-    set(_zmq_TOOLSET "-v100")
-  elseif(CMAKE_GENERATOR_TOOLSET MATCHES "v90" OR MSVC90)
-    set(_zmq_TOOLSET "-v90")
-  endif()
+if (MSVC)
+  # libzmq dll/lib built with MSVC is named using the Boost convention.
+  # https://github.com/zeromq/czmq/issues/577
+  # https://github.com/zeromq/czmq/issues/1972
+  if (MSVC_IDE)
+    set(MSVC_TOOLSET "-${CMAKE_VS_PLATFORM_TOOLSET}")
+  else ()
+    set(MSVC_TOOLSET "")
+  endif ()
 
-  set(_zmq_versions
-    "4_1_5" "4_1_4" "4_1_3" "4_1_2" "4_1_1" "4_1_0"
-    "4_0_8" "4_0_7" "4_0_6" "4_0_5" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0"
-    "3_2_5" "3_2_4" "3_2_3" "3_2_2"  "3_2_1" "3_2_0" "3_1_0")
-
-  set(_zmq_release_names)
-  set(_zmq_debug_names)
-  foreach( ver ${_zmq_versions})
-    list(APPEND _zmq_release_names "libzmq${_zmq_TOOLSET}-mt-${ver}")
+  # Retrieve ZeroMQ version number from zmq.h
+  file(STRINGS "${ZeroMQ_INCLUDE_DIRS}/zmq.h" zmq_version_defines
+    REGEX "#define ZMQ_VERSION_(MAJOR|MINOR|PATCH)")
+  foreach(ver ${zmq_version_defines})
+    if(ver MATCHES "#define ZMQ_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
+      set(ZMQ_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
+    endif()
   endforeach()
-  foreach( ver ${_zmq_versions})
-    list(APPEND _zmq_debug_names "libzmq${_zmq_TOOLSET}-mt-gd-${ver}")
-  endforeach()
 
-  #now try to find the release and debug version
-  find_library(ZeroMQ_LIBRARY_RELEASE
-    NAMES ${_zmq_release_names} zmq libzmq
-    HINTS ${_ZeroMQ_ROOT}/bin
-    ${_ZeroMQ_ROOT}/lib
+  set(_zmq_version ${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH})
+
+  set(_zmq_debug_names
+    "libzmq${MSVC_TOOLSET}-mt-gd-${_zmq_version}" # Debug, BUILD_SHARED
+    "libzmq${MSVC_TOOLSET}-mt-sgd-${_zmq_version}" # Debug, BUILD_STATIC
+    "libzmq-mt-gd-${_zmq_version}" # Debug, BUILD_SHARED
+    "libzmq-mt-sgd-${_zmq_version}" # Debug, BUILD_STATIC
     )
 
-  find_library(ZeroMQ_LIBRARY_DEBUG
-    NAMES ${_zmq_debug_names} zmq libzmq
-    HINTS ${_ZeroMQ_ROOT}/bin
-    ${_ZeroMQ_ROOT}/lib
+  set(_zmq_release_names
+    "libzmq${MSVC_TOOLSET}-mt-${_zmq_version}" # Release|RelWithDebInfo|MinSizeRel, BUILD_SHARED
+    "libzmq${MSVC_TOOLSET}-mt-s-${_zmq_version}" # Release|RelWithDebInfo|MinSizeRel, BUILD_STATIC
+    "libzmq-mt-${_zmq_version}" # Release|RelWithDebInfo|MinSizeRel, BUILD_SHARED
+    "libzmq-mt-s-${_zmq_version}" # Release|RelWithDebInfo|MinSizeRel, BUILD_STATIC
     )
 
-  if(ZeroMQ_LIBRARY_RELEASE AND ZeroMQ_LIBRARY_DEBUG)
-    set(ZeroMQ_LIBRARY
-      debug ${ZeroMQ_LIBRARY_DEBUG}
-      optimized ${ZeroMQ_LIBRARY_RELEASE}
-      )
-  elseif(ZeroMQ_LIBRARY_RELEASE)
-    set(ZeroMQ_LIBRARY ${ZeroMQ_LIBRARY_RELEASE})
-  elseif(ZeroMQ_LIBRARY_DEBUG)
-    set(ZeroMQ_LIBRARY ${ZeroMQ_LIBRARY_DEBUG})
-  endif()
-
-else()
-  find_library(ZeroMQ_LIBRARY
-    NAMES zmq libzmq
-    HINTS ${_ZeroMQ_ROOT}/lib
+  find_library (ZeroMQ_LIBRARY_DEBUG
+    NAMES ${_zmq_debug_names}
     )
-endif()
 
-function(extract_version_value value_name file_name value)
-  file(STRINGS ${file_name} val REGEX "${value_name} .")
-  string(FIND ${val} " " last REVERSE)
-  string(SUBSTRING ${val} ${last} -1 val)
-  string(STRIP ${val} val)
-  set(${value} ${val} PARENT_SCOPE)
-endfunction(extract_version_value)
+  find_library (ZeroMQ_LIBRARY_RELEASE
+    NAMES ${_zmq_release_names}
+    )
 
-extract_version_value("ZMQ_VERSION_MAJOR" ${ZeroMQ_INCLUDE_DIR}/zmq.h MAJOR)
-extract_version_value("ZMQ_VERSION_MINOR" ${ZeroMQ_INCLUDE_DIR}/zmq.h MINOR)
-extract_version_value("ZMQ_VERSION_PATCH" ${ZeroMQ_INCLUDE_DIR}/zmq.h PATCH)
+  include(SelectLibraryConfigurations)
+  select_library_configurations(ZeroMQ)
+endif (MSVC)
 
-set(ZeroMQ_VER "${MAJOR}.${MINOR}.${PATCH}")
+if (NOT ZeroMQ_LIBRARIES)
+  find_library (
+    ZeroMQ_LIBRARIES
+    NAMES libzmq zmq
+    HINTS 
+      ${ZeroMQ_ROOT}/lib
+      ${PC_ZeroMQ_LIBRARY_HINTS})
+endif ()
 
-#We are using the 2.8.10 signature of find_package_handle_standard_args,
-#as that is the version that ParaView 5.1 && VTK 6/7 ship, and inject
-#into the CMake module path. This allows our FindModule to work with
-#projects that include VTK/ParaView before searching for Remus
 include(FindPackageHandleStandardArgs)
+
 find_package_handle_standard_args(
   ZeroMQ
-  REQUIRED_VARS ZeroMQ_LIBRARY ZeroMQ_INCLUDE_DIR
-  VERSION_VAR ZeroMQ_VER
-  )
-
-set(ZeroMQ_FOUND ${ZEROMQ_FOUND})
-set(ZeroMQ_INCLUDE_DIRS ${ZeroMQ_INCLUDE_DIR})
-set(ZeroMQ_LIBRARIES ${ZeroMQ_LIBRARY})
-get_filename_component(ZeroMQ_LIBRARY_PATH ${ZeroMQ_LIBRARY} DIRECTORY CACHE)
-set(ZeroMQ_VERSION ${ZeroMQ_VER})
-
+  REQUIRED_VARS ZeroMQ_LIBRARIES ZeroMQ_INCLUDE_DIRS
+)
 mark_as_advanced(
-  ZeroMQ_ROOT
-  ZeroMQ_LIBRARY
-  ZeroMQ_LIBRARY_DEBUG
-  ZeroMQ_LIBRARY_RELEASE
-  ZeroMQ_INCLUDE_DIR
-  ZeroMQ_VERSION
-  )
+  ZeroMQ_FOUND
+  ZeroMQ_LIBRARIES ZeroMQ_INCLUDE_DIRS
+)
 
