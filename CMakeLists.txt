@@ -36,6 +36,7 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 option(WITH_JAVA   "Enable Java bindings " ON)
 option(WITH_PYTHON "Enable Python bindings " ON)
@@ -55,11 +56,12 @@ find_package(Threads REQUIRED)
 find_package(ZeroMQ 3.2.3 REQUIRED)
 
 if(ZeroMQ_FOUND)
-  add_library(zmq SHARED IMPORTED)
+  add_library(zmq SHARED IMPORTED GLOBAL)
   set_target_properties(zmq PROPERTIES
     IMPORTED_LOCATION "${ZeroMQ_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES ${ZeroMQ_INCLUDE_DIR}
   )
+  include_directories(${ZeroMQ_INCLUDE_DIR})
 endif()
 
 find_package(Protobuf 2.6.1 REQUIRED)
@@ -69,12 +71,13 @@ if(Protobuf_FOUND)
   # message(STATUS "PROTOBUF_PROTOC_EXECUTABLE:   ${PROTOBUF_PROTOC_EXECUTABLE}")
   # message(STATUS "PROTOBUF_INCLUDE_DIRS:        ${PROTOBUF_INCLUDE_DIR}")
   # message(STATUS "PROTOBUF_LIBRARIES:           ${PROTOBUF_LIBRARY}")
-  add_library(protobuf SHARED IMPORTED)
+  add_library(protobuf SHARED IMPORTED GLOBAL)
   set_target_properties(protobuf PROPERTIES
     IMPORTED_LOCATION "${PROTOBUF_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES ${PROTOBUF_INCLUDE_DIR}
   )
   get_filename_component(PROTOBUF_LIBRARY_PATH ${PROTOBUF_LIBRARY} DIRECTORY CACHE)
+  include_directories(${PROTOBUF_INCLUDE_DIR})
 endif()
 
 if(WITH_PYTHON)
