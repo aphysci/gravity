@@ -58,10 +58,10 @@ find_package(ZeroMQ 3.2.3 REQUIRED)
 if(ZeroMQ_FOUND)
   add_library(zmq SHARED IMPORTED GLOBAL)
   set_target_properties(zmq PROPERTIES
-    IMPORTED_LOCATION "${ZeroMQ_LIBRARY}"
-    INTERFACE_INCLUDE_DIRECTORIES ${ZeroMQ_INCLUDE_DIR}
+    IMPORTED_LOCATION "${ZeroMQ_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES ${ZeroMQ_INCLUDE_DIRS}
   )
-  include_directories(${ZeroMQ_INCLUDE_DIR})
+  include_directories(${ZeroMQ_INCLUDE_DIRS})
 endif()
 
 find_package(Protobuf 2.6.1 REQUIRED)
