@@ -26,11 +26,11 @@
 #ifndef GRAVITYDATAPRODUCT_H_
 #define GRAVITYDATAPRODUCT_H_
 
-#ifdef __GNUC__
+// #ifdef __GNUC__
+// #include <memory>
+// #else
 #include <memory>
-#else
-#include <memory>
-#endif
+// #endif
 #include "protobuf/GravityDataProductPB.pb.h"
 #include "Utility.h"
 

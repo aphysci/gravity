@@ -101,6 +101,9 @@ GRAVITY_API std::string& trim(
 
 GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
 {
+    //necessary check - otherwise program crashes
+    if (oldValue.empty())
+      return;
     auto pos = target.find(oldValue);
     while(pos != std::string::npos) {
       target.replace(pos, oldValue.size(), newValue);
