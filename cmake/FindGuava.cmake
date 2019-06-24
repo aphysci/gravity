@@ -13,19 +13,22 @@
 #  Guava_JAR          Path to Guava jar
 #
 
-set (GUAVA_ROOT /usr CACHE STRING "guava directory")
+if (NOT GUAVA_ROOT)
+  set (GUAVA_ROOT /usr CACHE STRING "guava directory")
+endif()
 
 set(_guava_versions
-  "10.0" "10.0.1" "11.0" "11.0.1" "11.0.2" "12.0" "12.0.1"
-  "13.0" "13.0.1" "14.0" "14.0.1" "15.0" "16.0" "16.0.1" "17.0" 
-  "18.0" "19.0" "20.0" "21.0"  "22.0" "23.0" "23.1-jre"
-  "23.2-jre" "23.3-jre" "23.4-jre" "23.5-jre"  "23.6-jre" 
-  "24.0-jre" "24.1-jre" "24.1.1-jre" "25.0-jre" "25.1-jre"
-  "26.0-jre" "27.0-jre" "27.0.1-jre" "27.1-jre"
-  "11.0.2-redhat-1" "11.0.2-redhat-2"
-  "13.0.1-redhat-1" "13.0.1-redhat-2" "13.0.1-redhat-3"
-  "14.0.1-redhat-1" "16.0.1-redhat-3" "18.0.0-redhat-1"
-  "19.0.0-redhat-1" "20.0.0-redhat-1" "27.0.1.jre-redhat-00001")
+  "27.0-jre" "27.0.1-jre" "27.1-jre" "27.0.1.jre-redhat-00001"
+  "26.0-jre" "25.1-jre" "25.0-jre" "24.1.1-jre" "24.1-jre" "24.0-jre"
+  "23.6-jre" "23.5-jre" "23.4-jre" "23.3-jre" "23.2-jre" "23.1-jre" "23.0"
+  "22.0" "21.0" "20.0" "20.0.0-redhat-1" "19.0.0-redhat-1" "19.0"
+  "18.0.0-redhat-1" "18.0" "17.0" "16.0.1" "16.0.1-redhat-3" "16.0"
+  "15.0" "14.0.1" "14.0.1-redhat-1" "14.0"
+  "13.0.1-redhat-3" "13.0.1-redhat-2" "13.0.1-redhat-1" "13.0.1" "13.0"
+  "12.0.1" "12.0"
+  "11.0.2-redhat-2" "11.0.2-redhat-1" "11.0.2" "11.0.1" "11.0"
+  "10.0.1" "10.0"
+  )
 
 set(_guava_names)
 foreach( ver ${_quava_versions})
