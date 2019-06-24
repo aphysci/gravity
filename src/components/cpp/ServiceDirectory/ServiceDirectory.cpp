@@ -563,7 +563,7 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			Log::message("[Lookup Request] ID: %s, Domain: %s, MessageType: Data Product, First Server: %s", 
 					 lookupRequest.lookupid().c_str(),
 					 lookupDomain.c_str(),
-                     dpMap.count(lookupRequest.lookupid()) != 0 ?
+                     (dpMap.count(lookupRequest.lookupid()) != 0 && dpMap[lookupRequest.lookupid()].size() > 0) ?
                      dpMap[lookupRequest.lookupid()].front().url().c_str(): "");
 		}
 		else
