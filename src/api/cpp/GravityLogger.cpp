@@ -227,7 +227,18 @@ Semaphore Log::lock;
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 {
     lock.Lock();
-	loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
+
+    //safeguard against adding duplicate logger
+    for (auto i = loggers.begin(); i != loggers.end(); ++i)
+    {
+      if (i->first == logger)
+      {
+        lock.Unlock();
+        return;
+      }
+    }
+
+    loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
     lock.Unlock();
 }
 
@@ -240,8 +251,7 @@ void Log::RemoveLogger(Logger* logger)
 		if(i->first == logger)
 		{
       delete i->first;
-			loggers.erase(i);
-      break;
+			i = loggers.erase(i);
 		}
 		else
 		{
@@ -352,13 +362,9 @@ void Log::CloseLoggers()
     //Remove all Loggers
     while(i != loggers.end())  
     {
-      //better way to do locking?
-      lock.Unlock();
-      Log::RemoveLogger(i->first);
-      lock.Lock();
-      i = loggers.begin(); //reset i to be the beginning of logger again
+      delete i->first;
+			i = loggers.erase(i);
     }
-
     lock.Unlock();
 }
 

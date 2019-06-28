@@ -1,0 +1,4 @@
+*.log
+run_test
+protobuf/*.pb.h
+protobuf/*.pb.o

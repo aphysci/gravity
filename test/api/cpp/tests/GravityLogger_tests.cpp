@@ -1,5 +1,4 @@
 #include "GravityLogger.h"
-#include "GravityLogger.cpp"
 #include "doctest.h"
 
 #include <string>
@@ -9,6 +8,18 @@
 #include <cstdio>
 
 using namespace gravity;
+
+// Create a logger that uses the Logger interface
+class TestLogger : public Logger {
+  public: 
+    TestLogger() = default;
+
+    //must implement the Log function   
+    void Log(int level, const char* messagestr)
+    {
+      //empty
+    }
+};
 
 TEST_CASE("Tests without the mocking framework") {
 
@@ -171,7 +182,7 @@ TEST_CASE("Tests without the mocking framework") {
     GIVEN("initializing 2 loggers through the init functions") {
       Log::initAndAddFileLogger("", "filename", Log::LogLevel::DEBUG);
       Log::initAndAddFileLogger("", "filename2", Log::LogLevel::DEBUG);
-      THEN("successfully close loggers") {
+      THEN("successfully close loggers with CloseLoggers()") {
         CHECK(2 == Log::NumberOfLoggers());
         Log::CloseLoggers();
         CHECK(0 == Log::NumberOfLoggers());
@@ -179,19 +190,46 @@ TEST_CASE("Tests without the mocking framework") {
     }
 
     GIVEN("manually create and add loggers") {
-      FileLogger* fileLogger = new FileLogger("", "filename", false);
-      Log::initAndAddLogger(fileLogger, Log::DEBUG); //now owned by Log
-      FileLogger* fileLogger2 = new FileLogger("", "filename2", false);
-      Log::initAndAddLogger(fileLogger2, Log::DEBUG); //now owned by Log
+      TestLogger* logger = new TestLogger();
+      Log::initAndAddLogger(logger, Log::DEBUG); //ptr now owned by Log
+      TestLogger* logger2 = new TestLogger();
+      Log::initAndAddLogger(logger2, Log::DEBUG); //ptr now owned by Log
 
-      THEN("successfully close loggers") {
+      THEN("successfully close loggers with RemoveLogger()") {
         CHECK(2 == Log::NumberOfLoggers());
-        Log::RemoveLogger(fileLogger2); //remove specific Loggger
-        Log::RemoveLogger(fileLogger); //remove specific Loggger
+        Log::RemoveLogger(logger2); //remove specific Loggger
+        Log::RemoveLogger(logger); //remove specific Loggger
+        CHECK(0 == Log::NumberOfLoggers());
+      }
+
+      THEN("successfully close loggers with CloseLoggers()") {
+        CHECK(2 == Log::NumberOfLoggers());
+        Log::CloseLoggers();
         CHECK(0 == Log::NumberOfLoggers());
       }
     }
-    std::remove("filename.log");
-    std::remove("filename2.log");
+
+    GIVEN("add pointer to same logger more than once") {
+      TestLogger* logger = new TestLogger();
+      TestLogger* logger2 = new TestLogger();
+      Log::initAndAddLogger(logger, Log::DEBUG); //ptr now owned by Log
+      Log::initAndAddLogger(logger2, Log::DEBUG); //ptr now owned by Log
+      Log::initAndAddLogger(logger, Log::DEBUG); //duplicate ptr
+
+      THEN("do not store duplicate loggers and close loggers with CloseLoggers") {
+        CHECK(2 == Log::NumberOfLoggers());
+        Log::CloseLoggers();
+        CHECK(0 == Log::NumberOfLoggers());
+      }
+     
+      THEN("do not store duplicate loggers and close loggers with RemoveLoggers") {
+        CHECK(2 == Log::NumberOfLoggers());
+        Log::RemoveLogger(logger2); //remove specific Loggger
+        Log::RemoveLogger(logger); //remove specific Loggger
+        CHECK(0 == Log::NumberOfLoggers());
+      }
+
+    }
   }
 } 
+
