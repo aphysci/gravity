@@ -1,0 +1,138 @@
+# (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#
+# Gravity is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program;
+# If not, see <http://www.gnu.org/licenses/>.
+
+
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# Tool-related substitution variables
+CC             = @CC@
+CXX            = @CXX@
+LIBS           = @LIBS@
+AC_CFLAGS      = @CFLAGS@ 
+AC_CPPFLAGS    = @CPPFLAGS@ @BOOST_CPPFLAGS@
+AC_LDFLAGS     = @LDFLAGS@
+PROTOC         = @PROTOC@
+
+#Locations
+MYPROTO_DIR=protobuf
+
+#Libraries
+KEYVALUE_PARSER_INCLUDE_DIR=../../../src/keyvalue_parser
+
+#gravity
+GRAVITY_DIR=../../../src/api/cpp/
+
+#OS Specific
+SYSTEM:=$(strip $(shell uname -s))
+#SYSTEM:=LINUX
+#SYSTEM=MINGW32_NT-6.1
+#WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+	OS_EXE_EXT=.exe
+windows: test;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+ifneq (,$(findstring lsodium,$(LIBS)))
+	OS_SPECIFIC_LIBS = -lzmq -lsodium -Wl,-Bdynamic -lrt -lpthread
+else
+	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lrt -lpthread
+endif
+	OS_EXE_EXT=
+linux: test;
+else
+ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
+
+#Compiler Flags
+INCLUDES=$(AC_CPPFLAGS)-I$(MYPROTO_DIR) -I$(GRAVITY_DIR)
+LIBDIRS=-L$(KEYVALUE_PARSER_INCLUDE_DIR) $(AC_LDFLAGS) -L$(GRAVITY_DIR)
+LIBS=-Wl,-Bstatic -lgravity $(OS_SPECIFIC_LIBS) -lkeyvalue_parser -lprotobuf 
+
+TARGET 			:= unit_tests
+ 
+SOURCES 		:= tests/main.cpp \
+							tests/DomainDataKey_tests.cpp \
+							tests/GravityDataProduct_tests.cpp \
+							tests/GravityLogger_tests.cpp \
+							tests/GravityNode_tests.cpp \
+							tests/Utility_tests.cpp \
+							tests/CommUtil_tests.cpp
+
+#location of test cpp files
+TESTS_DIR = tests
+
+############## No changes below here ######################
+
+#
+# Create .obj directory to store .o files.
+#
+obj_dir := .obj
+$(shell mkdir -p $(obj_dir) >/dev/null)
+
+#
+# Create list of object files (obj) from cpp files.
+#
+obj    := $(patsubst $(TESTS_DIR)/%.cpp, $(obj_dir)/%.o,$(SOURCES)) 
+
+#
+# Protobuf files
+#
+PROTO_SRC=$(wildcard $(MYPROTO_DIR)/*.proto)
+PROTO_CODE=$(patsubst $(MYPROTO_DIR)/%.proto,$(MYPROTO_DIR)/%.pb.cc,$(PROTO_SRC))
+PROTO_OBJ=$(patsubst $(MYPROTO_DIR)/%.cc,$(MYPROTO_DIR)/%.o,$(PROTO_CODE))
+
+# 
+# Create targets.
+#
+.PHONY: test clean libtarget 
+
+# all: libtarget $(PROTO_OBJ) $(TARGET) 
+
+test: libtarget $(PROTO_OBJ) $(TARGET) 
+	./$(TARGET)
+
+%.pb.cc:%.proto
+	$(PROTOC) --proto_path=$(MYPROTO_DIR) --cpp_out=$(MYPROTO_DIR) $<
+
+%.pb.o:%.pb.cc
+	$(CC) -c -o $@ $< $(INCLUDES)
+
+#build target if any object files are newer than current target
+#relink if library is newer than target
+# $(TARGET): $(obj) $(GRAVITY_DIR)/libgravity.a
+$(TARGET): $(obj) 
+	$(CXX) -o $@ $(PROTO_OBJ) $^ $(INCLUDES) $(LIBDIRS) $(LIBS) 
+	
+#build object files if cpp files are newer 
+$(obj_dir)/%.o: $(TESTS_DIR)/%.cpp
+	$(CXX) $(INCLUDES) -c $< -o $@
+
+libtarget:
+	# make -C $(GRAVITY_DIR) 
+
+clean:
+	rm -rf $(TARGET) $(obj_dir) *.log $(MYPROTO_DIR)/*.pb.h $(MYPROTO_DIR)/*.pb.o
+

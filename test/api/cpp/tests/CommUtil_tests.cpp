@@ -195,15 +195,6 @@ TEST_CASE("tests for sending/reading ZMQ messages") {
   SUBCASE("tests for sending/receiving one-part int messages") {
     int message = 25;
 
-
-    GIVEN("an int sent from the service -> client") {
-      sendIntMessage(serviceSocket, message, ZMQ_DONTWAIT);
-      THEN("receive a zero back") {
-        int result = readIntMessage(clientSocket);
-        CHECK(0 == result);
-      }
-    }  
-
     //check typical use case of request & response
     GIVEN("an integer message sent from the client -> service") {
       sendIntMessage(clientSocket, message, ZMQ_DONTWAIT);
@@ -211,10 +202,6 @@ TEST_CASE("tests for sending/reading ZMQ messages") {
       THEN("receive message on service socket") {
         int result = readIntMessage(serviceSocket);
         CHECK(message == result);
-        THEN("should be no more additional messages to read") {
-          result = readIntMessage(serviceSocket);
-          CHECK(0 == result);
-        }
       }
 
       GIVEN("a one-part string response from service -> client") {
@@ -225,10 +212,6 @@ TEST_CASE("tests for sending/reading ZMQ messages") {
         THEN("receive message on client socket") {
           int result = readIntMessage(clientSocket);
           CHECK(response == result);
-          THEN("should be no more additional messages to read") {
-            result = readIntMessage(clientSocket);
-            CHECK(0 == result);
-          }
         }
       }
     }
