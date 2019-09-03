@@ -1,5 +1,5 @@
 #include "Utility.h"
-#include "doctest.h"
+#include "../doctest.h"
 #include "../utils/utils.h"
 
 #include <climits>

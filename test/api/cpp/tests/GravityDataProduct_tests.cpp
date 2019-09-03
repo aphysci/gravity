@@ -1,5 +1,5 @@
 #include "GravityDataProduct.h"
-#include "doctest.h"
+#include "../doctest.h"
 
 #include <string>
 #include <iostream>

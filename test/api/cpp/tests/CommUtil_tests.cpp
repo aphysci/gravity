@@ -1,6 +1,6 @@
 #include "CommUtil.h"
 #include "GravityDataProduct.h"
-#include "doctest.h"
+#include "../doctest.h"
 #include "zmq.h"
 #include "BasicCounterDataProduct.pb.h"
 

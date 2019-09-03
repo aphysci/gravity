@@ -1,5 +1,5 @@
 #include "DomainDataKey.h"
-#include "doctest.h"
+#include "../doctest.h"
 
 #include <string>
 #include <iostream>
