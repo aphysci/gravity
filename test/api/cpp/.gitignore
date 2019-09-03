@@ -1,4 +1,4 @@
 *.log
-run_test
+unit_tests
 protobuf/*.pb.h
 protobuf/*.pb.o
