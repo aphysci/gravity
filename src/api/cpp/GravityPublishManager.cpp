@@ -317,7 +317,7 @@ void GravityPublishManager::registerDataProduct()
 	// Read the publish transport type
 	string transportType = readStringMessage(gravityNodeResponseSocket);
 
-    int minPort, maxPort;
+    int minPort = 0, maxPort = 0;
     if(transportType == "tcp")
     {
         minPort = readIntMessage(gravityNodeResponseSocket);

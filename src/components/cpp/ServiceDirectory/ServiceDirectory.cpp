@@ -813,7 +813,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 {
     ServiceDirectoryUnregistrationPB unregistration;
     request.populateMessage(unregistration);
-    bool foundUrl = true;
+    bool foundUrl = false;
 
     // If the registration does not specify a domain, default to our own
 	string domain = unregistration.has_domain() ? unregistration.domain() : this->domain;
@@ -859,33 +859,35 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 					
 			//remove instance mapping
 			registrationInstanceMap.erase(unregistration.url());
-        }
-        else
-        {
-            foundUrl = false;
+
+			foundUrl = true;
         }
     }
     else
     {
 		map<string, string>& sMap = serviceMap[domain];
 
-        if (sMap.find(unregistration.id()) != sMap.end())
+		// Check that we have a submap for the requested domain and a registration instance for the requested url
+		if (sMap.find(unregistration.id()) != sMap.end() && registrationInstanceMap.find(unregistration.url()) != registrationInstanceMap.end())
         {
-            sMap.erase(unregistration.id());
+			// Confirm that the requested removal matches the registered time
+			uint32_t regTime = static_cast<uint32_t>(registrationInstanceMap[unregistration.url()] / 1e6);
+			if (regTime == unregistration.registration_time())
+			{
+				sMap.erase(unregistration.id());
 
-            // Update any subscribers interested in our providers
-            if (domain == this->domain)
-            {
-                updateProductLocations(unregistration.id(), unregistration.url(), 
+				// Update any subscribers interested in our providers
+				if (domain == this->domain)
+				{
+					updateProductLocations(unregistration.id(), unregistration.url(),
 						registrationInstanceMap[unregistration.url()], REMOVE, SERVICE);
-            }
+				}
 
-			// remove instance mapping
-			registrationInstanceMap.erase(unregistration.url());
-        }
-        else
-        {
-            foundUrl = false;
+				// remove instance mapping
+				registrationInstanceMap.erase(unregistration.url());
+
+				foundUrl = true;
+			}
         }
     }
 
@@ -898,8 +900,8 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     if (!foundUrl)
     {
         sdr.set_returncode(ServiceDirectoryResponsePB::NOT_REGISTERED);
-        Log::warning("Attempt to unregister unregistered %s, %s, %s", unregistration.id().c_str(), 
-            unregistration.url().c_str(), unregistration.domain().c_str());
+        Log::warning("Attempt to unregister unregistered/invalid provider: %s, %s, %s, %u", unregistration.id().c_str(), 
+            unregistration.url().c_str(), unregistration.domain().c_str(), unregistration.registration_time());
     }
     else
     {

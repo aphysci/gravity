@@ -58,7 +58,7 @@ private:
 	void ready();
 
 	std::string serviceDirectoryUrl;
-	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url);
+	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url, uint32_t regTime);
 public:
 	/**
 	 * Constructor GravityRequestManager
