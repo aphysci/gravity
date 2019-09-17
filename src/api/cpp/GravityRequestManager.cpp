@@ -217,7 +217,7 @@ void GravityRequestManager::start()
 							reqDetails->serviceID.c_str(), response.getRegistrationTime(), reqDetails->registrationTime);
 
 						// Send notification of stale data to ServiceDirectory
-						notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url);
+						notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url, reqDetails->registrationTime);
 					}
 					else
 					{
@@ -250,12 +250,13 @@ void GravityRequestManager::start()
 	zmq_close(gravityResponseSocket);
 }
 
-void GravityRequestManager::notifyServiceDirectoryOfStaleEntry(string serviceId, string url)
+void GravityRequestManager::notifyServiceDirectoryOfStaleEntry(string serviceId, string url, uint32_t regTime)
 {
 	Log::debug("Notifying ServiceDirectory of stale service: [%s @ %s]", serviceId.c_str(), url.c_str());
 	ServiceDirectoryUnregistrationPB unregistration;
 	unregistration.set_id(serviceId);
 	unregistration.set_url(url);
+	unregistration.set_registration_time(regTime);
 	unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
 
 	GravityDataProduct request("UnregistrationRequest");

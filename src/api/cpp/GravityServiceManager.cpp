@@ -208,7 +208,7 @@ void GravityServiceManager::addService()
     // Read the publish transport type
     string transportType = readStringMessage(gravityNodeSocket);
 
-    int minPort, maxPort;
+    int minPort = 0, maxPort = 0;
     if(transportType == "tcp")
     {
         minPort = readIntMessage(gravityNodeSocket);

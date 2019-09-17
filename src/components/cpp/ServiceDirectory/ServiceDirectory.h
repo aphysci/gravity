@@ -66,6 +66,7 @@ private:
 	// mapping from URL to name of publisher/service provider
 	std::map<std::string, std::string> urlToComponentMap;
 
+	// mapping from URL to registered timestamp
 	std::map<std::string, uint64_t> registrationInstanceMap;
 
 	// mapping from Domain to URL
