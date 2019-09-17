@@ -433,33 +433,66 @@ GravityNode::~GravityNode()
 	//kill the domain listener
 	if(listenerEnabled)
 	{
-		sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
-		readStringMessage(domainListenerSWL.socket);
-		zmq_close(domainListenerSWL.socket);
-		zmq_close(domainRecvSWL.socket);
-	}
+    if (domainListenerSWL.socket)
+    {
+		  sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
+		  readStringMessage(domainListenerSWL.socket);
+		  zmq_close(domainListenerSWL.socket);
+    }
+    if (domainRecvSWL.socket)
+    {
+      zmq_close(domainRecvSWL.socket);
+    }
+  }
 
 	// Close the inproc sockets
-	sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
-	zmq_close(subscriptionManagerSWL.socket);
-	zmq_close(subscriptionManagerConfigSWL.socket);
+  if (subscriptionManagerSWL.socket)
+  {
+	  sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
+	  zmq_close(subscriptionManagerSWL.socket);
+  }
+  if (subscriptionManagerConfigSWL.socket)
+  {
+    zmq_close(subscriptionManagerConfigSWL.socket);
+  }
 
-	sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
-	zmq_close(requestManagerSWL.socket);
-	zmq_close(requestManagerRepSWL.socket);
+  if (requestManagerSWL.socket)
+  {
+	  sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
+	  zmq_close(requestManagerSWL.socket);
+  }
+  if (requestManagerRepSWL.socket)
+  {
+    zmq_close(requestManagerRepSWL.socket);
+  }
 
+  if (publishManagerPublishSWL.socket)
+  {
     sendStringMessage(publishManagerPublishSWL.socket, "kill", ZMQ_DONTWAIT);
     zmq_close(publishManagerPublishSWL.socket);
+  } 
+  if (publishManagerRequestSWL.socket)
+  {
     zmq_close(publishManagerRequestSWL.socket);
+  }
 
+  if (serviceManagerSWL.socket)
+  {
     sendStringMessage(serviceManagerSWL.socket, "kill", ZMQ_DONTWAIT);
     zmq_close(serviceManagerSWL.socket);
-	zmq_close(serviceManagerConfigSWL.socket);
-
+  }
+  if (serviceManagerConfigSWL.socket)
+  {
+    zmq_close(serviceManagerConfigSWL.socket);
+  }
+  
+  if (metricsManagerSocket)
+  {
     sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
     zmq_close(metricsManagerSocket);
+  }
 
-    if (hbSocket != NULL)
+    if (hbSocket)
     {
         stopHeartbeat();
         sendStringMessage(hbSocket, "kill", ZMQ_DONTWAIT);
@@ -467,13 +500,19 @@ GravityNode::~GravityNode()
     }
 
 	// Clean up the zmq context object
-    zmq_term(context);
+    if(context)
+    {
+      zmq_term(context);
+    }
 
-    if (parser != NULL)
+    if (parser)
         delete parser;
 
   //Do not destroy object until sub manager thread is joined
-  subscriptionManagerThread.join();
+  if (subscriptionManagerThread.joinable())
+  {
+    subscriptionManagerThread.join();
+  }
 }
 
 GravityReturnCode GravityNode::init()

@@ -21,14 +21,9 @@
 
 #include <string>
 #include <map>
-#ifndef __GNUC__
 #include <memory>
-#else
-#include <memory>
-#endif
 
 #include "keyvalue_parser.h"
-
 
 /**
  * A really simple C++ wrapper for the keyvalue library.

@@ -103,7 +103,7 @@ typedef GravityTransportTypes::Types GravityTransportType;
 
 typedef struct SocketWithLock
 {
-	void *socket;
+	void *socket = nullptr;
 	Semaphore lock;
 } SocketWithLock;
 
@@ -198,7 +198,7 @@ private:
 	
   std::thread subscriptionManagerThread;
 
-    void* context;
+    void* context = nullptr;
     SocketWithLock subscriptionManagerSWL;
     SocketWithLock subscriptionManagerConfigSWL;
     SocketWithLock publishManagerRequestSWL;
@@ -209,7 +209,7 @@ private:
 	SocketWithLock requestManagerRepSWL;
 	SocketWithLock domainListenerSWL;
 	SocketWithLock domainRecvSWL;
-    void* metricsManagerSocket; // only used in init, no lock needed
+    void* metricsManagerSocket = nullptr; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
 
 	std::string listenForBroadcastURL(std::string domain, int port, int timeout);

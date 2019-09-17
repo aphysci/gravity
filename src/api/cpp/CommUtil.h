@@ -61,6 +61,8 @@ namespace gravity
 
 /**
  * Read a message through the zmq socket.
+ * \ref readStringMessage(void*,int) with 0 as the flag
+ * \note flag 0 is not defined in zmq.h. From the unit tests it seems that this will block until it receives a message. If messages are sent with the ZMQ_SNDMORE flag, zmq will hold off on actually sending the messages until it has the final message with the ZMQ_DONTWAIT flag. Until then this will be a blocking call.
  * \return message
  */
 GRAVITY_API std::string readStringMessage(void *socket);
@@ -68,7 +70,7 @@ GRAVITY_API std::string readStringMessage(void *socket);
 /**
  * \copybrief readStringMessage(void*)
  * \param flags a zmq flag. Options include:
- * \n ZMQ_DONTWAIT "Specifies that the operation should be performed in non-blocking mode."
+ * \n ZMQ_DONTWAIT (set to 1 in zmq.h) "Specifies that the operation should be performed in non-blocking mode."
  * \n <a href="http://api.zeromq.org/3-0:zmq-recvmsg">source</a>
  * \copydetails readStringMessage(void*)
  */
@@ -77,9 +79,8 @@ GRAVITY_API std::string readStringMessage(void *socket, int flags);
 /**
  * Send a message through a zmq socket
  * \param flags a zmq flag. Options include: 
- * \n ZMQ_DONTWAIT "Specifies that the operation should be performed in non-blocking mode."
- * \n ZMQ_SNDLABEL "Specifies that the message part being sent is an address label, and that further message parts are to follow."
- * \n ZMQ_SNDMORE "Specifies that the message being sent is a multi-part message, and that further message data parts are to follow." 
+ * \n ZMQ_DONTWAIT (set to 1 in zmq.h) "Specifies that the operation should be performed in non-blocking mode."
+ * \n ZMQ_SNDMORE (set to 2 in zmq.h) "Specifies that the message being sent is a multi-part message, and that further message data parts are to follow." 
  * \n <a href="http://api.zeromq.org/3-0:zmq-sendmsg">source</a>
  */
 GRAVITY_API void sendStringMessage(void* socket, std::string str, int flags); 

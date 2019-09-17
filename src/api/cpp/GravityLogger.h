@@ -92,12 +92,12 @@ public:
      * Initialize a Logger to log to a file.  
      * Note that you do not have to create the Logger - this function does it for you.
      * May be called multiple times.
-     * \param filename                 Local logging filename.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
-     * \param comp_id                  ID of the component being logged.
+     * \param filename                 Existing directory to place log file in. Use "" to place in current directory.  Use "/dev/null" and set local_log_level to Log::NONE to turn off local logging.
+     * \param comp_id                  ID of the component being logged. Will be the name of the log file.
      * \param local_log_level          The initial local logging level.
      * \param close_file_after_write   Boolean that indicates whether the log file should be kept open between writes.  Defaults to false.
      */
-    GRAVITY_API static void initAndAddFileLogger(const char* filename, const char* comp_id, LogLevel local_log_level, bool close_file_after_write = false);
+    GRAVITY_API static void initAndAddFileLogger(const char* directory, const char* comp_id, LogLevel local_log_level, bool close_file_after_write = false);
 
     /**
      * Initialize a Logger to log to the console.
@@ -125,7 +125,8 @@ public:
     GRAVITY_API static void initAndAddLogger(Logger* logger, LogLevel log_level);
 
     /**
-     * Close and delete all open Loggers.
+     * Close all open Loggers.
+     * Deallocates memory used for Loggers.
      */
     GRAVITY_API static void CloseLoggers();
 
@@ -146,8 +147,14 @@ public:
 
     /**
      * Removes the specified Logger.
+     * Deallocates memory used for Logger.
      */
     GRAVITY_API static void RemoveLogger(Logger* logger);
+
+    /**
+     * Return the number of open loggers.
+     */
+    GRAVITY_API static int NumberOfLoggers();
 private:
     /**
      * Calls the Logger::Log function for each initialized Logger 

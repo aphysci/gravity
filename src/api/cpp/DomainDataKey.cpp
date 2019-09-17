@@ -41,7 +41,17 @@ bool DomainDataKey::operator<(const DomainDataKey &right) const
 	return ret;
 }
 
+bool DomainDataKey::operator>(const DomainDataKey &right) const
+{
+  return (!(*this < right || *this == right));
+}
+
 bool DomainDataKey::operator==(const DomainDataKey &right) const
 {
 	return ( !(*this < right) && !(right < *this) );
+}
+
+bool DomainDataKey::operator!=(const DomainDataKey &right) const
+{
+  return (!(*this == right));
 }

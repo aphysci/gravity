@@ -139,7 +139,6 @@ void FileLogger::Log(int level, const char* messagestr)
 
 FileLogger::~FileLogger()
 {
-    Log::RemoveLogger(this);
     fclose(log_file);
 }
 
@@ -208,7 +207,7 @@ void GravityLogger::Log(int level, const char* messagestr)
 
 GravityLogger::~GravityLogger()
 {
-    Log::RemoveLogger(this);
+  //empty
 }
 
 
@@ -228,18 +227,30 @@ Semaphore Log::lock;
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 {
     lock.Lock();
-	loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
+
+    //safeguard against adding duplicate logger
+    for (auto i = loggers.begin(); i != loggers.end(); ++i)
+    {
+      if (i->first == logger)
+      {
+        lock.Unlock();
+        return;
+      }
+    }
+
+    loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
     lock.Unlock();
 }
 
 void Log::RemoveLogger(Logger* logger)
 {
-    lock.Lock();
-    std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+  lock.Lock();
+  std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
 	while(i != loggers.end())
 	{
 		if(i->first == logger)
 		{
+      delete i->first;
 			i = loggers.erase(i);
 		}
 		else
@@ -247,7 +258,7 @@ void Log::RemoveLogger(Logger* logger)
 		    i++;
 		}
 	}
-    lock.Unlock();
+  lock.Unlock();
 }
 
 const char* Log::LogLevelToString(LogLevel level)
@@ -346,19 +357,23 @@ int Log::LevelToInt(LogLevel level)
 void Log::CloseLoggers()
 {
     lock.Lock();
-    std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
-    std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
-
-    //Delete all Loggers
-    while(i != l_end)
+    std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+    
+    //Remove all Loggers
+    while(i != loggers.end())  
     {
-        delete i->first;
-        i++;
+      delete i->first;
+			i = loggers.erase(i);
     }
-
-    //Remove all References
-    loggers.erase(loggers.begin(), loggers.end());
     lock.Unlock();
+}
+
+int Log::NumberOfLoggers()
+{
+  lock.Lock();
+  int size = loggers.size();
+  lock.Unlock(); 
+  return size;
 }
 
 //Using functions instead of macros so we can use namespaces.

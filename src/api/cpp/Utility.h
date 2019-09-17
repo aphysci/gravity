@@ -48,7 +48,7 @@ GRAVITY_API std::string StringToLowerCase(std::string str); ///< Return lowercas
 GRAVITY_API char* StringToLowerCase(char* str, int leng); ///< In-place modification and returns ptr to string
 GRAVITY_API std::string StringCopyToLowerCase(const std::string &str); ///< \TODO remove, same as StringToLowerCase
 GRAVITY_API int StringToInt(std::string str, int default_value); ///< Return an integer.
-GRAVITY_API double StringToDouble(std::string str, int default_value); ///< Return a double
+GRAVITY_API double StringToDouble(std::string str, double default_value); ///< Return a double
 /**
  * Trim a string.
  * \param s string that will be modified
