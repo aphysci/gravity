@@ -18,7 +18,7 @@
 
 // all imports required in the generated Python SWIG code
 %pythonbegin %{
-import abc, logging
+import abc, logging, time
 from .GravityDataProduct import GravityDataProduct 
 %}
 
@@ -172,7 +172,6 @@ namespace gravity {
 	    ~GravityNode();
 		GravityReturnCode init();
 	    GravityReturnCode init(std::string);
-	    void waitForExit();
 		GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
 	    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
@@ -245,7 +244,16 @@ namespace gravity {
 	    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
 			const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 		GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID, const std::string &domain = "");
-	
+
+        // Ctrl-C has no effect if we hand control over to C++ here, so
+        // just reimplement in Python
+        %ignore waitForExit;
+        %pythoncode %{
+            def waitForExit(self):
+                while True:
+                    time.sleep(10)                
+        %}
+        	
 	    std::string getStringParam(std::string key, std::string default_value = "");
 	    int getIntParam(std::string key, int default_value = -1);
 	    double getFloatParam(std::string key, double default_value = 0.0);
