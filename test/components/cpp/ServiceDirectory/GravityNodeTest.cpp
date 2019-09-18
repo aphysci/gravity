@@ -91,22 +91,30 @@ void GravitySyncTest::subscriptionFilled(const std::vector< std::shared_ptr<Grav
     for(vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
     {
         std::shared_ptr<GravityDataProduct> dataProduct = *i;
+        int receivedCount;
+        dataProduct->getData(&receivedCount, sizeof(int));
         if (dataProduct->getDataProductID().compare("SyncTestGDP") == 0)
         {
-            gdpcount1++;
+            GRAVITY_TEST_EQUALS(gdpcount1, receivedCount);
             // only compare these at the end when we know they should be the same
             if (gdpcount1 == 100)
             {
                 GRAVITY_TEST(*dataProduct == gdp);
             }
             GravityDataProduct gdp2("SyncTestGDP2");
-            gdp.setData(&gdpcount1, sizeof(int));
+            gdp2.setData(&gdpcount1, sizeof(int));
             gravityNode.publish(gdp2);
             GRAVITY_TEST(!(*dataProduct == gdp2));
+            gdpcount1++;
+        }
+        else if (dataProduct->getDataProductID().compare("SyncTestGDP2") == 0)
+        {
+            GRAVITY_TEST_EQUALS(gdpcount2, receivedCount);
+            gdpcount2++;
         }
         else
         {
-            gdpcount2++;
+            GRAVITY_TEST_EQUALS(1, 0);
         }
     }
 }
