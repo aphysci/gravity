@@ -1841,6 +1841,9 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
+	// Set the registration time of the service
+	request.setRegistrationTime(regTime);
+
 	uint64_t t1 = gravity::getCurrentTime();
 	std::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
