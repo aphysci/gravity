@@ -21,11 +21,16 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <mutex>
 #ifndef WIN32
 #include <sys/unistd.h>
 #endif
 
 using namespace std;
+
+namespace {
+  std::mutex mtx;
+} //end anonymous namespace
 
 namespace gravity {
 
@@ -33,9 +38,6 @@ FileReader::FileReader() {}
 
 void FileReader::init(const string& filename, const string& dataProductList)
 {
-	// Initialize mutex
-	pthread_mutex_init(&mutex, NULL);
-
 	// Open archive file
 	archiveFile.open(filename.c_str(), ios::in | ios::binary);
 
@@ -60,25 +62,31 @@ void FileReader::processArchive()
 {
     while (readNextDataProduct())
     {
-	pthread_mutex_lock(&mutex);
-	while (archiveFile && dataProducts.size() > 100)
-	{
-		pthread_mutex_unlock(&mutex);
+	    bool condition;
+      {
+        std::lock_guard<std::mutex> guard(mtx);
+        condition = archiveFile && dataProducts.size() > 100;
+      }
+      
+    while (condition)
+    {
 #ifdef WIN32
-		gravity::sleep(10);
+gravity::sleep(10);
 #else
-		usleep(10000);
-#endif
-		pthread_mutex_lock(&mutex);
-	}
-	pthread_mutex_unlock(&mutex);
+usleep(10000);
+#endif  
+      {
+        std::lock_guard<std::mutex> guard(mtx);
+        condition = archiveFile && dataProducts.size() > 100;
+      }
     }
+  }
 }
 
 int FileReader::readNextDataProduct()
 {
 	int size;
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 
 	while (archiveFile)
 	{
@@ -104,7 +112,7 @@ int FileReader::readNextDataProduct()
         	}
 
         	// Convert to GravityDataProduct
-        tr1::shared_ptr<GravityDataProduct> gdp = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
+        std::shared_ptr<GravityDataProduct> gdp = std::shared_ptr<GravityDataProduct>(new GravityDataProduct(buffer.data(), size));
 		//gdp->parseFromArray(buffer, size);
 
 		// Make sure this is a data product we care about
@@ -118,7 +126,6 @@ int FileReader::readNextDataProduct()
 	}
 
 	int sz = dataProducts.size();
-	pthread_mutex_unlock(&mutex);
 
 	return sz;
 }
@@ -142,24 +149,22 @@ vector<string> FileReader::split(string s)
 
 bool FileReader::hasData()
 {
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	bool ret = !dataProducts.empty();
-	pthread_mutex_unlock(&mutex);
 	return ret;
 }
 
-tr1::shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
+std::shared_ptr<GravityDataProduct> FileReader::popGravityDataProduct()
 {
-	pthread_mutex_lock(&mutex);
-	tr1::shared_ptr<GravityDataProduct> gdp = dataProducts[0];
+  	std::lock_guard<std::mutex> guard(mtx);
+	std::shared_ptr<GravityDataProduct> gdp = dataProducts[0];
 	dataProducts.erase(dataProducts.begin());
-	pthread_mutex_unlock(&mutex);
 	return gdp;
 }
 
-tr1::shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
+std::shared_ptr<GravityDataProduct> FileReader::getNextDataProduct()
 {
-    tr1::shared_ptr<GravityDataProduct> gdp;
+    std::shared_ptr<GravityDataProduct> gdp;
 	if (!hasData() && !readNextDataProduct())
 	{
 	}

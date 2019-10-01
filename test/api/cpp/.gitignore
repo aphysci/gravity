@@ -1,0 +1,6 @@
+*.log
+unit_tests
+Makefile
+test.sh
+protobuf/*.pb.h
+protobuf/*.pb.o

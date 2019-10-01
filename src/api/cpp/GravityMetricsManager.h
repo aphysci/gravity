@@ -29,7 +29,7 @@
 #include "Utility.h"
 
 #ifdef __GNUC__
-#include <tr1/memory>
+#include <memory>
 #else
 #include <memory>
 #endif

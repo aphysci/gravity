@@ -26,11 +26,11 @@
 #ifndef GRAVITYDATAPRODUCT_H_
 #define GRAVITYDATAPRODUCT_H_
 
-#ifdef __GNUC__
-#include <tr1/memory>
-#else
+// #ifdef __GNUC__
+// #include <memory>
+// #else
 #include <memory>
-#endif
+// #endif
 #include "protobuf/GravityDataProductPB.pb.h"
 #include "Utility.h"
 
@@ -45,13 +45,17 @@ class GravityNode;
 class GravityDataProduct
 {
 protected:
-    std::tr1::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
+    std::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
 	friend class GravityServiceManager;
     friend void* Heartbeat(void*);
 public:
+    /**
+     * Default Constructor
+     */
     GRAVITY_API GravityDataProduct() {}
+
     /**
      * Constructor
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
@@ -65,7 +69,7 @@ public:
      * \param size size of serialized data
      * \return a GravityDataProduct
      */
-    GRAVITY_API GravityDataProduct(void* arrayPtr, int size);
+    GRAVITY_API GravityDataProduct(const void* arrayPtr, int size);
 
     /**
      * Default Destructor
@@ -73,7 +77,7 @@ public:
     GRAVITY_API virtual ~GravityDataProduct();
 
     /**
-     * Method to return the timestamp associated with this data product
+     * Method to return the timestamp associated with this data product.
      *  Represents Microseconds since the Unix Epoch
      * \return timestamp for data
      */
@@ -149,7 +153,7 @@ public:
      * \param arrayPtr pointer to array of bytes containing serialized GravityDataProduct
      * \param size size of serialized data
      */
-    GRAVITY_API void parseFromArray(void* arrayPtr, int size);
+    GRAVITY_API void parseFromArray(const void* arrayPtr, int size);
 
     /**
      * Serialize this GravityDataProduct
@@ -160,37 +164,44 @@ public:
 
     /**
      * Check equivalence between two GravityDataProducts.  GravityDataProducts are considered equivalent
-     * if they're product ID and data are identical.
+     * if their product IDs and data are identical.
      * \param gdp GravityDataProduct to compare with this one.
      * \return true if the two GravityDataProducts are equivalent, false otherwise.
      */
     GRAVITY_API bool operator==(const GravityDataProduct &gdp) const;
 
+    /**
+     * Check non-equivalence between two GravityDataProducts. 
+     * \param gdp GravityDataProduct to compare with this one.
+     * \return true if the two GravityDataProducts are not equivalent, false otherwise.
+     */
+    GRAVITY_API bool operator!=(const GravityDataProduct &gdp) const;
+
 	/**
-	 * Get the componentId of the Gravity Node that produced this data product
-	 * \return componentId of the source Gravity Node
+	 * Get the component ID of the GravityNode that produced this data product
+	 * \return component ID of the source GravityNode
 	 */
 	GRAVITY_API std::string getComponentId() const;
 
 	/**
-	 * Get the domain of the Gravity Node that produced this data product
-	 * \return domain of the source Gravity Node
+	 * Get the domain of the GravityNode that produced this data product
+	 * \return domain of the source GravityNode
 	 */
 	GRAVITY_API std::string getDomain() const;
 
 	/**
-	 * Get the flag indicating if this is a "future" reponse
+	 * Get the flag indicating if this is a "future" response
 	 * \return future response flag
 	 */
 	GRAVITY_API bool isFutureResponse() const;
 
 	/**
-	* Get the flag indicated if this was a cached data product.	*
+	* Get the flag indicated if this was a cached data product.	
 	*/
 	GRAVITY_API bool isCachedDataproduct() const;
 	
 	/**
-	* Sets the flag indicating this data product is cached	*
+	* Sets the flag indicating this data product is cached	
 	*/
 	GRAVITY_API void setIsCachedDataproduct(bool cached);
 
@@ -230,7 +241,7 @@ public:
 	GRAVITY_API bool isRelayedDataproduct() const;
 
 	/**
-	 * Set the flag indicating that this message has been relayed, and is not coming from the original source
+	 * Set the flag indicating whether this message has been relayed or has come from the original source
 	 */
 	GRAVITY_API void setIsRelayedDataproduct(bool relayed);
 
@@ -242,7 +253,7 @@ public:
 	/**
 	 * Get the data protocol in this data product (for instance, protobuf2)
 	 */
-	GRAVITY_API const std::string& getProtocol();
+	GRAVITY_API const std::string& getProtocol() const;
 
 	/**
 	 * Set the type of data in this data product (for instance, the full protobuf type name)
@@ -252,7 +263,20 @@ public:
 	/**
 	 * Get the type of data in this data product (for instance, the full protobuf type name)
 	 */
-	GRAVITY_API const std::string& getTypeName();
+	GRAVITY_API const std::string& getTypeName() const;
+
+	/**
+	* Method to return the time associated with the registration of this data product
+	*  Represents Seconds since the Unix Epoch
+	* \return registration time for data (0 if not set)
+	*/
+	GRAVITY_API uint32_t getRegistrationTime() const;
+
+	/**
+	* Set the registration time on this GravityDataProduct (typically set by infrastructure when created)
+	* \param ts Registration time (epoch seconds) for this GravityDataProduct
+	*/
+	GRAVITY_API void setRegistrationTime(uint32_t ts) const { gravityDataProductPB->set_registration_time(ts); }
 };
 
 } /* namespace gravity */

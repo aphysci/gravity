@@ -42,13 +42,14 @@
 //#include "protobuf/ServiceDirectoryBroadcastSetup.pb.h"
 
 #include <zmq.h>
-#include <boost/algorithm/string.hpp>
 
 #include <stdlib.h>
 #include <string>
 #include <cstring>
 #include <iostream>
 #include <algorithm>
+#include <thread>
+#include <locale>
 
 #define REGISTERED_PUBLISHERS "RegisteredPublishers"
 #define DIRECTORY_SERVICE "DirectoryService"
@@ -90,7 +91,6 @@ static void* registration(void* regData)
 
 static void* startUDPBroadcastManager(void* context)
 {
-
 	// Create and start the UDP Broadcaster thread
 	gravity::ServiceDirectoryUDPBroadcaster udpBroadcaster(context);
 	udpBroadcaster.start();
@@ -168,7 +168,12 @@ ServiceDirectory::~ServiceDirectory()
 
 void ServiceDirectory::start()
 {
-	//set up zmq context
+  //Declare threads to be spawned
+  std::thread udpBroadcasterThread;
+  std::thread udpReceiverThread;
+  std::thread synchronizerThread;
+	
+  //set up zmq context
 	context = zmq_init(1);
 
 	//set up broadcast and recieve managers
@@ -178,12 +183,12 @@ void ServiceDirectory::start()
 		return;
 	}
 	
-    registeredPublishersReady = registeredPublishersProcessed = false;
-    gn.init("ServiceDirectory");
+  registeredPublishersReady = registeredPublishersProcessed = false;
+  gn.init("ServiceDirectory");
 
-    std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
-    boost::replace_all(sdURL, "localhost", "127.0.0.1");
-    Log::message("running with SD connection string: %s", sdURL.c_str());
+  std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
+  replaceAll(sdURL, "localhost", "127.0.0.1");
+  Log::message("running with SD connection string: %s", sdURL.c_str());
 
 	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
 
@@ -253,7 +258,7 @@ void ServiceDirectory::start()
 		//start the udp broadcaster
 		udpBroadcastSocket.socket = zmq_socket(context,ZMQ_REQ);
 		zmq_bind(udpBroadcastSocket.socket,"inproc://service_directory_udp_broadcast");
-		pthread_create(&udpBroadcasterThread,NULL,startUDPBroadcastManager,context);
+    udpBroadcasterThread = std::thread(&startUDPBroadcastManager,context);
 
 		//configure the broadcaster
 		sendBroadcasterParameters(domain,sdURL,broadcastIP,broadcastPort,broadcastRate);
@@ -273,7 +278,7 @@ void ServiceDirectory::start()
 		//start the udp receiver
 		udpReceiverSocket.socket = zmq_socket(context,ZMQ_REQ);
 		zmq_bind(udpReceiverSocket.socket,"inproc://service_directory_udp_receive");
-		pthread_create(&udpReceiverThread,NULL,startUDPReceiveManager,context);
+    udpReceiverThread = std::thread(startUDPReceiveManager,context);
 
 		//configure the receiver
 		sendReceiverParameters(domain,sdURL,broadcastPort,numDomains,knownDomainCSV);
@@ -282,8 +287,8 @@ void ServiceDirectory::start()
 		Log::message("Starting ServiceDirectorySynchronization thread");
 		syncInitDetails.context = context;
 		syncInitDetails.url = sdURL;
-		pthread_create(&synchronizerThread, NULL, startSynchronizer, (void*)&syncInitDetails);
-		
+    synchronizerThread = std::thread(startSynchronizer, (void*)&syncInitDetails);
+
 		// Configure the comms channel to direct the synchronizer thread
 		synchronizerSocket = zmq_socket(context, ZMQ_PUB);
 		zmq_bind(synchronizerSocket, "inproc://service_directory_synchronizer");			
@@ -313,14 +318,9 @@ void ServiceDirectory::start()
     struct RegistrationData regData;
     regData.node = &gn;
     regData.provider = this;
-    pthread_attr_t attr;
-    if (pthread_attr_init(&attr) == 0)
-    {
-        pthread_t registerThread;
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        pthread_create(&registerThread, &attr, registration, (void*)&regData);
-        pthread_attr_destroy(&attr);
-    }
+    std::thread registerThread(registration, (void*)&regData);
+    registerThread.detach();
+        
     /****
      * End last block of code before main loop
      */
@@ -353,7 +353,7 @@ void ServiceDirectory::start()
              * on a separate thread provided by the GravityNode.
              */
             lock.Lock();
-            tr1::shared_ptr<GravityDataProduct> response = request(req);
+            std::shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
@@ -391,9 +391,23 @@ void ServiceDirectory::start()
 					publishDomainUpdateMessage(domainToAdd,url,ADD);
 
 					// Send Add command to synchronization thread
-					Log::debug("Sending add command to synchronziation thread for %s:%s", domainToAdd.c_str(), url.c_str());
+					Log::debug("Sending add command to synchronization thread for %s:%s", domainToAdd.c_str(), url.c_str());
 					sendStringMessage(synchronizerSocket, "Add", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToAdd, ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
+
+				}
+				if (command == "Update")
+				{
+					string domainToUpdate = readStringMessage(domainSocket);
+					string url = readStringMessage(domainSocket);
+
+					domainMap[domainToUpdate] = url;
+
+					// Send Add command to synchronization thread
+					Log::debug("Sending update command to synchronization thread for %s:%s", domainToUpdate.c_str(), url.c_str());
+					sendStringMessage(synchronizerSocket, "Update", ZMQ_SNDMORE);
+					sendStringMessage(synchronizerSocket, domainToUpdate, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
 
 				}
@@ -415,11 +429,19 @@ void ServiceDirectory::start()
 			}
 		}
     }
+    //join the threads that were spawned before exiting loop
+    udpBroadcasterThread.join();
+    udpReceiverThread.join();
+		synchronizerThread.join();
 }
 
-tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
+/**
+ * Even though this looks like a normal Gravity request callback, this method is only called locally, not from
+ * the GravityNode.
+ */
+std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataProduct& dataProduct)
 {
-    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DataProductRegistrationResponse"));
     string requestType = dataProduct.getDataProductID();
 
     ///////////////////////////////////
@@ -456,10 +478,10 @@ tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataP
  * Because the lock in this method blocks the main SD loop above, we can't issue any GravityNode calls
  * here that require SD support (e.g. register, etc).
  */
-tr1::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
+std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
-    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
     if (serviceID == DIRECTORY_SERVICE)
     {
@@ -541,7 +563,7 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			Log::message("[Lookup Request] ID: %s, Domain: %s, MessageType: Data Product, First Server: %s", 
 					 lookupRequest.lookupid().c_str(),
 					 lookupDomain.c_str(),
-                     dpMap.count(lookupRequest.lookupid()) != 0 ?
+                     (dpMap.count(lookupRequest.lookupid()) != 0 && dpMap[lookupRequest.lookupid()].size() > 0) ?
                      dpMap[lookupRequest.lookupid()].front().url().c_str(): "");
 		}
 		else
@@ -572,6 +594,9 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
 				lookupResponse.set_url(sMap[lookupRequest.lookupid()]);
+
+				uint32_t regTime = static_cast<uint32_t>(registrationInstanceMap[sMap[lookupRequest.lookupid()]] / 1e6);
+				lookupResponse.set_registration_time(regTime);
 			}
 		}
 
@@ -611,8 +636,8 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	}
 	
 	// Add change to data product
-	Log::debug("Adding Change : %s %s %s %lu", productID.c_str(), url.c_str(), 
-			urlToComponentMap[url].c_str(),0);//urlToComponentMap[url].timestamp); 
+	Log::debug("Adding Change : %s %s %s %llu", productID.c_str(), url.c_str(), 
+			urlToComponentMap[url].c_str(), timestamp);
 	ProductChange* change = providerMap.mutable_change();
 	change->set_product_id(productID);
 	change->set_url(url);
@@ -676,15 +701,31 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				if (iter->url() == registration.url())
 					break;
 			}
-			if (iter == urls.end())
-			{
-				PublisherInfoPB infoPB;
-				infoPB.set_url(registration.url());
-				if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
-				if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
-				if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+			
+			// Insert new instance mapping for URL
+			registrationInstanceMap[registration.url()] = registration.timestamp();
 
-				dpMap[registration.id()].push_back(infoPB);
+			uint32_t regTimeSecs = static_cast<uint32_t>(registration.timestamp() / 1e6);
+			if (iter == urls.end() || iter->registration_time() != regTimeSecs)
+			{
+				if (iter == urls.end())
+				{
+					PublisherInfoPB infoPB;
+					infoPB.set_url(registration.url());
+					if (registration.has_is_relay()) infoPB.set_isrelay(registration.is_relay());
+					if (registration.has_component_id()) infoPB.set_componentid(registration.component_id());
+					if (registration.has_ip_address()) infoPB.set_ipaddress(registration.ip_address());
+					infoPB.set_registration_time(regTimeSecs);
+
+					dpMap[registration.id()].push_back(infoPB);
+				}
+				else
+				{
+					if (registration.has_is_relay()) iter->set_isrelay(registration.is_relay());
+					if (registration.has_component_id()) iter->set_componentid(registration.component_id());
+					if (registration.has_ip_address()) iter->set_ipaddress(registration.ip_address());
+					iter->set_registration_time(regTimeSecs);
+				}				
 				
 				urlToComponentMap[registration.url()] = registration.component_id();
 
@@ -702,9 +743,6 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				// Remove any previous registrations at this URL as they obviously no longer exist
 				purgeObsoletePublishers(registration.id(), registration.url());
 
-				//insert new instance mapping for URL
-				registrationInstanceMap[registration.url()] = registration.timestamp();
-
 				// Update any subscribers interested in our providers
 				if (domain == this->domain && registration.id() != REGISTERED_PUBLISHERS)
 				{
@@ -715,9 +753,6 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			else
 			{
 				foundDup = true;
-						
-				//Replace existing timestamp with the new one
-				registrationInstanceMap[registration.url()] = registration.timestamp();
 				
 				// Update any subscribers interested in our providers
 				if(domain == this->domain)
@@ -778,7 +813,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 {
     ServiceDirectoryUnregistrationPB unregistration;
     request.populateMessage(unregistration);
-    bool foundUrl = true;
+    bool foundUrl = false;
 
     // If the registration does not specify a domain, default to our own
 	string domain = unregistration.has_domain() ? unregistration.domain() : this->domain;
@@ -791,8 +826,10 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         list<PublisherInfoPB>::iterator iter = infoPBs->begin();
         for (;iter != infoPBs->end(); iter++)
         {
-        	if (iter->url() == unregistration.url())
-        		break;
+			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
+			{
+				break;
+			}
         }
         if (iter != infoPBs->end())
         {
@@ -822,33 +859,35 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 					
 			//remove instance mapping
 			registrationInstanceMap.erase(unregistration.url());
-        }
-        else
-        {
-            foundUrl = false;
+
+			foundUrl = true;
         }
     }
     else
     {
 		map<string, string>& sMap = serviceMap[domain];
 
-        if (sMap.find(unregistration.id()) != sMap.end())
+		// Check that we have a submap for the requested domain and a registration instance for the requested url
+		if (sMap.find(unregistration.id()) != sMap.end() && registrationInstanceMap.find(unregistration.url()) != registrationInstanceMap.end())
         {
-            sMap.erase(unregistration.id());
+			// Confirm that the requested removal matches the registered time
+			uint32_t regTime = static_cast<uint32_t>(registrationInstanceMap[unregistration.url()] / 1e6);
+			if (regTime == unregistration.registration_time())
+			{
+				sMap.erase(unregistration.id());
 
-            // Update any subscribers interested in our providers
-            if (domain == this->domain)
-            {
-                updateProductLocations(unregistration.id(), unregistration.url(), 
+				// Update any subscribers interested in our providers
+				if (domain == this->domain)
+				{
+					updateProductLocations(unregistration.id(), unregistration.url(),
 						registrationInstanceMap[unregistration.url()], REMOVE, SERVICE);
-            }
+				}
 
-			// remove instance mapping
-			registrationInstanceMap.erase(unregistration.url());
-        }
-        else
-        {
-            foundUrl = false;
+				// remove instance mapping
+				registrationInstanceMap.erase(unregistration.url());
+
+				foundUrl = true;
+			}
         }
     }
 
@@ -861,8 +900,8 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
     if (!foundUrl)
     {
         sdr.set_returncode(ServiceDirectoryResponsePB::NOT_REGISTERED);
-        Log::warning("Attempt to unregister unregistered %s, %s, %s", unregistration.id().c_str(), 
-            unregistration.url().c_str(), unregistration.domain().c_str());
+        Log::warning("Attempt to unregister unregistered/invalid provider: %s, %s, %s, %u", unregistration.id().c_str(), 
+            unregistration.url().c_str(), unregistration.domain().c_str(), unregistration.registration_time());
     }
     else
     {

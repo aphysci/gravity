@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 option java_outer_classname = "ServiceDirectoryMapContainer";
 option java_package = "com.aphysci.gravity.protobuf";

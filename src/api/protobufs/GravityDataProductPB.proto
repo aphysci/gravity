@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 option java_outer_classname = "GravityDataProductContainer";
 option java_package = "com.aphysci.gravity.protobuf";
@@ -37,5 +38,6 @@ message GravityDataProductPB
 	optional bool is_relayed_dataproduct = 11 [default = false];
 	optional string protocol = 12 [default=""]; // typically 'protobuf2', all lowercase.
 	optional string type_name = 13 [default=""]; // e.g.: gravity.GravityDataProductPB
+	optional uint32 registration_time = 14;  // Time (seconds) of publication/service registration
 }
 

@@ -18,7 +18,7 @@
 import traceback
 
 from google.protobuf import message
-from GravityDataProductPB_pb2 import GravityDataProductPB
+from .GravityDataProductPB_pb2 import GravityDataProductPB
 
 class GravityDataProduct(object):
     def __init__(self, dataProductID=None, data=None):

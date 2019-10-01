@@ -45,7 +45,7 @@ Semaphore Heartbeat::lock;
 std::set<std::string> Heartbeat::filledHeartbeats;
 
 
-void Heartbeat::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void Heartbeat::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
 	lock.Lock();
 	for(size_t i = 0; i < dataProducts.size(); i++)
@@ -265,6 +265,7 @@ void* Heartbeat(void* thread_context)
 	{
 		// Publish heartbeat (via the GravityPublishManager)
 		gdp.setTimestamp(getCurrentTime());
+		gdp.setRegistrationTime(params->registrationTime);
 		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
 		sendStringMessage(heartbeatSocket, "publish", ZMQ_SNDMORE);
 		sendStringMessage(heartbeatSocket, gdp.getDataProductID(), ZMQ_SNDMORE);

@@ -104,13 +104,13 @@ vector<string> FileArchiver::split(string s)
 	return tokens;
 }
 
-void FileArchiver::subscriptionFilled(const vector<tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void FileArchiver::subscriptionFilled(const vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     if (!suspend)
     {
         for (unsigned int i = 0; i < dataProducts.size(); i++)
         {
-            tr1::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
+            std::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
 
             // Write the size of the data product
             int size = dataProduct->getSize();
@@ -127,7 +127,7 @@ void FileArchiver::subscriptionFilled(const vector<tr1::shared_ptr<GravityDataPr
     }
 }
 
-tr1::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
     Log::debug("Received service request of type '%s'", serviceID.c_str());
     FileArchiverControlResponsePB faResponse;
@@ -149,7 +149,7 @@ tr1::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serv
         }
     }
 
-    tr1::shared_ptr<GravityDataProduct> gdpResponse = tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
     gdpResponse->setData(faResponse);
     return gdpResponse;
 }

@@ -27,7 +27,7 @@ using namespace System;
 
 namespace GravityCS
 {
-using namespace std::tr1;
+using namespace std;
 
 //Forward Declarations.
 ref class DataProduct;

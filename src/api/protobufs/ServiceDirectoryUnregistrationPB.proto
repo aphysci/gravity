@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 option java_outer_classname = "ServiceDirectoryUnregistrationContainer";
 option java_package = "com.aphysci.gravity.protobuf";
@@ -34,4 +35,5 @@ message ServiceDirectoryUnregistrationPB
 	}
 	optional RegistrationType type = 3;
 	optional string domain = 4;
+	optional uint32 registration_time = 5;
 }

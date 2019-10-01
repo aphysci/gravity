@@ -1,14 +1,15 @@
 
 import time
-import gravity
 from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
+
 class MySubscriber(GravitySubscriber):
-    # Don't need to declare your own __init__, but make sure to call 
-    # GravitySubscriber.__init__ (super) - therein lies magical SWIG code
+    # We're only using GravitySubscriber here, but this is generally the way we 
+    # initialize Gravity Python components to ensure that __init__ is called
+    # on each parent.
     def __init__(self):
-        super(MySubscriber, self).__init__()
+        GravitySubscriber.__init__(self)
 
     def subscriptionFilled(self, dataProducts):
         counterPB = BasicCounterDataProductPB()

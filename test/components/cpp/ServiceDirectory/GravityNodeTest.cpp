@@ -19,6 +19,12 @@
 #include "GravityNodeTest.h"
 #include "GravityTest.h"
 
+#include <mutex>
+
+namespace {
+  std::mutex mtx;
+} //end anonymous namespace
+
 using namespace gravity;
 using namespace std;
 
@@ -29,7 +35,7 @@ public:
     Subscriber() : count(0) {}
     ~Subscriber() {}
     int getCount() { return count; }
-    void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
+    void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) { count++; }
 };
 
 class GravitySyncTest : public GravitySubscriber
@@ -41,7 +47,7 @@ class GravitySyncTest : public GravitySubscriber
 public:
 
     GravitySyncTest();
-    void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
+    void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
     void testSync();
 };
 
@@ -80,34 +86,41 @@ void GravitySyncTest::testSync()
     gravityNode.unsubscribe("SyncTestGDP2", *this);
 }
 
-void GravitySyncTest::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void GravitySyncTest::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    for(vector<tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    for(vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
     {
-        tr1::shared_ptr<GravityDataProduct> dataProduct = *i;
+        std::shared_ptr<GravityDataProduct> dataProduct = *i;
+        int receivedCount;
+        dataProduct->getData(&receivedCount, sizeof(int));
         if (dataProduct->getDataProductID().compare("SyncTestGDP") == 0)
         {
-            gdpcount1++;
+            GRAVITY_TEST_EQUALS(gdpcount1, receivedCount);
             // only compare these at the end when we know they should be the same
             if (gdpcount1 == 100)
             {
                 GRAVITY_TEST(*dataProduct == gdp);
             }
             GravityDataProduct gdp2("SyncTestGDP2");
-            gdp.setData(&gdpcount1, sizeof(int));
+            gdp2.setData(&gdpcount1, sizeof(int));
             gravityNode.publish(gdp2);
             GRAVITY_TEST(!(*dataProduct == gdp2));
+            gdpcount1++;
+        }
+        else if (dataProduct->getDataProductID().compare("SyncTestGDP2") == 0)
+        {
+            GRAVITY_TEST_EQUALS(gdpcount2, receivedCount);
+            gdpcount2++;
         }
         else
         {
-            gdpcount2++;
+            GRAVITY_TEST_EQUALS(1, 0);
         }
     }
 }
 
 void GravityNodeTest::setUp()
 {
-    pthread_mutex_init(&mutex, NULL);
     subFilledFlag = false;
     gotRequestFlag = false;
     gotResponseFlag = false;
@@ -122,7 +135,7 @@ void GravityNodeTest::testServiceWithDomain(void)
 	// Get the domain from the Service Directory
 	string domain;
 	GravityDataProduct request("GetDomain");
-	tr1::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	std::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
 	GRAVITY_TEST(response);
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());
@@ -152,7 +165,7 @@ void GravityNodeTest::testServiceWithDomain(void)
 	GRAVITY_TEST(gotResponse());	
 
 	// Submit sync request  with domain specified
-	tr1::shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp, -1, domain);
+	std::shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp, -1, domain);
 	GRAVITY_TEST_EQUALS(retGDP->getDataProductID(), "RESPONSE");
 
 	// Clear service info
@@ -186,7 +199,7 @@ void GravityNodeTest::testSubscribeDomain(void)
 	// Get the domain from the Service Directory
 	string domain;
 	GravityDataProduct request("GetDomain");
-	tr1::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	std::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
 	GRAVITY_TEST(response);
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());
@@ -391,7 +404,7 @@ void GravityNodeTest::testServiceManager(void)
     GRAVITY_TEST_EQUALS(ret, GravityReturnCodes::SUCCESS);
     sleep(2);
 
-    tr1::shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp);
+    std::shared_ptr<GravityDataProduct> retGDP = node.request("SERVICE_TEST", gdp);
 	GRAVITY_TEST_EQUALS(retGDP->getDataProductID(), "RESPONSE");
 
 	ret = node.unregisterService("SERVICE_TEST");
@@ -462,78 +475,70 @@ void GravityNodeTest::testComponentID(void)
     GRAVITY_TEST_EQUALS(gn.getComponentID(), "TestCompId");
 }
 
-void GravityNodeTest::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void GravityNodeTest::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
     subFilledFlag = true;
-    pthread_mutex_unlock(&mutex);
 }
 
 bool GravityNodeTest::subFilled()
 {
 	bool ret;
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	ret = subFilledFlag;
-	pthread_mutex_unlock(&mutex);
 	return ret;
 }
 
 void GravityNodeTest::clearSubFlag()
 {
-   	pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
    	subFilledFlag = false;
-   	pthread_mutex_unlock(&mutex);
 }
 
 void GravityNodeTest::clearServiceFlags()
 {
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	gotResponseFlag = false;
 	gotRequestFlag = false;
-	pthread_mutex_unlock(&mutex);
 }
 
 bool GravityNodeTest::gotRequest()
 {
 	bool ret = false;
-  	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
    	ret = gotRequestFlag;
-   	pthread_mutex_unlock(&mutex);
    	return ret;
 }
 
 bool GravityNodeTest::gotResponse()
 {
   	bool ret = false;
-  	pthread_mutex_lock(&mutex);
+    std::lock_guard<std::mutex> guard(mtx);
    	ret = gotResponseFlag;
-  	pthread_mutex_unlock(&mutex);
    	return ret;
 }
 
-tr1::shared_ptr<GravityDataProduct> GravityNodeTest::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> GravityNodeTest::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
-    tr1::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
+    std::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("RESPONSE"));
 	ret->setData("RESP_DATA", 10);
 
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	char* data = (char*)malloc(dataProduct.getDataSize());
 	dataProduct.getData(data, dataProduct.getDataSize());
 	gotRequestFlag = (strcmp(dataProduct.getDataProductID().c_str(), "REQUEST")==0 &&
 	    						strcmp(data, "REQ_DATA")==0);
-	pthread_mutex_unlock(&mutex);
 
 	return ret;
 }
 
 void GravityNodeTest::requestFilled(string serviceID, string requestID, const GravityDataProduct& response)
 {
-	pthread_mutex_lock(&mutex);
+  std::lock_guard<std::mutex> guard(mtx);
 	char* data = (char*)malloc(response.getDataSize());
 	response.getData(data, response.getDataSize());
 	gotResponseFlag = (strcmp(response.getDataProductID().c_str(), "RESPONSE")==0 &&
 						strcmp(data, "RESP_DATA")==0);
-	pthread_mutex_unlock(&mutex);
 }
 
 int main( int argc, char *argv[] )

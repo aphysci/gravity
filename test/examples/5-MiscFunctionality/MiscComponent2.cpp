@@ -47,12 +47,12 @@ void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, int64_t& inter
 class MiscGravitySubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
-void MiscGravitySubscriber::subscriptionFilled(const std::vector< tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void MiscGravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< tr1::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 			i != dataProducts.end(); i++)
 	{
 		//Get a raw message

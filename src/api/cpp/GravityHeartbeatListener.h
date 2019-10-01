@@ -28,6 +28,7 @@
 
 #include <string>
 #include <stdint.h>
+#include "Utility.h"
 
 namespace gravity
 {
@@ -47,7 +48,7 @@ public:
 	 * will change the interval used in subsequent iterations.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
 	 */
-	virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds) = 0;
+	GRAVITY_API virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds) = 0;
 
 	/**
 	 * Called when another component's heartbeat is received
@@ -56,12 +57,12 @@ public:
      * will change the interval used in subsequent iterations.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
 	 */
-	virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) = 0;
+	GRAVITY_API virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) = 0;
 
     /**
      * Default destructor
      */
-	virtual ~GravityHeartbeatListener() { };
+	GRAVITY_API virtual ~GravityHeartbeatListener() { };
 };
 
 } /* namespace gravity */

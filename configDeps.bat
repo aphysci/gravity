@@ -158,7 +158,13 @@ echo ===== Build Java Protobuf Runtime lib =====
 echo.
 pushd %PROTOBUF_HOME%\java
 copy /y %PROTOBUF_HOME%\protoc.exe ..\src
-call mvn package
+protoc --java_out=src\main\java -I..\src ..\src\google\protobuf\descriptor.proto
+pushd %PROTOBUF_HOME%\java\src\main\java
+if not exist "build" mkdir build
+javac -d .\build .\com\google\protobuf\*.java
+jar cvf %PROTOBUF_HOME%\java\target\protobuf-java.jar -C build .
+::call mvn package
+popd
 popd
 copy /y /b %PROTOBUF_HOME%\java\target\protobuf-java-*.jar %GRAVITY_DEPS%\protobuf-java.jar
 

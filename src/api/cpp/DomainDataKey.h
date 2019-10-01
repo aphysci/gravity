@@ -32,7 +32,9 @@ public:
 	~DomainDataKey(void);
 
 	bool operator<(const DomainDataKey &right) const;
+	bool operator>(const DomainDataKey &right) const;
 	bool operator==(const DomainDataKey &right) const;
+	bool operator!=(const DomainDataKey &right) const;
 };
 
 #endif /* DOMAINDATAKEY_H_ */

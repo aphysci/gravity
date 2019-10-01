@@ -20,7 +20,6 @@
 #define FILEREADER_H_
 
 #include <GravityDataProduct.h>
-#include <pthread.h>
 #include <fstream>
 #include <vector>
 
@@ -30,11 +29,10 @@ class FileReader
 {
 private:
 	std::ifstream archiveFile;
-	std::vector<std::tr1::shared_ptr<GravityDataProduct> > dataProducts;
+	std::vector<std::shared_ptr<GravityDataProduct> > dataProducts;
 	std::vector<std::string> dpList;
-	pthread_mutex_t mutex;
 	void processArchive();
-	std::tr1::shared_ptr<GravityDataProduct> popGravityDataProduct();
+	std::shared_ptr<GravityDataProduct> popGravityDataProduct();
 	bool hasData();
 	std::vector<std::string> split(std::string s);
 	int readNextDataProduct();
@@ -46,7 +44,7 @@ public:
 	void init(const std::string& filename, const std::string& dataProductList);
 	virtual ~FileReader();
 	static void* start(void* context);
-	std::tr1::shared_ptr<GravityDataProduct> getNextDataProduct();
+	std::shared_ptr<GravityDataProduct> getNextDataProduct();
 };
 
 } /* namespace gravity */

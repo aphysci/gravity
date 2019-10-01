@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 option java_outer_classname = "ComponentDataLookupResponseContainer";
 option java_package = "com.aphysci.gravity.protobuf";
@@ -24,10 +25,11 @@ package gravity;
 
 message PublisherInfoPB
 {
-	optional string url         = 1;
-	optional bool isRelay       = 2;
-	optional string componentID = 3;
-	optional string ipAddress   = 4;
+	optional string url               = 1;
+	optional bool isRelay             = 2;
+	optional string componentID       = 3;
+	optional string ipAddress         = 4;
+	optional uint32 registration_time = 5;
 }
 
 message ComponentDataLookupResponsePB

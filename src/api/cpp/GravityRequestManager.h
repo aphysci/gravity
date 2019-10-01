@@ -39,6 +39,8 @@ typedef struct RequestDetails
 	std::string requestID;
 	long timeoutTimeMilliseconds;
 	GravityRequestor* requestor;
+	uint32_t registrationTime;
+	std::string url;
 } RequestDetails;
 
 class GravityRequestManager
@@ -47,13 +49,16 @@ private:
 	void* context;
 	void* gravityNodeSocket;
 	void* gravityResponseSocket;
-	std::map<void*,std::tr1::shared_ptr<RequestDetails> > requestMap;
+	std::map<void*,std::shared_ptr<RequestDetails> > requestMap;
 	std::vector<zmq_pollitem_t> pollItems;
 	std::map<std::string,void*> futureResponseUrlToSocketMap;
 	void processRequest();
 	void createFutureResponse();
 	void sendFutureResponse();
 	void ready();
+
+	std::string serviceDirectoryUrl;
+	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url, uint32_t regTime);
 public:
 	/**
 	 * Constructor GravityRequestManager

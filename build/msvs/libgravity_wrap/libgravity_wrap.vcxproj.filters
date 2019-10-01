@@ -56,7 +56,7 @@
     <ClInclude Include="..\..\gravity_wrap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\CPPGravitySubscriptionMonitor.h">
+    <ClInclude Include="..\..\CPPGravitySubscriptionMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
