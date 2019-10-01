@@ -28,11 +28,11 @@ classdef GravityNode < handle
             % Initialize the GravityNode
             this.gravityNode = com.aphysci.gravity.swig.GravityNode;
 
-			if (isempty(componentID))
-            	this.initStatus = this.gravityNode.init();
-			else
-            	this.initStatus = this.gravityNode.init(componentID);
-			end
+            if nargin && ~isempty(componentID)
+                this.initStatus = this.gravityNode.init(componentID);
+            else
+                this.initStatus = this.gravityNode.init();
+            end
             
             % Initialize the subscription map
             this.subscriptionMap = containers.Map;
