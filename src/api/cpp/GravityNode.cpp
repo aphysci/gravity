@@ -859,6 +859,13 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
 
+	// Auto start heartbeats if specified in INI
+	int heartbeatPeriodMicro = getIntParam("GravityHeartbeatPeriodMicros", 0);
+	if (heartbeatPeriodMicro > 0)
+	{
+		startHeartbeat(heartbeatPeriodMicro);
+	}
+
 	return ret;
 }
 
@@ -1841,9 +1848,6 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
-	// Set the registration time of the service
-	request.setRegistrationTime(regTime);
-
 	uint64_t t1 = gravity::getCurrentTime();
 	std::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
 	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
@@ -2116,7 +2120,7 @@ GravityReturnCode GravityNode::stopHeartbeat()
 		Heartbeat::setHeartbeatRunning(false);
 
 		// Unregister heartbeat with Service Directory
-		std::string heartbeatName = componentID + "_GravityHeartbeat_" + myDomain;
+		std::string heartbeatName = componentID + "_GravityHeartbeat";
 		ret = unregisterDataProduct(heartbeatName);
 	}
 
@@ -2132,8 +2136,8 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 		return gravity::GravityReturnCodes::FAILURE; //We shouldn't be able to start this guy twice
 
 	std::string heartbeatName;
-	//Gravity Heartbeats should be keyed with the domain
-	heartbeatName = componentID+"_GravityHeartbeat_"+myDomain;
+	//Gravity Heartbeats named by component ID
+	heartbeatName = componentID + "_GravityHeartbeat";
 
 	this->registerDataProduct(heartbeatName, GravityTransportTypes::TCP);
 
@@ -2172,8 +2176,8 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 
 	std::string heartbeatName;
 
-	//Gravity Heartbeats should be keyed with the domain
-	heartbeatName = componentID+"_GravityHeartbeat_"+(domain.empty()?myDomain:domain);
+	//Gravity Heartbeats named by component ID
+	heartbeatName = componentID + "_GravityHeartbeat";
 
 	ret = this->subscribe(heartbeatName, hbSub,"",domain);
 
@@ -2210,7 +2214,7 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	static class Heartbeat hbSub;
 	
 	std::string heartbeatName;
-	heartbeatName = componentID+"_GravityHeartbeat_"+(domain.empty()?myDomain:domain);
+	heartbeatName = componentID + "_GravityHeartbeat";
 
 	this->unsubscribe(heartbeatName,hbSub);
 
