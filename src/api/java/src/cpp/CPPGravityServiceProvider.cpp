@@ -30,8 +30,8 @@ std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std
     unsigned char* array = new unsigned char[dataProduct.getSize()];
     dataProduct.serializeToArray(array);
     std::shared_ptr<GravityDataProduct> ret = request(serviceID, (char*)array, dataProduct.getSize());
-	delete array;
-	return ret;
+    delete[] array;
+    return ret;
 }
 
 std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, char* array, int length)
