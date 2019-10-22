@@ -478,7 +478,7 @@ void GravitySubscriptionManager::start()
 			lastCachedValueMap.erase(socket);
 			
 			// Unsubscribe
-			Log::debug("Unsubscribing: %s:%s:%s @ %s", subDetails->domain.c_str(), subDetails->dataProductID.c_str(), 
+			Log::trace("Unsubscribing: %s:%s:%s @ %s", subDetails->domain.c_str(), subDetails->dataProductID.c_str(), 
 														subDetails->filter.c_str(), url.c_str());
 			zmq_setsockopt(socket, ZMQ_UNSUBSCRIBE, subDetails->filter.c_str(), subDetails->filter.length());			
 			

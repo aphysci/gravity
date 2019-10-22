@@ -40,6 +40,7 @@
 #include <sstream>
 #include <signal.h>
 #include <memory>
+#include <cmath>
 
 #include "GravityMetricsUtil.h"
 #include "GravityMetricsManager.h"
@@ -847,6 +848,15 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 			configureServiceManager();
 			configureSubscriptionManager();
+	
+			// Auto start heartbeats if specified in INI
+			double heartbeatPeriodSecs = getFloatParam("GravityHeartbeatPeriodSecs", -1);
+			if (heartbeatPeriodSecs > 0)
+			{
+				Log::debug("Starting heartbeats (%f secs)", heartbeatPeriodSecs);
+				int64_t micros = std::round(heartbeatPeriodSecs * 1e6);		
+				startHeartbeat(micros);
+			}
 		}
 	}
 	else
@@ -857,13 +867,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	if (iniWarning)
 	{
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
-	}
-
-	// Auto start heartbeats if specified in INI
-	int heartbeatPeriodMicro = getIntParam("GravityHeartbeatPeriodMicros", 0);
-	if (heartbeatPeriodMicro > 0)
-	{
-		startHeartbeat(heartbeatPeriodMicro);
 	}
 
 	return ret;
