@@ -37,7 +37,7 @@ typedef struct RequestDetails
 {
 	std::string serviceID;
 	std::string requestID;
-	long timeoutTimeMilliseconds;
+	int64_t timeoutTimeMilliseconds;
 	GravityRequestor* requestor;
 	uint32_t registrationTime;
 	std::string url;

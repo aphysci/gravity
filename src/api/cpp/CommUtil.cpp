@@ -188,8 +188,8 @@ GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp)
     time =  ((uint64_t)file_time.dwLowDateTime )      ;
     time += ((uint64_t)file_time.dwHighDateTime) << 32;
 
-    tp->tv_sec  = (long) ((time - EPOCH) / 10000000L);
-    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
+    tp->tv_sec  = (time_t) ((time - EPOCH) / 10000000L);
+    tp->tv_usec = (suseconds_t) (system_time.wMilliseconds * 1000);
     return 0;
 }
 #endif
@@ -242,7 +242,7 @@ GRAVITY_API struct timeval subtractTime(const struct timeval *t1, const struct t
 	}
 
 	newTime.tv_sec=t1->tv_sec - t2->tv_sec;
-	long sub = t1->tv_usec;
+	suseconds_t sub = t1->tv_usec;
 	if(t2->tv_usec > t1->tv_usec)
 	{
 		sub = 1000000;

@@ -78,13 +78,13 @@ void GravityRequestManager::start()
 	{
 	    // before we poll, determine when the next timeout is (if any)
 	    // and handle any expired requests.
-	    long nextTimeout = -1;
+	    int64_t nextTimeout = -1;
 	    for (map<void*,std::shared_ptr<RequestDetails> >::iterator iter = requestMap.begin(); iter != requestMap.end(); )
 	    {
-	        long t = iter->second->timeoutTimeMilliseconds;
+	        int64_t t = iter->second->timeoutTimeMilliseconds;
 	        if (t > 0)
 	        {
-	            long currentTime = getCurrentTime() / 1e3;
+	            int64_t currentTime = getCurrentTime() / 1e3;
 	            if (t <= currentTime)
 	            {
 	                std::shared_ptr<RequestDetails> reqDetails = iter->second;
@@ -388,7 +388,7 @@ void GravityRequestManager::processRequest()
 	string requestID = readStringMessage(gravityNodeSocket);
 
 	int timeout_milliseconds = readIntMessage(gravityNodeSocket);
-	long timeoutTimeMilliseconds = -1;
+	int64_t timeoutTimeMilliseconds = -1;
 	// calculate an actual time in milliseconds
 	if (timeout_milliseconds > 0)
 	{
