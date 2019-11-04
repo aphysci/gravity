@@ -84,7 +84,8 @@ void GravityRequestManager::start()
 	        int64_t t = iter->second->timeoutTimeMilliseconds;
 	        if (t > 0)
 	        {
-	            int64_t currentTime = getCurrentTime() / 1e3;
+	            // signed int64 is easily large enough to hold milli or microseconds since 1970
+	            int64_t currentTime = (int64_t) getCurrentTime() / 1e3;
 	            if (t <= currentTime)
 	            {
 	                std::shared_ptr<RequestDetails> reqDetails = iter->second;
