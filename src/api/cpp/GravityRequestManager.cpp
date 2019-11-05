@@ -85,7 +85,7 @@ void GravityRequestManager::start()
 	        if (t > 0)
 	        {
 	            // signed int64 is easily large enough to hold milli or microseconds since 1970
-	            int64_t currentTime = (int64_t) getCurrentTime() / 1e3;
+	            int64_t currentTime = (int64_t) (getCurrentTime() / 1e3);
 	            if (t <= currentTime)
 	            {
 	                std::shared_ptr<RequestDetails> reqDetails = iter->second;
@@ -120,7 +120,7 @@ void GravityRequestManager::start()
 	    }
 
 		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItems[0], pollItems.size(), nextTimeout); // 0 --> return immediately, -1 --> blocks
+		int rc = zmq_poll(&pollItems[0], (int) pollItems.size(), (long) nextTimeout); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
 			// Interrupted
@@ -181,7 +181,7 @@ void GravityRequestManager::start()
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItemIter->socket, &message, 0);
 				// Create new GravityDataProduct from the incoming message
-				GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
+				GravityDataProduct response(zmq_msg_data(&message), (int) zmq_msg_size(&message));
 				// Clean up message
 				zmq_msg_close(&message);
 
@@ -297,7 +297,7 @@ void GravityRequestManager::sendFutureResponse()
 	zmq_msg_init(&message);
     zmq_recvmsg(gravityResponseSocket, &message, 0);
     // Create new GravityDataProduct from the incoming message
-	GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
+	GravityDataProduct response(zmq_msg_data(&message), (int) zmq_msg_size(&message));
     // Clean up message
     zmq_msg_close(&message);
 
@@ -393,7 +393,7 @@ void GravityRequestManager::processRequest()
 	// calculate an actual time in milliseconds
 	if (timeout_milliseconds > 0)
 	{
-	    timeoutTimeMilliseconds = getCurrentTime() / 1e3 + timeout_milliseconds;
+	    timeoutTimeMilliseconds = (int64_t) (getCurrentTime() / 1e3 + timeout_milliseconds);
 	}
 
 	uint32_t regTime = readUint32Message(gravityNodeSocket);
@@ -402,7 +402,7 @@ void GravityRequestManager::processRequest()
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
 	zmq_recvmsg(gravityNodeSocket, &msg, -1);
-	GravityDataProduct dataProduct(zmq_msg_data(&msg), zmq_msg_size(&msg));
+	GravityDataProduct dataProduct(zmq_msg_data(&msg), (int) zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 	dataProduct.setRegistrationTime(regTime);
 

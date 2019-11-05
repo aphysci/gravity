@@ -55,7 +55,7 @@ GRAVITY_API string readStringMessage(void *socket, int flags)
 
 	zmq_msg_init(&msg);
 	zmq_recvmsg(socket, &msg, flags);
-	int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
 	char* s = (char*)malloc(size+1);
 	memcpy(s, zmq_msg_data(&msg), size);
 	s[size] = 0;
@@ -82,7 +82,7 @@ GRAVITY_API int readIntMessage(void *socket)
 
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     int val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -104,7 +104,7 @@ GRAVITY_API uint64_t readUint64Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint64_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -126,7 +126,7 @@ GRAVITY_API uint32_t readUint32Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint32_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -188,8 +188,8 @@ GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp)
     time =  ((uint64_t)file_time.dwLowDateTime )      ;
     time += ((uint64_t)file_time.dwHighDateTime) << 32;
 
-    tp->tv_sec  = (time_t) ((time - EPOCH) / 10000000L);
-    tp->tv_usec = (suseconds_t) (system_time.wMilliseconds * 1000);
+    tp->tv_sec  = (long) ((time - EPOCH) / 10000000L);
+    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
     return 0;
 }
 #endif
@@ -242,7 +242,7 @@ GRAVITY_API struct timeval subtractTime(const struct timeval *t1, const struct t
 	}
 
 	newTime.tv_sec=t1->tv_sec - t2->tv_sec;
-	suseconds_t sub = t1->tv_usec;
+	long sub = t1->tv_usec;
 	if(t2->tv_usec > t1->tv_usec)
 	{
 		sub = 1000000;
