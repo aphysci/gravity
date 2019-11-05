@@ -55,7 +55,7 @@ GRAVITY_API string readStringMessage(void *socket, int flags)
 
 	zmq_msg_init(&msg);
 	zmq_recvmsg(socket, &msg, flags);
-	int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
 	char* s = (char*)malloc(size+1);
 	memcpy(s, zmq_msg_data(&msg), size);
 	s[size] = 0;
@@ -82,7 +82,7 @@ GRAVITY_API int readIntMessage(void *socket)
 
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     int val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -104,7 +104,7 @@ GRAVITY_API uint64_t readUint64Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint64_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -126,7 +126,7 @@ GRAVITY_API uint32_t readUint32Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint32_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
