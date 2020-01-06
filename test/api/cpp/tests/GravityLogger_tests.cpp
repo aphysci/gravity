@@ -13,11 +13,12 @@ using namespace gravity;
 class TestLogger : public Logger {
   public: 
     TestLogger() = default;
+    std::string lastMessage;
 
     //must implement the Log function   
     void Log(int level, const char* messagestr)
     {
-      //empty
+      lastMessage = std::string(messagestr);
     }
 };
 
@@ -58,6 +59,29 @@ TEST_CASE("Tests without the mocking framework") {
 
   }
 
+  SUBCASE("Test ability to truncate string") {
+      GIVEN("a string with %n") {
+          TestLogger* logger = new TestLogger();
+          Log::initAndAddLogger(logger, Log::DEBUG); //ptr now owned by Log
+          std::string truncStr(" !!!!!!!!! '%n' DETECTED, MESSAGE TRUNCATED");
+          THEN("Truncate short log line") {
+              std::string shortBadStr("a bad string %n");
+              Log::debug(shortBadStr.c_str());
+              CHECK(logger->lastMessage == shortBadStr.substr(0, shortBadStr.size() - 3) + truncStr);
+          }
+          THEN("Truncate long log line") {
+              std::string longBadStr(600, 'a');
+              longBadStr += "%n";
+              Log::debug(longBadStr.c_str());
+              CHECK(logger->lastMessage == longBadStr.substr(0, 512 - truncStr.size() - 2) + truncStr);
+          }
+          THEN("No truncate %n as arg") {
+              Log::debug("good string %s", "%n");
+              CHECK(logger->lastMessage == "good string %n");
+          }
+          Log::RemoveLogger(logger);
+      }
+  }
   //Note: equally tests initAndAddConsoleLogger because
   //the ConsoleLogger inherits from FileLogger with the only
   //difference being that logs are directed to stdout
