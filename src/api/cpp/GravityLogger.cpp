@@ -306,13 +306,33 @@ void Log::vLog(int level, const char* format, va_list args)
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
     if(i != l_end)
     {
-        char messagestr[512];
-        vsnprintf(messagestr, 512, format, args);
+        uint32_t maxStrLen = 512;
+        char messageStr[maxStrLen];
+        const char * truncLoc = strstr(format, "%n");
+        if (truncLoc != NULL)
+        {
+            const char* truncStr = " !!!!!!!!! '%n' DETECTED, MESSAGE TRUNCATED";
+            uint32_t truncLen = (uint32_t) (truncLoc - format);
+            if (truncLen > maxStrLen - strlen(truncStr) - 1)
+            {
+                truncLen = maxStrLen - strlen(truncStr) - 1;
+            }
+            char truncFormat[maxStrLen];
+            // need to create a copy of the format string that ends before the %n
+            // even if the the len provided to vsnprintf means it won't reach that point.
+            strncpy(truncFormat, format, truncLen);
+            vsnprintf(messageStr, truncLen, truncFormat, args);
+            strcat(messageStr, truncStr);
+        }
+        else
+        {
+            vsnprintf(messageStr, maxStrLen, format, args);
+        }
 
         do
         {
             if(i->second & level)
-                i->first->Log(level, messagestr);
+                i->first->Log(level, messageStr);
             i++;
         } while(i != l_end);
     }
