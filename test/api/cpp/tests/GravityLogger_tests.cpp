@@ -88,7 +88,7 @@ TEST_CASE("Tests without the mocking framework") {
   SUBCASE("Test the initAndAddFileLogger() function") {
 
     GIVEN("a debug file logger with an invalid componentID") {
-      std::string componentID =  "/~]filename";
+      std::string componentID =  "/foo/blah/?test";
       Log::initAndAddFileLogger("", componentID.c_str(), Log::LogLevel::DEBUG);
       THEN("Create a Gravity.log file") {
         std::ifstream myfile("Gravity.log"); 
