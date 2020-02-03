@@ -317,11 +317,11 @@ int32_t Log::detectPercentN(const char* format)
         {
             break;
         }
-        pos++;
+        size_t percentPos = pos++;
         pos = checkStr.find_first_not_of(subspecs, pos);
         if (checkStr[pos] == 'n')
         {
-            return pos - 1;
+            return percentPos;
         }
     }
     return -1;
@@ -349,6 +349,7 @@ void Log::vLog(int level, const char* format, va_list args)
             // need to create a copy of the format string that ends before the %n
             // even if the the len provided to vsnprintf means it won't reach that point.
             strncpy(truncFormat, format, truncLen);
+            truncFormat[truncLen] = (char)NULL;
             vsnprintf(messageStr, truncLen, truncFormat, args);
             strcat(messageStr, truncStr);
         }
