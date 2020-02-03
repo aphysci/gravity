@@ -299,6 +299,34 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
     return ret;
 }
 
+int32_t Log::detectPercentN(const char* format)
+{
+
+    const char subspecs[] = {// flags
+                             '-', '+', '0', ' ', '#',
+                             // width/precision
+                             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '*',
+                             // modifiers
+                             'h', 'l', 'L', 'z', 'j', 't' };
+    size_t pos = 0;
+    std::string checkStr(format);
+    while (pos < checkStr.length())
+    {
+        pos = checkStr.find_first_of('%', pos);
+        if (pos == checkStr.npos)
+        {
+            break;
+        }
+        pos++;
+        pos = checkStr.find_first_not_of(subspecs, pos);
+        if (checkStr[pos] == 'n')
+        {
+            return pos - 1;
+        }
+    }
+    return -1;
+}
+
 void Log::vLog(int level, const char* format, va_list args)
 {
     lock.Lock();
@@ -306,13 +334,13 @@ void Log::vLog(int level, const char* format, va_list args)
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
     if(i != l_end)
     {
-        uint32_t maxStrLen = 512;
+        uint32_t maxStrLen = 4096;
         char messageStr[maxStrLen];
-        const char * truncLoc = strstr(format, "%n");
-        if (truncLoc != NULL)
+        int percentNPos = detectPercentN(format);
+        if (percentNPos >= 0)
         {
             const char* truncStr = " !!!!!!!!! '%n' DETECTED, MESSAGE TRUNCATED";
-            uint32_t truncLen = (uint32_t) (truncLoc - format);
+            uint32_t truncLen = percentNPos;
             if (truncLen > maxStrLen - strlen(truncStr) - 1)
             {
                 truncLen = maxStrLen - strlen(truncStr) - 1;
