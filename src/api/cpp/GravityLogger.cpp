@@ -351,11 +351,15 @@ void Log::vLog(int level, const char* format, va_list args)
             strncpy(truncFormat, format, truncLen);
             truncFormat[truncLen] = (char)NULL;
             vsnprintf(messageStr, truncLen, truncFormat, args);
+            // vsnprintf does not null terminate on all platforms
+            messageStr[truncLen] = (char)NULL;
             strcat(messageStr, truncStr);
         }
         else
         {
             vsnprintf(messageStr, maxStrLen, format, args);
+			// make sure null terminated
+			messageStr[maxStrLen-1] = (char)NULL;
         }
 
         do
