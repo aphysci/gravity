@@ -64,16 +64,21 @@ TEST_CASE("Tests without the mocking framework") {
           TestLogger* logger = new TestLogger();
           Log::initAndAddLogger(logger, Log::DEBUG); //ptr now owned by Log
           std::string truncStr(" !!!!!!!!! '%n' DETECTED, MESSAGE TRUNCATED");
-          THEN("Truncate short log line") {
-              std::string shortBadStr("a bad string %n");
+          THEN("Truncate only %n") {
+              std::string shortBadStr("%-4.7Ln");
               Log::debug(shortBadStr.c_str());
-              CHECK(logger->lastMessage == shortBadStr.substr(0, shortBadStr.size() - 3) + truncStr);
+              CHECK(logger->lastMessage == truncStr);
+          }
+          THEN("Truncate short log line") {
+              std::string shortBadStr("a bad string %+9.0n");
+              Log::debug(shortBadStr.c_str());
+              CHECK(logger->lastMessage == shortBadStr.substr(0, shortBadStr.size() - 6) + truncStr);
           }
           THEN("Truncate long log line") {
-              std::string longBadStr(600, 'a');
-              longBadStr += "%n";
+              std::string longBadStr(5000, 'a');
+              longBadStr += "% 2*n";
               Log::debug(longBadStr.c_str());
-              CHECK(logger->lastMessage == longBadStr.substr(0, 512 - truncStr.size() - 2) + truncStr);
+              CHECK(logger->lastMessage == longBadStr.substr(0, 4096 - truncStr.size() - 2) + truncStr);
           }
           THEN("No truncate %n as arg") {
               Log::debug("good string %s", "%n");

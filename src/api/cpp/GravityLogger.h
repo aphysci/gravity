@@ -166,6 +166,8 @@ private:
      */
     static int LevelToInt(LogLevel level);
 
+    static int32_t detectPercentN(const char* format);
+
     /**
      * List of all initialized Loggers.
      */
