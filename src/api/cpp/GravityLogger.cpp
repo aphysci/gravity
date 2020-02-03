@@ -334,7 +334,7 @@ void Log::vLog(int level, const char* format, va_list args)
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
     if(i != l_end)
     {
-        uint32_t maxStrLen = 4096;
+        const uint32_t maxStrLen = 4096;
         char messageStr[maxStrLen];
         int percentNPos = detectPercentN(format);
         if (percentNPos >= 0)
