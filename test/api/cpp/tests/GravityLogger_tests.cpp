@@ -72,7 +72,7 @@ TEST_CASE("Tests without the mocking framework") {
           THEN("Truncate short log line") {
               std::string shortBadStr("a bad string %+9.0n");
               Log::debug(shortBadStr.c_str());
-              CHECK(logger->lastMessage == shortBadStr.substr(0, shortBadStr.size() - 6) + truncStr);
+              CHECK(logger->lastMessage == shortBadStr.substr(0, shortBadStr.size() - 7) + truncStr);
           }
           THEN("Truncate long log line") {
               std::string longBadStr(5000, 'a');

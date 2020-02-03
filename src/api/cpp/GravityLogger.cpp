@@ -317,11 +317,11 @@ int32_t Log::detectPercentN(const char* format)
         {
             break;
         }
-        pos++;
+        size_t percentPos = pos++;
         pos = checkStr.find_first_not_of(subspecs, pos);
         if (checkStr[pos] == 'n')
         {
-            return pos - 1;
+            return percentPos;
         }
     }
     return -1;
@@ -334,7 +334,7 @@ void Log::vLog(int level, const char* format, va_list args)
     std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
     if(i != l_end)
     {
-        uint32_t maxStrLen = 4096;
+        const uint32_t maxStrLen = 4096;
         char messageStr[maxStrLen];
         int percentNPos = detectPercentN(format);
         if (percentNPos >= 0)
@@ -349,12 +349,17 @@ void Log::vLog(int level, const char* format, va_list args)
             // need to create a copy of the format string that ends before the %n
             // even if the the len provided to vsnprintf means it won't reach that point.
             strncpy(truncFormat, format, truncLen);
+            truncFormat[truncLen] = (char)NULL;
             vsnprintf(messageStr, truncLen, truncFormat, args);
+            // vsnprintf does not null terminate on all platforms
+            messageStr[truncLen] = (char)NULL;
             strcat(messageStr, truncStr);
         }
         else
         {
             vsnprintf(messageStr, maxStrLen, format, args);
+			// make sure null terminated
+			messageStr[maxStrLen-1] = (char)NULL;
         }
 
         do
