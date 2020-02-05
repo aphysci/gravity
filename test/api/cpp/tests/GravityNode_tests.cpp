@@ -46,10 +46,12 @@ TEST_CASE("Tests without the mocking framework") {
         int pint2 = gn.getIntParam("pint2", 0);
         int pint3 = gn.getIntParam("pint3", 0);
         int pint4 = gn.getIntParam("pint4", 0);
+        int pintp = gn.getIntParam("pintp", 0);
         CHECK(pint1 == 1);
         CHECK(pint2 == 2);
         CHECK(pint3 == 3);
         CHECK(pint4 == 4);
+        CHECK(pintp == 1);
 
         int nint1 = gn.getIntParam("nint1", 0);
         CHECK(nint1 == -9);
@@ -58,15 +60,16 @@ TEST_CASE("Tests without the mocking framework") {
         double pflt2 = gn.getFloatParam("pflt2", 0);
         double pflt3 = gn.getFloatParam("pflt3", 0);
         double pflt4 = gn.getFloatParam("pflt4", 0);
+        double pfltp = gn.getFloatParam("pfltp", 0);
         CHECK(pflt1 == 1.6);
         CHECK(pflt2 == 2.6);
         CHECK(pflt3 == 3.6);
         CHECK(pflt4 == 4.6);
+        CHECK(pfltp == 9.7);
 
         double nflt1 = gn.getFloatParam("nflt1", 0);
         CHECK(nflt1 == -9.6);
-        double nflt2 = gn.getFloatParam("nflt2", 0);
-        CHECK(nflt2 == 9.6);
+        
 
         bool bool1 = gn.getBoolParam("bool1", false);
         bool bool2 = gn.getBoolParam("bool2", false);
