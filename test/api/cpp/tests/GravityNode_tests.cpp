@@ -20,7 +20,7 @@ TEST_CASE("Tests without the mocking framework") {
   // Note that parsing method is different on different systems.
   // Do we have to conduct tests on different machines to validate system?
   // 
- 
+
   SUBCASE("Testing the Gravity.ini parsing functions")
   {
     //only initializing gravity node once - will make it quicker to run
@@ -51,6 +51,9 @@ TEST_CASE("Tests without the mocking framework") {
         CHECK(pint3 == 3);
         CHECK(pint4 == 4);
 
+        int nint1 = gn.getIntParam("nint1", 0);
+        CHECK(nint1 == -9);
+
         double pflt1 = gn.getFloatParam("pflt1", 0);
         double pflt2 = gn.getFloatParam("pflt2", 0);
         double pflt3 = gn.getFloatParam("pflt3", 0);
@@ -59,6 +62,11 @@ TEST_CASE("Tests without the mocking framework") {
         CHECK(pflt2 == 2.6);
         CHECK(pflt3 == 3.6);
         CHECK(pflt4 == 4.6);
+
+        double nflt1 = gn.getFloatParam("nflt1", 0);
+        CHECK(nflt1 == -9.6);
+        double nflt2 = gn.getFloatParam("nflt2", 0);
+        CHECK(nflt2 == 9.6);
 
         bool bool1 = gn.getBoolParam("bool1", false);
         bool bool2 = gn.getBoolParam("bool2", false);
@@ -119,9 +127,11 @@ TEST_CASE("Tests without the mocking framework") {
         std::string pint1 = gn.getStringParam("pint1", "default");
         std::string pflt1 = gn.getStringParam("pflt1", "default");
         std::string bool1 = gn.getStringParam("bool1", "default");
+        std::string nflt1 = gn.getStringParam("nflt1", "default");
         CHECK(pint1 == "1");
         CHECK(pflt1 == "1.6");
         CHECK(bool1 == "true");
+        CHECK(nflt1 == "-9.6");
       }
 
       THEN("return default for an invalid int") {
