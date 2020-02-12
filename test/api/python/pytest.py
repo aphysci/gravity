@@ -69,6 +69,9 @@ class TestHBListener(GravityHeartbeatListener):
 ### Test functions
 ###
 def testPubSub(gravityNode):
+    if gravityNode.getCodeString(gravity.SUCCESS) != "SUCCESS":
+        raise AssertionError("unexpected getCodeString(SUCCES) return value: {}".format(gravityNode.getCodeString(gravity.SUCCESS)))
+
     gravityNode.registerDataProduct("PubTest", gravity.TCP)
     mySub = MySubscriber()
     gravityNode.subscribe("PubTest", mySub)
