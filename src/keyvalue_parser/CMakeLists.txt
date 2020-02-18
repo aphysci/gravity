@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(libkeyvalue_parser)
+project(GravityKeyValueParser)
 
+set(LIB_NAME libkeyvalue_parser)
+
+include(CMakePackageConfigHelpers)
 include(FetchContent)
 include(GravityExternalUrls)
 include(GravitySupport)
@@ -28,18 +31,26 @@ if (NOT Yacc_CMD)
 endif()
 
 add_definitions(-DLIBKEYVALUE_PARSER_EXPORTS)
-set(SRCS keyvalue_parser.h keyvalue_parser.c params.h lex.yy.c y.tab.c)
-add_library(${PROJECT_NAME} SHARED ${SRCS})
-gravity_add_dependency(${PROJECT_NAME})
+set(SRCS keyvalue_parser.h keyvalue_parser.c params.h "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
+set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/y.tab.c" PROPERTIES GENERATED ON)
+add_library(${LIB_NAME} SHARED ${SRCS})
+gravity_add_dependency(${LIB_NAME})
 
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND ${Lex_CMD} -o "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l")
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND ${Yacc_CMD} -dt "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" -o "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
+add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Lex_CMD} -o "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l")
+add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Yacc_CMD} -dt "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" -o "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
 
-target_include_directories(${PROJECT_NAME} INTERFACE
+target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME} RUNTIME DESTINATION bin ARCHIVE DESTINATION lib)
+install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets RUNTIME DESTINATION bin ARCHIVE DESTINATION lib)
 install(FILES keyvalue_parser.h DESTINATION include)
-install(EXPORT ${PROJECT_NAME} DESTINATION cmake)
+configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../cmake/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION cmake)
+install(EXPORT ${PROJECT_NAME}-targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION cmake)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    DESTINATION cmake)

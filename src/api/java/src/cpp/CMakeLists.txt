@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
 include(GravitySupport)
+include(CMakePackageConfigHelpers)
 
-project(libgravity-wrap)
+project(GravityWrap)
+
+set(LIB_NAME libgravity-wrap)
 
 find_package(JNI REQUIRED)
 
@@ -13,7 +16,7 @@ set(SRCS
     CPPGravityServiceProvider.cpp
     CPPGravitySubscriber.cpp
     CPPGravitySubscriptionMonitor.cpp
-    gravity_wrap.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp"
     
     CPPGravitySubscriptionMonitor.h
     CPPGravityHeartbeatListener.h
@@ -21,16 +24,22 @@ set(SRCS
     CPPGravityRequestor.h
     CPPGravityServiceProvider.h
     CPPGravitySubscriber.h
-    gravity_wrap.h)
+    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h")
     
-get_filename_component(JavaBin_DIR "${Java_JAVAC_EXECUTABLE}" DIRECTORY)
-get_filename_component(Java_DIR "${JavaBin_DIR}/../" ABSOLUTE)
-include_directories(${JNI_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} SHARED ${SRCS})
-target_link_libraries(${PROJECT_NAME} gravity)
-gravity_add_dependency(${PROJECT_NAME})
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME} ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
-install(EXPORT ${PROJECT_NAME} DESTINATION cmake)
+include_directories(${JNI_INCLUDE_DIRS})
+set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp" "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h" PROPERTIES GENERATED ON)
+add_library(${LIB_NAME} SHARED ${SRCS})
+target_link_libraries(${LIB_NAME} gravity)
+gravity_add_dependency(${LIB_NAME})
+install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
+configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../../../cmake/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION cmake)
+install(EXPORT ${PROJECT_NAME}-targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION cmake)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    DESTINATION cmake)
 
 

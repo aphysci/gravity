@@ -18,3 +18,8 @@ add_subdirectory(components/cpp/LogRecorder)
 add_subdirectory(components/cpp/Playback)
 add_subdirectory(components/cpp/Relay)
 
+install(FILES 
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindPThreadsWin32.cmake" 
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravityExternalUrls.cmake" 
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravitySupport.cmake" DESTINATION cmake)
+

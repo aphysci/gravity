@@ -1,0 +1,24 @@
+# GravityKeyValueParser cmake module
+#
+# The following import targets are created
+#
+# ::
+#
+#   libgravity-wrap
+#
+# This module sets the following variables in your project::
+#
+#   GravityKeyValueParser_FOUND - true if ZeroMQ found on the system
+#   GravityKeyValueParser_INCLUDE_DIR - the directory containing ZeroMQ headers
+#   GravityKeyValueParser_LIBRARY - 
+
+@PACKAGE_INIT@
+
+if(NOT TARGET libgravity-wrap)
+  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+  if (TARGET libgravity-wrap)
+    get_target_property(@PROJECT_NAME@_INCLUDE_DIR libgravity-wrap INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(@PROJECT_NAME@_LIBRARY libgravity-wrap LOCATION)
+  endif()
+endif()

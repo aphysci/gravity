@@ -1,0 +1,24 @@
+# GravityKeyValueParser cmake module
+#
+# The following import targets are created
+#
+# ::
+#
+#   libkeyvalue_parser
+#
+# This module sets the following variables in your project::
+#
+#   GravityKeyValueParser_FOUND - true if ZeroMQ found on the system
+#   GravityKeyValueParser_INCLUDE_DIR - the directory containing ZeroMQ headers
+#   GravityKeyValueParser_LIBRARY - 
+
+@PACKAGE_INIT@
+
+if(NOT TARGET libkeyvalue_parser)
+  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+  if (TARGET libkeyvalue_parser)
+    get_target_property(@PROJECT_NAME@_INCLUDE_DIR libkeyvalue_parser INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(@PROJECT_NAME@_LIBRARY libkeyvalue_parser LOCATION)
+  endif()
+endif()

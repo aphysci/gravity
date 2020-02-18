@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.11)
 
 include(FetchContent)
 include(GravitySupport)
-project(gravity)
+include(CMakePackageConfigHelpers)
+project(Gravity)
+
+set(LIB_NAME gravity)
 
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
@@ -27,13 +30,31 @@ gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/
                     ../protobufs/FileArchiverControlResponsePB.proto
                     ../protobufs/ConfigRequest.proto)
                     
-add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS "${PROTO_SRCS}")
+add_custom_target(${LIB_NAME}_protos ALL DEPENDS "${PROTO_SRCS}")
 
 if (WIN32)
     find_package(PThreadsWin32 REQUIRED)
     include_directories("${PThreadsWin32_Include}")
 endif()
     
+
+set(PROTO_HDRS
+        protobuf/ComponentDataLookupResponsePB.pb.h
+        protobuf/ComponentLookupRequestPB.pb.h
+        protobuf/ComponentServiceLookupResponsePB.pb.h
+        protobuf/GravityDataProductPB.pb.h
+        protobuf/GravityLogMessagePB.pb.h
+        protobuf/GravityMetricsDataPB.pb.h
+        protobuf/ServiceDirectoryRegistrationPB.pb.h
+        protobuf/ServiceDirectoryResponsePB.pb.h
+        protobuf/ServiceDirectoryUnregistrationPB.pb.h
+        protobuf/ServiceDirectoryMapPB.pb.h
+        protobuf/ServiceDirectoryDomainUpdatePB.pb.h
+        protobuf/ConfigRequest.pb.h
+        protobuf/ServiceDirectoryBroadcastPB.pb.h
+        protobuf/FileArchiverControlRequestPB.pb.h
+        protobuf/FileArchiverControlResponsePB.pb.h
+        protobuf/ConfigRequest.pb.h)
 
 set(HDRS
         CommUtil.h
@@ -57,7 +78,9 @@ set(HDRS
         GravitySubscriber.h
         GravitySubscriptionManager.h
         GravitySubscriptionMonitor.h
-        Utility.h)
+        Utility.h
+        
+        ${PROTO_HDRS})
 
 set(SRCS
         ${HDRS}
@@ -86,25 +109,33 @@ set(SRCS
         
 add_definitions(-DGRAVITY_EXPORTS)
 include_directories(${Boost_INCLUDE_DIRS})
-add_library(${PROJECT_NAME} SHARED ${SRCS})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_protos)
-gravity_add_dependency(${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME} INTERFACE
+add_library(${LIB_NAME} SHARED ${SRCS})
+add_dependencies(${LIB_NAME} ${LIB_NAME}_protos)
+gravity_add_dependency(${LIB_NAME})
+target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC libkeyvalue_parser protobuf::libprotobuf libzmq)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
+target_link_libraries(${LIB_NAME} PUBLIC libkeyvalue_parser protobuf::libprotobuf libzmq)
+target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
-    target_include_directories(${PROJECT_NAME} INTERFACE
+    target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
         $<INSTALL_INTERFACE:deps/pthreads-w32/include>
     )
 endif()
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME} ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
+install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 install(FILES ${HDRS} DESTINATION include)
-install(EXPORT ${PROJECT_NAME} DESTINATION cmake)
+install(FILES ${PROTO_HDRS} DESTINATION include/protobuf)
+configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION cmake)
+install(EXPORT ${PROJECT_NAME}-targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION cmake)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    DESTINATION cmake)
 
 
 
