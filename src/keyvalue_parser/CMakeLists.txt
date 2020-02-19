@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 
 project(GravityKeyValueParser)
 
-set(LIB_NAME libkeyvalue_parser)
+set(LIB_NAME keyvalue_parser)
 
 include(CMakePackageConfigHelpers)
 include(FetchContent)
@@ -36,8 +36,13 @@ set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURREN
 add_library(${LIB_NAME} SHARED ${SRCS})
 gravity_add_dependency(${LIB_NAME})
 
-add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Lex_CMD} -o "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l")
-add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Yacc_CMD} -dt "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" -o "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
+if (WIN32)
+    add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Lex_CMD} -o "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l")
+    add_custom_command(TARGET ${LIB_NAME} PRE_BUILD COMMAND ${Yacc_CMD} -dt "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" -o "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
+else()
+    add_custom_target(RunLexYacc ALL ${Lex_CMD} -o "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l" COMMAND ${Yacc_CMD} -dt "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" -o "${CMAKE_CURRENT_LIST_DIR}/y.tab.c" DEPENDS "${CMAKE_CURRENT_LIST_DIR}/keyvalue.l" "${CMAKE_CURRENT_LIST_DIR}/keyvalue.y" BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/y.tab.c" "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c")
+    add_dependencies(${LIB_NAME} RunLexYacc)
+endif()
 
 target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

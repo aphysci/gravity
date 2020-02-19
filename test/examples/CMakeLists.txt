@@ -11,4 +11,8 @@ get_filename_component(ABS_GRAVITY_ROOT "${GRAVITY_ROOT}" ABSOLUTE BASE_DIR "${C
 set(CMAKE_INSTALL_PREFIX "${ABS_GRAVITY_ROOT}")
 message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
 
+if (EXISTS "${CMAKE_INSTALL_PREFIX}/deps/boost")
+    set(BOOST_ROOT "${CMAKE_INSTALL_PREFIX}/deps/boost")
+endif()
+
 add_subdirectory("1-BasicDataProduct")

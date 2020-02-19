@@ -6,6 +6,9 @@ include(GravityExternalUrls)
 
 project(gravity-meta)
 
+get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
+set(CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
+
 macro(add_external_protobuf build_type)
     ExternalProject_Add(    
         protobuf_${build_type}

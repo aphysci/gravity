@@ -8,10 +8,11 @@ project(Gravity)
 set(LIB_NAME gravity)
 set(PROTO_LIB_NAME gravity_protobufs)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
-find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
+find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
 find_package(Boost REQUIRED)
 
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/protobuf")
 gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/protobuf" OUT_VAR PROTO_SRCS 
                             EXPORT_MACRO GRAVITY_PROTOBUF_API
                             PROTOS 
@@ -117,7 +118,7 @@ install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINA
 if (WIN32)
     target_compile_definitions(${PROTO_LIB_NAME} PRIVATE -DGRAVITY_PROTOBUF_API=__declspec\(dllexport\) INTERFACE -DGRAVITY_PROTOBUF_API=__declspec\(dllimport\))
 else()
-    target_compile_definitions(${PROTO_LIB_NAME} PUBLIC -DGRAVITY_PROTOBUF_API)
+    target_compile_definitions(${PROTO_LIB_NAME} PUBLIC -DGRAVITY_PROTOBUF_API=)
 endif()
 
 add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
@@ -130,7 +131,7 @@ target_include_directories(${LIB_NAME} INTERFACE
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} libkeyvalue_parser protobuf::libprotobuf libzmq)
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} keyvalue_parser protobuf::libprotobuf libzmq)
 target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE

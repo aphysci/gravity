@@ -12,7 +12,7 @@ endif()
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
+find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
 
 gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${Protobufs_SRC_DIR}/java/core/src/main/java" IMPORT_DIRS "${Protobufs_SRC_DIR}/src" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS 
                     "${Protobufs_SRC_DIR}/src/google/protobuf/descriptor.proto")
