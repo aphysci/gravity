@@ -35,5 +35,5 @@ if (WIN32)
     endif()
 
     include(FindPackageHandleStandardArgs)
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GravityJava REQUIRED_VARS PThreadsWin32Lib_Installed PThreadsWin32Dll_Installed PThreadsWin32_Include PThreadsWin32LibName PThreadsWin32DllName)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(PThreadsWin32 REQUIRED_VARS PThreadsWin32Lib_Installed PThreadsWin32Dll_Installed PThreadsWin32_Include PThreadsWin32LibName PThreadsWin32DllName)
 endif()

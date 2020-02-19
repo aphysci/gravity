@@ -6,31 +6,34 @@ include(CMakePackageConfigHelpers)
 project(Gravity)
 
 set(LIB_NAME gravity)
+set(PROTO_LIB_NAME gravity_protobufs)
 
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 find_package(Boost REQUIRED)
 
-gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/protobuf" OUT_VAR PROTO_SRCS PROTOS 
+gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/protobuf" OUT_VAR PROTO_SRCS 
+                            EXPORT_MACRO GRAVITY_PROTOBUF_API
+                            PROTOS 
                     ../protobufs/ComponentDataLookupResponsePB.proto 
                     ../protobufs/ComponentLookupRequestPB.proto 
                     ../protobufs/ComponentServiceLookupResponsePB.proto 
-                    ../protobufs/GravityDataProductPB.proto 
-                    ../protobufs/GravityDataProductPB.proto 
+                    ../protobufs/GravityDataProductPB.proto  
                     ../protobufs/GravityLogMessagePB.proto 
                     ../protobufs/GravityMetricsDataPB.proto
-                    ../protobufs/ServiceDirectoryRegistrationPB.proto 
-                    ../protobufs/ServiceDirectoryResponsePB.proto 
-                    ../protobufs/ServiceDirectoryUnregistrationPB.proto 
-                    ../protobufs/ServiceDirectoryMapPB.proto
-                    ../protobufs/ServiceDirectoryDomainUpdatePB.proto
                     ../protobufs/ConfigRequest.proto
-                    ../protobufs/ServiceDirectoryBroadcastPB.proto
                     ../protobufs/FileArchiverControlRequestPB.proto
                     ../protobufs/FileArchiverControlResponsePB.proto
-                    ../protobufs/ConfigRequest.proto)
-                    
-add_custom_target(${LIB_NAME}_protos ALL DEPENDS "${PROTO_SRCS}")
+                    ../protobufs/ConfigRequest.proto
+                    ../protobufs/ServiceDirectoryResponsePB.proto
+                    ../protobufs/ServiceDirectoryRegistrationPB.proto 
+                    ../protobufs/ServiceDirectoryUnregistrationPB.proto
+                    ../protobufs/ServiceDirectoryBroadcastPB.proto
+                    ../protobufs/ServiceDirectoryMapPB.proto
+                    ../protobufs/ServiceDirectoryDomainUpdatePB.proto
+                    )
+                            
+add_custom_target(${LIB_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
 if (WIN32)
     find_package(PThreadsWin32 REQUIRED)
@@ -78,9 +81,7 @@ set(HDRS
         GravitySubscriber.h
         GravitySubscriptionManager.h
         GravitySubscriptionMonitor.h
-        Utility.h
-        
-        ${PROTO_HDRS})
+        Utility.h)
 
 set(SRCS
         ${HDRS}
@@ -104,20 +105,32 @@ set(SRCS
         GravitySubscriptionManager.cpp
         GravitySubscriptionMonitor.cpp
         Semaphore.cpp
-        Utility.cpp
-        ${PROTO_SRCS})
+        Utility.cpp)
         
-add_definitions(-DGRAVITY_EXPORTS)
+
+        
+add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
+add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
+install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
+
+if (WIN32)
+    target_compile_definitions(${PROTO_LIB_NAME} PRIVATE -DGRAVITY_PROTOBUF_API=__declspec\(dllexport\) INTERFACE -DGRAVITY_PROTOBUF_API=__declspec\(dllimport\))
+else()
+    target_compile_definitions(${PROTO_LIB_NAME} PUBLIC -DGRAVITY_PROTOBUF_API)
+endif()
+
+add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
 include_directories(${Boost_INCLUDE_DIRS})
 add_library(${LIB_NAME} SHARED ${SRCS})
-add_dependencies(${LIB_NAME} ${LIB_NAME}_protos)
+add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})
 target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${LIB_NAME} PUBLIC libkeyvalue_parser protobuf::libprotobuf libzmq)
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} libkeyvalue_parser protobuf::libprotobuf libzmq)
 target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE

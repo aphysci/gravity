@@ -7,9 +7,9 @@ project(LogRecorder)
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 
-set(PROTO_SRCS
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/GravityLogMessagePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/GravityLogMessagePB.pb.h)
+set(PROTO_SRCS)
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/GravityLogMessagePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/GravityLogMessagePB.pb.h)
         
 set_source_files_properties(${PROTO_SRCS} PROPERTIES GENERATED TRUE)
 

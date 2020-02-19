@@ -7,16 +7,17 @@ project(ServiceDirectory)
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 
-set(PROTO_SRCS
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentDataLookupResponsePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentLookupRequestPB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentServiceLookupResponsePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryBroadcastPB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryDomainUpdatePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryMapPB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryRegistrationPB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryResponsePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryUnregistrationPB.pb.cc)
+set(PROTO_SRCS)
+        
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentDataLookupResponsePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentLookupRequestPB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ComponentServiceLookupResponsePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryBroadcastPB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryDomainUpdatePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryMapPB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryRegistrationPB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryResponsePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/ServiceDirectoryUnregistrationPB.pb.cc)
         
 set_source_files_properties(${PROTO_SRCS} PROPERTIES GENERATED TRUE)
 

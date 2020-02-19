@@ -7,11 +7,11 @@ project(Archiver)
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 
-set(PROTO_SRCS
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlRequestPB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlResponsePB.pb.cc
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlRequestPB.pb.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlResponsePB.pb.h)
+set(PROTO_SRCS)
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlRequestPB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlResponsePB.pb.cc
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlRequestPB.pb.h
+        #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/FileArchiverControlResponsePB.pb.h)
         
 set_source_files_properties(${PROTO_SRCS} PROPERTIES GENERATED TRUE)
 

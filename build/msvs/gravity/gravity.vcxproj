@@ -1617,9 +1617,8 @@ git describe --tag &gt; $(OutDir)\..\VERSION.txt</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\api\protobufs\FileArchiverControlRequestPB.proto" />
-    <None Include="..\..\..\src\api\protobufs\FileArchiverControlResponsePB.proto" />
-    <None Include="..\..\..\src\api\protobufs\GravityMetricsDataPB.proto" />
+    
+    
     <CustomBuild Include="..\..\..\src\api\protobufs\ServiceDirectoryMapPB.proto">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release2010|Win32'">protoc --proto_path=../../../src/api/protobufs --cpp_out=../../../src/api/cpp/protobuf %(Identity)</Command>
