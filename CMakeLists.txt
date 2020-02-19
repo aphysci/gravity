@@ -82,24 +82,34 @@ else()
     
 endif()
 
-find_package(GravityJava REQUIRED)
+find_package(GravityJava)
 
-ExternalProject_Add(
-    protobuf-java_external
-    DEPENDS ${protobuf_depends}
-    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src/api/protobufs/protobufs-java"
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
-        -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+if (NOT Java_FOUND)
+    set(SKIP_JAVA ON)
+elseif(NOT SKIP_JAVA)
+    set(SKIP_JAVA OFF)
+endif()
+
+if (NOT SKIP_JAVA)
+    ExternalProject_Add(
+        protobuf-java_external
+        DEPENDS ${protobuf_depends}
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src/api/protobufs/protobufs-java"
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+        LOG_INSTALL ON
+        CMAKE_ARGS
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+            -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+            -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         )
+    list(APPEND depends protobuf-java_external)
+endif()
+
 
 ExternalProject_Add(
     gravity_external 
-    DEPENDS protobuf-java_external ${depends}
+    DEPENDS ${depends}
     SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src"
     LOG_CONFIGURE ON
     LOG_BUILD ON
@@ -109,5 +119,6 @@ ExternalProject_Add(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DBOOST_ROOT=${BOOST_ROOT}
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+        -DSKIP_JAVA=${SKIP_JAVA}
     BUILD_ALWAYS 1)
 
