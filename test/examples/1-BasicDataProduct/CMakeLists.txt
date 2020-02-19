@@ -5,7 +5,7 @@ project(BasicDataProduct)
 list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
 
-set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-win32")
+set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-w32")
 find_package(PThreadsWin32 REQUIRED)
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
