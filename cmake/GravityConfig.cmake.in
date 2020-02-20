@@ -8,8 +8,8 @@
 #
 # This module sets the following variables in your project::
 #
-#   Gravity_FOUND - true if ZeroMQ found on the system
-#   Gravity_INCLUDE_DIR - the directory containing ZeroMQ headers
+#   Gravity_FOUND - true if gravity found on the system
+#   Gravity_INCLUDE_DIR - the directory containing gravity headers
 #   Gravity_LIBRARY - 
 
 @PACKAGE_INIT@
