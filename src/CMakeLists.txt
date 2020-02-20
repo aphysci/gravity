@@ -4,12 +4,6 @@ project(gravity)
 
 set(CMAKE_DEBUG_POSTFIX _d)
 
-message("CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
-
-if (NOT WIN32)
-	set(ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/")
-endif()
-
 add_subdirectory(keyvalue_parser)
 if (NOT SKIP_JAVA)
     add_subdirectory(api/protobufs)
