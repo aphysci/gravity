@@ -37,4 +37,4 @@ endforeach()
         
 add_jar(protobuf-java ${Generated_Java} ${Java_SRCS})
 add_dependencies(protobuf-java ${PROJECT_NAME}_protos)
-install_jar(protobuf-java "${CMAKE_INSTALL_PREFIX}/deps/protobuf/bin")
+install_jar(protobuf-java "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib")

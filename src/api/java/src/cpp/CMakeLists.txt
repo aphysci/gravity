@@ -5,7 +5,7 @@ include(CMakePackageConfigHelpers)
 
 project(GravityWrap)
 
-set(LIB_NAME gravity-wrap)
+set(LIB_NAME gravity_wrap)
 
 find_package(JNI REQUIRED)
 

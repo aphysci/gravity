@@ -11,8 +11,13 @@ get_filename_component(ABS_GRAVITY_ROOT "${GRAVITY_ROOT}" ABSOLUTE BASE_DIR "${C
 set(CMAKE_INSTALL_PREFIX "${ABS_GRAVITY_ROOT}")
 message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
 
+list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
+
 if (EXISTS "${CMAKE_INSTALL_PREFIX}/deps/boost")
     set(BOOST_ROOT "${CMAKE_INSTALL_PREFIX}/deps/boost")
 endif()
 
 add_subdirectory("1-BasicDataProduct")
+add_subdirectory("2-ProtobufDataProduct")
+add_subdirectory("6-JavaProtobufDataProduct")

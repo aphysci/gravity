@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.11)
+
+project(ProtoBufDataProduct)
+
+include(GravitySupport)
+
+set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-w32")
+find_package(PThreadsWin32 REQUIRED)
+find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+find_package(GravityKeyValueParser REQUIRED)
+find_package(Gravity REQUIRED)
+find_package(Boost REQUIRED)
+
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
+
+gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../protobuf" OUT_VAR PROTO_SRCS 
+                            PROTOS ${PROTO_FILES})
+
+add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
+
+set(CMAKE_DEBUG_POSTFIX _d)
+add_executable(ProtobufDataProductPublisher ProtobufDataProductPublisher.cpp ${PROTO_SRCS})
+set_target_properties(ProtobufDataProductPublisher PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+target_link_libraries(ProtobufDataProductPublisher gravity)
+add_dependencies(ProtobufDataProductPublisher ${PROJECT_NAME}_protos)
+
+add_executable(ProtobufDataProductSubscriber ProtobufDataProductSubscriber.cpp ${PROTO_SRCS})
+set_target_properties(ProtobufDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+target_link_libraries(ProtobufDataProductSubscriber gravity)
+add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
+install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION bin)

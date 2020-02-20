@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.11)
 
 project(BasicDataProduct)
 
-list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
-
 set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-w32")
 find_package(PThreadsWin32 REQUIRED)
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
