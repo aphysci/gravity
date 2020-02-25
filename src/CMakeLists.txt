@@ -4,6 +4,18 @@ project(gravity)
 
 set(CMAKE_DEBUG_POSTFIX _d)
 
+if (NOT SKIP_JAVA)
+    find_package(GravityJava REQUIRED)
+
+    if (NOT SKIP_JAVA AND NOT JAVA_HOME)
+	get_filename_component(REAL_JAVA_EXEC "${Java_JAVA_EXECUTABLE}" REALPATH)
+	get_filename_component(JAVA_BIN_DIR "${REAL_JAVA_EXEC}" DIRECTORY)
+        get_filename_component(JAVA_HOME "${JAVA_BIN_DIR}/../" ABSOLUTE)
+        set(ENV{JAVA_HOME} "${JAVA_HOME}")
+	message(STATUS "Set ENV{JAVA_HOME} to ${JAVA_HOME}")
+    endif()
+endif()
+
 add_subdirectory(keyvalue_parser)
 if (NOT SKIP_JAVA)
     add_subdirectory(api/protobufs)
