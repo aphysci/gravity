@@ -5,17 +5,8 @@ project(protobufs-compile)
 
 find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
 
-gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../java/src/java" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS 
-                    ComponentDataLookupResponsePB.proto 
-                    ComponentLookupRequestPB.proto 
-                    ComponentServiceLookupResponsePB.proto 
-                    GravityDataProductPB.proto 
-                    GravityDataProductPB.proto 
-                    GravityLogMessagePB.proto 
-                    GravityMetricsDataPB.proto
-                    ServiceDirectoryRegistrationPB.proto 
-                    ServiceDirectoryResponsePB.proto 
-                    ServiceDirectoryUnregistrationPB.proto 
-                    ServiceDirectoryMapPB.proto)
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
+
+gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../java/src/java" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS ${PROTO_FILES})
 add_custom_target(${PROJECT_NAME} ALL DEPENDS "${SRCS}")
 gravity_add_dependency(${PROJECT_NAME})

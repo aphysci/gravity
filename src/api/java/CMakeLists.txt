@@ -18,10 +18,38 @@ set(JAVA_SRCS
         src/java/com/aphysci/gravity/GravitySubscriptionMonitor.java
         src/java/com/aphysci/gravity/Logger.java)
         
-file(GLOB JAVA_PROTO_SRCS "${CMAKE_CURRENT_LIST_DIR}/src/java/com/aphysci/gravity/protobuf/*.java")
+set(JAVA_PROTO_SRCS 
+        src/java/com/aphysci/gravity/protobuf/ComponentDataLookupResponseContainer.java
+        src/java/com/aphysci/gravity/protobuf/ComponentLookupRequestContainer.java
+        src/java/com/aphysci/gravity/protobuf/ComponentServiceLookupResponseContainer.java
+        src/java/com/aphysci/gravity/protobuf/FileArchiverControlRequestContainer.java
+        src/java/com/aphysci/gravity/protobuf/FileArchiverControlResponseContainer.java
+        src/java/com/aphysci/gravity/protobuf/GravityDataProductContainer.java
+        src/java/com/aphysci/gravity/protobuf/GravityLogMessageContainer.java
+        src/java/com/aphysci/gravity/protobuf/GravityMetricsDataContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryBroadcastContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryDomainUpdateContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryMapContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryRegistrationContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryResponseContainer.java
+        src/java/com/aphysci/gravity/protobuf/ServiceDirectoryUnregistrationContainer
+        src/java/gravity/ConfigRequest.java)
 set_source_files_properties(${JAVA_PROTO_SRCS} PROPERTIES GENERATED TRUE)
 
-file(GLOB SWIG_JAVA_SRCS "${CMAKE_CURRENT_LIST_DIR}/src/java/com/aphysci/gravity/swig/*.java")
+set(SWIG_JAVA_SRCS 
+        src/java/com/aphysci/gravity/swig/CPPGravityHeartbeatListener.java
+        src/java/com/aphysci/gravity/swig/CPPGravityLogger.java
+        src/java/com/aphysci/gravity/swig/CPPGravityRequestor.java
+        src/java/com/aphysci/gravity/swig/CPPGravityServiceProvider.java
+        src/java/com/aphysci/gravity/swig/CPPGravitySubscriber.java
+        src/java/com/aphysci/gravity/swig/CPPGravitySubscriptionMonitor.java
+        src/java/com/aphysci/gravity/swig/gravity.java
+        src/java/com/aphysci/gravity/swig/gravityConstants.java
+        src/java/com/aphysci/gravity/swig/gravityJNI.java
+        src/java/com/aphysci/gravity/swig/GravityNode.java
+        src/java/com/aphysci/gravity/swig/GravityReturnCode.java
+        src/java/com/aphysci/gravity/swig/GravityTransportType.java
+        src/java/com/aphysci/gravity/swig/Log.java)
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
 add_jar(${PROJECT_NAME} ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} OUTPUT_NAME gravity)

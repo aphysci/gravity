@@ -12,27 +12,12 @@ find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmak
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
 find_package(Boost REQUIRED)
 
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
+
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/protobuf")
 gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/protobuf" OUT_VAR PROTO_SRCS 
                             EXPORT_MACRO GRAVITY_PROTOBUF_API
-                            PROTOS 
-                    ../protobufs/ComponentDataLookupResponsePB.proto 
-                    ../protobufs/ComponentLookupRequestPB.proto 
-                    ../protobufs/ComponentServiceLookupResponsePB.proto 
-                    ../protobufs/GravityDataProductPB.proto  
-                    ../protobufs/GravityLogMessagePB.proto 
-                    ../protobufs/GravityMetricsDataPB.proto
-                    ../protobufs/ConfigRequest.proto
-                    ../protobufs/FileArchiverControlRequestPB.proto
-                    ../protobufs/FileArchiverControlResponsePB.proto
-                    ../protobufs/ConfigRequest.proto
-                    ../protobufs/ServiceDirectoryResponsePB.proto
-                    ../protobufs/ServiceDirectoryRegistrationPB.proto 
-                    ../protobufs/ServiceDirectoryUnregistrationPB.proto
-                    ../protobufs/ServiceDirectoryBroadcastPB.proto
-                    ../protobufs/ServiceDirectoryMapPB.proto
-                    ../protobufs/ServiceDirectoryDomainUpdatePB.proto
-                    )
+                            PROTOS ${PROTO_FILES})
                             
 add_custom_target(${LIB_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
