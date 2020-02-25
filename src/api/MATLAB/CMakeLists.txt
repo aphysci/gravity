@@ -7,7 +7,9 @@ project(gravity-MATLAB NONE)
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
-set(CMAKE_JAVA_INCLUDE_PATH guava-13.0.1.jar "${CMAKE_INSTALL_PREFIX}/lib/gravity.jar")
+get_property(GRAVITY_JAR TARGET gravity-java PROPERTY JAR_FILE)
+
+set(CMAKE_JAVA_INCLUDE_PATH guava-13.0.1.jar "${GRAVITY_JAR}")
 
 add_jar(MATLABGravitySubscriber MATLABGravitySubscriber.java)
 add_jar(MATLABProtobufGenerator MATLABProtobufGenerator.java)
