@@ -31,3 +31,7 @@ endif()
 if (NOT SKIP_JAVA)
     add_subdirectory("6-JavaProtobufDataProduct")
 endif()
+
+if (NOT SKIP_PYTHON)
+    add_subdirectory("11-PythonPubSub")
+endif()

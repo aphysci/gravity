@@ -107,8 +107,21 @@ if (NOT SKIP_JAVA)
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         )
     list(APPEND depends protobuf-java_external)
+else()
+    message(STATUS "Building without Java")
 endif()
 
+find_package(Python COMPONENTS Interpreter Development)
+
+if (NOT Python_FOUND)
+    set(SKIP_PYTHON ON)
+elseif(NOT SKIP_PYTHON)
+    set(SKIP_PYTHON OFF)
+endif()
+
+if (NOT SKIP_PYTHON)
+    message(STATUS "Building without Python")
+endif()
 
 ExternalProject_Add(
     gravity_external 
@@ -123,5 +136,6 @@ ExternalProject_Add(
         -DBOOST_ROOT=${BOOST_ROOT}
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DSKIP_JAVA=${SKIP_JAVA}
+        -DSKIP_PYTHON=${SKIP_PYTHON}
     BUILD_ALWAYS 1)
 

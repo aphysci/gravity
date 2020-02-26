@@ -34,6 +34,11 @@ add_subdirectory(components/cpp/LogRecorder)
 add_subdirectory(components/cpp/Playback)
 add_subdirectory(components/cpp/Relay)
 
+if (NOT SKIP_PYTHON)
+    add_subdirectory(api/python/src/swig)
+    add_subdirectory(api/python/src/cpp)
+endif()
+
 install(FILES 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindPThreadsWin32.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravityExternalUrls.cmake" 
