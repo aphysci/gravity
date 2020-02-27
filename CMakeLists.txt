@@ -119,8 +119,21 @@ elseif(NOT SKIP_PYTHON)
     set(SKIP_PYTHON OFF)
 endif()
 
-if (NOT SKIP_PYTHON)
+if (SKIP_PYTHON)
     message(STATUS "Building without Python")
+else()
+    ExternalProject_Add(
+	    py-protobufs-external
+	    DEPENDS ${protobuf_depends}
+	    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/py-protobuf
+	    LOG_CONFIGURE ON
+	    LOG_BUILD ON
+	    LOG_INSTALL ON
+	    INSTALL_COMMAND ""
+	    CMAKE_ARGS
+              -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+	      -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+	      )
 endif()
 
 ExternalProject_Add(
