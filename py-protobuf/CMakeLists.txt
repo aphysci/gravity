@@ -18,7 +18,7 @@ file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin/")
 configure_file("${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh.in" "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" @ONLY)
 if (NOT WIN32)
     add_custom_target(${PROJECT_NAME} ALL 
-	    COMMAND ${CMAKE_COMMAND} -E "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" 
+	    COMMAND "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" 
         COMMAND 
 	${CMAKE_COMMAND} -E copy_directory ${Protobufs_SRC_DIR}/python/build/`ls ${Protobufs_SRC_DIR}/python/build/`/google/ "${CMAKE_INSTALL_PREFIX}/bin/google")
 endif()
