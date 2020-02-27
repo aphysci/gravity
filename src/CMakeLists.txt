@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 project(gravity)
 
 set(CMAKE_DEBUG_POSTFIX _d)
+set(CMAKE_CXX_STANDARD 11)
 
 if (NOT SKIP_JAVA)
     find_package(GravityJava REQUIRED)
