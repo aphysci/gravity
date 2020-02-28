@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.11)
 
-include(ExternalProject)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(GravityExternalUrls)
+include(GravitySupport)
+include(ExternalProject)
 
 project(gravity-meta)
+
+option(GRAVITY_USE_INTERNAL_PROTOBUF "Download, Build and Use and internal protobuf build")
+option(BUILD_EXAMPLES "Build Gravity examples" ON)
+option(SKIP_JAVA "Skip building Gravity Java wrapper")
+option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
+set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
+set(BOOST_ROOT "" CACHE PATH "Path to boost to use")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 set(CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
@@ -66,23 +74,30 @@ else()
     list(GET Boost_INCLUDE_DIRS 0 BOOST_ROOT)
 endif()
 
+gravity_find_protobuf(Protobuf_External OFF)
+
 if (WIN32)
-    add_external_protobuf(Debug)
-    add_external_protobuf(Release)
-    list(APPEND depends protobuf_Release protobuf_Debug)
-    list(APPEND protobuf_depends protobuf_Release protobuf_Debug)
-    
+    if (NOT Protobuf_External)
+        add_external_protobuf(Debug)
+        add_external_protobuf(Release)
+        list(APPEND depends protobuf_Release protobuf_Debug)
+        list(APPEND protobuf_depends protobuf_Release protobuf_Debug)
+    endif()   
     add_external_libzmq(Debug)
     add_external_libzmq(Release)
     list(APPEND depends libzmq_Debug libzmq_Release) 
 else()
-    add_external_protobuf(${CMAKE_BUILD_TYPE})
-    list(APPEND depends protobuf_${CMAKE_BUILD_TYPE})
-    list(APPEND protobuf_depends protobuf_${CMAKE_BUILD_TYPE})
-    
+    if (NOT Protobuf_External)
+        add_external_protobuf(${CMAKE_BUILD_TYPE})
+        list(APPEND depends protobuf_${CMAKE_BUILD_TYPE})
+        list(APPEND protobuf_depends protobuf_${CMAKE_BUILD_TYPE})
+    endif() 
     add_external_libzmq(${CMAKE_BUILD_TYPE})
     list(APPEND depends libzmq_${CMAKE_BUILD_TYPE})
-    
+endif()
+
+if (Protobuf_External)
+    message(STATUS "Using external protobuf libraries")
 endif()
 
 find_package(GravityJava)
@@ -93,7 +108,7 @@ elseif(NOT SKIP_JAVA)
     set(SKIP_JAVA OFF)
 endif()
 
-if (NOT SKIP_JAVA)
+if (NOT SKIP_JAVA AND NOT Protobuf_External)
     ExternalProject_Add(
         protobuf-java_external
         DEPENDS ${protobuf_depends}
@@ -105,9 +120,12 @@ if (NOT SKIP_JAVA)
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
             -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+	    -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
         )
     list(APPEND depends protobuf-java_external)
-else()
+endif()
+
+if (SKIP_JAVA)
     message(STATUS "Building without Java")
 endif()
 
@@ -121,7 +139,7 @@ endif()
 
 if (SKIP_PYTHON)
     message(STATUS "Building without Python")
-else()
+elseif(NOT Protobuf_External)
     ExternalProject_Add(
 	    py-protobufs-external
 	    DEPENDS ${protobuf_depends}
@@ -133,7 +151,9 @@ else()
 	    CMAKE_ARGS
               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	      -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
+	    -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
 	      )
+      list(APPEND depends py-protobufs-external)
 endif()
 
 ExternalProject_Add(
@@ -150,5 +170,24 @@ ExternalProject_Add(
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DSKIP_JAVA=${SKIP_JAVA}
         -DSKIP_PYTHON=${SKIP_PYTHON}
+	-DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
     BUILD_ALWAYS 1)
 
+if (BUILD_EXAMPLES)
+    ExternalProject_Add(
+        gravity_external_examples 
+        DEPENDS gravity_external
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/test/examples"
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+        LOG_INSTALL ON
+        CMAKE_ARGS
+	    -DGRAVITY_ROOT=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DBOOST_ROOT=${BOOST_ROOT}
+            -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+            -DSKIP_JAVA=${SKIP_JAVA}
+            -DSKIP_PYTHON=${SKIP_PYTHON}
+	    -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+    BUILD_ALWAYS 1)
+endif()

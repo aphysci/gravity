@@ -8,7 +8,7 @@ project(Gravity)
 set(LIB_NAME gravity)
 set(PROTO_LIB_NAME gravity_protobufs)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+gravity_find_protobuf(external ON)
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
 find_package(Boost REQUIRED)
 

@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
-
+include(GravitySupport)
 project(BasicDataProduct)
 
 set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-w32")
 find_package(PThreadsWin32 REQUIRED)
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+gravity_find_protobuf(external ON)
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
 find_package(GravityKeyValueParser REQUIRED)
 find_package(Gravity REQUIRED)
@@ -23,4 +23,4 @@ target_link_libraries(BasicDataProductPublisher gravity)
 add_executable(BasicDataProductSubscriber BasicDataProductSubscriber.cpp)
 set_target_properties(BasicDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(BasicDataProductSubscriber gravity)
-install(TARGETS BasicDataProductPublisher BasicDataProductSubscriber DESTINATION bin)
+install(TARGETS BasicDataProductPublisher BasicDataProductSubscriber DESTINATION bin/examples)

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 include(GravitySupport)
 project(protobufs-compile)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+gravity_find_protobuf(external ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
 
@@ -23,5 +23,5 @@ if (NOT SKIP_PYTHON)
     gravity_protobuf_generate(APPEND_PATH LANGUAGE python PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../python/src/python/gravity" GENERATE_EXTENSIONS .py OUT_VAR PY_SRCS PROTOS ${PY_PROTO_FILES})
     add_custom_target(${PROJECT_NAME}-py ALL DEPENDS "${PY_SRCS}")
     gravity_add_dependency(${PROJECT_NAME}-py)
-    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/src/python/gravity/" DESTINATION bin/gravity FILES_MATCHING PATTERN *.py)
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/src/python/gravity/" DESTINATION lib/gravity FILES_MATCHING PATTERN *.py)
 endif()

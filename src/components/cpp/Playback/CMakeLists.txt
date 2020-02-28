@@ -4,7 +4,7 @@ include(GravitySupport)
 
 project(Playback)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
+gravity_find_protobuf(external ON)
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 
 set(SRCS

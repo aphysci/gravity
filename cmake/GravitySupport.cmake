@@ -1,15 +1,26 @@
 
 
 macro(gravity_add_dependency project_name)
+    get_property(previous GLOBAL PROPERTY gravity_previous_dependency)
+    if (previous)
+        add_dependencies(${project_name} ${previous})
+    endif()
+    set_property(GLOBAL PROPERTY gravity_previous_dependency ${project_name})
+endmacro()
 
-get_property(previous GLOBAL PROPERTY gravity_previous_dependency)
-
-if (previous)
-    add_dependencies(${project_name} ${previous})
-endif()
-
-set_property(GLOBAL PROPERTY gravity_previous_dependency ${project_name})
-
+macro(gravity_find_protobuf found_external fail_if_missing)
+    set(${found_external} OFF)
+    if (NOT GRAVITY_USE_INTERNAL_PROTOBUF)
+        find_package(Protobuf)
+    endif()
+    if (Protobuf_FOUND)
+        set(${found_external} ON)
+    else()
+        find_package(protobuf PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+    endif()
+    if (fail_if_missing AND NOT Protobuf_FOUND)
+        message(FATAL_ERROR "Failed to find protobuf libraries")
+    endif()
 endmacro()
 
 function(gravity_protobuf_generate)

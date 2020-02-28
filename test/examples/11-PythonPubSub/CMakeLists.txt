@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 include(GravitySupport)
 project(PythonPubSub)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+gravity_find_protobuf(external ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 

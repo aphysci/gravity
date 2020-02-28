@@ -4,7 +4,7 @@ include(GravitySupport)
 
 project(ServiceDirectory)
 
-find_package(protobuf REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake")
+gravity_find_protobuf(external ON)
 find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
 
 set(PROTO_SRCS)

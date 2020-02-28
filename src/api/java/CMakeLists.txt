@@ -5,7 +5,14 @@ project(gravity-java NONE)
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
-set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/protobuf-java.jar")
+gravity_find_protobuf(external ON)
+if (external)
+    set(PUBLIC_JAR "/usr/share/java/protobuf.jar")
+else()
+    set(PUBLIC_JAR)
+endif()
+
+set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/protobuf-java.jar" "${PUBLIC_JAR}")
 set(CMAKE_JAVA_COMPILE_FLAGS -sourcepath "${CMAKE_CURRENT_LIST_DIR}/src/java")
 
 set(JAVA_SRCS
