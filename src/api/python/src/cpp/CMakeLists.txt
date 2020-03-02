@@ -10,11 +10,12 @@ set(LIB_NAME _gravity)
 find_package (Python REQUIRED COMPONENTS Interpreter Development)
 
 set(SRCS
-    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h")
+	"${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp"
+	"${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.h")
     
-set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp" "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h" PROPERTIES GENERATED ON)
+set_source_files_properties(${SRCS} PROPERTIES GENERATED ON)
 
+include_directories("${CMAKE_BINARY_DIR}")
 add_library(${LIB_NAME} SHARED ${SRCS})
 if (WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES SUFFIX  .pyd)

@@ -14,6 +14,7 @@ set(SRCS
         FileReplay.h
         )
         
+include_directories("${CMAKE_BINARY_DIR}")        
 add_executable(${PROJECT_NAME} ${SRCS})
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(${PROJECT_NAME} gravity)

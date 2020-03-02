@@ -22,7 +22,9 @@ set(ADDTL_DEFINE)
 if (WIN32)
     set(ADDTL_DEFINE -DWIN32)
 endif()
-add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp" -outdir "${CMAKE_CURRENT_LIST_DIR}/../python/gravity/" -python -threads ${ADDTL_DEFINE} "${CMAKE_CURRENT_LIST_DIR}/gravity.i"
+
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/cpp/swig/python")
+add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp" -outdir "${CMAKE_BINARY_DIR}/python/gravity/" -python -threads ${ADDTL_DEFINE} "${CMAKE_CURRENT_LIST_DIR}/gravity.i"
                     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/gravity.i" 
                     BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp"
                     SOURCES "${CMAKE_CURRENT_LIST_DIR}/gravity.i")
