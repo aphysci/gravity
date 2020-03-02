@@ -16,7 +16,7 @@ set(SRCS
     CPPGravityServiceProvider.cpp
     CPPGravitySubscriber.cpp
     CPPGravitySubscriptionMonitor.cpp
-    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp"
+    "${CMAKE_BINARY_DIR}/cpp/swig/gravity_wrap.cpp"
     
     CPPGravitySubscriptionMonitor.h
     CPPGravityHeartbeatListener.h
@@ -24,11 +24,11 @@ set(SRCS
     CPPGravityRequestor.h
     CPPGravityServiceProvider.h
     CPPGravitySubscriber.h
-    "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h")
+    "${CMAKE_BINARY_DIR}/cpp/swig/gravity_wrap.h")
     
 
 include_directories(${JNI_INCLUDE_DIRS})
-set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.cpp" "${CMAKE_CURRENT_LIST_DIR}/gravity_wrap.h" PROPERTIES GENERATED ON)
+set_source_files_properties("${CMAKE_BINARY_DIR}/cpp/swig/gravity_wrap.cpp" "${CMAKE_BINARY_DIR}/cpp/swig/gravity_wrap.h" PROPERTIES GENERATED ON)
 add_library(${LIB_NAME} SHARED ${SRCS})
 target_link_libraries(${LIB_NAME} gravity)
 gravity_add_dependency(${LIB_NAME})

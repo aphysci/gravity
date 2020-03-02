@@ -15,7 +15,7 @@ find_package(Boost REQUIRED)
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/protobuf")
-gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/protobuf" OUT_VAR PROTO_SRCS 
+gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf" OUT_VAR PROTO_SRCS 
                             EXPORT_MACRO GRAVITY_PROTOBUF_API
                             PROTOS ${PROTO_FILES})
                             
@@ -28,22 +28,22 @@ endif()
     
 
 set(PROTO_HDRS
-        protobuf/ComponentDataLookupResponsePB.pb.h
-        protobuf/ComponentLookupRequestPB.pb.h
-        protobuf/ComponentServiceLookupResponsePB.pb.h
-        protobuf/GravityDataProductPB.pb.h
-        protobuf/GravityLogMessagePB.pb.h
-        protobuf/GravityMetricsDataPB.pb.h
-        protobuf/ServiceDirectoryRegistrationPB.pb.h
-        protobuf/ServiceDirectoryResponsePB.pb.h
-        protobuf/ServiceDirectoryUnregistrationPB.pb.h
-        protobuf/ServiceDirectoryMapPB.pb.h
-        protobuf/ServiceDirectoryDomainUpdatePB.pb.h
-        protobuf/ConfigRequest.pb.h
-        protobuf/ServiceDirectoryBroadcastPB.pb.h
-        protobuf/FileArchiverControlRequestPB.pb.h
-        protobuf/FileArchiverControlResponsePB.pb.h
-        protobuf/ConfigRequest.pb.h)
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ComponentDataLookupResponsePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ComponentLookupRequestPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ComponentServiceLookupResponsePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityDataProductPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityLogMessagePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/GravityMetricsDataPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryRegistrationPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryResponsePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryMapPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryDomainUpdatePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ConfigRequest.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ServiceDirectoryBroadcastPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlRequestPB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/FileArchiverControlResponsePB.pb.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/protobuf/ConfigRequest.pb.h")
 
 set(HDRS
         CommUtil.h

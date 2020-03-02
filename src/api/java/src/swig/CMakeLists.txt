@@ -32,8 +32,7 @@ else()
     find_package(SWIG REQUIRED MODULE) 
 endif()
 
-message(STATUS ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp" -outdir "${CMAKE_CURRENT_LIST_DIR}/../java/com/aphysci/gravity/swig" -package com.aphysci.gravity.swig -java "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i")
-add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp" -outdir "${CMAKE_CURRENT_LIST_DIR}/../java/com/aphysci/gravity/swig" -package com.aphysci.gravity.swig -java "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i"
+add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_BINARY_DIR}/cpp/swig/gravity_wrap.cpp" -outdir "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig" -package com.aphysci.gravity.swig -java "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i"
                     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i" 
                     BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp"
                     SOURCES "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i")
