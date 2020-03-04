@@ -15,8 +15,14 @@ get_target_property(PYTHON_EXE Python::Interpreter LOCATION)
 message(STATUS "PYTHON_EXE = ${PYTHON_EXE}")
 file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin/")
 
-configure_file("${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh.in" "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" @ONLY)
-if (NOT WIN32)
+if (WIN32)
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.bat.in" "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.bat" @ONLY)
+    add_custom_target(${PROJECT_NAME} ALL 
+	    COMMAND "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.bat" 
+        COMMAND 
+	${CMAKE_COMMAND} -E copy_directory ${Protobufs_SRC_DIR}/python/build/lib/google/ "${CMAKE_INSTALL_PREFIX}/lib/google")
+else()
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh.in" "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" @ONLY)
     add_custom_target(${PROJECT_NAME} ALL 
 	    COMMAND "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.sh" 
         COMMAND 

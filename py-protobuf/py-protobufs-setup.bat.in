@@ -1,0 +1,8 @@
+@echo off
+setlocal
+
+cd @Protobufs_SRC_DIR@/python
+set Path=%Path%;@CMAKE_INSTALL_PREFIX@/deps/protobuf/bin
+@PYTHON_EXE@ setup.py build
+
+endlocal
