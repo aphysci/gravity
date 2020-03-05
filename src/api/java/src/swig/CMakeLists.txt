@@ -7,7 +7,7 @@ project(gravity-swig NONE)
 include(FetchContent)
 include(GravityExternalUrls)
 
-find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+gravity_find_zeromq(ZeroMQ_External ON)
 
 if (WIN32)
     get_target_property(ZeroMQ_LIBRARY_RELEASE libzmq LOCATION_RELEASE)

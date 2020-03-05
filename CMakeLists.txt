@@ -7,15 +7,22 @@ include(ExternalProject)
 
 project(gravity-meta)
 
-option(GRAVITY_USE_INTERNAL_PROTOBUF "Download, Build and Use and internal protobuf build")
+option(GRAVITY_USE_INTERNAL_PROTOBUF "Download, Build and Use an internal protobuf build")
+option(GRAVITY_USE_INTERNAL_ZEROMQ "Download, build and use and internal ZeroMQ build")
 option(BUILD_EXAMPLES "Build Gravity examples" ON)
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
 set(BOOST_ROOT "" CACHE PATH "Path to boost to use")
+set(Protobuf_SRC_ROOT_FOLDER "" CACHE PATH "Path to Protobuf source build")
+option(Protobuf_USE_STATIC_LIBS "Use a static external build of protobufs")
+set(ZMQ_HOME "" CACHE PATH "Path to your external ZeroMQ installation")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 set(CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
+
+string(REPLACE "\"" "" Protobuf_SRC_ROOT_FOLDER "${Protobuf_SRC_ROOT_FOLDER}")
+file(TO_CMAKE_PATH "${Protobuf_SRC_ROOT_FOLDER}" Protobuf_SRC_ROOT_FOLDER)
 
 macro(add_external_protobuf build_type)
     ExternalProject_Add(    
@@ -75,6 +82,7 @@ else()
 endif()
 
 gravity_find_protobuf(Protobuf_External OFF)
+gravity_find_zeromq(ZeroMQ_External OFF)
 
 if (WIN32)
     if (NOT Protobuf_External)
@@ -82,22 +90,29 @@ if (WIN32)
         add_external_protobuf(Release)
         list(APPEND depends protobuf_Release protobuf_Debug)
         list(APPEND protobuf_depends protobuf_Release protobuf_Debug)
-    endif()   
-    add_external_libzmq(Debug)
-    add_external_libzmq(Release)
-    list(APPEND depends libzmq_Debug libzmq_Release) 
+    endif()
+    if (NOT ZeroMQ_External)
+        add_external_libzmq(Debug)
+        add_external_libzmq(Release)
+        list(APPEND depends libzmq_Debug libzmq_Release)
+    endif()        
 else()
     if (NOT Protobuf_External)
         add_external_protobuf(${CMAKE_BUILD_TYPE})
         list(APPEND depends protobuf_${CMAKE_BUILD_TYPE})
         list(APPEND protobuf_depends protobuf_${CMAKE_BUILD_TYPE})
-    endif() 
-    add_external_libzmq(${CMAKE_BUILD_TYPE})
-    list(APPEND depends libzmq_${CMAKE_BUILD_TYPE})
+    endif()
+    if (NOT ZeroMQ_External)
+        add_external_libzmq(${CMAKE_BUILD_TYPE})
+        list(APPEND depends libzmq_${CMAKE_BUILD_TYPE})
+    endif()
 endif()
 
 if (Protobuf_External)
     message(STATUS "Using external protobuf libraries")
+endif()
+if (ZeroMQ_External)
+    message(STATUS "Using external zeromq libraries")
 endif()
 
 find_package(GravityJava)
@@ -129,12 +144,19 @@ if (SKIP_JAVA)
     message(STATUS "Building without Java")
 endif()
 
-find_package(Python COMPONENTS Interpreter Development)
+set(Python_ADDITIONAL_VERSIONS 2 3)
+find_package(PythonInterp)
+find_package(PythonLibs)
 
-if (NOT Python_FOUND)
+if (NOT PYTHONLIBS_FOUND)
     set(SKIP_PYTHON ON)
 elseif(NOT SKIP_PYTHON)
     set(SKIP_PYTHON OFF)
+endif()
+
+if (NOT SKIP_PYTHON AND "${PYTHON_VERSION_STRING}" VERSION_LESS "2.7.9")
+     message(WARNING "Please install python version 2.7.9 or later to build the python wrapper, skipping python for this build")
+     set(SKIP_PYTHON ON)
 endif()
 
 if (SKIP_PYTHON)
@@ -152,6 +174,7 @@ elseif(NOT Protobuf_External)
               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	      -DProtobufs_SRC_DIR=${CMAKE_CURRENT_BINARY_DIR}/protobuf
 	    -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+        -DGRAVITY_USE_INTERNAL_ZEROMQ=${GRAVITY_USE_INTERNAL_ZEROMQ}
 	      )
       list(APPEND depends py-protobufs-external)
 endif()
@@ -170,7 +193,10 @@ ExternalProject_Add(
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DSKIP_JAVA=${SKIP_JAVA}
         -DSKIP_PYTHON=${SKIP_PYTHON}
-	-DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+        -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+        -DGRAVITY_USE_INTERNAL_ZEROMQ=${GRAVITY_USE_INTERNAL_ZEROMQ}
+        -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
+        -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
     BUILD_ALWAYS 1)
 
 if (BUILD_EXAMPLES)
@@ -188,6 +214,9 @@ if (BUILD_EXAMPLES)
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
             -DSKIP_JAVA=${SKIP_JAVA}
             -DSKIP_PYTHON=${SKIP_PYTHON}
-	    -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+            -DGRAVITY_USE_INTERNAL_PROTOBUF=${GRAVITY_USE_INTERNAL_PROTOBUF}
+            -DGRAVITY_USE_INTERNAL_ZEROMQ=${GRAVITY_USE_INTERNAL_ZEROMQ}
+            -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
+            -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
     BUILD_ALWAYS 1)
 endif()

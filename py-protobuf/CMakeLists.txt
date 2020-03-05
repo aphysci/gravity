@@ -9,11 +9,13 @@ get_target_property(PROTOC_EXE protobuf::protoc LOCATION)
 
 file(COPY "${PROTOC_EXE}" DESTINATION "${Protobufs_SRC_DIR}/src/")
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
+set(Python_ADDITIONAL_VERSIONS 2 3)
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
 
-get_target_property(PYTHON_EXE Python::Interpreter LOCATION)
+set(PYTHON_EXE "${PYTHON_EXECUTABLE}")
 message(STATUS "PYTHON_EXE = ${PYTHON_EXE}")
-file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin/")
+file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib/")
 
 if (WIN32)
     configure_file("${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.bat.in" "${CMAKE_CURRENT_LIST_DIR}/py-protobufs-setup.bat" @ONLY)

@@ -9,7 +9,7 @@ set(LIB_NAME gravity)
 set(PROTO_LIB_NAME gravity_protobufs)
 
 gravity_find_protobuf(external ON)
-find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+gravity_find_zeromq(ZeroMQ_External ON)
 find_package(Boost REQUIRED)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
@@ -116,8 +116,11 @@ target_include_directories(${LIB_NAME} INTERFACE
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} keyvalue_parser protobuf::libprotobuf libzmq)
 target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
+if (WIN32)
+    target_link_libraries(${LIB_NAME} PUBLIC Ws2_32.lib)
+endif()
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} keyvalue_parser protobuf::libprotobuf libzmq)
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>

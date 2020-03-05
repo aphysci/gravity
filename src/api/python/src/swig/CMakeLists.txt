@@ -30,4 +30,6 @@ add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAK
                     SOURCES "${CMAKE_CURRENT_LIST_DIR}/gravity.i")
 
 gravity_add_dependency(${PROJECT_NAME})
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/gravity" DESTINATION lib/ FILES_MATCHING PATTERN "*.py")
+install(DIRECTORY "${CMAKE_BINARY_DIR}/python/gravity" DESTINATION lib/)
 													                 

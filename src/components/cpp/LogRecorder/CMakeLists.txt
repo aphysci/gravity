@@ -5,7 +5,7 @@ include(GravitySupport)
 project(LogRecorder)
 
 gravity_find_protobuf(external ON)
-find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
+gravity_find_zeromq(ZeroMQ_External ON)
 
 set(PROTO_SRCS)
         #${CMAKE_CURRENT_LIST_DIR}/../../../api/cpp/protobuf/GravityLogMessagePB.pb.cc

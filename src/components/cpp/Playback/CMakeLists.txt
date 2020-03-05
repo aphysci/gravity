@@ -5,7 +5,7 @@ include(GravitySupport)
 project(Playback)
 
 gravity_find_protobuf(external ON)
-find_package(ZeroMQ REQUIRED PATHS "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake")
+gravity_find_zeromq(ZeroMQ_External ON)
 
 set(SRCS
         FileReader.cpp
