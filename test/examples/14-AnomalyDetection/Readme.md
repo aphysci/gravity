@@ -2,8 +2,7 @@
 # Gravity Machine Learning Example
 This example shows a Gravity anomaly detector that can detect changes in the relationship between data streams. It shows how one might use TensorFlow to implement machine learning in Gravity.
 
-There are two scripts that run Gravity node clusters [^1]:
-[^1]: The TensorFlow libraries may print warning messages to the terminal about CUDA support when you run these scripts.  The examples will work with or without CUDA so you can ignore these messages. For help configuring CUDA, here's a good place to start: https://www.tensorflow.org/install/gpu
+There are two scripts that run Gravity node clusters*:
 
 If you don't already have TensorFlow installed, you should be able to install it by running:
 
@@ -22,3 +21,4 @@ Runs the a publisher node that is configured to change one of the streams (an 'a
 
 This code was last tested with Python 3.6.9 and TensorFlow version 2.1.0
 
+*: The TensorFlow libraries may print warning messages to the terminal about CUDA support when you run these scripts.  The examples will work with or without CUDA so you can ignore these messages. For help configuring CUDA, here's a good place to start: https://www.tensorflow.org/install/gpu
