@@ -28,8 +28,6 @@ from tensorflow.keras.layers import LSTM, Dense, RepeatVector, TimeDistributed
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras import optimizers
 
-import matplotlib.pyplot as plt
-
 n_steps = 20 # number of samples to autoencode
 lr = 0.0001  # Adam optimizer parameter
 

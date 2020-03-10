@@ -57,9 +57,8 @@ class MySubscriber(GravitySubscriber):
             self.subs += 1
             if self.subs == 100:
                 self.subs = 0
-                Log.message("Subs: " + str([(k,len(v)) for k,v in training_data.items()]))
-                #Log.message(str(len(training_data[pointPB.name])) + " received "+
-                #    pointPB.name + " value = "+str(pointPB.value) + " ts: " +str(pointPB.timestamp))
+                Log.message("Received %d of %d training samples. "%([len(v) for v in training_data.values()][0], training_size))
+                #Log.message("Training Subscriptions: " + str([(k,len(v)) for k,v in training_data.items()]))
         
         has_enough_data = True
         for k,v in training_data.items():
@@ -81,13 +80,13 @@ while gn.init("AnomalyDetector") != gravity.SUCCESS:
     time.sleep(1)
 
 epochs = gn.getIntParam("training_epochs", epochs)
-Log.message("Epochs: " + str(epochs))
 training_size = gn.getIntParam("training_size", training_size)
 channel = gn.getStringParam("subscription_name", "channel")
 model_file = gn.getStringParam("model_file", "model.json")
 gn.subscribe(channel, mySub)
 
 while mySub.train_state != TrainingState.TRAINED: time.sleep(1)
-Log.message("train_state" + str(mySub.train_state))
+Log.message("Training Complete " + str(mySub.train_state))
+
 gn.unsubscribe(channel, mySub)
 sys.exit(0)

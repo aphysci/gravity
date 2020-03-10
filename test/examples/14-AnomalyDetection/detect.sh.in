@@ -35,9 +35,10 @@ then
 
    @PROTOC@ --proto_path=. --python_out=. DataPoint.proto || exit
 
-   ServiceDirectory &
-   $TERM -- /bin/bash -c "$PYTHON pub.py 500 ; read -p 'Press return to exit'" &
-   $TERM -- /bin/bash -c "$PYTHON detect.py ; read -p 'Press return to exit'" &
+   $TERM -- /bin/bash -c "echo -ne '\033]0;Service Directory \007'; ServiceDirectory ; read -p 'Press return to exit'" &
+   $TERM -- /bin/bash -c "echo -ne '\033]0;Publisher \007'; $PYTHON pub.py 500 ; read -p 'Press return to exit'" &
+   $TERM -- /bin/bash -c "echo -ne '\033]0;Anomaly Detector \007'; $PYTHON detect.py ; read -p 'Press return to exit'" &
+
 
    sleep 10
 
