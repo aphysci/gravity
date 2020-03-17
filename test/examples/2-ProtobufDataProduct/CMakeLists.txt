@@ -29,4 +29,4 @@ add_executable(ProtobufDataProductSubscriber ProtobufDataProductSubscriber.cpp $
 set_target_properties(ProtobufDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(ProtobufDataProductSubscriber gravity)
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION bin/examples)
+install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION examples)

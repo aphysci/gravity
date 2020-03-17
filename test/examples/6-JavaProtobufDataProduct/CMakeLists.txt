@@ -32,4 +32,4 @@ set(JAVA_SRCS
         
 add_jar(${PROJECT_NAME} ${JAVA_SRCS})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_protos)
-install_jar(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/bin/examples")
+install_jar(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/examples")
