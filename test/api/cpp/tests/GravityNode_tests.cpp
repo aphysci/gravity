@@ -162,11 +162,20 @@ TEST_CASE("Tests without the mocking framework") {
 
   SUBCASE("Testing uninitalization GravideNode")
   {
-    class TestSub : public GravitySubscriber
+    class TestStub : public GravitySubscriber, public GravityRequestor, public GravityServiceProvider,
+                     public GravityHeartbeatListener, public GravitySubscriptionMonitor
     {
     public:
       GRAVITY_API virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) {}
-      ~TestSub() {}
+      GRAVITY_API virtual void requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response) {}
+      virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct)
+      {
+          return std::shared_ptr<GravityDataProduct>(NULL);
+      }
+      GRAVITY_API virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) {}
+      GRAVITY_API virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds) {}
+      GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) {}
+      virtual ~TestStub() {}
     };
 
     static GravityNode gn;
@@ -185,8 +194,70 @@ TEST_CASE("Tests without the mocking framework") {
       }
 
       THEN("methods should return NOT_INITIALIZED") {
-        GravityReturnCode ret = gn.subscribe("", TestSub());
+        GravityReturnCode ret;
+
+        ret = gn.subscribe("", TestStub());
         CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.subscribe("", TestStub(), "");
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.subscribe("", TestStub(), "", "");
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.subscribe("", TestStub(), "", "", false);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.unsubscribe("", TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.publish(GravityDataProduct());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.request("", GravityDataProduct(), TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.startHeartbeat(100);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.stopHeartbeat();
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.registerDataProduct("", GravityTransportType::TCP);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.registerDataProduct("", GravityTransportType::TCP, true);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.unregisterDataProduct("");
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.registerService("", GravityTransportType::TCP, TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.unregisterService("");
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.registerHeartbeatListener("", 100, TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.unregisterHeartbeatListener("", "");
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.registerRelay("", TestStub(), true, GravityTransportType::TCP);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.registerRelay("", TestStub(), true, GravityTransportType::TCP, true);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.unregisterRelay("", TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+
+        ret = gn.setSubscriptionTimeoutMonitor("", TestStub(), 100);
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+        ret = gn.clearSubscriptionTimeoutMonitor("", TestStub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+      }
+
+      THEN("other methods should return as expected") {
+        std::shared_ptr<GravityDataProduct> retSP = gn.request("", GravityDataProduct());
+        CHECK(!retSP);
+
+        CHECK(gn.getComponentID() == "");
+        CHECK(gn.getIP() == "");
+        CHECK(gn.getDomain() == "");
+
+        std::shared_ptr<FutureResponse> ret = gn.createFutureResponse();
+        CHECK(!ret);
       }
     }
   }
