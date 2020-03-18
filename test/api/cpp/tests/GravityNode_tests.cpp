@@ -159,4 +159,35 @@ TEST_CASE("Tests without the mocking framework") {
     }
     std::remove("Test.log");
   }
+
+  SUBCASE("Testing uninitalization GravideNode")
+  {
+    class TestSub : public GravitySubscriber
+    {
+    public:
+      GRAVITY_API virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) {}
+      ~TestSub() {}
+    };
+
+    static GravityNode gn;
+
+    GIVEN("an uninitialized GravityNode") {
+
+      THEN("getParam methods should return default value") {
+        std::string string1 = gn.getStringParam("string1", "default");
+        CHECK(string1 == "default");
+        int int1 = gn.getIntParam("int1", -123);
+        CHECK(int1 == -123);
+        float float1 = gn.getFloatParam("float1", 1.234);
+        CHECK(float1 == 1.234f);
+        bool bool1 = gn.getBoolParam("bool1", true);
+        CHECK(bool1);
+      }
+
+      THEN("methods should return NOT_INITIALIZED") {
+        GravityReturnCode ret = gn.subscribe("", TestSub());
+        CHECK(ret == GravityReturnCodes::NOT_INITIALIZED);
+      }
+    }
+  }
 }

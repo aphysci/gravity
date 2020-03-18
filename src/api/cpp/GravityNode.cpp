@@ -382,6 +382,9 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 
 GravityNode::GravityNode()
 {
+    defaultReceiveLastSentDataproduct = true;
+    defaultCacheLastSentDataprodut = true;
+
     // Eventually to be read from a config/properties file
     serviceDirectoryNode.port = 5555;
     serviceDirectoryNode.transport = "tcp";
@@ -402,6 +405,8 @@ GravityNode::GravityNode()
 
 GravityNode::GravityNode(std::string componentID)
 {
+    componentID = "";
+
     // Eventually to be read from a config/properties file
     serviceDirectoryNode.port = 5555;
     serviceDirectoryNode.transport = "tcp";
@@ -1129,6 +1134,10 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
 		                                                    bool cacheLastValue, bool isRelay, bool localOnly)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1289,6 +1298,10 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
 
 GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
     publishManagerRequestSWL.lock.Lock();
@@ -1441,6 +1454,11 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
 GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
+
     if (domain.empty())
     {
         domain = myDomain;
@@ -1521,6 +1539,11 @@ GravityReturnCode GravityNode::unsubscribe(string dataProductID, const GravitySu
 
 GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
+
 	if (domain.empty())
 	{
 		domain = myDomain;
@@ -1558,6 +1581,11 @@ GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const G
 
 GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, std::string filterText, uint64_t timestamp)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
+
     string dataProductID = dataProduct.getDataProductID();
 	Log::trace("Publishing %s", dataProductID.c_str());
 
@@ -1777,6 +1805,10 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduct& dataProduct,
         const GravityRequestor& requestor, string requestID, int timeout_milliseconds, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	std::string url;
 	uint32_t regTime;
 	GravityReturnCode ret = ServiceDirectoryServiceLookup(serviceID, url, domain, regTime);
@@ -1789,6 +1821,10 @@ GravityReturnCode GravityNode::request(string serviceID, const GravityDataProduc
 GravityReturnCode GravityNode::request(string connectionURL, string serviceID, const GravityDataProduct& dataProduct,
 	const GravityRequestor& requestor, uint32_t regTime, string requestID, int timeout_milliseconds)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	// Send subscription details
     requestManagerSWL.lock.Lock();
 
@@ -1826,6 +1862,10 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const GravityDataProduct& request,
 													int timeout_milliseconds, string domain)
 {
+    if (!initialized)
+    {
+        return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
+    }
 	//set Component ID
 	request.setComponentId(componentID);
 
@@ -1893,6 +1933,10 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 GravityReturnCode GravityNode::registerService(string serviceID, GravityTransportType transportType,
         const GravityServiceProvider& server)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
     string transportType_str;
 
     // manage access to service manager socket as well as serviceMap.
@@ -2042,6 +2086,10 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
 
 GravityReturnCode GravityNode::unregisterService(string serviceID)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
     serviceManagerSWL.lock.Lock();
     if (serviceMap.count(serviceID) == 0)
@@ -2114,6 +2162,10 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
 
 GravityReturnCode GravityNode::stopHeartbeat()
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	GravityReturnCode ret = gravity::GravityReturnCodes::SUCCESS;
 	if (heartbeatStarted)
 	{
@@ -2132,6 +2184,10 @@ GravityReturnCode GravityNode::stopHeartbeat()
 
 GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	if(interval_in_microseconds < 0)
 		return gravity::GravityReturnCodes::FAILURE;
 
@@ -2163,6 +2219,10 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int64_t timebetweenMessages, 
 									const GravityHeartbeatListener& listener, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	void* HeartbeatListener(void*); //Forward declaration.
 	static class Heartbeat hbSub;
 	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
@@ -2214,6 +2274,10 @@ GravityReturnCode GravityNode::registerHeartbeatListener(string componentID, int
 
 GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	static class Heartbeat hbSub;
 	
 	std::string heartbeatName;
@@ -2238,6 +2302,10 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
 	if (ret != GravityReturnCodes::SUCCESS)
 		return ret;
@@ -2246,6 +2314,10 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
 
 GravityReturnCode GravityNode::unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
     GravityReturnCode ret = unregisterDataProduct(dataProductID);
     if (ret != GravityReturnCodes::SUCCESS)
     {
@@ -2287,6 +2359,10 @@ string GravityNode::getDomain()
 
 std::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 {
+    if (!initialized)
+    {
+        return std::shared_ptr<FutureResponse>((FutureResponse*)NULL);
+    }
 	// Send request to create future response
     requestManagerRepSWL.lock.Lock();
 
@@ -2318,6 +2394,10 @@ std::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 
 GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureResponse)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	requestManagerRepSWL.lock.Lock();
 	
 	sendStringMessage(requestManagerRepSWL.socket, "sendFutureResponse", ZMQ_SNDMORE);
@@ -2344,6 +2424,10 @@ GravityReturnCode GravityNode::sendFutureResponse(const FutureResponse& futureRe
 GravityReturnCode GravityNode::setSubscriptionTimeoutMonitor(string dataProductID, const GravitySubscriptionMonitor& monitor, 
 			int milliSecondTimeout, string filter, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	if (domain.empty())
     {
         domain = myDomain;
@@ -2385,6 +2469,10 @@ GravityReturnCode GravityNode::setSubscriptionTimeoutMonitor(string dataProductI
 GravityReturnCode GravityNode::clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
 			string filter, string domain)
 {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
 	subscriptionManagerSWL.lock.Lock();
 
 	sendStringMessage(subscriptionManagerSWL.socket, "clear_monitor", ZMQ_SNDMORE);
@@ -2411,6 +2499,11 @@ GravityReturnCode GravityNode::clearSubscriptionTimeoutMonitor(std::string dataP
 
 string GravityNode::getIP()
 {
+    if (!initialized)
+    {
+        return "";
+    }
+
     string ip = "127.0.0.1";
 
     serviceDirectoryLock.Lock();
@@ -2462,11 +2555,19 @@ string GravityNode::getIP()
 
 std::string GravityNode::getStringParam(std::string key, std::string default_value)
 {
+    if (parser == NULL)
+    {
+        return default_value;
+    }
 	return parser->getString(key, default_value);
 }
 
 int GravityNode::getIntParam(std::string key, int default_value)
 {
+    if (parser == NULL)
+    {
+        return default_value;
+    }
 	std::string value = parser->getString(key, "");
 
 	return StringToInt(value, default_value);
@@ -2474,6 +2575,10 @@ int GravityNode::getIntParam(std::string key, int default_value)
 
 double GravityNode::getFloatParam(std::string key, double default_value)
 {
+    if (parser == NULL)
+    {
+        return default_value;
+    }
 	std::string value = parser->getString(key, "");
 
 	return StringToDouble(value, default_value);
@@ -2481,6 +2586,10 @@ double GravityNode::getFloatParam(std::string key, double default_value)
 
 bool GravityNode::getBoolParam(std::string key, bool default_value)
 {
+    if (parser == NULL)
+    {
+        return default_value;
+    }
     string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
 	if( val == "true" ||
 		val == "t" ||
@@ -2509,7 +2618,9 @@ static std::map<GravityReturnCode,std::string> code_strings =
     {GravityReturnCodes::LINK_ERROR, "LINK_ERROR"},
     {GravityReturnCodes::INTERRUPTED, "INTERRUPTED"},
     {GravityReturnCodes::NO_SERVICE_PROVIDER, "NO_SERVICE_PROVIDER"},
-    {GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE"}
+    {GravityReturnCodes::NO_PORTS_AVAILABLE, "NO_PORTS_AVAILABLE"},
+    {GravityReturnCodes::INVALID_PARAMETER, "INVALID_PARAMETER"},
+    {GravityReturnCodes::NOT_INITIALIZED, "NOT_INITIALIZED"}
   };
 
 
