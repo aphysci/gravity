@@ -13,13 +13,14 @@ option(BUILD_EXAMPLES "Build Gravity examples" ON)
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
-set(BOOST_ROOT "" CACHE PATH "Path to boost to use")
 set(Protobuf_SRC_ROOT_FOLDER "" CACHE PATH "Path to Protobuf source build")
 option(Protobuf_USE_STATIC_LIBS "Use a static external build of protobufs")
 set(ZMQ_HOME "" CACHE PATH "Path to your external ZeroMQ installation")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
+string(REPLACE "\"" "" ABS_CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
 set(CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
+file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}" CMAKE_INSTALL_PREFIX)
 
 string(REPLACE "\"" "" Protobuf_SRC_ROOT_FOLDER "${Protobuf_SRC_ROOT_FOLDER}")
 file(TO_CMAKE_PATH "${Protobuf_SRC_ROOT_FOLDER}" Protobuf_SRC_ROOT_FOLDER)
@@ -62,24 +63,6 @@ macro(add_external_libzmq build_type)
         BUILD_COMMAND ""
         INSTALL_COMMAND cmake --build . --target install --config ${build_type})
 endmacro()
-
-find_package(Boost)
-
-if (NOT Boost_FOUND)
-    if (NOT EXISTS "${CMAKE_INSTALL_PREFIX}/deps/boost/bootstrap.bat")
-        ExternalProject_Add(
-            boost
-            SOURCE_DIR "${CMAKE_INSTALL_PREFIX}/deps/boost"
-            URL ${boost_url}
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ""
-            INSTALL_COMMAND "")
-        list(APPEND depends boost)
-    endif()
-    set(BOOST_ROOT "${CMAKE_INSTALL_PREFIX}/deps/boost")
-else()
-    list(GET Boost_INCLUDE_DIRS 0 BOOST_ROOT)
-endif()
 
 gravity_find_protobuf(Protobuf_External OFF)
 gravity_find_zeromq(ZeroMQ_External OFF)
@@ -189,7 +172,6 @@ ExternalProject_Add(
     CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DBOOST_ROOT=${BOOST_ROOT}
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DSKIP_JAVA=${SKIP_JAVA}
         -DSKIP_PYTHON=${SKIP_PYTHON}
@@ -197,6 +179,7 @@ ExternalProject_Add(
         -DGRAVITY_USE_INTERNAL_ZEROMQ=${GRAVITY_USE_INTERNAL_ZEROMQ}
         -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
         -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
+        -Dprotobuf_MODULE_COMPATIBLE=ON
     BUILD_ALWAYS 1)
 
 if (BUILD_EXAMPLES)
@@ -210,7 +193,6 @@ if (BUILD_EXAMPLES)
         CMAKE_ARGS
 	    -DGRAVITY_ROOT=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-            -DBOOST_ROOT=${BOOST_ROOT}
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
             -DSKIP_JAVA=${SKIP_JAVA}
             -DSKIP_PYTHON=${SKIP_PYTHON}
@@ -218,5 +200,6 @@ if (BUILD_EXAMPLES)
             -DGRAVITY_USE_INTERNAL_ZEROMQ=${GRAVITY_USE_INTERNAL_ZEROMQ}
             -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
             -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
+            -Dprotobuf_MODULE_COMPATIBLE=ON
     BUILD_ALWAYS 1)
 endif()

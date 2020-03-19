@@ -5,6 +5,9 @@ project(gravity)
 set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_CXX_STANDARD 11)
 
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+
 if (NOT SKIP_JAVA)
     find_package(GravityJava REQUIRED)
 

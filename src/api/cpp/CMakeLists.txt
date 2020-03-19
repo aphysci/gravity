@@ -10,7 +10,6 @@ set(PROTO_LIB_NAME gravity_protobufs)
 
 gravity_find_protobuf(external ON)
 gravity_find_zeromq(ZeroMQ_External ON)
-find_package(Boost REQUIRED)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
@@ -107,7 +106,7 @@ else()
 endif()
 
 add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
-include_directories(${Boost_INCLUDE_DIRS} "${CMAKE_BINARY_DIR}")
+include_directories("${CMAKE_BINARY_DIR}")
 add_library(${LIB_NAME} SHARED ${SRCS})
 add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})

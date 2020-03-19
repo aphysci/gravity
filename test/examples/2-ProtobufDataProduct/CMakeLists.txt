@@ -10,7 +10,6 @@ gravity_find_protobuf(external ON)
 gravity_find_zeromq(ZeroMQ_External ON)
 find_package(GravityKeyValueParser REQUIRED)
 find_package(Gravity REQUIRED)
-find_package(Boost REQUIRED)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
@@ -29,4 +28,4 @@ add_executable(ProtobufDataProductSubscriber ProtobufDataProductSubscriber.cpp $
 set_target_properties(ProtobufDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(ProtobufDataProductSubscriber gravity)
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION examples)
+install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION bin)

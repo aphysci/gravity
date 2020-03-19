@@ -148,7 +148,7 @@ if(ZeroMQ_LIBRARY)
           IMPORTED_LOCATION_DEBUG "${ZeroMQ_LIBRARY_DEBUG}")
       endif()
       if(UNIX AND TARGET Threads::Threads)
-        set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
+        set_property(TARGET libzmq APPEND PROPERTY
             INTERFACE_LINK_LIBRARIES Threads::Threads)
       endif()
   endif()
