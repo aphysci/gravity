@@ -22,3 +22,4 @@ config.status
 Documents/html_gravity/**
 cmake_build
 install
+build

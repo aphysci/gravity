@@ -7,8 +7,8 @@ include(ExternalProject)
 
 project(gravity-meta)
 
-option(GRAVITY_USE_INTERNAL_PROTOBUF "Download, Build and Use an internal protobuf build")
-option(GRAVITY_USE_INTERNAL_ZEROMQ "Download, build and use and internal ZeroMQ build")
+option(GRAVITY_USE_EXTERNAL_PROTOBUF "Download, Build and Use an externally downloaded protobuf build")
+option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downloaded ZeroMQ build")
 option(BUILD_EXAMPLES "Build Gravity examples" ON)
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
