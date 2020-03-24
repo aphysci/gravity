@@ -11,7 +11,6 @@ endif()
 string(REPLACE "\"" "" zmq_dir "${zmq_dir}")
 file(TO_CMAKE_PATH "${zmq_dir}" zmq_dir)
 
-
 include(SelectLibraryConfigurations)
 
 function(_zeromq_find_libraries name filename)
@@ -94,9 +93,9 @@ if (ZeroMQ_INCLUDE_DIR)
     unset(ZeroMQ_VERSION_CONTENTS)
     
     set(ZeroMQ_VERSION "${ZMQ_VERSION_MAJOR}")
-    if (ZMQ_VERSION_MINOR)
+    if (ZMQ_VERSION_MINOR OR "${ZMQ_VERSION_MINOR}" STREQUAL "0")
         set(ZeroMQ_VERSION "${ZeroMQ_VERSION}.${ZMQ_VERSION_MINOR}")
-        if (ZMQ_VERSION_PATCH)
+        if (ZMQ_VERSION_PATCH OR "${ZMQ_VERSION_PATCH}" STREQUAL "0")
             set(ZeroMQ_VERSION "${ZeroMQ_VERSION}.${ZMQ_VERSION_PATCH}")
         endif()
     endif()

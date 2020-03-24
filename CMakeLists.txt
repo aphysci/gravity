@@ -162,6 +162,10 @@ elseif(NOT Protobuf_External)
       list(APPEND depends py-protobufs-external)
 endif()
 
+if (NOT ZMQ_HOME)
+    set(ZMQ_HOME "${CMAKE_INSTALL_PREFIX}/deps/libzmq")
+endif()
+
 ExternalProject_Add(
     gravity_external 
     DEPENDS ${depends}
@@ -175,6 +179,7 @@ ExternalProject_Add(
         -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
         -DSKIP_JAVA=${SKIP_JAVA}
         -DSKIP_PYTHON=${SKIP_PYTHON}
+        -DZMQ_HOME=${ZMQ_HOME}
         -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
         -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
         -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
@@ -195,6 +200,7 @@ if (BUILD_EXAMPLES)
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
             -DSKIP_JAVA=${SKIP_JAVA}
+            -DZMQ_HOME=${ZMQ_HOME}
             -DSKIP_PYTHON=${SKIP_PYTHON}
             -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
             -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
