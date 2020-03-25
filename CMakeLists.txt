@@ -64,8 +64,13 @@ macro(add_external_libzmq build_type)
         INSTALL_COMMAND cmake --build . --target install --config ${build_type})
 endmacro()
 
-gravity_find_protobuf(Protobuf_External OFF)
-gravity_find_zeromq(ZeroMQ_External OFF)
+if (NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
+    gravity_find_protobuf(Protobuf_External OFF)
+endif()
+
+if (NOT GRAVITY_USE_EXTERNAL_ZEROMQ)
+    gravity_find_zeromq(ZeroMQ_External OFF)
+endif()
 
 if (WIN32)
     if (NOT Protobuf_External)
