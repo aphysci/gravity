@@ -1,6 +1,6 @@
 
 
-if (DEFINED ENV{ZMQ_HOME})
+if (NOT GRAVITY_USE_EXTERNAL_ZEROMQ AND DEFINED ENV{ZMQ_HOME})
     set(zmq_dir $ENV{ZMQ_HOME})
 elseif(ZMQ_HOME)
     set(zmq_dir "${ZMQ_HOME}")
