@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 project(GravityExamples)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 if (NOT GRAVITY_ROOT)
     message(FATAL_ERROR "Please define GRAVITY_ROOT to the Gravity install location")
 endif()

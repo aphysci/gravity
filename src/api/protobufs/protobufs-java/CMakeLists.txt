@@ -15,7 +15,9 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMA
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
-gravity_find_protobuf(external ON)
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+
+gravity_find_protobuf(ON)
 
 gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${Protobufs_SRC_DIR}/java/core/src/main/java" IMPORT_DIRS "${Protobufs_SRC_DIR}/src" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS 
                     "${Protobufs_SRC_DIR}/src/google/protobuf/descriptor.proto")

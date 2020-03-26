@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 include(GravitySupport)
 project(protobufs-compile)
 
-gravity_find_protobuf(external ON)
+gravity_find_protobuf(ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
 

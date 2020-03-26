@@ -4,8 +4,8 @@ include(GravitySupport)
 
 project(Playback)
 
-gravity_find_protobuf(external ON)
-gravity_find_zeromq(ZeroMQ_External ON)
+gravity_find_protobuf(ON)
+gravity_find_zeromq(ON)
 
 set(SRCS
         FileReader.cpp

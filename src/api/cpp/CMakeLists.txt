@@ -8,8 +8,8 @@ project(Gravity)
 set(LIB_NAME gravity)
 set(PROTO_LIB_NAME gravity_protobufs)
 
-gravity_find_protobuf(external ON)
-gravity_find_zeromq(ZeroMQ_External ON)
+gravity_find_protobuf(ON)
+gravity_find_zeromq(ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 

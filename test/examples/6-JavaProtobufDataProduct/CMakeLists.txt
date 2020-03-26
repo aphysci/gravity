@@ -4,16 +4,8 @@ project(JavaProtobufDataProduct)
 
 include(GravitySupport)
 
-gravity_find_protobuf(external ON)
-if (external)
-    set(PUBLIC_JAR "/usr/share/java/protobuf.jar")
-    find_file(SRC_JAR "protobuf-java-${Protobuf_VERSION}.jar" PATHS "${Protobuf_SRC_ROOT_FOLDER}/java/target/")
-    if (SRC_JAR)
-        list(APPEND PUBLIC_JAR "${SRC_JAR}")
-    endif()
-else()
-    set(PUBLIC_JAR)
-endif()
+gravity_find_protobuf(ON)
+set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 find_package(GravityJava REQUIRED)
 include(UseJava)
 

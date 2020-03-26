@@ -7,7 +7,7 @@ project(gravity-swig NONE)
 include(FetchContent)
 include(GravityExternalUrls)
 
-gravity_find_zeromq(ZeroMQ_External ON)
+gravity_find_zeromq(ON)
 
 if (WIN32)
     get_target_property(ZeroMQ_LIBRARY_RELEASE libzmq LOCATION_RELEASE)

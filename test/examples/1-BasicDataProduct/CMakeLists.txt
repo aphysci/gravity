@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 3.11)
 include(GravitySupport)
 project(BasicDataProduct)
 
-set(PThreadsWin32_DIR "${ABS_GRAVITY_ROOT}/deps/pthreads-w32")
 find_package(PThreadsWin32 REQUIRED)
-gravity_find_protobuf(external ON)
-gravity_find_zeromq(ZeroMQ_External ON)
+gravity_find_protobuf(ON)
+gravity_find_zeromq(ON)
 find_package(GravityKeyValueParser REQUIRED)
 find_package(Gravity REQUIRED)
 
