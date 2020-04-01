@@ -7,9 +7,7 @@ project(GravityWrapPython)
 
 set(LIB_NAME _gravity)
 
-set(Python_ADDITIONAL_VERSIONS 2 3)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 set(SRCS
 	"${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp"
@@ -24,7 +22,8 @@ if (WIN32)
 else()
     set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 endif()
-add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
-target_link_libraries(${LIB_NAME} gravity ${PYTHON_LIBRARIES})
+
+#add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
+target_link_libraries(${LIB_NAME} gravity Python::Python)
 gravity_add_dependency(${LIB_NAME})
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib/gravity RUNTIME DESTINATION lib/gravity)

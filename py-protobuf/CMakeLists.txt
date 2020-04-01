@@ -9,11 +9,9 @@ get_target_property(PROTOC_EXE protobuf::protoc LOCATION)
 
 file(COPY "${PROTOC_EXE}" DESTINATION "${Protobufs_SRC_DIR}/src/")
 
-set(Python_ADDITIONAL_VERSIONS 2 3)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
-set(PYTHON_EXE "${PYTHON_EXECUTABLE}")
+set(PYTHON_EXE "${Python_EXECUTABLE}")
 message(STATUS "PYTHON_EXE = ${PYTHON_EXE}")
 file(MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib/")
 
