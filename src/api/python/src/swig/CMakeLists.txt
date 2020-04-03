@@ -29,7 +29,18 @@ add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAK
                     BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp"
                     SOURCES "${CMAKE_CURRENT_LIST_DIR}/gravity.i")
 
+if (WIN32)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development)
+    gravity_find_python_debug(Python_LIBRARY_DEBUG)
+    list(APPEND InstallConfigs Release RelWithDebInfo)
+    if (Python_LIBRARY_DEBUG)
+        list(APPEND InstallConfigs Debug)
+    endif()
+else()
+    set(InstallConfigs Debug Release RelWithDebInfo)
+endif()
+
 gravity_add_dependency(${PROJECT_NAME})
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/gravity" DESTINATION lib/ FILES_MATCHING PATTERN "*.py")
-install(DIRECTORY "${CMAKE_BINARY_DIR}/python/gravity" DESTINATION lib/)
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/gravity"  CONFIGURATIONS ${InstallConfigs} DESTINATION lib/  FILES_MATCHING PATTERN "*.py")
+install(DIRECTORY "${CMAKE_BINARY_DIR}/python/gravity" CONFIGURATIONS ${InstallConfigs} DESTINATION lib/ FILES_MATCHING PATTERN "*.py")
 													                 

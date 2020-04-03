@@ -25,6 +25,13 @@ macro(gravity_find_zeromq fail_if_missing)
     endif()
 endmacro()
 
+function(gravity_find_python_debug outvar)
+    get_target_property(Python_LIBRARY_RELEASE Python::Python LOCATION_RELEASE)
+    get_filename_component(Python_LIBRARY_FILENAME "${Python_LIBRARY_RELEASE}" NAME_WE)
+    find_library(Python_LIBRARY_DEBUG NAMES ${Python_LIBRARY_FILENAME}_d NAMES_PER_DIR HINTS ${Python_LIBRARY_DIRS})
+    set(${outvar} ${Python_LIBRARY_DEBUG} PARENT_SCOPE)
+endfunction()
+
 function(gravity_protobuf_generate)
   include(CMakeParseArguments)
 

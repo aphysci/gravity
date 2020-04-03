@@ -203,6 +203,7 @@ ExternalProject_Add(
         -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
         -Dprotobuf_MODULE_COMPATIBLE=ON
         -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
+    INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     BUILD_ALWAYS 1)
 
 if (BUILD_EXAMPLES)
