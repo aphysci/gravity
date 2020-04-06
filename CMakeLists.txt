@@ -142,7 +142,7 @@ if (SKIP_JAVA)
     message(STATUS "Building without Java")
 endif()
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
+find_package(Python COMPONENTS Interpreter Development)
 
 if (NOT Python_FOUND)
     set(SKIP_PYTHON ON)

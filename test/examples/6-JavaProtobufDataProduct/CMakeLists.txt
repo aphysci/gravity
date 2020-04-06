@@ -24,4 +24,10 @@ set(JAVA_SRCS
         
 add_jar(${PROJECT_NAME} ${JAVA_SRCS})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_protos)
-install_jar(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/bin")
+
+set(INSTALL_CONFIGS)
+if (WIN32)
+    set(INSTALL_CONFIGS CONFIGURATIONS Release RelWithDebInfo)
+endif()
+
+gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" ${INSTALL_CONFIGS})

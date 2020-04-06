@@ -57,5 +57,10 @@ set(SWIG_JAVA_SRCS
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
 add_jar(${PROJECT_NAME} ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} OUTPUT_NAME gravity)
-install_jar(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/lib")
+
+set(INSTALL_CONFIGS)
+if (WIN32)
+    set(INSTALL_CONFIGS CONFIGURATIONS Release RelWithDebInfo)
+endif()
+gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" ${INSTALL_CONFIGS})
 gravity_add_dependency(${PROJECT_NAME})

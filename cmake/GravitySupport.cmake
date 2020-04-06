@@ -32,6 +32,58 @@ function(gravity_find_python_debug outvar)
     set(${outvar} ${Python_LIBRARY_DEBUG} PARENT_SCOPE)
 endfunction()
 
+function(GRAVITY_INSTALL_JAR _TARGET_NAME)
+    if (ARGC EQUAL 2)
+      set (_DESTINATION ${ARGV1})
+    else()
+      cmake_parse_arguments(_install_jar
+        ""
+        "DESTINATION;COMPONENT;CONFIGURATIONS"
+        ""
+        ${ARGN})
+      if (_install_jar_DESTINATION)
+        set (_DESTINATION ${_install_jar_DESTINATION})
+      else()
+        message(SEND_ERROR "install_jar: ${_TARGET_NAME}: DESTINATION must be specified.")
+      endif()
+
+      if (_install_jar_COMPONENT)
+        set (_COMPONENT COMPONENT ${_install_jar_COMPONENT})
+      endif()
+      
+      if (_install_jar_CONFIGURATIONS)
+          set(_CONFIGURATIONS CONFIGURATIONS ${_install_jar_CONFIGURATIONS})
+      endif()
+    endif()
+
+    get_property(__FILES
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_FILES
+    )
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_DESTINATION
+            ${_DESTINATION}
+    )
+
+    if (__FILES)
+        install(
+            FILES
+                ${__FILES}
+            DESTINATION
+                ${_DESTINATION}
+            ${_COMPONENT}
+            ${_CONFIGURATIONS}
+        )
+    else ()
+        message(SEND_ERROR "install_jar: The target ${_TARGET_NAME} is not known in this scope.")
+    endif ()
+endfunction()
+
 function(gravity_protobuf_generate)
   include(CMakeParseArguments)
 
