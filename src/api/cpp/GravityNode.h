@@ -75,7 +75,8 @@ namespace GravityReturnCodes
         INTERRUPTED = -9, ///< Received an interruption.
         NO_SERVICE_PROVIDER = -10, ///< No service provider found.
         NO_PORTS_AVAILABLE = -11, ///< No ports available
-		INVALID_PARAMETER = -12 ///< Invalid parameter. (Ex: entered a negative number for time)
+		INVALID_PARAMETER = -12, ///< Invalid parameter. (Ex: entered a negative number for time)
+		NOT_INITIALIZED = -13  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
