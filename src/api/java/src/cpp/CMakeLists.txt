@@ -32,7 +32,7 @@ set_source_files_properties("${CMAKE_BINARY_DIR}/cpp/swig/java/gravity_wrap.cpp"
 set(InstallConfigs)
 if (WIN32)
     file(TOUCH "${CMAKE_BINARY_DIR}/gravity_wrap_dummy.cpp")
-    add_library(${LIB_NAME} SHARED $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:${SRCS}> "${CMAKE_BINARY_DIR}/gravity_wrap_dummy.cpp")
+    add_library(${LIB_NAME} SHARED $<$<NOT:$<CONFIG:Debug>>:${SRCS}> "${CMAKE_BINARY_DIR}/gravity_wrap_dummy.cpp")
     set(InstallConfigs CONFIGURATIONS Release RelWithDebInfo)
 else()
     add_library(${LIB_NAME} SHARED ${SRCS})

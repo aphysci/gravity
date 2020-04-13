@@ -56,7 +56,7 @@ set(SWIG_JAVA_SRCS
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java")
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
-add_jar(${PROJECT_NAME} ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} OUTPUT_NAME gravity)
+gravity_add_jar_release(${PROJECT_NAME} ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} OUTPUT_NAME gravity)
 
 set(INSTALL_CONFIGS)
 if (WIN32)

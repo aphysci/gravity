@@ -21,8 +21,8 @@ set(JAVA_SRCS
         src/JavaProtobufDataProductPublisher.java
         src/JavaProtobufDataProductSubscriber.java
         ${PROTO_SRCS})
-        
-add_jar(${PROJECT_NAME} ${JAVA_SRCS})
+
+gravity_add_jar_release(${PROJECT_NAME} ${JAVA_SRCS})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_protos)
 
 set(INSTALL_CONFIGS)

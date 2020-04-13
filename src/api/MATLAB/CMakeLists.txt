@@ -11,8 +11,8 @@ get_property(GRAVITY_JAR TARGET gravity-java PROPERTY JAR_FILE)
 
 set(CMAKE_JAVA_INCLUDE_PATH guava-13.0.1.jar "${GRAVITY_JAR}")
 
-add_jar(MATLABGravitySubscriber MATLABGravitySubscriber.java)
-add_jar(MATLABProtobufGenerator MATLABProtobufGenerator.java)
+gravity_add_jar_release(MATLABGravitySubscriber MATLABGravitySubscriber.java)
+gravity_add_jar_release(MATLABProtobufGenerator MATLABProtobufGenerator.java)
 
 set(INSTALL_CONFIGS)
 if (WIN32)
