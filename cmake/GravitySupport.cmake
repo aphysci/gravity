@@ -51,16 +51,19 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
         set (_COMPONENT COMPONENT ${_install_jar_COMPONENT})
       endif()
       
-      if (_install_jar_CONFIGURATIONS)
-          set(_CONFIGURATIONS CONFIGURATIONS ${_install_jar_CONFIGURATIONS})
-      endif()
     endif()
 
-    get_property(__FILES
+    get_property(__FILES_DEBUG
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES
+            INSTALL_FILES_DEBUG
+    )
+    get_property(__FILES_RELEASE
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_FILES_RELEASE
     )
     set_property(
         TARGET
@@ -70,15 +73,25 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
             ${_DESTINATION}
     )
 
-    if (__FILES)
+    if (__FILES_DEBUG)
         install(
             FILES
-                ${__FILES}
+                ${__FILES_DEBUG}
             DESTINATION
                 ${_DESTINATION}
             ${_COMPONENT}
-            ${_CONFIGURATIONS}
+            CONFIGURATIONS Debug
         )
+    endif()
+    
+    if (__FILES_RELEASE)
+        install(
+            FILES
+                ${__FILES_RELEASE}
+            DESTINATION
+                ${_DESTINATION}
+            ${_COMPONENT}
+            CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
     else ()
         message(SEND_ERROR "install_jar: The target ${_TARGET_NAME} is not known in this scope.")
     endif ()
@@ -199,12 +212,12 @@ function(gravity_protobuf_generate)
 
 endfunction()
 
-function(gravity_add_jar_release _TARGET_NAME)
+function(gravity_add_jar_debug_release _TARGET_NAME)
 
     cmake_parse_arguments(_add_jar
       ""
       "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT;MANIFEST"
-      "SOURCES;INCLUDE_JARS;GENERATE_NATIVE_HEADERS"
+      "SOURCES;DEBUG_SOURCES;RELEASE_SOURCES;INCLUDE_JARS;GENERATE_NATIVE_HEADERS"
       ${ARGN}
     )
 
@@ -230,6 +243,8 @@ function(gravity_add_jar_release _TARGET_NAME)
         set(_add_jar_ENTRY_POINT "${CMAKE_JAVA_JAR_ENTRY_POINT}")
     endif()
 
+    set(_JAVA_SOURCE_FILES_DEBUG ${_add_jar_DEBUG_SOURCES})
+    set(_JAVA_SOURCE_FILES_RELEASE ${_add_jar_RELEASE_SOURCES})
     set(_JAVA_SOURCE_FILES ${_add_jar_SOURCES} ${_add_jar_UNPARSED_ARGUMENTS})
 
     if (NOT DEFINED _add_jar_OUTPUT_DIR)
@@ -291,6 +306,13 @@ function(gravity_add_jar_release _TARGET_NAME)
     foreach (JAVA_INCLUDE_DIR IN LISTS CMAKE_JAVA_INCLUDE_PATH)
        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${JAVA_INCLUDE_DIR}")
     endforeach()
+    
+    foreach (JAVA_INCLUDE_TARGET IN LISTS CMAKE_JAVA_INCLUDE_TARGET)
+        get_property(TARGET_JAR_DEBUG TARGET ${JAVA_INCLUDE_TARGET} PROPERTY JAR_FILE_DEBUG)
+        get_property(TARGET_JAR_RELEASE TARGET ${JAVA_INCLUDE_TARGET} PROPERTY JAR_FILE_RELEASE)
+        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${TARGET_JAR_DEBUG}")
+        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${TARGET_JAR_RELEASE}")
+    endforeach()
 
     set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
 
@@ -298,20 +320,26 @@ function(gravity_add_jar_release _TARGET_NAME)
     if (_add_jar_OUTPUT_NAME AND _add_jar_VERSION)
         set(_JAVA_TARGET_OUTPUT_NAME "${_add_jar_OUTPUT_NAME}-${_add_jar_VERSION}.jar")
         set(_JAVA_TARGET_OUTPUT_LINK "${_add_jar_OUTPUT_NAME}.jar")
+        set(_JAVA_TAREGET_OUTPUT_LINK_DEBUG "${_add_jar_OUTPUT_NAME}${CMAKE_DEBUG_POSTFIX}.jar")
     elseif (_add_jar_VERSION)
         set(_JAVA_TARGET_OUTPUT_NAME "${_TARGET_NAME}-${_add_jar_VERSION}.jar")
         set(_JAVA_TARGET_OUTPUT_LINK "${_TARGET_NAME}.jar")
+        set(_JAVA_TARGET_OUTPUT_LINK_DEBUG "${_TARGET_NAME}${CMAKE_DEBUG_POSTFIX}.jar")
     elseif (_add_jar_OUTPUT_NAME)
         set(_JAVA_TARGET_OUTPUT_NAME "${_add_jar_OUTPUT_NAME}.jar")
     endif ()
 
     set(_JAVA_CLASS_FILES)
     set(_JAVA_COMPILE_FILES)
+    set(_JAVA_COMPILE_FILES_DEBUG)
+    set(_JAVA_COMPILE_FILES_RELEASE)
     set(_JAVA_COMPILE_FILELISTS)
     set(_JAVA_DEPENDS)
     set(_JAVA_COMPILE_DEPENDS)
     set(_JAVA_RESOURCE_FILES)
     set(_JAVA_RESOURCE_FILES_RELATIVE)
+    set(_JAVA_CLASS_FILES_DEBUG)
+    set(_JAVA_CLASS_FILES_RELEASE)
     foreach(_JAVA_SOURCE_FILE IN LISTS _JAVA_SOURCE_FILES)
         get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
         get_filename_component(_JAVA_FILE ${_JAVA_SOURCE_FILE} NAME_WE)
@@ -356,6 +384,54 @@ function(gravity_add_jar_release _TARGET_NAME)
             list(APPEND _JAVA_RESOURCE_FILES_RELATIVE ${_JAVA_SOURCE_FILE})
         endif ()
     endforeach()
+    
+    foreach(_JAVA_SOURCE_FILE IN LISTS _JAVA_SOURCE_FILES_DEBUG)
+        get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
+        get_filename_component(_JAVA_FULL ${_JAVA_SOURCE_FILE} ABSOLUTE)
+        get_filename_component(_JAVA_FILE ${_JAVA_SOURCE_FILE} NAME_WE)
+        
+        if (_JAVA_EXT MATCHES ".java")
+            file(RELATIVE_PATH _JAVA_REL_BINARY_PATH ${CMAKE_CURRENT_BINARY_DIR} ${_JAVA_FULL})
+            file(RELATIVE_PATH _JAVA_REL_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${_JAVA_FULL})
+            string(LENGTH ${_JAVA_REL_BINARY_PATH} _BIN_LEN)
+            string(LENGTH ${_JAVA_REL_SOURCE_PATH} _SRC_LEN)
+            if (_BIN_LEN LESS _SRC_LEN)
+                set(_JAVA_REL_PATH ${_JAVA_REL_BINARY_PATH})
+            else ()
+                set(_JAVA_REL_PATH ${_JAVA_REL_SOURCE_PATH})
+            endif ()
+            get_filename_component(_JAVA_REL_PATH ${_JAVA_REL_PATH} PATH)
+
+            list(APPEND _JAVA_COMPILE_FILES_DEBUG ${_JAVA_SOURCE_FILE})
+            set(_JAVA_CLASS_FILE "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_REL_PATH}/${_JAVA_FILE}.class")
+            set(_JAVA_CLASS_FILES_DEBUG ${_JAVA_CLASS_FILES_DEBUG} ${_JAVA_CLASS_FILE})
+        endif()
+    endforeach()
+    
+    foreach(_JAVA_SOURCE_FILE IN LISTS _JAVA_SOURCE_FILES_RELEASE)
+        get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
+        get_filename_component(_JAVA_FULL ${_JAVA_SOURCE_FILE} ABSOLUTE)
+        get_filename_component(_JAVA_FILE ${_JAVA_SOURCE_FILE} NAME_WE)
+        
+        if (_JAVA_EXT MATCHES ".java")
+            file(RELATIVE_PATH _JAVA_REL_BINARY_PATH ${CMAKE_CURRENT_BINARY_DIR} ${_JAVA_FULL})
+            file(RELATIVE_PATH _JAVA_REL_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${_JAVA_FULL})
+            string(LENGTH ${_JAVA_REL_BINARY_PATH} _BIN_LEN)
+            string(LENGTH ${_JAVA_REL_SOURCE_PATH} _SRC_LEN)
+            if (_BIN_LEN LESS _SRC_LEN)
+                set(_JAVA_REL_PATH ${_JAVA_REL_BINARY_PATH})
+            else ()
+                set(_JAVA_REL_PATH ${_JAVA_REL_SOURCE_PATH})
+            endif ()
+            get_filename_component(_JAVA_REL_PATH ${_JAVA_REL_PATH} PATH)
+
+            list(APPEND _JAVA_COMPILE_FILES_RELEASE ${_JAVA_SOURCE_FILE})
+            set(_JAVA_CLASS_FILE "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_REL_PATH}/${_JAVA_FILE}.class")
+            set(_JAVA_CLASS_FILES_RELEASE ${_JAVA_CLASS_FILES_RELEASE} ${_JAVA_CLASS_FILE})
+        endif()
+    endforeach()
+    
+    
 
     foreach(_JAVA_INCLUDE_JAR IN LISTS _add_jar_INCLUDE_JARS)
         if (TARGET ${_JAVA_INCLUDE_JAR})
@@ -378,13 +454,31 @@ function(gravity_add_jar_release _TARGET_NAME)
 
     if (_JAVA_COMPILE_FILES OR _JAVA_COMPILE_FILELISTS)
         set (_JAVA_SOURCES_FILELISTS)
-
+        set (_JAVA_SOURCES_FILELISTS_DEBUG)
+        set (_JAVA_SOURCES_FILELISTS_RELEASE)
+        
         if (_JAVA_COMPILE_FILES)
             # Create the list of files to compile.
             set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
             string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
             file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
             list (APPEND _JAVA_SOURCES_FILELISTS "@${_JAVA_SOURCES_FILE}")
+            
+            if (_JAVA_COMPILE_FILES_DEBUG)
+                set(_JAVA_COMPILE_STRING)
+                set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources_debug)
+                string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES_DEBUG}\"")
+                file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+                list (APPEND _JAVA_SOURCES_FILELISTS_DEBUG "@${_JAVA_SOURCES_FILE}")
+            endif()
+            
+            if (_JAVA_COMPILE_FILES_RELEASE)
+                set(_JAVA_COMPILE_STRING)
+                set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources_release)
+                string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES_RELEASE}\"")
+                file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+                list (APPEND _JAVA_SOURCES_FILELISTS_RELEASE "@${_JAVA_SOURCES_FILE}")
+            endif()
         endif()
         if (_JAVA_COMPILE_FILELISTS)
             foreach (_JAVA_FILELIST IN LISTS _JAVA_COMPILE_FILELISTS)
@@ -396,14 +490,19 @@ function(gravity_add_jar_release _TARGET_NAME)
         add_custom_command(
             # NOTE: this command generates an artificial dependency file
             OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${Java_JAVAC_EXECUTABLE}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${CMAKE_COMMAND}
+            ARGS
+                -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
+                -DCMAKE_JAR_CLASSES_PREFIX="${CMAKE_JAR_CLASSES_PREFIX}"
+                -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CleanJavaClassFilelist.cmake 
+            COMMAND ${Java_JAVAC_EXECUTABLE}
             ARGS
                 ${CMAKE_JAVA_COMPILE_FLAGS}
-                -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
+                -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}$<$<NOT:$<CONFIG:Debug>>:${CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG}>"
                 -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 ${_GENERATE_NATIVE_HEADERS}
-                ${_JAVA_SOURCES_FILELISTS}
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}>$<$<CONFIG:Debug>:echo> 
+                ${_JAVA_SOURCES_FILELISTS} $<$<NOT:$<CONFIG:Debug>>:${_JAVA_SOURCES_FILELISTS_RELEASE}>$<$<CONFIG:Debug>:${_JAVA_SOURCES_FILELISTS_DEBUG}>
+            COMMAND ${CMAKE_COMMAND}
             ARGS
                 -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS}
@@ -412,7 +511,7 @@ function(gravity_add_jar_release _TARGET_NAME)
         )
         add_custom_command(
             OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${CMAKE_COMMAND}
             ARGS
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX="${CMAKE_JAR_CLASSES_PREFIX}"
@@ -430,24 +529,27 @@ function(gravity_add_jar_release _TARGET_NAME)
     # create the jar file
     set(_JAVA_JAR_OUTPUT_PATH
       "${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_NAME}")
+    get_filename_component(_JAVA_TARGET_OUTPUT_NAME_DEBUG "${_JAVA_TARGET_OUTPUT_NAME}" NAME_WE)
+    set(_JAVA_TARGET_OUTPUT_NAME_DEBUG "${_JAVA_TARGET_OUTPUT_NAME_DEBUG}${CMAKE_DEBUG_POSTFIX}.jar")
+    set(_JAVA_JAR_OUTPUT_PATH_DEBUG "${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_NAME_DEBUG}")
     if (CMAKE_JNI_TARGET)
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${Java_JAR_EXECUTABLE}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${Java_JAR_EXECUTABLE}
             ARGS
-                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
+                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} $<$<NOT:$<CONFIG:Debug>>:${_JAVA_JAR_OUTPUT_PATH}>$<$<CONFIG:Debug>:${_JAVA_JAR_OUTPUT_PATH_DEBUG}> ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
                 ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${CMAKE_COMMAND}
             ARGS
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
-                -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}
-                -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
+                -D_JAVA_TARGET_OUTPUT_NAME=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_TARGET_OUTPUT_NAME}>$<$<CONFIG:Debug>:${_JAVA_TARGET_OUTPUT_NAME_DEBUG}>
+                -D_JAVA_TARGET_OUTPUT_LINK=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_TARGET_OUTPUT_LINK}>$<$<CONFIG:Debug>:${_JAVA_TARGET_OUTPUT_LINK_DEBUG}>
                 -P ${_JAVA_SYMLINK_SCRIPT}
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${CMAKE_COMMAND}
             ARGS
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
-                -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_JAR_OUTPUT_PATH}
-                -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
+                -D_JAVA_TARGET_OUTPUT_NAME=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_JAR_OUTPUT_PATH}>$<$<CONFIG:Debug>:${_JAVA_JAR_OUTPUT_PATH_DEBUG}>
+                -D_JAVA_TARGET_OUTPUT_LINK=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_TARGET_OUTPUT_LINK}>$<$<CONFIG:Debug>:${_JAVA_TARGET_OUTPUT_LINK_DEBUG}>
                 -P ${_JAVA_SYMLINK_SCRIPT}
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
@@ -456,15 +558,15 @@ function(gravity_add_jar_release _TARGET_NAME)
     else ()
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${Java_JAR_EXECUTABLE}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${Java_JAR_EXECUTABLE}>
             ARGS
-                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
+                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} $<$<NOT:$<CONFIG:Debug>>:${_JAVA_JAR_OUTPUT_PATH}>$<$<CONFIG:Debug>:${_JAVA_JAR_OUTPUT_PATH_DEBUG}> ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
                 ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
-            COMMAND $<$<NOT:$<CONFIG:Debug>>:${CMAKE_COMMAND}>$<$<CONFIG:Debug>:echo>
+            COMMAND ${CMAKE_COMMAND}
             ARGS
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
-                -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}
-                -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
+                -D_JAVA_TARGET_OUTPUT_NAME=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_TARGET_OUTPUT_NAME}>$<$<CONFIG:Debug>:${_JAVA_TARGET_OUTPUT_NAME_DEBUG}>
+                -D_JAVA_TARGET_OUTPUT_LINK=$<$<NOT:$<CONFIG:Debug>>:${_JAVA_TARGET_OUTPUT_LINK}>$<$<CONFIG:Debug>:${_JAVA_TARGET_OUTPUT_LINK_DEBUG}>
                 -P ${_JAVA_SYMLINK_SCRIPT}
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
@@ -473,13 +575,21 @@ function(gravity_add_jar_release _TARGET_NAME)
     endif ()
 
     # Add the target and make sure we have the latest resource files.
-    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_JAR_OUTPUT_PATH} SOURCES ${_JAVA_SOURCE_FILES})
+    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_JAR_OUTPUT_PATH} SOURCES ${_JAVA_SOURCE_FILES} $<$<NOT:$<CONFIG:Debug>>:${_JAVA_SOURCE_FILES_RELEASE}>$<$<CONFIG:Debug>:${_JAVA_SOURCE_FILES_DEBUG}>)
 
     set_property(
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES
+            INSTALL_FILES_DEBUG
+                ${_JAVA_JAR_OUTPUT_PATH_DEBUG}
+    )
+    
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_FILES_RELEASE
                 ${_JAVA_JAR_OUTPUT_PATH}
     )
 
@@ -488,7 +598,16 @@ function(gravity_add_jar_release _TARGET_NAME)
             TARGET
                 ${_TARGET_NAME}
             PROPERTY
-                INSTALL_FILES
+                INSTALL_FILES_DEBUG
+                    ${_JAVA_JAR_OUTPUT_PATH_DEBUG}
+                    ${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_LINK_DEBUG}
+        )
+        
+        set_property(
+            TARGET
+                ${_TARGET_NAME}
+            PROPERTY
+                INSTALL_FILES_RELEASE
                     ${_JAVA_JAR_OUTPUT_PATH}
                     ${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
         )
@@ -498,7 +617,14 @@ function(gravity_add_jar_release _TARGET_NAME)
                 TARGET
                     ${_TARGET_NAME}
                 PROPERTY
-                    JNI_SYMLINK
+                    JNI_SYMLINK_DEBUG
+                        ${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_LINK_DEBUG}
+            )
+            set_property(
+                TARGET
+                    ${_TARGET_NAME}
+                PROPERTY
+                    JNI_SYMLINK_RELEASE
                         ${_add_jar_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
             )
         endif ()
@@ -508,8 +634,16 @@ function(gravity_add_jar_release _TARGET_NAME)
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            JAR_FILE
+            JAR_FILE_RELEASE
                 ${_JAVA_JAR_OUTPUT_PATH}
+    )
+    
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            JAR_FILE_DEBUG
+                ${_JAVA_JAR_OUTPUT_PATH_DEBUG}
     )
 
     set_property(

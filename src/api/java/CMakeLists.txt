@@ -47,20 +47,30 @@ set(SWIG_JAVA_SRCS
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravityServiceProvider.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravitySubscriber.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravitySubscriptionMonitor.java"
-	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity.java"
-	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityConstants.java"
-	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityJNI.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityNode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityReturnCode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityTransportType.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java")
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
-gravity_add_jar_release(${PROJECT_NAME} ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} OUTPUT_NAME gravity)
+set(SWIG_CONFIG_JAVA_SRCS "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity.java"
+                          "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_d.java"
+                          "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityJNI.java"
+                          "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_dJNI.java"
+                          "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityConstants.java"
+                          "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_dConstants.java"
+                          )
+set_source_files_properties(${SWIG_CONFIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
-set(INSTALL_CONFIGS)
-if (WIN32)
-    set(INSTALL_CONFIGS CONFIGURATIONS Release RelWithDebInfo)
-endif()
-gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" ${INSTALL_CONFIGS})
+gravity_add_jar_debug_release(${PROJECT_NAME} SOURCES ${JAVA_SRCS} ${JAVA_PROTO_SRCS} ${SWIG_JAVA_SRCS} DEBUG_SOURCES 
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_d.java"
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_dJNI.java"
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity_dConstants.java"
+            RELEASE_SOURCES
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityJNI.java"
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity.java" 
+            "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityConstants.java"
+            OUTPUT_NAME gravity)
+
+gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 gravity_add_dependency(${PROJECT_NAME})

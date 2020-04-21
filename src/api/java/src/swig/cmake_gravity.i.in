@@ -23,7 +23,7 @@
 //%include "stdint.i"
 //%include "typemaps.i"
 
-%module(directors="1") gravity
+%module(directors="1") gravity@POSTFIX@
 
 %javaconst(1);
 %{
@@ -48,10 +48,10 @@
     }
 
     try {
-        System.loadLibrary("gravity_wrap");
+        System.loadLibrary("gravity_wrap@POSTFIX@");
     } catch (UnsatisfiedLinkError unused) {
 	    try {
-	        System.loadLibrary("libgravity_wrap");
+	        System.loadLibrary("libgravity_wrap@POSTFIX@");
 	    } catch (UnsatisfiedLinkError e) {
 	      System.err.println("Native code library failed to load. Tried both gravity_wrap and libgravity_wrap.\n" + e);
 	      System.exit(1);
@@ -67,7 +67,7 @@
 %typemap(javainterfaces) GravitySubscriber "GravitySubscriber"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravitySubscriber n = gravity.makeNativeSubscriber($javainput);")
+         pre="    CPPGravitySubscriber n = gravity@POSTFIX@.makeNativeSubscriber($javainput);")
         const gravity::GravitySubscriber&  "CPPGravitySubscriber.getCPtr(n)"
 
 /******
@@ -77,7 +77,7 @@
 %typemap(javainterfaces) GravityRequestor "GravityRequestor"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravityRequestor n = gravity.makeNativeRequestor($javainput);")
+         pre="    CPPGravityRequestor n = gravity@POSTFIX@.makeNativeRequestor($javainput);")
         const gravity::GravityRequestor&  "CPPGravityRequestor.getCPtr(n)"
 
 /******
@@ -87,7 +87,7 @@
 %typemap(javainterfaces) GravityServiceProvider "GravityServiceProvider"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravityServiceProvider n = gravity.makeNativeProvider($javainput);")
+         pre="    CPPGravityServiceProvider n = gravity@POSTFIX@.makeNativeProvider($javainput);")
         const gravity::GravityServiceProvider&  "CPPGravityServiceProvider.getCPtr(n)"
 
 /******
@@ -97,7 +97,7 @@
 %typemap(javainterfaces) GravityHeartbeatListener "GravityHeartbeatListener"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravityHeartbeatListener n = gravity.makeNativeHeartbeatListener($javainput);")
+         pre="    CPPGravityHeartbeatListener n = gravity@POSTFIX@.makeNativeHeartbeatListener($javainput);")
         const gravity::GravityHeartbeatListener&  "CPPGravityHeartbeatListener.getCPtr(n)"
 
 /******
@@ -107,7 +107,7 @@
 %typemap(javainterfaces) GravitySubscriptionMonitor "GravitySubscriptionMonitor"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravitySubscriptionMonitor n = gravity.makeNativeSubscriptionMonitor($javainput);")
+         pre="    CPPGravitySubscriptionMonitor n = gravity@POSTFIX@.makeNativeSubscriptionMonitor($javainput);")
         const gravity::GravitySubscriptionMonitor&  "CPPGravitySubscriptionMonitor.getCPtr(n)"
 
 /******
@@ -117,7 +117,7 @@
 %typemap(javainterfaces) Logger "Logger"
 
 %typemap(javain,pgcppname="n",
-         pre="    CPPGravityLogger n = gravity.makeNativeLogger($javainput);")
+         pre="    CPPGravityLogger n = gravity@POSTFIX@.makeNativeLogger($javainput);")
         gravity::Logger*  "CPPGravityLogger.getCPtr(n)"
 
 

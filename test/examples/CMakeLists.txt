@@ -19,6 +19,7 @@ message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
 
 list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
+set(CMAKE_DEBUG_POSTFIX _d)
 
 add_subdirectory("1-BasicDataProduct")
 add_subdirectory("2-ProtobufDataProduct")
