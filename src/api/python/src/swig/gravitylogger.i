@@ -55,12 +55,29 @@ namespace gravity{
 	
 	    static void CloseLoggers();
 	
-	    static void fatal(const char* message, ...);
-	    static void critical(const char* message, ...);
-	    static void warning(const char* message, ...);
-	    static void message(const char* message, ...);
-	    static void debug(const char* message, ...);
-	    static void trace(const char* message, ...);
-	
+%typemap(in) (const char* format, const char* message) 
+  (int res, char *buf = 0, int alloc = 0)
+{ 
+  $1 = (char *) malloc(4*sizeof(char *));
+  sprintf($1, "%%s");
+  res = SWIG_AsCharPtrAndSize($input, &buf, NULL, &alloc);
+  if (!SWIG_IsOK(res)) {
+    %argument_fail(res,"$type",$symname, $argnum);
+  }
+  $2 = %reinterpret_cast(buf, $2_ltype); 
+}
+
+%typemap(freearg) (const char* format, const char* message)
+{
+  free((char *) $1);
+  if (alloc$argnum == SWIG_NEWOBJ) delete[] buf$argnum;
+}
+
+        static void fatal(const char* format, const char* message);
+        static void critical(const char* format, const char* message);
+        static void warning(const char* format, const char* message);
+        static void message(const char* format, const char* message);
+        static void debug(const char* format, const char* message);
+        static void trace(const char* format, const char* message);
 	};
 };
