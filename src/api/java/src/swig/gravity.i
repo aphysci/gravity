@@ -189,7 +189,9 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 %typemap(javadirectorin) int64_t "$jniinput"
 %typemap(javadirectorout) int64_t "$javacall"
 //%typemap(directorout) int64_t {}
-%typemap(directorin,descriptor="J") int64_t {}
+%typemap(directorin,descriptor="J") int64_t { 
+  $input = $1;
+}
 %typemap(javaout) int64_t {
     return $jnicall;
   }
