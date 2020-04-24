@@ -180,6 +180,8 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 {
     INOUT = ((int64_t *) jenv->GetLongArrayElements(jINOUT, 0))[0];
     (jenv)->DeleteLocalRef(jINOUT);
+    
+    $result = (int64_t)$input;
 }
 
 %typemap(jtype) int64_t "long";
