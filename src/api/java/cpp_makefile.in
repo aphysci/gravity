@@ -101,9 +101,11 @@ endif
 
 all: $(LIB_NAME).$(LIB_EXT)
 
+src/cpp/gravity_wrap.$(OBJ_EXT): CFLAGS+=-fno-strict-aliasing
+
 %.$(OBJ_EXT): %.cpp
 	@echo $(CC) $<
-	$(warning COMPILE_FLAG is $(COMPILE_FLAG))
+	$(warning CFLAGS = $(CFLAGS))
 	@$(CC) $(COMPILE_FLAG) $(OS_SPECIFIC_FLAGS) $(CFLAGS) $(COUTPUT_FLAG)$@ $<
 
 $(LIB_NAME).$(LIB_EXT): $(CPP_OBJ)
