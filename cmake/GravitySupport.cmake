@@ -195,7 +195,7 @@ function(gravity_protobuf_generate)
     get_target_property(PROTOC_EXE protobuf::protoc LOCATION) 
     add_custom_command(
       OUTPUT ${_generated_srcs}
-      COMMAND  ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib" ${PROTOC_EXE} 
+      COMMAND  ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib:${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64:${ABS_GRAVITY_ROOT}/deps/protobuf/lib:${ABS_GRAVITY_ROOT}/deps/protobuf/lib64" ${PROTOC_EXE} 
       ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc
       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
@@ -558,7 +558,7 @@ function(gravity_add_jar_debug_release _TARGET_NAME)
     else ()
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
-            COMMAND ${Java_JAR_EXECUTABLE}>
+            COMMAND ${Java_JAR_EXECUTABLE}
             ARGS
                 -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} $<$<NOT:$<CONFIG:Debug>>:${_JAVA_JAR_OUTPUT_PATH}>$<$<CONFIG:Debug>:${_JAVA_JAR_OUTPUT_PATH_DEBUG}> ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
                 ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist

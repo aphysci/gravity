@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17)
 include(FetchContent)
 include(GravitySupport)
 
-project(protobufs-java NONE)
+project(protobufs-java)
 
 if (NOT Protobufs_SRC_DIR)
     message(FATAL_ERROR "Protobufs_SRC_DIR not set")

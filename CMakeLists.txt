@@ -113,7 +113,7 @@ elseif(NOT SKIP_JAVA)
     set(SKIP_JAVA OFF)
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
 
 string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
