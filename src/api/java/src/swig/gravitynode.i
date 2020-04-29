@@ -16,7 +16,6 @@
  **
  */
 
-
 %typemap(javaimports) gravity::GravityNode %{
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.FutureResponse;
@@ -56,6 +55,7 @@ namespace gravity {
 	   virtual std::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
+    // return type changed to int64_t on these to pick up typemap for deallocation of the int64_t ref value (INOUT)
 	class CPPGravityHeartbeatListener
 	{
 	public:
