@@ -27,6 +27,11 @@ file(TO_CMAKE_PATH "${Protobuf_SRC_ROOT_FOLDER}" Protobuf_SRC_ROOT_FOLDER)
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 
+if (NOT Protobuf_SRC_ROOT_FOLDER)
+  set(GRAVITY_USE_EXTERNAL_PROTOBUF ON)
+endif()
+
+
 macro(add_external_protobuf build_type)
     ExternalProject_Add(    
         protobuf_${build_type}
@@ -100,9 +105,13 @@ endif()
 
 if (Protobuf_FOUND)
     message(STATUS "Using local protobuf libraries")
+else()
+    message(STATUS "Using external protobuf build")
 endif()
 if (ZeroMQ_FOUND)
     message(STATUS "Using local zeromq libraries")
+else()
+    message(STATUS "Using external zeromq build")
 endif()
 
 find_package(GravityJava)
