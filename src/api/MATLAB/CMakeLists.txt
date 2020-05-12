@@ -21,7 +21,7 @@ gravity_install_jar(MATLABProtobufGenerator DESTINATION "${CMAKE_INSTALL_PREFIX}
 install(FILES guava-13.0.1.jar LICENSE-2.0.txt DESTINATION lib/MATLAB/)
 file(GLOB M_FILES "${CMAKE_CURRENT_LIST_DIR}/*.m")
 if (M_FILES)
-    install(FILES ${M_FILES} DESTINATION lib/MATLAB)
+    install(FILES ${M_FILES} DESTINATION include/MATLAB)
 endif()
 gravity_add_dependency(MATLABGravitySubscriber)
 gravity_add_dependency(MATLABProtobufGenerator)

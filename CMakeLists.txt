@@ -42,7 +42,8 @@ macro(add_external_protobuf build_type)
         LOG_INSTALL ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/deps/protobuf
-            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=ON
+            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=OFF
+            -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
             -Dprotobuf_BUILD_TESTS:BOOL=OFF
             -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF
             -Dprotobuf_WITH_ZLIB:BOOL=OFF
