@@ -31,6 +31,10 @@ if (NOT Protobuf_SRC_ROOT_FOLDER)
   set(GRAVITY_USE_EXTERNAL_PROTOBUF ON)
 endif()
 
+set(PROTOBUF_CXX_FLAGS)
+if (NOT WIN32)
+  set(PROTOBUF_CXX_FLAGS -DCMAKE_CXX_FLAGS=-fPIC)
+endif()
 
 macro(add_external_protobuf build_type)
     ExternalProject_Add(    
@@ -48,6 +52,7 @@ macro(add_external_protobuf build_type)
             -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF
             -Dprotobuf_WITH_ZLIB:BOOL=OFF
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+	    ${PROTOBUF_CXX_FLAGS}
         SOURCE_SUBDIR cmake
         BUILD_COMMAND ""
         INSTALL_COMMAND cmake --build . --target install --config ${build_type})
