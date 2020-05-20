@@ -5,12 +5,14 @@ project(protobufs-compile)
 
 gravity_find_protobuf(ON)
 
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
+if (NOT SKIP_JAVA)
+  file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
 
-file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/java")
-gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_BINARY_DIR}/java/" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS ${PROTO_FILES})
-add_custom_target(${PROJECT_NAME} ALL DEPENDS "${SRCS}")
-gravity_add_dependency(${PROJECT_NAME})
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/java")
+  gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_BINARY_DIR}/java/" GENERATE_EXTENSIONS .java OUT_VAR SRCS PROTOS ${PROTO_FILES})
+  add_custom_target(${PROJECT_NAME} ALL DEPENDS "${SRCS}")
+  gravity_add_dependency(${PROJECT_NAME})
+endif()
 
 if (NOT SKIP_PYTHON)
     set(PY_PROTO_FILES

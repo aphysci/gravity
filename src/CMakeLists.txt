@@ -40,6 +40,7 @@ add_subdirectory(components/cpp/Playback)
 add_subdirectory(components/cpp/Relay)
 
 if (NOT SKIP_PYTHON)
+    add_subdirectory(api/python/src/proto/gravity)
     add_subdirectory(api/python/src/swig)
     add_subdirectory(api/python/src/cpp)
 endif()
