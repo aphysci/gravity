@@ -1,0 +1,24 @@
+# GravityKeyValueParser cmake module
+#
+# The following import targets are created
+#
+# ::
+#
+#   keyvalue_parser
+#
+# This module sets the following variables in your project::
+#
+#   GravityKeyValueParser_FOUND - true if keyvalue_parser found on the system
+#   GravityKeyValueParser_INCLUDE_DIR - the directory containing keyvalue_parser headers
+#   GravityKeyValueParser_LIBRARY - 
+
+@PACKAGE_INIT@
+
+if(NOT TARGET keyvalue_parser)
+  include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+  if (TARGET keyvalue_parser)
+    get_target_property(@PROJECT_NAME@_INCLUDE_DIR keyvalue_parser INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(@PROJECT_NAME@_LIBRARY keyvalue_parser LOCATION)
+  endif()
+endif()
