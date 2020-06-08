@@ -82,6 +82,10 @@ classdef GravityDataProduct < handle
 		
 		function setComponentID(this, componentID)
 			this.gravityDataProduct.setComponentID(componentID);
-	    end
+        end
+        
+        function setReceivedTimestamp(this, receivedTimestamp)
+			this.gravityDataProduct.setReceivedTimestamp(receivedTimestamp);
+        end        
     end
 end

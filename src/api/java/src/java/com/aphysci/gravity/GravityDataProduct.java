@@ -77,6 +77,15 @@ public class GravityDataProduct {
 		}
     	return receivedTimestamp;
     }
+    
+    /**
+     * Method to set the timestamp associated with receipt of data product
+     * @param ts timestamp (epoch microseconds) for this GravityDataProduct's receipt timestamp
+     */
+  
+    public void setReceivedTimestamp(long ts) {
+		gdp.setReceivedTimestamp(ts);		
+    }
 
     /**
      * Method to set the timestamp for this GravityDataProduct
