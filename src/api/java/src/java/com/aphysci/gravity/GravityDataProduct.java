@@ -77,6 +77,14 @@ public class GravityDataProduct {
 		}
     	return receivedTimestamp;
     }
+    
+    /**
+     * Method to set the timestamp associated with receipt of data product
+     * @param ts timestamp (epoch microseconds) for this GravityDataProduct's receipt timestamp
+     */
+    public void setReceivedTimestamp(long ts) {
+		gdp.setReceivedTimestamp(ts);		
+    }
 
     /**
      * Method to set the timestamp for this GravityDataProduct
@@ -249,7 +257,8 @@ public class GravityDataProduct {
 	{
 		return gdp.getFutureResponse();
 	}
-		/**
+
+	/**
 	 * Method to get the boolean indication of whether this is a cached data product.
 	 * Unless specified otherwise, publishers cache the last data product sent to 
 	 * send to new subscribers. This flag indicates whether the DP is new or if it was 
