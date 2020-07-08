@@ -24,7 +24,7 @@
 #ifdef WIN32
 #include <Windows.h>
 #include <time.h>
-#ifndef _CRT_NO_TIME_T
+#if _MSC_VER < 1910 && !defined(_CRT_NO_TIME_T) 
 struct timespec
 {
 	time_t tv_sec; // Seconds - >= 0

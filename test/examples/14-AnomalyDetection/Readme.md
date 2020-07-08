@@ -17,7 +17,7 @@ Stop the nodes with Ctrl-C or by closing the windows.
 
 
 ## **detect.sh** 
-Runs the a publisher node that is configured to change one of the streams (an 'anomaly') after a certain number of samples.  The anomaly point is configured by passing a command-line argument to the python node.  The subscriber node runs the streams through the autoencoder trained in step 1 and reports the mean squared error.  Notice that the MSE is low initially because the streams match the training streams. Watch the output of the publisher node to see when it starts inserting the anomaly.  When the anomaly starts after a few seconds, the MSE increases noticeably.
+Runs a publisher node that is configured to change one of the streams (an 'anomaly') after a certain number of samples.  The anomaly point is configured by passing a command-line argument to the python node.  The subscriber node runs the streams through the autoencoder trained in step 1 and reports the mean squared error.  Notice that the MSE is low initially because the streams match the training streams. Watch the output of the publisher node to see when it starts inserting the anomaly.  When the anomaly starts after a few seconds, the MSE increases noticeably.
 
 This code was last tested with Python 3.6.9 and TensorFlow version 2.1.0
 

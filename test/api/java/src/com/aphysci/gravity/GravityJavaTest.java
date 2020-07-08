@@ -33,7 +33,40 @@ public class GravityJavaTest {
 	private static boolean reqCalled = false;
 	private static boolean provCalled = false;
 	private static boolean logCalled = false;
+    private static int missedHBCount = 0;
+    private static int receivedHBCount = 0;
 
+    private static void testHB(GravityNode gravityNode) {
+        GravityHeartbeatListener hbListener = new TestHBListener();
+        gravityNode.registerHeartbeatListener("TestNode", 100000, hbListener);
+        gravityNode.startHeartbeat(100000); // .1 seconds
+        int count = 0;
+        while (count < 10 && receivedHBCount < 5) {
+            count += 1;
+            try {
+                Thread.sleep(100);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        Log.message("receivedHBCount = "+receivedHBCount);
+        testAssert(receivedHBCount >= 5);
+        
+        gravityNode.stopHeartbeat();
+        count = 0;
+        while (count < 10 && missedHBCount < 5) {
+            count += 1;
+            try {
+                Thread.sleep(100);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        Log.message("missedHBCount = "+missedHBCount);
+        testAssert(missedHBCount >= 5);
+        gravityNode.unregisterHeartbeatListener("TestNode");
+    }
+    
     public static void main(String[] argv) {
     	Log.initAndAddLogger(new TestLogger(), Log.LogLevel.DEBUG);
         Log.debug("in main");
@@ -129,6 +162,8 @@ public class GravityJavaTest {
         testAssert(provCalled);
         testAssert(logCalled);
 
+        testHB(node);
+        
         Log.message("Tests OK!!");
     }
 
@@ -194,6 +229,23 @@ public class GravityJavaTest {
 		public void Log(int level, String messagestr) {
 			logCalled = Log.LogLevel.swigToEnum(level) == Log.LogLevel.DEBUG;
 		}
+    }
+
+    private static class TestHBListener implements GravityHeartbeatListener {
+        @Override
+        public void MissedHeartbeat(String componentID, long microsecond_to_last_heartbeat, long[] interval_in_microseconds) {
+            testAssert(microsecond_to_last_heartbeat >= 100000);
+            Log.message("HB Listener MissedHeartbeat called, microsecond_to_last_heartbeat = "+microsecond_to_last_heartbeat);
+            missedHBCount += 1;
+        }
+        
+        @Override
+        public void ReceivedHeartbeat(String componentID, long[] interval_in_microseconds) {
+            testAssert(interval_in_microseconds.length > 0);
+            testAssert(interval_in_microseconds[0] == 100000);
+            Log.message("HB Listener ReceivedHeartbeat called, interval_in_microseconds[0] = "+interval_in_microseconds[0]);
+            receivedHBCount += 1;
+        }
     }
 
     private static void testAssert(boolean test) {
