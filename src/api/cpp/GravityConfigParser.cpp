@@ -52,11 +52,8 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 			i != keys.end(); i++)
 	{
 		std::string value = parser.GetString(*i);
-		if(value != "")
-        {
-            std::string key_lower = StringCopyToLowerCase(*i);
-			key_value_map[key_lower] = value;
-        }
+        std::string key_lower = StringCopyToLowerCase(*i);
+	    key_value_map[key_lower] = value;
 	}
 	return;
 }
