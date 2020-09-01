@@ -140,6 +140,12 @@ install(EXPORT ${PROJECT_NAME}-targets
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
     DESTINATION cmake)
 
+find_program(GIT_EXE git)
+if (GIT_EXE)
+    add_custom_command(TARGET ${LIB_NAME} POST_BUILD COMMAND "${GIT_EXE}" describe --tag > "${CMAKE_BINARY_DIR}/VERSION.txt")
+    INSTALL(FILES "${CMAKE_BINARY_DIR}/VERSION.txt" DESTINATION .)
+endif()
+
 
 
 
