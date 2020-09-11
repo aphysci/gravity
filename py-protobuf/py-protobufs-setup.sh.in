@@ -2,4 +2,4 @@
 
 cd @Protobufs_SRC_DIR@/python
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@CMAKE_INSTALL_PREFIX@/deps/protobuf/lib:@CMAKE_INSTALL_PREFIX@/deps/protobuf/lib64
-@PYTHON_EXE@ setup.py build
+"@PYTHON_EXE@" setup.py build

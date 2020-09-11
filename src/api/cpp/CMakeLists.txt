@@ -14,6 +14,8 @@ gravity_find_zeromq(ON)
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/protobuf")
+file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/protobuf")
+
 gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_BINARY_DIR}/protobuf" OUT_VAR PROTO_SRCS 
                             EXPORT_MACRO GRAVITY_PROTOBUF_API
                             PROTOS ${PROTO_FILES})
