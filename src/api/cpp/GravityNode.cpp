@@ -31,11 +31,13 @@
 #include <winsock2.h>
 #include <WinBase.h>
 #include <Windows.h>
+#include <WS2tcpip.h>
 #else
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/unistd.h>
+#include <netdb.h>
 #endif
 #include <sstream>
 #include <signal.h>
@@ -876,6 +878,41 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 	return ret;
 }
+/*
+ * Do a name lookup to convert a hostname to an IP address in ascii 
+ * dotted-quad notation.
+ */
+static string toDottedQuad(string hostname) {
+   struct addrinfo hints;
+   struct addrinfo *result, *rp;
+   int s, sfd;
+   memset(&hints, 0, sizeof(struct addrinfo));
+   hints.ai_family = AF_INET;
+   hints.ai_socktype = SOCK_STREAM;
+   hints.ai_flags = AI_PASSIVE;
+   // others zero
+   //Log::debug("Looking up quad for: %s\n", hostname.c_str());
+   s = getaddrinfo(hostname.c_str(), NULL, &hints, &result);
+   if (s != 0) {   
+       if (s == EAI_SYSTEM) {
+           perror("getaddrinfo");
+       } else {
+           Log::warning("error in getaddrinfo: %s\n", gai_strerror(s));
+       }   
+       return hostname;
+   }   
+   string quad = hostname;
+   for (rp = result; rp != NULL; rp = rp->ai_next) {
+       struct in_addr pp = (((struct sockaddr_in*)(rp->ai_addr))->sin_addr);
+       //Log::debug("found addr quad for: %s : %x", hostname.c_str(), pp);
+       //Log::debug("quad is: %s", inet_ntoa(pp));
+       quad.assign(inet_ntoa(pp));
+       break;
+   }
+
+   freeaddrinfo(result);           /* No longer needed */
+   return quad;
+}
 
 void GravityNode::updateServiceDirectoryUrl(string serviceDirectoryUrl)
 {
@@ -899,8 +936,15 @@ void GravityNode::updateServiceDirectoryUrl(string serviceDirectoryUrl)
 	/* The "*" is for the case where they did not define a URL in the Gravity.ini file,
 	So the ServiceDirectory broadcasted a URL with a "*" in it
 	*/
-	if (serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*")
+	if (serviceDirectoryNode.ipAddress == "" || serviceDirectoryNode.ipAddress == "*" )
 		serviceDirectoryNode.ipAddress = "localhost";
+
+	if (serviceDirectoryNode.ipAddress != "localhost" && serviceDirectoryNode.ipAddress != "0.0.0.0" ) {
+                //Log::debug("SD IP originally: %s", serviceDirectoryNode.ipAddress.c_str());
+		serviceDirectoryNode.ipAddress = toDottedQuad(serviceDirectoryNode.ipAddress);
+                //Log::debug("SD IP set to: %s", serviceDirectoryNode.ipAddress.c_str());
+        }
+
 	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
 	serviceDirectoryLock.Unlock();
 
