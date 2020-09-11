@@ -894,12 +894,8 @@ static string toDottedQuad(string hostname) {
    //Log::debug("Looking up quad for: %s\n", hostname.c_str());
    s = getaddrinfo(hostname.c_str(), NULL, &hints, &result);
    if (s != 0) {   
-       if (s == EAI_SYSTEM) {
-           perror("getaddrinfo");
-       } else {
-           Log::warning("error in getaddrinfo: %s\n", gai_strerror(s));
-       }   
-       return hostname;
+        Log::warning("error in getaddrinfo: %s\n", gai_strerror(s));
+		return hostname;
    }   
    string quad = hostname;
    for (rp = result; rp != NULL; rp = rp->ai_next) {
