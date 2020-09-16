@@ -233,8 +233,16 @@ void ServiceDirectory::start()
     int rc = zmq_bind(socket, sdURL.c_str());
     if (rc < 0)
     {
-        Log::fatal("Could not bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
-        exit(1);
+        if (sdURL.rfind("tcp://",0) == 0) {   // Try to bind to all interfaces
+            string newURL = "tcp://*:" + sdURL.substr(sdURL.rfind(":")+1);
+            sdURL = newURL;
+	    Log::warning("ZMQ bind failed: Try fallback socket: '%s'",sdURL.c_str());
+            rc = zmq_bind(socket, sdURL.c_str());
+        }
+        if (rc < 0) {
+            Log::fatal("Could not bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
+            exit(1);
+       }
     }
 
 	std::vector<zmq_pollitem_t> pollItems;
