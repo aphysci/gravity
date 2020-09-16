@@ -2368,30 +2368,6 @@ GravityReturnCode GravityNode::unregisterRelay(std::string dataProductID, const 
     return unsubscribe(dataProductID, subscriber);
 }
 
-#ifdef WIN32
-//convert binary address to string.
-const char *inet_ntop(int af, const void * src, char* dest, int dest_length)
-{
-	assert(af == AF_INET); //We only support IPV4
-
-	unsigned short new_src[4];
-	new_src[0] = (uint8_t) ((char *) src)[0];
-	new_src[1] = (uint8_t) ((char *) src)[1];
-	new_src[2] = (uint8_t) ((char *) src)[2];
-	new_src[3] = (uint8_t) ((char *) src)[3];
-	std::stringstream ss;
-	ss << new_src[0] << "." << new_src[1]  << "." << new_src[2]   << "." << new_src[3]; //TODO: verify Byte Order.
-	if(dest_length < (int) ss.str().length() + 1)
-		return NULL;
-
-	memcpy(dest, ss.str().c_str(), ss.str().length() + 1);
-
-	return dest;
-}
-
-typedef int socklen_t;
-#endif
-
 string GravityNode::getDomain()
 {
     return myDomain;
