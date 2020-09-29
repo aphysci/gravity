@@ -345,6 +345,13 @@ public:
     GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "", uint64_t timestamp = 0);
 
     /**
+     * Determine whether there currently any subscribers for this DataProduct
+     * \param dataProduct GravityDataProduct for which to check for the presence of subscribers
+     * \return false if there are no subscribers, otherwise true
+     **/
+    bool querySubscribers(std::string dataProductID);
+
+    /**
      * Make an asynchronous request against a service provider through the Gravity Service Directory
      * \param serviceID The registered service ID of a service provider
      * \param request data product representation of the request

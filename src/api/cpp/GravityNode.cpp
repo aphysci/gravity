@@ -1171,6 +1171,27 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
 }
 
+bool GravityNode::querySubscribers(std::string dataProductID) {
+    if (!initialized)
+    {
+        return GravityReturnCodes::NOT_INITIALIZED;
+    }
+    publishManagerRequestSWL.lock.Lock();
+    sendStringMessage(publishManagerRequestSWL.socket, "querySubscribers", ZMQ_SNDMORE);
+    sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
+    string result = readStringMessage(publishManagerRequestSWL.socket);
+    publishManagerRequestSWL.lock.Unlock();
+    if (result == "Y") {
+        return true;
+    } else if (result == "N") {
+        return false;
+    } else {
+	Log::warning("Query for subscribers return error : %s", result.c_str());
+    }
+    return true;  // if error, safer to assume we have a subscriber
+}
+
+
 GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
 		                                                    bool cacheLastValue, bool isRelay, bool localOnly)
 {
