@@ -349,7 +349,7 @@ public:
      * \param dataProduct GravityDataProduct for which to check for the presence of subscribers
      * \return false if there are no subscribers, otherwise true
      **/
-    bool querySubscribers(std::string dataProductID);
+    GRAVITY_API bool querySubscribers(std::string dataProductID);
 
     /**
      * Make an asynchronous request against a service provider through the Gravity Service Directory
