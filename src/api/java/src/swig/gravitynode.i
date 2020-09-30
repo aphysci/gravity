@@ -140,6 +140,7 @@ public:
     std::string getComponentID();
 	std::string getIP();
     std::string getDomain();
+    bool querySubscribers(std::string dataProductID);
 
     std::shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);

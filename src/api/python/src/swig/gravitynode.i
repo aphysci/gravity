@@ -262,6 +262,8 @@ namespace gravity {
 		std::string getIP();
 	    std::string getDomain();
         std::string getCodeString(GravityReturnCode code);
+        bool querySubscribers(std::string dataProductID);
+
 
 /*	Not yet implemented
 	    std::shared_ptr<gravity::FutureResponse> createFutureResponse();
