@@ -345,7 +345,7 @@ public:
     GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "", uint64_t timestamp = 0);
 
     /**
-     * Determine whether there currently any subscribers for this DataProduct
+     * Determine whether there are any subscribers for this DataProduct
      * \param dataProduct GravityDataProduct for which to check for the presence of subscribers
      * \return false if there are no subscribers, otherwise true
      **/
