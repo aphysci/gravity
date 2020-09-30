@@ -50,6 +50,10 @@ classdef GravityNode < handle
             ret = this.gravityNode.publish(dataProduct.getGravityDataProduct());
         end
         
+        function ret = querySubscribers(this, dataProductID)
+            ret = this.gravityNode.querySubscribers(dataProductID);
+        end
+        
         function subscription = subscribe(this, dataProductID, varargin)
 
  			filter = '';
