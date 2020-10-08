@@ -885,7 +885,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 static string toDottedQuad(string hostname) {
    struct addrinfo hints;
    struct addrinfo *result, *rp;
-   int s, sfd;
+   int s;
    memset(&hints, 0, sizeof(struct addrinfo));
    hints.ai_family = AF_INET;
    hints.ai_socktype = SOCK_STREAM;
