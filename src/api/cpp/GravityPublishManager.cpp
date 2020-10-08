@@ -536,10 +536,10 @@ void GravityPublishManager::querySubscribers()
     string ret;
     if (!publishDetails)
     {
-        Log::critical("Unable to query subscribers for unknown data product %s", dataProductID.c_str());
-        string ret = "Unknown data product id: "+dataProductID ;
+        ret = "Unknown data product id: "+dataProductID ;
+    } else {
+        ret = publishDetails->hasSubscribers ? "Y" : "N";
     }
-    ret = publishDetails->hasSubscribers ? "Y" : "N";
     sendStringMessage(gravityNodeResponseSocket, ret, ZMQ_DONTWAIT);
 }
 

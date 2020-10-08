@@ -1186,7 +1186,7 @@ bool GravityNode::querySubscribers(std::string dataProductID) {
     } else if (result == "N") {
         return false;
     } else {
-	Log::warning("Query for subscribers return error : %s", result.c_str());
+	Log::warning("Query for subscribers returns error : %s", result.c_str());
     }
     return true;  // if error, safer to assume we have a subscriber
 }
