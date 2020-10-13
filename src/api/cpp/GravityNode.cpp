@@ -1171,24 +1171,30 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
 }
 
-bool GravityNode::querySubscribers(std::string dataProductID) {
-    if (!initialized)
-    {
+GravityReturnCode GravityNode::subscribersExist(std::string dataProductID, bool& hasSubscribersOut) {
+	hasSubscribersOut = true;  // if error and the client doesn't check, safer to assume we have a subscriber
+	GravityReturnCode ret = GravityReturnCode::FAILURE;
+    if (!initialized) {
         return GravityReturnCodes::NOT_INITIALIZED;
     }
     publishManagerRequestSWL.lock.Lock();
-    sendStringMessage(publishManagerRequestSWL.socket, "querySubscribers", ZMQ_SNDMORE);
+    sendStringMessage(publishManagerRequestSWL.socket, "subscribersExist", ZMQ_SNDMORE);
     sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
     string result = readStringMessage(publishManagerRequestSWL.socket);
     publishManagerRequestSWL.lock.Unlock();
     if (result == "Y") {
-        return true;
+		hasSubscribersOut = true;
+		ret = GravityReturnCode::SUCCESS;
     } else if (result == "N") {
-        return false;
-    } else {
-	Log::warning("Query for subscribers returns error : %s", result.c_str());
+		hasSubscribersOut = false;
+		ret = GravityReturnCode::SUCCESS;
+	} else {
+		Log::warning("Query for subscribers returns error : %s", result.c_str());
+		if (result.rfind("Unknown data product", 0) == 0) {
+			ret = GravityReturnCode::NOT_REGISTERED;
+		} // otherwise, leave as generic failure code and hasSubscribersOut=true
     }
-    return true;  // if error, safer to assume we have a subscriber
+    return ret;  
 }
 
 

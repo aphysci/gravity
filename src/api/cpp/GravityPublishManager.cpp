@@ -145,9 +145,9 @@ void GravityPublishManager::start()
 			{
 				setHWM();
 			}
-			else if (command == "querySubscribers")
+			else if (command == "subscribersExist")
 			{
-				querySubscribers();
+				subscribersExist();
 			}
 			else
 			{
@@ -529,14 +529,14 @@ void GravityPublishManager::publish(void* socket, const string &filterText, cons
 
 }
 
-void GravityPublishManager::querySubscribers()
+void GravityPublishManager::subscribersExist()
 {
     string dataProductID = readStringMessage(gravityNodeResponseSocket);
     std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
     string ret;
     if (!publishDetails)
     {
-        ret = "Unknown data product id: "+dataProductID ;
+        ret = "Unknown data product id: "+dataProductID ;  // Note: this string is used in GravityNode to set the error code
     } else {
         ret = publishDetails->hasSubscribers ? "Y" : "N";
     }

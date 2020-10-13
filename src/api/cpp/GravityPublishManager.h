@@ -82,7 +82,7 @@ private:
     std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();
-	void querySubscribers();
+	void subscribersExist();
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();

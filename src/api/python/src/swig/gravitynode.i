@@ -15,6 +15,7 @@
  ** If not, see <http://www.gnu.org/licenses/>.
  **
  */
+%include "typemaps.i"
 
 // all imports required in the generated Python SWIG code
 %pythonbegin %{
@@ -262,7 +263,7 @@ namespace gravity {
 		std::string getIP();
 	    std::string getDomain();
         std::string getCodeString(GravityReturnCode code);
-        bool querySubscribers(std::string dataProductID);
+        GravityReturnCode subscribersExist(std::string dataProductID, bool& OUTPUT);
 
 
 /*	Not yet implemented
