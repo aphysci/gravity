@@ -228,6 +228,9 @@ void ServiceDirectory::start()
         exit(1);
     }
 
+    // Remember the user-specified URL in case we fall back to binding on all interfaces. 
+    // We'll broadcast this one to the clients.
+    string originalSDURL = sdURL;
     // Set up the inproc socket to listen for requests messages from the GravityNode
     void *socket = zmq_socket(context, ZMQ_REP);
     int rc = zmq_bind(socket, sdURL.c_str());
@@ -269,7 +272,7 @@ void ServiceDirectory::start()
     udpBroadcasterThread = std::thread(&startUDPBroadcastManager,context);
 
 		//configure the broadcaster
-		sendBroadcasterParameters(domain,sdURL,broadcastIP,broadcastPort,broadcastRate);
+		sendBroadcasterParameters(domain,originalSDURL,broadcastIP,broadcastPort,broadcastRate);
 	}
 
 	SyncInitDetails syncInitDetails;
