@@ -153,6 +153,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 	domainName = readStringMessage(sdSocket);
 	url = readStringMessage(sdSocket);
 	broadcastIP = readStringMessage(sdSocket);
+	Log::message("Broadcast params: domain '%s' url '%s' ip: '%s'", domainName.c_str(), url.c_str(), broadcastIP.c_str());
 
 	//receive port
 	zmq_msg_t msg;
