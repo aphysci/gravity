@@ -6940,10 +6940,12 @@ do
     "src/api/python/cpp_makefile") CONFIG_FILES="$CONFIG_FILES src/api/python/cpp_makefile" ;;
     "src/api/python/Makefile") CONFIG_FILES="$CONFIG_FILES src/api/python/Makefile" ;;
     "test/api/java/Makefile") CONFIG_FILES="$CONFIG_FILES test/api/java/Makefile" ;;
+    "test/api/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES test/api/cpp/Makefile" ;;
     "test/api/python/Makefile") CONFIG_FILES="$CONFIG_FILES test/api/python/Makefile" ;;
     "test/components/cpp/ServiceDirectory/test.sh") CONFIG_FILES="$CONFIG_FILES test/components/cpp/ServiceDirectory/test.sh" ;;
     "test/components/cpp/ServiceDirectoryReregister/test.sh") CONFIG_FILES="$CONFIG_FILES test/components/cpp/ServiceDirectoryReregister/test.sh" ;;
     "test/api/java/test.sh") CONFIG_FILES="$CONFIG_FILES test/api/java/test.sh" ;;
+    "test/api/cpp/test.sh") CONFIG_FILES="$CONFIG_FILES test/api/cpp/test.sh" ;;
     "test/api/python/test.sh") CONFIG_FILES="$CONFIG_FILES test/api/python/test.sh" ;;
     "test/examples/1-BasicDataProduct/Makefile") CONFIG_FILES="$CONFIG_FILES test/examples/1-BasicDataProduct/Makefile" ;;
     "test/examples/1-BasicDataProduct/run.sh") CONFIG_FILES="$CONFIG_FILES test/examples/1-BasicDataProduct/run.sh" ;;
