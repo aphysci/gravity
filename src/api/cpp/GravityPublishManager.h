@@ -30,7 +30,7 @@
 #include "GravityMetrics.h"
 
 #ifdef __GNUC__
-#include <tr1/memory>
+#include <memory>
 #else
 #include <memory>
 #endif
@@ -59,7 +59,7 @@ typedef struct PublishDetails
     std::string url;
     std::string dataProductID;
 	bool cacheLastValue;
-	std::map<std::string,std::tr1::shared_ptr<CacheValue> > lastCachedValues;
+	std::map<std::string,std::shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;
 } PublishDetails;
@@ -76,8 +76,8 @@ private:
     void* metricsPublishSocket;
 	void* gravityNodeResponseSocket;
     void* gravityNodeSubscribeSocket;
-    std::map<void*,std::tr1::shared_ptr<PublishDetails> > publishMapBySocket;
-    std::map<std::string,std::tr1::shared_ptr<PublishDetails> > publishMapByID;
+    std::map<void*,std::shared_ptr<PublishDetails> > publishMapBySocket;
+    std::map<std::string,std::shared_ptr<PublishDetails> > publishMapByID;
     std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();

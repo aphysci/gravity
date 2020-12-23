@@ -63,12 +63,30 @@ public:
 
     static void CloseLoggers();
 
-    static void fatal(const char* message, ...);
-    static void critical(const char* message, ...);
-    static void warning(const char* message, ...);
-    static void message(const char* message, ...);
-    static void debug(const char* message, ...);
-    static void trace(const char* message, ...);
+/**
+ * For all of the log methods, only take a single string, but provide that string to the C++
+ * call as the second arg with "%s" as the format string.  This prevents issues with any text 
+ * in the log message that may be interpretted as a format character.
+ */
+%typemap(in) (const char* format, const char* message) {
+    $1 = (char *) malloc(4*sizeof(char *));
+    sprintf($1, "%%s");
+    $2 = (char *)jenv->GetStringUTFChars($input, 0);
+    if (!$2) return ;
+}
+%typemap(jtype) (const char* format, const char* message) "String"
+%typemap(jstype) (const char* format, const char* message) "String"
+%typemap(javain) (const char* format, const char* message) "$javainput"
+%typemap(freearg) (const char* format, const char* message) {
+    free((char *) $1);
+    if ($2) jenv->ReleaseStringUTFChars($input, (const char *)$2);
+}
+    static void fatal(const char* format, const char* message);
+    static void critical(const char* format, const char* message);
+    static void warning(const char* format, const char* message);
+    static void message(const char* format, const char* message);
+    static void debug(const char* format, const char* message);
+    static void trace(const char* format, const char* message);
 
 };
 

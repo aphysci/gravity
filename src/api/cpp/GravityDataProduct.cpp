@@ -34,7 +34,7 @@ GravityDataProduct::GravityDataProduct(string dataProductID) : gravityDataProduc
     gravityDataProductPB->set_dataproductid(dataProductID);
 }
 
-GravityDataProduct::GravityDataProduct(void* arrayPtr, int size) : gravityDataProductPB(new GravityDataProductPB())
+GravityDataProduct::GravityDataProduct(const void* arrayPtr, int size) : gravityDataProductPB(new GravityDataProductPB())
 {
     gravityDataProductPB->ParseFromArray(arrayPtr, size);
 }
@@ -111,7 +111,7 @@ int GravityDataProduct::getSize() const
     return gravityDataProductPB->ByteSize();
 }
 
-void GravityDataProduct::parseFromArray(void* arrayPtr, int size)
+void GravityDataProduct::parseFromArray(const void* arrayPtr, int size)
 {
     gravityDataProductPB->ParseFromArray(arrayPtr, size);
 }
@@ -129,6 +129,11 @@ bool GravityDataProduct::operator==(const GravityDataProduct &gdp) const
     if (getDataProductID().compare(gdp.getDataProductID()) != 0)
         return false;
     return memcmp(gravityDataProductPB->data().c_str(), gdp.gravityDataProductPB->data().c_str(), getDataSize()) == 0;
+}
+
+bool GravityDataProduct::operator!=(const GravityDataProduct &gdp) const
+{
+  return !operator==(gdp);
 }
 
 std::string GravityDataProduct::getComponentId() const
@@ -153,7 +158,6 @@ bool GravityDataProduct::isCachedDataproduct() const
 
 void GravityDataProduct::setIsCachedDataproduct(bool cached)
 {
-	
 	gravityDataProductPB->set_is_cached_dataproduct(cached);
 	
 }
@@ -176,7 +180,7 @@ void GravityDataProduct::setProtocol(const std::string& protocol) {
 	gravityDataProductPB->set_protocol(protocol);
 }
 
-const std::string& GravityDataProduct::getProtocol() {
+const std::string& GravityDataProduct::getProtocol() const {
 	return gravityDataProductPB->protocol();
 }
 
@@ -184,9 +188,18 @@ void GravityDataProduct::setTypeName(const std::string& dataType) {
 	gravityDataProductPB->set_type_name(dataType);
 }
 
-const std::string& GravityDataProduct::getTypeName() {
+const std::string& GravityDataProduct::getTypeName() const {
 	return gravityDataProductPB->type_name();
 }
 
+uint32_t GravityDataProduct::getRegistrationTime() const
+{
+	uint64_t registrationTime = 0;
+	if (gravityDataProductPB->has_registration_time())
+	{
+		registrationTime = gravityDataProductPB->registration_time();
+	}
+	return registrationTime;
+}
 
 } /* namespace gravity */

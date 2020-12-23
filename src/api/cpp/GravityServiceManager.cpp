@@ -123,7 +123,7 @@ void GravityServiceManager::start()
 			{
 				addService();
 			}
-			if (command == "unregister")
+			else if (command == "unregister")
 			{
 				removeService();
 			}
@@ -133,7 +133,7 @@ void GravityServiceManager::start()
 			}
 			else
 			{
-				// LOG WARNING HERE - Unknown command request
+				Log::warning("GravityServiceManager received unknown command '%s' from GravityNode", command.c_str());
 			}
 		}
 
@@ -150,13 +150,23 @@ void GravityServiceManager::start()
 				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
 				// Clean up message
 				zmq_msg_close(&message);
-
-				tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
-				Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
-				tr1::shared_ptr<GravityDataProduct> response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+				
+				std::shared_ptr<GravityDataProduct> response;
+				std::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];				
+				if (dataProduct.getRegistrationTime() != 0 && dataProduct.getRegistrationTime() != serviceRegistrationTimeMap[serviceDetails->serviceID])
+				{
+					// Invalid request - likely due to a stale service directory entry
+					response = std::shared_ptr<GravityDataProduct>(new GravityDataProduct(serviceDetails->serviceID));
+				}
+				else
+				{
+					Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
+					response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+				}
 
 				response->setComponentId(componentID);
 				response->setDomain(domain);
+				response->setRegistrationTime(serviceRegistrationTimeMap[serviceDetails->serviceID]);
 
 				sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
 			}
@@ -164,7 +174,7 @@ void GravityServiceManager::start()
 	}
 
 	// Clean up all our open sockets
-	for (map<void*,tr1::shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin(); iter != serviceMapBySocket.end(); iter++)
+	for (map<void*,std::shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin(); iter != serviceMapBySocket.end(); iter++)
 	{
 		void* socket = iter->first;
 		zmq_close(socket);
@@ -198,7 +208,7 @@ void GravityServiceManager::addService()
     // Read the publish transport type
     string transportType = readStringMessage(gravityNodeSocket);
 
-    int minPort, maxPort;
+    int minPort = 0, maxPort = 0;
     if(transportType == "tcp")
     {
         minPort = readIntMessage(gravityNodeSocket);
@@ -208,6 +218,9 @@ void GravityServiceManager::addService()
     // Read the publish transport type
     string endpoint = readStringMessage(gravityNodeSocket);
 
+	// Read the registration time
+	uint32_t registrationTime = readUint32Message(gravityNodeSocket);
+
 	// Read the server pointer
 	zmq_msg_t msg;
 	zmq_msg_init(&msg);
@@ -216,7 +229,7 @@ void GravityServiceManager::addService()
 	memcpy(&server, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	tr1::shared_ptr<ServiceDetails> serviceDetails;
+	std::shared_ptr<ServiceDetails> serviceDetails;
 
 	// Create the response socket
 	void* serverSocket = zmq_socket(context, ZMQ_REP);
@@ -269,6 +282,7 @@ void GravityServiceManager::addService()
 
 	serviceMapBySocket[serverSocket] = serviceDetails;
 	serviceMapByServiceID[serviceID] = serviceDetails;
+	serviceRegistrationTimeMap[serviceID] = registrationTime;
 }
 
 void GravityServiceManager::removeService()
@@ -279,10 +293,11 @@ void GravityServiceManager::removeService()
 	// If service ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
 	if (serviceMapByServiceID.count(serviceID))
 	{
-	    tr1::shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
+	    std::shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
 		void* socket = serviceDetails->pollItem.socket;
 		serviceMapBySocket.erase(socket);
 		serviceMapByServiceID.erase(serviceID);
+		serviceRegistrationTimeMap.erase(serviceID);
 		zmq_unbind(socket, serviceDetails->url.c_str());
 		zmq_close(socket);
 

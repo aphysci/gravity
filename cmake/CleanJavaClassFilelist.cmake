@@ -1,0 +1,27 @@
+if (CMAKE_JAVA_CLASS_OUTPUT_PATH)
+    if (EXISTS "${CMAKE_JAVA_CLASS_OUTPUT_PATH}")
+
+        set(_JAVA_GLOBBED_FILES)
+        if (CMAKE_JAR_CLASSES_PREFIX)
+            foreach(JAR_CLASS_PREFIX ${CMAKE_JAR_CLASSES_PREFIX})
+                message(STATUS "JAR_CLASS_PREFIX: ${JAR_CLASS_PREFIX}")
+
+                file(GLOB_RECURSE _JAVA_GLOBBED_TMP_FILES "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${JAR_CLASS_PREFIX}/*.class")
+                if (_JAVA_GLOBBED_TMP_FILES)
+                    list(APPEND _JAVA_GLOBBED_FILES ${_JAVA_GLOBBED_TMP_FILES})
+                endif ()
+            endforeach()
+        else()
+            file(GLOB_RECURSE _JAVA_GLOBBED_FILES "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/*.class")
+        endif ()
+
+        if (_JAVA_GLOBBED_FILES)
+            file(REMOVE ${_JAVA_GLOBBED_FILES})
+        endif()
+
+    else ()
+        message(SEND_ERROR "FATAL: Java class output path doesn't exist")
+    endif ()
+else ()
+    message(SEND_ERROR "FATAL: Can't find CMAKE_JAVA_CLASS_OUTPUT_PATH")
+endif ()

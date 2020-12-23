@@ -21,14 +21,9 @@
 
 #include <string>
 #include <map>
-#ifndef __GNUC__
 #include <memory>
-#else
-#include <tr1/memory>
-#endif
 
 #include "keyvalue_parser.h"
-
 
 /**
  * A really simple C++ wrapper for the keyvalue library.
@@ -70,7 +65,7 @@ public:
     }
 
 protected:
-    std::tr1::shared_ptr< keyvalue_type_t > spKeyValueHandle;
+    std::shared_ptr< keyvalue_type_t > spKeyValueHandle;
 };
 
 #endif //_KEYVALUE_PARSERWRAP_H

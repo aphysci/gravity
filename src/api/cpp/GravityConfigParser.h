@@ -27,6 +27,9 @@
 
 namespace gravity {
 
+/**
+ * Class to parse a .ini config file for a specific gravity component.
+ */
 class GravityConfigParser
 {
 public:

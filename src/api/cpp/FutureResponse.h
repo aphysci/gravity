@@ -44,9 +44,12 @@ private:
 	/**
 	 * Private constructor
 	 */ 
-    GRAVITY_API FutureResponse(std::string url);
+    FutureResponse(std::string url);
 
-	GRAVITY_API std::string getUrl() const;
+  /**
+   * Get socket URL
+   */
+	std::string getUrl() const;
 
 public:
 	/**
@@ -55,7 +58,7 @@ public:
      * \param size size of serialized data
      * \return a FutureResponse
      */
-    GRAVITY_API FutureResponse(void* arrayPtr, int size);
+    GRAVITY_API FutureResponse(const void* arrayPtr, int size);
 
     /**
      * Default Destructor

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <thread>
 #ifndef WIN32
 #include <sys/unistd.h>
 #endif
@@ -58,8 +59,8 @@ FileReplay::FileReplay()
 
 	// Kick off the thread to start reading the file
 	fileReader.init(filename, dpList);
-	pthread_t readerThread;
-	pthread_create(&readerThread, NULL, &FileReader::start, &fileReader);
+  std::thread readerThread(&FileReader::start, &fileReader);
+  readerThread.detach();
 
 	// Start processing the archive file
 	processArchive();
@@ -69,7 +70,7 @@ FileReplay::~FileReplay() {}
 
 void FileReplay::processArchive()
 {
-    tr1::shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
+    std::shared_ptr<GravityDataProduct> gdp = fileReader.getNextDataProduct();
     while (gdp)
     {
         // Ensure that we've registered this data product

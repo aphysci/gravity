@@ -16,7 +16,6 @@
  **
  */
 
-
 %typemap(javaimports) gravity::GravityNode %{
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.FutureResponse;
@@ -53,9 +52,10 @@ namespace gravity {
 	class CPPGravityServiceProvider {
 	public:
 	   virtual ~CPPGravityServiceProvider();
-	   virtual std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
+	   virtual std::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, char *BYTE, int byteLength);
 	};
 
+    // return type changed to int64_t on these to pick up typemap for deallocation of the int64_t ref value (INOUT)
 	class CPPGravityHeartbeatListener
 	{
 	public:
@@ -121,7 +121,7 @@ public:
 
     GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 	        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
-    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+    std::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 
     GravityReturnCode registerService(const std::string& serviceID, const GravityTransportType& transportType,
     		const gravity::GravityServiceProvider& server);
@@ -141,7 +141,7 @@ public:
 	std::string getIP();
     std::string getDomain();
 
-    std::tr1::shared_ptr<gravity::FutureResponse> createFutureResponse();
+    std::shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 	GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 			int milliSecondTimeout, const std::string& filter="", const std::string& domain="");

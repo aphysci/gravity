@@ -18,8 +18,8 @@
 
 // all imports required in the generated Python SWIG code
 %pythonbegin %{
-import abc, logging
-from GravityDataProduct import GravityDataProduct 
+import abc, logging, time
+from .GravityDataProduct import GravityDataProduct 
 %}
 
 %header %{
@@ -94,8 +94,8 @@ from GravityDataProduct import GravityDataProduct
 %typemap(in) const gravity::GravityDataProduct&  {
 	PyObject* pyStr = PyObject_CallMethod($input, (char*)"serializeToString", NULL);
 	if (!pyStr) SWIG_fail;
-	char* data = PyString_AsString(pyStr);
-    int length = (int) PyString_Size(pyStr);
+	char* data = PyBytes_AsString(pyStr);
+    int length = (int) PyBytes_Size(pyStr);
 	$1 = new gravity::GravityDataProduct((void *)data, length);
 	Py_XDECREF(pyStr);
 }
@@ -105,18 +105,18 @@ from GravityDataProduct import GravityDataProduct
     if ($1 != 0) delete $1;
 }
 
-%typemap(out) std::tr1::shared_ptr<gravity::GravityDataProduct> {
+%typemap(out) std::shared_ptr<gravity::GravityDataProduct> {
     if ($1 != NULL)
     {
         char* buffer = new char[$1->getSize()];
         $1->serializeToArray(buffer);
-        $result = PyString_FromStringAndSize(buffer, $1->getSize());
+        $result = PyBytes_FromStringAndSize(buffer, $1->getSize());
         delete[] buffer;
     }   
     else
     {
         char buffer[] = "";
-        $result = PyString_FromStringAndSize(buffer, 0);
+        $result = PyBytes_FromStringAndSize(buffer, 0);
     }
     
 }
@@ -172,7 +172,6 @@ namespace gravity {
 	    ~GravityNode();
 		GravityReturnCode init();
 	    GravityReturnCode init(std::string);
-	    void waitForExit();
 		GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
 	    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
@@ -216,7 +215,7 @@ namespace gravity {
 	    GravityReturnCode request(const std::string& serviceID, const gravity::GravityDataProduct& dataProduct,
 		        const gravity::GravityRequestor& requestor, const std::string& requestID = "", int timeout_milliseconds = -1, const std::string& domain = "");
 
-	    std::tr1::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
+	    std::shared_ptr<gravity::GravityDataProduct> request(const std::string& serviceID, const gravity::GravityDataProduct& request, int timeout_milliseconds = -1, const std::string& domain = "");
 	    %pythoncode %{
             # The above request methods will both be renamed as requestBinary.  This provides a request method in the Python API that wraps the requestBinary
             # call and converts the serialized GDP into a Python GDP in the case of the synchronous request.
@@ -245,7 +244,16 @@ namespace gravity {
 	    GravityReturnCode registerHeartbeatListener(const std::string& dataProductID, long timebetweenMessages, 
 			const gravity::GravityHeartbeatListener& listener, const std::string& domain = "");
 		GravityReturnCode unregisterHeartbeatListener(const std::string& dataProductID, const std::string &domain = "");
-	
+
+        // Ctrl-C has no effect if we hand control over to C++ here, so
+        // just reimplement in Python
+        %ignore waitForExit;
+        %pythoncode %{
+            def waitForExit(self):
+                while True:
+                    time.sleep(10)                
+        %}
+        	
 	    std::string getStringParam(std::string key, std::string default_value = "");
 	    int getIntParam(std::string key, int default_value = -1);
 	    double getFloatParam(std::string key, double default_value = 0.0);
@@ -253,9 +261,10 @@ namespace gravity {
 	    std::string getComponentID();
 		std::string getIP();
 	    std::string getDomain();
+        std::string getCodeString(GravityReturnCode code);
 
 /*	Not yet implemented
-	    std::tr1::shared_ptr<gravity::FutureResponse> createFutureResponse();
+	    std::shared_ptr<gravity::FutureResponse> createFutureResponse();
 		GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);
 		GravityReturnCode setSubscriptionTimeoutMonitor(const std::string& dataProductID, const gravity::GravitySubscriptionMonitor& monitor, 
 				int milliSecondTimeout, const std::string& filter="", const std::string& domain="");

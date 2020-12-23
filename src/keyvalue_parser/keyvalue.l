@@ -38,7 +38,7 @@ const char *g_section_name;
 extern char *g_current_section;
 
 extern int yyparse(void* pbuckets);
-extern void yyerror(const char *s);
+extern void yyerror(void *p, const char *s);
 extern int yydebug;
 
 
@@ -91,13 +91,13 @@ int keyvalue_parse_params(const char* param_fn, const char * const section_list[
 %option never-interactive
 %%
 
-[+()=*\-\n\r\/]                                           { return(*yytext); }
+[+()=*\-\n\r\/]                                         { return(*yytext); }
 <INITIAL>#	                                            { BEGIN(comment); }
 <comment>[^\r\n]*                                       { }
 <comment>(\n)                                           { yyless(1); BEGIN(INITIAL);return('\n'); }
-[A-Za-z0-9\_\.\@;:,]+                                    { yylval = yytext; return(TOKEN); }
-\"[ ]*[-A-Za-z0-9\_\.\@\/;,\":\$+()=\\*\-\ ]*[ ]*\"      { yylval = yytext; return(TOKEN_STRING); }
+[-|+]?[A-Za-z0-9\_\.\@;:,]+                            { yylval = yytext; return(TOKEN); }
+\"[ ]*[-A-Za-z0-9\_\.\@\/;,\":\$+()=\\*\-\ ]*[ ]*\"     { yylval = yytext; return(TOKEN_STRING); }
 \[[ ]*[A-Za-z0-9\_\.\@\/;]+[ ]*\]                       { yylval = yytext; return(SECTION); }
 $[A-Za-z0-9\_\.\@;]+                                    { yylval = yytext+1; return(VAR); }
 [ \t]+                                                  { }
-.                                                       { printf("%s ", yytext ); yyerror("invalid character"); return(ERROR);}
+.                                                       { printf("%s ", yytext ); yyerror(NULL, "invalid character"); return(ERROR);}

@@ -20,13 +20,14 @@
 
 #include "CPPGravitySubscriber.h"
 #include <iostream>
+#include <memory>
 
 using namespace gravity;
 
 CPPGravitySubscriber::~CPPGravitySubscriber()
 {}
 
-void CPPGravitySubscriber::subscriptionFilled(const std::vector< std::tr1::shared_ptr<GravityDataProduct> >& dataProducts)
+void CPPGravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     int* lengths = new int[dataProducts.size()];
     int arrayLength = 0;

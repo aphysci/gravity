@@ -16,6 +16,7 @@
  **
  */
 
+syntax = "proto2";
 option optimize_for = SPEED;
 option java_outer_classname = "ComponentServiceLookupResponseContainer";
 option java_package = "com.aphysci.gravity.protobuf";
@@ -27,4 +28,5 @@ message ComponentServiceLookupResponsePB
 	required string lookupID = 1;
 	required string url = 2;
 	optional string domain_id = 3;
+	optional uint32 registration_time = 4;
 }

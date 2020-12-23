@@ -93,7 +93,7 @@ int main()
 	multRequest2.setData(params2);
 
 	//Make a Synchronous request for multiplication
-	tr1::shared_ptr<GravityDataProduct> multSync = gn.request("Multiplication", //Service Name
+	std::shared_ptr<GravityDataProduct> multSync = gn.request("Multiplication", //Service Name
 														multRequest2, //Request
 														1000); //Timeout in milliseconds
 	if(multSync == NULL)

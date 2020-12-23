@@ -34,7 +34,7 @@
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
-#include <pthread.h>
+#include <thread>
 #include <list>
 
 //This is defined in Windows for NetBIOS in nb30.h
@@ -51,43 +51,52 @@ namespace gravity
 {
 
 /**
- * Enumerated Type for Gravity Return Codes
+ * Namespace to hold Gravity Return Codes.
  */
 namespace GravityReturnCodes
 {
-    enum Codes
+    /**
+     * Return codes used on a Gravity system.
+     */
+    GRAVITY_API enum Codes
     {
         /*
          * If you add to this list, also add to GravityNode::getCodeString()
          */
-        SUCCESS = 0,
-        FAILURE = -1,
-        NO_SERVICE_DIRECTORY = -2,
-        REQUEST_TIMEOUT = -3,
-        DUPLICATE = -4,
-        REGISTRATION_CONFLICT = -5,
-        NOT_REGISTERED = -6,
-        NO_SUCH_SERVICE = -7,
-        LINK_ERROR = -8,
-        INTERRUPTED = -9,
-        NO_SERVICE_PROVIDER = -10,
-        NO_PORTS_AVAILABLE = -11,
-		INVALID_PARAMETER = -12
+        SUCCESS = 0, ///< The request was successful
+        FAILURE = -1, ///< The request failed
+        NO_SERVICE_DIRECTORY = -2, ///< Could not find Service Directory
+        REQUEST_TIMEOUT = -3, ///< The request timed out while waiting for a response.
+        DUPLICATE = -4, ///< Attempting to register an existing data product ID
+        REGISTRATION_CONFLICT = -5, ///< Attempting to unregister from a service or dataProductID that is not currently registered.
+        NOT_REGISTERED = -6, ///< TBD
+        NO_SUCH_SERVICE = -7, ///< Made a bad request (Ex: used a non-existent domain or submitted a request before service was available)
+        LINK_ERROR = -8, ///< Error serializing or deserializing a Gravity Data Product 
+        INTERRUPTED = -9, ///< Received an interruption.
+        NO_SERVICE_PROVIDER = -10, ///< No service provider found.
+        NO_PORTS_AVAILABLE = -11, ///< No ports available
+		INVALID_PARAMETER = -12, ///< Invalid parameter. (Ex: entered a negative number for time)
+		NOT_INITIALIZED = -13  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
 
-
+/**
+ * Namespace to hold Gravity Transport Types.
+ */
 namespace GravityTransportTypes
 {
+   /**
+    * Network transport protocols available on a Gravity system. 
+    */
    enum Types
    {
-      TCP = 0,
-      INPROC = 1,
-      PGM = 2,
-      EPGM= 3,
+      TCP = 0, ///< Transmission Control Protocol
+      INPROC = 1, ///< In-process (Inter-thread) Communication 
+      PGM = 2, ///< Pragmatic General Multicast Protocol
+      EPGM= 3, ///< Encapsulated PGM
 #ifndef WIN32
-      IPC = 4
+      IPC = 4 ///< Inter-Process Communication
 #endif
    };
 }
@@ -95,7 +104,7 @@ typedef GravityTransportTypes::Types GravityTransportType;
 
 typedef struct SocketWithLock
 {
-	void *socket;
+	void *socket = nullptr;
 	Semaphore lock;
 } SocketWithLock;
 
@@ -115,16 +124,29 @@ class GravityConfigParser;
 class FutureResponse;
 
 /**
- * The GravityNode is a component that provides a simple interface point to a Gravity-enabled application
+ * A component that provides a simple interface point to a Gravity-enabled application
  */
 class GravityNode
 {
 private:
+  
+  /**
+   * Domain change listener for a GravityNode.
+   */
 	class GravityNodeDomainListener
 	{
 	public:
+    /**
+     * Return the current Gravity domain.
+     */
 		std::string getDomainUrl();
+
+    /**
+     * Listen for and implement a gravity domain change for the given GravityNode.
+     * Continues until the it is interruption or receives a kill command. 
+     */
 		void start();
+
 		GravityNodeDomainListener(void *context);
 
 		virtual ~GravityNodeDomainListener();
@@ -140,7 +162,6 @@ private:
 		int timeout;
 		GravityNode* gravityNode;
 		void* gravityNodeSocket;
-
 
 		Semaphore lock;
 
@@ -176,14 +197,9 @@ private:
 	bool defaultCacheLastSentDataprodut;
 	bool defaultReceiveLastSentDataproduct;
 	
-    pthread_t subscriptionManagerThread;
-    pthread_t publishManagerThread;
-    pthread_t requestManagerThread;
-    pthread_t serviceManagerThread;
-    pthread_t metricsManagerThread;
-	pthread_t domainListenerThread;
+  std::thread subscriptionManagerThread;
 
-    void* context;
+    void* context = nullptr;
     SocketWithLock subscriptionManagerSWL;
     SocketWithLock subscriptionManagerConfigSWL;
     SocketWithLock publishManagerRequestSWL;
@@ -194,7 +210,7 @@ private:
 	SocketWithLock requestManagerRepSWL;
 	SocketWithLock domainListenerSWL;
 	SocketWithLock domainRecvSWL;
-    void* metricsManagerSocket; // only used in init, no lock needed
+    void* metricsManagerSocket = nullptr; // only used in init, no lock needed
     void* hbSocket; // Inproc socket for adding requests to heartbeat listener thread.
 
 	std::string listenForBroadcastURL(std::string domain, int port, int timeout);
@@ -213,11 +229,14 @@ private:
 	std::map<std::string,uint64_t> urlInstanceMap;
     std::string myDomain;
     std::string componentID;
+	std::map<std::string, uint32_t> dataRegistrationTimeMap; // Maps data product id to registration time
 	GravityConfigParser* parser;
 
-	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain);
+	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
-    GravityReturnCode ServiceDirectoryReregister(std::string componentId);
+    GravityReturnCode ServiceDirectoryReregister(std::string componentId, std::string url);
+
+	void updateServiceDirectoryUrl(std::string serviceDirectoryUrl);
 
     // Separate actual functionality of sub/unsub methods so that they can be locked correctly
     GravityReturnCode subscribeInternal(std::string dataProductID, const GravitySubscriber& subscriber,
@@ -226,7 +245,7 @@ private:
                                                 std::string filter, std::string domain);
 
     GravityReturnCode request(std::string connectionURL, std::string serviceID, const GravityDataProduct& dataProduct,
-            const GravityRequestor& requestor, std::string requestID = "", int timeout_milliseconds = -1);
+		const GravityRequestor& requestor, uint32_t regTime, std::string requestID = "", int timeout_milliseconds = -1);
 
     GRAVITY_API GravityReturnCode registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
     		                                                  bool cacheLastValue, bool isRelay, bool localOnly);
@@ -259,14 +278,14 @@ public:
 
 	/**
      * Initialize the Gravity infrastructure.
-	 * Reads the ComponentID from the Gravity.ini file.
+	   * Reads the ComponentID from the Gravity.ini file.
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
     GRAVITY_API GravityReturnCode init();
 
     /**
      * Initialize the Gravity infrastructure.
-     * \param componentID ID of the component to initialize
+     * \copydetails GravityNode(std::string)
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
     GRAVITY_API GravityReturnCode init(std::string componentID);
@@ -280,40 +299,58 @@ public:
      * Setup a subscription to a data product through the Gravity Service Directory.
      * \param dataProductID string ID of the data product of interest
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
-     * \param filter text filter to apply to subscription
-     * \param domain domain of the network components
      * \return success flag
      */
 	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber);
+
+    /**
+     * \copybrief subscribe(std::string,const GravitySubscriber&)
+     * \param filter text filter to apply to subscription
+     * \copydetails subscribe(std::string,const GravitySubscriber&)
+     */
 	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter);
+
+    /**
+     * \copybrief subscribe(std::string,const GravitySubscriber&,std::string)
+     * \param domain domain of the network components
+     * \copydetails subscribe(std::string,const GravitySubscriber&,std::string)
+     */
 	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter, std::string domain);
+
+    /**
+     * \copybrief subscribe(std::string,const GravitySubscriber&,std::string,std::string)
+     * \param receiveLastCachedValue
+     * \copydetails subscribe(std::string,const GravitySubscriber&,std::string,std::string)
+     */
 	GRAVITY_API GravityReturnCode subscribe(std::string dataProductID, const GravitySubscriber& subscriber, std::string filter, std::string domain, bool receiveLastCachedValue);
 
     /**
-     * Un-subscribe to a data product
+     * Un-subscribe from a data product
      * \param dataProductID ID of data product for which subscription is to be removed
      * \param subscriber the subscriber that will be removed from the notification list for this subscription
      * \param filter text filter associated with the subscription to cancel
-     * \paramn domain domain of the network components
+     * \param domain domain of the network components
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unsubscribe(std::string dataProductID, const GravitySubscriber& subscriber, 
 												std::string filter="", std::string domain = "");
 
     /**
-     * Publish a data product
+     * Publish a data product to the Gravity Service Directory.
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers
+     * \param filterText text filter associated with the publish
+     * \param timestamp time dataProduct was created
      * \return success flag
      */
     GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "", uint64_t timestamp = 0);
 
     /**
-     * Make a request against a service provider through the Gravity Service Directory
+     * Make an asynchronous request against a service provider through the Gravity Service Directory
      * \param serviceID The registered service ID of a service provider
-     * \param dataProduct data product representation of the request
+     * \param request data product representation of the request
      * \param requestor object implementing the GravityRequestor interface that will be notified of the response
      * \param requestID identifier for this request
-     * \param timeout_microseconds Timeout in Microseconds (-1 for no timeout)
+     * \param timeout_milliseconds Timeout in Milliseconds (-1 for no timeout)
      * \param domain domain of the network components
      * \return success flag
      */
@@ -324,30 +361,40 @@ public:
     /**
      * Make a synchronous request against a service provider
      * \param serviceID The registered service ID of a service provider
-     * \param dataProduct data product representation of the request
+     * \param request data product representation of the request
      * \param timeout_milliseconds Timeout in Milliseconds (-1 for no timeout)
      * \param domain domain of the network components
-     * \return shared_ptr<GravityDataProduct> NULL upon failure.
+     * \return shared_ptr<GravityDataProduct> pointer to the data product representation of the response. NULL upon failure.
      */
-    GRAVITY_API std::tr1::shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request,
+    GRAVITY_API std::shared_ptr<GravityDataProduct> request(std::string serviceID, const GravityDataProduct& request,
 										int timeout_milliseconds = -1, std::string domain = "");
 
     /**
      * Starts a heart beat for this GravityNode.
      * \param interval_in_microseconds interval that heart beats are sent.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
+     * \return success flag
      */
     GRAVITY_API GravityReturnCode startHeartbeat(int64_t interval_in_microseconds);
 
 	/**
      * Stops the heart beat for this GravityNode.
+     * \return success flag
 	 */
 	GRAVITY_API GravityReturnCode stopHeartbeat();
 
+    /**
+     * @name Gravity.ini parsing functions
+     * @{
+     *  Functions to extract parameters from the Gravity.ini
+     *  \param key lookup key
+     *  \param default_value default value to return if Gravity.ini does not contain the key
+     */
     GRAVITY_API std::string getStringParam(std::string key, std::string default_value = "");
     GRAVITY_API int getIntParam(std::string key, int default_value = -1);
     GRAVITY_API double getFloatParam(std::string key, double default_value = 0.0);
     GRAVITY_API bool getBoolParam(std::string key, bool default_value = false);
+    /** @} */ //Gravity.ini parsing functions
 
     /**
      * Get the ID of this gravity node (given in the init function).
@@ -356,16 +403,16 @@ public:
 
     /**
      * @name Registration functions
+     * @{
      *  These presumably must only be accessed by one thread at a time (this is true for registerHeartbeatListener,
      *   registerDataProduct doesn't synchronize access to publishMap either [besides that it's ok]).
-     * @{
      */
 
     /**
      * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
      * \param dataProductID string ID used to uniquely identify this published data product
-     * \param transport type (e.g. 'tcp', 'ipc')
+     * \param transportType transport type (e.g. 'tcp', 'ipc')
      * \return success flag
      */
 	GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType);
@@ -373,7 +420,7 @@ public:
      * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
      * \param dataProductID string ID used to uniquely identify this published data product
-     * \param transport type (e.g. 'tcp', 'ipc')
+     * \param transportType transport type (e.g. 'tcp', 'ipc')
 	 * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
      * \return success flag
      */
@@ -387,7 +434,7 @@ public:
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
-     * \param transport type for requests (e.g. 'tcp', 'ipc')
+     * \param transportType transport type for requests (e.g. 'tcp', 'ipc')
      * \param server object implementing the GravityServiceProvider interface that will be notified of requests
      * \return success flag
      */
@@ -395,7 +442,7 @@ public:
             const GravityServiceProvider& server);
     /**
      * Unregister as a service provider with the Gravity Service Directory
-     * \param serviceID Unique ID with which the service was originially registered
+     * \param serviceID Unique ID with which the service was originally registered
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterService(std::string serviceID);
@@ -412,9 +459,10 @@ public:
     GRAVITY_API GravityReturnCode registerHeartbeatListener(std::string componentID, int64_t interval_in_microseconds, 
 			const GravityHeartbeatListener& listener, std::string domain = "");
 
-	/**
+	  /**
      * Unregisters a callback for when we get a heartbeat from another component.
-	 * \param componentID name of component we are currently registered to
+	   * \param componentID name of component we are currently registered to
+	   * \param domain name of domain for the componentID
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
@@ -428,8 +476,7 @@ public:
      * \param dataProductID string ID used to uniquely identify this published data product
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
      * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
-     * \param transport type (e.g. 'tcp', 'ipc')
-     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \param transportType transport type (e.g. 'tcp', 'ipc')
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType);
@@ -443,7 +490,7 @@ public:
      * \param dataProductID string ID used to uniquely identify this published data product
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
      * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
-     * \param transport type (e.g. 'tcp', 'ipc')
+     * \param transportType transport type (e.g. 'tcp', 'ipc')
      * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
      * \return success flag
      */
@@ -457,6 +504,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber);
+    /** @} */ //Registration functions
 
     /**
      * Returns a string representation of the provided error code.
@@ -476,20 +524,30 @@ public:
 	/**
 	 * Creates and returns a FutureReponse pointer for delayed response to requests
 	 */
-	GRAVITY_API std::tr1::shared_ptr<FutureResponse> createFutureResponse();
+	GRAVITY_API std::shared_ptr<FutureResponse> createFutureResponse();
 
 	/**
-	 * Method to send future response
+	 * Send a FutureResponse
+   * \return success flag
 	 */
 	GRAVITY_API GravityReturnCode sendFutureResponse(const FutureResponse& futureResponse);
 
+  /**
+   * Setup a GravitySubscriptionMonitor to receive subscription timeout information through the Gravity Service Directory.
+   * \param dataProductID the ID of the data product to monitor 
+   * \param milliSecondTimeout the time elapsed since receiving a new data product that qualifies as a subscription timeout 
+   * \return success flag
+   */
 	GRAVITY_API GravityReturnCode setSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
 			int milliSecondTimeout, std::string filter="", std::string domain="");
 
+  /**
+   * Remove the given dataProductID from the given GravitySubscriptionMonitor. 
+   * \return success  flag
+   */
 	GRAVITY_API GravityReturnCode clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
 			std::string filter="", std::string domain="");
 
-    /** @} */ //Registration Functions
 };
 
 } /* namespace gravity */

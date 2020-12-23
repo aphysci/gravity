@@ -55,7 +55,7 @@ GRAVITY_API string readStringMessage(void *socket, int flags)
 
 	zmq_msg_init(&msg);
 	zmq_recvmsg(socket, &msg, flags);
-	int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
 	char* s = (char*)malloc(size+1);
 	memcpy(s, zmq_msg_data(&msg), size);
 	s[size] = 0;
@@ -82,7 +82,7 @@ GRAVITY_API int readIntMessage(void *socket)
 
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     int val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -104,7 +104,7 @@ GRAVITY_API uint64_t readUint64Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint64_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -126,7 +126,7 @@ GRAVITY_API uint32_t readUint32Message(void* socket)
     zmq_msg_t msg;
     zmq_msg_init(&msg);
     zmq_recvmsg(socket, &msg, 0);
-    int size = zmq_msg_size(&msg);
+	int size = (int) zmq_msg_size(&msg);
     uint32_t val;
     memcpy(&val, zmq_msg_data(&msg), size);
     zmq_msg_close(&msg);
@@ -194,7 +194,7 @@ GRAVITY_API int gettimeofday(struct timeval * tp, struct timezone * tzp)
 }
 #endif
 
-GRAVITY_API struct timeval addTime(struct timeval *t1, int sec)
+GRAVITY_API struct timeval addTime(const struct timeval *t1, int sec)
 {
 	struct timeval newTime;
 	newTime.tv_sec=t1->tv_sec+sec;
@@ -203,7 +203,7 @@ GRAVITY_API struct timeval addTime(struct timeval *t1, int sec)
 	return newTime;
 }
 
-GRAVITY_API int timevalcmp(struct timeval* t1, struct timeval* t2)
+GRAVITY_API int timevalcmp(const struct timeval* t1, const struct timeval* t2)
 {
 	if (t1->tv_sec ==t2->tv_sec)
 	{
@@ -230,7 +230,7 @@ GRAVITY_API int timevalcmp(struct timeval* t1, struct timeval* t2)
 	}
 }
 
-GRAVITY_API struct timeval subtractTime(struct timeval *t1, struct timeval *t2)
+GRAVITY_API struct timeval subtractTime(const struct timeval *t1, const struct timeval *t2)
 {
 	struct timeval newTime;
 	newTime.tv_sec=0;
@@ -252,12 +252,12 @@ GRAVITY_API struct timeval subtractTime(struct timeval *t1, struct timeval *t2)
 	return newTime;
 }
 
-GRAVITY_API unsigned int timevalToMilliSeconds(struct timeval *tv)
+GRAVITY_API unsigned int timevalToMilliSeconds(const struct timeval *tv)
 {
 	return (unsigned int) (tv->tv_usec/1000) + (tv->tv_sec*1000);
 }
 
-GRAVITY_API void printByteBuffer(char* buffer, int len)
+GRAVITY_API void printByteBuffer(const char* buffer, int len)
 {
 	for(int i = 0; i < len; i++)
 	{

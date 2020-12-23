@@ -51,9 +51,9 @@ typedef struct SyncDomainDetails
 	std::string domain;
 	std::string ipAddress;
 	void* socket;
-	int pollItemIndex;
 	bool initialized;
 	ServiceDirectoryMapPB providerMap;
+	uint32_t registrationTime;
 } SyncDomainDetails;
 
 class ServiceDirectorySynchronizer
@@ -64,15 +64,16 @@ private:
 	void* commandSocket;
 	void* requestSocket;
 	std::vector<zmq_pollitem_t> pollItems;
-	std::map<std::string, std::tr1::shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
-	std::queue<std::tr1::shared_ptr<GravityDataProduct> > registrationUpdates;
+	std::map<std::string, std::shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
+	std::map<void*, std::shared_ptr<SyncDomainDetails> > socketToDomainDetailsMap;
+	std::queue<std::shared_ptr<GravityDataProduct> > registrationUpdates;
 	bool pendingResponse;
 
 	void printMap(ServiceDirectoryMapPB providerMap);
 
 	void createRegistrationRequest(std::string productID, std::string url, std::string componentID, std::string domain, 
 									ProductChange_RegistrationType type, uint64_t timestamp);
-	void createUnregistrationRequest(std::string productID, std::string url, std::string domain, ProductChange_RegistrationType type);
+	void createUnregistrationRequest(std::string productID, std::string url, std::string domain, ProductChange_RegistrationType type, uint32_t regTime);
 
 public:
 	ServiceDirectorySynchronizer(void* context, std::string url);

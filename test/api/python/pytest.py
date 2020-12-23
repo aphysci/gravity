@@ -10,7 +10,7 @@ from PythonTestPB_pb2 import PythonTestPB
 ###
 class MySubscriber(GravitySubscriber):
     def __init__(self):
-        super(MySubscriber, self).__init__()
+        GravitySubscriber.__init__(self)
         self.subCount = 0
 
     def subscriptionFilled(self, dataProducts):
@@ -22,7 +22,7 @@ class MySubscriber(GravitySubscriber):
 
 class MyRequestHandler(GravityRequestor):
     def __init__(self, gravityNode):
-        super(MyRequestHandler, self).__init__()
+        GravityRequestor.__init__(self)
         self.gravityNode = gravityNode 
         self.reqCount = 0
         self.timeoutCount = 0
@@ -52,7 +52,7 @@ class TestProvider(GravityServiceProvider):
 
 class TestHBListener(GravityHeartbeatListener):
     def __init__(self):
-        super(TestHBListener, self).__init__()
+        GravityHeartbeatListener.__init__(self)
         self.missedCount = 0
         self.receivedCount = 0
         
@@ -69,6 +69,9 @@ class TestHBListener(GravityHeartbeatListener):
 ### Test functions
 ###
 def testPubSub(gravityNode):
+    if gravityNode.getCodeString(gravity.SUCCESS) != "SUCCESS":
+        raise AssertionError("unexpected getCodeString(SUCCES) return value: {}".format(gravityNode.getCodeString(gravity.SUCCESS)))
+
     gravityNode.registerDataProduct("PubTest", gravity.TCP)
     mySub = MySubscriber()
     gravityNode.subscribe("PubTest", mySub)

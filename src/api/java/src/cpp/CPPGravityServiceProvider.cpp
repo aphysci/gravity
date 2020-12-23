@@ -18,24 +18,25 @@
 
 #include "CPPGravityServiceProvider.h"
 #include <iostream>
+#include <memory>
 
 using namespace gravity;
 
 CPPGravityServiceProvider::~CPPGravityServiceProvider()
 {}
 
-std::tr1::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
     unsigned char* array = new unsigned char[dataProduct.getSize()];
     dataProduct.serializeToArray(array);
-    std::tr1::shared_ptr<GravityDataProduct> ret = request(serviceID, (char*)array, dataProduct.getSize());
-	delete array;
-	return ret;
+    std::shared_ptr<GravityDataProduct> ret = request(serviceID, (char*)array, dataProduct.getSize());
+    delete[] array;
+    return ret;
 }
 
-std::tr1::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, char* array, int length)
+std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, char* array, int length)
 {
-    std::tr1::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("CPP RESPONSE"));
+    std::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("CPP RESPONSE"));
     return ret;
 }
 

@@ -5,7 +5,13 @@ from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, 
 from Multiplication_pb2 import MultiplicationOperandsPB, MultiplicationResultPB
 
 done = False
-class MyRequestor(GravityRequestor):
+class MyRequestorProvider(GravityRequestor, GravityServiceProvider):
+    # We need to explicitly initialize each parent here to allow swig to
+    # configure the underlying proxy object correctly.
+    def __init__(self):
+        GravityRequestor.__init__(self)
+        GravityServiceProvider.__init__(self)
+
     def requestFilled(self, serviceID, requestID, response):
         multResponse = MultiplicationResultPB()
         response.populateMessage(multResponse)
@@ -13,7 +19,6 @@ class MyRequestor(GravityRequestor):
         global done
         done = True
 
-class MyProvider(GravityServiceProvider):
     def request(self, serviceID, dataProduct):
         Log.message("made it to my request!")
         Log.message("for serviceID = "+serviceID)
@@ -34,8 +39,8 @@ while gn.init("PyRequest") != gravity.SUCCESS:
     Log.warning("failed to init, retrying...")
     time.sleep(1)
 
-myProv = MyProvider()
-gn.registerService("Multiplication", gravity.TCP, myProv)
+requestorProvider = MyRequestorProvider()
+gn.registerService("Multiplication", gravity.TCP, requestorProvider)
 
 # Async request
 operands = MultiplicationOperandsPB()
@@ -43,8 +48,7 @@ operands.multiplicand_a = 3
 operands.multiplicand_b = 4
 gdp = GravityDataProduct("MultRequest")
 gdp.data = operands
-myReq = MyRequestor()
-gn.request("Multiplication", gdp, myReq)
+gn.request("Multiplication", gdp, requestorProvider)
 
 while not done:
     time.sleep(1)

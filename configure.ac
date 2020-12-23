@@ -293,7 +293,9 @@ AC_CONFIG_FILES([Makefile
                  test/examples/12-PythonBasicService/run.sh
                  test/examples/12-PythonBasicService/Makefile
                  test/examples/13-Relay/Makefile
-                 test/examples/13-Relay/run.sh])
+                 test/examples/13-Relay/run.sh
+		 test/examples/14-AnomalyDetection/train.sh
+		 test/examples/14-AnomalyDetection/detect.sh])
 
 AC_OUTPUT
 

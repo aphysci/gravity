@@ -28,21 +28,21 @@ class Provider : public GravityServiceProvider
 {
 public:
     int counter;
-	virtual tr1::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+	virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 };
 
 
-tr1::shared_ptr<GravityDataProduct> Provider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> Provider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
 	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
 	if(dataProduct.getDataProductID() != "Counter") {
 		Log::critical("Request is not for counter!");
-		return tr1::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
+		return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
 	}
 
 	Log::warning("Request received");
 
-	tr1::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("Result"));
+	std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("Result"));
 	resultDP->setData(&counter, sizeof(int));
 	counter++;
 

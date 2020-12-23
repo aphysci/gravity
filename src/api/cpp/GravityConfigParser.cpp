@@ -22,6 +22,7 @@
 #include "protobuf/ConfigRequest.pb.h"
 #include "KeyValueParserWrap.h"
 
+#include <memory>
 #include <map>
 #include <iostream>
 
@@ -51,11 +52,8 @@ void GravityConfigParser::ParseConfigFile(const char* config_filename)
 			i != keys.end(); i++)
 	{
 		std::string value = parser.GetString(*i);
-		if(value != "")
-        {
-            std::string key_lower = StringCopyToLowerCase(*i);
-			key_value_map[key_lower] = value;
-        }
+        std::string key_lower = StringCopyToLowerCase(*i);
+	    key_value_map[key_lower] = value;
 	}
 	return;
 }
@@ -70,7 +68,7 @@ void GravityConfigParser::ParseConfigService(GravityNode &gn)
 	dataproduct.setData(crpb);
 
 	//Send Request/Get Response
-	std::tr1::shared_ptr<GravityDataProduct> response = gn.request("ConfigService", dataproduct, CONFIG_REQUEST_TIMEOUT);
+	std::shared_ptr<GravityDataProduct> response = gn.request("ConfigService", dataproduct, CONFIG_REQUEST_TIMEOUT);
 	if(response == NULL)
 		return;
 

@@ -1,0 +1,15 @@
+setlocal
+
+cd @CMAKE_INSTALL_PREFIX@/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/deps/libzmq/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/deps/protobuf/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/deps/pthreads-w32/bin
+set Path=%Path%;@LOCAL_ZEROMQ_RUNTIME_DIR@
+set path=%Path%;@LOCAL_PROTOBUF_RUNTIME_DIR@
+
+start ServiceDirectory.exe
+sleep 3
+start "" "@Java_JAVA_EXECUTABLE@" -cp JavaProtobufDataProduct.jar;"@ABS_GRAVITY_ROOT@/deps/protobuf/lib/protobuf-java.jar";"@LOCAL_PROTOBUF_JAR@";"@ABS_GRAVITY_ROOT@/lib/gravity.jar" -Djava.library.path="@ABS_GRAVITY_ROOT@/deps/libzmq/bin";"@LOCAL_ZEROMQ_RUNTIME_DIR@";"@ABS_GRAVITY_ROOT@/bin" JavaProtobufDataProductPublisher
+sleep 3
+start "" "@Java_JAVA_EXECUTABLE@" -cp JavaProtobufDataProduct.jar;"@ABS_GRAVITY_ROOT@/deps/protobuf/lib/protobuf-java.jar";"@LOCAL_PROTOBUF_JAR@";"@ABS_GRAVITY_ROOT@/lib/gravity.jar" -Djava.library.path="@ABS_GRAVITY_ROOT@/deps/libzmq/bin";"@LOCAL_ZEROMQ_RUNTIME_DIR@";"@ABS_GRAVITY_ROOT@/bin" JavaProtobufDataProductSubscriber
