@@ -32,7 +32,6 @@ namespace fs = boost::filesystem;
 #include <fcntl.h>
 #include <sys/unistd.h>
 using namespace std;
-using namespace std::tr1;
 
 namespace gravity {
 
@@ -82,13 +81,13 @@ void ProtobufRegistry::setProtobufPath(const std::string& path) {
     }
 }
 
-std::tr1::shared_ptr<gp::Message> ProtobufRegistry::createMessageByName(const std::string& name) {
+shared_ptr<gp::Message> ProtobufRegistry::createMessageByName(const std::string& name) {
     const gp::Descriptor* desc = _pool.FindMessageTypeByName(name);
     if (!desc) {
         throw std::runtime_error("Could not find protofile for type '" + name + "'.");
     }
     const gp::Message* prototype = _factory.GetPrototype(desc);
-    return std::tr1::shared_ptr<gp::Message>(prototype->New());
+    return shared_ptr<gp::Message>(prototype->New());
 }
 
 PBErrorCollector::PBErrorCollector(string filename_or_typename) : context(filename_or_typename) { }

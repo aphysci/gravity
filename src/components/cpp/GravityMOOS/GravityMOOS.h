@@ -26,11 +26,9 @@
 
 #include <MOOS/libMOOS/Comms/MOOSAsyncCommClient.h>
 
-#include <tr1/memory>
-
 namespace gravity {
 
-typedef std::vector<std::tr1::shared_ptr<GravityDataProduct> > DataProductVec;
+typedef std::vector<std::shared_ptr<GravityDataProduct> > DataProductVec;
 
 class GravityMOOS : public GravitySubscriber {
 public:

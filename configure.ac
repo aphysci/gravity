@@ -209,6 +209,14 @@ AC_ARG_WITH([protoc],
     [PROTOC='protoc'])
 AC_SUBST([PROTOC])
 
+# Check for moos-ivp path
+AC_ARG_WITH([moos-dir],
+    [AS_HELP_STRING([--with-moos-dir=PATH],
+        [location of the moos ivp directory, defaults to /opt/moos-ivp])],
+        [MOOS_DIR="$withval"],
+        [MOOS_DIR='/opt/moos-ivp'])
+AC_SUBST([MOOS_DIR])
+
 # Check for protoc program
 # But macro does not work during cross-compile, so skip test in that case
 if test $cross_compiling != "yes"

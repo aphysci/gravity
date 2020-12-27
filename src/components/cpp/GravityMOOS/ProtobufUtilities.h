@@ -24,7 +24,6 @@
 #include <google/protobuf/compiler/importer.h>
 
 #include <string>
-#include <tr1/memory>
 
 namespace gravity {
 
@@ -45,7 +44,7 @@ public:
 class PBErrorCollector : public google::protobuf::io::ErrorCollector {
 public:
     const std::string context;
-    int errors;
+    int errors = 0;
     int warnings;
     
     PBErrorCollector(std::string filename_or_typename);
@@ -61,7 +60,7 @@ public:
     virtual ~ProtobufRegistry();
     
     void setProtobufPath(const std::string& path);
-    std::tr1::shared_ptr<google::protobuf::Message> createMessageByName(const std::string& name);
+    std::shared_ptr<google::protobuf::Message> createMessageByName(const std::string& name);
 
 private:
     google::protobuf::compiler::DiskSourceTree _tree;

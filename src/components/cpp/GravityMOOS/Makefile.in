@@ -47,9 +47,10 @@ top_builddir   = @top_builddir@
 builddir       = @builddir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@ 
+MOOS_DIR       = @MOOS_DIR@
 
-ADDITIONAL_INCLUDES = -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Comms/include -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Utils/include -I${MOOS_DIR}/core-moos/src/Core/libMOOS/Thirdparty/PocoBits/include/
-ADDITIONAL_LIBS = -L${MOOS_DIR}/core-moos/build/lib -lMOOS -lboost_filesystem -lboost_system
+ADDITIONAL_INCLUDES =  -I${MOOS_DIR}/MOOS/MOOSCore/Core/libMOOS/Comms/include -I${MOOS_DIR}/MOOS/MOOSCore/Core/libMOOS/Utils/include -I${MOOS_DIR}/MOOS/MOOSCore/Core/libMOOS/Thirdparty/PocoBits/include
+ADDITIONAL_LIBS = -L${MOOS_DIR}/build/MOOS/MOOSCore/lib -lMOOS -lboost_filesystem -lboost_system -lm
 
 EXE_NAME = GravityMOOS
 

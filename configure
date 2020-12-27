@@ -630,6 +630,7 @@ CXXCPP
 BOOST_CPPFLAGS
 DISTCHECK_CONFIGURE_FLAGS
 BOOST_ROOT
+MOOS_DIR
 PROTOC
 ZEROMQ_INCDIR
 ZEROMQ_LIBDIR
@@ -722,6 +723,7 @@ with_protobuf_incdir
 with_zeromq_libdir
 with_zeromq_incdir
 with_protoc
+with_moos_dir
 with_boost
 '
       ac_precious_vars='build_alias
@@ -1384,6 +1386,8 @@ Optional Packages:
                           /usr/local/include
   --with-protoc=PATH      location of the protoc protocol buffer compiler
                           binary, defaults to protoc
+  --with-moos-dir=PATH    location of the moos ivp directory, defaults to
+                          /opt/moos-ivp
   --with-boost=DIR        prefix of Boost [guess]
 
 Some influential environment variables:
@@ -5726,6 +5730,17 @@ fi
 
 
 
+# Check for moos-ivp path
+
+# Check whether --with-moos-dir was given.
+if test "${with_moos_dir+set}" = set; then :
+  withval=$with_moos_dir; MOOS_DIR="$withval"
+else
+  MOOS_DIR='/opt/moos-ivp'
+fi
+
+
+
 # Check for protoc program
 # But macro does not work during cross-compile, so skip test in that case
 if test $cross_compiling != "yes"
@@ -6928,6 +6943,7 @@ do
     "src/components/cpp/Archiver/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Archiver/Makefile" ;;
     "src/components/cpp/ConfigServer/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/ConfigServer/Makefile" ;;
     "src/components/cpp/LogRecorder/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/LogRecorder/Makefile" ;;
+    "src/components/cpp/GravityMOOS/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/GravityMOOS/Makefile" ;;
     "src/components/cpp/Playback/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Playback/Makefile" ;;
     "src/components/cpp/Relay/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/Relay/Makefile" ;;
     "src/components/cpp/ServiceDirectory/Makefile") CONFIG_FILES="$CONFIG_FILES src/components/cpp/ServiceDirectory/Makefile" ;;
@@ -6973,6 +6989,8 @@ do
     "test/examples/12-PythonBasicService/Makefile") CONFIG_FILES="$CONFIG_FILES test/examples/12-PythonBasicService/Makefile" ;;
     "test/examples/13-Relay/Makefile") CONFIG_FILES="$CONFIG_FILES test/examples/13-Relay/Makefile" ;;
     "test/examples/13-Relay/run.sh") CONFIG_FILES="$CONFIG_FILES test/examples/13-Relay/run.sh" ;;
+    "test/examples/14-AnomalyDetection/train.sh") CONFIG_FILES="$CONFIG_FILES test/examples/14-AnomalyDetection/train.sh" ;;
+    "test/examples/14-AnomalyDetection/detect.sh") CONFIG_FILES="$CONFIG_FILES test/examples/14-AnomalyDetection/detect.sh" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
