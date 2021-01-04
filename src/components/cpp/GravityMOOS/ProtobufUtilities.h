@@ -45,7 +45,7 @@ class PBErrorCollector : public google::protobuf::io::ErrorCollector {
 public:
     const std::string context;
     int errors = 0;
-    int warnings;
+    int warnings = 0;
     
     PBErrorCollector(std::string filename_or_typename);
     ~PBErrorCollector();
