@@ -171,6 +171,8 @@ bool GravityMOOS::moosMessageReceived(CMOOSMsg& msg) {
     
     if (_node.publish(gdp) != GravityReturnCodes::SUCCESS) {
         Log::warning("Unable to publish '%s' via Gravity.", msg.GetKey().c_str());
+    } else {
+        Log::debug("Publish '%s' via Gravity.", msg.GetKey().c_str());
     };
     return true;
 }
