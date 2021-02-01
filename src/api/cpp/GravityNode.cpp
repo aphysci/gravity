@@ -1642,15 +1642,15 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 			dataProduct.setTimestamp(timestamp);
 		}
 
-		// Set registration time
-		dataProduct.setRegistrationTime(dataRegistrationTimeMap[dataProductID]);
-
 		//set Component ID
 		dataProduct.setComponentId(componentID);
 
 		//set Domain
 		dataProduct.setDomain(myDomain);
 	}
+
+    // Set registration time
+    dataProduct.setRegistrationTime(dataRegistrationTimeMap[dataProductID]);
 
 	// Send subscription details
     publishManagerPublishSWL.lock.Lock();
@@ -2337,7 +2337,7 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
 {
-	return registerRelay(dataProductID, subscriber, localOnly, transportType, defaultCacheLastSentDataprodut);
+	return registerRelay(dataProductID, subscriber, localOnly, transportType, false);
 }
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue)
@@ -2346,10 +2346,14 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
     {
         return GravityReturnCodes::NOT_INITIALIZED;
     }
+    if (cacheLastValue)
+    {
+        Log::warning("Using a Relay with cacheLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition");
+    }
 	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
 	if (ret != GravityReturnCodes::SUCCESS)
 		return ret;
-	return subscribe(dataProductID, subscriber);
+	return subscribe(dataProductID, subscriber, "", "", false);
 }
 
 GravityReturnCode GravityNode::unregisterRelay(std::string dataProductID, const GravitySubscriber& subscriber)

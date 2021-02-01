@@ -491,7 +491,8 @@ public:
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
      * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
      * \param transportType transport type (e.g. 'tcp', 'ipc')
-     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct. Note that using a Relay
+     *                       with cachedLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue);
