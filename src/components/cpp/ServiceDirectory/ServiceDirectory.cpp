@@ -74,8 +74,8 @@ static void* registration(void* regData)
     gravity::GravityNode* gn = ((RegistrationData*)regData)->node;
     gravity::GravityServiceProvider* provider = ((RegistrationData*)regData)->provider;
 
-    // Register data product for reporting changes to registered publishers
-    gn->registerDataProduct(REGISTERED_PUBLISHERS, gravity::GravityTransportTypes::TCP);
+    // Register data product for reporting changes to registered publishers (always cache this one)
+    gn->registerDataProduct(REGISTERED_PUBLISHERS, gravity::GravityTransportTypes::TCP, true);
 
     // Register the data product for domain broadcast details
 	gn->registerDataProduct("ServiceDirectory_DomainDetails", gravity::GravityTransportTypes::TCP);
