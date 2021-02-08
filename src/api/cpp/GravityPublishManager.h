@@ -62,6 +62,7 @@ typedef struct PublishDetails
 	std::map<std::string,std::shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;
+    bool hasSubscribers;
 } PublishDetails;
 
 /**
@@ -81,6 +82,7 @@ private:
     std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();
+	void subscribersExist();
 	void ready();
 	void registerDataProduct();
 	void unregisterDataProduct();

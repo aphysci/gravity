@@ -26,7 +26,8 @@ classdef GravityNode < handle
     methods (Access = public)
         function this = GravityNode(componentID)
             % Initialize the GravityNode
-            this.gravityNode = com.aphysci.gravity.swig.GravityNode;
+            i%this.gravityNode = com.aphysci.gravity.swig.GravityNode;
+            this.gravityNode = com.aphysci.gravity.matlab.MATLABGravityNode;
 
             if nargin && ~isempty(componentID)
                 this.initStatus = this.gravityNode.init(componentID);
@@ -48,6 +49,10 @@ classdef GravityNode < handle
         
         function ret = publish(this, dataProduct)
             ret = this.gravityNode.publish(dataProduct.getGravityDataProduct());
+        end
+        
+        function ret = subscribersExist(this, dataProductID)
+            ret = this.gravityNode.subscribersExist(dataProductID);
         end
         
         function subscription = subscribe(this, dataProductID, varargin)
