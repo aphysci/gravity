@@ -100,6 +100,7 @@ void GravityMOOS::subscriptionFilled(const DataProductVec& dataProducts) {
     Log::debug("Received %u GravityDataProducts", (unsigned)dataProducts.size());
     // Don't bother doing anything if MOOS is disconnected.
     if (!_moosComm.IsConnected()) {
+        Log::critical("Moos is not connected");
         return;
     }
     // 
@@ -107,9 +108,10 @@ void GravityMOOS::subscriptionFilled(const DataProductVec& dataProducts) {
         shared_ptr<gp::Message> message;
         // Make sure that the DataProduct has the new type_name and protocol fields set.
         if (((*it)->getTypeName() == "") || ((*it)->getProtocol() != "protobuf2")) {
-            Log::critical("Unknown protocol (%s) or no type name.", (*it)->getProtocol().c_str());
+            Log::critical("Unknown protocol (%s) or no type name (%s).", (*it)->getProtocol().c_str(), (*it)->getTypeName().c_str());
             return;
         }
+        Log::debug("protocol (%s), type name (%s).", (*it)->getProtocol().c_str(), (*it)->getTypeName().c_str());
         // Try to create and populate a message of that named type from the encoded data.
         try {
             message = _registry.createMessageByName((*it)->getTypeName());
