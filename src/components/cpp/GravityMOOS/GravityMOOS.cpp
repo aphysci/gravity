@@ -34,7 +34,7 @@ static bool wrapMoosConnected(void *param) {
     return static_cast<GravityMOOS*>(param)->moosConnected();
 }
 
-GravityMOOS::GravityMOOS() {
+GravityMOOS::GravityMOOS(const std::string& config_file) {
     // Initialize Gravity Node
     if (_node.init(GravityMOOS::ComponentName) != GravityReturnCodes::SUCCESS) {
         throw std::runtime_error("Could not connect to ServiceDirectory!");
@@ -44,24 +44,25 @@ GravityMOOS::GravityMOOS() {
     Log::initAndAddConsoleLogger(GravityMOOS::ComponentName, Log::DEBUG);
    
     // Parse Protobuf Config file
-    bool success = textFileToProtobuf("gravitymoos.pbtxt", _cfg);
+    bool success = textFileToProtobuf(config_file.c_str(), _cfg);
     if (!success) { throw std::runtime_error("Could not parse configuration file!"); }
     
     // Point the registry at the folder containing all the protobuf files.
     _registry.setProtobufPath(_cfg.protobuf_path());
+    Log::message("Setting protobuf path to '%s'", _cfg.protobuf_path().c_str());
     
     // Setup MOOSPB/Gravity registrations/subscriptions/callbacks.  Gravity will do the right thing
     // across a server restart, but MOOS will not.  We can setup the MOOS callback here, but the
     // subscriptions are made in moosConnected().
     for(int i=0, n=_cfg.gravity_publications_size(); i < n; ++i) {
-        Log::debug("Subscribing to gravity publication '%s'", _cfg.gravity_publications(i).c_str());
+        Log::message("Subscribing to gravity publication '%s'", _cfg.gravity_publications(i).c_str());
         if (_node.subscribe(_cfg.gravity_publications(i), *this) != GravityReturnCodes::SUCCESS) {
             Log::critical("Failed to subscribe to '%s'", _cfg.gravity_publications(i).c_str());
         }
     }
     for(int i=0, n=_cfg.moospbt_publications_size(); i < n; ++i) {
         std::string pubname = _cfg.moospbt_publications(i);
-        Log::debug("Registering gravity publication '%s'", pubname.c_str());
+        Log::message("Registering gravity publication '%s'", pubname.c_str());
         _node.registerDataProduct(pubname, GravityTransportTypes::TCP);
         _moosComm.AddMessageRouteToActiveQueue<GravityMOOS>(pubname + " Queue", pubname,
             this, &GravityMOOS::moosMessageReceived);
@@ -105,6 +106,7 @@ void GravityMOOS::subscriptionFilled(const DataProductVec& dataProducts) {
     }
     // 
     for (DataProductVec::const_iterator it = dataProducts.begin(); it != dataProducts.end(); ++it) {
+        Log::debug("Received %s", (*it)->getDataProductID().c_str());
         shared_ptr<gp::Message> message;
         // Make sure that the DataProduct has the new type_name and protocol fields set.
         if (((*it)->getTypeName() == "") || ((*it)->getProtocol() != "protobuf2")) {

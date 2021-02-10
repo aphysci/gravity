@@ -20,8 +20,42 @@
 
 using namespace gravity;
 
-int main(int argc, const char* argv[]) {
-    GravityMOOS gravityMOOS;
+char* getCmdOption(char** begin, char** end, const std::string& option) {
+    char** itr = std::find(begin, end, option);
+    if(itr != end && ++itr !=end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+bool cmdOptionExists(char** begin, char** end, const std::string& option) {
+    return std::find(begin, end, option) != end;
+}
+
+void printUsage() {
+    printf("usage: GravityMOOS -f filename [-h] \n");
+    printf("\t -f filename:\t Configuration filename\n");
+    printf("\t -h:\t\t Display this text\n");
+}
+
+int main(int argc, char* argv[]) {
+    if(cmdOptionExists(argv, argv + argc, "-h")) {
+        printUsage();
+        return -1;
+    }
+
+    std::string config_file = "";
+
+    char* fname = getCmdOption(argv, argv + argc, "-f");
+    if (fname) {
+        config_file = std::string(fname);
+    } else {
+        printUsage();
+        return -1;
+    }
+
+    GravityMOOS gravityMOOS(config_file);
     
     return gravityMOOS.run();
 }

@@ -32,7 +32,7 @@ typedef std::vector<std::shared_ptr<GravityDataProduct> > DataProductVec;
 
 class GravityMOOS : public GravitySubscriber {
 public:
-    GravityMOOS();
+    GravityMOOS(const std::string& config_file);
     virtual ~GravityMOOS();
     
     int run();

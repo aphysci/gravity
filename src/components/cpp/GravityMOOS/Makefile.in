@@ -50,7 +50,7 @@ VPATH          = @srcdir@
 MOOS_INCDIR    = @MOOS_INCDIR@
 MOOS_LIBDIR    = @MOOS_LIBDIR@
 
-ADDITIONAL_INCLUDES =  -I${MOOS_INCDIR}
+ADDITIONAL_INCLUDES =  -I${MOOS_INCDIR}/Comms/include -I${MOOS_INCDIR}/Utils/include -I${MOOS_INCDIR}/Thirdparty/PocoBits/include
 ADDITIONAL_LIBS = -L${MOOS_LIBDIR} -lMOOS -lboost_filesystem -lboost_system -lm
 
 EXE_NAME = GravityMOOS
