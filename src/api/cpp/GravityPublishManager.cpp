@@ -145,6 +145,10 @@ void GravityPublishManager::start()
 			{
 				setHWM();
 			}
+			else if (command == "subscribersExist")
+			{
+				subscribersExist();
+			}
 			else
 			{
 				Log::warning("GravityPublishManager received unknown command '%s' from GravityNode", command.c_str());
@@ -238,10 +242,11 @@ void GravityPublishManager::start()
 				if (newsub)
 				{					
 				    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
+                                    pd->hasSubscribers = true;
 				    // can't log here because the network logging uses this code - any logs here will result in an
 				    // infinite loop, or a deadlock.
 				    // This message can be useful though, so leaving it in, but commented out.
-//				    Log::debug("got a new subscriber for %s, resending %d values", pd->dataProductID.c_str(), pd->lastCachedValues.size());
+				    //Log::debug("got a new subscriber for %s, resending %d values.", pd->dataProductID.c_str(), pd->lastCachedValues.size());
 
 				    list<std::shared_ptr<CacheValue> > values;
 				    for (map<string,std::shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
@@ -267,6 +272,11 @@ void GravityPublishManager::start()
 				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
 				        delete[] newBytes;
 					}
+				} else {
+				    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
+                                    pd->hasSubscribers = false;
+    				    // See comment above re the use of log statements in this section of code
+				    //Log::debug("no more subscribers for %s ", pd->dataProductID.c_str());
 				}
 			}
 		}
@@ -386,6 +396,7 @@ void GravityPublishManager::registerDataProduct()
     publishDetails->socket = pubSocket;
 	publishDetails->pollItem = pollItem;
 	publishDetails->cacheLastValue = cacheLastValue;
+	publishDetails->hasSubscribers = false;
 
     publishMapByID[dataProductID] = publishDetails;
     publishMapBySocket[pubSocket] = publishDetails;
@@ -416,6 +427,7 @@ void GravityPublishManager::unregisterDataProduct()
         for (map<string,std::shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin(); iter != publishDetails->lastCachedValues.end(); iter++)
 		    delete [] iter->second->value;
         publishDetails->lastCachedValues.clear();
+        publishDetails->hasSubscribers = false;
 
 		// Remove from poll items
 		vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
@@ -516,4 +528,20 @@ void GravityPublishManager::publish(void* socket, const string &filterText, cons
     zmq_msg_close(&data);
 
 }
+
+void GravityPublishManager::subscribersExist()
+{
+    string dataProductID = readStringMessage(gravityNodeResponseSocket);
+    std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
+    string ret;
+    if (!publishDetails)
+    {
+        ret = "Unknown data product id: "+dataProductID ;  // Note: this string is used in GravityNode to set the error code
+    } else {
+        ret = publishDetails->hasSubscribers ? "Y" : "N";
+    }
+    sendStringMessage(gravityNodeResponseSocket, ret, ZMQ_DONTWAIT);
+}
+
+
 } /* namespace gravity */

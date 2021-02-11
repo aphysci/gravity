@@ -40,12 +40,15 @@ JAVASRC_DIR=.
 JAVA_BUILD_DIR=build
 SUB_LIB_NAME=MATLABGravitySubscriber.jar
 PROTO_LIB_NAME=MATLABProtobufGenerator.jar
+NODE_LIB_NAME=MATLABGravityNode.jar
 
 CLASSPATH=../java/gravity.jar:$(GUAVAJAR_DIR)
 SUB_SOURCES=MATLABGravitySubscriber.java
 SUB_CLASSES=$(SUB_SOURCES:.java=.class)
 PROTO_SOURCES=MATLABProtobufGenerator.java
 PROTO_CLASSES=$(PROTO_SOURCES:.java=.class)
+NODE_SOURCES=MATLABGravityNode.java
+NODE_CLASSES=$(NODE_SOURCES:.java=.class)
 PACKAGE=com/aphysci/gravity/matlab
 
 all: $(SUB_LIB_NAME) $(PROTO_LIB_NAME)
@@ -56,10 +59,13 @@ $(SUB_LIB_NAME): $(SUB_CLASSES)
 $(PROTO_LIB_NAME): $(PROTO_CLASSES)
 	@jar cf $(PROTO_LIB_NAME) -C $(JAVA_BUILD_DIR) $(PACKAGE)/$(PROTO_CLASSES)
 
+$(NODE_LIB_NAME): $(NODE_CLASSES)
+	@jar cf $(NODE_LIB_NAME) -C $(JAVA_BUILD_DIR) $(PACKAGE)/$(NODE_CLASSES)
+
 %.class: %.java
 	@echo $<
 	@mkdir -p $(JAVA_BUILD_DIR)
 	@javac -d $(JAVA_BUILD_DIR) -cp $(CLASSPATH) $(JAVASRC_DIR)/$<
 
 clean:
-	rm -rf $(JAVA_BUILD_DIR) $(SUB_LIB_NAME) $(PROTO_LIB_NAME)
+	rm -rf $(JAVA_BUILD_DIR) $(SUB_LIB_NAME) $(PROTO_LIB_NAME) $(NODE_LIB_NAME)

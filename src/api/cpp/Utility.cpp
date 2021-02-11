@@ -228,6 +228,8 @@ GRAVITY_API uint64_t getCurrentTime()
 
 GRAVITY_API unsigned int sleep(int milliseconds)
 {
+	// If sleep time < 0, set it to 0
+	milliseconds = std::max(0, milliseconds);
 #ifdef WIN32
 	Sleep(milliseconds);
 	return 0;

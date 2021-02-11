@@ -16,6 +16,8 @@
  **
  */
 
+%include "typemaps.i"
+
 %typemap(javaimports) gravity::GravityNode %{
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.FutureResponse;
@@ -140,6 +142,7 @@ public:
     std::string getComponentID();
 	std::string getIP();
     std::string getDomain();
+    GravityReturnCode subscribersExist(std::string dataProductID, bool& OUTPUT);
 
     std::shared_ptr<gravity::FutureResponse> createFutureResponse();
 	GravityReturnCode sendFutureResponse(const gravity::FutureResponse& futureResponse);

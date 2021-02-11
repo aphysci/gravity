@@ -345,6 +345,14 @@ public:
     GRAVITY_API GravityReturnCode publish(const GravityDataProduct& dataProduct, std::string filterText = "", uint64_t timestamp = 0);
 
     /**
+     * Determine whether there are any subscribers for this DataProduct
+     * \param dataProduct GravityDataProduct for which to check for the presence of subscribers
+	 * \param hasSubscribersOut (output only) false if there are no subscribers, otherwise true
+     * \return success flag
+     **/
+    GRAVITY_API GravityReturnCode  subscribersExist(std::string dataProductID, bool& hasSubscribersOut);
+
+    /**
      * Make an asynchronous request against a service provider through the Gravity Service Directory
      * \param serviceID The registered service ID of a service provider
      * \param request data product representation of the request
@@ -491,7 +499,8 @@ public:
      * \param subscriber object that implements the GravitySubscriber interface and will be notified of data availability
      * \param localOnly specifies whether the registered relay will provide data to their own host only, or components on any host looking for this dataProductID
      * \param transportType transport type (e.g. 'tcp', 'ipc')
-     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct. Note that using a Relay
+     *                       with cachedLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerRelay(std::string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType, bool cacheLastValue);
