@@ -142,8 +142,18 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
 
 find_program(GIT_EXE git)
 if (GIT_EXE)
-    add_custom_command(TARGET ${LIB_NAME} POST_BUILD COMMAND "${GIT_EXE}" describe --tag > "${CMAKE_BINARY_DIR}/VERSION.txt")
-    INSTALL(FILES "${CMAKE_BINARY_DIR}/VERSION.txt" DESTINATION .)
+    execute_process(
+          COMMAND "${GIT_EXE}" status "${CMAKE_CURRENT_LIST_DIR}"
+          RESULT_VARIABLE STATUS
+          OUTPUT_VARIABLE OUTPUT2 
+          ERROR_QUIET)
+    if(STATUS AND NOT STATUS EQUAL 0)
+        message(STATUS "${GIT_EXE} FAILED: ${STATUS}")
+    else()
+        message(STATUS "${GIT_EXE} SUCCESS: ${OUTPUT2}")
+        add_custom_command(TARGET ${LIB_NAME} POST_BUILD COMMAND "${GIT_EXE}" describe --tag > "${CMAKE_BINARY_DIR}/VERSION.txt")
+        INSTALL(FILES "${CMAKE_BINARY_DIR}/VERSION.txt" DESTINATION .)
+    endif()
 endif()
 
 
