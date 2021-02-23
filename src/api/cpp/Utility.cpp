@@ -22,8 +22,10 @@
 #include "Utility.h"
 
 #ifdef WIN32
+#define NOMINMAX
 #include <Windows.h>
 #include <time.h>
+#include <algorithm>
 #if _MSC_VER < 1910 && !defined(_CRT_NO_TIME_T) 
 struct timespec
 {
