@@ -35,7 +35,7 @@ struct timespec
 #endif
 #else
 #include <stdint.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 #endif
 
 namespace gravity {

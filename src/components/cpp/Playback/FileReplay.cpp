@@ -25,7 +25,7 @@
 #include <string>
 #include <thread>
 #ifndef WIN32
-#include <sys/unistd.h>
+#include <unistd.h>
 #endif
 
 using namespace std;

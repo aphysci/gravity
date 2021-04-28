@@ -23,7 +23,7 @@
 #include <iostream>
 #include <mutex>
 #ifndef WIN32
-#include <sys/unistd.h>
+#include <unistd.h>
 #endif
 
 using namespace std;
