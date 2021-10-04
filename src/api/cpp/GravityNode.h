@@ -188,6 +188,8 @@ private:
 
     static const int NETWORK_TIMEOUT = 3000; // msec
     static const int NETWORK_RETRIES = 3; // attempts to connect
+    static Semaphore initLock;
+
     bool metricsEnabled;
 	bool initialized;
 	bool logInitialized;
