@@ -382,6 +382,7 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 	sendStringMessage(gravityNodeSocket,"ACK",ZMQ_DONTWAIT);
 }
 
+Semaphore GravityNode::initLock;
 GravityNode::GravityNode()
 {
     defaultReceiveLastSentDataproduct = true;
@@ -575,6 +576,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	bool domainTimeout=false;
 	bool iniWarning = false;
 
+    initLock.Lock();
+
     // Setup zmq context
 	if(!initialized)
 	{
@@ -649,8 +652,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		s_restore_signals();
 
-		if(s_interrupted)
+		if(s_interrupted) {
+		    initLock.Unlock();
 			raise(s_interrupted);
+		}
 
 		// connect down here to make sure manager has bound address.
 		publishManagerRequestSWL.socket = zmq_socket(context, ZMQ_REQ);
@@ -875,6 +880,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	{
 			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
+
+    initLock.Unlock();
 
 	return ret;
 }
