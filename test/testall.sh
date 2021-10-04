@@ -16,6 +16,8 @@
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pushd $SCRIPT_DIR
 
 for script in `find . -name test.sh`
 do
@@ -36,6 +38,8 @@ do
     echo
     echo Success!
 done
+
+popd 
 
 echo
 echo All tests completed Successfully
