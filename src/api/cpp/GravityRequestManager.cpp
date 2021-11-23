@@ -214,11 +214,15 @@ void GravityRequestManager::start()
 					// Verify the service provider
 					if (response.getRegistrationTime() != reqDetails->registrationTime)
 					{
-						Log::critical("Received service (%s) response from invalid service [%u != %u]. Aborting.",
+						Log::critical("Received service (%s) response from invalid service [%u != %u]. Aborting request.",
 							reqDetails->serviceID.c_str(), response.getRegistrationTime(), reqDetails->registrationTime);
 
 						// Send notification of stale data to ServiceDirectory
-						notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url, reqDetails->registrationTime);
+						if (response.getRegistrationTime() > 0) {
+						    notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url, reqDetails->registrationTime);
+						} else {
+						    Log::debug("Service response appears to be invalid, so not requesting deletion from ServiceDirectory.");
+						}
 					}
 					else
 					{
