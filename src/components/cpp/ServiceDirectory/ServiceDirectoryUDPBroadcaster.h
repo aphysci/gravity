@@ -33,6 +33,7 @@
 #include <WinBase.h>
 #include <Windows.h>
 #else
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
