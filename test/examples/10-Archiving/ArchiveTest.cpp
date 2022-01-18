@@ -38,7 +38,7 @@ int main()
 	// the component has connected to the ServiceDirectory before it continues to other tasks.
 	while (grc != GravityReturnCodes::SUCCESS)
 	{
-	    Log::warning("Unable to connect to ServiceDirectory, will try again in 1 second...");
+	    spdlog::warn("Unable to connect to ServiceDirectory, will try again in 1 second...");
 	    gravity::sleep(1000);
 	    grc = gn.init("ArchiveTest");
 	}
@@ -68,7 +68,7 @@ int main()
 
 		//Publish the data product.
 		gn.publish(counterDataProduct);
-		Log::message("published count = %d", count);
+		spdlog::info("published count = {}", count);
 
 		//Increment count
 		count++;

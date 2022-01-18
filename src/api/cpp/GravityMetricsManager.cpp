@@ -42,6 +42,7 @@ namespace gravity
         // This is the zmq context that is shared with the GravityNode. Must use
         // a shared context to establish an inproc socket.
         this->context = context;
+		logger = spdlog::get("GravityLogger");
     }
 
     GravityMetricsManager::~GravityMetricsManager() {}
@@ -133,7 +134,7 @@ namespace gravity
                 }
                 else
                 {
-					Log::warning("GravityMetricsManager received unknown command '%s' from GravityNode", command.c_str());
+					logger->warn("GravityMetricsManager received unknown command '{}' from GravityNode", command);
                 }
             }
 

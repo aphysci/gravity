@@ -42,7 +42,7 @@ void MultiplicationRequestor::requestFilled(std::string serviceID, std::string r
 	response.populateMessage(result);
 
 	//Write the answer
-	Log::warning("Asynchronous response received: %s = %d", requestID.c_str(), result.result());
+	spdlog::warn("Asynchronous response received: {} = {}", requestID, result.result());
 
 	gotAsyncMessage = true;
 }
@@ -54,7 +54,7 @@ int main()
 	GravityReturnCode ret = gn.init("MultiplicationRequestor");
 	while (ret != GravityReturnCodes::SUCCESS)
 	{
-	    Log::warning("Unable to init component, retrying...");
+	    spdlog::warn("Unable to init component, retrying...");
 	    ret = gn.init("MultiplicationRequestor");
 	}
 
@@ -78,7 +78,7 @@ int main()
         // Service may not be registered yet
         if (ret != GravityReturnCodes::SUCCESS)
         {
-            Log::warning("request to Multiplication service failed, retrying...");
+            spdlog::warn("request to Multiplication service failed, retrying...");
             gravity::sleep(1000);
         }
 	}
@@ -98,14 +98,14 @@ int main()
 														1000); //Timeout in milliseconds
 	if(multSync == NULL)
 	{
-		Log::critical("Request Returned NULL!");
+		spdlog::error("Request Returned NULL!");
 	}
 	else
 	{
 		MultiplicationResultPB result;
 		multSync->populateMessage(result);
 
-		Log::warning("Synchronous response received: 5 x 7 = %d", result.result());
+		spdlog::warn("Synchronous response received: 5 x 7 = {}", result.result());
 	}
 
 	/////////////////////////////////////////

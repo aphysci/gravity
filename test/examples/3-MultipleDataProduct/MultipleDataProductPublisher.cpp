@@ -74,7 +74,7 @@ int main()
 		gn.publish(helloWorldDataProduct);
 
 		//A little logging is always nice.  Use gravity.ini to control which logs get written.
-		Log::warning("Published message1 with count %d and message2 with data %s", count, data.c_str());
+		spdlog::warn("Published message1 with count {} and message2 with data {}", count, data);
 
 		//Sleep for 1 second.
 		gravity::sleep(1000);

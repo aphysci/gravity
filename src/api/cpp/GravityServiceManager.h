@@ -29,6 +29,7 @@
 #include <zmq.h>
 #include <vector>
 #include "GravityNode.h"
+#include "spdlog/spdlog.h"
 
 #define SERVICE_MGR_URL "inproc://gravity_service_manager"
 
@@ -55,6 +56,7 @@ private:
 	void addService();
 	void removeService();
 	void ready();
+	std::shared_ptr<spdlog::logger> logger;
 public:
 	/**
 	 * Constructor GravityServiceManager

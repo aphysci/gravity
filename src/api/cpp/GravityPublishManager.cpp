@@ -52,6 +52,9 @@ GravityPublishManager::GravityPublishManager(void* context)
 
 	// Default high water mark
 	publishHWM = 1000;
+	
+	// Get the gravity logger
+	logger = spdlog::get("GravityLogger");
 }
 
 GravityPublishManager::~GravityPublishManager() {}
@@ -130,7 +133,7 @@ void GravityPublishManager::start()
 		{
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeResponseSocket);
-			Log::trace("GravityPublishManager, pollItems[0], command = %s", command.c_str());
+			logger->trace("GravityPublishManager, pollItems[0], command = {}", command);
 
 			// message from gravity node on this socket
 			if (command == "register")
@@ -151,7 +154,7 @@ void GravityPublishManager::start()
 			}
 			else
 			{
-				Log::warning("GravityPublishManager received unknown command '%s' from GravityNode", command.c_str());
+				logger->warn("GravityPublishManager received unknown command '{}' from GravityNode", command);
 			}
 		}
 
@@ -159,7 +162,7 @@ void GravityPublishManager::start()
 		{
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
-            Log::trace("GravityPublishManager, pollItems[1], command = %s", command.c_str());
+            logger->trace("GravityPublishManager, pollItems[1], command = {}", command);
 
 			// message from gravity node should be either a publish or kill request
 			if (command == "publish")
@@ -172,7 +175,7 @@ void GravityPublishManager::start()
 			}
 			else
 			{
-                Log::critical("Received unknown publish command %s", command.c_str());
+                logger->error("Received unknown publish command {}", command);
 			}
 		}
 
@@ -181,7 +184,7 @@ void GravityPublishManager::start()
             // Received a command from the metrics control
             void* socket = pollItems[2].socket;
             string command = readStringMessage(socket);
-            Log::trace("GravityPublishManager, pollItems[2], command = %s", command.c_str());
+            logger->trace("GravityPublishManager, pollItems[2], command = {}", command);
 
             if (command == "MetricsEnable")
             {
@@ -220,7 +223,7 @@ void GravityPublishManager::start()
         if (pollItems[3].revents & ZMQ_POLLIN)
         {
             string command = readStringMessage(pollItems[3].socket);
-            Log::trace("GravityPublishManager, pollItems[3], command = %s", command.c_str());
+            logger->trace("GravityPublishManager, pollItems[3], command = {}", command);
             if (command == "publish")
             {
                 // This is an instruction to publish the attached metrics data
@@ -246,7 +249,7 @@ void GravityPublishManager::start()
 				    // can't log here because the network logging uses this code - any logs here will result in an
 				    // infinite loop, or a deadlock.
 				    // This message can be useful though, so leaving it in, but commented out.
-				    //Log::debug("got a new subscriber for %s, resending %d values.", pd->dataProductID.c_str(), pd->lastCachedValues.size());
+				    //logger->debug("got a new subscriber for {}, resending {} values.", pd->dataProductID, pd->lastCachedValues.size());
 
 				    list<std::shared_ptr<CacheValue> > values;
 				    for (map<string,std::shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
@@ -268,7 +271,7 @@ void GravityPublishManager::start()
 						char* newBytes = new char[newSize];
 						dataProduct.serializeToArray(newBytes);		
 						// See comment above re the use of log statements in this section of code
-						//Log::trace("Publishing data product %s..., Which is cached? %s", dataProduct.getDataProductID().c_str(),dataProduct.isCachedDataproduct() ? "true" : "false");
+						//logger->trace("Publishing data product {}..., Which is cached? {}", dataProduct.getDataProductID(),dataProduct.isCachedDataproduct() ? "true" : "false");
 				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
 				        delete[] newBytes;
 					}
@@ -276,7 +279,7 @@ void GravityPublishManager::start()
 				    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
                                     pd->hasSubscribers = false;
     				    // See comment above re the use of log statements in this section of code
-				    //Log::debug("no more subscribers for %s ", pd->dataProductID.c_str());
+				    //logger->debug("no more subscribers for {} ", pd->dataProductID);
 				}
 			}
 		}
@@ -355,7 +358,7 @@ void GravityPublishManager::registerDataProduct()
         int port = bindFirstAvailablePort(pubSocket, endpoint, minPort, maxPort);
         if (port < 0)
         {
-            Log::critical("Could not find available port for %s in range [%d,%d]", dataProductID.c_str(), minPort, maxPort);
+            logger->error("Could not find available port for{} in range [{},{}]", dataProductID, minPort, maxPort);
             zmq_close(pubSocket);
             sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
             return;
@@ -372,7 +375,7 @@ void GravityPublishManager::registerDataProduct()
         int rc = zmq_bind(pubSocket, ss.str().c_str());
         if (rc < 0)
         {
-            Log::critical("Could not bind address %s", connectionURL.c_str());
+            logger->error("Could not bind address {}", connectionURL);
             zmq_close(pubSocket);
             sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
             return;
@@ -475,7 +478,7 @@ void GravityPublishManager::publish(void* requestSocket)
     std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
     if (!publishDetails)
     {
-        Log::critical("Unable to process publish for unknown data product %s", dataProductId.c_str());
+        logger->error("Unable to process publish for unknown data product {}", dataProductId);
         return;
     }
 
@@ -486,7 +489,7 @@ void GravityPublishManager::publish(void* requestSocket)
 
 	//cache new data unless publisher specified not to
 	if(publishDetails->cacheLastValue){
-		Log::trace("Cache last data product value for %s", dataProductId.c_str());
+		logger->trace("Cache last data product value for {}", dataProductId);
 		// ... save new data for late subscribers
 		std::shared_ptr<CacheValue> val = std::shared_ptr<CacheValue>(new CacheValue);
 		val->filterText = filterText;
@@ -496,7 +499,7 @@ void GravityPublishManager::publish(void* requestSocket)
 		publishDetails->lastCachedValues[filterText] = val;
 	
 	}else{
-		Log::trace("We are not caching data products");
+		logger->trace("We are not caching data products");
 	}
     publish(publishDetails->socket, filterText, bytes, gdbSize);
 

@@ -56,6 +56,12 @@ map<string,unsigned int> broadcastRateMap;
 map<string,struct timeval> expectedMsgTimeMap;
 map<string, int64_t> connectedDomainMap;
 
+ServiceDirectoryUDPReceiver::ServiceDirectoryUDPReceiver(void* context)
+{
+	this->context = context;
+	logger = spdlog::get("GravityLogger");
+}
+
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
 	#ifdef _WIN32
@@ -94,7 +100,7 @@ void ServiceDirectoryUDPReceiver::start()
 		int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
-			Log::fatal("Interrupted, exiting (rc = %d)", rc);
+			logger->critical("Interrupted, exiting (rc = {})", rc);
 			// Interrupted
 			return;
 		}
@@ -108,7 +114,7 @@ void ServiceDirectoryUDPReceiver::start()
 				receiveReceiverParameters();
 				if(initReceiveSocket()<0)
 				{
-					Log::fatal("UDP Receiver init error");
+					logger->critical("UDP Receiver init error");
 				}
 				waiting = false;
 			}
@@ -153,7 +159,7 @@ void ServiceDirectoryUDPReceiver::start()
 		{
 			if (!(errno == EAGAIN || errno == EWOULDBLOCK))
 			{
-				Log::fatal("recv() error, errno: %d", errno);
+				logger->critical("recv() error, errno: {}", errno);
 				break;
 			}
 		}
@@ -165,13 +171,13 @@ void ServiceDirectoryUDPReceiver::start()
 			//Log a warning if we received the same domain from a different url
 			if((ourDomain.compare(broadcastPB.domain())==0) && ourUrl.compare(broadcastPB.url())!=0)
 			{
-				Log::warning("Duplicate Domain: %s, %s",ourDomain.c_str(),broadcastPB.url().c_str());
+				logger->warn("Duplicate Domain: {}, {}",ourDomain,broadcastPB.url());
 			}
 			
 			//ignore messages from our domain name or invalid domains
 			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
 			{
-				//Log::trace("Received UDP Broadcast Message for Domain: %s",broadcastPB.domain().c_str());
+				//logger->trace("Received UDP Broadcast Message for Domain: {}",broadcastPB.domain());
 
 				//if first time seeing domain
 				if(receivedCountMap.find(broadcastPB.domain())==receivedCountMap.end())
@@ -197,7 +203,7 @@ void ServiceDirectoryUDPReceiver::start()
 							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 							
 							// Inform SD of new connection
-							Log::trace("Sending domain Add command to synchronizer thread");
+							logger->trace("Sending domain Add command to synchronizer thread");
 							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
 							sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
@@ -208,7 +214,7 @@ void ServiceDirectoryUDPReceiver::start()
 							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
 							// Inform SD of updated connection
-							Log::trace("Sending domain Update command to synchronizer thread");
+							logger->trace("Sending domain Update command to synchronizer thread");
 							sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
 							sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
 							sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
@@ -346,7 +352,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
     /* Create a best-effort datagram socket using UDP */
     if ((receiveSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-		Log::fatal("Receiver: socket() failed");
+		logger->critical("Receiver: socket() failed");
 		return receiveSocket;
     }
 
@@ -368,7 +374,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 #endif
 	if (rc < 0)
     {
-		Log::fatal("Receiver: bind() failed");
+		logger->critical("Receiver: bind() failed");
 		return rc;
     }
 

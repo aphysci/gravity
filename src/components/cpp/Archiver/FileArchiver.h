@@ -23,6 +23,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "spdlog/spdlog.h"
 
 namespace gravity {
 
@@ -35,6 +36,8 @@ private:
 	bool suspend;
 
 	std::vector<std::string> split(std::string s);
+	
+	std::shared_ptr<spdlog::logger> logger;
 public:
 	FileArchiver();
 	virtual ~FileArchiver();

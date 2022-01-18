@@ -45,7 +45,7 @@ int main()
     // the component has connected to the ServiceDirectory before it continues to other tasks.
 	while (grc != GravityReturnCodes::SUCCESS)
     {
-        Log::warning("Unable to connect to ServiceDirectory, will try again in 1 second...");
+        spdlog::warn("Unable to connect to ServiceDirectory, will try again in 1 second...");
         gravity::sleep(1000);
         grc = gn.init("ReplayTest");
     }
@@ -73,6 +73,6 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::
 		(*i)->populateMessage(counterDataPB);
 
 		//Process the message
-		Log::warning("Current Count: %d", counterDataPB.count());
+		spdlog::warn("Current Count: {}", counterDataPB.count());
 	}
 }

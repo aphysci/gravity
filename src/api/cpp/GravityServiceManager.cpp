@@ -35,6 +35,7 @@ using namespace std;
 GravityServiceManager::GravityServiceManager(void* context)
 {
 	this->context = context;
+	logger = spdlog::get("GravityLogger");
 }
 
 GravityServiceManager::~GravityServiceManager() {}
@@ -133,7 +134,7 @@ void GravityServiceManager::start()
 			}
 			else
 			{
-				Log::warning("GravityServiceManager received unknown command '%s' from GravityNode", command.c_str());
+				logger->warn("GravityServiceManager received unknown command '{}' from GravityNode", command);
 			}
 		}
 
@@ -142,7 +143,7 @@ void GravityServiceManager::start()
 		{
 			if (pollItems[i].revents & ZMQ_POLLIN)
 			{
-				Log::trace("Received a service request on %s", serviceMapBySocket[pollItems[i].socket]->url.c_str());
+				logger->trace("Received a service request on {}", serviceMapBySocket[pollItems[i].socket]->url);
 				// Read response data product from socket
 				zmq_msg_init(&message);
 				zmq_recvmsg(pollItems[i].socket, &message, 0);
@@ -160,7 +161,7 @@ void GravityServiceManager::start()
 				}
 				else
 				{
-					Log::trace("Sending request to provider for serviceID = '%s'", serviceDetails->serviceID.c_str());
+					logger->trace("Sending request to provider for serviceID = '{}'", serviceDetails->serviceID);
 					response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
 				}
 
@@ -239,7 +240,7 @@ void GravityServiceManager::addService()
         int port = bindFirstAvailablePort(serverSocket, endpoint, minPort, maxPort);
         if (port < 0)
         {
-            Log::critical("Could not find available port for %s in range [%d,%d]", serviceID.c_str(), minPort, maxPort);
+            logger->error("Could not find available port for {} in range [{},{}]", serviceID, minPort, maxPort);
             zmq_close(serverSocket);
             sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
             return;
@@ -256,7 +257,7 @@ void GravityServiceManager::addService()
         int rc = zmq_bind(serverSocket, ss.str().c_str());
         if (rc < 0)
         {
-            Log::critical("Could not bind address %s", connectionURL.c_str());
+            logger->critical("Could not bind address {}", connectionURL);
             zmq_close(serverSocket);
             sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
             return;

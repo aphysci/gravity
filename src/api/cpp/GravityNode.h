@@ -37,6 +37,8 @@
 #include <thread>
 #include <list>
 
+#include "spdlog/spdlog.h"
+
 //This is defined in Windows for NetBIOS in nb30.h
 #ifdef DUPLICATE
 #undef DUPLICATE
@@ -260,6 +262,10 @@ private:
 	void configureSubscriptionManager();
 
 	std::string getDomainUrl(int timeout);
+	
+	// SpdLog 
+	std::shared_ptr<spdlog::logger> logger;
+	void configSpdLoggers();
 
 public:
     /**

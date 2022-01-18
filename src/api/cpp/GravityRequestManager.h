@@ -29,6 +29,7 @@
 #include <zmq.h>
 #include <vector>
 #include "GravityNode.h"
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {
@@ -59,6 +60,9 @@ private:
 
 	std::string serviceDirectoryUrl;
 	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url, uint32_t regTime);
+	
+	std::shared_ptr<spdlog::logger> logger;
+	
 public:
 	/**
 	 * Constructor GravityRequestManager

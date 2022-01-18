@@ -34,6 +34,7 @@
 #include "GravityNode.h"
 #include "protobuf/ServiceDirectoryMapPB.pb.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {
@@ -93,6 +94,9 @@ private:
 	void updateProductLocations(std::string productID, std::string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType);
 	void updateProductLocations();
 	std::shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
+	
+	// Gravity logger
+	std::shared_ptr<spdlog::logger> logger;
 
 public:
     virtual ~ServiceDirectory();

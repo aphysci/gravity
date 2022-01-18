@@ -22,6 +22,7 @@
 #include "GravityNode.h"
 #include <fstream>
 #include <set>
+#include "spdlog/spdlog.h"
 
 namespace gravity {
 
@@ -41,6 +42,8 @@ private:
 	set<string> datatypes;
 
 	void processArchive();
+	
+	std::shared_ptr<spdlog::logger> logger;
 public:
 	FileReplay();
 	virtual ~FileReplay();

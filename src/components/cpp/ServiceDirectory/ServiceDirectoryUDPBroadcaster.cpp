@@ -38,6 +38,12 @@ using namespace std;
 
 namespace gravity
 {
+ServiceDirectoryUDPBroadcaster::ServiceDirectoryUDPBroadcaster(void* context)
+{
+	this->context = context;
+	logger = spdlog::get("GravityLogger");
+}
+
 ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster()
 {
 	//close sockets
@@ -77,7 +83,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 		int rc = zmq_poll(&pollItem, 1, block); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
-			Log::debug("Interrupted, exiting (rc = %d)", rc);
+			logger->debug("Interrupted, exiting (rc = {})", rc);
 			// Interrupted
 			break;
 		}
@@ -88,7 +94,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 
 			if (command == "broadcast")
 			{
-				Log::message("Initializing Service Directory Broadcast");
+				logger->info("Initializing Service Directory Broadcast");
 				block = 0;
 				//read broadcast parameters
 				receiveBroadcastParameters();
@@ -101,7 +107,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 				rc = initBroadcastSocket();
 				if (rc < 0)
 				{
-					Log::fatal("Broadcast: Socket Init Error: %d",&broadcastSocket);
+					logger->critical("Broadcast: Socket Init Error: {}", broadcastSocket);
 				}
 				broadcast = true;
 			}
@@ -127,7 +133,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 			if (bytesSent < 0)
 			{
 				//exit
-				Log::fatal("Broadcast: sendto() Error");
+				logger->critical("Broadcast: sendto() Error");
 				break;
 			}
 			#ifdef _WIN32
@@ -153,7 +159,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 	domainName = readStringMessage(sdSocket);
 	url = readStringMessage(sdSocket);
 	broadcastIP = readStringMessage(sdSocket);
-	Log::message("Broadcast params: domain '%s' url '%s' ip: '%s'", domainName.c_str(), url.c_str(), broadcastIP.c_str());
+	logger->info("Broadcast params: domain '{}' url '{}' ip: '{}'", domainName, url, broadcastIP);
 
 	//receive port
 	zmq_msg_t msg;
@@ -175,7 +181,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 	//if windows and broadcasting on loopback
 	if(url.find("127.0.0.1")!=std::string::npos)
 	{
-		Log::warning("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
+		logger->warn("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
 	}
 #endif
 
@@ -202,7 +208,7 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 	        ip = "255.255.255.255";
 	    }
 	}
-	Log::debug("Using broadcast IP %s", ip.c_str());
+	logger->debug("Using broadcast IP {}", ip);
 	destAddr->sin_addr.s_addr = inet_addr(ip.c_str());
 
 	memcpy(&destAddress,destAddr,sizeof(struct sockaddr_in));

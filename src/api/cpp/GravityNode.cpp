@@ -65,6 +65,12 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/dist_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "PublishSink.h"
+#include <mutex>
+
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition.
 
 static void* startSubscriptionManager(void* context)
@@ -188,6 +194,7 @@ void GravityNode::GravityNodeDomainListener::start()
 	pollItem.fd = 0;
 	pollItem.revents = 0;
 
+	shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
 
 	while(!ready)
 	{
@@ -195,7 +202,7 @@ void GravityNode::GravityNodeDomainListener::start()
 		int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1 )
 		{
-		    Log::debug("Interrupted, exiting (rc = %d)", rc);
+		    logger->debug("Interrupted, exiting (rc = {})", rc);
 			// Interrupted
 			break;
 		}
@@ -279,15 +286,15 @@ void GravityNode::GravityNodeDomainListener::start()
 			//if we received some error
 		    int error = errno;
 		    if (error == EAGAIN)
-		        Log::trace("Timed out waiting for domain broadcast");
+		        logger->trace("Timed out waiting for domain broadcast");
 		    else
-		        Log::warning("Received error reading domain listener socket: %d", error);
+		        logger->warn("Received error reading domain listener socket: %d", error);
 
 		}
 		else //we received a message
 		{
 			broadcastPB.ParseFromArray(recvString,recvStringLen);
-			//Log::trace("Domain listener received message from domain '%s'", broadcastPB.domain().c_str());
+			//logger->trace("Domain listener received message from domain '{}'", broadcastPB.domain());
 
 			//if the domains match
 			if(domain.compare(broadcastPB.domain())==0)
@@ -299,8 +306,8 @@ void GravityNode::GravityNodeDomainListener::start()
 				// if it's a new start time...
 				if (serviceDirectoryStartTime < broadcastPB.starttime())
 				{
-				    Log::debug("Domain listener found update to our domain, orig SD start time = %u, new SD start time = %llu, SD url is now %s",
-				                serviceDirectoryStartTime, broadcastPB.starttime(), broadcastPB.url().c_str());
+				    logger->debug("Domain listener found update to our domain, orig SD start time = {}, new SD start time = {}, SD url is now {}",
+				                serviceDirectoryStartTime, broadcastPB.starttime(), broadcastPB.url());
 				             // If we've seen a start time before, then re-register
 				    if (serviceDirectoryStartTime != 0)
 				    {
@@ -339,7 +346,7 @@ void GravityNode::GravityNodeDomainListener::start()
 
 	}//end while
 
-	Log::warning("Closing Domain Receiver");
+	logger->warn("Closing Domain Receiver");
 
 	#ifdef _WIN32
 	closesocket(sock);
@@ -384,7 +391,7 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 
 Semaphore GravityNode::initLock;
 GravityNode::GravityNode()
-{
+{	
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;
 
@@ -524,6 +531,65 @@ GravityNode::~GravityNode()
   }
 }
 
+void GravityNode::configSpdLoggers()
+{
+	if (logger = spdlog::get("GravityLogger"))
+	{
+		return;
+	}
+	
+	// Get log leves from INI file
+	auto gravityFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityFileLogLevel", "err")));
+	auto gravityConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "err")));
+	auto appFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "err")));
+	auto appConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "err")));
+	auto appPublishLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "none")));
+	
+	// Create shared sinks (console & file)
+	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(componentID + ".log");
+	auto sharedConsoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	
+	// Create publish sink (application level only)
+	auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
+	
+	// Configure sinks for GravityLogger
+	using proxy_dist_sink_mt = gravity::proxy_dist_sink<std::mutex>;
+	auto console_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
+	console_proxy_for_gravity->add_sink(sharedConsoleSink);
+	console_proxy_for_gravity->set_level(gravityConsoleLevel);
+	auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_gravity->add_sink(sharedFileSink);
+	file_proxy_for_gravity->set_level(gravityFileLevel);
+	spdlog::sinks_init_list gravity_sink_list = {console_proxy_for_gravity, file_proxy_for_gravity};
+	
+	// Configure sinks for ApplicationLogger
+	auto console_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	console_proxy_for_app->add_sink(sharedConsoleSink);
+	console_proxy_for_app->set_level(appConsoleLevel);
+	auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_app->add_sink(sharedFileSink);
+	file_proxy_for_app->set_level(appFileLevel);
+	auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	publish_proxy_for_app->add_sink(publishSink);
+	publish_proxy_for_app->set_level(appPublishLevel);
+	spdlog::sinks_init_list app_sink_list = {console_proxy_for_app, file_proxy_for_app, publish_proxy_for_app};
+	
+	// Configure GravityLogger.
+	logger = std::make_shared<spdlog::logger>("GravityLogger", gravity_sink_list);
+	logger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
+	logger->flush_on(spdlog::level::trace); // logger will flush on all messages
+	spdlog::register_logger(logger);
+	
+	// Configure ApplicationLogger
+	auto appLogger = std::make_shared<spdlog::logger>("ApplicationLogger", app_sink_list);
+	appLogger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
+	appLogger->flush_on(spdlog::level::trace); // logger will flush on all messages
+	spdlog::register_logger(appLogger);
+	
+	// Set the ApplicaitonLogger as the default
+	spdlog::set_default_logger(appLogger);
+}
+
 GravityReturnCode GravityNode::init()
 {
 	////////////////////////////////////////////////////////
@@ -544,21 +610,23 @@ GravityReturnCode GravityNode::init()
 		//Setup Logging if enabled.
 		if(!logInitialized)
 		{
-   			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
+   			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "none").c_str());
 			if(local_log_level != Log::NONE)
 				Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
 						local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
 
-			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
+			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "none").c_str());
 			if(console_log_level != Log::NONE)
 				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
 
+			/*
 			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 			if(net_log_level != Log::NONE)
 				Log::initAndAddGravityLogger(this, net_log_level);
-
+			*/
+			
 			//log an error indicating the componentID was missing
-			Log::critical("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
+			logger->error("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
 
 			logInitialized=true;
 		}
@@ -581,6 +649,35 @@ GravityReturnCode GravityNode::init(std::string componentID)
     // Setup zmq context
 	if(!initialized)
 	{
+		////////////////////////////////////////////////////////
+		//Now that Gravity is set up, get gravity configuration.
+		parser = new GravityConfigParser(componentID);
+
+		parser->ParseConfigFile("Gravity.ini");
+		std::string config_file_name = componentID + ".ini";
+		if(gravity::IsValidFilename(config_file_name))
+		{
+			parser->ParseConfigFile(config_file_name.c_str());
+		}
+
+		// Setup Logging as soon as config parser is available.
+		if(!logInitialized)
+		{
+			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "none").c_str());
+			if(local_log_level != Log::NONE)
+				Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
+						local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
+
+			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "none").c_str());
+			if(console_log_level != Log::NONE)
+				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
+		
+			// Configure spdlog loggers
+			configSpdLoggers();
+
+			logInitialized=true;
+		}
+		
 		context = zmq_init(1);
 		if (!context)
 		{
@@ -664,37 +761,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		serviceManagerSWL.socket = zmq_socket(context, ZMQ_REQ);
 		zmq_connect(serviceManagerSWL.socket, SERVICE_MGR_URL);
 
-		////////////////////////////////////////////////////////
-		//Now that Gravity is set up, get gravity configuration.
-		parser = new GravityConfigParser(componentID);
-
-		parser->ParseConfigFile("Gravity.ini");
-		std::string config_file_name = componentID + ".ini";
-		if(gravity::IsValidFilename(config_file_name))
-		{
-			parser->ParseConfigFile(config_file_name.c_str());
-		}
-
-		// Setup Logging as soon as config parser is available.
-		if(!logInitialized)
-		{
-			Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "warning").c_str());
-			if(local_log_level != Log::NONE)
-				Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-						local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-
-			Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "warning").c_str());
-			if(console_log_level != Log::NONE)
-				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-
-			logInitialized=true;
-		}
-
 		// Configure high water marks
 		int publishHWM = getIntParam("PublishHWM", 1000);
 		if (publishHWM < 0)
 		{
-			Log::warning("Invalid PublishHWM = %d. Ignoring.", publishHWM);
+			logger->warn("Invalid PublishHWM = {}. Ignoring.", publishHWM);
 		}
 		else
 		{
@@ -707,7 +778,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		int subscribeHWM = getIntParam("SubscribeHWM", 1000);
 		if (subscribeHWM < 0)
 		{
-			Log::warning("Invalid subscribeHWM = %d. Ignoring.", subscribeHWM);
+			logger->warn("Invalid subscribeHWM = {}. Ignoring.", subscribeHWM);
 		}
 		else
 		{
@@ -715,7 +786,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			sendStringMessage(subscriptionManagerSWL.socket, "set_hwm", ZMQ_SNDMORE);
 			sendIntMessage(subscriptionManagerSWL.socket, subscribeHWM, ZMQ_DONTWAIT);
 		}
-
 		//get the Domain name of the Service Directory to connect to
 		std::string serviceDirectoryDomain = getStringParam("Domain");
 
@@ -755,12 +825,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				
 			}
 		}
-
 		defaultCacheLastSentDataprodut = getBoolParam("CacheLastSentDataproduct", true);
-		Log::trace("Default Setting For CacheLastSentDataproduct: %s", defaultCacheLastSentDataprodut ? "TRUE": "FALSE"); 
+		logger->trace("Default Setting For CacheLastSentDataproduct: {}", defaultCacheLastSentDataprodut ? "TRUE": "FALSE"); 
 
 		defaultReceiveLastSentDataproduct = getBoolParam("ReceiveLastSentDataproduct", true);			 
-		Log::trace("Default Setting For ReceiveLastSentDataproduct: %s", defaultReceiveLastSentDataproduct ? "TRUE": "FALSE");
+		logger->trace("Default Setting For ReceiveLastSentDataproduct: {}", defaultReceiveLastSentDataproduct ? "TRUE": "FALSE");
 
 		initialized = true;
 	}
@@ -854,10 +923,12 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			//parser->ParseCmdLine
 
    			// Setup up network logging now that SD is available
+			/*
 			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 			if(net_log_level != Log::NONE)
 				Log::initAndAddGravityLogger(this, net_log_level);
-
+			*/
+			
 			configureServiceManager();
 			configureSubscriptionManager();
 	
@@ -865,7 +936,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			double heartbeatPeriodSecs = getFloatParam("GravityHeartbeatPeriodSecs", -1);
 			if (heartbeatPeriodSecs > 0)
 			{
-				Log::debug("Starting heartbeats (%f secs)", heartbeatPeriodSecs);
+				logger->debug("Starting heartbeats ({} secs)", heartbeatPeriodSecs);
 				int64_t micros = std::round(heartbeatPeriodSecs * 1e6);		
 				startHeartbeat(micros);
 			}
@@ -878,7 +949,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 	if (iniWarning)
 	{
-			Log::warning("Gravity.ini specifies both Domain and URL. Using URL.");
+			logger->warn("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
 
     initLock.Unlock();
@@ -897,18 +968,18 @@ static string toDottedQuad(string hostname) {
    hints.ai_family = AF_INET;
    hints.ai_socktype = SOCK_STREAM;
    hints.ai_flags = AI_PASSIVE;
+   shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
    // others zero
-   //Log::debug("Looking up quad for: %s\n", hostname.c_str());
+   //logger->debug("Looking up quad for: {}\n", hostname);
    s = getaddrinfo(hostname.c_str(), NULL, &hints, &result);
    if (s != 0) {   
-        Log::warning("error in getaddrinfo: %s\n", gai_strerror(s));
+        logger->warn("error in getaddrinfo: {}\n", gai_strerror(s));
 		return hostname;
    }   
    string quad = hostname;
    for (rp = result; rp != NULL; rp = rp->ai_next) {
        struct in_addr pp = (((struct sockaddr_in*)(rp->ai_addr))->sin_addr);
-       //Log::debug("found addr quad for: %s : %x", hostname.c_str(), pp);
-       //Log::debug("quad is: %s", inet_ntoa(pp));
+       //logger->debug("found addr quad for: {} : {}", hostname.c_str(), inet_ntoa(pp));
        quad.assign(inet_ntoa(pp));
        break;
    }
@@ -943,9 +1014,9 @@ void GravityNode::updateServiceDirectoryUrl(string serviceDirectoryUrl)
 		serviceDirectoryNode.ipAddress = "localhost";
 
 	if (serviceDirectoryNode.ipAddress != "localhost" && serviceDirectoryNode.ipAddress != "0.0.0.0" ) {
-                //Log::debug("SD IP originally: %s", serviceDirectoryNode.ipAddress.c_str());
+                //logger->debug("SD IP originally: {}", serviceDirectoryNode.ipAddress);
 		serviceDirectoryNode.ipAddress = toDottedQuad(serviceDirectoryNode.ipAddress);
-                //Log::debug("SD IP set to: %s", serviceDirectoryNode.ipAddress.c_str());
+                //logger->debug("SD IP set to: {}", serviceDirectoryNode.ipAddress);
         }
 
 	serviceDirectoryNode.port = gravity::StringToInt(serviceDirectoryUrl.substr(pos1 + 1), 5555);
@@ -1091,8 +1162,8 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
 	// Connect to service provider
-	Log::trace("GravityNode::sendRequestToServiceProvider(%s,%s,%s,%d)", url.c_str(), request.getDataProductID().c_str(), 
-													response.getDataProductID().c_str(), timeout_in_milliseconds);
+	logger->trace("GravityNode::sendRequestToServiceProvider({},{},{},{})", url, request.getDataProductID(), 
+													response.getDataProductID(), timeout_in_milliseconds);
     void* socket = zmq_socket(context, ZMQ_REQ); // Socket to connect to service provider
 	zmq_connect(socket, url.c_str());
 	int linger = 0;
@@ -1162,7 +1233,7 @@ GravityReturnCode GravityNode::sendRequestToServiceDirectory(const GravityDataPr
 	ss << serviceDirectoryNode.transport << "://" << serviceDirectoryNode.ipAddress <<
 	                ":" << serviceDirectoryNode.port;
 	string serviceDirectoryURL = ss.str();
-	Log::trace("About to make SD request at URL = %s", serviceDirectoryURL.c_str());
+	logger->trace("About to make SD request at URL = {}", serviceDirectoryURL);
 
 	GravityReturnCode ret = sendRequestsToServiceProvider(serviceDirectoryURL, request, response, NETWORK_TIMEOUT, NETWORK_RETRIES);
     serviceDirectoryLock.Unlock();
@@ -1196,7 +1267,7 @@ GravityReturnCode GravityNode::subscribersExist(std::string dataProductID, bool&
 		hasSubscribersOut = false;
 		ret = GravityReturnCode::SUCCESS;
 	} else {
-		Log::warning("Query for subscribers returns error : %s", result.c_str());
+		logger->warn("Query for subscribers returns error : {}", result);
 		if (result.rfind("Unknown data product", 0) == 0) {
 			ret = GravityReturnCode::NOT_REGISTERED;
 		} // otherwise, leave as generic failure code and hasSubscribersOut=true
@@ -1222,7 +1293,7 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
 
     if (publishMap.count(dataProductID) > 0)
     {
-        Log::warning("attempt to register duplicate data product ID: %s", dataProductID.c_str());
+        logger->warn("attempt to register duplicate data product ID: {}", dataProductID);
         publishManagerRequestSWL.lock.Unlock();
         return GravityReturnCodes::SUCCESS;
     }
@@ -1351,7 +1422,7 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
 
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
-	    Log::warning("Failed to register %s at url %s with error %s", dataProductID.c_str(), connectionURL.c_str(), getCodeString(ret).c_str());
+	    logger->warn("Failed to register {} at url {} with error {}", dataProductID, connectionURL, getCodeString(ret));
 	    // if we didn't succesfully register with the SD, then unregister with the publish manager
 	    sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
 	    sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
@@ -1359,7 +1430,7 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
 	}
 	else
 	{
-	    Log::debug("Registered publisher at address: %s", connectionURL.c_str());
+	    logger->debug("Registered publisher at address: {}", connectionURL);
         publishMap[dataProductID] = connectionURL;
 		urlInstanceMap[connectionURL] = timestamp;
 		dataRegistrationTimeMap[dataProductID] = static_cast<uint32_t>(timestamp / 1e6); // Maintained in epoch seconds
@@ -1546,7 +1617,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
         return ret;
     }
 
-	Log::trace("Subscribing to [%s] and receiving cached values: %d", dataProductID.c_str(), receiveLastCachedValue);
+	logger->trace("Subscribing to [{}] and receiving cached values: {}", dataProductID, receiveLastCachedValue);
 	
 	vector<PublisherInfoPB> registeredPublishersInfo;
 	int tries = 5;
@@ -1556,7 +1627,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
 		if (registeredPublishersInfo.size() > 1)
-			Log::warning("Found more than one (%d) Service Directory registered for publisher updates?", registeredPublishersInfo.size());
+			logger->warn("Found more than one ({}) Service Directory registered for publisher updates?", registeredPublishersInfo.size());
 		else if (registeredPublishersInfo.size() == 1)
 			break;
 
@@ -1566,12 +1637,12 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
 	if (registeredPublishersInfo.size() == 0 || !registeredPublishersInfo[0].has_url())
 	{
-		Log::critical("Service Directory has not finished initialization (RegisteredPublishers not available)");
+		logger->error("Service Directory has not finished initialization (RegisteredPublishers not available)");
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
 	}
 
 	// Send subscription details
-	Log::trace("Sending subscription details to subscription manager");
+	logger->trace("Sending subscription details to subscription manager");
 	sendStringMessage(subscriptionManagerSWL.socket, "subscribe", ZMQ_SNDMORE);
 	sendStringMessage(subscriptionManagerSWL.socket, dataProductID, ZMQ_SNDMORE);
 	sendIntMessage(subscriptionManagerSWL.socket, receiveLastCachedValue, ZMQ_SNDMORE);
@@ -1661,7 +1732,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
     }
 
     string dataProductID = dataProduct.getDataProductID();
-	Log::trace("Publishing %s", dataProductID.c_str());
+	logger->trace("Publishing {}", dataProductID);
 
 	// keep original info if this message has been relayed from somewhere else
 	if (!dataProduct.isRelayedDataproduct())
@@ -1713,7 +1784,7 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
 {
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
-    Log::warning("ServiceDirectory restart detected, attempting to re-register...");
+    logger->warn("ServiceDirectory restart detected, attempting to re-register...");
 
 	// Update service directory location
 	updateServiceDirectoryUrl(url);
@@ -1741,16 +1812,16 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
         int numTries = 3;
         while (pubRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
         {
-            Log::debug("Error re-registering publisher, retrying...");
+            logger->debug("Error re-registering publisher, retrying...");
             pubRet = sendRequestToServiceDirectory(request, response);
         }
         if (pubRet == GravityReturnCodes::SUCCESS)
         {
-            Log::message("Successfully re-registered data product %s", iter->first.c_str());
+            logger->info("Successfully re-registered data product {}", iter->first);
         }
         else
         {
-            Log::critical("Error re-registering data product %s: %s", iter->first.c_str(), getCodeString(pubRet).c_str());
+            logger->error("Error re-registering data product {}: {}", iter->first, getCodeString(pubRet));
             ret = pubRet;
         }
     }
@@ -1779,16 +1850,16 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
         int numTries = 3;
         while (servRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
         {
-            Log::debug("Error re-registering service, retrying...");
+            logger->debug("Error re-registering service, retrying...");
             servRet = sendRequestToServiceDirectory(request, response);
         }
         if (servRet == GravityReturnCodes::SUCCESS)
         {
-            Log::message("Successfully re-registered service %s", iter->first.c_str());
+            logger->info("Successfully re-registered service {}", iter->first);
         }
         else
         {
-            Log::critical("Error re-registering service %s: %s", iter->first.c_str(), getCodeString(servRet).c_str());
+            logger->error("Error re-registering service {}: {}", iter->first, getCodeString(servRet));
             ret = servRet;
         }
     }
@@ -1805,15 +1876,15 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
         int numTries = 3;
         while (subRet != GravityReturnCodes::SUCCESS && numTries-- > 0)
         {
-			Log::debug("Error re-subscribing, retrying...");
+			logger->debug("Error re-subscribing, retrying...");
             subRet = subscribeInternal(iter->dataProductID, *iter->subscriber, iter->filter, iter->domain);
         }
-        Log::message("Successfully re-subscribed %s", iter->dataProductID.c_str());
+        logger->info("Successfully re-subscribed {}", iter->dataProductID);
     }
     subscriptionManagerSWL.lock.Unlock();
 
     if (ret == GravityReturnCodes::SUCCESS)
-        Log::warning("Successfully re-registered with the ServiceDirectory");
+        logger->warn("Successfully re-registered with the ServiceDirectory");
 
     return ret;
 }
@@ -1946,7 +2017,7 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 	//set Domain
 	request.setDomain(myDomain);
 
-	Log::trace("Synchronous request('%s','%s')", serviceID.c_str(), request.getDataProductID().c_str());
+	logger->trace("Synchronous request('{}','{}')", serviceID, request.getDataProductID());
 
 	std::string connectionURL;
 	uint32_t regTime;
@@ -1956,33 +2027,33 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		//special case for ConfigService. Since this happens frequently, log message not warning.
 		if (serviceID=="ConfigService")
 		{
-			Log::message("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
+			logger->info("Unable to find service {}: {}", serviceID, getCodeString(ret));
 		}
 		else
 		{
-			Log::warning("Unable to find service %s: %s", serviceID.c_str(), getCodeString(ret).c_str());
+			logger->warn("Unable to find service {}: {}", serviceID, getCodeString(ret));
 		}
 		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	uint64_t t1 = gravity::getCurrentTime();
 	std::shared_ptr<GravityDataProduct> response(new GravityDataProduct(serviceID));
-	Log::trace("Sending request to service provider @ %s", connectionURL.c_str());
+	logger->trace("Sending request to service provider @ {}", connectionURL);
 	ret = sendRequestToServiceProvider(connectionURL, request, *response, timeout_milliseconds);
 	if(ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::warning("service request returned error: %s", getCodeString(ret).c_str());
+		logger->warn("service request returned error: {}", getCodeString(ret));
 		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 	if (response->getRegistrationTime() != regTime)
 	{
-		Log::warning("Received service (%s) response from invalid service [%u != %u]", serviceID.c_str(), response->getRegistrationTime(), regTime);
+		logger->warn("Received service ({}) response from invalid service [{} != {}]", serviceID, response->getRegistrationTime(), regTime);
 		return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 	}
 
 	if (response->isFutureResponse())
 	{
-		Log::trace("Synchronous Request: received a future response");
+		logger->trace("Synchronous Request: received a future response");
 		if (timeout_milliseconds > 0)
 		{
 			timeout_milliseconds -= (int)((gravity::getCurrentTime() - t1) / 1e3);
@@ -1991,14 +2062,14 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 				timeout_milliseconds = 1;
 			}
 		}
-		Log::trace("Sending request to future response socket (url='%s', timeout=%d)", response->getFutureSocketUrl().c_str(), timeout_milliseconds);
+		logger->trace("Sending request to future response socket (url='{}', timeout={})", response->getFutureSocketUrl(), timeout_milliseconds);
 		ret = sendRequestToServiceProvider(response->getFutureSocketUrl(), request, *response, timeout_milliseconds);
 		if(ret != GravityReturnCodes::SUCCESS)
 		{
-			Log::warning("service request returned error: %s", getCodeString(ret).c_str());
+			logger->warn("service request returned error: {}", getCodeString(ret));
 			return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 		}
-		Log::trace("Received future response's response");
+		logger->trace("Received future response's response");
 	}
 
 	return response;
@@ -2017,7 +2088,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
     serviceManagerSWL.lock.Lock();
     if (serviceMap.count(serviceID) > 0)
     {
-        Log::warning("attempt to register duplicate service ID: %s", serviceID.c_str());
+        logger->warn("attempt to register duplicate service ID: {}", serviceID);
         serviceManagerSWL.lock.Unlock();
         return GravityReturnCodes::SUCCESS;
     }
@@ -2150,7 +2221,7 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
     }
     else
     {
-        Log::debug("Registered service at address: %s (%llu)", connectionURL.c_str(), timestamp);
+        logger->debug("Registered service at address: {} ({})", connectionURL, timestamp);
         serviceMap[serviceID] = connectionURL;
 		urlInstanceMap[connectionURL] = timestamp;
     }
@@ -2382,7 +2453,7 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
     }
     if (cacheLastValue)
     {
-        Log::warning("Using a Relay with cacheLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition");
+        logger->warn("Using a Relay with cacheLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition");
     }
 	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
 	if (ret != GravityReturnCodes::SUCCESS)
@@ -2436,7 +2507,7 @@ std::shared_ptr<FutureResponse> GravityNode::createFutureResponse()
 
 	if (url.empty())
 	{
-		Log::critical("Could not find available port for FutureResponse");
+		logger->critical("Could not find available port for FutureResponse");
 		return std::shared_ptr<FutureResponse>((FutureResponse*)NULL);
 	}
 
