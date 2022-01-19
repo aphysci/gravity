@@ -539,10 +539,10 @@ void GravityNode::configSpdLoggers()
 	}
 	
 	// Get log leves from INI file
-	auto gravityFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityFileLogLevel", "err")));
-	auto gravityConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "err")));
-	auto appFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "err")));
-	auto appConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "err")));
+	auto gravityFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityFileLogLevel", "warn")));
+	auto gravityConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "warn")));
+	auto appFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "warn")));
+	auto appConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "warn")));
 	auto appPublishLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "none")));
 	
 	// Create shared sinks (console & file)
@@ -588,6 +588,8 @@ void GravityNode::configSpdLoggers()
 	
 	// Set the ApplicaitonLogger as the default
 	spdlog::set_default_logger(appLogger);
+	
+	spdlog::set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
 }
 
 GravityReturnCode GravityNode::init()

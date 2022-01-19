@@ -34,6 +34,7 @@
 #include "CPPGravityRequestor.h"
 #include "CPPGravityHeartbeatListener.h"
 #include "CPPGravityLogger.h"
+#include "SpdLog.h"
 #include "CPPGravitySubscriptionMonitor.h"
 %}
 
@@ -123,7 +124,12 @@
 %typemap(javain,pgcppname="n",
          pre="    CPPGravityLogger n = gravity.makeNativeLogger($javainput);")
         gravity::Logger*  "CPPGravityLogger.getCPtr(n)"
+		
 
+/******
+ * SpdLog conversion
+ *******/
+%typemap(jstype) gravity::SpdLog* "SpdLog";
 
 /******
  * map int64 to java long
@@ -401,4 +407,5 @@ INOUT_TYPEMAP(int64_t, jlong, long, Long, "[Ljava/lang/Long;", jlongArray);
 
 %include "modulecode.i"
 %include "logger.i"
+%include "spdlogger.i"
 %include "gravitynode.i"
