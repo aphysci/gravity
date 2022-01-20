@@ -2,7 +2,7 @@
 import gc, sys
 import time
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, SpdLog
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, SpdLog
 from PythonTestPB_pb2 import PythonTestPB
 
 ###
@@ -17,8 +17,7 @@ class MySubscriber(GravitySubscriber):
         testPB = PythonTestPB()
         for gdp in dataProducts:
             gdp.populateMessage(testPB)
-            Log.message("received counter with value = "+str(testPB.count))
-            SpdLog.message("received counter with value = "+str(testPB.count))
+            SpdLog.info("received counter with value = "+str(testPB.count))
             self.subCount = testPB.count
 
 class MyRequestHandler(GravityRequestor):
@@ -31,8 +30,7 @@ class MyRequestHandler(GravityRequestor):
     def requestFilled(self, serviceID, requestID, response):
         testPB = PythonTestPB()
         response.populateMessage(testPB)
-        Log.message("made it to request filled with request GDP ID = "+response.dataProductID +" and count = " + str(testPB.count))
-        SpdLog.message("made it to request filled with request GDP ID = "+response.dataProductID +" and count = " + str(testPB.count))
+        SpdLog.info("made it to request filled with request GDP ID = "+response.dataProductID +" and count = " + str(testPB.count))
         self.reqCount = testPB.count
         if self.reqCount < 5:
             gdp = GravityDataProduct("ServiceRequest")
@@ -40,8 +38,7 @@ class MyRequestHandler(GravityRequestor):
             self.gravityNode.request("ServiceTest", gdp, self)
             
     def requestTimeout(self, serviceID, requestID):
-        Log.message("Service request timed out")
-        SpdLog.message("Service request timed out")
+        SpdLog.info("Service request timed out")
         self.timeoutCount += 1
             
 class TestProvider(GravityServiceProvider):
@@ -60,13 +57,11 @@ class TestHBListener(GravityHeartbeatListener):
         self.receivedCount = 0
         
     def MissedHeartbeat(self, componentID, microsecond_to_last_heartbeat, interval_in_microseconds):
-        Log.message("HB Listener MissedHeartbeat called")
-        SpdLog.message("HB Listener MissedHeartbeat called")
+        SpdLog.info("HB Listener MissedHeartbeat called")
         self.missedCount += 1
     
     def ReceivedHeartbeat(self, componentID, interval_in_microseconds):
-        Log.message("HB Listener ReceivedHeartbeat called")
-        SpdLog.message("HB Listener ReceivedHeartbeat called")
+        SpdLog.info("HB Listener ReceivedHeartbeat called")
         self.receivedCount += 1
     
 
@@ -80,8 +75,7 @@ def testPubSub(gravityNode):
     gravityNode.registerDataProduct("PubTest", gravity.TCP)
     mySub = MySubscriber()
     gravityNode.subscribe("PubTest", mySub)
-    Log.warning("ref count = {}".format(sys.getrefcount(mySub)))
-    SpdLog.warning("ref count = {}".format(sys.getrefcount(mySub)))
+    SpdLog.warn("ref count = {}".format(sys.getrefcount(mySub)))
     if sys.getrefcount(mySub) != 2+1:   # +1 for temp reference in call
         raise AssertionError("Ref count didn't increment properly on subscribe")
     
@@ -96,7 +90,6 @@ def testPubSub(gravityNode):
         time.sleep(.1)
         
     if mySub.subCount < 5:
-        Log.critical("Pub/Sub failed")
         SpdLog.critical("Pub/Sub failed")
         return 1
     # make sure ref count doesn't change when unsubscribe called with params we didn't use for subscribe
@@ -124,7 +117,6 @@ def testService(gravityNode):
     gdp = GravityDataProduct("ServiceRequest")
     gdp.data = testPB
     if gravityNode.request("jaskhf", gdp, 2) is not None:
-        Log.critical("Request to non-existing service should return None")
         SpdLog.critical("Request to non-existing service should return None")
         return 1
     gravityNode.request("ServiceTest", gdp, myReq)
@@ -136,7 +128,6 @@ def testService(gravityNode):
         time.sleep(1)
          
     if myReq.reqCount < 5:
-        Log.critical("Asynchronous Service Request failed, expected {} on counter, but was {}".format(5, myReq.reqCount))
         SpdLog.critical("Asynchronous Service Request failed, expected {} on counter, but was {}".format(5, myReq.reqCount))
         return 1
     
@@ -148,12 +139,10 @@ def testService(gravityNode):
         responseGDP = gravityNode.request("ServiceTest", gdp)
         responseGDP.populateMessage(responsePB)
         if responsePB.count != testPB.count+1:
-            Log.critical("Incorrect return value, got {} but expected {}".format(responsePB.count, testPB.count+1))
             SpdLog.critical("Incorrect return value, got {} but expected {}".format(responsePB.count, testPB.count+1))
             return 1
         else:
-            Log.message("Received return value {} on synchronous request".format(responsePB.count))
-            SpdLog.message("Received return value {} on synchronous request".format(responsePB.count))
+            SpdLog.info("Received return value {} on synchronous request".format(responsePB.count))
         testPB.count += 1
         gdp.data = testPB
     
@@ -168,12 +157,10 @@ def testHB(gravityNode):
         count += 1
         time.sleep(.1)
     if hbListener.receivedCount < 5:
-        Log.critical("didn't receive enough heartbeats. Expected {}, but received {}".format(5, hbListener.receivedCount))
         SpdLog.critical("didn't receive enough heartbeats. Expected {}, but received {}".format(5, hbListener.receivedCount))
         return 1
     else:
-        Log.message("Received {} heartbeats (needed {}, but more is OK)".format(hbListener.receivedCount, 5))
-        SpdLog.message("Received {} heartbeats (needed {}, but more is OK)".format(hbListener.receivedCount, 5))
+        SpdLog.info("Received {} heartbeats (needed {}, but more is OK)".format(hbListener.receivedCount, 5))
     gravityNode.stopHeartbeat()
 
     count = 0
@@ -181,12 +168,10 @@ def testHB(gravityNode):
         count += 1
         time.sleep(.1)
     if hbListener.missedCount < 5:
-        Log.critical("didn't miss enough heartbeats. Expected {}, but received {}".format(5, hbListener.missedCount))
         SpdLog.critical("didn't miss enough heartbeats. Expected {}, but received {}".format(5, hbListener.missedCount))
         return 1
     else:
-        Log.message("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
-        SpdLog.message("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
+        SpdLog.info("Missed {} heartbeats (needed {}, but more is OK)".format(hbListener.missedCount, 5))
 
     gravityNode.unregisterHeartbeatListener("PythonTest")
     
@@ -196,12 +181,10 @@ def createTempService():
     tempGravityNode = GravityNode()
     count = 0
     while tempGravityNode.init("TempNode") != gravity.SUCCESS and count < 5:
-        Log.warning("failed to init, retrying...")
-        SpdLog.warning("failed to init, retrying...")
+        SpdLog.warn("failed to init, retrying...")
         time.sleep(1)
         count += 1
     if count == 5:
-        Log.critical("Could not connect to ServiceDirectory")
         SpdLog.critical("Could not connect to ServiceDirectory")
         return 1
     testProv = TestProvider()
@@ -231,12 +214,10 @@ def main():
     gravityNode = GravityNode()
     count = 0
     while gravityNode.init("PythonTest") != gravity.SUCCESS and count < 5:
-        Log.warning("failed to init, retrying...")
-        SpdLog.warning("failed to init, retrying...")
+        SpdLog.warn("failed to init, retrying...")
         time.sleep(1)
         count += 1
     if count == 5:
-        Log.critical("Could not connect to ServiceDirectory")
         SpdLog.critical("Could not connect to ServiceDirectory")
         return 1
     
@@ -253,8 +234,7 @@ def main():
     if ret != 0:
         return ret
         
-    Log.message("Python tests successful!")
-    SpdLog.message("Python tests successful!")
+    SpdLog.info("Python tests successful!")
     return 0
 
 if __name__ == "__main__":
