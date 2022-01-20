@@ -58,7 +58,7 @@ int main()
 		//Create a data product to send across the network of type "HelloWorldDataProduct"
 		GravityDataProduct helloWorldDataProduct(dataProductID);
 		//This is going to be a raw data product (ie not using protobufs).
-		char data[20];
+		char data[24];
 		sprintf(data, "Hello World #%d", count++);
 		helloWorldDataProduct.setData((void*)data, strlen(data));
 
