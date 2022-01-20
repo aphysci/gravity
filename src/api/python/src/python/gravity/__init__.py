@@ -15,7 +15,8 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger
+from .gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger, SpdLog
 from .GravityDataProduct import GravityDataProduct 
 from .GravityLogHandler import GravityLogHandler
+from .SpdLogHandler import SpdLogHandler
 
