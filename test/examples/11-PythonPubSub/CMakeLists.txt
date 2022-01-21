@@ -4,6 +4,7 @@ include(GravitySupport)
 project(PythonPubSub)
 
 gravity_find_protobuf(ON)
+gravity_find_spdlog(ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 

@@ -31,6 +31,8 @@ namespace gravity {
 #define SPD_LOG_DEBUG 1
 #define SPD_LOG_TRACE 0
 
+#undef ERROR
+
 /**
  * Manages logging and stores information about the logging state.  
  */
