@@ -91,6 +91,9 @@ macro(add_external_spdlog build_type)
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/deps/spdlog
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+	if (UNIX)
+		-DCMAKE_CXX_FLAGS=-fPIC
+	endif()
         BUILD_COMMAND ""
         INSTALL_COMMAND cmake --build . --target install --config ${build_type})
 endmacro()
