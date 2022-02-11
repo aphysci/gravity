@@ -69,7 +69,7 @@ endif
 #Compiler Flags
 INCLUDES=$(AC_CPPFLAGS)-I$(MYPROTO_DIR) -I$(GRAVITY_DIR)
 LIBDIRS=-L$(KEYVALUE_PARSER_INCLUDE_DIR) $(AC_LDFLAGS) -L$(GRAVITY_DIR)
-LIBS=-Wl,-Bstatic -lgravity $(OS_SPECIFIC_LIBS) -lkeyvalue_parser -lprotobuf 
+LIBS=-Wl,-Bstatic -lgravity $(OS_SPECIFIC_LIBS) -lkeyvalue_parser -lprotobuf -lpgm -lnorm -lgssapi_krb5
 
 TARGET 			:= unit_tests
  
