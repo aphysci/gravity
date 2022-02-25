@@ -546,7 +546,13 @@ void GravityNode::configSpdLoggers()
 	auto appPublishLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "none")));
 	
 	// Create shared sinks (console & file)
-	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(componentID + ".log");
+#ifdef WIN32
+    string fileSeparator = "\\";
+#else
+    string fileSeparator = "/";
+#endif
+	string filename = getStringParam("LogDirectory", ".") + fileSeparator + componentID + ".log";
+	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
 	auto sharedConsoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	
 	// Create publish sink (application level only)
