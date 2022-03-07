@@ -266,6 +266,8 @@ private:
 	// SpdLog 
 	std::shared_ptr<spdlog::logger> logger;
 	void configSpdLoggers();
+	
+	static const std::string file_separator;
 
 public:
     /**

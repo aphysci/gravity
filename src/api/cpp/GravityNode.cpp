@@ -73,6 +73,14 @@
 
 #include "GravityNode.h" //Needs to be last on Windows so it is included after nb30.h for the DUPLICATE definition.
 
+#ifdef WIN32
+    const std::string gravity::GravityNode::file_separator = "\\";
+#else
+    const std::string gravity::GravityNode::file_separator = "/";
+#endif
+
+using proxy_dist_sink_mt = gravity::proxy_dist_sink<std::mutex>;
+
 static void* startSubscriptionManager(void* context)
 {
 	// Create and start the GravitySubscriptionManager
@@ -538,64 +546,96 @@ void GravityNode::configSpdLoggers()
 		return;
 	}
 	
-	// Get log leves from INI file
-	auto gravityFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityFileLogLevel", "warn")));
-	auto gravityConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "warn")));
-	auto appFileLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "warn")));
-	auto appConsoleLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "warn")));
-	auto appPublishLevel = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "none")));
+	// Get log levels from INI file
+	auto gravity_file_level = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityFileLogLevel", "off")));
+	auto gravity_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "off")));
+	auto app_file_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "off")));
+	auto app_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "off")));
+	auto app_publish_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "off")));
 	
-	// Create shared sinks (console & file)
-#ifdef WIN32
-    string fileSeparator = "\\";
-#else
-    string fileSeparator = "/";
-#endif
-	string filename = getStringParam("LogDirectory", ".") + fileSeparator + componentID + ".log";
-	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
-	auto sharedConsoleSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	bool has_gravity_file_logger = gravity_file_level != SPDLOG_LEVEL_OFF;
+	bool has_app_file_logger = app_file_level != SPDLOG_LEVEL_OFF;
+	bool has_app_console_logger = app_console_level != SPDLOG_LEVEL_OFF;
+	bool has_app_publish_logger = app_publish_level != SPDLOG_LEVEL_OFF;
 	
-	// Create publish sink (application level only)
-	auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
+	bool has_app_logger = has_app_file_logger || has_app_console_logger || has_app_publish_logger;
 	
-	// Configure sinks for GravityLogger
-	using proxy_dist_sink_mt = gravity::proxy_dist_sink<std::mutex>;
+	// Create lists to hold sinks
+	std::list<shared_ptr<spdlog::sinks::sink>> app_sink_list = {};
+	std::list<shared_ptr<spdlog::sinks::sink>> gravity_sink_list = {};
+	
+	// Always create console loggers
+	auto shared_console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	auto console_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
-	console_proxy_for_gravity->add_sink(sharedConsoleSink);
-	console_proxy_for_gravity->set_level(gravityConsoleLevel);
-	auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
-	file_proxy_for_gravity->add_sink(sharedFileSink);
-	file_proxy_for_gravity->set_level(gravityFileLevel);
-	spdlog::sinks_init_list gravity_sink_list = {console_proxy_for_gravity, file_proxy_for_gravity};
-	
-	// Configure sinks for ApplicationLogger
+	console_proxy_for_gravity->add_sink(shared_console_sink);
+	console_proxy_for_gravity->set_level(gravity_console_level);
+	gravity_sink_list.push_back(console_proxy_for_gravity);
 	auto console_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-	console_proxy_for_app->add_sink(sharedConsoleSink);
-	console_proxy_for_app->set_level(appConsoleLevel);
-	auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-	file_proxy_for_app->add_sink(sharedFileSink);
-	file_proxy_for_app->set_level(appFileLevel);
-	auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-	publish_proxy_for_app->add_sink(publishSink);
-	publish_proxy_for_app->set_level(appPublishLevel);
-	spdlog::sinks_init_list app_sink_list = {console_proxy_for_app, file_proxy_for_app, publish_proxy_for_app};
+	console_proxy_for_app->add_sink(shared_console_sink);
+	console_proxy_for_app->set_level(app_console_level);
+	app_sink_list.push_back(console_proxy_for_app);
+	
+	// Configure file logger (if specified)
+	if (has_gravity_file_logger || has_app_file_logger)
+	{
+		string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
+		auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+		
+		if (has_gravity_file_logger)
+		{
+			auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
+			file_proxy_for_gravity->add_sink(sharedFileSink);
+			file_proxy_for_gravity->set_level(gravity_file_level);
+			gravity_sink_list.push_back(file_proxy_for_gravity);
+		}
+		
+		if (has_app_file_logger)
+		{
+			auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+			file_proxy_for_app->add_sink(sharedFileSink);
+			file_proxy_for_app->set_level(app_file_level);
+			app_sink_list.push_back(file_proxy_for_app);
+		}
+		
+	}
+	
+	// Configure publish logger
+	if (has_app_publish_logger)
+	{
+		auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
+		auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+		publish_proxy_for_app->add_sink(publishSink);
+		publish_proxy_for_app->set_level(app_publish_level);
+		app_sink_list.push_back(publish_proxy_for_app);
+	}
 	
 	// Configure GravityLogger.
-	logger = std::make_shared<spdlog::logger>("GravityLogger", gravity_sink_list);
+	logger = std::make_shared<spdlog::logger>("GravityLogger");
+	for (auto sink : gravity_sink_list)
+	{
+		logger->sinks().push_back(sink);
+	}
 	logger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
 	logger->flush_on(spdlog::level::trace); // logger will flush on all messages
+	logger->set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(logger);
 	
 	// Configure ApplicationLogger
-	auto appLogger = std::make_shared<spdlog::logger>("ApplicationLogger", app_sink_list);
-	appLogger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
-	appLogger->flush_on(spdlog::level::trace); // logger will flush on all messages
-	spdlog::register_logger(appLogger);
+	auto app_logger = std::make_shared<spdlog::logger>("GravityApplicationLogger");
+	for (auto sink : app_sink_list)
+	{
+		app_logger->sinks().push_back(sink);
+	}
+	app_logger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
+	app_logger->flush_on(spdlog::level::trace); // logger will flush on all messages
+	app_logger->set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
+	spdlog::register_logger(app_logger);
 	
-	// Set the ApplicaitonLogger as the default
-	spdlog::set_default_logger(appLogger);
-	
-	spdlog::set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
+	if (has_app_logger)
+	{
+		// Set the ApplicaitonLogger as the default
+		spdlog::set_default_logger(app_logger);
+	}
 }
 
 GravityReturnCode GravityNode::init()
