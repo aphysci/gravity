@@ -44,6 +44,14 @@
 
 namespace gravity {
 
+    %pythonprepend GravitySubscriber::GravitySubscriber() %{
+    # check for > 2 parents
+    gravityParents = set(["GravitySubscriber", "GravityServiceProvider",
+                          "GravityRequestor",  "GravityHeartbeatListener"])
+    if len(gravityParents.intersection([c.__name__ for c in self.__class__.__bases__])) > 2:
+        raise ValueError("\n\nCurrently only extending 2 Gravity classes is supported, but extending {}: \n\t\t{}.\nSee https://github.com/aphysci/gravity/issues/190.\n\n".format(len(self.__class__.__bases__), self.__class__.__bases__))
+    %}
+
     // rename the method defined in the C++ GravitySubscriber so that the callback from C++ will invoke the subscriptionFilledBinary defined below
     %rename(subscriptionFilledBinary) GravitySubscriber::subscriptionFilled;
     
