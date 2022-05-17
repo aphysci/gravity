@@ -551,7 +551,7 @@ void GravityNode::configSpdLoggers()
 	auto gravity_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("GravityConsoleLogLevel", "off")));
 	auto app_file_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppFileLogLevel", "off")));
 	auto app_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "off")));
-	auto app_publish_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetorkLogLevel", "off")));
+	auto app_publish_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetworkLogLevel", "off")));
 	
 	bool has_gravity_file_logger = gravity_file_level != SPDLOG_LEVEL_OFF;
 	bool has_app_file_logger = app_file_level != SPDLOG_LEVEL_OFF;
