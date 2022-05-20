@@ -101,7 +101,7 @@ void LogRecorder::subscriptionFilled(const std::vector< std::shared_ptr<GravityD
 
         strftime(timestr, 100, "%m/%d/%y %H:%M:%S", timeinfo);
 
-        fprintf(log_file, "[%s %s %s] %s\n", message.domain().c_str(), message.level().c_str(), timestr, message.message().c_str());
+        fprintf(log_file, "[%s %s %s] %s\n", dataProduct->getDomain().c_str(), message.level().c_str(), timestr, message.message().c_str());
         fflush(log_file);
 
         if(num_logs >= NUM_LOGS_BEFORE_ROTATE)

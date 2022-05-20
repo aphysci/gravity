@@ -18,13 +18,14 @@
 
 syntax = "proto2";
 option optimize_for = SPEED;
-option java_outer_classname = "GravityLogMessageContainer";
+option java_outer_classname = "GravityConfigParamContainer";
 option java_package = "com.aphysci.gravity.protobuf";
-
 package gravity;
 
-message GravityLogMessagePB
+message GravityConfigParamPB
 {
-	optional string level = 1;
-	optional string message = 2;
+	optional string key = 1;
+	optional string value = 2;
+	optional bool is_default = 3;
 }
+

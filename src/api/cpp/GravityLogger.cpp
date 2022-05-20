@@ -194,9 +194,7 @@ void GravityLogger::Log(int level, const char* messagestr)
 {
     GravityDataProduct dp(log_dataProductID);
 
-    //TODO: how is this supposed to work???
     gravity::GravityLogMessagePB log_message;
-    log_message.set_domain("None");
     log_message.set_level(Log::LogLevelToString((Log::LogLevel)level));
     log_message.set_message(messagestr);
 
