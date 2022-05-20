@@ -36,6 +36,10 @@ GravityConfigParser::GravityConfigParser(std::string componentID)
 	this->componentID = componentID;
 }
 
+bool GravityConfigParser::hasKey(const char* key) {
+	return key_value_map.count(key) > 0;
+}
+
 void GravityConfigParser::ParseConfigFile(const char* config_filename)
 {
     std::vector<const char *> sections;
