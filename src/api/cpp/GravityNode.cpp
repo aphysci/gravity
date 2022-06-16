@@ -437,91 +437,101 @@ GravityNode::~GravityNode()
         unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
     }
 
-	//closeHeartbeatSocket();
-
-	//kill the domain listener
-	if(listenerEnabled)
-	{
-    if (domainListenerSWL.socket)
+    //kill the domain listener
+    if(listenerEnabled)
     {
+        if (domainListenerSWL.socket)
+        {
 		  sendStringMessage(domainListenerSWL.socket,"kill",ZMQ_DONTWAIT);
 		  readStringMessage(domainListenerSWL.socket);
 		  zmq_close(domainListenerSWL.socket);
+        }
+        if (domainRecvSWL.socket)
+        {
+          zmq_close(domainRecvSWL.socket);
+        }
     }
-    if (domainRecvSWL.socket)
+
+    // Close the inproc sockets
+    if (subscriptionManagerSWL.socket)
     {
-      zmq_close(domainRecvSWL.socket);
+        sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
+        zmq_close(subscriptionManagerSWL.socket);
     }
-  }
 
-	// Close the inproc sockets
-  if (subscriptionManagerSWL.socket)
-  {
-	  sendStringMessage(subscriptionManagerSWL.socket, "kill", ZMQ_DONTWAIT);
-	  zmq_close(subscriptionManagerSWL.socket);
-  }
-  if (subscriptionManagerConfigSWL.socket)
-  {
-    zmq_close(subscriptionManagerConfigSWL.socket);
-  }
+    if (subscriptionManagerConfigSWL.socket)
+    {
+      zmq_close(subscriptionManagerConfigSWL.socket);
+    }
 
-  if (requestManagerSWL.socket)
-  {
-	  sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
-	  zmq_close(requestManagerSWL.socket);
-  }
-  if (requestManagerRepSWL.socket)
-  {
-    zmq_close(requestManagerRepSWL.socket);
-  }
+    if (requestManagerSWL.socket)
+    {
+        sendStringMessage(requestManagerSWL.socket, "kill", ZMQ_DONTWAIT);
+        zmq_close(requestManagerSWL.socket);
+    }
 
-  if (publishManagerPublishSWL.socket)
-  {
-    sendStringMessage(publishManagerPublishSWL.socket, "kill", ZMQ_DONTWAIT);
-    zmq_close(publishManagerPublishSWL.socket);
-  } 
-  if (publishManagerRequestSWL.socket)
-  {
-    zmq_close(publishManagerRequestSWL.socket);
-  }
+    if (requestManagerRepSWL.socket)
+    { 
+        zmq_close(requestManagerRepSWL.socket);
+    }
 
-  if (serviceManagerSWL.socket)
-  {
-    sendStringMessage(serviceManagerSWL.socket, "kill", ZMQ_DONTWAIT);
-    zmq_close(serviceManagerSWL.socket);
-  }
-  if (serviceManagerConfigSWL.socket)
-  {
-    zmq_close(serviceManagerConfigSWL.socket);
-  }
+    if (publishManagerPublishSWL.socket)
+    {
+        sendStringMessage(publishManagerPublishSWL.socket, "kill", ZMQ_DONTWAIT);
+        zmq_close(publishManagerPublishSWL.socket);
+    } 
+
+    if (publishManagerRequestSWL.socket)
+    {
+        zmq_close(publishManagerRequestSWL.socket);
+    }
+
+    if (serviceManagerSWL.socket)
+    {
+        sendStringMessage(serviceManagerSWL.socket, "kill", ZMQ_DONTWAIT);
+        zmq_close(serviceManagerSWL.socket);
+    }
+
+    if (serviceManagerConfigSWL.socket)
+    {
+        zmq_close(serviceManagerConfigSWL.socket);
+    }
   
-  if (metricsManagerSocket)
-  {
-    sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
-    zmq_close(metricsManagerSocket);
-  }
+    if (metricsManagerSocket)
+    {
+        sendStringMessage(metricsManagerSocket, "kill", ZMQ_DONTWAIT);
+        zmq_close(metricsManagerSocket);
+    }
 
+    // Clean up heartbeat listener
     if (hbSocket)
     {
-        stopHeartbeat();
         sendStringMessage(hbSocket, "kill", ZMQ_DONTWAIT);
         zmq_close(hbSocket);
     }
 
-	// Clean up the zmq context object
-    if(context)
+    // Clean up heartbeat publisher
+    if (heartbeatStarted)
     {
-      zmq_term(context);
+        stopHeartbeat();
+    }
+
+    // Clean up the zmq context object
+    if (context)
+    {
+        zmq_term(context);
     }
 
     if (parser)
+    {
         delete parser;
+    }
 
-  //Do not destroy object until sub manager thread is joined
-  if (subscriptionManagerThread.joinable())
-  {
-    subscriptionManagerThread.join();
-  }
+    //Do not destroy object until sub manager thread is joined
+    if (subscriptionManagerThread.joinable())
+    {
+        subscriptionManagerThread.join();
+    }
 }
 
 GravityReturnCode GravityNode::init()
