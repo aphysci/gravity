@@ -64,7 +64,6 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
-#include "protobuf/GravityConfigParamPB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -940,12 +939,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
-
-			// GravityReturnCode ret1 = registerDataProduct("GRAVITY_SETTINGS", GravityTransportType::TCP);
-			// if (ret1 == GravityReturnCodes::SUCCESS) printf("Success registering GRAVITY_SETTINGS \n");
-			// else printf("Failure registering GRAVITY_SETTINGS with exit code: %d\n", ret1);
-
-			// getStringParam("AppFileLogLevel", "none");
 
 			// Enable metrics (if configured)
 			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
@@ -2733,125 +2726,51 @@ string GravityNode::getIP()
     return ip;
 }
 
-std::string GravityNode::getStringParam(std::string key, std::string default_value) {
-
-	GravityConfigParamPB pb;
-	GravityDataProduct gdp("GRAVITY_SETTINGS");
-
-	// GravityReturnCode code = registerDataProduct("GRAVITY_SETTINGS", GravityTransportType::TCP);
-	// if (code == GravityReturnCodes::SUCCESS) printf("Success registering GRAVITY_SETTINGS \n");
-	// else printf("Failure registering GRAVITY_SETTINGS with exit code: %d\n", code);
-	
-	// registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
-
-	pb.set_key(key);
-
-	if (parser == NULL || !(parser->hasKey(key))) {
-		pb.set_value(default_value);
-		pb.set_is_default(true);
-	}
-	else {
-		pb.set_value(parser->getString(key, default_value));
-		pb.set_is_default(false);
-	}
-
-	gdp.setData(pb);
-	publish(gdp);
-
-	// printf("(key: %s) (value: %s) (isDefault: %d)\n", pb.key().c_str(), pb.value().c_str(), pb.is_default());
-
-	return pb.value();
-}
-
-int GravityNode::getIntParam(std::string key, int default_value) {
-	
-	GravityConfigParamPB pb;
-	GravityDataProduct gdp("GRAVITY_SETTINGS");
-
-	pb.set_key(key);
-
-    if (parser == NULL || !(parser->hasKey(key))) {
-        pb.set_value(std::to_string(default_value));
-		pb.set_is_default(true);
-	}
-	else {
-		std::string value = parser->getString(key, "");
-		pb.set_value(value);
-		pb.set_is_default(false);
-	}
-
-	gdp.setData(pb);
-	publish(gdp);
-
-	// printf("(key: %s) (value: %s) (isDefault: %d)\n", pb.key().c_str(), pb.value().c_str(), pb.is_default());
-
-	return StringToInt(pb.value(), default_value);
-}
-
-double GravityNode::getFloatParam(std::string key, double default_value) {
-
-	GravityConfigParamPB pb;
-	GravityDataProduct gdp("GRAVITY_SETTINGS");
-
-	pb.set_key(key);
-
-    if (parser == NULL || !(parser->hasKey(key))) {
-		pb.set_value(std::to_string(default_value));
-		pb.set_is_default(true);
+std::string GravityNode::getStringParam(std::string key, std::string default_value)
+{
+    if (parser == NULL)
+    {
+        return default_value;
     }
-	else {
-		std::string value = parser->getString(key, "");
-		pb.set_value(value);
-		pb.set_is_default(false);
-	}
-
-	gdp.setData(pb);
-	publish(gdp);
-
-	// printf("Key: %s Value: %s isDefault: %d\n", pb.key().c_str(), pb.value().c_str(), pb.is_default());
-
-	return StringToDouble(pb.value(), default_value);
+	return parser->getString(key, default_value);
 }
 
-bool GravityNode::getBoolParam(std::string key, bool default_value) {
-
-	GravityConfigParamPB pb;
-	GravityDataProduct gdp("GRAVITY_SETTINGS");
-
-	pb.set_key(key);
-
-	bool retValue;
-
-    if (parser == NULL || !(parser->hasKey(key))) {
-		pb.set_value(std::to_string(default_value));
-		pb.set_is_default(true);
-		retValue = default_value;
+int GravityNode::getIntParam(std::string key, int default_value)
+{
+    if (parser == NULL)
+    {
+        return default_value;
     }
-	else {
-		string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
-		// printf("Key is %s, and value is %s\n", pb.key().c_str(), val.c_str());
-		if( val == "true" ||
-			val == "t" ||
-			val == "yes" ||
-			val == "y" ) {
+	std::string value = parser->getString(key, "");
 
-			pb.set_value(std::to_string(true));
-			retValue = true;
-		}
-		else {
-			pb.set_value(std::to_string(false));
-			retValue = false;
-		}
+	return StringToInt(value, default_value);
+}
 
-		pb.set_is_default(false);
-	}
+double GravityNode::getFloatParam(std::string key, double default_value)
+{
+    if (parser == NULL)
+    {
+        return default_value;
+    }
+	std::string value = parser->getString(key, "");
 
-	gdp.setData(pb);
-	publish(gdp);
+	return StringToDouble(value, default_value);
+}
 
-	// printf("Key: %s Value: %s isDefault: %d\n", pb.key().c_str(), pb.value().c_str(), pb.is_default());
-
-	return retValue;
+bool GravityNode::getBoolParam(std::string key, bool default_value)
+{
+    if (parser == NULL)
+    {
+        return default_value;
+    }
+    string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
+	if( val == "true" ||
+		val == "t" ||
+		val == "yes" ||
+		val == "y" )
+		return true;
+	else
+		return false;
 }
 
 std::string GravityNode::getComponentID()
