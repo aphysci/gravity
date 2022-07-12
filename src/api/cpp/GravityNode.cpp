@@ -617,7 +617,7 @@ void GravityNode::configSpdLoggers()
 	}
 	logger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
 	logger->flush_on(spdlog::level::trace); // logger will flush on all messages
-	logger->set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
+	logger->set_pattern("[%Y-%m-%d %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(logger);
 	
 	// Configure ApplicationLogger
@@ -628,7 +628,7 @@ void GravityNode::configSpdLoggers()
 	}
 	app_logger->set_level(spdlog::level::trace); // logger will pass through all logs to be filtered by sinks
 	app_logger->flush_on(spdlog::level::trace); // logger will flush on all messages
-	app_logger->set_pattern("[%m/%d/%Y %T.%f " + componentID + "-%l] %v");
+	app_logger->set_pattern("[%Y-%m-%d %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(app_logger);
 	
 	if (has_app_logger)
