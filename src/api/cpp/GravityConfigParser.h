@@ -35,6 +35,9 @@ class GravityConfigParser
 public:
     /** Constructor */
     GravityConfigParser(std::string componentID);
+
+    bool hasKey(std::string key);
+
     /** Update configuration based on .ini file */
     void ParseConfigFile(const char* config_filename);
     /** Update configuration based on Config Service */
