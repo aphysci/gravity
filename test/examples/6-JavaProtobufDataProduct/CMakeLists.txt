@@ -6,6 +6,7 @@ include(GravitySupport)
 
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
+gravity_find_spdlog(ON)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)

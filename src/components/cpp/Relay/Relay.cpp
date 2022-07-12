@@ -61,6 +61,7 @@ class Relay : public GravitySubscriber
 {
 private:
     GravityNode gravityNode;
+	shared_ptr<spdlog::logger> logger;
 
 public:
     Relay() {};
@@ -78,6 +79,9 @@ int Relay::run()
         cerr << "Failed to initialize " << COMPONENT_ID << ", retrying..." << endl;
         ret = gravityNode.init(COMPONENT_ID);
     }
+	
+	// Get Gravity logger
+	logger = spdlog::get("GravityLogger");
 
     bool localOnly = gravityNode.getBoolParam("ProvideLocalOnly", true);
 
@@ -94,14 +98,14 @@ int Relay::run()
         token.erase(token.find_last_not_of(" ") + 1);
         token.erase(0, token.find_first_not_of(" "));
 
-        Log::debug("Configured to relay: %s", token.c_str());
+        logger->debug("Configured to relay: {}", token);
         gravityNode.registerRelay(token, *this, localOnly, GravityTransportTypes::TCP);
         dataProducts.push_back(token);
     }
 
 #ifdef WIN32
 	if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
-		Log::critical("ERROR: Could not set control handler - Relay will not be able to unregister when terminated"); 
+		logger->error("ERROR: Could not set control handler - Relay will not be able to unregister when terminated"); 
 	}
 #else
     struct sigaction sigIntHandler;
@@ -123,12 +127,12 @@ int Relay::run()
         relayLock.Unlock();
     }
 
-    Log::warning("Exiting, but cleaning up registrations first...");
+    logger->warn("Exiting, but cleaning up registrations first...");
     for (list<string>::iterator iter = dataProducts.begin(); iter != dataProducts.end(); iter++)
     {
         gravityNode.unregisterRelay(*iter, *this);
     }
-    Log::warning("...done");
+    logger->warn("...done");
 
     return 0;
 }
@@ -142,7 +146,7 @@ void Relay::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataPro
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
         std::shared_ptr<GravityDataProduct> dataProduct = dataProducts.at(i);
-        Log::debug("Republishing %s", dataProduct->getDataProductID().c_str());
+        logger->debug("Republishing {}", dataProduct->getDataProductID());
         dataProduct->setIsRelayedDataproduct(true);
         gravityNode.publish(*dataProduct);
     }

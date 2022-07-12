@@ -26,22 +26,30 @@ import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
 import com.aphysci.gravity.swig.GravityTransportType;
 import com.aphysci.gravity.swig.Log;
+import com.aphysci.gravity.swig.SpdLog;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GravityJavaTest {
 
-	private static int subCount = 0;
-	private static boolean reqCalled = false;
-	private static boolean provCalled = false;
+	//private static int subCount = 0;
+	//private static boolean reqCalled = false;
+	//private static boolean provCalled = false;
 	private static boolean logCalled = false;
-    private static int missedHBCount = 0;
-    private static int receivedHBCount = 0;
+    	//private static int missedHBCount = 0;
+    	//private static int receivedHBCount = 0;
+	private static AtomicBoolean reqCalled = new AtomicBoolean(false);
+	private static AtomicBoolean provCalled = new AtomicBoolean(false);
+	private static AtomicInteger subCount = new AtomicInteger(0);
+	private static AtomicInteger missedHBCount = new AtomicInteger(0);
+	private static AtomicInteger receivedHBCount = new AtomicInteger(0);
 
     private static void testHB(GravityNode gravityNode) {
         GravityHeartbeatListener hbListener = new TestHBListener();
-        gravityNode.registerHeartbeatListener("TestNode", 100000, hbListener);
         gravityNode.startHeartbeat(100000); // .1 seconds
+        gravityNode.registerHeartbeatListener("TestNode", 100000, hbListener);
         int count = 0;
-        while (count < 10 && receivedHBCount < 5) {
+        while (count < 10 && receivedHBCount.get() < 5) {
             count += 1;
             try {
                 Thread.sleep(100);
@@ -49,12 +57,12 @@ public class GravityJavaTest {
                 Thread.currentThread().interrupt();
             }
         }
-        Log.message("receivedHBCount = "+receivedHBCount);
-        testAssert(receivedHBCount >= 5);
+        SpdLog.info("receivedHBCount = "+receivedHBCount.get());
+        testAssert(receivedHBCount.get() >= 5);
         
         gravityNode.stopHeartbeat();
         count = 0;
-        while (count < 10 && missedHBCount < 5) {
+        while (count < 10 && missedHBCount.get() < 5) {
             count += 1;
             try {
                 Thread.sleep(100);
@@ -62,8 +70,8 @@ public class GravityJavaTest {
                 Thread.currentThread().interrupt();
             }
         }
-        Log.message("missedHBCount = "+missedHBCount);
-        testAssert(missedHBCount >= 5);
+        SpdLog.info("missedHBCount = "+missedHBCount.get());
+        testAssert(missedHBCount.get() >= 5);
         gravityNode.unregisterHeartbeatListener("TestNode");
     }
     
@@ -157,14 +165,16 @@ public class GravityJavaTest {
         GravityDataProduct syncResponse = node.request("SyncJavaService", syncRequest);
         testAssert(syncResponse.getDataProductID().equals("SyncJavaResponse"));
 
-        testAssert(subCount == 4);
-        testAssert(reqCalled);
-        testAssert(provCalled);
-        testAssert(logCalled);
+        testAssert(subCount.get() == 4);
+        testAssert(reqCalled.get());
+        testAssert(provCalled.get());
+
+	//Log.message("TEST");
+        //testAssert(logCalled);
 
         testHB(node);
         
-        Log.message("Tests OK!!");
+        SpdLog.info("Tests OK!!");
     }
 
     private static class Subscriber implements GravitySubscriber {
@@ -178,11 +188,11 @@ public class GravityJavaTest {
 				JavaTestPB.Builder builder = JavaTestPB.newBuilder();
 				gdp.populateMessage(builder);
 				JavaTestPB pb = builder.build();
-				testAssert(pb.getCount() == subCount);
+				testAssert(pb.getCount() == subCount.get());
 				testAssert(pb.getMessage().equals("Hello Java World"));
-				subCount++;
+				subCount.incrementAndGet();
 
-				Log.debug("Got GDP");
+				SpdLog.debug("Got GDP");
 			}
 			// sleep to give messages a chance to queue up.
 			try {
@@ -197,8 +207,8 @@ public class GravityJavaTest {
 		@Override
 		public void requestFilled(String serviceID, String requestID,
 				GravityDataProduct response) {
-			reqCalled = true;
-			Log.debug("Got Request");
+			reqCalled.set(true);
+			SpdLog.debug("Got Request");
 			testAssert(response.getDataProductID().equals("JavaResponse"));
 		}
     }
@@ -207,8 +217,8 @@ public class GravityJavaTest {
 
 		@Override
 		public GravityDataProduct request(String serviceID, GravityDataProduct dataProduct) {
-			Log.debug("Request Made: " + serviceID);
-			provCalled = true;
+			SpdLog.debug("Request Made: " + serviceID);
+			provCalled.set(true);
 			testAssert(dataProduct.getDataProductID().equals("JavaRequest"));
 			return new GravityDataProduct("JavaResponse");
 		}
@@ -218,7 +228,7 @@ public class GravityJavaTest {
 
 		@Override
 		public GravityDataProduct request(String serviceID, GravityDataProduct dataProduct) {
-			Log.debug("Sync Request Made: " + serviceID);
+			SpdLog.debug("Sync Request Made: " + serviceID);
 			testAssert(dataProduct.getDataProductID().equals("SyncJavaRequest"));
 			return new GravityDataProduct("SyncJavaResponse");
 		}
@@ -234,23 +244,25 @@ public class GravityJavaTest {
     private static class TestHBListener implements GravityHeartbeatListener {
         @Override
         public void MissedHeartbeat(String componentID, long microsecond_to_last_heartbeat, long[] interval_in_microseconds) {
+            SpdLog.info("HB Listener MissedHeartbeat called, microsecond_to_last_heartbeat = "+microsecond_to_last_heartbeat);
             testAssert(microsecond_to_last_heartbeat >= 100000);
-            Log.message("HB Listener MissedHeartbeat called, microsecond_to_last_heartbeat = "+microsecond_to_last_heartbeat);
-            missedHBCount += 1;
+            //missedHBCount += 1;
+	    missedHBCount.incrementAndGet();
         }
         
         @Override
         public void ReceivedHeartbeat(String componentID, long[] interval_in_microseconds) {
             testAssert(interval_in_microseconds.length > 0);
+            SpdLog.info("HB Listener ReceivedHeartbeat called, interval_in_microseconds[0] = "+interval_in_microseconds[0]);
             testAssert(interval_in_microseconds[0] == 100000);
-            Log.message("HB Listener ReceivedHeartbeat called, interval_in_microseconds[0] = "+interval_in_microseconds[0]);
-            receivedHBCount += 1;
+            //receivedHBCount += 1;
+            receivedHBCount.incrementAndGet();
         }
     }
 
     private static void testAssert(boolean test) {
     	if (!test) {
-    		Log.fatal("Failed assertion, aborting");
+    		SpdLog.critical("Failed assertion, aborting");
     		(new Exception()).printStackTrace();
     		System.exit(1);
     	}

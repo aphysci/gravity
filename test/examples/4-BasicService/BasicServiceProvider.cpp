@@ -37,7 +37,7 @@ std::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const
 {
 	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
 	if(dataProduct.getDataProductID() != "Multiplication") {
-		Log::critical("Request is not for multiplication!");
+		spdlog::error("Request is not for multiplication!");
 		return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
 	}
 
@@ -45,7 +45,7 @@ std::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const
 	MultiplicationOperandsPB params;
 	dataProduct.populateMessage(params);
 
-	Log::warning("Request received: %d x %d", params.multiplicand_a(), params.multiplicand_b());
+	spdlog::warn("Request received: {} x {}", params.multiplicand_a(), params.multiplicand_b());
 
 	//Do the calculation
 	int result = params.multiplicand_a() * params.multiplicand_b();

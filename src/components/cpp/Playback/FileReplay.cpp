@@ -44,9 +44,12 @@ FileReplay::FileReplay()
 {
 	// Initialize Gravity Node
 	gravityNode.init(FileReplay::ComponentName);
+	
+	// Get logger
+	logger = spdlog::get("GravityLogger");
 
 	// Configure logger to log to console
-	Log::initAndAddConsoleLogger(FileReplay::ComponentName, Log::MESSAGE);
+	//Log::initAndAddConsoleLogger(FileReplay::ComponentName, Log::MESSAGE);
 
 	// Initialize firstPublishTime
 	firstPublishTime = 0;
@@ -99,7 +102,7 @@ void FileReplay::processArchive()
             uint64_t elapsedTime = gravity::getCurrentTime() - firstPublishTime;
             if (elapsedTime < timeToWait)
             {
-				Log::debug("waiting %d", timeToWait-elapsedTime);
+				logger->debug("waiting {}", timeToWait-elapsedTime);
 #ifdef WIN32
 				gravity::sleep( (timeToWait-elapsedTime) / 1000 );
 #else
@@ -109,14 +112,14 @@ void FileReplay::processArchive()
         }
 
         // publish
-        Log::debug("publishing %s", gdp->getDataProductID().c_str());
+        logger->debug("publishing {}", gdp->getDataProductID());
         gravityNode.publish(*gdp);
 
 	// Get the next one
 	gdp = fileReader.getNextDataProduct();
     }
 
-    Log::message("Reached end of archive");
+    logger->info("Reached end of archive");
 }
 
 void FileReplay::waitForExit()

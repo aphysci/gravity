@@ -16,39 +16,36 @@
  **
  */
 
-#ifndef FILEREPLAY_H_
-#define FILEREPLAY_H_
-
-#include "GravityNode.h"
-#include <fstream>
-#include <set>
-#include "spdlog/spdlog.h"
-
-namespace gravity {
+#include "SpdLog.h"
 
 using namespace gravity;
-using namespace std;
 
-class FileReplay
+void SpdLog::critical(const char* message)
 {
-private:
-	static const char* ComponentName;
-	uint64_t firstPublishTime;
-	uint64_t firstDataTime;
+	spdlog::critical(message);
+}
 
-	FileReader fileReader;
+void SpdLog::error(const char* message)
+{
+	spdlog::error(message);
+}
 
-	GravityNode gravityNode;
-	set<string> datatypes;
+void SpdLog::warn(const char* message)
+{
+	spdlog::warn(message);
+}
 
-	void processArchive();
-	
-	std::shared_ptr<spdlog::logger> logger;
-public:
-	FileReplay();
-	virtual ~FileReplay();
-	void waitForExit();
-};
+void SpdLog::info(const char* message)
+{
+	spdlog::info(message);
+}
 
-} /* namespace gravity */
-#endif /* FILEREPLAY_H_ */
+void SpdLog::debug(const char* message)
+{
+	spdlog::debug(message);
+}
+
+void SpdLog::trace(const char* message)
+{
+	spdlog::trace(message);
+}

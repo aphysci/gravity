@@ -32,6 +32,8 @@
 #include "GravityLogger.h"
 #include "CommUtil.h"
 
+#include "spdlog/spdlog.h"
+
 namespace gravity
 {
 
@@ -60,6 +62,8 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 
     void* hbSocket = zmq_socket(params->zmq_context, ZMQ_REP);
     zmq_connect(hbSocket, "inproc://heartbeat_listener");
+	
+	shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
 
     while(true)
     {
@@ -214,7 +218,7 @@ void* Heartbeat::HeartbeatListenerThrFunc(void* thread_context)
 				int errnum = zmq_errno();
 				if (errnum != EAGAIN)
 				{
-					Log::critical("Heartbeat Message Error: %s",zmq_strerror(errnum));
+					logger->critical("Heartbeat Message Error: {}",zmq_strerror(errnum));
 					break;
 				}
 			}
@@ -260,13 +264,15 @@ void* Heartbeat(void* thread_context)
 	zmq_connect(heartbeatSocket,PUB_MGR_HB_URL);
 
 	Heartbeat::setHeartbeatRunning(true);
+	
+	shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
 
 	while(Heartbeat::isHeartbeatRunning())
 	{
 		// Publish heartbeat (via the GravityPublishManager)
 		gdp.setTimestamp(getCurrentTime());
 		gdp.setRegistrationTime(params->registrationTime);
-		Log::trace("%s: Publishing heartbeat", params->componentID.c_str());
+		logger->trace("{}: Publishing heartbeat", params->componentID);
 		sendStringMessage(heartbeatSocket, "publish", ZMQ_SNDMORE);
 		sendStringMessage(heartbeatSocket, gdp.getDataProductID(), ZMQ_SNDMORE);
 		sendUint64Message(heartbeatSocket, gdp.getGravityTimestamp(), ZMQ_SNDMORE);

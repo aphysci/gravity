@@ -13,6 +13,7 @@ get_filename_component(ABS_GRAVITY_ROOT "${GRAVITY_ROOT}" ABSOLUTE BASE_DIR "${C
 
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/protobuf/cmake" "${ABS_GRAVITY_ROOT}/deps/protobuf/lib/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/libzmq/CMake" "${ABS_GRAVITY_ROOT}/deps/libzmq/share/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake" "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake/spdlog")
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}")
 message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
@@ -23,6 +24,7 @@ set(CMAKE_DEBUG_POSTFIX _d)
 
 add_subdirectory("1-BasicDataProduct")
 add_subdirectory("2-ProtobufDataProduct")
+#add_subdirectory("8-ConfigFile")
 
 find_package(GravityJava)
 if (NOT Java_FOUND)

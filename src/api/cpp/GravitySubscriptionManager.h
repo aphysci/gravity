@@ -42,6 +42,7 @@
 #include "GravityMetrics.h"
 #include "DomainDataKey.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {
@@ -110,11 +111,14 @@ private:
 	std::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
 	std::shared_ptr<SubscriptionDetails> currMonitorDetails;
 
-
 	int subscribeHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
     void collectMetrics(std::vector<std::shared_ptr<GravityDataProduct> > dataProducts);
+	
+	// Logger
+	std::shared_ptr<spdlog::logger> logger;
+	
 public:
 	/**
 	 * Constructor GravitySubscriptionManager

@@ -55,6 +55,9 @@ GravitySubscriptionManager::GravitySubscriptionManager(void* context)
 
 	// Default high water mark
 	subscribeHWM = 1000;
+	
+	// Get logger
+	logger = spdlog::get("GravityLogger");
 }
 
 GravitySubscriptionManager::~GravitySubscriptionManager() {}
@@ -139,7 +142,7 @@ void GravitySubscriptionManager::start()
 		int rc = zmq_poll(&pollItems[0], pollItems.size(), pollTimeout); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
-		    Log::debug("Interrupted, exiting (rc = %d)", rc);
+		    logger->debug("Interrupted, exiting (rc = {})", rc);
 			// Interrupted
 			break;
 		}
@@ -155,7 +158,7 @@ void GravitySubscriptionManager::start()
 				(currTimeoutMonitor->monitor)->subscriptionTimeout(currMonitorDetails->dataProductID, timeSinceLast, currMonitorDetails->filter, currMonitorDetails->domain);
 				//reset timeout for the current monitor
 				currTimeoutMonitor->endTime = currTimeoutMonitor->endTime + currTimeoutMonitor->timeout;
-				Log::trace("Subscription Timeout (%s)",currMonitorDetails->dataProductID.c_str());
+				logger->trace("Subscription Timeout ({})",currMonitorDetails->dataProductID);
 			}
 			continue;
 		}
@@ -166,12 +169,12 @@ void GravitySubscriptionManager::start()
 			// Get new GravityNode request
 			string command = readStringMessage(gravityNodeSocket);
 
-			Log::trace("Received command [%s]", command.c_str());
+			logger->trace("Received command [{}]", command);
 
 			// message from gravity node should be either a subscribe or unsubscribe request
 			if (command == "subscribe")
 			{
-				Log::trace("About to add subscription");
+				logger->trace("About to add subscription");
 				addSubscription();
 			}
 			else if (command == "unsubscribe")
@@ -200,7 +203,7 @@ void GravitySubscriptionManager::start()
 			}
 			else
 			{
-				Log::warning("GravitySubscriptionManager received unknown command '%s' from GravityNode", command.c_str());
+				logger->warn("GravitySubscriptionManager received unknown command '{}' from GravityNode", command);
 			}
 		}
 
@@ -252,7 +255,7 @@ void GravitySubscriptionManager::start()
 			{
 				url = subscriptionSocketMap[pollItems[index].socket]->socketToUrlMap[pollItems[index].socket];
 			}
-	        Log::trace("Checking poll item: index = %d, size = %d, url=%s", index, pollItems.size(), url.c_str());
+	        logger->trace("Checking poll item: index = {}, size = {}, url={}", index, pollItems.size(), url);
 			if (pollItems[index].revents & ZMQ_POLLIN)
 			{
 			    // if it's a regular subscription poll item
@@ -273,8 +276,8 @@ void GravitySubscriptionManager::start()
 						if (socketVerificationMap[pollItems[index].socket] != dataProduct->getRegistrationTime())
 						{
 							// Published data does not match publisher
-							Log::critical("Received data product (%s) from publisher different from registered with ServiceDirectory [%u != %u].",
-											dataProduct->getDataProductID().c_str(), socketVerificationMap[pollItems[index].socket], 
+							logger->critical("Received data product ({}) from publisher different from registered with ServiceDirectory [{} != {}]",
+											dataProduct->getDataProductID(), socketVerificationMap[pollItems[index].socket], 
 											dataProduct->getRegistrationTime());								
 							
 							// Notify Service Directory of stale entry
@@ -325,12 +328,12 @@ void GravitySubscriptionManager::start()
 																												
 							if(dataProduct->isCachedDataproduct() && subDetails->receiveCachedDataProducts == false){
 								// if it's cached and we're not receiving cached, do nothing
-								Log::trace("Ignoring cached data product");
+								logger->trace("Ignoring cached data product");
 							}
 							else
 							{														
 								// Add data product to vector to be provided to the subscriber								
-								Log::trace(dataProduct->isCachedDataproduct() ? "Accepting cached data product" : "Accepting new data product");
+								logger->trace(dataProduct->isCachedDataproduct() ? "Accepting cached data product" : "Accepting new data product");
 								dataProducts.push_back(dataProduct);
 							}
 								// Save most recent value so we can provide it to new subscribers, and to perform check above.
@@ -342,7 +345,7 @@ void GravitySubscriptionManager::start()
                     // Loop through all subscribers and deliver the messages
 					if(dataProducts.size() != 0)
 					{
-						Log::trace("received %d gdp's, about to send to %d subscribers", dataProducts.size(), subDetails->subscribers.size());
+						logger->trace("received {} gdp's, about to send to {} subscribers", dataProducts.size(), subDetails->subscribers.size());
 
 						for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
 						{
@@ -368,17 +371,17 @@ void GravitySubscriptionManager::start()
                     readSubscription(pollItems[index].socket, dataProductID, dataProduct);
                     if (dataProductID.empty())
                     {
-                        Log::warning("Received an apparently empty update list from ServiceDirectory");
+                        logger->warn("Received an apparently empty update list from ServiceDirectory");
                         continue;
                     }
                     ComponentDataLookupResponsePB update;
                     dataProduct->populateMessage(update);
 					string domain = update.domain_id();
-                    Log::trace("Found update to publishers list for data product %s (domain:%s)", dataProductID.c_str(), domain.c_str());
+                    logger->trace("Found update to publishers list for data product {} (domain:{})", dataProductID, domain);
 
 					// Create the domain/data key for tracking subscriptions
 					DomainDataKey key(domain, dataProductID);
-					Log::trace("subscriptionMap.count(key) = %d", subscriptionMap.count(key));
+					logger->trace("subscriptionMap.count(key) = {}", subscriptionMap.count(key));
 
 					list<PublisherInfoPB> allPublishers, trimmedPublishers;
                     for (int i = 0; i < update.publishers_size(); i++)
@@ -408,13 +411,13 @@ void GravitySubscriptionManager::start()
                                 {                                    
 									if (socketVerificationMap[subDetails->pollItemMap[trimmedIter->url()].socket] != trimmedIter->registration_time())
 									{
-										Log::trace("Updated url: %s", trimmedIter->url().c_str());
+										logger->trace("Updated url: {}", trimmedIter->url());
 										// This is an updated publisher location. Remove the old one.
 										deleteList.push_back(std::make_pair(subDetails, subDetails->pollItemMap[trimmedIter->url()].socket));
 									}
 									else
 									{
-										Log::trace("New url: %s", trimmedIter->url().c_str());
+										logger->trace("New url: {}", trimmedIter->url());
 									}
 
                                     zmq_pollitem_t pollItem;
@@ -431,7 +434,7 @@ void GravitySubscriptionManager::start()
                                 }								
                                 else
                                 {
-                                    Log::trace("Skipping. Already have this publisher url: %s", trimmedIter->url().c_str());
+                                    logger->trace("Skipping. Already have this publisher url: {}", trimmedIter->url());
                                 }
 
 								// Insert/Update map to manage publisher verification
@@ -456,7 +459,7 @@ void GravitySubscriptionManager::start()
 
                                 if (!found) 
 								{
-                                    Log::debug("url %s is gone, adding to delete list", socketIter->first.c_str());
+                                    logger->debug("url {} is gone, adding to delete list", socketIter->first);
 									deleteList.push_back(std::make_pair(iter->second, socketIter->second.socket));
                                 } 								
 								++socketIter;
@@ -478,8 +481,7 @@ void GravitySubscriptionManager::start()
 			lastCachedValueMap.erase(socket);
 			
 			// Unsubscribe
-			Log::trace("Unsubscribing: %s:%s:%s @ %s", subDetails->domain.c_str(), subDetails->dataProductID.c_str(), 
-														subDetails->filter.c_str(), url.c_str());
+			logger->trace("Unsubscribing: {}:{}:{} @ {}", subDetails->domain, subDetails->dataProductID, subDetails->filter, url);
 			zmq_setsockopt(socket, ZMQ_UNSUBSCRIBE, subDetails->filter.c_str(), subDetails->filter.length());			
 			
 			// Close the socket
@@ -497,7 +499,7 @@ void GravitySubscriptionManager::start()
 				if (socket == pollIter->socket)
 				{
 					pollItems.erase(pollIter);
-					Log::debug("delete socket from pollitems, size is now %d", pollItems.size());
+					logger->debug("delete socket from pollitems, size is now {}", pollItems.size());
 					break;
 				}
 			}
@@ -507,7 +509,7 @@ void GravitySubscriptionManager::start()
 			if (subDetails->pollItemMap.empty())
 			{
 				// Clean up update publisher subscription
-				Log::debug("Unsubscribing from publisher updates");
+				logger->debug("Unsubscribing from publisher updates");
 				zmq_setsockopt(subDetails->publisherUpdatePollItem.socket, ZMQ_UNSUBSCRIBE, subDetails->dataProductID.c_str(),
 								subDetails->dataProductID.length());
 				zmq_close(subDetails->publisherUpdatePollItem.socket);
@@ -517,7 +519,7 @@ void GravitySubscriptionManager::start()
 					if (subDetails->publisherUpdatePollItem.socket == pollIter->socket)
 					{
 						pollItems.erase(pollIter);
-						Log::debug("delete socket from pollitems, size is now %d", pollItems.size());
+						logger->debug("delete socket from pollitems, size is now {}", pollItems.size());
 						break;
 					}
 				}
@@ -605,22 +607,22 @@ int GravitySubscriptionManager::readSubscription(void *socket, string &filterTex
 
 void *GravitySubscriptionManager::setupSubscription(const string &url, const string &filter, zmq_pollitem_t &pollItem)
 {
-	Log::trace("Setting up subscription for %s", url.c_str());
+	logger->trace("Setting up subscription for {}", url);
     // Create the socket
     void* subSocket = zmq_socket(context, ZMQ_SUB);
-	Log::trace("Created socket");
+	logger->trace("Created socket");
 
 	// Configure high water mark
 	zmq_setsockopt(subSocket, ZMQ_RCVHWM, &subscribeHWM, sizeof(subscribeHWM));    
-	Log::trace("Configured hwm");
+	logger->trace("Configured hwm");
 
     // Configure filter
     zmq_setsockopt(subSocket, ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
-	Log::trace("Configured filter");
+	logger->trace("Configured filter");
 
 	// Connect to publisher
     zmq_connect(subSocket, url.c_str());
-	Log::trace("connected to publisher");
+	logger->trace("connected to publisher");
 
     // set up the poll item for this subscription
     pollItem.socket = subSocket;
@@ -628,7 +630,7 @@ void *GravitySubscriptionManager::setupSubscription(const string &url, const str
     pollItem.fd = 0;
     pollItem.revents = 0;
     pollItems.push_back(pollItem);
-	Log::trace("Added to pollItem");
+	logger->trace("Added to pollItem");
 
     return subSocket;
 }
@@ -658,13 +660,13 @@ void GravitySubscriptionManager::setHWM()
 
 void GravitySubscriptionManager::addSubscription()
 {
-	Log::trace("Adding subscription");
+	logger->trace("Adding subscription");
 	// Read the data product id for this subscription
 	string dataProductID = readStringMessage(gravityNodeSocket);
-	Log::trace("dataProductID = '%s'", dataProductID.c_str());
+	logger->trace("dataProductID = '{}'", dataProductID);
 
 	bool receiveLastCachedValue = readIntMessage(gravityNodeSocket);
-	Log::trace("receiveLastCachedValue = '%d'", receiveLastCachedValue);
+	logger->trace("receiveLastCachedValue = {}", receiveLastCachedValue);
 
 	// Read all the publisher infos
 	uint32_t numPubInfoPBs = readUint32Message(gravityNodeSocket);
@@ -679,20 +681,20 @@ void GravitySubscriptionManager::addSubscription()
         zmq_msg_close(&msg);
         pubInfoPBs.push_back(pb);
         if (pb.has_url())
-            Log::trace("url = '%s'", pb.url().c_str());
+            logger->trace("url = '{}'", pb.url());
 	}
 
 	// Read the subscription filter
 	string filter = readStringMessage(gravityNodeSocket);
-	Log::trace("filter = '%s'", filter.c_str());
+	logger->trace("filter = {}s'", filter);
 
 	// Read the domain
 	string domain = readStringMessage(gravityNodeSocket);
-	Log::trace("domain = '%s'", domain.c_str());
+	logger->trace("domain = '{}'", domain);
 
     // Read the url for to subscribe to for publisher updates
     string publisherUpdateUrl = readStringMessage(gravityNodeSocket);
-	Log::trace("publisherUpdateUrl = '%s'", publisherUpdateUrl.c_str());
+	logger->trace("publisherUpdateUrl = '{}'", publisherUpdateUrl);
 
 	// Read the subscriber
 	zmq_msg_t msg;
@@ -702,7 +704,7 @@ void GravitySubscriptionManager::addSubscription()
 	memcpy(&subscriber, zmq_msg_data(&msg), zmq_msg_size(&msg));
 	zmq_msg_close(&msg);
 
-	Log::trace("Set up GravitySubscriber");
+	logger->trace("Set up GravitySubscriber");
 
 	// Create the domain/data key for tracking subscriptions
 	DomainDataKey key(domain, dataProductID);
@@ -718,13 +720,13 @@ void GravitySubscriptionManager::addSubscription()
 	
 	if (subscriptionMap[key].count(filter) > 0)
 	{
-		Log::trace("Already have details for this");
+		logger->trace("Already have details for this");
 		// Already have a details for this
 		subDetails = subscriptionMap[key][filter];
 	}
 	else
 	{
-		Log::trace("Populate new subDetails");
+		logger->trace("Populate new subDetails");
 	    subDetails.reset(new SubscriptionDetails());
         subDetails->dataProductID = dataProductID;
 		subDetails->domain = domain;
@@ -745,7 +747,7 @@ void GravitySubscriptionManager::addSubscription()
 		// if we have a url and we haven't seen it before, subscribe to it
 		if (iter->has_url() && subDetails->pollItemMap.count(iter->url()) == 0)
 		{
-			Log::trace("Subscribe to new url");
+			logger->trace("Subscribe to new url");
 			zmq_pollitem_t pollItem;
 			void *subSocket = setupSubscription(iter->url(), filter, pollItem);
 
@@ -776,14 +778,14 @@ void GravitySubscriptionManager::addSubscription()
     // Add new subscriber if it isn't already in the list
     if (subDetails->subscribers.find(subscriber) == subDetails->subscribers.end())
     {
-		Log::trace("Adding new subscriber to list");
+		logger->trace("Adding new subscriber to list");
         subDetails->subscribers.insert(subscriber);
 
         // If we've already received data on this subscription, send the most recent
         // value to the new subscriber, unless the subscriber doesn't want the lastCachedValue
 		if (receiveLastCachedValue)
 		{
-			Log::trace("Sending cached value to subscriber");
+			logger->trace("Sending cached value to subscriber");
 			vector<std::shared_ptr<GravityDataProduct> > dataProducts;
 			for (map<string, zmq_pollitem_t>::iterator iter = subDetails->pollItemMap.begin(); iter != subDetails->pollItemMap.end(); iter++)
 			{
@@ -794,17 +796,17 @@ void GravitySubscriptionManager::addSubscription()
 			}
 			if (dataProducts.size() > 0)
 			{
-				Log::debug("sending data (%s) to late subscriber", dataProductID.c_str());
+				logger->debug("sending data ({}) to late subscriber", dataProductID);
 				sort(dataProducts.begin(), dataProducts.end(), sortCacheValues);
 				subscriber->subscriptionFilled(dataProducts);
 			}			
 		}else
 		{
-			Log::trace("Not sending cached value to subscriber");
+			logger->trace("Not sending cached value to subscriber");
 		}
     }else
 	{
-		Log::trace("Subscriber already in list");
+		logger->trace("Subscriber already in list");
 	}
 }
 
@@ -822,7 +824,7 @@ void GravitySubscriptionManager::removeSubscription()
 	// Read the domain
 	string domain = readStringMessage(gravityNodeSocket);
 
-	Log::trace("unsubscribe from data product: %s:%s:%s", domain.c_str(), dataProductID.c_str(), filter.c_str());
+	logger->trace("unsubscribe from data product: {}:{}:{}", domain, dataProductID, filter);
 
 	// Read the subscriber
 	zmq_msg_t msg;
@@ -837,7 +839,7 @@ void GravitySubscriptionManager::removeSubscription()
 
 	if (subscriptionMap.count(key) > 0 && subscriptionMap[key].count(filter) > 0)
 	{
-		Log::trace("Found at least one subscriber");
+		logger->trace("Found at least one subscriber");
 		// Get subscription details
 	    std::shared_ptr<SubscriptionDetails> subDetails = subscriptionMap[key][filter];
 
@@ -848,7 +850,7 @@ void GravitySubscriptionManager::removeSubscription()
 			// Pointer to same subscriber?
 			if (*iter == subscriber)
 			{
-				Log::trace("Found and removed subscriber");
+				logger->trace("Found and removed subscriber");
 				subDetails->subscribers.erase(iter);
 				break;
 			}
@@ -861,11 +863,11 @@ void GravitySubscriptionManager::removeSubscription()
 		// If no more subscribers, close the subscription sockets and clear the details
 		if (subDetails->subscribers.empty())
 		{
-			Log::trace("No more subscribers");
+			logger->trace("No more subscribers");
 			//if no more monitor references
 			if(subDetails->monitors.empty())
 			{
-				Log::trace("No more monitors");
+				logger->trace("No more monitors");
 
 				// Remove details from main map
 				subscriptionMap[key].erase(filter);
@@ -876,7 +878,7 @@ void GravitySubscriptionManager::removeSubscription()
 
 				// If we no longer have subscriptions for this domain/dataProductID combo, then stop
 				// subscribing for updates from the SD on this as well				
-				Log::trace("Removing subscription to RegisteredPublishers");
+				logger->trace("Removing subscription to RegisteredPublishers");
 				removePollItem(subDetails->publisherUpdatePollItem);
 				zmq_setsockopt(subDetails->publisherUpdatePollItem.socket, ZMQ_UNSUBSCRIBE, dataProductID.c_str(), dataProductID.length());
 				zmq_close(subDetails->publisherUpdatePollItem.socket);
@@ -1061,7 +1063,7 @@ void GravitySubscriptionManager::calculateTimeout()
 						//reset next timeout
 						(*monitorIter)->endTime = (*monitorIter)->endTime + (*monitorIter)->timeout;
 						
-						Log::trace("Subscription Timeout (%s)",subDetails->dataProductID.c_str());	
+						logger->trace("Subscription Timeout ({})",subDetails->dataProductID);	
 
 						if((*monitorIter)->timeout < minTime || minTime == -1)
 						{
@@ -1086,7 +1088,7 @@ void GravitySubscriptionManager::calculateTimeout()
 
 void GravitySubscriptionManager::notifyServiceDirectoryOfStaleEntry(string dataProductId, string domain, string url, uint32_t regTime)
 {
-	Log::debug("Notifying ServiceDirectory of stale publisher: [%s @ %s]", dataProductId.c_str(), url.c_str());
+	logger->debug("Notifying ServiceDirectory of stale publisher: [{} @ {}]", dataProductId, url);
 	ServiceDirectoryUnregistrationPB unregistration;
 	unregistration.set_id(dataProductId);
 	unregistration.set_url(url);
@@ -1141,7 +1143,7 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 	{
 	    if (!iter->has_url())  // if invalid publisher - should never happen
 	    {
-	        Log::warning("Found publisher with no url??  Skipping...");
+	        logger->warn("Found publisher with no url??  Skipping...");
 	        continue;
 	    }
 	    else if (iAmRelay)
@@ -1153,11 +1155,11 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 		{
             if (iter->has_ipaddress())
             {
-                Log::trace("found valid relay with ip = %s, my ip = %s", iter->ipaddress().c_str(), ipAddress.c_str());
+                logger->trace("found valid relay with ip = {}, my ip = {}", iter->ipaddress(), ipAddress);
             }
             else
             {
-                Log::trace("Found valid global relay");
+                logger->trace("Found valid global relay");
             }
             // if it's a relay for any IP or our IP
             if(!iter->has_ipaddress() || iter->ipaddress() == ipAddress)
@@ -1183,7 +1185,7 @@ void GravitySubscriptionManager::trimPublishers(const std::list<gravity::Publish
 			trimmedList.push_back(*iter);
 		}
 	}
-	Log::trace("added %u elements to trimmed pub list", trimmedList.size());
+	logger->trace("added {} elements to trimmed pub list", trimmedList.size());
 }
 
 } /* namespace gravity */

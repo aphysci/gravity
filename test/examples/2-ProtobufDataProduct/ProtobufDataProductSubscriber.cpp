@@ -63,6 +63,6 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::
 		(*i)->populateMessage(counterDataPB);
 
 		//Process the message
-		Log::warning("Current Count: %d", counterDataPB.count());
+		spdlog::warn("Current Count: {}", counterDataPB.count());
 	}
 }

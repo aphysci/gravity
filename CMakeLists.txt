@@ -80,6 +80,24 @@ macro(add_external_libzmq build_type)
         INSTALL_COMMAND cmake --build . --target install --config ${build_type})
 endmacro()
 
+macro(add_external_spdlog build_type)
+    ExternalProject_Add(    
+        spdlog_${build_type}
+        SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog"
+        URL ${spdlog_url}
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+        LOG_INSTALL ON
+        CMAKE_ARGS
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/deps/spdlog
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+	if (UNIX)
+		-DCMAKE_CXX_FLAGS=-fPIC
+	endif()
+        BUILD_COMMAND ""
+        INSTALL_COMMAND cmake --build . --target install --config ${build_type})
+endmacro()
+
 if (NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
     gravity_find_protobuf(OFF)
 endif()
@@ -101,6 +119,9 @@ if (WIN32)
         add_external_libzmq(Release)
         list(APPEND depends libzmq_Debug libzmq_Release)
     endif()        
+    add_external_spdlog(Debug)
+    add_external_spdlog(Release)
+    list(APPEND depends spdlog_Debug spdlog_Release)
 else()
     if (NOT Protobuf_FOUND OR GRAVITY_USING_EXTERNAL_PROTOBUF)
         add_external_protobuf(${CMAKE_BUILD_TYPE})
@@ -111,6 +132,9 @@ else()
         add_external_libzmq(${CMAKE_BUILD_TYPE})
         list(APPEND depends libzmq_${CMAKE_BUILD_TYPE})
     endif()
+    add_external_spdlog(Debug)
+    add_external_spdlog(Release)
+    list(APPEND depends spdlog_Debug spdlog_Release)
 endif()
 
 if (Protobuf_FOUND AND NOT GRAVITY_USING_EXTERNAL_PROTOBUF)
@@ -138,6 +162,7 @@ endif()
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake/spdlog")
 
 string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
 

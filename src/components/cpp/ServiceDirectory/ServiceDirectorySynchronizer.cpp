@@ -44,6 +44,7 @@ ServiceDirectorySynchronizer::ServiceDirectorySynchronizer(void* context, string
     // a shared context to establish an inproc socket.
     this->context = context;
 	this->ownURL = url;
+	logger = spdlog::get("GravityLogger");
 }
 
 ServiceDirectorySynchronizer::~ServiceDirectorySynchronizer() {};
@@ -104,7 +105,7 @@ void ServiceDirectorySynchronizer::start()
 				// Get URL from message
 				string domainIP = readStringMessage(commandSocket);
 
-				Log::message("Received Domain Add command for %s:%s", domain.c_str(), domainIP.c_str());
+				logger->info("Received Domain Add command for {}:{}", domain, domainIP);
 
 				// We need to sychronize with a newly connected domain
 				if (syncMap.find(domain) == syncMap.end())
@@ -158,7 +159,7 @@ void ServiceDirectorySynchronizer::start()
 				// Get URL from message
 				string domainIP = readStringMessage(commandSocket);
 
-				Log::message("Received Domain Update command for %s:%s", domain.c_str(), domainIP.c_str());
+				logger->info("Received Domain Update command for {}:{}", domain, domainIP);
 
 				// A domain has been update and should be reset. 
 				std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
@@ -176,11 +177,11 @@ void ServiceDirectorySynchronizer::start()
 						pollIter++;
 					}
 				}
-				Log::message("deleted from Synchronizer pollItems: pollItems len = %u", pollItems.size());
+				logger->info("deleted from Synchronizer pollItems: pollItems len = {}", pollItems.size());
 
 				// Close SUB socket
 				socketToDomainDetailsMap.erase(details->socket);
-				Log::trace("deleted from Synchronizer socketToDomainDetailsMap: socketToDomainDetailsMap len = %u", socketToDomainDetailsMap.size());
+				logger->trace("deleted from Synchronizer socketToDomainDetailsMap: socketToDomainDetailsMap len = {}", socketToDomainDetailsMap.size());
 				zmq_close(details->socket);
 
 				// Update details
@@ -227,7 +228,7 @@ void ServiceDirectorySynchronizer::start()
 				// Get Domain from message 
 				string domain = readStringMessage(commandSocket);
 
-				Log::message("Received Domain Remove command for '%s'", domain.c_str());
+				logger->info("Received Domain Remove command for '{}'", domain);
 
 				//make sure we have a mapping to the domain
 				if(syncMap.find(domain)!=syncMap.end())
@@ -250,7 +251,7 @@ void ServiceDirectorySynchronizer::start()
 				            pollIter++;
 				        }
 				    }
-				    Log::message("deleted from Synchronizer pollItems: pollItems len = %u", pollItems.size());
+				    logger->info("deleted from Synchronizer pollItems: pollItems len = {}", pollItems.size());
 
 					// Close SUB socket
 					zmq_close(details->socket);				
@@ -284,7 +285,7 @@ void ServiceDirectorySynchronizer::start()
 		else if (pollItems[1].revents & ZMQ_POLLIN)
         {
 			// This is a response from our request to update our own Service Directory
-			Log::debug("Received response from own SD for an update");
+			logger->debug("Received response from own SD for an update");
 
 			// Read (and ignore for now) the response
 			zmq_msg_t message;
@@ -313,29 +314,29 @@ void ServiceDirectorySynchronizer::start()
 					int ret = zmq_recvmsg(pollItemIter->socket, &message, 0);
 					if (ret < 0)
 					{
-					    Log::warning("Received error from zmq_recvmsg, errno = %d", errno);
+					    logger->warn("Received error from zmq_recvmsg, errno = {}", errno);
 					}
 
 					// Create new GravityDataProduct from the incoming message
 					GravityDataProduct response(zmq_msg_data(&message), zmq_msg_size(&message));
 
-					Log::trace("Response domain:reg time = %s:%u, pollItemIter->socket = %u, socketToDomainDetailsMap size = %u, msg id = %s",
-					        response.getDomain().c_str(),
+					logger->trace("Response domain:reg time = {}:{}, pollItemIter->socket = {}, socketToDomainDetailsMap size = {}, msg id = {}",
+					        response.getDomain(),
 					        response.getRegistrationTime(),
 					        pollItemIter->socket,
 					        socketToDomainDetailsMap.size(),
-							response.getDataProductID().c_str());
+							response.getDataProductID());
 
 					if (zmq_msg_size(&message) > 0 &&
 					        socketToDomainDetailsMap.find(pollItemIter->socket) != socketToDomainDetailsMap.end() &&
 					        socketToDomainDetailsMap[pollItemIter->socket]->registrationTime != response.getRegistrationTime())
 					{
-					    Log::debug("Found invalid socket - expecting domain:time %s:%u, but found %s:%u with GDP id = %s and msg size = %u, ignoring",
-					            socketToDomainDetailsMap[pollItemIter->socket]->domain.c_str(),
+					    logger->debug("Found invalid socket - expecting domain:time {}:{}, but found {}:{} with GDP id = {} and msg size = {}, ignoring",
+					            socketToDomainDetailsMap[pollItemIter->socket]->domain,
 					            socketToDomainDetailsMap[pollItemIter->socket]->registrationTime,
-					            response.getDomain().c_str(),
+					            response.getDomain(),
 					            response.getRegistrationTime(),
-					            response.getDataProductID().c_str(),
+					            response.getDataProductID(),
 					            zmq_msg_size(&message));
 					}
 					else if (response.getDataProductID() == "DataProductRegistrationResponse")
@@ -346,7 +347,7 @@ void ServiceDirectorySynchronizer::start()
 						response.populateMessage(resp);
 						if (resp.publishers_size() == 0 || !resp.publishers(0).has_url())
 						{
-						    Log::warning("Received empty response to request for subscription updates from remote service directory, trying again...");
+						    logger->warn("Received empty response to request for subscription updates from remote service directory, trying again...");
 
 							gravity::sleep(500);
 
@@ -371,7 +372,7 @@ void ServiceDirectorySynchronizer::start()
                             string domain = resp.domain_id();
                             string url = resp.publishers(0).url();
 
-                            Log::message("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '%s'", domain.c_str());
+                            logger->info("Received DataProductRegistrationResponse response from ServiceDirectory for domain: '{}'", domain);
 
                             // Get the details for the domain that is providing an update
                             std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
@@ -404,7 +405,7 @@ void ServiceDirectorySynchronizer::start()
 						response.populateMessage(providerMap);					
 						string domain = providerMap.domain();
 
-						Log::message("Received update from ServiceDirectory for domain: '%s'", domain.c_str());
+						logger->info("Received update from ServiceDirectory for domain: '{}'", domain);
 
 						std::shared_ptr<SyncDomainDetails> details = syncMap[domain];
 						details->providerMap.Clear();
@@ -413,10 +414,10 @@ void ServiceDirectorySynchronizer::start()
 						{
 							// First update from this Service Directory
 							details->initialized = true;
-							Log::message("Initial Update from domain '%s'", domain.c_str());
+							logger->info("Initial Update from domain '{}'", domain);
 
 							// Test code
-							//Log::debug("Received new providerMap: ");
+							//logger->debug("Received new providerMap: ");
 							//printMap(providerMap);
 
 							// Send all content as updates to our service directory
@@ -453,8 +454,7 @@ void ServiceDirectorySynchronizer::start()
 							string componentID = providerMap.change().component_id();
 							uint64_t timestamp = providerMap.change().timestamp();
 
-							Log::message("Incremental Update from domain '%s': %s %s named %s at %s", domain.c_str(), 
-											change.c_str(), type.c_str(), productID.c_str(), url.c_str());							
+							logger->info("Incremental Update from domain '{}': {} {} named {} at {}", domain, change, type, productID, url);							
 
 							if (providerMap.change().change_type() == ProductChange_ChangeType_ADD)
 							{
@@ -466,7 +466,7 @@ void ServiceDirectorySynchronizer::start()
 								createUnregistrationRequest(productID, url, domain, providerMap.change().registration_type(), regTimeSecs);
 							}
 							// Test code
-							//Log::debug("Received updated providerMap: ");
+							//logger->debug("Received updated providerMap: ");
 							//printMap(providerMap);
 						}
 					}				
@@ -540,46 +540,46 @@ void ServiceDirectorySynchronizer::createUnregistrationRequest(string productID,
 // test function
 void ServiceDirectorySynchronizer::printMap(ServiceDirectoryMapPB providerMap)
 {
-    Log::debug("Services:");
+    logger->debug("Services:");
     for (int i = 0; i < providerMap.service_provider_size(); i++)
     {
         string providerID = providerMap.service_provider(i).product_id();
-        Log::debug("   provider: %s", providerID.c_str());
+        logger->debug("   provider: {}", providerID);
         for (int j = 0; j < providerMap.service_provider(i).url_size(); j++)
         {
             string url = providerMap.service_provider(i).url(j);
-            Log::debug("      url: %s", url.c_str());
+            logger->debug("      url: {}", url);
             string componentID = providerMap.service_provider(i).component_id(j);
-            Log::debug("      componentID: %s", componentID.c_str());
+            logger->debug("      componentID: {}", componentID);
             string domainID = providerMap.service_provider(i).domain_id(j);
-            Log::debug("      domainID: %s", domainID.c_str());
+            logger->debug("      domainID: {}", domainID);
         }
     }
 
-    Log::debug("Data:");
+    logger->debug("Data:");
     for (int i = 0; i < providerMap.data_provider_size(); i++)
     {
         string providerID = providerMap.data_provider(i).product_id();
-        Log::debug("   provider: %s", providerID.c_str());
+        logger->debug("   provider: {}", providerID);
         for (int j = 0; j < providerMap.data_provider(i).url_size(); j++)
         {
             string url = providerMap.data_provider(i).url(j);
-            Log::debug("      url: %s", url.c_str());
+            logger->debug("      url: {}", url);
         }
         for (int j = 0; j < providerMap.data_provider(i).component_id_size(); j++)
         {
             string componentID = providerMap.data_provider(i).component_id(j);
-            Log::debug("      componentID: %s", componentID.c_str());
+            logger->debug("      componentID: {}", componentID);
         }
         for (int j = 0; j < providerMap.data_provider(i).timestamp_size(); j++)
         {
             uint64_t timestamp = providerMap.data_provider(i).timestamp(j);
-            Log::debug("      timestamp: %llu", timestamp);
+            logger->debug("      timestamp: {}", timestamp);
         }
         for (int j = 0; j < providerMap.data_provider(i).domain_id_size(); j++)
         {
             string domainID = providerMap.data_provider(i).domain_id(j);
-            Log::debug("      domainID: %s", domainID.c_str());
+            logger->debug("      domainID: {}", domainID);
         }
     }
 }

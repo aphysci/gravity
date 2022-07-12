@@ -32,23 +32,23 @@ int main()
 	GravityReturnCode ret = gn.init("ConfigFileExample");
 	while (ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::warning("Could not initialize GravityNode, return code was %d, retrying...", ret);
+		spdlog::warn("Could not initialize GravityNode, return code was {} retrying...", ret);
 	    ret = gn.init("ConfigFileExample");
 	}
 
 	// Note that all config keys are case insensitive
-    Log::message("ServiceDirectoryURL = %s\n", gn.getStringParam( "ServiceDirectoryURL", "Not found" ).c_str() );
-    Log::message("LocalLogLevel = %s\n", gn.getStringParam( "LocalLogLevel", "Not Found" ).c_str() );
-    Log::message("bin_ms = %f\n", gn.getFloatParam( "bin_ms", 0. ) );
-    Log::message("bin_us = %f\n", gn.getFloatParam( "bin_us", 0. ) );
-    Log::message("win_ms = %d\n", gn.getIntParam( "win_ms", 0 ) );
-    Log::message("na_samples = %d\n", gn.getIntParam( "na_samples", 0 ) );
-    Log::message("nsamps = %d\n", gn.getIntParam( "nsamps", 0 ) );
-    Log::message("nsamps_minus = %d\n", gn.getIntParam( "nsamps_minus", 0 ) );
-    Log::message("operatorstr = %s\n", gn.getStringParam( "operatorstr", "Not found" ).c_str() );
-    Log::message("default_value = %s\n", gn.getStringParam( "default_value", "Not found" ).c_str() );
+    spdlog::info("ServiceDirectoryURL = {}\n", gn.getStringParam( "ServiceDirectoryURL", "Not found" ));
+    spdlog::info("LocalLogLevel = {}\n", gn.getStringParam( "LocalLogLevel", "Not Found" ));
+    spdlog::info("bin_ms = {}\n", gn.getFloatParam( "bin_ms", 0. ) );
+    spdlog::info("bin_us = {}\n", gn.getFloatParam( "bin_us", 0. ) );
+    spdlog::info("win_ms = {}\n", gn.getIntParam( "win_ms", 0 ) );
+    spdlog::info("na_samples = {}\n", gn.getIntParam( "na_samples", 0 ) );
+    spdlog::info("nsamps = {}\n", gn.getIntParam( "nsamps", 0 ) );
+    spdlog::info("nsamps_minus = {}\n", gn.getIntParam( "nsamps_minus", 0 ) );
+    spdlog::info("operatorstr = {}\n", gn.getStringParam( "operatorstr", "Not found" ));
+    spdlog::info("default_value = {}\n", gn.getStringParam( "default_value", "Not found" ));
 
-    Log::message("config_server_value = %d\n", gn.getIntParam( "CONFIG_server_value", 0 ));
-    Log::message("config_server_overridden_value = %d\n", gn.getIntParam( "CONFIG_server_overridden_value", 0 ));
+    spdlog::info("config_server_value = {}\n", gn.getIntParam( "CONFIG_server_value", 0 ));
+    spdlog::info("config_server_overridden_value = {}\n", gn.getIntParam( "CONFIG_server_overridden_value", 0 ));
     return 0;
 }

@@ -31,6 +31,10 @@ namespace gravity {
 
 int GravityConfigParser::CONFIG_REQUEST_TIMEOUT = 4000;
 
+bool GravityConfigParser::hasKey(std::string key) {
+	return key_value_map.count(StringCopyToLowerCase(key)) > 0;
+}
+
 GravityConfigParser::GravityConfigParser(std::string componentID)
 {
 	this->componentID = componentID;

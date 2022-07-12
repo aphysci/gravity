@@ -38,6 +38,7 @@
 #include <map>
 #include <string>
 #include "protobuf/GravityMetricsDataPB.pb.h"
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {
@@ -68,6 +69,9 @@ private:
 
 	void collectMetrics(void* socket, GravityMetricsPB_MessageType type);
 	void publishMetrics();
+	
+	std::shared_ptr<spdlog::logger> logger;
+	
 public:
 	/**
 	 * Constructor GravityMetricsManager

@@ -29,7 +29,7 @@
 #include <vector>
 #include <string>
 #include <zmq.h>
-
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {
@@ -53,10 +53,10 @@ private:
 	void parseValidDomains(std::string domainString,unsigned int num);
 	bool isValidDomain(std::string domain);
 
+	std::shared_ptr<spdlog::logger> logger;
 
 public:
-	ServiceDirectoryUDPReceiver(void* __context__) :
-		context(__context__){}
+	ServiceDirectoryUDPReceiver(void* context);
 
 	virtual ~ServiceDirectoryUDPReceiver();
 

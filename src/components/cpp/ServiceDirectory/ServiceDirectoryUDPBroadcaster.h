@@ -38,6 +38,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
+#include "spdlog/spdlog.h"
 
 namespace gravity{
 
@@ -60,10 +61,10 @@ private:
 	void receiveBroadcastParameters();
 	int initBroadcastSocket();
 
+	std::shared_ptr<spdlog::logger> logger;
 
 public:
-	ServiceDirectoryUDPBroadcaster(void* __context__):
-		context(__context__){}
+	ServiceDirectoryUDPBroadcaster(void* context);
 
 	virtual ~ServiceDirectoryUDPBroadcaster();
 

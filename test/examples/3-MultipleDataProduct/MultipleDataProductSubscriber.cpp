@@ -93,7 +93,7 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::
 		//Process the message
 		countTotals = countTotals + counterDataPB.count();
 
-		Log::warning("Subscriber 1: Sum of All Counts Received: %d", countTotals);
+		spdlog::warn("Subscriber 1: Sum of All Counts Received: {}", countTotals);
 	}
 }
 
@@ -109,7 +109,7 @@ void SimpleGravityHelloWorldSubscriber::subscriptionFilled(const std::vector< st
 		message[size] = 0; //Add NULL terminator
 
 		//Output the message
-		Log::warning("Subscriber 2: Got message: %s", message);
+		spdlog::warn("Subscriber 2: Got message: {}", message);
 		//Don't forget to free the memory we allocated.
 		delete[] message;
 	}
@@ -121,14 +121,14 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< std::shared_
 			i != dataProducts.end(); i++)
 	{
 		//Process Message
-		Log::warning("Subscriber 3: Got a %s data product", (*i)->getDataProductID().c_str());
+		spdlog::warn("Subscriber 3: Got a {} data product", (*i)->getDataProductID());
 
 		//Take different actions based on the message type.
 		if((*i)->getDataProductID() == "BasicCounterDataProduct")
 		{
 			BasicCounterDataProductPB counterDataPB;
 			(*i)->populateMessage(counterDataPB);
-			Log::warning("Subscriber 3: Current Count: %d", counterDataPB.count());
+			spdlog::warn("Subscriber 3: Current Count: {}", counterDataPB.count());
 		}
 	}
 }

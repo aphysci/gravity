@@ -10,6 +10,7 @@ set(PROTO_LIB_NAME gravity_protobufs)
 
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
+gravity_find_spdlog(ON)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
@@ -55,6 +56,7 @@ set(HDRS
 	"${CMAKE_CURRENT_LIST_DIR}/GravityHeartbeat.h"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityHeartbeatListener.h"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityLogger.h"
+	"${CMAKE_CURRENT_LIST_DIR}/SpdLog.h"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetrics.h"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetricsManager.h"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetricsUtil.h"
@@ -79,6 +81,7 @@ set(SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/GravityDataProduct.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityHeartbeat.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityLogger.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/SpdLog.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetrics.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetricsManager.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/GravityMetricsUtil.cpp"
@@ -97,7 +100,7 @@ set(SRCS
 
         
 add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
+target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf spdlog::spdlog)
 add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
 install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 

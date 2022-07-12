@@ -33,7 +33,7 @@ int main()
 	GravityReturnCode ret = gn.init("SimpleGravityComponentID");
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::fatal("Could not initialize GravityNode, return code was %d", ret);
+		spdlog::critical("Could not initialize GravityNode, return code was {}", ret);
 		exit(1);
 	}
 
@@ -47,7 +47,7 @@ int main()
 							GravityTransportTypes::TCP);
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::fatal("Could not register data product with id %s, return code was %d", dataProductID.c_str(), ret);
+		spdlog::critical("Could not register data product with id {}, return code was {}", dataProductID, ret);
 		exit(1);
 	}
 
@@ -58,7 +58,7 @@ int main()
 		//Create a data product to send across the network of type "HelloWorldDataProduct"
 		GravityDataProduct helloWorldDataProduct(dataProductID);
 		//This is going to be a raw data product (ie not using protobufs).
-		char data[20];
+		char data[24];
 		sprintf(data, "Hello World #%d", count++);
 		helloWorldDataProduct.setData((void*)data, strlen(data));
 
@@ -66,7 +66,7 @@ int main()
 		ret = gn.publish(helloWorldDataProduct);
 		if (ret != GravityReturnCodes::SUCCESS)
 		{
-			Log::critical("Could not publish data product with id %s, return code was %d", dataProductID.c_str(), ret);
+			spdlog::error("Could not publish data product with id {}, return code was {}", dataProductID, ret);
 		}
 
 		//Sleep for 1 second.

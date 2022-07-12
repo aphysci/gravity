@@ -143,6 +143,7 @@ public:
     GRAVITY_API static void message(const char* message, ...);
     GRAVITY_API static void debug(const char* message, ...);
     GRAVITY_API static void trace(const char* message, ...);
+
     /** @} */ //Logging Functions
 
     /**

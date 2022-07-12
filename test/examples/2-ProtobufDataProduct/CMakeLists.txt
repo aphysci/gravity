@@ -7,6 +7,7 @@ include(GravitySupport)
 find_package(PThreadsWin32 REQUIRED)
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
+gravity_find_spdlog(ON)
 find_package(GravityKeyValueParser REQUIRED)
 find_package(Gravity REQUIRED)
 

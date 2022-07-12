@@ -40,7 +40,7 @@ int main()
 	GravityReturnCode ret = gn.init("SimpleGravityComponentID2");
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::fatal("Could not initialize GravityNode, return code is %d", ret);
+		spdlog::critical("Could not initialize GravityNode, return code is {}", ret);
 		exit(1);
 	}
 
@@ -49,7 +49,7 @@ int main()
 	ret = gn.subscribe(dataProductID, hwSubscriber);
 	if (ret != GravityReturnCodes::SUCCESS)
 	{
-		Log::critical("Could not subscribe to data product with id %s, return code was %d", dataProductID.c_str(), ret);
+		spdlog::error("Could not subscribe to data product with id {}, return code was {}", dataProductID, ret);
 		exit(1);
 	}
 
@@ -73,7 +73,7 @@ void SimpleGravitySubscriber::subscriptionFilled(const std::vector< std::shared_
 		message[size] = 0; // null terminate
 
 		//Output the message
-		Log::warning("Got message: %s", message);
+		spdlog::warn("Got message: {}", message);
 		//Don't forget to free the memory we allocated.
 		delete[] message;
 	}

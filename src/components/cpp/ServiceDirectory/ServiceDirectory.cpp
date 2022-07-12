@@ -179,16 +179,19 @@ void ServiceDirectory::start()
 	//set up broadcast and recieve managers
 	if (!context)
 	{
-		Log::fatal("Could not create ZMQ Context");
+		//logger->critical("Could not create ZMQ Context");
 		return;
 	}
 	
   registeredPublishersReady = registeredPublishersProcessed = false;
   gn.init("ServiceDirectory");
+  
+  // Get Gravity logger
+  logger = spdlog::get("GravityLogger");
 
   std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
   replaceAll(sdURL, "localhost", "127.0.0.1");
-  Log::message("running with SD connection string: %s", sdURL.c_str());
+  logger->info("running with SD connection string: {}", sdURL);
 
 	// Get the optional domain for this Service Directory instance
 	domain = gn.getStringParam("Domain", "");
@@ -199,12 +202,12 @@ void ServiceDirectory::start()
 	if (!validateDomainName(domain))
 	{
 		domain = "";
-		Log::warning("Invalid Domain (must be alpha-numeric or '.').");
+		logger->warn("Invalid Domain (must be alpha-numeric or '.').");
 
 		//don't broadcast if domain is invalid
 		broadcastEnabled = false;
 	}
-	Log::message("Domain set to '%s'", domain.c_str());
+	logger->info("Domain set to '{}'", domain);
 
 
 	unsigned int broadcastPort = gn.getIntParam("ServiceDirectoryBroadcastPort",DEFAULT_BROADCAST_PORT);
@@ -218,14 +221,14 @@ void ServiceDirectory::start()
 	{
 		knownDomainCSV="";
 		numDomains=0;
-		Log::warning("Invalid DomainSyncList (must be alpha-numeric or '.').");
+		logger->warn("Invalid DomainSyncList (must be alpha-numeric or '.').");
 	}
-	Log::message("DomainSyncList set to '%s'",knownDomainCSV.c_str());
+	logger->info("DomainSyncList set to '{}'",knownDomainCSV);
 
     void *context = zmq_init(1);
     if (!context)
     {
-        Log::critical("Could not create ZeroMQ context, exiting");
+        logger->critical("Could not create ZeroMQ context, exiting");
         exit(1);
     }
 
@@ -240,11 +243,11 @@ void ServiceDirectory::start()
         if (sdURL.rfind("tcp://",0) == 0) {   // Try to bind to all interfaces
             string newURL = "tcp://*:" + sdURL.substr(sdURL.rfind(":")+1);
             sdURL = newURL;
-	    Log::warning("ZMQ bind failed: Try fallback socket: '%s'",sdURL.c_str());
+	    logger->warn("ZMQ bind failed: Try fallback socket: '{}'",sdURL);
             rc = zmq_bind(socket, sdURL.c_str());
         }
         if (rc < 0) {
-            Log::fatal("Could not bind address for ServiceDirectory, error code was %d (%s)", rc, strerror(errno));
+            logger->critical("Could not bind address for ServiceDirectory, error code was {} ({})", rc, strerror(errno));
             exit(1);
        }
     }
@@ -262,7 +265,7 @@ void ServiceDirectory::start()
 	//If broadcast was enabled, start the broadcaster
 	if(broadcastEnabled)
 	{
-		Log::message("Starting ServiceDirectoryBroadcaster");
+		logger->info("Starting ServiceDirectoryBroadcaster");
 
 		string broadcastIP = gn.getStringParam("ServiceDirectoryBroadcastIP", "");
 		unsigned int broadcastRate = gn.getIntParam("ServiceDirectoryBroadcastRate",DEFAULT_BROADCAST_RATE_SEC);
@@ -281,7 +284,7 @@ void ServiceDirectory::start()
 	//only start the receiver is there is at least one domain to sync to
 	if(numDomains > 0)
 	{
-		Log::message("Starting ServiceDirectoryReceiver");
+		logger->info("Starting ServiceDirectoryReceiver");
 		//create the socket for receiving domains from the udp receiver, used for polling
 		void *domainRecvSocket = zmq_socket(context,ZMQ_SUB);
 		zmq_bind(domainRecvSocket,"inproc://service_directory_domain_socket");
@@ -296,7 +299,7 @@ void ServiceDirectory::start()
 		sendReceiverParameters(domain,sdURL,broadcastPort,numDomains,knownDomainCSV);
 
 		// start the synchronization thread
-		Log::message("Starting ServiceDirectorySynchronization thread");
+		logger->info("Starting ServiceDirectorySynchronization thread");
 		syncInitDetails.context = context;
 		syncInitDetails.url = sdURL;
     synchronizerThread = std::thread(startSynchronizer, (void*)&syncInitDetails);
@@ -371,7 +374,7 @@ void ServiceDirectory::start()
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
                 for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); it++)
                 {
-                    Log::debug("Processing pending registered publishers update for %s", it->c_str());
+                    logger->debug("Processing pending registered publishers update for {}", *it);
                     addPublishers(*it, update, domain);
                     gn.publish(update, *it);
                 }
@@ -403,7 +406,7 @@ void ServiceDirectory::start()
 					publishDomainUpdateMessage(domainToAdd,url,ADD);
 
 					// Send Add command to synchronization thread
-					Log::debug("Sending add command to synchronization thread for %s:%s", domainToAdd.c_str(), url.c_str());
+					logger->debug("Sending add command to synchronization thread for {}:{}", domainToAdd, url);
 					sendStringMessage(synchronizerSocket, "Add", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToAdd, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
@@ -417,7 +420,7 @@ void ServiceDirectory::start()
 					domainMap[domainToUpdate] = url;
 
 					// Send Add command to synchronization thread
-					Log::debug("Sending update command to synchronization thread for %s:%s", domainToUpdate.c_str(), url.c_str());
+					logger->debug("Sending update command to synchronization thread for {}:{}", domainToUpdate, url);
 					sendStringMessage(synchronizerSocket, "Update", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToUpdate, ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, url, ZMQ_DONTWAIT);
@@ -434,7 +437,7 @@ void ServiceDirectory::start()
 					publishDomainUpdateMessage(domainToRemove,url,REMOVE);
 
 					// Send Remove command to synchronization thread
-					Log::debug("Sending remove command to synchronziation thread for %s", domainToRemove.c_str());
+					logger->debug("Sending remove command to synchronziation thread for {}", domainToRemove);
 					sendStringMessage(synchronizerSocket, "Remove", ZMQ_SNDMORE);
 					sendStringMessage(synchronizerSocket, domainToRemove, ZMQ_DONTWAIT);
 				}
@@ -461,17 +464,17 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataP
     // synchronization here
     if (requestType == "ComponentLookupRequest")
     {
-        Log::trace("Handling lookup");
+        logger->trace("Handling lookup");
         handleLookup(dataProduct, *gdpResponse);
     }
     else if (requestType == "RegistrationRequest")
     {
-        Log::trace("Handling register");
+        logger->trace("Handling register");
         handleRegister(dataProduct, *gdpResponse);
     }
     else if (requestType == "UnregistrationRequest")
     {
-        Log::trace("Handling unregister");
+        logger->trace("Handling unregister");
         handleUnregister(dataProduct, *gdpResponse);
     }
     else if (requestType == "GetDomain")
@@ -480,7 +483,7 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataP
     }
     else
     {
-        Log::warning("unknown request type: %s", requestType.c_str());
+        logger->warn("unknown request type: {}", requestType);
     }
 
     return gdpResponse;
@@ -492,7 +495,7 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const GravityDataP
  */
 std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string serviceID, const GravityDataProduct& request)
 {
-    Log::debug("Received service request of type '%s'", serviceID.c_str());
+    logger->debug("Received service request of type '{}'", serviceID);
     std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
     if (serviceID == DIRECTORY_SERVICE)
@@ -572,17 +575,16 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 		{
 			map<string, list<PublisherInfoPB> > dpMap = dataProductMap[lookupDomain];
 
-			Log::message("[Lookup Request] ID: %s, Domain: %s, MessageType: Data Product, First Server: %s", 
-					 lookupRequest.lookupid().c_str(),
-					 lookupDomain.c_str(),
+			logger->info("[Lookup Request] ID: {}, Domain: {}, MessageType: Data Product, First Server: {}", 
+					 lookupRequest.lookupid(),
+					 lookupDomain,
                      (dpMap.count(lookupRequest.lookupid()) != 0 && dpMap[lookupRequest.lookupid()].size() > 0) ?
-                     dpMap[lookupRequest.lookupid()].front().url().c_str(): "");
+                     dpMap[lookupRequest.lookupid()].front().url(): "");
 		}
 		else
 		{
-			Log::message("[Lookup Request] No data provider found for ID: %s in Domain: %s",
-						lookupRequest.lookupid().c_str(),
-						lookupDomain.c_str());
+			logger->info("[Lookup Request] No data provider found for ID: {} in Domain: {}",
+						lookupRequest.lookupid(), lookupDomain);
 		}
 
 		addPublishers(lookupRequest.lookupid(), response, lookupDomain);
@@ -599,9 +601,9 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			// Get service map for our domain
 			map<string, string> sMap = serviceMap[lookupDomain];
 
-			Log::message("[Lookup Request] ID: %s, MessageType: Service, Server: %s", lookupRequest.lookupid().c_str(),
+			logger->info("[Lookup Request] ID: {}, MessageType: Service, Server: {}", lookupRequest.lookupid(),
                      sMap.count(lookupRequest.lookupid()) != 0 ?
-                     sMap[lookupRequest.lookupid()].c_str(): "");
+                     sMap[lookupRequest.lookupid()]: "");
 
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
@@ -648,8 +650,8 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	}
 	
 	// Add change to data product
-	Log::debug("Adding Change : %s %s %s %llu", productID.c_str(), url.c_str(), 
-			urlToComponentMap[url].c_str(), timestamp);
+	logger->debug("Adding Change : {} {} {} {}", productID, url, 
+			urlToComponentMap[url], timestamp);
 	ProductChange* change = providerMap.mutable_change();
 	change->set_product_id(productID);
 	change->set_url(url);
@@ -660,7 +662,7 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
                     ProductChange_RegistrationType_SERVICE : ProductChange_RegistrationType_DATA);
 
 	// Publish update
-	Log::debug("Publishing ServiceDirectory_DomainDetails");
+	logger->debug("Publishing ServiceDirectory_DomainDetails");
 	GravityDataProduct gdp("ServiceDirectory_DomainDetails");
 	gdp.setData(providerMap);
 	gn.publish(gdp);
@@ -680,7 +682,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 	// if the request does not have a timestamp
 	if(!registration.has_timestamp())
 	{
-		Log::warning("Received Register for URL: %s with no timestamp. Ignoring Request",registration.url().c_str());
+		logger->warn("Received Register for URL: {} with no timestamp. Ignoring Request",registration.url());
 		update = false;
 	}
 	//if we already have an instance for this URL
@@ -689,7 +691,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 		//check if the update for the specified URL is older then our current mapping
 		if(registration.timestamp() < registrationInstanceMap[registration.url()])
 		{
-			Log::warning("Received Register for URL: %s with old timestamp %lu",registration.url().c_str(),registration.timestamp());
+			logger->warn("Received Register for URL: {} with old timestamp {}",registration.url(),registration.timestamp());
 			update = false;
 		}
 	}
@@ -758,7 +760,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				// Update any subscribers interested in our providers
 				if (domain == this->domain && registration.id() != REGISTERED_PUBLISHERS)
 				{
-					Log::debug("Sending update of product definitions (resulting from added data for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+					logger->debug("Sending update of product definitions (resulting from added data for '{}' @ '{}')", registration.id(), registration.url());
 					updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, DATA);
 				}
 			}
@@ -779,7 +781,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 
 			if (sMap.find(registration.id()) != sMap.end())
 			{
-				Log::warning("Replacing existing provider for service id '%s'", registration.id().c_str()); 
+				logger->warn("Replacing existing provider for service id '{}'", registration.id()); 
 			}
 			// Add as service provider, overwriting any existing provider for this service
 			sMap[registration.id()] = registration.url();
@@ -796,13 +798,13 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			// Update any subscribers interested in our providers
 			if (domain == this->domain)
 			{
-				Log::debug("Sending update of product definitions (resulting from added service for '%s' @ '%s')", registration.id().c_str(), registration.url().c_str());
+				logger->debug("Sending update of product definitions (resulting from added service for '{}' @ '{}')", registration.id(), registration.url());
 				updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, SERVICE);
 			}
 		}
-		Log::message("[Register] ID: %s, MessageType: %s, URL: %s, Domain: %s", registration.id().c_str(),
+		logger->info("[Register] ID: {}, MessageType: {}, URL: {}, Domain: {}", registration.id(),
 				registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", 
-				registration.url().c_str(), registration.domain().c_str());
+				registration.url(), registration.domain());
 	
 	}
 
@@ -811,7 +813,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
     if (foundDup)
     {
         sdr.set_returncode(ServiceDirectoryResponsePB::SUCCESS);
-        Log::warning("Attempt to register duplicate url (%s) for %s", registration.url().c_str(), registration.id().c_str());
+        logger->warn("Attempt to register duplicate url ({}) for {}", registration.url(), registration.id());
     }
     else
     {
@@ -903,17 +905,17 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
         }
     }
 
-    Log::message("[Unregister] ID: %s, MessageType: %s, URL: %s, Domain: %s", unregistration.id().c_str(),
+    logger->info("[Unregister] ID: {}, MessageType: {}, URL: {}, Domain: {}", unregistration.id(),
             unregistration.type() == ServiceDirectoryUnregistrationPB_RegistrationType_DATA? "Data Product": "Service", 
-            unregistration.url().c_str(), unregistration.domain().c_str());
+            unregistration.url(), unregistration.domain());
 
     ServiceDirectoryResponsePB sdr;
     sdr.set_id(unregistration.id());
     if (!foundUrl)
     {
         sdr.set_returncode(ServiceDirectoryResponsePB::NOT_REGISTERED);
-        Log::warning("Attempt to unregister unregistered/invalid provider: %s, %s, %s, %u", unregistration.id().c_str(), 
-            unregistration.url().c_str(), unregistration.domain().c_str(), unregistration.registration_time());
+        logger->warn("Attempt to unregister unregistered/invalid provider: {}, {}, {}, {}", unregistration.id(), 
+            unregistration.url(), unregistration.domain(), unregistration.registration_time());
     }
     else
     {
@@ -941,8 +943,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
             if (it != infoPBs.end())
             {
                 // We need to remove/"unregister" this one
-                Log::message("[Auto-Unregister] ID: %s, MessageType: Data Product, URL: %s",
-                                iter->first.c_str(), url.c_str());
+                logger->info("[Auto-Unregister] ID: {}, MessageType: Data Product, URL: {}", iter->first, url);
                 infoPBs.erase(it);
 
                 if (registeredPublishersReady)

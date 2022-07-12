@@ -63,6 +63,6 @@ void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::
 		(*i)->populateMessage(counterDataPB);
 
 		//Process the message
-		Log::warning("Current Count: %d, message was relayed = %s", counterDataPB.count(), (*i)->isRelayedDataproduct() ? "true" : "false");
+		spdlog::warn("Current Count: {}, message was relayed = {}", counterDataPB.count(), (*i)->isRelayedDataproduct() ? "true" : "false");
 	}
 }

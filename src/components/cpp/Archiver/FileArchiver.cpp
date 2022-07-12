@@ -41,9 +41,12 @@ FileArchiver::FileArchiver()
 {
 	// Initialize Gravity Node
 	gravityNode.init(FileArchiver::ComponentName);
+	
+	// Get logger
+	logger = spdlog::get("GravityLogger");
 
 	// Configure logger to log to console
-	Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);
+	//Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);
 
 	// Open archive file
 	string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
@@ -129,7 +132,7 @@ void FileArchiver::subscriptionFilled(const vector<std::shared_ptr<GravityDataPr
 
 std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
-    Log::debug("Received service request of type '%s'", serviceID.c_str());
+    logger->debug("Received service request of type '{}'", serviceID);
     FileArchiverControlResponsePB faResponse;
     faResponse.set_status(false);
 
@@ -138,13 +141,13 @@ std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serv
         FileArchiverControlRequestPB faRequest;
         if (!dataProduct.populateMessage(faRequest))
         {
-            Log::critical("Unable to deserialize received FileArchiverControlRequest data");
+            logger->error("Unable to deserialize received FileArchiverControlRequest data");
             faResponse.set_status(false);
         }
         else
         {
             suspend = faRequest.suspend();
-            Log::warning("Suspend flag has been set to %s", suspend ? "true" : "false");
+            logger->warn("Suspend flag has been set to {}", suspend ? "true" : "false");
             faResponse.set_status(true);
         }
     }

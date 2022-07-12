@@ -27,11 +27,13 @@
 
 #include "GravityNode.h"
 #include "GravityLogger.h"
+#include "SpdLog.h"
 #include "FutureResponse.h"
 %}
 
 %include "gravitynode.i"
 %include "gravitylogger.i"
+%include "spdlogger.i"
 %include "gravitysubscriber.i"
 %include "gravityrequestor.i"
 %include "gravityprovider.i"

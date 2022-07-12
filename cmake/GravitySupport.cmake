@@ -15,6 +15,14 @@ macro(gravity_find_protobuf fail_if_missing)
     endif()
 endmacro()
 
+macro(gravity_find_spdlog fail_if_missing)
+    find_package(spdlog)
+    if (${fail_if_missing} AND NOT spdlog_FOUND)
+        message(FATAL_ERROR "Failed to find spdlog library")
+    endif()
+endmacro()
+
+
 macro(gravity_find_zeromq fail_if_missing)
     find_package(ZeroMQ)
     if (${fail_if_missing} AND NOT TARGET libzmq)

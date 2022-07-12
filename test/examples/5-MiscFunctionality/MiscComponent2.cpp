@@ -33,12 +33,12 @@ public:
 
 void MiscHBListener::MissedHeartbeat(std::string dataProductID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds)
 {
-	Log::warning("Missed Heartbeat.  Last heartbeat %d microseconds ago.  ", microsecond_to_last_heartbeat);
+	spdlog::warn("Missed Heartbeat.  Last heartbeat {} microseconds ago.  ", microsecond_to_last_heartbeat);
 }
 
 void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, int64_t& interval_in_microseconds)
 {
-	Log::warning("Received Heartbeat.");
+	spdlog::warn("Received Heartbeat.");
 	// Now that we've received one, change the interval to 10 seconds.
 	interval_in_microseconds = 10 * 1000000;
 }
@@ -62,7 +62,7 @@ void MiscGravitySubscriber::subscriptionFilled(const std::vector< std::shared_pt
 		message[size] = 0; // null terminate
 
 		//Output the message
-		Log::warning("Got message: %s", message);
+		spdlog::warn("Got message: {}", message);
 		//Don't forget to free the memory we allocated.
 		delete[] message;
 	}

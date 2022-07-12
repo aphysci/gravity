@@ -40,6 +40,7 @@ GravityRequestManager::GravityRequestManager(void* context)
 {
 	// This is the zmq context used to the comms socket
 	this->context = context;
+	logger = spdlog::get("GravityLogger");
 }
 
 GravityRequestManager::~GravityRequestManager() {}
@@ -148,7 +149,7 @@ void GravityRequestManager::start()
 			}
 			else
 			{
-				Log::warning("GravityRequestManager received unknown command '%s' from GravityNode", command.c_str());
+				logger->warn("GravityRequestManager received unknown command '{}' from GravityNode", command);
 			}
 		}
 
@@ -187,7 +188,7 @@ void GravityRequestManager::start()
 
 				if (response.isFutureResponse())
 				{					
-					Log::trace("Received a future response placeholder (url = %s)", response.getFutureSocketUrl().c_str());
+					logger->trace("Received a future response placeholder (url = {})", response.getFutureSocketUrl());
 					// Create REQ socket to interact with future REP socket
 					void* socket = zmq_socket(context, ZMQ_REQ);
 					zmq_connect(socket, response.getFutureSocketUrl().c_str());					
@@ -214,20 +215,20 @@ void GravityRequestManager::start()
 					// Verify the service provider
 					if (response.getRegistrationTime() != reqDetails->registrationTime)
 					{
-						Log::critical("Received service (%s) response from invalid service [%u != %u]. Aborting request.",
-							reqDetails->serviceID.c_str(), response.getRegistrationTime(), reqDetails->registrationTime);
+						logger->error("Received service ({}) response from invalid service [{} != {}]. Aborting request.",
+							reqDetails->serviceID, response.getRegistrationTime(), reqDetails->registrationTime);
 
 						// Send notification of stale data to ServiceDirectory
 						if (response.getRegistrationTime() > 0) {
 						    notifyServiceDirectoryOfStaleEntry(reqDetails->serviceID, reqDetails->url, reqDetails->registrationTime);
 						} else {
-						    Log::debug("Service response appears to be invalid, so not requesting deletion from ServiceDirectory.");
+						    logger->debug("Service response appears to be invalid, so not requesting deletion from ServiceDirectory.");
 						}
 					}
 					else
 					{
 						// Deliver to requestor
-						Log::trace("GravityRequestManager: call requestFilled()");
+						logger->trace("GravityRequestManager: call requestFilled()");
 						reqDetails->requestor->requestFilled(reqDetails->serviceID, reqDetails->requestID, response);
 					}
 				}
@@ -257,7 +258,7 @@ void GravityRequestManager::start()
 
 void GravityRequestManager::notifyServiceDirectoryOfStaleEntry(string serviceId, string url, uint32_t regTime)
 {
-	Log::debug("Notifying ServiceDirectory of stale service: [%s @ %s]", serviceId.c_str(), url.c_str());
+	logger->debug("Notifying ServiceDirectory of stale service: [{} @ {}]", serviceId, url);
 	ServiceDirectoryUnregistrationPB unregistration;
 	unregistration.set_id(serviceId);
 	unregistration.set_url(url);
@@ -307,7 +308,7 @@ void GravityRequestManager::sendFutureResponse()
 
 	if (futureResponseUrlToSocketMap.find(url) == futureResponseUrlToSocketMap.end())
 	{
-		Log::warning("Received a future response that is not associated with a REP url ('%s')", url.c_str());
+		logger->warn("Received a future response that is not associated with a REP url ('{}')", url);
 		ret = GravityReturnCodes::FAILURE;
 	}
 	else
@@ -364,7 +365,7 @@ void GravityRequestManager::createFutureResponse()
 	int port = bindFirstAvailablePort(responseSocket, ip, minPort, maxPort);
     if (port < 0)
     {
-        Log::critical("Could not find available port for FutureResponse");
+        logger->error("Could not find available port for FutureResponse");
         zmq_close(responseSocket);
     }
 	else
@@ -376,7 +377,7 @@ void GravityRequestManager::createFutureResponse()
 		futureResponseUrlToSocketMap[url] = responseSocket;
 	}
 
-	Log::trace("GravityRequestManager::createFutureResponse(): URL = '%s'", url.c_str());
+	logger->trace("GravityRequestManager::createFutureResponse(): URL = '{}'", url);
 
 	sendStringMessage(gravityResponseSocket, url, ZMQ_DONTWAIT);
 }

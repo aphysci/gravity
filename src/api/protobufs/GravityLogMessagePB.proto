@@ -25,7 +25,6 @@ package gravity;
 
 message GravityLogMessagePB
 {
-	required string domain = 1;
-	required string level = 2;
-	required string message = 3;
+	optional string level = 1;
+	optional string message = 2;
 }

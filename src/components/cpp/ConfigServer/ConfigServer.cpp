@@ -86,12 +86,13 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 	}
 
 	//Populate Response Message and Send it
-	Log::message("Sending Config to %s", cfpb.componentid().c_str());
+	shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
+	logger->info("Sending Config to {}", cfpb.componentid());
 	ConfigeResponsePB message;
 	for(std::map<std::string, std::string>::iterator i = key_value_map.begin();
 			i != key_value_map.end(); i++)
 	{
-		Log::message("\t%s=%s", i->first.c_str(), i->second.c_str());
+		logger->info("\t{}={}", i->first, i->second);
 		message.add_key(i->first);
 		message.add_value(i->second);
 	}
