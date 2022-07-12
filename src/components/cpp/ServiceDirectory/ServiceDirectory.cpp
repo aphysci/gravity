@@ -190,10 +190,11 @@ void ServiceDirectory::start()
   replaceAll(sdURL, "localhost", "127.0.0.1");
   Log::message("running with SD connection string: %s", sdURL.c_str());
 
-	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled",false);
-
 	// Get the optional domain for this Service Directory instance
 	domain = gn.getStringParam("Domain", "");
+
+	// If domain IS specified, default broadcastEnabled to true
+	bool broadcastEnabled = gn.getBoolParam("BroadcastEnabled", !domain.empty());
 	
 	if (!validateDomainName(domain))
 	{
