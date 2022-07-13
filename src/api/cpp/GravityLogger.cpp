@@ -211,7 +211,8 @@ GravityLogger::~GravityLogger()
 
 void Log::initAndAddGravityLogger(GravityNode *gn, LogLevel net_log_level)
 {
-    Log::initAndAddLogger(new GravityLogger(gn), net_log_level);
+    spdlog::warn("The GravityLogger is non-functional. Please use new spdlog implementation");
+    //Log::initAndAddLogger(new GravityLogger(gn), net_log_level);
 }
 
 ////////////////////////////////////////////////////////////////
