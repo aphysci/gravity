@@ -48,17 +48,9 @@ private:
 	GravityNode* gn;
 	std::mutex lock;
 	bool init;
-	
-	bool checkInit()
-	{
-		std::lock_guard<std::mutex> guard(lock);
-		if (!init)
-		{
-			GravityReturnCode ret  = gn->registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
-			init = ret == GravityReturnCodes::SUCCESS;
-		}
-		return init;
-	}
+	GravityDataProduct dp = GravityDataProduct("GRAVITY_LOGGER");
+	gravity::GravityLogMessagePB logMessage;
+
 	
 public:
 	PublishSink(GravityNode* gn) : init(false)
@@ -69,19 +61,14 @@ public:
 protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
-		if (checkInit())
-		{
-			// Format message
-			spdlog::memory_buf_t formatted;
-			spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
+		// Format message
+		spdlog::memory_buf_t formatted;
+		spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
-			GravityDataProduct dp("GRAVITY_LOGGER");
-			gravity::GravityLogMessagePB logMessage;
-			logMessage.set_level(spdlog::level::to_string_view(msg.level).data());
-			logMessage.set_message(fmt::to_string(formatted));
-			dp.setData(logMessage);
-			gn->publish(dp);
-		}
+		logMessage.set_level(spdlog::level::to_string_view(msg.level).data());
+		logMessage.set_message(fmt::to_string(formatted));
+		dp.setData(logMessage);
+		gn->publish(dp, gn->getComponentID());
     }
 
     void flush_() override 

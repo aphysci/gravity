@@ -64,6 +64,8 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
+#include "protobuf/GravityConfigParamPB.pb.h"
+#include "protobuf/GravityLogMessagePB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -950,6 +952,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
 
+			registerDataProduct("GRAVITY_SETTINGS", GravityTransportType::TCP);
+			registerDataProduct("GRAVITY_LOGGER", GravityTransportType::TCP);
+			registerDataProduct("GRAVITY_MESSAGES", GravityTransportType::TCP);
+
+			publishGravityMessages = getBoolParam("PublishGravityMessages", false);
 			// Enable metrics (if configured)
 			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
 			if (metricsEnabled)
@@ -969,9 +976,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
 				sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
 
-				// Finally, send our component id & ip address (to be published with metrics)
+				// Finally, send our component id, ip address, and registration time (to be published with metrics)
 				sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
-				sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
+				sendStringMessage(metricsManagerSocket, getIP(), ZMQ_SNDMORE);
+				sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[GRAVITY_METRICS_DATA_PRODUCT_ID] , ZMQ_DONTWAIT);
 			}
 
 			if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
@@ -1728,6 +1736,15 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 	details.subscriber = &subscriber;
 	subscriptionList.push_back(details);
 
+	if (publishGravityMessages) {
+		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
+		GravityLogMessagePB message;
+		message.set_level("info");
+		message.set_message("Talon subscribe method called");
+		gdp.setData(message);
+		publish(gdp, componentID);
+	}
+	
     return GravityReturnCodes::SUCCESS;
 }
 
@@ -1831,6 +1848,15 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	zmq_msg_close(&msg);
 
     publishManagerPublishSWL.lock.Unlock();
+
+	if (publishGravityMessages && dataProduct.getDataProductID() != "GRAVITY_MESSAGES") {
+		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
+    	GravityLogMessagePB message;
+		message.set_level("info");
+		message.set_message("Talon publish method called");
+		gdp.setData(message);
+		publish(gdp, componentID);
+	}
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -2058,6 +2084,15 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 
     requestManagerSWL.lock.Unlock();
 
+	if (publishGravityMessages) {
+		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
+		GravityLogMessagePB message;
+		message.set_level("info");
+		message.set_message("Talon request method 1 called");
+		gdp.setData(message);
+		publish(gdp, componentID);
+	}
+
 	return GravityReturnCodes::SUCCESS;
 }
 
@@ -2128,6 +2163,15 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 			return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 		}
 		logger->trace("Received future response's response");
+	}
+
+	if (publishGravityMessages) {
+		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
+		GravityLogMessagePB message;
+		message.set_level("info");
+		message.set_message("Talon request method 2 called");
+		gdp.setData(message);
+		publish(gdp, componentID);
 	}
 
 	return response;
@@ -2736,51 +2780,110 @@ string GravityNode::getIP()
     return ip;
 }
 
-std::string GravityNode::getStringParam(std::string key, std::string default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	return parser->getString(key, default_value);
+std::string GravityNode::getStringParam(std::string key, std::string default_value) {
+
+	GravityConfigParamPB pb;
+	GravityDataProduct gdp("GRAVITY_SETTINGS");
+
+	pb.set_key(key);
+
+	if (parser == NULL || !(parser->hasKey(key))) {
+		pb.set_value(default_value);
+		pb.set_is_default(true);
+	}
+	else {
+		pb.set_value(parser->getString(key, default_value));
+		pb.set_is_default(false);
+	}
+
+	gdp.setData(pb);
+	publish(gdp, componentID);
+
+	return pb.value();
 }
 
-int GravityNode::getIntParam(std::string key, int default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	std::string value = parser->getString(key, "");
+int GravityNode::getIntParam(std::string key, int default_value) {
+	
+	GravityConfigParamPB pb;
+	GravityDataProduct gdp("GRAVITY_SETTINGS");
 
-	return StringToInt(value, default_value);
+	pb.set_key(key);
+
+    if (parser == NULL || !(parser->hasKey(key))) {
+        pb.set_value(std::to_string(default_value));
+		pb.set_is_default(true);
+	}
+	else {
+		std::string value = parser->getString(key, "");
+		pb.set_value(value);
+		pb.set_is_default(false);
+	}
+
+	gdp.setData(pb);
+	publish(gdp, componentID);
+
+	return StringToInt(pb.value(), default_value);
 }
 
-double GravityNode::getFloatParam(std::string key, double default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	std::string value = parser->getString(key, "");
+double GravityNode::getFloatParam(std::string key, double default_value) {
 
-	return StringToDouble(value, default_value);
+	GravityConfigParamPB pb;
+	GravityDataProduct gdp("GRAVITY_SETTINGS");
+
+	pb.set_key(key);
+
+    if (parser == NULL || !(parser->hasKey(key))) {
+		pb.set_value(std::to_string(default_value));
+		pb.set_is_default(true);
+    }
+	else {
+		std::string value = parser->getString(key, "");
+		pb.set_value(value);
+		pb.set_is_default(false);
+	}
+
+	gdp.setData(pb);
+	publish(gdp, componentID);
+
+	return StringToDouble(pb.value(), default_value);
 }
 
-bool GravityNode::getBoolParam(std::string key, bool default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
+bool GravityNode::getBoolParam(std::string key, bool default_value) {
+
+	GravityConfigParamPB pb;
+	GravityDataProduct gdp("GRAVITY_SETTINGS");
+
+	pb.set_key(key);
+
+	bool retValue;
+
+    if (parser == NULL || !(parser->hasKey(key))) {
+		pb.set_value(std::to_string(default_value));
+		pb.set_is_default(true);
+		retValue = default_value;
     }
-    string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
-	if( val == "true" ||
-		val == "t" ||
-		val == "yes" ||
-		val == "y" )
-		return true;
-	else
-		return false;
+	else {
+		string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
+		if( val == "true" ||
+			val == "t" ||
+			val == "yes" ||
+			val == "y" ) {
+
+			pb.set_value(std::to_string(true));
+			retValue = true;
+		}
+		else {
+			pb.set_value(std::to_string(false));
+			retValue = false;
+		}
+
+		pb.set_is_default(false);
+	}
+
+	gdp.setData(pb);
+	publish(gdp, componentID);
+
+	return retValue;
 }
 
 std::string GravityNode::getComponentID()
