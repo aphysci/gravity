@@ -27,9 +27,6 @@
 #define GRAVITYSUBSCRIBER_H_
 
 #include "GravityDataProduct.h"
-#include "protobuf/GravityMetricsDataPB.pb.h"
-
-using namespace std;
 
 namespace gravity
 {
@@ -50,25 +47,6 @@ public:
      * \param dataProducts the data products that fill the registered subscription
      */
     GRAVITY_API virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) = 0;
-};
-
-class GravityMetricsSubscriber : public GravitySubscriber {
-
-    // GRAVITY_API ~GravitySubscriber() override;
-
-public:
-    
-    virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) {
-		// for(std::vector< shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
-        // {
-        //     //Get the protobuf object from the message
-        //     // GravityMetricsDataPB metricsPB;
-        //     // (*i)->populateMessage(metricsPB);
-
-        //     //Process the message
-        //     // Log::warning("Current Count: %d", metricsPB.count());
-        // }
-	}
 };
 
 } /* namespace gravity */
