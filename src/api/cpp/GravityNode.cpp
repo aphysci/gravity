@@ -1740,7 +1740,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
 		GravityLogMessagePB message;
 		message.set_level("info");
-		message.set_message("Talon subscribe method called");
+		message.set_message("Subscribe method called");
 		gdp.setData(message);
 		publish(gdp, componentID);
 	}
@@ -1853,7 +1853,7 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
     	GravityLogMessagePB message;
 		message.set_level("info");
-		message.set_message("Talon publish method called");
+		message.set_message("Publish method called");
 		gdp.setData(message);
 		publish(gdp, componentID);
 	}
@@ -2088,7 +2088,7 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
 		GravityLogMessagePB message;
 		message.set_level("info");
-		message.set_message("Talon request method 1 called");
+		message.set_message("Asynchronous request method called");
 		gdp.setData(message);
 		publish(gdp, componentID);
 	}
@@ -2169,7 +2169,7 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
 		GravityLogMessagePB message;
 		message.set_level("info");
-		message.set_message("Talon request method 2 called");
+		message.set_message("Synchronous request method called");
 		gdp.setData(message);
 		publish(gdp, componentID);
 	}
