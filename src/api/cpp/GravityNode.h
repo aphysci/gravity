@@ -192,7 +192,6 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
     static Semaphore initLock;
 
-    bool publishGravityMessages;
     bool metricsEnabled;
 	bool initialized;
 	bool logInitialized;
@@ -231,6 +230,7 @@ private:
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
+    std::map<std::string,std::string> publishedParams;
 	std::map<std::string,uint64_t> urlInstanceMap;
     std::string myDomain;
     std::string componentID;

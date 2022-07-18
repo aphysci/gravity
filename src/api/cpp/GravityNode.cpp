@@ -65,7 +65,6 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
-#include "protobuf/GravityLogMessagePB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -954,9 +953,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 			registerDataProduct("GRAVITY_SETTINGS", GravityTransportType::TCP);
 			registerDataProduct("GRAVITY_LOGGER", GravityTransportType::TCP);
-			registerDataProduct("GRAVITY_MESSAGES", GravityTransportType::TCP);
 
-			publishGravityMessages = getBoolParam("PublishGravityMessages", false);
 			// Enable metrics (if configured)
 			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
 			if (metricsEnabled)
@@ -1735,15 +1732,6 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 	details.receiveLastCachedValue = receiveLastCachedValue;
 	details.subscriber = &subscriber;
 	subscriptionList.push_back(details);
-
-	if (publishGravityMessages) {
-		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
-		GravityLogMessagePB message;
-		message.set_level("info");
-		message.set_message("Subscribe method called");
-		gdp.setData(message);
-		publish(gdp, componentID);
-	}
 	
     return GravityReturnCodes::SUCCESS;
 }
@@ -1848,15 +1836,6 @@ GravityReturnCode GravityNode::publish(const GravityDataProduct& dataProduct, st
 	zmq_msg_close(&msg);
 
     publishManagerPublishSWL.lock.Unlock();
-
-	if (publishGravityMessages && dataProduct.getDataProductID() != "GRAVITY_MESSAGES") {
-		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
-    	GravityLogMessagePB message;
-		message.set_level("info");
-		message.set_message("Publish method called");
-		gdp.setData(message);
-		publish(gdp, componentID);
-	}
 
     return GravityReturnCodes::SUCCESS;
 }
@@ -2084,15 +2063,6 @@ GravityReturnCode GravityNode::request(string connectionURL, string serviceID, c
 
     requestManagerSWL.lock.Unlock();
 
-	if (publishGravityMessages) {
-		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
-		GravityLogMessagePB message;
-		message.set_level("info");
-		message.set_message("Asynchronous request method called");
-		gdp.setData(message);
-		publish(gdp, componentID);
-	}
-
 	return GravityReturnCodes::SUCCESS;
 }
 
@@ -2163,15 +2133,6 @@ std::shared_ptr<GravityDataProduct> GravityNode::request(string serviceID, const
 			return std::shared_ptr<GravityDataProduct>((GravityDataProduct*)NULL);
 		}
 		logger->trace("Received future response's response");
-	}
-
-	if (publishGravityMessages) {
-		GravityDataProduct gdp = GravityDataProduct("GRAVITY_MESSAGES");
-		GravityLogMessagePB message;
-		message.set_level("info");
-		message.set_message("Synchronous request method called");
-		gdp.setData(message);
-		publish(gdp, componentID);
 	}
 
 	return response;
