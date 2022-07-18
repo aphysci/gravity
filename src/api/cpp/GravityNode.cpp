@@ -449,7 +449,7 @@ GravityNode::~GravityNode()
     // If metrics are enabled, we need to unregister our metrics data product
     if (metricsEnabled)
     {
-        unregisterDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID);
+        unregisterDataProduct(gravity::constants::METRICS_DATA_DPID);
     }
 
     //kill the domain listener
@@ -955,7 +955,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			if (metricsEnabled)
 			{
 				// Register our metrics data product with the service directory
-				registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
+				registerDataProduct(gravity::constants::METRICS_DATA_DPID, GravityTransportTypes::TCP);
 
 				// Command the GravityMetricsManager thread to start collecting metrics
 				sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
@@ -1303,7 +1303,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 }
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType, bool cacheLastValue)
-{
+{ 
 	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
 }
 
@@ -1341,6 +1341,19 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
     {
         return GravityReturnCodes::NOT_INITIALIZED;
     }
+
+	set<string> reservedDataProductIds;
+	reservedDataProductIds.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
+	reservedDataProductIds.insert(gravity::constants::DOMAIN_DETAILS_DPID);
+	reservedDataProductIds.insert(gravity::constants::DOMAIN_UPDATE_DPID);
+	reservedDataProductIds.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
+
+	if (reservedDataProductIds.find(dataProductID) != reservedDataProductIds.end())
+	{
+		spdlog::warn("Rejecting attempt to reserve Data Product ID");
+		return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
+	}
+
     std::string transportType_str;
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -1681,7 +1694,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 	int tries = 5;
 	while (registeredPublishersInfo.size() == 0 && tries-- > 0)
 	{
-		ret = ServiceDirectoryDataProductLookup("RegisteredPublishers", registeredPublishersInfo, myDomain);
+		ret = ServiceDirectoryDataProductLookup(gravity::constants::REGISTERED_PUBLISHERS_DPID, registeredPublishersInfo, myDomain);
 		if(ret != GravityReturnCodes::SUCCESS)
 			return ret;
 		if (registeredPublishersInfo.size() > 1)
@@ -1695,7 +1708,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
 	if (registeredPublishersInfo.size() == 0 || !registeredPublishersInfo[0].has_url())
 	{
-		logger->error("Service Directory has not finished initialization (RegisteredPublishers not available)");
+		logger->error("Service Directory has not finished initialization ({} not available)", gravity::constants::REGISTERED_PUBLISHERS_DPID);
 		return GravityReturnCodes::NO_SERVICE_DIRECTORY;
 	}
 

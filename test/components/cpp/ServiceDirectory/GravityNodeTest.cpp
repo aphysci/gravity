@@ -18,6 +18,7 @@
 
 #include "GravityNodeTest.h"
 #include "GravityTest.h"
+#include "CommUtil.h"
 
 #include <mutex>
 
@@ -135,7 +136,7 @@ void GravityNodeTest::testServiceWithDomain(void)
 	// Get the domain from the Service Directory
 	string domain;
 	GravityDataProduct request("GetDomain");
-	std::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	std::shared_ptr<GravityDataProduct> response = node.request(gravity::constants::DIRECTORY_SERVICE_DPID, request, 1000);
 	GRAVITY_TEST(response);
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());
@@ -199,7 +200,7 @@ void GravityNodeTest::testSubscribeDomain(void)
 	// Get the domain from the Service Directory
 	string domain;
 	GravityDataProduct request("GetDomain");
-	std::shared_ptr<GravityDataProduct> response = node.request("DirectoryService", request, 1000);
+	std::shared_ptr<GravityDataProduct> response = node.request(gravity::constants::DIRECTORY_SERVICE_DPID, request, 1000);
 	GRAVITY_TEST(response);
 	char* p = (char*)calloc(response->getDataSize(), sizeof(char));
 	response->getData(p, response->getDataSize());

@@ -78,7 +78,8 @@ namespace GravityReturnCodes
         NO_SERVICE_PROVIDER = -10, ///< No service provider found.
         NO_PORTS_AVAILABLE = -11, ///< No ports available
 		INVALID_PARAMETER = -12, ///< Invalid parameter. (Ex: entered a negative number for time)
-		NOT_INITIALIZED = -13  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
+		NOT_INITIALIZED = -13,  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
+        RESERVED_DATA_PRODUCT_ID = -14 ///< Data Product IDs used internally by Gravity
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;

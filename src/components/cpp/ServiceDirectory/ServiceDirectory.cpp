@@ -51,9 +51,6 @@
 #include <thread>
 #include <locale>
 
-#define REGISTERED_PUBLISHERS "RegisteredPublishers"
-#define DIRECTORY_SERVICE "DirectoryService"
-
 using namespace std;
 
 struct RegistrationData
@@ -75,16 +72,16 @@ static void* registration(void* regData)
     gravity::GravityServiceProvider* provider = ((RegistrationData*)regData)->provider;
 
     // Register data product for reporting changes to registered publishers (always cache this one)
-    gn->registerDataProduct(REGISTERED_PUBLISHERS, gravity::GravityTransportTypes::TCP, true);
+    gn->registerDataProduct(gravity::constants::REGISTERED_PUBLISHERS_DPID, gravity::GravityTransportTypes::TCP, true);
 
     // Register the data product for domain broadcast details
-	gn->registerDataProduct("ServiceDirectory_DomainDetails", gravity::GravityTransportTypes::TCP);
+	gn->registerDataProduct(gravity::constants::DOMAIN_DETAILS_DPID, gravity::GravityTransportTypes::TCP);
     
     // Register service for external requests
-    gn->registerService(DIRECTORY_SERVICE, gravity::GravityTransportTypes::TCP, *provider);
+    gn->registerService(gravity::constants::DIRECTORY_SERVICE_DPID, gravity::GravityTransportTypes::TCP, *provider);
 
 	// Register the data products for adding and removing domains
-	gn->registerDataProduct("ServiceDirectory_DomainUpdate",gravity::GravityTransportTypes::TCP);
+	gn->registerDataProduct(gravity::constants::DOMAIN_UPDATE_DPID, gravity::GravityTransportTypes::TCP);
 
     return NULL;
 }
@@ -371,7 +368,7 @@ void ServiceDirectory::start()
             std::shared_ptr<GravityDataProduct> response = request(req);
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
-                GravityDataProduct update(REGISTERED_PUBLISHERS);
+                GravityDataProduct update(gravity::constants::REGISTERED_PUBLISHERS_DPID);
                 for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); it++)
                 {
                     logger->debug("Processing pending registered publishers update for {}", *it);
@@ -498,7 +495,7 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string 
     logger->debug("Received service request of type '{}'", serviceID);
     std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("DirectoryServiceResponse"));
    
-    if (serviceID == DIRECTORY_SERVICE)
+    if (serviceID == gravity::constants::DIRECTORY_SERVICE_DPID)
     {
         lock.Lock();
         string requestType = request.getDataProductID();
@@ -663,7 +660,7 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 
 	// Publish update
 	logger->debug("Publishing ServiceDirectory_DomainDetails");
-	GravityDataProduct gdp("ServiceDirectory_DomainDetails");
+	GravityDataProduct gdp(gravity::constants::DOMAIN_DETAILS_DPID);
 	gdp.setData(providerMap);
 	gn.publish(gdp);
 }
@@ -702,7 +699,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 		{
 			map<string, list<PublisherInfoPB> >& dpMap = dataProductMap[domain];
 
-			if (registration.id() == REGISTERED_PUBLISHERS)
+			if (registration.id() == gravity::constants::REGISTERED_PUBLISHERS_DPID)
 			{
 				// When this request is received here, this product ID has already been registered with our GravityNode, so
 				// it's safe to start publishing to it (cached values will be sent to new subscribers).
@@ -745,7 +742,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 
 				if (registeredPublishersReady)
 				{
-					GravityDataProduct update(REGISTERED_PUBLISHERS);
+					GravityDataProduct update(gravity::constants::REGISTERED_PUBLISHERS_DPID);
 					addPublishers(registration.id(), update, domain);
 					gn.publish(update, registration.id());
 				}
@@ -758,7 +755,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				purgeObsoletePublishers(registration.id(), registration.url());
 
 				// Update any subscribers interested in our providers
-				if (domain == this->domain && registration.id() != REGISTERED_PUBLISHERS)
+				if (domain == this->domain && registration.id() != gravity::constants::REGISTERED_PUBLISHERS_DPID)
 				{
 					logger->debug("Sending update of product definitions (resulting from added data for '{}' @ '{}')", registration.id(), registration.url());
 					updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, DATA);
@@ -855,7 +852,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
 			if (registeredPublishersReady)
 			{
-			    GravityDataProduct update(REGISTERED_PUBLISHERS);
+			    GravityDataProduct update(gravity::constants::REGISTERED_PUBLISHERS_DPID);
 			    addPublishers(unregistration.id(), update, domain);
 			    gn.publish(update, unregistration.id());
 			}
@@ -948,7 +945,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
 
                 if (registeredPublishersReady)
                 {
-                    GravityDataProduct update(REGISTERED_PUBLISHERS);
+                    GravityDataProduct update(gravity::constants::REGISTERED_PUBLISHERS_DPID);
                     addPublishers(iter->first, update, domain);
                     gn.publish(update, iter->first);
                 }
@@ -1060,7 +1057,7 @@ void ServiceDirectory::publishDomainUpdateMessage(string updateDomain, string ur
 	updatePB.set_type(type == ADD? ServiceDirectoryDomainUpdatePB_UpdateType_ADD : 
 		ServiceDirectoryDomainUpdatePB_UpdateType_REMOVE);
 
-	GravityDataProduct gdp("ServiceDirectory_DomainUpdate");
+	GravityDataProduct gdp(gravity::constants::DOMAIN_UPDATE_DPID);
 	gdp.setData(updatePB);
 	gn.publish(gdp);
 }

@@ -49,6 +49,15 @@
 namespace gravity
 {
 
+    namespace constants 
+    {
+        const std::string REGISTERED_PUBLISHERS_DPID = "RegisteredPublishers";
+        const std::string DOMAIN_DETAILS_DPID = "ServiceDirectory_DomainDetails";
+        const std::string DOMAIN_UPDATE_DPID = "ServiceDirectory_DomainUpdate";
+        const std::string DIRECTORY_SERVICE_DPID = "DirectoryService";
+        const std::string METRICS_DATA_DPID = "GravityMetricsData";
+    }
+
 /**
  * @name ZMQ Socket functions 
  * @{
