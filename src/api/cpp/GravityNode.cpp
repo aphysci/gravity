@@ -413,6 +413,7 @@ GravityNode::GravityNode()
     hbSocket = NULL;
 
     // Default to no metrics
+	publishGravitySettings=false;
     metricsEnabled = false;
 	initialized=false;
 	logInitialized = false;
@@ -435,6 +436,7 @@ GravityNode::GravityNode(std::string componentID)
     hbSocket = NULL;
 
     // Default to no metrics
+	publishGravitySettings=false;
     metricsEnabled = false;
 	initialized=false;
 	logInitialized=false;
@@ -951,8 +953,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
 
-			// registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
-			registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
+			registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
+			// registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
 
 			publishGravitySettings = false;
 
