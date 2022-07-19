@@ -132,7 +132,9 @@ class FutureResponse;
 class GravityNode
 {
 private:
-  
+    // set of reservedDataProduct IDs 
+    std::set<std::string> reservedDataProductIds;
+
   /**
    * Domain change listener for a GravityNode.
    */

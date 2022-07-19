@@ -400,6 +400,12 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 Semaphore GravityNode::initLock;
 GravityNode::GravityNode()
 {	
+	// Populating set of registered DataProduct IDs
+	reservedDataProductIds.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
+	reservedDataProductIds.insert(gravity::constants::DOMAIN_DETAILS_DPID);
+	reservedDataProductIds.insert(gravity::constants::DOMAIN_UPDATE_DPID);
+	reservedDataProductIds.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
+
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;
 
@@ -1342,15 +1348,9 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
         return GravityReturnCodes::NOT_INITIALIZED;
     }
 
-	set<string> reservedDataProductIds;
-	reservedDataProductIds.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
-	reservedDataProductIds.insert(gravity::constants::DOMAIN_DETAILS_DPID);
-	reservedDataProductIds.insert(gravity::constants::DOMAIN_UPDATE_DPID);
-	reservedDataProductIds.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
-
-	if (reservedDataProductIds.find(dataProductID) != reservedDataProductIds.end())
+	if ((reservedDataProductIds.find(dataProductID) != reservedDataProductIds.end()) && (componentID != "ServiceDirectory"))
 	{
-		spdlog::warn("Rejecting attempt to reserve Data Product ID");
+		spdlog::warn("Rejecting attempt to register Data Product ID");
 		return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
 	}
 
