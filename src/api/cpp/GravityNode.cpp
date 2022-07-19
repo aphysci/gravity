@@ -953,34 +953,36 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
 
-			registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
-			// registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
+			if (componentID != "ServiceDirectory") {
+				registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
+				// registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
 
-			publishGravitySettings = false;
+				publishGravitySettings = getBoolParam("PublishGravitySettings", false);
 
-			// Enable metrics (if configured)
-			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
-			if (metricsEnabled)
-			{
-				// Register our metrics data product with the service directory
-				registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
+				// Enable metrics (if configured)
+				metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
+				if (metricsEnabled)
+				{
+					// Register our metrics data product with the service directory
+					registerDataProduct(GRAVITY_METRICS_DATA_PRODUCT_ID, GravityTransportTypes::TCP);
 
-				// Command the GravityMetricsManager thread to start collecting metrics
-				sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
+					// Command the GravityMetricsManager thread to start collecting metrics
+					sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
 
-				// Get collection parameters from ini file
-				// (default to 10 second sampling, publishing once per min)
-				int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
-				int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
+					// Get collection parameters from ini file
+					// (default to 10 second sampling, publishing once per min)
+					int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
+					int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
 
-				// Send collection details to the GravityMetricsManager
-				sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
-				sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+					// Send collection details to the GravityMetricsManager
+					sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
+					sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
 
-				// Finally, send our component id, ip address, and registration time (to be published with metrics)
-				sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
-				sendStringMessage(metricsManagerSocket, getIP(), ZMQ_SNDMORE);
-				sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[GRAVITY_METRICS_DATA_PRODUCT_ID] , ZMQ_DONTWAIT);
+					// Finally, send our component id, ip address, and registration time (to be published with metrics)
+					sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
+					sendStringMessage(metricsManagerSocket, getIP(), ZMQ_SNDMORE);
+					sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[GRAVITY_METRICS_DATA_PRODUCT_ID] , ZMQ_DONTWAIT);
+				}
 			}
 
 			if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
