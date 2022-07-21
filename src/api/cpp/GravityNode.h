@@ -133,7 +133,8 @@ class GravityNode
 {
 private:
     // set of reservedDataProduct IDs 
-    std::set<std::string> reservedDataProductIds;
+    std::set<std::string> serviceDirectory_ReservedDataProductIDs;
+    std::set<std::string> gravityNode_ReservedDataProductIDs;
 
   /**
    * Domain change listener for a GravityNode.
@@ -255,7 +256,7 @@ private:
 		const GravityRequestor& requestor, uint32_t regTime, std::string requestID = "", int timeout_milliseconds = -1);
 
     GRAVITY_API GravityReturnCode registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
-    		                                                  bool cacheLastValue, bool isRelay, bool localOnly);
+    		                                                  bool cacheLastValue, bool isRelay, bool localOnly, bool allowReservedIDs);
 
 	static void* startGravityDomainListener(void* context);
 	

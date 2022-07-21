@@ -400,11 +400,14 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 Semaphore GravityNode::initLock;
 GravityNode::GravityNode()
 {	
-	// Populating set of registered DataProduct IDs
-	reservedDataProductIds.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
-	reservedDataProductIds.insert(gravity::constants::DOMAIN_DETAILS_DPID);
-	reservedDataProductIds.insert(gravity::constants::DOMAIN_UPDATE_DPID);
-	reservedDataProductIds.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
+	// Populating (ServiceDirectory) set of RegisteredDataProductIDs 
+	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
+	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DOMAIN_DETAILS_DPID);
+	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DOMAIN_UPDATE_DPID);
+	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
+	
+	// Populating (ServiceDirectory) set of RegisteredDataProductIDs
+	gravityNode_ReservedDataProductIDs.insert(gravity::constants::METRICS_DATA_DPID);
 
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;
@@ -708,6 +711,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	bool domainTimeout=false;
 	bool iniWarning = false;
 
+	gravityNode_ReservedDataProductIDs.insert(componentID + "_GravityHeartbeat");
+
     initLock.Lock();
 
     // Setup zmq context
@@ -961,7 +966,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			if (metricsEnabled)
 			{
 				// Register our metrics data product with the service directory
-				registerDataProduct(gravity::constants::METRICS_DATA_DPID, GravityTransportTypes::TCP);
+				registerDataProductInternal(gravity::constants::METRICS_DATA_DPID, GravityTransportTypes::TCP, false, false, false, true);
 
 				// Command the GravityMetricsManager thread to start collecting metrics
 				sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
@@ -1310,7 +1315,7 @@ GravityReturnCode GravityNode::registerDataProduct(string dataProductID, Gravity
 
 GravityReturnCode GravityNode::registerDataProduct(string dataProductID, GravityTransportType transportType, bool cacheLastValue)
 { 
-	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, "");
+	return registerDataProductInternal(dataProductID, transportType, cacheLastValue, false, false, false);
 }
 
 GravityReturnCode GravityNode::subscribersExist(std::string dataProductID, bool& hasSubscribersOut) {
@@ -1341,16 +1346,17 @@ GravityReturnCode GravityNode::subscribersExist(std::string dataProductID, bool&
 
 
 GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
-		                                                    bool cacheLastValue, bool isRelay, bool localOnly)
+		                                                    bool cacheLastValue, bool isRelay, bool localOnly, bool allowReservedIDs)
 {
     if (!initialized)
     {
         return GravityReturnCodes::NOT_INITIALIZED;
     }
 
-	if ((reservedDataProductIds.find(dataProductID) != reservedDataProductIds.end()) && (componentID != "ServiceDirectory"))
+	if ((componentID != "ServiceDirectory" && serviceDirectory_ReservedDataProductIDs.find(dataProductID) != serviceDirectory_ReservedDataProductIDs.end()) || 
+		(allowReservedIDs == false && gravityNode_ReservedDataProductIDs.find(dataProductID) != gravityNode_ReservedDataProductIDs.end()))
 	{
-		spdlog::warn("Rejecting attempt to register Data Product ID");
+		spdlog::warn("Rejecting attempt to register {}", dataProductID);
 		return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
 	}
 
@@ -2414,7 +2420,7 @@ GravityReturnCode GravityNode::startHeartbeat(int64_t interval_in_microseconds)
 	//Gravity Heartbeats named by component ID
 	heartbeatName = componentID + "_GravityHeartbeat";
 
-	this->registerDataProduct(heartbeatName, GravityTransportTypes::TCP);
+	this->registerDataProductInternal(heartbeatName, GravityTransportTypes::TCP, false, false, false, true);
 
 	HBParams* params = new HBParams(); //(freed by thread)
 	params->zmq_context = context;
@@ -2526,7 +2532,7 @@ GravityReturnCode GravityNode::registerRelay(string dataProductID, const Gravity
     {
         logger->warn("Using a Relay with cacheLastValue=true is atypical and may result in duplicate messages received by subscribers during the relay start/stop transition");
     }
-	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly);
+	GravityReturnCode ret = registerDataProductInternal(dataProductID, transportType, cacheLastValue, true, localOnly, false);
 	if (ret != GravityReturnCodes::SUCCESS)
 		return ret;
 	return subscribe(dataProductID, subscriber, "", "", false);

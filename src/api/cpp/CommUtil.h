@@ -48,13 +48,15 @@
 
 namespace gravity
 {
-
     namespace constants 
     {
+        // ServiceDirectory Reserved Data Products
         const std::string REGISTERED_PUBLISHERS_DPID = "RegisteredPublishers";
         const std::string DOMAIN_DETAILS_DPID = "ServiceDirectory_DomainDetails";
         const std::string DOMAIN_UPDATE_DPID = "ServiceDirectory_DomainUpdate";
         const std::string DIRECTORY_SERVICE_DPID = "DirectoryService";
+
+        // GravityNode Reserved Data Products
         const std::string METRICS_DATA_DPID = "GravityMetricsData";
     }
 
