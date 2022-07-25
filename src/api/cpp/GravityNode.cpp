@@ -2770,86 +2770,30 @@ std::string GravityNode::getStringParam(std::string key, std::string default_val
 
 int GravityNode::getIntParam(std::string key, int default_value) {
 
-	configParamPB.set_key(key);
-
-    if (parser == NULL || !(parser->hasKey(key))) {
-        configParamPB.set_value(std::to_string(default_value));
-		configParamPB.set_is_default(true);
-	}
-	else {
-		std::string value = parser->getString(key, "");
-		configParamPB.set_value(value);
-		configParamPB.set_is_default(false);
-	}
-
-	if (settingsPubEnabled && initialized && !(publishedSettings.count(configParamPB.key()) == 1 && publishedSettings.at(configParamPB.key()) == configParamPB.value())) {
-		settingsGDP.setData(configParamPB);
-		publish(settingsGDP, componentID);
-		publishedSettings[configParamPB.key()] = configParamPB.value();
-	}
-
-	return StringToInt(configParamPB.value(), default_value);
+	std::string s = getStringParam(key, std::to_string(default_value));
+	return StringToInt(s, default_value);
 }
 
 double GravityNode::getFloatParam(std::string key, double default_value) {
 
-	configParamPB.set_key(key);
-
-    if (parser == NULL || !(parser->hasKey(key))) {
-		configParamPB.set_value(std::to_string(default_value));
-		configParamPB.set_is_default(true);
-    }
-	else {
-		std::string value = parser->getString(key, "");
-		configParamPB.set_value(value);
-		configParamPB.set_is_default(false);
-	}
-
-	if (settingsPubEnabled && initialized && !(publishedSettings.count(configParamPB.key()) == 1 && publishedSettings.at(configParamPB.key()) == configParamPB.value())) {
-		settingsGDP.setData(configParamPB);
-		publish(settingsGDP, componentID);
-		publishedSettings[configParamPB.key()] = configParamPB.value();
-	}
-
-	return StringToDouble(configParamPB.value(), default_value);
+	std::string s = getStringParam(key, std::to_string(default_value));
+	return StringToDouble(s, default_value);
 }
 
 bool GravityNode::getBoolParam(std::string key, bool default_value) {
 
-	configParamPB.set_key(key);
+	std::string val = getStringParam(key, default_value ? "true" : "false");
 
-	bool retValue;
+	if( val == "true" ||
+		val == "t" ||
+		val == "yes" ||
+		val == "y" ) {
 
-    if (parser == NULL || !(parser->hasKey(key))) {
-		configParamPB.set_value(std::to_string(default_value));
-		configParamPB.set_is_default(true);
-		retValue = default_value;
-    }
+		return true;
+	}
 	else {
-		string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
-		if( val == "true" ||
-			val == "t" ||
-			val == "yes" ||
-			val == "y" ) {
-
-			configParamPB.set_value(std::to_string(true));
-			retValue = true;
-		}
-		else {
-			configParamPB.set_value(std::to_string(false));
-			retValue = false;
-		}
-
-		configParamPB.set_is_default(false);
+		return false;
 	}
-
-	if (settingsPubEnabled && initialized && !(publishedSettings.count(configParamPB.key()) == 1 && publishedSettings.at(configParamPB.key()) == configParamPB.value())) {
-		settingsGDP.setData(configParamPB);
-		publish(settingsGDP, componentID);
-		publishedSettings[configParamPB.key()] = configParamPB.value();
-	}
-
-	return retValue;
 }
 
 std::string GravityNode::getComponentID()
