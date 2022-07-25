@@ -680,11 +680,11 @@ GravityReturnCode GravityNode::init()
 			if(console_log_level != Log::NONE)
 				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
 
-			/*
+			
 			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 			if(net_log_level != Log::NONE)
 				Log::initAndAddGravityLogger(this, net_log_level);
-			*/
+			
 			
 			//log an error indicating the componentID was missing
 			logger->error("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
@@ -992,11 +992,11 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			//parser->ParseCmdLine
 
    			// Setup up network logging now that SD is available
-			/*
+			
 			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
 			if(net_log_level != Log::NONE)
 				Log::initAndAddGravityLogger(this, net_log_level);
-			*/
+			
 			
 			configureServiceManager();
 			configureSubscriptionManager();
