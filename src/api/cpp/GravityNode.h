@@ -192,7 +192,7 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
     static Semaphore initLock;
 
-    bool publishGravitySettings;
+    bool settingsEnabled;
     bool metricsEnabled;
 	bool initialized;
 	bool logInitialized;
@@ -270,8 +270,6 @@ private:
 	void configSpdLoggers();
 	
 	static const std::string file_separator;
-
-    void print_map(const std::map<std::string, std::string>& map);
 
 public:
     /**

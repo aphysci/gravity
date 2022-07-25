@@ -413,8 +413,8 @@ GravityNode::GravityNode()
     hbSocket = NULL;
 
     // Default to no metrics
-	publishGravitySettings=false;
     metricsEnabled = false;
+	settingsEnabled=false;
 	initialized=false;
 	logInitialized = false;
 	listenerEnabled=false;
@@ -436,8 +436,8 @@ GravityNode::GravityNode(std::string componentID)
     hbSocket = NULL;
 
     // Default to no metrics
-	publishGravitySettings=false;
     metricsEnabled = false;
+	settingsEnabled=false;
 	initialized=false;
 	logInitialized=false;
 	heartbeatStarted=false;
@@ -957,7 +957,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 				registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
 				// registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
 
-				publishGravitySettings = getBoolParam("PublishGravitySettings", false);
+				settingsEnabled = getBoolParam("GravitySettingsEnabled", false);
 
 				// Enable metrics (if configured)
 				metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
@@ -2763,46 +2763,13 @@ std::string GravityNode::getStringParam(std::string key, std::string default_val
 		pb.set_is_default(false);
 	}
 
-	if (publishGravitySettings && initialized) {
-		printf("PublishGravitySettings is %d, GetStringParam called: Key -> %s Value -> %s\n", publishGravitySettings, pb.key().c_str(), pb.value().c_str());
-		if (publishedParams.count(pb.key()) == 1 && publishedParams.at(pb.key()) == pb.value()) {
-			printf("Key-value is in table. No publish needed\n");
-		}
-		else {
-			printf("Key is not in table or key-value in table is different. Publishing now...\n");
-			gdp.setData(pb);
-			publish(gdp, componentID);
-			publishedParams[pb.key()] = pb.value();
-		}
-
-		// publishedParams[pb.key()] = pb.value();
-
-		printf("%s: ", componentID.c_str());
-		print_map(publishedParams);
-		printf("\n");
+	if (settingsEnabled && initialized && !(publishedParams.count(pb.key()) == 1 && publishedParams.at(pb.key()) == pb.value())) {
+		gdp.setData(pb);
+		publish(gdp, componentID);
+		publishedParams[pb.key()] = pb.value();
 	}
 
 	return pb.value();
-}
-
-void GravityNode::print_map(const std::map<std::string, std::string>& map)
-{
-    // iterate using C++17 facilities
-    // for (const auto& [key, value] : m) {
-    //     std::cout << '[' << key << "] = " << value << "; ";
-    // }
-
-	// C++11 alternative:
-	for (const auto& n : map) {
-		std::cout << n.first << " = " << n.second << "; ";
-	}
-
-	// C++98 alternative
-	//  for (std::map<std::string, int>::const_iterator it = m.begin(); it != m.end(); it++) {
-	//      std::cout << it->first << " = " << it->second << "; ";
-	//  }
-
-    std::cout << '\n';
 }
 
 int GravityNode::getIntParam(std::string key, int default_value) {
@@ -2822,10 +2789,10 @@ int GravityNode::getIntParam(std::string key, int default_value) {
 		pb.set_is_default(false);
 	}
 
-
-	if (publishGravitySettings && initialized) {
+	if (settingsEnabled && initialized && !(publishedParams.count(pb.key()) == 1 && publishedParams.at(pb.key()) == pb.value())) {
 		gdp.setData(pb);
 		publish(gdp, componentID);
+		publishedParams[pb.key()] = pb.value();
 	}
 
 	return StringToInt(pb.value(), default_value);
@@ -2848,9 +2815,10 @@ double GravityNode::getFloatParam(std::string key, double default_value) {
 		pb.set_is_default(false);
 	}
 
-	if (publishGravitySettings && initialized) {
+	if (settingsEnabled && initialized && !(publishedParams.count(pb.key()) == 1 && publishedParams.at(pb.key()) == pb.value())) {
 		gdp.setData(pb);
 		publish(gdp, componentID);
+		publishedParams[pb.key()] = pb.value();
 	}
 
 	return StringToDouble(pb.value(), default_value);
@@ -2888,9 +2856,10 @@ bool GravityNode::getBoolParam(std::string key, bool default_value) {
 		pb.set_is_default(false);
 	}
 
-	if (publishGravitySettings && initialized) {
+	if (settingsEnabled && initialized && !(publishedParams.count(pb.key()) == 1 && publishedParams.at(pb.key()) == pb.value())) {
 		gdp.setData(pb);
 		publish(gdp, componentID);
+		publishedParams[pb.key()] = pb.value();
 	}
 
 	return retValue;
