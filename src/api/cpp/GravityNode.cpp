@@ -2782,7 +2782,7 @@ double GravityNode::getFloatParam(std::string key, double default_value) {
 
 bool GravityNode::getBoolParam(std::string key, bool default_value) {
 
-	std::string val = getStringParam(key, default_value ? "true" : "false");
+	std::string val = StringToLowerCase(getStringParam(key, default_value ? "true" : "false"));
 
 	if( val == "true" ||
 		val == "t" ||
