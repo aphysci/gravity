@@ -410,6 +410,7 @@ GravityNode::GravityNode()
 	// Populating (ServiceDirectory) set of RegisteredDataProductIDs
 	gravityNode_ReservedDataProductIDs.insert(gravity::constants::METRICS_DATA_DPID);
 	gravityNode_ReservedDataProductIDs.insert(gravity::constants::GRAVITY_SETTINGS_DPID);
+	gravityNode_ReservedDataProductIDs.insert(gravity::constants::GRAVITY_LOGGER_DPID);
 
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;

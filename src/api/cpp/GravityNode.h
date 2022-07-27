@@ -34,6 +34,7 @@
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
 #include "CommUtil.h"
+//#include "PublishSink.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
 #include <thread>
@@ -127,6 +128,7 @@ typedef struct GravityINIConfig
 
 class GravityConfigParser;
 class FutureResponse;
+//template<typename Mutex> class PublishSink;
 
 /**
  * A component that provides a simple interface point to a Gravity-enabled application
@@ -134,6 +136,8 @@ class FutureResponse;
 class GravityNode
 {
 private:
+    template<typename Mutex> friend class PublishSink;
+
     // set of reservedDataProduct IDs 
     std::set<std::string> serviceDirectory_ReservedDataProductIDs;
     std::set<std::string> gravityNode_ReservedDataProductIDs;

@@ -31,7 +31,7 @@ using namespace std;
 
 namespace gravity {
 
-const string LogRecorder::logDataProductID("GRAVITY_LOGGER"); //Needs to be the same as gravity::Log::log_dataProductID.
+const string LogRecorder::logDataProductID(gravity::constants::GRAVITY_LOGGER_DPID);
 
 //Note: Out filename is assumed to be 512 bytes long.
 void LogRecorder::getNewFilename(char* outfilename, string basefilename)
