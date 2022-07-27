@@ -409,6 +409,7 @@ GravityNode::GravityNode()
 	
 	// Populating (ServiceDirectory) set of RegisteredDataProductIDs
 	gravityNode_ReservedDataProductIDs.insert(gravity::constants::METRICS_DATA_DPID);
+	gravityNode_ReservedDataProductIDs.insert(gravity::constants::GRAVITY_SETTINGS_DPID);
 
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;
@@ -958,7 +959,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
 			if (componentID != "ServiceDirectory") {
-				registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
+				registerDataProductInternal(gravity::constants::GRAVITY_SETTINGS_DPID, GravityTransportTypes::TCP, false, false, false, true);
 
 				settingsPubEnabled = getBoolParam("GravitySettingsPublishEnabled", false);
 

@@ -33,6 +33,7 @@
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
+#include "CommUtil.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
 #include <thread>
@@ -244,7 +245,7 @@ private:
 	GravityConfigParser* parser;
 
     GravityConfigParamPB configParamPB;
-    GravityDataProduct settingsGDP = GravityDataProduct("GRAVITY_SETTINGS");
+    GravityDataProduct settingsGDP = GravityDataProduct(gravity::constants::GRAVITY_SETTINGS_DPID);
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
