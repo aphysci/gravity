@@ -65,6 +65,7 @@ private:
 	int samplesPerPublish;
 	std::string componentID;
 	std::string ipAddr;
+	int regTimestamp;
 	std::map<std::pair<std::string,GravityMetricsPB_MessageType>,  GravityMetricsPB> metricsData;
 
 	void collectMetrics(void* socket, GravityMetricsPB_MessageType type);
