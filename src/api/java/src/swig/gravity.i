@@ -44,23 +44,17 @@
     try {
         System.loadLibrary("zmq");
     } catch (UnsatisfiedLinkError unused) {
-	    try {
-	        System.loadLibrary("libzmq");
-	    } catch (UnsatisfiedLinkError e) {
-	      System.err.println("Native code library failed to load. Tried both zmq and libzmq.\n" + e);
-	      System.exit(1);
-	    }
+        System.loadLibrary("libzmq");
+        // Unhandled exceptions will bubble up, so that MATLAB (e.g.) can catch them
+        // If exiting is the desired behavior, the using application can catch and exit
     }
 
     try {
         System.loadLibrary("gravity_wrap");
     } catch (UnsatisfiedLinkError unused) {
-	    try {
-	        System.loadLibrary("libgravity_wrap");
-	    } catch (UnsatisfiedLinkError e) {
-	      System.err.println("Native code library failed to load. Tried both gravity_wrap and libgravity_wrap.\n" + e);
-	      System.exit(1);
-	    }
+        System.loadLibrary("libgravity_wrap");
+        // Unhandled exceptions will bubble up, so that MATLAB (e.g.) can catch them
+        // If exiting is the desired behavior, the using application can catch and exit
     }
   }
 %}
