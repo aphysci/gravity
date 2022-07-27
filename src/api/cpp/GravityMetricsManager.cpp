@@ -117,6 +117,7 @@ namespace gravity
 
                     componentID = readStringMessage(metricsControlSocket);
                     ipAddr = readStringMessage(metricsControlSocket);
+                    regTimestamp = readIntMessage(metricsControlSocket);
 
                     // Send metrics enable message to the collectors
                     sendStringMessage(pubMetricsSocket, command, ZMQ_DONTWAIT);
@@ -216,11 +217,14 @@ namespace gravity
 
         GravityDataProduct gdp(gravity::constants::METRICS_DATA_DPID);
         gdp.setTimestamp(gravity::getCurrentTime());
+        gdp.setRegistrationTime(regTimestamp);
         gdp.setData(metrics);
 
         // Send publish command and empty filter
         sendStringMessage(metricsPubSocket, "publish", ZMQ_SNDMORE);
-        sendStringMessage(metricsPubSocket, "", ZMQ_SNDMORE);
+        sendStringMessage(metricsPubSocket, gdp.getDataProductID(), ZMQ_SNDMORE);
+        sendUint64Message(metricsPubSocket, gdp.getGravityTimestamp(), ZMQ_SNDMORE);
+        sendStringMessage(metricsPubSocket, componentID, ZMQ_SNDMORE);
 
         // Publish metrics
         sendGravityDataProduct(metricsPubSocket, gdp, ZMQ_DONTWAIT);

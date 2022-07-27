@@ -34,6 +34,7 @@
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
+#include "protobuf/GravityConfigParamPB.pb.h"
 #include <thread>
 #include <list>
 
@@ -196,6 +197,7 @@ private:
     static const int NETWORK_RETRIES = 3; // attempts to connect
     static Semaphore initLock;
 
+    bool settingsPubEnabled;
     bool metricsEnabled;
 	bool initialized;
 	bool logInitialized;
@@ -234,11 +236,15 @@ private:
     std::map<std::string,std::string> publishMap;
     std::map<std::string,std::string> serviceMap; ///< Maps serviceID to url
     std::list<SubscriptionDetails> subscriptionList;
+    std::map<std::string,std::string> publishedSettings;
 	std::map<std::string,uint64_t> urlInstanceMap;
     std::string myDomain;
     std::string componentID;
 	std::map<std::string, uint32_t> dataRegistrationTimeMap; // Maps data product id to registration time
 	GravityConfigParser* parser;
+
+    GravityConfigParamPB configParamPB;
+    GravityDataProduct settingsGDP = GravityDataProduct("GRAVITY_SETTINGS");
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);

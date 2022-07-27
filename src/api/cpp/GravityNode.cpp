@@ -64,6 +64,7 @@
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
+#include "protobuf/GravityConfigParamPB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -422,6 +423,7 @@ GravityNode::GravityNode()
 
     // Default to no metrics
     metricsEnabled = false;
+	settingsPubEnabled=false;
 	initialized=false;
 	logInitialized = false;
 	listenerEnabled=false;
@@ -444,6 +446,7 @@ GravityNode::GravityNode(std::string componentID)
 
     // Default to no metrics
     metricsEnabled = false;
+	settingsPubEnabled=false;
 	initialized=false;
 	logInitialized=false;
 	heartbeatStarted=false;
@@ -686,12 +689,6 @@ GravityReturnCode GravityNode::init()
 			if(console_log_level != Log::NONE)
 				Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
 
-			
-			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
-			if(net_log_level != Log::NONE)
-				Log::initAndAddGravityLogger(this, net_log_level);
-			
-			
 			//log an error indicating the componentID was missing
 			logger->error("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
 
@@ -960,29 +957,35 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
+			if (componentID != "ServiceDirectory") {
+				registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
 
-			// Enable metrics (if configured)
-			metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
-			if (metricsEnabled)
-			{
-				// Register our metrics data product with the service directory
-				registerDataProductInternal(gravity::constants::METRICS_DATA_DPID, GravityTransportTypes::TCP, false, false, false, true);
+				settingsPubEnabled = getBoolParam("GravitySettingsPublishEnabled", false);
 
-				// Command the GravityMetricsManager thread to start collecting metrics
-				sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
+				// Enable metrics (if configured)
+				metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
+				if (metricsEnabled)
+				{
+					// Register our metrics data product with the service directory
+					registerDataProductInternal(gravity::constants::METRICS_DATA_DPID, GravityTransportTypes::TCP, false, false, false, true);
 
-				// Get collection parameters from ini file
-				// (default to 10 second sampling, publishing once per min)
-				int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
-				int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
+					// Command the GravityMetricsManager thread to start collecting metrics
+					sendStringMessage(metricsManagerSocket, "MetricsEnable", ZMQ_SNDMORE);
 
-				// Send collection details to the GravityMetricsManager
-				sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
-				sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+					// Get collection parameters from ini file
+					// (default to 10 second sampling, publishing once per min)
+					int samplePeriod = getIntParam("GravityMetricsSamplePeriodSeconds", 10);
+					int samplesPerPublish = getIntParam("GravityMetricsSamplesPerPublish", 6);
 
-				// Finally, send our component id & ip address (to be published with metrics)
-				sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
-				sendStringMessage(metricsManagerSocket, getIP(), ZMQ_DONTWAIT);
+					// Send collection details to the GravityMetricsManager
+					sendIntMessage(metricsManagerSocket, samplePeriod, ZMQ_SNDMORE);
+					sendIntMessage(metricsManagerSocket, samplesPerPublish, ZMQ_SNDMORE);
+
+					// Finally, send our component id, ip address, and registration time (to be published with metrics)
+					sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
+					sendStringMessage(metricsManagerSocket, getIP(), ZMQ_SNDMORE);
+					sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[GRAVITY_METRICS_DATA_PRODUCT_ID] , ZMQ_DONTWAIT);
+				}
 			}
 
 			if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
@@ -991,13 +994,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
    			}
 			//parser->ParseCmdLine
 
-   			// Setup up network logging now that SD is available
-			
-			Log::LogLevel net_log_level = Log::LogStringToLevel(getStringParam("NetLogLevel", "none").c_str());
-			if(net_log_level != Log::NONE)
-				Log::initAndAddGravityLogger(this, net_log_level);
-			
-			
 			configureServiceManager();
 			configureSubscriptionManager();
 	
@@ -1746,7 +1742,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 	details.receiveLastCachedValue = receiveLastCachedValue;
 	details.subscriber = &subscriber;
 	subscriptionList.push_back(details);
-
+	
     return GravityReturnCodes::SUCCESS;
 }
 
@@ -2755,51 +2751,54 @@ string GravityNode::getIP()
     return ip;
 }
 
-std::string GravityNode::getStringParam(std::string key, std::string default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	return parser->getString(key, default_value);
+std::string GravityNode::getStringParam(std::string key, std::string default_value) {
+
+	configParamPB.set_key(key);
+
+	if (parser == NULL || !(parser->hasKey(key))) {
+		configParamPB.set_value(default_value);
+		configParamPB.set_is_default(true);
+	}
+	else {
+		configParamPB.set_value(parser->getString(key, default_value));
+		configParamPB.set_is_default(false);
+	}
+
+	if (settingsPubEnabled && initialized && !(publishedSettings.count(configParamPB.key()) == 1 && publishedSettings.at(configParamPB.key()) == configParamPB.value())) {
+		settingsGDP.setData(configParamPB);
+		publish(settingsGDP, componentID);
+		publishedSettings[configParamPB.key()] = configParamPB.value();
+	}
+
+	return configParamPB.value();
 }
 
-int GravityNode::getIntParam(std::string key, int default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	std::string value = parser->getString(key, "");
+int GravityNode::getIntParam(std::string key, int default_value) {
 
-	return StringToInt(value, default_value);
+	std::string s = getStringParam(key, std::to_string(default_value));
+	return StringToInt(s, default_value);
 }
 
-double GravityNode::getFloatParam(std::string key, double default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-	std::string value = parser->getString(key, "");
+double GravityNode::getFloatParam(std::string key, double default_value) {
 
-	return StringToDouble(value, default_value);
+	std::string s = getStringParam(key, std::to_string(default_value));
+	return StringToDouble(s, default_value);
 }
 
-bool GravityNode::getBoolParam(std::string key, bool default_value)
-{
-    if (parser == NULL)
-    {
-        return default_value;
-    }
-    string val = StringToLowerCase(parser->getString(key, default_value ? "true" : "false"));
+bool GravityNode::getBoolParam(std::string key, bool default_value) {
+
+	std::string val = StringToLowerCase(getStringParam(key, default_value ? "true" : "false"));
+
 	if( val == "true" ||
 		val == "t" ||
 		val == "yes" ||
-		val == "y" )
+		val == "y" ) {
+
 		return true;
-	else
+	}
+	else {
 		return false;
+	}
 }
 
 std::string GravityNode::getComponentID()
