@@ -401,13 +401,13 @@ void GravityNode::GravityNodeDomainListener::readDomainListenerParameters()
 Semaphore GravityNode::initLock;
 GravityNode::GravityNode()
 {	
-	// Populating (ServiceDirectory) set of RegisteredDataProductIDs 
+	// Populating (ServiceDirectory) set of reserved data product IDs
 	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::REGISTERED_PUBLISHERS_DPID);
 	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DOMAIN_DETAILS_DPID);
 	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DOMAIN_UPDATE_DPID);
 	serviceDirectory_ReservedDataProductIDs.insert(gravity::constants::DIRECTORY_SERVICE_DPID);
 	
-	// Populating (ServiceDirectory) set of RegisteredDataProductIDs
+	// Populating (GravityNode) set of reserved data product IDs
 	gravityNode_ReservedDataProductIDs.insert(gravity::constants::METRICS_DATA_DPID);
 
     defaultReceiveLastSentDataproduct = true;
