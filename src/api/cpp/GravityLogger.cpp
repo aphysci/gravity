@@ -167,54 +167,6 @@ void Log::initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level)
     Log::initAndAddLogger(new ConsoleLogger(comp_id), local_log_level);
 }
 
-/**
- * Logs to a GravityLogRecorder on the Network.
- */
-class GravityLogger : public Logger
-{
-public:
-    GravityLogger(GravityNode* gn);
-    virtual void Log(int level, const char* messagestr);
-    virtual ~GravityLogger();
-private:
-    GravityNode* gravity_node;
-    static std::string log_dataProductID;
-};
-
-std::string GravityLogger::log_dataProductID = "GRAVITY_LOGGER";
-
-GravityLogger::GravityLogger(GravityNode* gn)
-{
-    gravity_node = gn;
-    if(gravity_node->registerDataProduct(log_dataProductID, GravityTransportTypes::TCP) != GravityReturnCodes::SUCCESS)
-        cerr << "[Log::init] Could not register Logger" << endl;
-}
-
-void GravityLogger::Log(int level, const char* messagestr)
-{
-    GravityDataProduct dp(log_dataProductID);
-
-    gravity::GravityLogMessagePB log_message;
-    log_message.set_level(Log::LogLevelToString((Log::LogLevel)level));
-    log_message.set_message(messagestr);
-
-    dp.setData(log_message);
-
-    gravity_node->publish(dp);
-}
-
-GravityLogger::~GravityLogger()
-{
-  //empty
-}
-
-
-void Log::initAndAddGravityLogger(GravityNode *gn, LogLevel net_log_level)
-{
-    spdlog::warn("The GravityLogger is non-functional. Please use new spdlog implementation");
-    //Log::initAndAddLogger(new GravityLogger(gn), net_log_level);
-}
-
 ////////////////////////////////////////////////////////////////
 // Main Log Functions
 //

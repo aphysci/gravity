@@ -409,6 +409,8 @@ GravityNode::GravityNode()
 	
 	// Populating (GravityNode) set of reserved data product IDs
 	gravityNode_ReservedDataProductIDs.insert(gravity::constants::METRICS_DATA_DPID);
+	gravityNode_ReservedDataProductIDs.insert(gravity::constants::GRAVITY_SETTINGS_DPID);
+	gravityNode_ReservedDataProductIDs.insert(gravity::constants::GRAVITY_LOGGER_DPID);
 
     defaultReceiveLastSentDataproduct = true;
     defaultCacheLastSentDataprodut = true;
@@ -958,7 +960,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
 			if (componentID != "ServiceDirectory") {
-				registerDataProduct("GRAVITY_SETTINGS", GravityTransportTypes::TCP);
+				registerDataProductInternal(gravity::constants::GRAVITY_SETTINGS_DPID, GravityTransportTypes::TCP, false, false, false, true);
 
 				settingsPubEnabled = getBoolParam("GravitySettingsPublishEnabled", false);
 
@@ -984,7 +986,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 					// Finally, send our component id, ip address, and registration time (to be published with metrics)
 					sendStringMessage(metricsManagerSocket, componentID, ZMQ_SNDMORE);
 					sendStringMessage(metricsManagerSocket, getIP(), ZMQ_SNDMORE);
-					sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[GRAVITY_METRICS_DATA_PRODUCT_ID] , ZMQ_DONTWAIT);
+					sendIntMessage(metricsManagerSocket, dataRegistrationTimeMap[gravity::constants::METRICS_DATA_DPID] , ZMQ_DONTWAIT);
 				}
 			}
 

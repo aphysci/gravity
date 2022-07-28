@@ -20,6 +20,7 @@
 #include "GravityNode.h"
 #include "GravityDataProduct.h"
 #include "protobuf/GravityLogMessagePB.pb.h"
+#include "CommUtil.h"
 
 #include <iostream>
 
@@ -54,7 +55,8 @@ private:
 		std::lock_guard<std::mutex> guard(lock);
 		if (!init)
 		{
-			GravityReturnCode ret  = gn->registerDataProduct("GRAVITY_LOGGER", GravityTransportTypes::TCP);
+			//GravityReturnCode ret  = gn->registerDataProduct(gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP);
+			GravityReturnCode ret  = gn->registerDataProductInternal(gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP, false, false, false, true);
 			init = ret == GravityReturnCodes::SUCCESS;
 		}
 		return init;
@@ -75,7 +77,7 @@ protected:
 			spdlog::memory_buf_t formatted;
 			spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
-			GravityDataProduct dp("GRAVITY_LOGGER");
+			GravityDataProduct dp(gravity::constants::GRAVITY_LOGGER_DPID);
 			gravity::GravityLogMessagePB logMessage;
 			logMessage.set_level(spdlog::level::to_string_view(msg.level).data());
 			logMessage.set_message(fmt::to_string(formatted));

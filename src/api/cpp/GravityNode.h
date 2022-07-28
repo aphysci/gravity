@@ -33,6 +33,8 @@
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
+#include "CommUtil.h"
+//#include "PublishSink.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
 #include <thread>
@@ -126,6 +128,7 @@ typedef struct GravityINIConfig
 
 class GravityConfigParser;
 class FutureResponse;
+//template<typename Mutex> class PublishSink;
 
 /**
  * A component that provides a simple interface point to a Gravity-enabled application
@@ -133,6 +136,8 @@ class FutureResponse;
 class GravityNode
 {
 private:
+    template<typename Mutex> friend class PublishSink;
+
     // set of reservedDataProduct IDs 
     std::set<std::string> serviceDirectory_ReservedDataProductIDs;
     std::set<std::string> gravityNode_ReservedDataProductIDs;
@@ -244,7 +249,7 @@ private:
 	GravityConfigParser* parser;
 
     GravityConfigParamPB configParamPB;
-    GravityDataProduct settingsGDP = GravityDataProduct("GRAVITY_SETTINGS");
+    GravityDataProduct settingsGDP = GravityDataProduct(gravity::constants::GRAVITY_SETTINGS_DPID);
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
