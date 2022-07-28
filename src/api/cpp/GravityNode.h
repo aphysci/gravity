@@ -33,6 +33,8 @@
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
 #include "Utility.h"
+#include "CommUtil.h"
+//#include "PublishSink.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
 #include <thread>
@@ -79,7 +81,8 @@ namespace GravityReturnCodes
         NO_SERVICE_PROVIDER = -10, ///< No service provider found.
         NO_PORTS_AVAILABLE = -11, ///< No ports available
 		INVALID_PARAMETER = -12, ///< Invalid parameter. (Ex: entered a negative number for time)
-		NOT_INITIALIZED = -13  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
+		NOT_INITIALIZED = -13,  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
+        RESERVED_DATA_PRODUCT_ID = -14 ///< Data Product IDs used internally by Gravity
     };
 }
 typedef GravityReturnCodes::Codes GravityReturnCode;
@@ -125,6 +128,7 @@ typedef struct GravityINIConfig
 
 class GravityConfigParser;
 class FutureResponse;
+//template<typename Mutex> class PublishSink;
 
 /**
  * A component that provides a simple interface point to a Gravity-enabled application
@@ -132,7 +136,12 @@ class FutureResponse;
 class GravityNode
 {
 private:
-  
+    template<typename Mutex> friend class PublishSink;
+
+    // set of reservedDataProduct IDs 
+    std::set<std::string> serviceDirectory_ReservedDataProductIDs;
+    std::set<std::string> gravityNode_ReservedDataProductIDs;
+
   /**
    * Domain change listener for a GravityNode.
    */
@@ -240,7 +249,7 @@ private:
 	GravityConfigParser* parser;
 
     GravityConfigParamPB configParamPB;
-    GravityDataProduct settingsGDP = GravityDataProduct("GRAVITY_SETTINGS");
+    GravityDataProduct settingsGDP = GravityDataProduct(gravity::constants::GRAVITY_SETTINGS_DPID);
 
 	GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string &url, std::string &domain, uint32_t &regTime);
 	GravityReturnCode ServiceDirectoryDataProductLookup(std::string serviceOrDPID, std::vector<gravity::PublisherInfoPB> &urls, std::string &domain);
@@ -258,7 +267,7 @@ private:
 		const GravityRequestor& requestor, uint32_t regTime, std::string requestID = "", int timeout_milliseconds = -1);
 
     GRAVITY_API GravityReturnCode registerDataProductInternal(std::string dataProductID, GravityTransportType transportType,
-    		                                                  bool cacheLastValue, bool isRelay, bool localOnly);
+    		                                                  bool cacheLastValue, bool isRelay, bool localOnly, bool allowReservedIDs);
 
 	static void* startGravityDomainListener(void* context);
 	

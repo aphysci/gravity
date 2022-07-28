@@ -135,7 +135,7 @@ void ServiceDirectorySynchronizer::start()
 					// subscriber to updates from the "remote" service directory
 					GravityDataProduct request("ComponentLookupRequest");
 					ComponentLookupRequestPB lookup;
-					lookup.set_lookupid("ServiceDirectory_DomainDetails");
+					lookup.set_lookupid(gravity::constants::DOMAIN_DETAILS_DPID);
 					lookup.set_type(gravity::ComponentLookupRequestPB_RegistrationType_DATA);
 					lookup.set_domain_id(domain);
 					request.setData(lookup);
@@ -208,7 +208,7 @@ void ServiceDirectorySynchronizer::start()
 				// subscriber to updates from the "remote" service directory
 				GravityDataProduct request("ComponentLookupRequest");
 				ComponentLookupRequestPB lookup;
-				lookup.set_lookupid("ServiceDirectory_DomainDetails");
+				lookup.set_lookupid(gravity::constants::DOMAIN_DETAILS_DPID);
 				lookup.set_type(gravity::ComponentLookupRequestPB_RegistrationType_DATA);
 				lookup.set_domain_id(domain);
 				request.setData(lookup);
@@ -355,7 +355,7 @@ void ServiceDirectorySynchronizer::start()
 							// subscriber to updates from the "remote" service directory
 							GravityDataProduct request("ComponentLookupRequest");
 							ComponentLookupRequestPB lookup;
-							lookup.set_lookupid("ServiceDirectory_DomainDetails");
+							lookup.set_lookupid(gravity::constants::DOMAIN_DETAILS_DPID);
 							lookup.set_type(gravity::ComponentLookupRequestPB_RegistrationType_DATA);
 							lookup.set_domain_id(response.getDomain());
 							request.setData(lookup);
@@ -398,7 +398,7 @@ void ServiceDirectorySynchronizer::start()
                             zmq_setsockopt(details->socket, ZMQ_SUBSCRIBE, NULL, 0);
 						}
 					}
-					else if (response.getDataProductID() == "ServiceDirectory_DomainDetails")
+					else if (response.getDataProductID() == gravity::constants::DOMAIN_DETAILS_DPID)
 					{
 						// This is a subscription update of a service directory's content map
 						ServiceDirectoryMapPB providerMap;

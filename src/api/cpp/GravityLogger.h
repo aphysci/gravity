@@ -108,14 +108,6 @@ public:
     GRAVITY_API static void initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level);
 
     /**
-     * Initialize a Logger to log to the Gravity network.  
-     * Note that you do not have to create the Logger - this function does it for you.
-     * May be called in addition to initAndAddFileLogger().
-     * \param gravity_node     The GravityNode with which to connect to the remote log recorder machine.  Can be NULL for logging only to a file.
-     * \param net_log_level    The initial network logging level.
-     */
-    GRAVITY_API static void initAndAddGravityLogger(GravityNode *gravity_node, LogLevel net_log_level);
-    /**
      * Initialize a Logger.  
      * May be called along with other init functions.
      * After calling this function the Logger is now owned by this class (for now).

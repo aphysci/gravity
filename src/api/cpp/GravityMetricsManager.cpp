@@ -215,7 +215,7 @@ namespace gravity
             *gmPB = it->second;
         }
 
-        GravityDataProduct gdp(GRAVITY_METRICS_DATA_PRODUCT_ID);
+        GravityDataProduct gdp(gravity::constants::METRICS_DATA_DPID);
         gdp.setTimestamp(gravity::getCurrentTime());
         gdp.setRegistrationTime(regTimestamp);
         gdp.setData(metrics);

@@ -878,7 +878,7 @@ void GravitySubscriptionManager::removeSubscription()
 
 				// If we no longer have subscriptions for this domain/dataProductID combo, then stop
 				// subscribing for updates from the SD on this as well				
-				logger->trace("Removing subscription to RegisteredPublishers");
+				logger->trace("Removing subscription to {}", gravity::constants::REGISTERED_PUBLISHERS_DPID);
 				removePollItem(subDetails->publisherUpdatePollItem);
 				zmq_setsockopt(subDetails->publisherUpdatePollItem.socket, ZMQ_UNSUBSCRIBE, dataProductID.c_str(), dataProductID.length());
 				zmq_close(subDetails->publisherUpdatePollItem.socket);
