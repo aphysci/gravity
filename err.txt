@@ -1,0 +1,260 @@
+[src/api/DotNet/GravityInteractor.h:114]: (style) Boolean result is used in bitwise operation. Clarify expression with parentheses.
+[src/api/DotNet/GravityInteractor.h:122]: (style) Boolean result is used in bitwise operation. Clarify expression with parentheses.
+[src/api/DotNet/GravityInteractor.cpp:74]: (style) Boolean result is used in bitwise operation. Clarify expression with parentheses.
+[src/api/DotNet/GravityInteractor.cpp:262]: (style) C-style pointer casting
+[src/api/DotNet/GravityInteractor.h:51]: (style) The class 'GravityInteractor' does not have a constructor.
+[src/api/DotNet/GravityInteractor.h:95]: (style) class 'DataProduct' does not have a copy constructor which is recommended since the class contains a pointer to allocated memory.
+[src/api/DotNet/GravityInteractor.h:107]: (style) Class 'DataProduct' has a constructor with 1 argument that is not explicit.
+[src/api/DotNet/GravityInteractor.cpp:66]: (style) Class 'genericSubscribeWrapper' has a constructor with 1 argument that is not explicit.
+[src/api/DotNet/GravityInteractor.cpp:146]: (style) Class 'genericRequestWrapperCS' has a constructor with 1 argument that is not explicit.
+[src/api/DotNet/GravityInteractor.cpp:229]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/api/cpp/Utility.h:69]: (performance) Function parameter 'filename' should be passed by reference.
+[src/api/cpp/GravitySemaphore.h:34]: (style) Class 'Semaphore' has a constructor with 1 argument that is not explicit.
+[src/api/cpp/Utility.cpp:118]: (performance) Function parameter 'filename' should be passed by reference.
+[src/api/java/src/cpp/CPPGravityHeartbeatListener.cpp:35]: (performance) Function parameter 'componentID' should be passed by reference.
+[src/api/java/src/cpp/CPPGravityHeartbeatListener.cpp:45]: (performance) Function parameter 'componentID' should be passed by reference.
+[src/api/java/src/cpp/CPPGravityServiceProvider.cpp:28]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/api/java/src/cpp/CPPGravityServiceProvider.cpp:37]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/components/cpp/Archiver/FileArchiver.cpp:133]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/components/cpp/Archiver/FileArchiver.cpp:83]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:35]: (performance) Variable 'section' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:36]: (performance) Variable 'key' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:37]: (performance) Variable 'value' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:33]: (performance) Function parameter 's1' should be passed by reference.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:33]: (performance) Function parameter 's2' should be passed by reference.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:33]: (performance) Function parameter 's3' should be passed by reference.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:52]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:75]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ConfigServer/ConfigServer.cpp:93]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/LogRecorder/GravityLogRecorder.cpp:37]: (performance) Function parameter 'basefilename' should be passed by reference.
+[src/components/cpp/LogRecorder/GravityLogRecorder.cpp:61]: (performance) Function parameter 'filebasename' should be passed by reference.
+[src/components/cpp/LogRecorder/GravityLogRecorder.cpp:87]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/Playback/FileReader.cpp:57]: (style) C-style pointer casting
+[src/components/cpp/Playback/FileReader.cpp:37]: (warning) Member variable 'FileReader::swapEndian' is not initialized in the constructor.
+[src/components/cpp/Relay/Relay.cpp:131]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:74]: (style) C-style pointer casting
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:75]: (style) C-style pointer casting
+[src/components/cpp/ServiceDirectory/ServiceDirectory.h:54]: (style) The class 'ServiceDirectory' does not have a constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.h:59]: (style) Class 'ServiceDirectoryUDPReceiver' has a constructor with 1 argument that is not explicit.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.h:67]: (style) Class 'ServiceDirectoryUDPBroadcaster' has a constructor with 1 argument that is not explicit.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.h:73]: (performance) Function parameter 'domain' should be passed by reference.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:496]: (performance) Function parameter 'serviceID' should be passed by reference.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:1046]: (performance) Function parameter 'url' should be passed by reference.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:375]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:511]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:515]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:526]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:530]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:536]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:627]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:638]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:644]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:713]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:841]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:938]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectory.cpp:988]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:41]: (warning) Member variable 'ServiceDirectorySynchronizer::commandSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:41]: (warning) Member variable 'ServiceDirectorySynchronizer::requestSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:41]: (warning) Member variable 'ServiceDirectorySynchronizer::pendingResponse' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.h:73]: (style) Unused private function: 'ServiceDirectorySynchronizer::printMap'
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:46]: (performance) Variable 'ownURL' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:47]: (performance) Variable 'logger' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:41]: (performance) Function parameter 'url' should be passed by reference.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:177]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:251]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:477]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:41]: (warning) Member variable 'ServiceDirectoryUDPBroadcaster::port' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:41]: (warning) Member variable 'ServiceDirectoryUDPBroadcaster::broadcastRate' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:41]: (warning) Member variable 'ServiceDirectoryUDPBroadcaster::broadcastSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:41]: (warning) Member variable 'ServiceDirectoryUDPBroadcaster::sdSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:41]: (warning) Member variable 'ServiceDirectoryUDPBroadcaster::starttime' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPBroadcaster.cpp:44]: (performance) Variable 'logger' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.cpp:125]: (style) The scope of the variable 'recvStringLen' can be reduced.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.cpp:59]: (warning) Member variable 'ServiceDirectoryUDPReceiver::sdSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.cpp:59]: (warning) Member variable 'ServiceDirectoryUDPReceiver::port' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.cpp:59]: (warning) Member variable 'ServiceDirectoryUDPReceiver::receiveSocket' is not initialized in the constructor.
+[src/components/cpp/ServiceDirectory/ServiceDirectoryUDPReceiver.cpp:62]: (performance) Variable 'logger' is assigned in constructor body. Consider performing initialization in initialization list.
+[src/keyvalue_parser/keyvalue_main.c:58]: (style) The scope of the variable 'c' can be reduced.
+[src/keyvalue_parser/keyvalue_main.c:56] -> [src/keyvalue_parser/keyvalue_main.c:98]: (style) Variable 'fn' is reassigned a value before the old one has been used.
+[src/keyvalue_parser/keyvalue_main.c:56] -> [src/keyvalue_parser/keyvalue_main.c:99]: (style) Variable 'componentid' is reassigned a value before the old one has been used.
+[src/keyvalue_parser/keyvalue_parser.c:67]: (style) The scope of the variable 'var_el' can be reduced.
+[lex.yy.c:1497]: (warning) Possible null pointer dereference: b
+[lex.yy.c:1498]: (warning) Possible null pointer dereference: b
+[lex.yy.c:1509]: (warning) Possible null pointer dereference: b
+[lex.yy.c:771]: (information) Skipping configuration 'YY_USER_INIT' since the value of 'YY_USER_INIT' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:836]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[keyvalue.l:97]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:924]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:957]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:972]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1007]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1023]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1028]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1038]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1062]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1072]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1092]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1190]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1204]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1290]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1321]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1357]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[lex.yy.c:1432]: (information) Skipping configuration 'yytext_ptr' since the value of 'yytext_ptr' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:732] -> [* yacc.c:358  *:698]: (warning) Either the condition 'yytoken!=-2' is redundant, otherwise there is negative array index -2.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'EXIT_SUCCESS;_ALLOCA_H;YYSTACK_USE_ALLOCA;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:498]: (information) Skipping configuration 'YYPRINT' since the value of 'YYPRINT' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'YYSTACK_USE_ALLOCA;_AIX;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'YYSTACK_USE_ALLOCA;_MSC_VER;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'YYSTACK_USE_ALLOCA;__BUILTIN_VA_ARG_INCR;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'YYSTACK_USE_ALLOCA;__GNUC__;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'YYSTACK_USE_ALLOCA;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:24]: (information) Skipping configuration 'YYTYPE_INT16' since the value of 'YYTYPE_INT16' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:12]: (information) Skipping configuration 'YYTYPE_INT8' since the value of 'YYTYPE_INT8' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:18]: (information) Skipping configuration 'YYTYPE_UINT16' since the value of 'YYTYPE_UINT16' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:6]: (information) Skipping configuration 'YYTYPE_UINT8' since the value of 'YYTYPE_UINT8' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:165]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:607]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:610]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:646]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:651]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:695]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:698]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:699]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:759]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:761]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:785]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:786]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:795]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:796]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:880]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:894]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:929]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:968]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:969]: (information) Skipping configuration '__SIZE_TYPE__' since the value of '__SIZE_TYPE__' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:1646  *:62]: (information) Skipping configuration 'free;yyoverflow' since the value of 'free' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:1646  *:223]: (information) Skipping configuration 'free;yyoverflow' since the value of 'free' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'free;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:1646  *:63]: (information) Skipping configuration 'malloc;yyoverflow' since the value of 'malloc' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'malloc;yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:165]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:607]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:610]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:646]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:651]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:695]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:698]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:699]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:759]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:761]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:785]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:786]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:795]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:796]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:880]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:894]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:929]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:968]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:969]: (information) Skipping configuration 'size_t' since the value of 'size_t' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[* yacc.c:358  *:943]: (information) Skipping configuration 'yyoverflow' since the value of 'yyoverflow' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[test/api/cpp/doctest.h:452]: (style) Class 'String' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:754]: (style) Struct 'any_t' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1184]: (style) Struct 'ExpressionDecomposer' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1616]: (style) Struct 'test_suite' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1617]: (style) Struct 'description' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1618]: (style) Struct 'skip' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1619]: (style) Struct 'timeout' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1620]: (style) Struct 'may_fail' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1621]: (style) Struct 'should_fail' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1622]: (style) Struct 'expected_failures' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:1411]: (style) Exception should be caught by reference.
+[test/api/cpp/tests/CommUtil_tests.cpp:20] -> [test/api/cpp/tests/CommUtil_tests.cpp:25]: (style) Variable 'ret' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:156] -> [test/api/cpp/tests/CommUtil_tests.cpp:158]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:158] -> [test/api/cpp/tests/CommUtil_tests.cpp:160]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:160] -> [test/api/cpp/tests/CommUtil_tests.cpp:162]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:179] -> [test/api/cpp/tests/CommUtil_tests.cpp:181]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:181] -> [test/api/cpp/tests/CommUtil_tests.cpp:183]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:183] -> [test/api/cpp/tests/CommUtil_tests.cpp:185]: (style) Variable 'result' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/CommUtil_tests.cpp:25]: (style) Variable 'ret' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:36]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:41]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:51]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:56]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:70]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:83]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:92]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:106]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:115]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:138]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:162]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:185]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:203]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:213]: (style) Variable 'result' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:228]: (style) Variable 'bytes' is assigned a value that is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:240]: (style) Variable 'bytes' is assigned a value that is never used.
+[test/api/cpp/doctest.h:4205]: (warning) Member variable 'ConsoleReporter::hasLoggedCurrentTestStart' is not initialized in the constructor.
+[test/api/cpp/doctest.h:4205]: (warning) Member variable 'ConsoleReporter::opt' is not initialized in the constructor.
+[test/api/cpp/doctest.h:4205]: (warning) Member variable 'ConsoleReporter::tc' is not initialized in the constructor.
+[test/api/cpp/doctest.h:4205]: (style) Struct 'ConsoleReporter' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/doctest.h:4471]: (style) Struct 'ConsoleReporterWithHelpers' has a constructor with 1 argument that is not explicit.
+[test/api/cpp/tests/GravityLogger_tests.cpp:112] -> [test/api/cpp/tests/GravityLogger_tests.cpp:114]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:114] -> [test/api/cpp/tests/GravityLogger_tests.cpp:116]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:149] -> [test/api/cpp/tests/GravityLogger_tests.cpp:151]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:151] -> [test/api/cpp/tests/GravityLogger_tests.cpp:153]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:191] -> [test/api/cpp/tests/GravityLogger_tests.cpp:193]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:193] -> [test/api/cpp/tests/GravityLogger_tests.cpp:195]: (style) Variable 'pos' is reassigned a value before the old one has been used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:32]: (style) Variable 'str' is assigned a value that is never used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:66]: (style) Variable 'truncStr' is assigned a value that is never used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:116]: (style) Variable 'pos' is assigned a value that is never used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:153]: (style) Variable 'pos' is assigned a value that is never used.
+[test/api/cpp/tests/GravityLogger_tests.cpp:167]: (style) Unused variable: line
+[test/api/cpp/tests/GravityLogger_tests.cpp:195]: (style) Variable 'pos' is assigned a value that is never used.
+[test/api/cpp/tests/GravityNode_tests.cpp:171]: (performance) Function parameter 'serviceID' should be passed by reference.
+[test/api/cpp/doctest.h:3220]: (warning) Member variable 'Context::p' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3411]: (information) Skipping configuration 'DOCTEST_CONFIG_GETCURRENTTICKS' since the value of 'DOCTEST_CONFIG_GETCURRENTTICKS' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.
+[test/api/cpp/doctest.h:3120]: (warning) Member variable 'SubcaseSignature::m_name' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3120]: (warning) Member variable 'SubcaseSignature::m_file' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3120]: (warning) Member variable 'SubcaseSignature::m_line' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3171]: (warning) Member variable 'Approx::m_epsilon' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3171]: (warning) Member variable 'Approx::m_scale' is not initialized in the constructor.
+[test/api/cpp/doctest.h:3171]: (warning) Member variable 'Approx::m_value' is not initialized in the constructor.
+[test/api/cpp/doctest.h:1223]: (warning) The struct 'TestCase' has 'copy constructor' but lack of 'operator='.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:507] -> [test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:509]: (style) Variable 'ret' is reassigned a value before the old one has been used.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:515] -> [test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:517]: (style) Variable 'ret' is reassigned a value before the old one has been used.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.h:56]: (style) The class 'GravityNodeTest' does not have a constructor.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:54]: (warning) Member variable 'GravitySyncTest::gdpcount1' is not initialized in the constructor.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:54]: (warning) Member variable 'GravitySyncTest::gdpcount2' is not initialized in the constructor.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.h:70]: (performance) Function parameter 'serviceID' should be passed by reference.
+[test/components/cpp/ServiceDirectory/GravityNodeTest.cpp:91]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/components/cpp/ServiceDirectoryReregister/Provider.cpp:35]: (performance) Function parameter 'serviceID' should be passed by reference.
+[test/components/cpp/ServiceDirectoryReregister/Subscriber.cpp:81]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/1-BasicDataProduct/BasicDataProductPublisher.cpp:56]: (style) Condition '!quit' is always true
+[test/examples/1-BasicDataProduct/BasicDataProductSubscriber.cpp:67]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/10-Archiving/ArchiveTest.cpp:57]: (style) Condition '!quit' is always true
+[test/examples/10-Archiving/ReplayTest.cpp:69]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/13-Relay/ProtobufDataProductPublisher.cpp:45]: (style) Condition '!quit' is always true
+[test/examples/13-Relay/ProtobufDataProductSubscriber.cpp:59]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/2-ProtobufDataProduct/ProtobufDataProductPublisher.cpp:45]: (style) Condition '!quit' is always true
+[test/examples/2-ProtobufDataProduct/ProtobufDataProductSubscriber.cpp:59]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/3-MultipleDataProduct/MultipleDataProductPublisher.cpp:48]: (style) Condition '!quit' is always true
+[test/examples/3-MultipleDataProduct/MultipleDataProductSubscriber.cpp:87]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/3-MultipleDataProduct/MultipleDataProductSubscriber.cpp:103]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/3-MultipleDataProduct/MultipleDataProductSubscriber.cpp:121]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/4-BasicService/BasicServiceProvider.cpp:36]: (performance) Function parameter 'serviceID' should be passed by reference.
+[test/examples/5-MiscFunctionality/MiscComponent2.cpp:56]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[test/examples/9-Domains/ProtobufDataProductPublisher.cpp:54]: (style) Condition '!quit' is always true
+[test/examples/9-Domains/ProtobufDataProductSubscriber.cpp:69]: (performance) Prefer prefix ++/-- operators for non-primitive types.
+[src/api/DotNet/GravityInteractor.cpp:41]: (style) The function 'Init' is never used.
+[src/api/cpp/Utility.cpp:118]: (style) The function 'IsValidFilename' is never used.
+[src/api/java/src/cpp/CPPGravityLogger.cpp:26]: (style) The function 'Log' is never used.
+[src/api/java/src/cpp/CPPGravityHeartbeatListener.cpp:30]: (style) The function 'MissedHeartbeat' is never used.
+[src/api/java/src/cpp/CPPGravityHeartbeatListener.cpp:40]: (style) The function 'ReceivedHeartbeat' is never used.
+[src/api/DotNet/GravityInteractor.cpp:185]: (style) The function 'RegisterDataProduct' is never used.
+[src/api/DotNet/GravityInteractor.cpp:243]: (style) The function 'RegisterService' is never used.
+[src/api/DotNet/GravityInteractor.cpp:197]: (style) The function 'UnregisterDataProduct' is never used.
+[src/api/DotNet/GravityInteractor.cpp:251]: (style) The function 'UnregisterService' is never used.
+[src/api/DotNet/GravityInteractor.cpp:104]: (style) The function 'Unsubscribe' is never used.
+[test/api/cpp/tests/CommUtil_tests.cpp:12]: (style) The function '_DOCTEST_ANON_FUNC_5' is never used.
+[test/api/cpp/tests/Utility_tests.cpp:12]: (style) The function '_DOCTEST_ANON_FUNC_6' is never used.
+[src/components/cpp/ServiceDirectory/ServiceDirectorySynchronizer.cpp:541]: (style) The function 'printMap' is never used.
+[src/api/cpp/GravitySubscriptionMonitor.cpp:32]: (style) The function 'subscriptionTimeout' is never used.
+(information) Cppcheck cannot find all the include files (use --check-config for details)

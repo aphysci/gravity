@@ -128,7 +128,7 @@ int Relay::run()
     }
 
     logger->warn("Exiting, but cleaning up registrations first...");
-    for (list<string>::iterator iter = dataProducts.begin(); iter != dataProducts.end(); iter++)
+    for (list<string>::iterator iter = dataProducts.begin(); iter != dataProducts.end(); ++iter)
     {
         gravityNode.unregisterRelay(*iter, *this);
     }

@@ -80,7 +80,7 @@ FileArchiver::FileArchiver()
 
 	// Subscribe to each data product
 	vector<string> dps = split(dpList);
-	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
+	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); ++iter)
 	{
 	    gravityNode.subscribe(*iter, *this);
 	}

@@ -34,7 +34,7 @@ namespace gravity {
 const string LogRecorder::logDataProductID("GRAVITY_LOGGER"); //Needs to be the same as gravity::Log::log_dataProductID.
 
 //Note: Out filename is assumed to be 512 bytes long.
-void LogRecorder::getNewFilename(char* outfilename, string basefilename)
+void LogRecorder::getNewFilename(char* outfilename, string& basefilename)
 {
     int len = filebasename.length();
     if(len > (511 - 19))
@@ -84,7 +84,7 @@ void LogRecorder::subscriptionFilled(const std::vector< std::shared_ptr<GravityD
 {
     //std::shared_ptr<GravityDataProduct> gdp = *dataProducts.begin();
     //for_each(dataProducts.begin(), dataProducts.end(), [ this ] (std::shared_ptr<GravityDataProduct> dataProduct) { //Lambda function
-    for(vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+    for(vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); ++i)
     {
         std::shared_ptr<GravityDataProduct> dataProduct = *i;
         num_logs++;

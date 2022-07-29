@@ -56,6 +56,8 @@
 
 using namespace std;
 
+struct ServiceDirecoty {};
+
 struct RegistrationData
 {
     gravity::GravityNode* node;
@@ -372,7 +374,7 @@ void ServiceDirectory::start()
             if (!registeredPublishersProcessed && registeredPublishersReady)
             {
                 GravityDataProduct update(REGISTERED_PUBLISHERS);
-                for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); it++)
+                for (set<string>::iterator it = registerUpdatesToSend.begin(); it != registerUpdatesToSend.end(); ++it)
                 {
                     logger->debug("Processing pending registered publishers update for {}", *it);
                     addPublishers(*it, update, domain);
@@ -508,11 +510,11 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string 
             ServiceDirectoryMapPB providerMap;
             providerMap.set_domain(domain);
 
-			for (map<string, map<string, string> >::iterator it = serviceMap.begin(); it != serviceMap.end(); it++)
+			for (map<string, map<string, string> >::iterator it = serviceMap.begin(); it != serviceMap.end(); ++it)
 			{
 				string domain = it->first;
 				map<string,string> sMap = it->second;
-				for (map<string,string>::iterator it2 = sMap.begin(); it2 != sMap.end(); it2++)
+				for (map<string,string>::iterator it2 = sMap.begin(); it2 != sMap.end(); ++it2)
 				{
 					ProductLocations* locs = providerMap.add_service_provider();
 					locs->set_product_id(it2->first); // service ID
@@ -523,17 +525,17 @@ std::shared_ptr<GravityDataProduct> ServiceDirectory::request(const std::string 
 				}
 			}            
             
-			for (map<string, map<string, list<PublisherInfoPB> > >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); it++)
+			for (map<string, map<string, list<PublisherInfoPB> > >::iterator it = dataProductMap.begin(); it != dataProductMap.end(); ++it)
 			{
 				string domain = it->first;
 				map<string, list<PublisherInfoPB> > dpMap = it->second;
-				for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); it++)
+				for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); ++it)
 				{
 					ProductLocations* locs = providerMap.add_data_provider();
 					locs->set_product_id(it->first); // data product ID
 					locs->add_domain_id(domain); // domain
 					list<PublisherInfoPB> urls = it->second;
-					for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); lit++)
+					for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); ++lit)
 					{
 						locs->add_url(lit->url()); // url
 						locs->add_component_id(urlToComponentMap[lit->url()]); // component id
@@ -624,7 +626,7 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	providerMap.set_domain(domain);
 
 	map<string,string> sMap = serviceMap[domain];	
-	for (map<string,string>::iterator it2 = sMap.begin(); it2 != sMap.end(); it2++)
+	for (map<string,string>::iterator it2 = sMap.begin(); it2 != sMap.end(); ++it2)
 	{
 		ProductLocations* locs = providerMap.add_service_provider();
 		locs->set_product_id(it2->first); // service ID
@@ -635,13 +637,13 @@ void ServiceDirectory::updateProductLocations(string productID, string url, uint
 	}            
             
 	map<string, list<PublisherInfoPB> > dpMap = dataProductMap[domain];
-	for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); it++)
+	for(map<string, list<PublisherInfoPB> >::iterator it = dpMap.begin(); it != dpMap.end(); ++it)
 	{
 		ProductLocations* locs = providerMap.add_data_provider();
 		locs->set_product_id(it->first); // data product ID
 		locs->add_domain_id(domain); // domain
 		list<PublisherInfoPB> urls = it->second;
-		for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); lit++)
+		for(list<PublisherInfoPB>::iterator lit = urls.begin(); lit != urls.end(); ++lit)
 		{
 			locs->add_url(lit->url()); // url
 			locs->add_component_id(urlToComponentMap[lit->url()]); // component id
@@ -710,7 +712,7 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 			}
 			list<PublisherInfoPB>& urls = dpMap[registration.id()];
 			list<PublisherInfoPB>::iterator iter = urls.begin();
-			for (;iter != urls.end();iter++)
+			for (;iter != urls.end();++iter)
 			{
 				if (iter->url() == registration.url())
 					break;
@@ -838,7 +840,7 @@ void ServiceDirectory::handleUnregister(const GravityDataProduct& request, Gravi
 
         list<PublisherInfoPB>* infoPBs = &dpMap[unregistration.id()];
         list<PublisherInfoPB>::iterator iter = infoPBs->begin();
-        for (;iter != infoPBs->end(); iter++)
+        for (;iter != infoPBs->end(); ++iter)
         {
 			if (iter->url() == unregistration.url() && iter->registration_time() == unregistration.registration_time())
 			{
@@ -935,7 +937,7 @@ void ServiceDirectory::purgeObsoletePublishers(const string &dataProductID, cons
         {
             list<PublisherInfoPB>& infoPBs = iter->second;
             list<PublisherInfoPB>::iterator it = infoPBs.begin();
-            for (;it != infoPBs.end(); it++)
+            for (;it != infoPBs.end(); ++it)
             {
             	if (it->url() == url)
             		break;
@@ -985,7 +987,7 @@ void ServiceDirectory::addPublishers(const string &dataProductID, GravityDataPro
 	if (dpMap.count(dataProductID) != 0)
 	{
 		list<PublisherInfoPB>* infoPBs = &dpMap[dataProductID];
-		for (list<PublisherInfoPB>::iterator iter = infoPBs->begin(); iter != infoPBs->end(); iter++)
+		for (list<PublisherInfoPB>::iterator iter = infoPBs->begin(); iter != infoPBs->end(); ++iter)
 		{
 			PublisherInfoPB* lookupInfoPB = lookupResponse.add_publishers();
 			lookupInfoPB->CopyFrom(*iter);

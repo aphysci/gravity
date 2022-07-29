@@ -44,7 +44,7 @@ namespace gravity{
 typedef struct SyncInitDetails
 {
 	void* context;
-	std::string url;
+	std::string url = "";
 } SyncInitDetails;
 
 typedef struct SyncDomainDetails
@@ -61,14 +61,14 @@ class ServiceDirectorySynchronizer
 {
 private:
 	void* context;
-	std::string ownURL;
+	std::string ownURL = NULL;
 	void* commandSocket;
 	void* requestSocket;
 	std::vector<zmq_pollitem_t> pollItems;
 	std::map<std::string, std::shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
 	std::map<void*, std::shared_ptr<SyncDomainDetails> > socketToDomainDetailsMap;
 	std::queue<std::shared_ptr<GravityDataProduct> > registrationUpdates;
-	bool pendingResponse;
+	bool pendingResponse = false;
 
 	void printMap(ServiceDirectoryMapPB providerMap);
 
@@ -79,7 +79,7 @@ private:
 	std::shared_ptr<spdlog::logger> logger;
 
 public:
-	ServiceDirectorySynchronizer(void* context, std::string url);
+	ServiceDirectorySynchronizer(void* context, std::string& url);
 	virtual ~ServiceDirectorySynchronizer();
 
 	void start();

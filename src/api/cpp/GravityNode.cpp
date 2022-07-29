@@ -160,7 +160,7 @@ void* GravityNode::startGravityDomainListener(void* context)
 }
 
 //Forward Declarations that we don't want publicly visible (Need to be in gravity namespace).
-bool IsValidFilename(const std::string filename);
+bool IsValidFilename(const std::string& filename);
 int StringToInt(std::string str, int default_value);
 double StringToDouble(std::string str, double default_value);
 void* Heartbeat(void* thread_context);

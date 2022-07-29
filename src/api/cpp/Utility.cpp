@@ -115,7 +115,7 @@ GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, co
 
 
 // OS
-GRAVITY_API bool IsValidFilename(const std::string filename)
+GRAVITY_API bool IsValidFilename(const std::string& filename)
 {
 	char restrictedChars[] = "/\\?%*:|\"<>";
 	const size_t numRChars = 10;

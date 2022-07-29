@@ -30,11 +30,11 @@ using namespace std;
 
 struct ConfigEntry
 {
-	ConfigEntry(std::string s1, std::string s2, std::string s3)
+	ConfigEntry(std::string& s1, std::string& s2, std::string& s3):
+		section(s1),
+		key(s2),
+		value(s3)
 	{
-		section = s1;
-		key = s2;
-		value = s3;
 	}
 	std::string section;
 	std::string key;
@@ -72,7 +72,7 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
     keys = parser.GetKeys();
 
 	for(std::vector<std::string>::iterator i = keys.begin();
-			i != keys.end(); i++)
+			i != keys.end(); ++i)
 	{
 		std::string value = parser.GetString(*i);
 		if(value != "")
@@ -90,7 +90,7 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 	logger->info("Sending Config to {}", cfpb.componentid());
 	ConfigeResponsePB message;
 	for(std::map<std::string, std::string>::iterator i = key_value_map.begin();
-			i != key_value_map.end(); i++)
+			i != key_value_map.end(); ++i)
 	{
 		logger->info("\t{}={}", i->first, i->second);
 		message.add_key(i->first);

@@ -51,7 +51,7 @@ private:
 
     static const std::string logDataProductID;
 
-    void getNewFilename(char* outfilename, std::string basefilename);
+    void getNewFilename(char* outfilename, std::string& basefilename);
 
     void rotateLogs();
 };

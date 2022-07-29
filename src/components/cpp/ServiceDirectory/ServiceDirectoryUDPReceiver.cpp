@@ -122,7 +122,7 @@ void ServiceDirectoryUDPReceiver::start()
 	}
 
 	char recvString[MAXRECVSTRING+1]; /* Buffer for received string */
-    int recvStringLen;                /* Length of received string */
+    int recvStringLen = 0;                /* Length of received string */
 	ServiceDirectoryBroadcastPB broadcastPB;
 
 	struct timeval currTime;

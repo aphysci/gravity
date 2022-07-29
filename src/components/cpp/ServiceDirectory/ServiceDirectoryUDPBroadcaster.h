@@ -50,9 +50,9 @@ private:
 	std::string domainName;
 	std::string url;
 	std::string broadcastIP;
-	unsigned int port;
-	unsigned int broadcastRate;
-	int broadcastSocket;
+	unsigned int port = 0;
+	unsigned int broadcastRate = 0;
+	int broadcastSocket = 0;
 	struct sockaddr_in destAddress;
 	static bool loop;
 	void* sdSocket;
@@ -64,13 +64,13 @@ private:
 	std::shared_ptr<spdlog::logger> logger;
 
 public:
-	ServiceDirectoryUDPBroadcaster(void* context);
+	explicit ServiceDirectoryUDPBroadcaster(void* context);
 
 	virtual ~ServiceDirectoryUDPBroadcaster();
 
 	void start();
 
-	void setDomainName(std::string domain){domainName=domain;};
+	void setDomainName(std::string& domain){domainName=domain;};
 	void setBroadcastRate(u_int rate){broadcastRate=rate;};
 
 

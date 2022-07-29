@@ -109,7 +109,7 @@ private:
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
     void addPublishers(const std::string &dataProductID, GravityDataProduct &response, const std::string &domain);
-	void purgeObsoletePublishers(const std::string &dataProductID, const std::string &url);
+	void purgeObsoletePublishers(const std::string &dataProductID, const std::string& url);
 };
 
 } /* namespace gravity */

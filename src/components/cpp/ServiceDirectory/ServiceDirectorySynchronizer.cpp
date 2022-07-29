@@ -38,7 +38,7 @@ using namespace std;
 namespace gravity
 {
 
-ServiceDirectorySynchronizer::ServiceDirectorySynchronizer(void* context, string url)
+ServiceDirectorySynchronizer::ServiceDirectorySynchronizer(void* context, string& url)
 {
 	// This is the zmq context that is shared with the ServiceDirectory. Must use
     // a shared context to establish an inproc socket.
@@ -174,7 +174,7 @@ void ServiceDirectorySynchronizer::start()
 					}
 					else
 					{
-						pollIter++;
+						++pollIter;
 					}
 				}
 				logger->info("deleted from Synchronizer pollItems: pollItems len = {}", pollItems.size());
@@ -248,7 +248,7 @@ void ServiceDirectorySynchronizer::start()
 				        }
 				        else
 				        {
-				            pollIter++;
+				            ++pollIter;
 				        }
 				    }
 				    logger->info("deleted from Synchronizer pollItems: pollItems len = {}", pollItems.size());
@@ -474,7 +474,7 @@ void ServiceDirectorySynchronizer::start()
 					// Clean up message
 					zmq_msg_close(&message);				
 				}
-				pollItemIter++;
+				++pollItemIter;
 			}		
 		}
 		

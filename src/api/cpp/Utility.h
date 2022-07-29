@@ -66,7 +66,7 @@ GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " 
 GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue);
 /** @} */ //String conversion and helper functions
 
-GRAVITY_API bool IsValidFilename(const std::string filename); ///< Return if filename is valid, which is OS dependent
+GRAVITY_API bool IsValidFilename(const std::string& filename); ///< Return if filename is valid, which is OS dependent
 
 /**
  * @name Time functions

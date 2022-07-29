@@ -37,7 +37,7 @@ private:
 	std::vector<std::string> split(std::string s);
 	int readNextDataProduct();
 
-	bool swapEndian;
+	bool swapEndian = false;
 	void endian_swap(int& i);
 public:
 	FileReader();

@@ -43,8 +43,8 @@ private:
 	void* sdSocket;
 	std::string ourDomain;
 	std::string ourUrl;
-	unsigned int port;
-	int receiveSocket;
+	unsigned int port = 0;
+	int receiveSocket = 0;
 
 	std::vector<std::string> validDomains;
 
@@ -56,7 +56,7 @@ private:
 	std::shared_ptr<spdlog::logger> logger;
 
 public:
-	ServiceDirectoryUDPReceiver(void* context);
+	explicit ServiceDirectoryUDPReceiver(void* context);
 
 	virtual ~ServiceDirectoryUDPReceiver();
 
