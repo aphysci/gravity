@@ -1,0 +1,29 @@
+# Steps for setting up CI
+# 1. Create a VM
+# 2. Create a self-hosted runner through Github Actions and follow default instructions
+# 3. Install dependencies for gravity
+# 4. Clone gravity into ~/actions-runner/_work/gravity/gravity
+
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux]
+
+    steps:
+    - name: Build
+      run: |
+        cd gravity
+        git checkout .
+        git clean -dfx
+        export JAVA_HOME=/opt/java/jdk8/
+        ./configure --with-protobuf-libdir=/usr/local/lib --with-protobuf-incdir=/usr/include --with-zeromq-libdir=/usr/lib/x86_64-linux-gnu --with-zeromq-incdir=/usr/include --with-protoc=/usr/local/bin/protoc JAVAPROTOBUF_DIR=/usr/share/java/protobuf-3.6.1.jar GUAVAJAR_DIR="$PWD"/src/api/MATLAB/guava-13.0.1.jar CPPFLAGS=-std=c++11 PYTHON=python3 PYTHON_CONFIG=/usr/local/lib/python3.6/dist-packages/config.py PYTHON_INCLUDE=-I/usr/include/python3.6m
+        make clean
+        make
+        
+    - name: Test
+      run: make test
