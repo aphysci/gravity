@@ -959,10 +959,13 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 		if (ret == GravityReturnCodes::SUCCESS)
 		{
-			if (componentID != "ServiceDirectory") {
-				registerDataProductInternal(gravity::constants::GRAVITY_SETTINGS_DPID, GravityTransportTypes::TCP, false, false, false, true);
-
+			if (componentID != "ServiceDirectory") 
+			{
 				settingsPubEnabled = getBoolParam("GravitySettingsPublishEnabled", false);
+				if (settingsPubEnabled)
+				{
+					registerDataProductInternal(gravity::constants::GRAVITY_SETTINGS_DPID, GravityTransportTypes::TCP, false, false, false, true);
+				}
 
 				// Enable metrics (if configured)
 				metricsEnabled = getBoolParam("GravityMetricsEnabled", false);

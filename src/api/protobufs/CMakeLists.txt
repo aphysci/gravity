@@ -18,6 +18,8 @@ if (NOT SKIP_PYTHON)
     set(PY_PROTO_FILES
             "${CMAKE_CURRENT_LIST_DIR}/GravityDataProductPB.proto"
             "${CMAKE_CURRENT_LIST_DIR}/GravityMetricsDataPB.proto"
+            "${CMAKE_CURRENT_LIST_DIR}/GravityConfigParamPB.proto"
+            "${CMAKE_CURRENT_LIST_DIR}/GravityLogMessagePB.proto"
             "${CMAKE_CURRENT_LIST_DIR}/FileArchiverControlRequestPB.proto"
             "${CMAKE_CURRENT_LIST_DIR}/FileArchiverControlResponsePB.proto"
             "${CMAKE_CURRENT_LIST_DIR}/ServiceDirectoryMapPB.proto"
