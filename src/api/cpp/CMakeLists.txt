@@ -35,6 +35,7 @@ set(PROTO_HDRS
 	"${CMAKE_BINARY_DIR}/protobuf/ComponentServiceLookupResponsePB.pb.h"
 	"${CMAKE_BINARY_DIR}/protobuf/GravityDataProductPB.pb.h"
 	"${CMAKE_BINARY_DIR}/protobuf/GravityLogMessagePB.pb.h"
+	"${CMAKE_BINARY_DIR}/protobuf/GravityConfigParamPB.pb.h"
 	"${CMAKE_BINARY_DIR}/protobuf/GravityMetricsDataPB.pb.h"
 	"${CMAKE_BINARY_DIR}/protobuf/ServiceDirectoryRegistrationPB.pb.h"
 	"${CMAKE_BINARY_DIR}/protobuf/ServiceDirectoryResponsePB.pb.h"
