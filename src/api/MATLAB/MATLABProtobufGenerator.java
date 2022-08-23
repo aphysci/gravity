@@ -77,7 +77,7 @@ public class MATLABProtobufGenerator
 				
 				// Double check and make sure the class is of the right stuff
 				Class<?> c = classLoader.loadClass(className);
-				if (!c.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage$Builder"))
+				if (!c.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage$Builder") && !c.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessageV3$Builder"))
 				{
 					// Ignore
 					continue;
@@ -147,7 +147,17 @@ public class MATLABProtobufGenerator
 		String methodName = method.getName();
 		int numArgs = method.getParameterTypes().length;
 		String returnType = method.getReturnType().getName();
-		
+
+/*
+if (returnType.equals("interface com.google.protobuf.ProtocolStringList"))
+{
+	returnType = "java.util.List<String>";
+}
+else if (returnType.equals("interface java.util.List"))
+{
+	returnType = "java.util.List<?>";
+}
+*/
 		if (methodName.startsWith("add") && numArgs == 2)
 		{
 			// No overloaded methods in MATLAB
@@ -242,14 +252,20 @@ public class MATLABProtobufGenerator
 		{
 			// This method returns a list. Determine listed type.
 			String fullTypeName = method.getGenericReturnType().toString();
-			String listedType = fullTypeName.substring(fullTypeName.indexOf("<") + 1, fullTypeName.indexOf(">"));
-			Class<?> listedClass = classLoader.loadClass(listedType);
-			if (Number.class.isAssignableFrom(listedClass))
+	
+			String listedType = null;
+			Class<?> listedClass = null;
+			if (fullTypeName.contains("<") && fullTypeName.contains(">"))
+			{
+				listedType = fullTypeName.substring(fullTypeName.indexOf("<") + 1, fullTypeName.indexOf(">"));
+				listedClass = classLoader.loadClass(listedType);
+			}
+			if (listedClass != null && Number.class.isAssignableFrom(listedClass))
 			{
 				// Returns a list of numbers that we'll map to an array for MATLAB
 				writer.println("         ret = " + numListToArrayFcn + "(ret);");
 			}
-			else if (listedClass.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage"))
+			else if (listedClass != null && listedClass.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage"))
 			{
 				// Returns a list of protobufs. Loop over and create the appropriate MATLAB class for each, and add to a cell array
 				String mlClass = listedType.substring(listedType.indexOf("$") + 1);
@@ -276,7 +292,7 @@ public class MATLABProtobufGenerator
 			// Returns a string - convert to MATLAB char array
 			writer.println("      ret = char(ret);");
 		}
-		else if (returnClass != null && returnClass.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage"))
+		else if (returnClass != null && returnClass.getSuperclass() != null && returnClass.getSuperclass().getName().equals("com.google.protobuf.GeneratedMessage"))
 		{
 			// Returns a protobuf. Create the appropriate MATLAB class.
 			String mlClass = returnType.substring(returnType.indexOf("$") + 1);
@@ -284,10 +300,6 @@ public class MATLABProtobufGenerator
 			writer.println("         pb = " + mlClass + ";");
 			writer.println("         pb.setProtobufBuilder(ret);");
 			writer.println("         ret = pb;");
-		}
-		else
-		{
-						
 		}
 		
 		// Done
