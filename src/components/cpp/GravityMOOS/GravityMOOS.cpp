@@ -60,10 +60,12 @@ GravityMOOS::GravityMOOS(const std::string& config_file) {
             Log::critical("Failed to subscribe to '%s'", _cfg.gravity_publications(i).c_str());
         }
     }
-    for(int i=0, n=_cfg.moospbt_publications_size(); i < n; ++i) {
+    for(int i=0, n=_cfg.moospbt_publications_in_gravity_size(); i < n; ++i) {
         std::string pubname = _cfg.moospbt_publications(i);
-        Log::message("Registering gravity publication '%s'", pubname.c_str());
-        _node.registerDataProduct(pubname, GravityTransportTypes::TCP);
+        std::string pubname_in_gravity = _cfg.moospbt_publications_in_gravity(i);
+        moos2GravityPublishID[pubname] = pubname_in_gravity;
+        Log::message("Registering gravity publication '%s'", pubname_in_gravity.c_str());
+        _node.registerDataProduct(pubname_in_gravity, GravityTransportTypes::TCP);
         _moosComm.AddMessageRouteToActiveQueue<GravityMOOS>(pubname + " Queue", pubname,
             this, &GravityMOOS::moosMessageReceived);
     }
@@ -165,7 +167,8 @@ bool GravityMOOS::moosMessageReceived(CMOOSMsg& msg) {
         return true;
     };
     // Finally, populate GravityDataProduct and publish in Gravity.
-    GravityDataProduct gdp(msg.GetKey());
+    std::string publishID = moos2GravityPublishID[msg.GetKey()];
+    GravityDataProduct gdp(publishID);
     gdp.setData(*gpmsg);
     gdp.setTimestamp(msg.GetTime() * 1000000L);
     gdp.setComponentId(msg.GetSource());
@@ -174,9 +177,9 @@ bool GravityMOOS::moosMessageReceived(CMOOSMsg& msg) {
     gdp.setIsRelayedDataproduct(true);
     
     if (_node.publish(gdp) != GravityReturnCodes::SUCCESS) {
-        Log::warning("Unable to publish '%s' via Gravity.", msg.GetKey().c_str());
+        Log::warning("Unable to publish '%s' via Gravity.", publishID.c_str());
     } else {
-        Log::debug("Publish '%s' via Gravity.", msg.GetKey().c_str());
+        Log::debug("Publish '%s' via Gravity.", publishID.c_str());
     };
     return true;
 }

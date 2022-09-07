@@ -25,6 +25,7 @@
 #include "protobufs/GravityMOOSConfig.pb.h"
 
 #include <MOOS/libMOOS/Comms/MOOSAsyncCommClient.h>
+#include <map>
 
 namespace gravity {
 
@@ -45,6 +46,7 @@ protected:
 
     protobuf::GravityMOOSConfig _cfg;
     ProtobufRegistry _registry;
+    std::map<std::string, std::string> moos2GravityPublishID;
     
     GravityNode _node;
     void subscriptionFilled(const DataProductVec& gdp);

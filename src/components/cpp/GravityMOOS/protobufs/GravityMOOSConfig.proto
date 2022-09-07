@@ -32,6 +32,7 @@ message GravityMOOSConfig {
     // List of publications from each universe that should be published on the other
     repeated string gravity_publications = 10;
     repeated string moospbt_publications = 11;
+    repeated string moospbt_publications_in_gravity = 12;
     
     //repeated goby.moos.TranslatorEntry custom_mappings = 12;
 }
