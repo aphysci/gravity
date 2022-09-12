@@ -42,8 +42,6 @@ public:
     bool moosConnected();
         
 protected:
-    static const char *ComponentName;
-
     protobuf::GravityMOOSConfig _cfg;
     ProtobufRegistry _registry;
     std::map<std::string, std::string> moos2GravityPublishID;

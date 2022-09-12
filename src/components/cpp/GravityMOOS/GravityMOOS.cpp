@@ -27,8 +27,6 @@ using namespace std;
 
 namespace gravity {
 
-const char* GravityMOOS::ComponentName = "GravityMOOS";
-
 static bool wrapMoosConnected(void *param) {
     // MOOS only takes a C function pointer for the 'connected' callback, sadly.
     return static_cast<GravityMOOS*>(param)->moosConnected();
@@ -36,13 +34,11 @@ static bool wrapMoosConnected(void *param) {
 
 GravityMOOS::GravityMOOS(const std::string& config_file) {
     // Initialize Gravity Node
-    if (_node.init(GravityMOOS::ComponentName) != GravityReturnCodes::SUCCESS) {
-        throw std::runtime_error("Could not connect to ServiceDirectory!");
+    while (_node.init() != GravityReturnCodes::SUCCESS) {
+        Log::message("Could not connect to ServiceDirectory. Trying again..");
+        usleep(2000000);
     };
     
-    // Configure logger to log to console
-    Log::initAndAddConsoleLogger(GravityMOOS::ComponentName, Log::DEBUG);
-   
     // Parse Protobuf Config file
     bool success = textFileToProtobuf(config_file.c_str(), _cfg);
     if (!success) { throw std::runtime_error("Could not parse configuration file!"); }
