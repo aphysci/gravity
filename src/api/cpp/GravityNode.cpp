@@ -65,6 +65,7 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
+#include "protobuf/GravitySpdLogConfigPB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -2804,6 +2805,68 @@ bool GravityNode::getBoolParam(std::string key, bool default_value) {
 	else {
 		return false;
 	}
+}
+
+bool GravityNode::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)
+{
+	bool isCompID = false;
+	// Check if it is one of the specified components
+	if (spdLogConfigPB.has_componentID())
+	{
+		for (auto compID : spdLogConfigPB.componentID())
+		{
+			if (compID == componentID)
+			{
+				isCompID = true;
+				break;
+			}
+		}
+	}
+	// All components subscribed should be updated
+	else{
+		isCompID = true;
+	}
+
+	if (isCompID){
+
+		// Get the gravity and application loggers
+		gravityLogger = spdlog::get("GravityLogger");
+		gravityApplicationLogger = spdlog::get("GravityApplicationLogger");
+
+		if (spdLogConfigPB.has_spdlog_component());
+		{
+			for(auto logConfig : spdLogConfigPB.spdlog_component());
+			{
+				// Console log level always exists, do not need to check
+				if (logConfig.loggerID() == "GravityConsoleLogLevel")
+				{
+					console_proxy_for_gravity -> set_level(spdLogConfigPB.log_level());
+				}
+				else if (logConfig.loggerID() == "AppConsoleLogLevel")
+				{
+					console_proxy_for_app -> set_level(spdLogConfigPB.log_level());
+				}
+				// Assume right now that all exist
+				// ... ask about this later
+				// weird issue of accessing sinks (might need global map of sinks)
+				else if (logConfig.loggerID() == "GravityFileLogLevel")
+				{
+					file_proxy_for_gravity-> set_level(spdLogConfigPB.log_level());
+				}
+				else if (logConfig.loggerID() == "AppFileLogLevel")
+				{
+					file_proxy_for_app-> set_level(spdLogConfigPB.log_level());
+				}
+				else if (logConfig.loggerID() == "AppNetworkLogLevel")
+				{
+					publish_proxy_for_app-> set_level(spdLogConfigPB.log_level());
+				}
+			}
+		}
+	}
+ 
+
+	return false;
 }
 
 std::string GravityNode::getComponentID()
