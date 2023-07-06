@@ -27,7 +27,8 @@ message SpdLogComponentInfoPB
 {
 	// used or just implied?? 
 	required string log_level   = 1; // INFO ERR WARN CRITICAL DEBUG OFF TRACE
-	required string loggerID	= 2; //"GravityFileLogLevel""GravityConsoleLogLevel"AppFileLogLevel""AppConsoleLogLevel""AppNetworkLogLevel"
+	required string loggerID	= 2; //"console" "file" "network"
+	required bool isAppLogger   = 3;
 }
 
 message GravitySpdLogConfigPB

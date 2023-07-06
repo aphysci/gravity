@@ -578,61 +578,42 @@ void GravityNode::configSpdLoggers()
 	auto app_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "off")));
 	auto app_publish_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetworkLogLevel", "off")));
 	
-	bool has_gravity_file_logger = gravity_file_level != SPDLOG_LEVEL_OFF;
-	bool has_app_file_logger = app_file_level != SPDLOG_LEVEL_OFF;
-	bool has_app_console_logger = app_console_level != SPDLOG_LEVEL_OFF;
-	bool has_app_publish_logger = app_publish_level != SPDLOG_LEVEL_OFF;
-	
-	bool has_app_logger = has_app_file_logger || has_app_console_logger || has_app_publish_logger;
-	
 	// Create lists to hold sinks
 	std::list<shared_ptr<spdlog::sinks::sink>> app_sink_list = {};
 	std::list<shared_ptr<spdlog::sinks::sink>> gravity_sink_list = {};
 	
-	// Always create console loggers
+	// Always create all loggers, some may be set to off
 	auto shared_console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
 	auto console_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
 	console_proxy_for_gravity->add_sink(shared_console_sink);
 	console_proxy_for_gravity->set_level(gravity_console_level);
 	gravity_sink_list.push_back(console_proxy_for_gravity);
+	
 	auto console_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
 	console_proxy_for_app->add_sink(shared_console_sink);
 	console_proxy_for_app->set_level(app_console_level);
 	app_sink_list.push_back(console_proxy_for_app);
 	
-	// Configure file logger (if specified)
-	if (has_gravity_file_logger || has_app_file_logger)
-	{
-		string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
-		auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+
+	string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
+	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+
+	auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_gravity->add_sink(sharedFileSink);
+	file_proxy_for_gravity->set_level(gravity_file_level);
+	gravity_sink_list.push_back(file_proxy_for_gravity);
 		
-		if (has_gravity_file_logger)
-		{
-			auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
-			file_proxy_for_gravity->add_sink(sharedFileSink);
-			file_proxy_for_gravity->set_level(gravity_file_level);
-			gravity_sink_list.push_back(file_proxy_for_gravity);
-		}
+	auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_app->add_sink(sharedFileSink);
+	file_proxy_for_app->set_level(app_file_level);
+	app_sink_list.push_back(file_proxy_for_app);
 		
-		if (has_app_file_logger)
-		{
-			auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-			file_proxy_for_app->add_sink(sharedFileSink);
-			file_proxy_for_app->set_level(app_file_level);
-			app_sink_list.push_back(file_proxy_for_app);
-		}
-		
-	}
-	
-	// Configure publish logger
-	if (has_app_publish_logger)
-	{
-		auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
-		auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-		publish_proxy_for_app->add_sink(publishSink);
-		publish_proxy_for_app->set_level(app_publish_level);
-		app_sink_list.push_back(publish_proxy_for_app);
-	}
+	auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
+	auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	publish_proxy_for_app->add_sink(publishSink);
+	publish_proxy_for_app->set_level(app_publish_level);
+	app_sink_list.push_back(publish_proxy_for_app);
 	
 	// Configure GravityLogger.
 	logger = std::make_shared<spdlog::logger>("GravityLogger");
@@ -656,9 +637,9 @@ void GravityNode::configSpdLoggers()
 	app_logger->set_pattern("[%Y-%m-%d %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(app_logger);
 	
-	if (has_app_logger)
+	if ((app_file_level != SPDLOG_LEVEL_OFF) || (app_console_level != SPDLOG_LEVEL_OFF) || (app_publish_level != SPDLOG_LEVEL_OFF))
 	{
-		// Set the ApplicaitonLogger as the default
+		// Set the ApplicationLogger as the default
 		spdlog::set_default_logger(app_logger);
 	}
 }
@@ -2519,6 +2500,15 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	return GravityReturnCodes::SUCCESS;
 }
 
+
+GravityReturnCode GravityNode::registerSpdLogConfigListener()
+{
+	// Subscribe to the spdlogconfig publisher
+	this-> subscribe();
+
+	// Listener thread ? 
+}
+
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
 {
 	return registerRelay(dataProductID, subscriber, localOnly, transportType, false);
@@ -2830,37 +2820,39 @@ bool GravityNode::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)
 	if (isCompID){
 
 		// Get the gravity and application loggers
-		gravityLogger = spdlog::get("GravityLogger");
-		gravityApplicationLogger = spdlog::get("GravityApplicationLogger");
+		auto gravityLogger = spdlog::get("GravityLogger");
+		auto gravityApplicationLogger = spdlog::get("GravityApplicationLogger");
 
+		string loggerID = {"console","file", "network"};
+		
 		if (spdLogConfigPB.has_spdlog_component());
 		{
 			for(auto logConfig : spdLogConfigPB.spdlog_component());
 			{
-				// Console log level always exists, do not need to check
-				if (logConfig.loggerID() == "GravityConsoleLogLevel")
+				// Choose logger
+				auto logger;
+				// Set max number of loggers (2 for gravity, 3 for app)
+				int max = 2;
+				if (logConfig.isAppLogger())
 				{
-					console_proxy_for_gravity -> set_level(spdLogConfigPB.log_level());
+					logger = gravityApplicationLogger;
+					max = 3;
 				}
-				else if (logConfig.loggerID() == "AppConsoleLogLevel")
+				else
 				{
-					console_proxy_for_app -> set_level(spdLogConfigPB.log_level());
+					logger = gravityLogger;
 				}
-				// Assume right now that all exist
-				// ... ask about this later
-				// weird issue of accessing sinks (might need global map of sinks)
-				else if (logConfig.loggerID() == "GravityFileLogLevel")
+
+				// Choose sink and set level
+				for (int i = 0 ; i < max; i++)
 				{
-					file_proxy_for_gravity-> set_level(spdLogConfigPB.log_level());
+					if(loggerID[i] == logConfig.loggerID())
+					{
+						logger->sink()[i] -> set_level(logConfig.log_level());
+						break;
+					}
 				}
-				else if (logConfig.loggerID() == "AppFileLogLevel")
-				{
-					file_proxy_for_app-> set_level(spdLogConfigPB.log_level());
-				}
-				else if (logConfig.loggerID() == "AppNetworkLogLevel")
-				{
-					publish_proxy_for_app-> set_level(spdLogConfigPB.log_level());
-				}
+				
 			}
 		}
 	}
