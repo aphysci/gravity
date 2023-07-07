@@ -643,8 +643,8 @@ void GravityNode::configSpdLoggers()
 	}
 
 	// Set up the subscriber for any reconfiguration messages
-	slcs.init(componentID);
-	this->subscribe("GravitySpdLogConfig", slcs);
+	spdLogConfigSub.init(componentID);
+	this->subscribe("GravitySpdLogConfig", spdLogConfigSub);
 }
 
 GravityReturnCode GravityNode::init()

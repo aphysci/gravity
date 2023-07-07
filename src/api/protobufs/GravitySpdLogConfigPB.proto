@@ -22,16 +22,28 @@ option java_outer_classname = "ComponentDataLookupResponseContainer";
 option java_package = "com.aphysci.gravity.protobuf";
 
 package gravity;
-
-message SpdLogComponentInfoPB
-{
-	required bool isAppLogger   = 1; // application or gravity logger
-	required string loggerID	= 2; // "console" "file" "network"
-	required string log_level   = 3; // INFO ERR WARN CRITICAL DEBUG OFF TRACE
-}
-
 message GravitySpdLogConfigPB
 {
-	repeated string componentID   			         = 1; // GravityNode componentID
-	repeated SpdLogComponentInfoPB spdlog_component  = 2;
+	optional string component_id = 1; 
+	enum LogLevel
+	{
+		trace = 0;
+		debug = 1;
+		info = 2;
+		warn = 3;
+		err = 4;
+		critical = 5;
+		off = 6;
+	} 			       
+	optional LogLevel logger_level  = 2;
+	enum LoggerType
+	{
+		GravityConsoleLogger = 0;
+		GravityFileLogger = 1;
+		ApplicationConsoleLogger = 2;
+		ApplicationFileLogger = 3;
+		ApplicationNetworkLogger = 4;
+
+	}
+	optional LoggerType logger_id = 3;
 }

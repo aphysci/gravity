@@ -213,7 +213,7 @@ private:
 	bool defaultCacheLastSentDataprodut;
 	bool defaultReceiveLastSentDataproduct;
 
-    SpdLogConfigSubscriber slcs;
+    SpdLogConfigSubscriber spdLogConfigSub;
 	
   std::thread subscriptionManagerThread;
 
