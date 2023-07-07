@@ -1,13 +1,11 @@
 #include "GravitySpdLogConfigSubscriber.h"
-
 #include "spdlog/spdlog.h"
-
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
 
 
 namespace gravity {
     SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
-	spdLogConfigSubscriber::init(string compID)
+	spdLogConfigSubscriber::init(std::string compID)
 	{
 		componentID = compID;
 	}
@@ -23,7 +21,7 @@ namespace gravity {
 	    }
     }
 
-    // Determines whether or not to reconfigure this componenet based on the component ID
+    // Determines if correct ID and reconfigures accordingly
     void SpdLogConfigSubscriber::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)
     {
 	    bool isCompID = false;
@@ -51,7 +49,7 @@ namespace gravity {
 		    auto gravityLogger = spdlog::get("GravityLogger");
 		    auto gravityApplicationLogger = spdlog::get("GravityApplicationLogger");
 
-		    string loggerID = {"console","file", "network"};
+		    std::string loggerID[3] = {"console","file", "network"};
 		
 		    if (spdLogConfigPB.has_spdlog_component());
 		    {

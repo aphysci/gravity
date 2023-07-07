@@ -9,7 +9,7 @@ namespace gravity {
     class SpdLogConfigSubscriber: public GravitySubscriber
     {
         private:
-            string componentID;
+            std::string componentID;
             void reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB);
         public:
             SpdLogConfigSubscriber();
