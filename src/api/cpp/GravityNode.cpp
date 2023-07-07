@@ -65,7 +65,6 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
-#include "protobuf/GravitySpdLogConfigPB.pb.h"
 
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
@@ -642,6 +641,9 @@ void GravityNode::configSpdLoggers()
 		// Set the ApplicationLogger as the default
 		spdlog::set_default_logger(app_logger);
 	}
+
+	// Set up the subscriber for any reconfiguration messages
+	this->subscribe("GravitySpdLogConfig", slcs)
 }
 
 GravityReturnCode GravityNode::init()
@@ -2500,15 +2502,6 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	return GravityReturnCodes::SUCCESS;
 }
 
-
-GravityReturnCode GravityNode::registerSpdLogConfigListener()
-{
-	// Subscribe to the spdlogconfig publisher
-	this-> subscribe();
-
-	// Listener thread ? 
-}
-
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
 {
 	return registerRelay(dataProductID, subscriber, localOnly, transportType, false);
@@ -2795,70 +2788,6 @@ bool GravityNode::getBoolParam(std::string key, bool default_value) {
 	else {
 		return false;
 	}
-}
-
-bool GravityNode::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)
-{
-	bool isCompID = false;
-	// Check if it is one of the specified components
-	if (spdLogConfigPB.has_componentID())
-	{
-		for (auto compID : spdLogConfigPB.componentID())
-		{
-			if (compID == componentID)
-			{
-				isCompID = true;
-				break;
-			}
-		}
-	}
-	// All components subscribed should be updated
-	else{
-		isCompID = true;
-	}
-
-	if (isCompID){
-
-		// Get the gravity and application loggers
-		auto gravityLogger = spdlog::get("GravityLogger");
-		auto gravityApplicationLogger = spdlog::get("GravityApplicationLogger");
-
-		string loggerID = {"console","file", "network"};
-		
-		if (spdLogConfigPB.has_spdlog_component());
-		{
-			for(auto logConfig : spdLogConfigPB.spdlog_component());
-			{
-				// Choose logger
-				auto logger;
-				// Set max number of loggers (2 for gravity, 3 for app)
-				int max = 2;
-				if (logConfig.isAppLogger())
-				{
-					logger = gravityApplicationLogger;
-					max = 3;
-				}
-				else
-				{
-					logger = gravityLogger;
-				}
-
-				// Choose sink and set level
-				for (int i = 0 ; i < max; i++)
-				{
-					if(loggerID[i] == logConfig.loggerID())
-					{
-						logger->sink()[i] -> set_level(logConfig.log_level());
-						break;
-					}
-				}
-				
-			}
-		}
-	}
- 
-
-	return false;
 }
 
 std::string GravityNode::getComponentID()

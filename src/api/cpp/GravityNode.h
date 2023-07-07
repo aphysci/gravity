@@ -32,6 +32,7 @@
 #include "GravitySemaphore.h"
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
+#include "GravitySpdLogConfigSubscriber.h"
 #include "Utility.h"
 #include "CommUtil.h"
 //#include "PublishSink.h"
@@ -211,6 +212,8 @@ private:
 
 	bool defaultCacheLastSentDataprodut;
 	bool defaultReceiveLastSentDataproduct;
+
+    SpdLogConfigSubscriber slcs;
 	
   std::thread subscriptionManagerThread;
 
