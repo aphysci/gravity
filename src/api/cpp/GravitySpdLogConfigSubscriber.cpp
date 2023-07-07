@@ -6,7 +6,11 @@
 
 
 namespace gravity {
-    //init function setting the componentID
+    SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
+	spdLogConfigSubscriber::init(string compID)
+	{
+		componentID = compID;
+	}
     void SpdLogConfigSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) 
     {
         for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)

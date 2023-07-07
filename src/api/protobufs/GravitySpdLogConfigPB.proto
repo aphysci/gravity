@@ -25,14 +25,13 @@ package gravity;
 
 message SpdLogComponentInfoPB
 {
-	// used or just implied?? 
-	required string log_level   = 1; // INFO ERR WARN CRITICAL DEBUG OFF TRACE
-	required string loggerID	= 2; //"console" "file" "network"
-	required bool isAppLogger   = 3;
+	required bool isAppLogger   = 1; // application or gravity logger
+	required string loggerID	= 2; // "console" "file" "network"
+	required string log_level   = 3; // INFO ERR WARN CRITICAL DEBUG OFF TRACE
 }
 
 message GravitySpdLogConfigPB
 {
-	repeated string componentID   			         = 1;
+	repeated string componentID   			         = 1; // GravityNode componentID
 	repeated SpdLogComponentInfoPB spdlog_component  = 2;
 }
