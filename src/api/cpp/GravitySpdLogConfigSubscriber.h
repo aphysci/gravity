@@ -1,7 +1,6 @@
 #include <iostream>
-#include <GravitySubscriber.h>
-#include <Utility.h>
-
+#include "Utility.h"
+#include "GravitySubscriber.h"
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
 
 namespace gravity {
@@ -13,7 +12,7 @@ namespace gravity {
             void reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB);
         public:
             SpdLogConfigSubscriber();
-            void init();
+            void init(std::string compID);
             void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 
     };

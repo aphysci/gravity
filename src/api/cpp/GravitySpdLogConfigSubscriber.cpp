@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "GravitySpdLogConfigSubscriber.h"
 #include "spdlog/spdlog.h"
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
@@ -5,7 +7,7 @@
 
 namespace gravity {
     SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
-	spdLogConfigSubscriber::init(std::string compID)
+	void SpdLogConfigSubscriber::init(std::string compID)
 	{
 		componentID = compID;
 	}
@@ -26,9 +28,9 @@ namespace gravity {
     {
 	    bool isCompID = false;
 	    // Check if it is one of the specified components
-	    if (spdLogConfigPB.has_componentID())
+	    if (spdLogConfigPB.componentid_size() !=0)
 	    {
-		    for (auto compID : spdLogConfigPB.componentID())
+		    for (auto compID : spdLogConfigPB.componentid())
 		    {
 			    if (compID == componentID)
 			    {
@@ -51,31 +53,32 @@ namespace gravity {
 
 		    std::string loggerID[3] = {"console","file", "network"};
 		
-		    if (spdLogConfigPB.has_spdlog_component());
+		    if (spdLogConfigPB.spdlog_component_size() != 0)
 		    {
-			    for(SpdLogComponentInfoPB logConfig : spdLogConfigPB.spdlog_component());
+			    for(SpdLogComponentInfoPB logConfig : spdLogConfigPB.spdlog_component())
 			    {
 				    // Choose logger and max number 
                     // of loggers (2 for gravity, 3 for app)
-				    auto logger;
+				    std::shared_ptr<spdlog::logger> log;
 				    int max;
-				    if (logConfig.isAppLogger())
+				    if (logConfig.isapplogger())
 				    {
-					    logger = gravityApplicationLogger;
+					    log = gravityApplicationLogger;
 					    max = 3;
 				    }
 				    else
 				    {
-					    logger = gravityLogger;
+					    log = gravityLogger;
                         max = 2;
  				    }
 
 				    // Choose sink and set level
 				    for (int i = 0 ; i < max; i++)
 				    {
-					    if(loggerID[i] == logConfig.loggerID())
+					    if(loggerID[i] == logConfig.loggerid())
 					    {
-						    logger->sink()[i] -> set_level(logConfig.log_level());
+						    auto sink = log->sinks()[i];
+							sink -> set_level(spdlog::level::from_str(logConfig.log_level()));
 						    break;
 					    }
 				    }
