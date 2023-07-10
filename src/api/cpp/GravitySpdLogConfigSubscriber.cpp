@@ -32,7 +32,7 @@ namespace gravity {
 			return;
 		}
 
-		if (spdLogConfigPB.logger_id() <=1)
+		if (spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger || spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityFileLogger)
 		{
 			auto log = spdlog::get("GravityLogger");
 			log->sinks()[spdLogConfigPB.logger_id()]-> set_level((spdlog::level::level_enum)(spdLogConfigPB.logger_level()));   

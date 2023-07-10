@@ -25,7 +25,7 @@ package gravity;
 message GravitySpdLogConfigPB
 {
 	optional string component_id = 1; 
-	enum LogLevel
+	enum LoggerLevel
 	{
 		trace = 0;
 		debug = 1;
@@ -35,7 +35,7 @@ message GravitySpdLogConfigPB
 		critical = 5;
 		off = 6;
 	} 			       
-	optional LogLevel logger_level  = 2;
+	optional LoggerLevel logger_level  = 2;
 	enum LoggerType
 	{
 		GravityConsoleLogger = 0;
