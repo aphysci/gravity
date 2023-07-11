@@ -296,7 +296,7 @@ AC_CONFIG_FILES([Makefile
 		             test/examples/14-AnomalyDetection/train.sh
 		             test/examples/14-AnomalyDetection/detect.sh
                  test/examples/15-SpdlogDynamicConfiguration/Makefile
-                 test/examples/15-SpdLogDynamicConfiguration/run.sh])
+                 test/examples/15-SpdlogDynamicConfiguration/run.sh])
 
 AC_OUTPUT
 

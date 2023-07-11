@@ -1,6 +1,11 @@
 #include <iostream>
 #include <GravityNode.h>
+#include <GravitySubscriber.h>
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
+#include "protobuf/GravityLogMessagePB.pb.h"
+
+using namespace std;
+using namespace gravity;
 
 #ifdef WIN32
 #include <Windows.h>
@@ -9,11 +14,43 @@
 #include <unistd.h>
 #endif
 
-class SimpleSubscriber : public GravitySubscriber
-{
+class SimpleSubscriber : public GravitySubscriber {
 public:
 	virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
+
+void logAllAppLevels()
+{
+	spdlog::trace("AppTraceLog");
+	spdlog::debug("AppDebugLog");
+	spdlog::info("AppInfoLog");
+	spdlog::warn("AppWarnLog");
+	spdlog::error("AppErrorLog");
+	spdlog::critical("AppCriticalLog");
+}
+
+void sendConfigMessage(GravityNode &gn,std::string dataProductID,std::string compID, GravitySpdLogConfigPB_LoggerType lt, GravitySpdLogConfigPB_LoggerLevel ll)
+{
+	//Create a data product to send across the network
+	GravityDataProduct gravityConfigDP(dataProductID);
+		
+    //Initialize our message
+	GravitySpdLogConfigPB spdLogConfigPB;
+	if(compID != "")
+	{
+		spdLogConfigPB.set_component_id(compID);
+	}
+    
+	spdLogConfigPB.set_logger_id(lt);
+    spdLogConfigPB.set_logger_level(ll);
+    gravityConfigDP.setData(spdLogConfigPB);
+		
+    //Publish the  data product.
+	if (gn.publish(gravityConfigDP) != GravityReturnCodes::SUCCESS)
+	{
+		spdlog::error("Could not publish data product with id {}", dataProductID);
+	}
+}
 
 int main()
 {
@@ -23,31 +60,28 @@ int main()
 	GravityNode gn2;
 
 	//Initialize gravity, giving this node a componentID.
-	GravityReturnCode ret = gn1.init("SimpleGravityComponentID1");
-	if (ret != GravityReturnCodes::SUCCESS)
+	if (gn1.init("SimpleGravityComponentID1") != GravityReturnCodes::SUCCESS)
 	{
-		spdlog::critical("Could not initialize GravityNode, return code was {}", ret);
+		spdlog::critical("Could not initialize GravityNode");
 		exit(1);
 	}
-	GravityReturnCode ret = gn2.init("SimpleGravityComponentID2");
-	if (ret != GravityReturnCodes::SUCCESS)
+	if (gn2.init("SimpleGravityComponentID2") != GravityReturnCodes::SUCCESS)
 	{
-		spdlog::critical("Could not initialize GravityNode, return code was {}", ret);
+		spdlog::critical("Could not initialize GravityNode");
 		exit(1);
 	}
 
 	//Register a data product
 	const std::string dataProductID = "GravitySpdLogConfig";
-	ret = gn1.registerDataProduct(dataProductID, GravityTransportTypes::TCP);
-    if (ret != GravityReturnCodes::SUCCESS)
+    if (gn1.registerDataProduct(dataProductID, GravityTransportTypes::TCP) != GravityReturnCodes::SUCCESS)
 	{
-		spdlog::critical("Could not register data product with id {}, return code was {}", dataProductID, ret);
+		spdlog::critical("Could not register data product with id {}", dataProductID);
 		exit(1);
 	}
 
 	// Set up a subscriber to the Application Publisher Logger
 	SimpleSubscriber simpleSubscriber;
-	gn1.subscribe(gravity::constants::GRAVITY_LOGGER_DPID, simpleSubscriber)
+	gn1.subscribe(gravity::constants::GRAVITY_LOGGER_DPID, simpleSubscriber);
 
 	sleep(1000); // All components begin as off, nothing should print
 	// Change SimpleGravityComponentID1's GravityConsole to trace and file to debug
@@ -80,44 +114,10 @@ int main()
 	sleep(1000); // wait to allow for some gravity messages to generate (but none should be logged)
 }
 
-void logAllAppLevels()
-{
-	spdlog::trace("AppTraceLog");
-	spdlog::debug("AppDebugLog");
-	spdlog::info("AppInfoLog");
-	spdlog::warn("AppWarnLog");
-	spdlog::err("AppErrorLog");
-	spdlog::critical("AppCriticalLog");
-}
-
-void sendConfigMessage(GravityNode gn, std::string dataProductID,std::string compID, GravitySpdLogConfigPB_LoggerType lt, GravitySpdLogConfigPB_LoggerLevel ll)
-{
-	//Create a data product to send across the network
-	GravityDataProduct gravityConfigDP(dataProductID);
-		
-    //Initialize our message
-	GravitySpdLogConfigPB spdLogConfigPB;
-	if(compId != "")
-	{
-		spdLogConfigPB.set_component_id(compID);
-	}
-    
-	spdLogConfigPB.set_logger_id(lt);
-    spdLogConfigPB.set_logger_level(ll);
-    gravityConfigDP.set_data(spdLogConfigPB);
-		
-    //Publish the  data product.
-	ret = gn.publish(gravityConfigDP);
-	if (ret != GravityReturnCodes::SUCCESS)
-	{
-		spdlog::error("Could not publish data product with id {}, return code was {}", dataProductID, ret);
-	}
-}
-
-void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
 	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
-		i != dataProducts.end(); i++)
+	 				i != dataProducts.end(); i++)
 		{
 			//Get the protobuf object from the message
 			GravityLogMessagePB logMessage;
