@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.17)
+include(GravitySupport)
+project(SpdlogDynamicConfiguration)
+
+find_package(PThreadsWin32 REQUIRED)
+gravity_find_protobuf(ON)
+gravity_find_zeromq(ON)
+gravity_find_spdlog(ON)
+find_package(GravityKeyValueParser REQUIRED)
+find_package(Gravity REQUIRED)
+
+set(CMAKE_DEBUG_POSTFIX _d)
+add_executable(SpdlogConfigurationPublisherTest SpdlogConfigurationPublisherTest.cpp)
+set_target_properties(SpdlogConfigurationPublisherTest PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+target_link_libraries(SpdlogConfigurationPublisherTest gravity)
+install(TARGETS SpdlogConfigurationPublisherTest DESTINATION bin)

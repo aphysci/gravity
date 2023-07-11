@@ -64,6 +64,7 @@ all clean:
 	$(MAKE) -C test/examples/9-Domains $@
 	$(MAKE) -C test/examples/10-Archiving $@
 	$(MAKE) -C test/examples/13-Relay $@
+	$(MAKE) -C test/examples/15-SpdlogDynamicConfiguration $@
 
 	# Perform each of the following in their own if block, otherwise a failure in the below make commands
 	# won't cause the overall build to fail.
@@ -131,6 +132,7 @@ test-prep:
 	chmod 755 test/examples/13-Relay/run.sh
 	chmod 755 test/examples/14-AnomalyDetection/train.sh
 	chmod 755 test/examples/14-AnomalyDetection/detect.sh
+	chmod 755 test/examples/15-SpdlogDynamicConfiguration/run.sh
 
 test: distributable test-prep components
 	./test/testall.sh
