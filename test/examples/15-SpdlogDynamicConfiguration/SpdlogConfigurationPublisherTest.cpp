@@ -97,14 +97,12 @@ int main()
 
 	sleep(1000); // wait for some gravity messages to log (only ID1 is printing this)
 
-	// Change both components' ApplicationNetwork  to info
+	// Change ID1 ApplicationNetwork to critical, both components' ApplicationConsole to info
 	sendConfigMessage(gn1, dataProductID, "SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_ApplicationNetworkLogger, GravitySpdLogConfigPB_LoggerLevel_critical);
 	sendConfigMessage(gn1, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_info);
-
 	logAllAppLevels(); // both ApplicationConsole should be logging at info, application network for ID1 logging critical 
-
-	// Check subscriber to make sure they are logged
-	
+	// Wait for subscriber to receive this
+	sleep(1000);
 	// Change all logger's changed back to off
 	sendConfigMessage(gn1, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_off);
 	sendConfigMessage(gn1, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_off);
@@ -123,6 +121,7 @@ void SimpleSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<Gra
 			GravityLogMessagePB logMessage;
 			(*i)->populateMessage(logMessage);
 
+			cout << "Hello";
 			if(logMessage.message() == "AppCriticalLog" && logMessage.level() == "critical")
 			{
 				std::string isValid("The correct level and message were published");
