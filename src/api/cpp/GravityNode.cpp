@@ -643,8 +643,10 @@ void GravityNode::configSpdLoggers()
 	}
 
 	// Set up the subscriber for any reconfiguration messages
+	const std::string dataProductID = "GravitySpdLogConfig";
 	spdLogConfigSub.init(componentID);
-	this->subscribe("GravitySpdLogConfig", spdLogConfigSub);
+	this->subscribe(dataProductID, spdLogConfigSub);
+	std::cout << "Subscribed to data product " << dataProductID << "\n";
 }
 
 GravityReturnCode GravityNode::init()

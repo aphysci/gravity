@@ -1,5 +1,5 @@
 #include <memory>
-
+#include <iostream>
 #include "GravitySpdLogConfigSubscriber.h"
 #include "spdlog/spdlog.h"
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
@@ -9,10 +9,12 @@ namespace gravity {
     SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
 	void SpdLogConfigSubscriber::init(std::string compID)
 	{
+		std::cout<< "Set up ConfigSub for " << compID << "\n";
 		componentID = compID;
 	}
     void SpdLogConfigSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) 
     {
+		std::cout<< "Receiving subscription " << componentID << "\n";
         for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
 	    {
 		    //Get the protobuf object from the message
@@ -32,6 +34,7 @@ namespace gravity {
 			return;
 		}
 
+		std::cout<<"Going to reconfigure " << spdLogConfigPB.logger_id() << " to " << spdLogConfigPB.logger_level() << "\n";
 		if (spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger || spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityFileLogger)
 		{
 			auto log = spdlog::get("GravityLogger");
