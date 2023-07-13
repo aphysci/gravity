@@ -635,18 +635,9 @@ void GravityNode::configSpdLoggers()
 	app_logger->flush_on(spdlog::level::trace); // logger will flush on all messages
 	app_logger->set_pattern("[%Y-%m-%d %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(app_logger);
-	
-	if ((app_file_level != SPDLOG_LEVEL_OFF) || (app_console_level != SPDLOG_LEVEL_OFF) || (app_publish_level != SPDLOG_LEVEL_OFF))
-	{
-		// Set the ApplicationLogger as the default
-		spdlog::set_default_logger(app_logger);
-	}
 
-	// Set up the subscriber for any reconfiguration messages
-	const std::string dataProductID = "GravitySpdLogConfig";
-	spdLogConfigSub.init(componentID);
-	this->subscribe(dataProductID, spdLogConfigSub);
-	std::cout << "Subscribed to data product " << dataProductID << "\n";
+	// Set the ApplicationLogger as the default
+	spdlog::set_default_logger(app_logger);
 }
 
 GravityReturnCode GravityNode::init()
@@ -1683,7 +1674,6 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
     }
 
 	logger->trace("Subscribing to [{}] and receiving cached values: {}", dataProductID, receiveLastCachedValue);
-	
 	vector<PublisherInfoPB> registeredPublishersInfo;
 	int tries = 5;
 	while (registeredPublishersInfo.size() == 0 && tries-- > 0)
@@ -2503,6 +2493,20 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::registerSpdlogConfiguration()
+{
+	// Set up the subscriber for any reconfiguration messages
+	const std::string dataProductID = "GravitySpdLogConfig";
+	spdLogConfigSub.init(componentID);
+	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
+	ret = this->subscribe(dataProductID, spdLogConfigSub);
+	if (ret!=GravityReturnCodes::SUCCESS)
+	{
+		spdlog::error("Unsuccessfully registered data product {}", ret);
+	}
+	return ret;
 }
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)

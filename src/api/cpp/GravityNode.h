@@ -503,6 +503,14 @@ public:
      */
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
 
+
+     /**
+     * Sets up the ability to reconfigure spdlog levels 
+     * potentially add in params?? 
+     * \return success flag
+     */
+    GRAVITY_API GravityReturnCode registerSpdlogConfiguration();
+
     /**
      * Register a Relay that will act as a pass-through for the given dataProductID.  It will be a publisher and subscriber
      * for the given dataProductID, but other components will only subscribe to this data if they are on the same host (localOnly == true), or
