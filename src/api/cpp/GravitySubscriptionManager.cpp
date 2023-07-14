@@ -345,7 +345,7 @@ void GravitySubscriptionManager::start()
                     // Loop through all subscribers and deliver the messages
 					if(dataProducts.size() != 0)
 					{
-						logger->trace("received {} gdp's, about to send  {} to {} subscribers", dataProducts.size(),subDetails->dataProductID, subDetails->subscribers.size());
+						logger->trace("received {} gdp's to {} subscribers", dataProducts.size(), subDetails->subscribers.size());
 
 						for (set<GravitySubscriber*>::iterator iter = subDetails->subscribers.begin(); iter != subDetails->subscribers.end(); iter++)
 						{

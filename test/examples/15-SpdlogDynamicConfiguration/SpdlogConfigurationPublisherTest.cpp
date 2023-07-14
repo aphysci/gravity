@@ -21,6 +21,8 @@ public:
 
 void logAllAppLevels()
 {
+	// Wait to ensure it has been sent and received
+	sleep(3000);
 	spdlog::trace("App");
 	spdlog::debug("App");
 	spdlog::info("App");
@@ -77,39 +79,52 @@ int main()
 	gn.registerSpdlogConfiguration();
 	SimpleSubscriber simpleSubscriber;
 	gn.subscribe(gravity::constants::GRAVITY_LOGGER_DPID, simpleSubscriber);
+
+	std::cout<<"Begin testing GravityLogger\n";
 	
-	// Change SimpleGravityComponentID1's GravityFile to trace and GravityConsole to debug
-	// sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_debug);
+	// Change SimpleGravityComponentID1's File to trace level
+	// for gravity and trace level for the console
 	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_trace);
-	sleep(5000);
-	logAllAppLevels(); // nothing from application should log 
-	/*
-	// Nothing changes as component ID does not work
+	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_trace);
+
+	logAllAppLevels(); // nothing prints
+
+	// Turns off file and console for GravityLogger
+	// for SimpleGravityComponentID1 and ServiceDirectory
+	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_off);
+	sendConfigMessage(gn, dataProductID,"", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_off);
+
+	std::cout<<"End testing GravityLogger\n";
+
+	// Nothing changes as NotARealID does not work
 	sendConfigMessage(gn, dataProductID, "NotARealID", GravitySpdLogConfigPB_LoggerType_ApplicationFileLogger, GravitySpdLogConfigPB_LoggerLevel_error);
-	sleep(5000);
 	logAllAppLevels(); 
 
-	*/
-	// Change ID1 ApplicationNetwork to critical, any subscribed component ApplicationConsole to info
+	
+	std::cout<<"Begin testing ApplicationLogger\n";
+
+	// Change SimpleGravityComponentID1's network to critical level 
+	// for ApplicationLogger and any subscribed components' console to info level
+	// and file to warn level
 	sendConfigMessage(gn, dataProductID, "SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_ApplicationNetworkLogger, GravitySpdLogConfigPB_LoggerLevel_critical);
-	//sendConfigMessage(gn, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_info);
-	sleep(5000);
+	sendConfigMessage(gn, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_info);
+	sendConfigMessage(gn, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationFileLogger, GravitySpdLogConfigPB_LoggerLevel_warn);
 	logAllAppLevels();
 
 	// Change all logger's changed back to off
-	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_off);
-	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_off);
-	//sendConfigMessage(gn, dataProductID, "SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_ApplicationNetworkLogger, GravitySpdLogConfigPB_LoggerLevel_off);
+	sendConfigMessage(gn, dataProductID, "SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_ApplicationNetworkLogger, GravitySpdLogConfigPB_LoggerLevel_off);
 	sendConfigMessage(gn, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_off);
-	sleep(5000);
+	sendConfigMessage(gn, dataProductID, "", GravitySpdLogConfigPB_LoggerType_ApplicationFileLogger, GravitySpdLogConfigPB_LoggerLevel_off);
+
 	logAllAppLevels();
 
-	gn.waitForExit();
+	std::cout<<"End testing ApplicationLogger\n";
+
+	gn.unsubscribe(gravity::constants::GRAVITY_LOGGER_DPID, simpleSubscriber);
 }
 
 void SimpleSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	std::cout << "GRAVITY_LOGGER data product message received";
 	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
 	 				i != dataProducts.end(); i++)
 		{
@@ -117,11 +132,11 @@ void SimpleSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<Gra
 			GravityLogMessagePB logMessage;
 			(*i)->populateMessage(logMessage);
 
-			std::cout << "Received Application network log message";
-			if(logMessage.message() == "App" && logMessage.level() == "critical")
+			std::string message = logMessage.message();
+			// Use a substring to cut off the time and level info (metadata) included in log string
+			if(message.substr(message.length()-4,3) == "App" && logMessage.level() == "critical")
 			{
-				std::string isValid("The correct level and message were published");
-				std::cout << isValid;
+				std::cout << "The correct level and message were published for Application Network Logger\n";
 			}
 		}
 }

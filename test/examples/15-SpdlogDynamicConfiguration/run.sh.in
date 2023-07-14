@@ -25,16 +25,16 @@ ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
 export PATH=$PATH:../../../src/components/cpp/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
- control_c()
+ cleanup()
 # run if user hits control-c
 {
   kill -9 $SDPID
-  kill -9 $PUBPID
+  kill -9 $PUBID
   exit $?
 }
 
 # trap keyboard interrupt (control-c)
-trap control_c SIGINT
+trap cleanup SIGINT
 
 ServiceDirectory &
 SDPID=$!
@@ -43,4 +43,8 @@ SDPID=$!
 sleep 1
 
 ./SpdlogConfigurationPublisherTest &
-PUBPID=$!
+PUBID=$!
+
+sleep 30
+
+cleanup
