@@ -9,10 +9,11 @@ namespace gravity {
     {
         private:
             std::string componentID;
+            std::string filename;
             void reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB);
         public:
             SpdLogConfigSubscriber();
-            void init(std::string compID);
+            void init(std::string compID,std::string fname);
             void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 
     };

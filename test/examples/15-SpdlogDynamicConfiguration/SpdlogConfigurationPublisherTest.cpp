@@ -74,9 +74,7 @@ int main()
 		exit(1);
 	}
 	
-	// Register the subscriber for spdlog regconfiguration
 	// Set up a subscriber to the Application Publisher Logger
-	gn.registerSpdlogConfiguration();
 	SimpleSubscriber simpleSubscriber;
 	gn.subscribe(gravity::constants::GRAVITY_LOGGER_DPID, simpleSubscriber);
 
@@ -84,7 +82,7 @@ int main()
 	
 	// Change SimpleGravityComponentID1's File to trace level
 	// for gravity and trace level for the console
-	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_trace);
+	sendConfigMessage(gn, dataProductID,"", GravitySpdLogConfigPB_LoggerType_GravityFileLogger, GravitySpdLogConfigPB_LoggerLevel_trace);
 	sendConfigMessage(gn, dataProductID,"SimpleGravityComponentID1", GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger, GravitySpdLogConfigPB_LoggerLevel_trace);
 
 	logAllAppLevels(); // nothing prints

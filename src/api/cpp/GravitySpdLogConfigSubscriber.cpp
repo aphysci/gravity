@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <stdio.h>
 #include "GravitySpdLogConfigSubscriber.h"
 #include "spdlog/spdlog.h"
 #include "protobuf/GravitySpdLogConfigPB.pb.h"
@@ -7,9 +8,10 @@
 
 namespace gravity {
     SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
-	void SpdLogConfigSubscriber::init(std::string compID)
+	void SpdLogConfigSubscriber::init(std::string compID,std::string fname)
 	{
 		componentID = compID;
+		filename = fname;
 	}
     void SpdLogConfigSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) 
     {
@@ -23,6 +25,27 @@ namespace gravity {
 	    }
     }
 
+/*
+	void checkFile(GravitySpdLogConfigPB_LoggerType lt,GravitySpdLogConfigPB_LoggerLevel ll,std::string filename)
+	{
+		bool fileLogger = (lt == GravitySpdLogConfigPB_LoggerType_GravityFileLogger) 
+							|| (lt == GravitySpdLogConfigPB_LoggerType_ApplicationFileLogger);
+		bool levelOff = ll == GravitySpdLogConfigPB_LoggerLevel_off;
+		if(fileLogger && !levelOff)
+		{
+			FILE *pfile = fopen(filename.c_str(),"a");
+			if (pfile==NULL)
+			{
+				spdlog::error("Could not open/create file");
+			}
+			else
+			{
+				fclose(pfile);
+			}
+		}
+	}
+*/
+
     // Determines if correct ID and reconfigures accordingly
     void SpdLogConfigSubscriber::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)
     {
@@ -31,6 +54,9 @@ namespace gravity {
 		{
 			return;
 		}
+
+		// Create a file if necessary
+		//checkFile(spdLogConfigPB.logger_id(),spdLogConfigPB.logger_level(), filename);
 
 		if (spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger || spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityFileLogger)
 		{

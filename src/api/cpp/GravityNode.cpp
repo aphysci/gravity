@@ -25,6 +25,7 @@
 
 #include <zmq.h>
 #include <iostream>
+#include <stdio.h>
 #include <thread>
 #include <assert.h>
 #ifdef WIN32
@@ -594,7 +595,6 @@ void GravityNode::configSpdLoggers()
 	console_proxy_for_app->set_level(app_console_level);
 	app_sink_list.push_back(console_proxy_for_app);
 	
-
 	string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
 	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
 
@@ -638,6 +638,7 @@ void GravityNode::configSpdLoggers()
 
 	// Set the ApplicationLogger as the default
 	spdlog::set_default_logger(app_logger);
+	std::cout<< " DONE SETTING LOGGERS \n";
 }
 
 GravityReturnCode GravityNode::init()
@@ -998,6 +999,17 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	if (iniWarning)
 	{
 			logger->warn("Gravity.ini specifies both Domain and URL. Using URL.");
+	}
+
+	std::cout<<"About to configure subscriber for " << componentID;
+	if(componentID != "ServiceDirectory")
+	{
+		// Register subscriber to allow for dynamic logging changes
+		GravityReturnCode ret = registerSpdlogDynamicConfiguration();
+		if (ret!=GravityReturnCodes::SUCCESS)
+		{
+			logger->error(" {}'s Dynamic SpdLog Subscriber not registered ( code: {})", componentID, ret);
+		}
 	}
 
     initLock.Unlock();
@@ -1593,7 +1605,6 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
     // Send request to service directory
     GravityReturnCode ret = sendRequestToServiceDirectory(request, response);
-
     if (ret == GravityReturnCodes::SUCCESS)
     {
         ComponentDataLookupResponsePB pb;
@@ -1669,7 +1680,7 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
     GravityReturnCode ret;
     ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
-    if(ret != GravityReturnCodes::SUCCESS) {
+	if(ret != GravityReturnCodes::SUCCESS) {
         return ret;
     }
 
@@ -2495,18 +2506,13 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	return GravityReturnCodes::SUCCESS;
 }
 
-GravityReturnCode GravityNode::registerSpdlogConfiguration()
+GravityReturnCode GravityNode::registerSpdlogDynamicConfiguration()
 {
 	// Set up the subscriber for any reconfiguration messages
 	const std::string dataProductID = "GravitySpdLogConfig";
-	spdLogConfigSub.init(componentID);
-	GravityReturnCode ret = GravityReturnCodes::SUCCESS;
-	ret = this->subscribe(dataProductID, spdLogConfigSub);
-	if (ret!=GravityReturnCodes::SUCCESS)
-	{
-		spdlog::error("Unsuccessfully registered data product {}", ret);
-	}
-	return ret;
+	spdLogConfigSub.init(componentID, getStringParam("LogDirectory", ".") + file_separator + componentID + ".log");
+	sleep(700); // wait to see if domain changing
+	return this->subscribe(dataProductID, spdLogConfigSub);
 }
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
