@@ -505,7 +505,7 @@ public:
 
 
 	  /**
-     * Unregisters a callback for when we get a heartbeat from another component.
+     * Registers a subscriber to receuve messages about dynamic spdlog changes
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerSpdlogDynamicConfiguration();

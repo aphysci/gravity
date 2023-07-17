@@ -34,10 +34,6 @@ namespace gravity {
 		{
 			return;
 		}
-
-		// Create a file if necessary
-		//checkFile(spdLogConfigPB.logger_id(),spdLogConfigPB.logger_level(), filename);
-
 		if (spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityConsoleLogger || spdLogConfigPB.logger_id() == GravitySpdLogConfigPB_LoggerType_GravityFileLogger)
 		{
 			auto log = spdlog::get("GravityLogger");
