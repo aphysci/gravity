@@ -8,11 +8,12 @@
 
 namespace gravity {
     SpdLogConfigSubscriber::SpdLogConfigSubscriber(){}
-	void SpdLogConfigSubscriber::init(std::string compID,std::string fname)
+
+	void SpdLogConfigSubscriber::init(std::string compID)
 	{
 		componentID = compID;
-		filename = fname;
 	}
+
     void SpdLogConfigSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) 
     {
         for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
@@ -24,27 +25,6 @@ namespace gravity {
 		    reconfigSpdLoggers(spdLogConfigPB);
 	    }
     }
-
-/*
-	void checkFile(GravitySpdLogConfigPB_LoggerType lt,GravitySpdLogConfigPB_LoggerLevel ll,std::string filename)
-	{
-		bool fileLogger = (lt == GravitySpdLogConfigPB_LoggerType_GravityFileLogger) 
-							|| (lt == GravitySpdLogConfigPB_LoggerType_ApplicationFileLogger);
-		bool levelOff = ll == GravitySpdLogConfigPB_LoggerLevel_off;
-		if(fileLogger && !levelOff)
-		{
-			FILE *pfile = fopen(filename.c_str(),"a");
-			if (pfile==NULL)
-			{
-				spdlog::error("Could not open/create file");
-			}
-			else
-			{
-				fclose(pfile);
-			}
-		}
-	}
-*/
 
     // Determines if correct ID and reconfigures accordingly
     void SpdLogConfigSubscriber::reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB)

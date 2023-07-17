@@ -13,7 +13,7 @@ namespace gravity {
             void reconfigSpdLoggers(GravitySpdLogConfigPB spdLogConfigPB);
         public:
             SpdLogConfigSubscriber();
-            void init(std::string compID,std::string fname);
+            void init(std::string compID);
             void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 
     };

@@ -78,10 +78,10 @@ INCLUDES=-I$(GRAVLIB_DIR) $(AC_CPPFLAGS)
 CFLAGS=-std=c++11 -L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
 LIBS=-lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS)
 
-all: SpdlogConfigurationPublisherTest$(OS_EXE_EXT)
+all: SpdlogDynamicConfiguration$(OS_EXE_EXT)
 
 #Compile each cpp file to a separate executable.
-SpdlogConfigurationPublisherTest$(OS_EXE_EXT):SpdlogConfigurationPublisherTest.cpp
+SpdlogDynamicConfiguration$(OS_EXE_EXT):SpdlogDynamicConfiguration.cpp
 	$(CC) -o $@ $< $(INCLUDES) $(CFLAGS) $(LIBS)
 
 components: ServiceDirectory$(OS_EXE_EXT)
@@ -91,7 +91,7 @@ ServiceDirectory$(OS_EXE_EXT):
 	make
 
 clean:
-	@rm -rf *.o *.exe SpdlogConfigurationPublisherTest
+	@rm -rf *.o *.exe SpdlogDynamicConfiguration
 
-run: components SpdlogConfigurationPublisherTest$(OS_EXE_EXT)
+run: components SpdlogDynamicConfiguration$(OS_EXE_EXT)
 	./run.sh

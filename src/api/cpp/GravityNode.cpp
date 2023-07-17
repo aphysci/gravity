@@ -638,7 +638,6 @@ void GravityNode::configSpdLoggers()
 
 	// Set the ApplicationLogger as the default
 	spdlog::set_default_logger(app_logger);
-	std::cout<< " DONE SETTING LOGGERS \n";
 }
 
 GravityReturnCode GravityNode::init()
@@ -1001,7 +1000,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			logger->warn("Gravity.ini specifies both Domain and URL. Using URL.");
 	}
 
-	std::cout<<"About to configure subscriber for " << componentID;
 	if(componentID != "ServiceDirectory")
 	{
 		// Register subscriber to allow for dynamic logging changes
@@ -2509,10 +2507,9 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 GravityReturnCode GravityNode::registerSpdlogDynamicConfiguration()
 {
 	// Set up the subscriber for any reconfiguration messages
-	const std::string dataProductID = "GravitySpdLogConfig";
-	spdLogConfigSub.init(componentID, getStringParam("LogDirectory", ".") + file_separator + componentID + ".log");
+	spdLogConfigSub.init(componentID);
 	sleep(700); // wait to see if domain changing
-	return this->subscribe(dataProductID, spdLogConfigSub);
+	return this->subscribe(gravity::constants::SPD_LOG_CONFIG_DPID, spdLogConfigSub);
 }
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)
