@@ -505,7 +505,7 @@ public:
 
 
 	  /**
-     * Registers a subscriber to receuve messages about dynamic spdlog changes
+     * Registers a subscriber to receive messages about dynamic spdlog changes
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerSpdlogDynamicConfiguration();

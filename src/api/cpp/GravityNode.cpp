@@ -25,7 +25,6 @@
 
 #include <zmq.h>
 #include <iostream>
-#include <stdio.h>
 #include <thread>
 #include <assert.h>
 #ifdef WIN32
@@ -597,7 +596,7 @@ void GravityNode::configSpdLoggers()
 	
 	string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
 	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
-
+	
 	auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
 	file_proxy_for_gravity->add_sink(sharedFileSink);
 	file_proxy_for_gravity->set_level(gravity_file_level);
@@ -1678,11 +1677,13 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
     GravityReturnCode ret;
     ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
-	if(ret != GravityReturnCodes::SUCCESS) {
+	if(ret != GravityReturnCodes::SUCCESS) 
+	{
         return ret;
     }
 
 	logger->trace("Subscribing to [{}] and receiving cached values: {}", dataProductID, receiveLastCachedValue);
+	
 	vector<PublisherInfoPB> registeredPublishersInfo;
 	int tries = 5;
 	while (registeredPublishersInfo.size() == 0 && tries-- > 0)
@@ -2508,7 +2509,6 @@ GravityReturnCode GravityNode::registerSpdlogDynamicConfiguration()
 {
 	// Set up the subscriber for any reconfiguration messages
 	spdLogConfigSub.init(componentID);
-	sleep(700); // wait to see if domain changing
 	return this->subscribe(gravity::constants::SPD_LOG_CONFIG_DPID, spdLogConfigSub);
 }
 
