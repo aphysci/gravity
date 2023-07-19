@@ -1449,6 +1449,8 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
             // Wrap request in GravityDataProduct
             GravityDataProduct request("RegistrationRequest");
             request.setData(registration);
+			request.setComponentId(componentID);
+			request.setDomain(myDomain);
 
             // GravityDataProduct for response
             GravityDataProduct response("RegistrationResponse");
@@ -1609,6 +1611,7 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
     // Wrap request in GravityDataProduct
     GravityDataProduct request("ComponentLookupRequest");
     request.setData(lookup);
+	request.setComponentId(componentID);
 
     // GravityDataProduct for response
     GravityDataProduct response("ComponentLookupResponse");
@@ -1881,6 +1884,8 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
         request.setData(registration);
+		request.setComponentId(componentId);
+		request.setDomain(myDomain);
 
         // GravityDataProduct for response
         GravityDataProduct response("RegistrationResponse");
@@ -1919,6 +1924,8 @@ GravityReturnCode GravityNode::ServiceDirectoryReregister(string componentId, st
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
         request.setData(registration);
+		request.setComponentId(componentId);
+		request.setDomain(myDomain);
 
         // GravityDataProduct for response
         GravityDataProduct response("RegistrationResponse");
@@ -1978,6 +1985,7 @@ GravityReturnCode GravityNode::ServiceDirectoryServiceLookup(std::string service
 	// Wrap request in GravityDataProduct
 	GravityDataProduct requestDataProduct("ComponentLookupRequest");
 	requestDataProduct.setData(lookup);
+	requestDataProduct.setComponentId(componentID);
 
 	// GravityDataProduct for response
 	GravityDataProduct responseDataProduct("ComponentLookupResponse");
@@ -2244,6 +2252,8 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
         // Wrap request in GravityDataProduct
         GravityDataProduct request("RegistrationRequest");
         request.setData(registration);
+		request.setComponentId(componentID);
+		request.setDomain(myDomain);
 
         // GravityDataProduct for response
         GravityDataProduct response("RegistrationResponse");

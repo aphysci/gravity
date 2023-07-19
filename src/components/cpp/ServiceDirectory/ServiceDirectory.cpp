@@ -572,11 +572,10 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 		{
 			map<string, list<PublisherInfoPB> > dpMap = dataProductMap[lookupDomain];
 
-			logger->info("[Lookup Request] ID: {}, Domain: {}, MessageType: Data Product, First Server: {}", 
-					 lookupRequest.lookupid(),
-					 lookupDomain,
+			logger->info("[Lookup Request] Lookup ID: {}, Domain: {}, MessageType: Data Product, First Server: {}, ComponentID: {}", 
+					 lookupRequest.lookupid(), lookupDomain,
                      (dpMap.count(lookupRequest.lookupid()) != 0 && dpMap[lookupRequest.lookupid()].size() > 0) ?
-                     dpMap[lookupRequest.lookupid()].front().url(): "");
+                     dpMap[lookupRequest.lookupid()].front().url(): "", request.getComponentId());
 		}
 		else
 		{
@@ -598,9 +597,9 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 			// Get service map for our domain
 			map<string, string> sMap = serviceMap[lookupDomain];
 
-			logger->info("[Lookup Request] ID: {}, MessageType: Service, Server: {}", lookupRequest.lookupid(),
+			logger->info("[Lookup Request] Lookup ID: {}, MessageType: Service, Server: {}, ComponentID: {}", lookupRequest.lookupid(),
                      sMap.count(lookupRequest.lookupid()) != 0 ?
-                     sMap[lookupRequest.lookupid()]: "");
+                     sMap[lookupRequest.lookupid()]: ""), request.getComponentId();
 
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
@@ -799,9 +798,9 @@ void ServiceDirectory::handleRegister(const GravityDataProduct& request, Gravity
 				updateProductLocations(registration.id(), registration.url(), registration.timestamp(), ADD, SERVICE);
 			}
 		}
-		logger->info("[Register] ID: {}, MessageType: {}, URL: {}, Domain: {}", registration.id(),
+		logger->info("[Register] Registration ID: {}, MessageType: {}, URL: {}, Domain: {}, ComponentID: {}", registration.id(),
 				registration.type() == ServiceDirectoryRegistrationPB_RegistrationType_DATA ? "Data Product": "Service", 
-				registration.url(), registration.domain());
+				registration.url(), request.getDomain(), request.getComponentId());
 	
 	}
 
