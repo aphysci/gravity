@@ -599,7 +599,7 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 
 			logger->info("[Lookup Request] Lookup ID: {}, MessageType: Service, Server: {}, ComponentID: {}", lookupRequest.lookupid(),
                      sMap.count(lookupRequest.lookupid()) != 0 ?
-                     sMap[lookupRequest.lookupid()]: ""), request.getComponentId();
+                     sMap[lookupRequest.lookupid()]: "", request.getComponentId());
 
 			if (sMap.count(lookupRequest.lookupid()) > 0)
 			{
@@ -609,7 +609,6 @@ void ServiceDirectory::handleLookup(const GravityDataProduct& request, GravityDa
 				lookupResponse.set_registration_time(regTime);
 			}
 		}
-
         response.setData(lookupResponse);
     }
 }
