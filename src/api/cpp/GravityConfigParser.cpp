@@ -27,7 +27,7 @@
 #include <iostream>
 
 #ifdef min
-#	undef min
+#    undef min
 #endif
 
 namespace gravity {
