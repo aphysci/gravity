@@ -26,6 +26,9 @@
 #include <map>
 #include <iostream>
 
+#ifdef min
+#	undef min
+#endif
 
 namespace gravity {
 
