@@ -3,8 +3,7 @@
 #
 
 ## Protobuf version requirements
-# Versions greater than 3.5.1 check for a __cplusplus value that's incorrect and too low in VS2013.  So this is the latest protobuf version that will still build with 2013.
-# A Cmake build is required so the minimum version you can use is 3.4.1
+# This is the earliest version of protobuf that will build with VS 2022, it is incompatible with VS2013
 set(protobuf_url "https://github.com/protocolbuffers/protobuf/archive/v3.7.0.zip")
 
 
