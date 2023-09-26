@@ -91,6 +91,9 @@ macro(add_external_spdlog build_type)
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/deps/spdlog
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    if (WIN32)
+        -DSPDLOG_BUILD_SHARED:BOOL=ON
+    endif()
 	if (UNIX)
 		-DCMAKE_CXX_FLAGS=-fPIC
 	endif()
