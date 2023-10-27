@@ -8,6 +8,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 get_target_property(PROTOC_EXE protobuf::protoc LOCATION) 
 
 file(COPY "${PROTOC_EXE}" DESTINATION "${Protobufs_SRC_DIR}/src/")
+message(STATUS "PROTOC_EXE: ${PROTOC_EXE}")
+if (NOT WIN32)
+    get_filename_component(PROTOC_FN "${PROTOC_EXE}" NAME)
+    if (NOT "${PROTOC_FN}" STREQUAL "protoc")
+        file(RENAME "${Protobufs_SRC_DIR}/src/${PROTOC_FN}" "${Protobufs_SRC_DIR}/src/protoc")
+        message(STATUS "PROTOC_EXE now: ${Protobufs_SRC_DIR}/src/protoc")
+    endif()
+endif()
+
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
