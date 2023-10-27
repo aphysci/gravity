@@ -96,7 +96,7 @@ int keyvalue_parse_params(const char* param_fn, const char * const section_list[
 <comment>[^\r\n]*                                       { }
 <comment>(\n)                                           { yyless(1); BEGIN(INITIAL);return('\n'); }
 [-|+]?[A-Za-z0-9\_\.\@;:,]+                            { yylval = yytext; return(TOKEN); }
-\"[ ]*[-A-Za-z0-9\_\.\@\/;,\":\$+()=\\*\-\ ]*[ ]*\"     { yylval = yytext; return(TOKEN_STRING); }
+\"[ ]*[-A-Za-z0-9\]\[\|\_\.\@\/;,\":\$+()=\\*\-\ ]*[ ]*\"     { yylval = yytext; return(TOKEN_STRING); }
 \[[ ]*[A-Za-z0-9\_\.\@\/;]+[ ]*\]                       { yylval = yytext; return(SECTION); }
 $[A-Za-z0-9\_\.\@;]+                                    { yylval = yytext+1; return(VAR); }
 [ \t]+                                                  { }
