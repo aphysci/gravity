@@ -124,8 +124,13 @@ void GravityPublishManager::start()
 		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
-			// Interrupted
-			break;
+                    // Interrupted
+                    if (errno == EINTR)
+                    {
+                        continue;
+                    }
+                    // Error
+                    break;
 		}
 
 		// Process new requests from the gravity node

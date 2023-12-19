@@ -98,6 +98,11 @@ namespace gravity
             if (rc == -1)
             {
                 // Interrupted
+                if (errno == EINTR)
+                {
+                    continue;
+                }
+                // Error
                 break;
             }
 
