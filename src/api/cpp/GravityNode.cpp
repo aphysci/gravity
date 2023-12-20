@@ -213,7 +213,6 @@ void GravityNode::GravityNodeDomainListener::start()
 		{
 		    if (errno == EINTR)
 		    {
-		        logger->debug("GravityNode Interrupted, continuing (errno = {})", errno);
 			continue;
 		    }
 		    logger->debug("GravityNode zmq_poll error, exiting (errno = {})", errno);

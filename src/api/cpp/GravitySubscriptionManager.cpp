@@ -148,7 +148,6 @@ void GravitySubscriptionManager::start()
                     // Interrupted
                     if (errno == EINTR)
                     {
-                        logger->debug("Interrupted, continuing (errno = {})", errno);
                         continue;
                     }
                     // Error
