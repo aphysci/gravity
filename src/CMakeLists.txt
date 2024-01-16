@@ -44,6 +44,7 @@ endif()
 
 install(FILES 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindPThreadsWin32.cmake" 
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindZeroMQ.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravityExternalUrls.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravitySupport.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindGravityJava.cmake" 
