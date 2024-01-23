@@ -11,12 +11,12 @@ To get started:
    - ```$ cmake --build . --config release```
 2. build the native plugin
    - ```$ cd gravity/src/api/DotNet/gravity_plugin/build```
-    - ```$ cmake -DGRAVITY_ROOT=/home/user/git/gravity/build/install -DCMAKE_BUILD_TYPE=release```
+    - ```$ cmake -DGRAVITY_ROOT=/home/user/git/gravity/build/install -DCMAKE_BUILD_TYPE=release ..```
     - ```$ cmake --build . --config release --target install```
 3. Install .NET (for instance on [Ubuntu](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu))
 4. Set your library path to load the plugin (PATH on Windows and LD_LIBRARY_PATH on Linux), for example:
 - ```$ export LD_LIBRARY_PATH=/home/user/git/gravity/build/install/lib:/home/user/git/gravity/build/install/deps/spdlog/lib:/home/user/git/gravity/src/api/DotNet/gravity_plugin/build/install/Plugins```
-5. Make sure to run the ServiceDirectory and then you can Open [GravityInterop.sln](GravityInterop.sln) with VS Code and the [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) Extension
+5. Make sure to run the ServiceDirectory and then you can Open [GravityInterop.sln](GravityInterop.sln) with VS Code and the [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) Extension (or with Visual Studio on Windows)
 - ```$ cd gravity/src/api/DotNet && code .```
 
 - ![VSCode1](grab1.png) ![VSCode2](grab2.png)
