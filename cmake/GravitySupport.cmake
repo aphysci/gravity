@@ -139,8 +139,10 @@ function(gravity_protobuf_generate)
     set(protobuf_generate_PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
   endif()
 
-  if(protobuf_generate_EXPORT_MACRO AND protobuf_generate_LANGUAGE STREQUAL cpp)
+  if(WIN32 AND protobuf_generate_EXPORT_MACRO AND protobuf_generate_LANGUAGE STREQUAL cpp)
     set(_dll_export_decl "dllexport_decl=${protobuf_generate_EXPORT_MACRO}:")
+  else ()
+    set(_dll_export_decl)
   endif()
 
   if(NOT protobuf_generate_GENERATE_EXTENSIONS)
