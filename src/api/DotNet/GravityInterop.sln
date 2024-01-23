@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GravityInterop", "GravityInterop\GravityInterop.csproj", "{6FEB8547-5F5E-4A3B-805F-52088AC916BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GravityInterop.Tests", "GravityInterop.Tests\GravityInterop.Tests.csproj", "{CF789E4C-27F4-411F-81B4-296CC3068191}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FEB8547-5F5E-4A3B-805F-52088AC916BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FEB8547-5F5E-4A3B-805F-52088AC916BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FEB8547-5F5E-4A3B-805F-52088AC916BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FEB8547-5F5E-4A3B-805F-52088AC916BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF789E4C-27F4-411F-81B4-296CC3068191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF789E4C-27F4-411F-81B4-296CC3068191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF789E4C-27F4-411F-81B4-296CC3068191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF789E4C-27F4-411F-81B4-296CC3068191}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

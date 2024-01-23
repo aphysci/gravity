@@ -1,0 +1,13 @@
+syntax = "proto3";
+package gravity_wrapper;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "gravity_wrapper";
+
+message JoystickInput 
+{
+    float x = 1;
+    float y = 2;
+    google.protobuf.Timestamp ts = 3;
+}

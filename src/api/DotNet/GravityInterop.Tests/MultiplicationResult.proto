@@ -1,0 +1,12 @@
+syntax = "proto3";
+package gravity_wrapper;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "gravity_wrapper";
+
+message MultiplicationResponse 
+{
+    float result = 1;
+    google.protobuf.Timestamp ts = 2;
+}
