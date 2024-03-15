@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.17)
+include(GravitySupport)
+include(GenerateExportHeader)
+
+set(CMAKE_CXX_STANDARD 17)
+find_package(PThreadsWin32 REQUIRED)
+gravity_find_protobuf(ON)
+gravity_find_zeromq(ON)
+gravity_find_spdlog(ON)
+find_package(GravityKeyValueParser REQUIRED)
+find_package(Gravity REQUIRED)
+
+set(CMAKE_DEBUG_POSTFIX _d)
+set(CMAKE_CXX_VISIBILITY_PRESET default)
+option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+add_library(GravityWrapper gravity_wrapper.cpp)
+set_target_properties(GravityWrapper PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+target_link_libraries(GravityWrapper gravity)
+install(TARGETS GravityWrapper DESTINATION Plugins)
+
+generate_export_header(GravityWrapper)
+add_definitions(-DGravityWrapper_EXPORTS)
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")

@@ -209,11 +209,14 @@ void GravityNode::GravityNodeDomainListener::start()
 	{
 		// Start polling socket(s), blocking while we wait
 		int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1 )
+		if (rc == -1)
 		{
-		    logger->debug("Interrupted, exiting (rc = {})", rc);
-			// Interrupted
-			break;
+		    if (errno == EINTR)
+		    {
+			continue;
+		    }
+		    logger->debug("GravityNode zmq_poll error, exiting (errno = {})", errno);
+		    break;
 		}
 
 		// Process new subscription requests from the gravity node
@@ -1214,10 +1217,10 @@ void GravityNode::waitForExit()
 GravityReturnCode GravityNode::sendRequestsToServiceProvider(string url, const GravityDataProduct& request,
         GravityDataProduct& response, int timeout_in_milliseconds, int retries)
 {
-    GravityReturnCode ret = GravityReturnCodes::FAILURE;
+    GravityReturnCode ret = GravityReturnCodes::NOT_INITIALIZED;
 
     int retriesLeft = retries;
-    while(retriesLeft && ret != GravityReturnCodes::INTERRUPTED && ret != GravityReturnCodes::SUCCESS)
+    while(retriesLeft && ret != GravityReturnCodes::FAILURE && ret != GravityReturnCodes::SUCCESS)
     {
     	--retriesLeft;
     	ret = sendRequestToServiceProvider(url, request, response, timeout_in_milliseconds);
@@ -1247,7 +1250,12 @@ GravityReturnCode GravityNode::sendRequestToServiceProvider(string url, const Gr
 	zmq_pollitem_t items[] = {{socket, 0, ZMQ_POLLIN, 0}};
 	int rc = zmq_poll(items, 1, timeout_in_milliseconds);
 	if (rc == -1)
-		ret = GravityReturnCodes::INTERRUPTED;
+        {
+            if (errno == EINTR)
+	        ret = GravityReturnCodes::INTERRUPTED;
+            else
+                ret = GravityReturnCodes::FAILURE;
+        }
 	else if(rc == 0)
 		ret = GravityReturnCodes::REQUEST_TIMEOUT;
 	// Got a Response, now process it.  Process the response

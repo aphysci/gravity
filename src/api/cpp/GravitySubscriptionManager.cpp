@@ -113,8 +113,11 @@ void GravitySubscriptionManager::start()
 		int rc = zmq_poll(&configItem, 1, -1); // 0 --> return immediately, -1 --> blocks
 		if (rc == -1)
 		{
-			// Interrupted
-			break;
+                    // Interrupted
+                    if (errno == EINTR)
+                        continue;
+                    // Error
+                    break;
 		}
 
 		// Process new subscription requests from the gravity node
@@ -140,12 +143,17 @@ void GravitySubscriptionManager::start()
 	{
 		calculateTimeout();
 		int rc = zmq_poll(&pollItems[0], pollItems.size(), pollTimeout); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1)
-		{
-		    logger->debug("Interrupted, exiting (rc = {})", rc);
-			// Interrupted
-			break;
-		}
+                if (rc == -1)
+                {
+                    // Interrupted
+                    if (errno == EINTR)
+                    {
+                        continue;
+                    }
+                    // Error
+                    logger->debug("zmq_poll error, exiting (errno = {})", errno);
+                    break;
+                }
 
 		// If timeout occured
 		if(rc == 0)
