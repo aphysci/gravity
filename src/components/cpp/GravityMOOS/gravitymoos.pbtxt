@@ -1,0 +1,7 @@
+gravity_publications: "ssdte.GpsDataMsgPB"
+gravity_publications: "ssdte.InsDataMsgPB"
+moospbt_publications: "TESTING_1"
+moospbt_publications: "TESTING_2"
+moospbt_publications_in_gravity: "TESTING_1"
+moospbt_publications_in_gravity: "TESTING_2"
+

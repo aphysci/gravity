@@ -59,6 +59,35 @@ AC_ARG_WITH([java],
 AS_IF([test "x$WITHOUT_JAVA" != xno],[WITHOUT_JAVA=yes])
 AC_SUBST([WITHOUT_JAVA])
 
+# Allow user to enable GravityMOOS
+AC_ARG_WITH([moos],
+  [AS_HELP_STRING([--with-moos],
+    [Enable GravityMOOS])],
+  [],
+  [WITH_MOOS=no])
+
+AS_IF([test "x$WITH_MOOS" != xno],[WITH_MOOS=yes])
+AC_SUBST([WITH_MOOS])
+
+if test $WITH_MOOS == yes
+then
+  # Check for moos library
+  AC_ARG_WITH([moos-libdir],
+      [AS_HELP_STRING([--with-moos-libdir=LIB_DIR],
+          [location of the moos libraries, defaults to /usr/local/lib])],
+      [MOOS_LIBDIR="$withval"],
+      [MOOS_LIBDIR='/usr/local/lib'])
+  AC_SUBST([MOOS_LIBDIR])
+
+  # Check for moos include path
+  AC_ARG_WITH([moos-incdir],
+      [AS_HELP_STRING([--with-moos-incdir=INC_DIR],
+          [location of the moos includes, defaults to /usr/local/include])],
+      [MOOS_INCDIR="$withval"],
+      [MOOS_INCDIR='/usr/local/include'])
+  AC_SUBST([MOOS_INCDIR])
+fi
+
 want_python=yes
 AC_ARG_WITH(python, [
   --with-python=PATH      Enable Python bindings. PATH is location of python.
@@ -253,6 +282,7 @@ AC_CONFIG_FILES([Makefile
                  src/components/cpp/Playback/Makefile
                  src/components/cpp/Relay/Makefile
                  src/components/cpp/ServiceDirectory/Makefile
+                 src/components/cpp/GravityMOOS/Makefile
                  src/keyvalue_parser/Makefile
                  test/components/cpp/Makefile
                  test/components/cpp/ServiceDirectory/Makefile
@@ -261,10 +291,12 @@ AC_CONFIG_FILES([Makefile
                  src/api/java/java_makefile
                  src/api/python/cpp_makefile
                  src/api/python/Makefile
+                 test/api/cpp/Makefile
                  test/api/java/Makefile
                  test/api/python/Makefile
                  test/components/cpp/ServiceDirectory/test.sh
                  test/components/cpp/ServiceDirectoryReregister/test.sh
+                 test/api/cpp/test.sh
                  test/api/java/test.sh
                  test/api/python/test.sh
                  test/examples/1-BasicDataProduct/Makefile

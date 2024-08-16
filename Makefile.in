@@ -39,6 +39,7 @@ INSTALL_PROGRAM= @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 WITHOUT_JAVA   = @WITHOUT_JAVA@
 WITHOUT_PYTHON = @WITHOUT_PYTHON@
+WITH_MOOS = @WITH_MOOS@
 
 # VPATH-related substitution variables
 top_builddir   = @top_builddir@
@@ -67,6 +68,10 @@ all clean:
 
 	# Perform each of the following in their own if block, otherwise a failure in the below make commands
 	# won't cause the overall build to fail.
+	@if test ${WITH_MOOS} = yes;\
+	then \
+		$(MAKE) -C src/components/cpp/GravityMOOS $@;\
+	fi
 	@if test ${WITHOUT_JAVA} = no;\
 	then \
 		$(MAKE) -C src/api/java $@;\
@@ -111,6 +116,11 @@ components:
 	cp src/components/cpp/ServiceDirectory/ServiceDirectory src/components/cpp/bin
 	cp src/components/cpp/ConfigServer/ConfigServer src/components/cpp/bin
 	cp src/components/cpp/Relay/Relay src/components/cpp/bin
+
+	@if test ${WITH_MOOS} = yes;\
+	then \
+		cp src/components/cpp/GravityMOOS/GravityMOOS src/components/cpp/bin;\
+	fi
 
 test-prep:
 #	cp src/api/cpp/libgravity.a ${prefix}/lib
