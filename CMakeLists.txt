@@ -249,6 +249,9 @@ ExternalProject_Add(
         -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
         -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
         -Dprotobuf_MODULE_COMPATIBLE=ON
+	-DPython_EXECUTABLE=${Python_EXECUTABLE}
+        -DPython_LIBRARY=${Python_LIBRARY}
+        -DPython_INCLUDE_DIR=${Python_INCLUDE_DIR}
         -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
     INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     BUILD_ALWAYS 1)
@@ -274,6 +277,9 @@ if (BUILD_EXAMPLES)
             -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
             -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
             -Dprotobuf_MODULE_COMPATIBLE=ON
+	    -DPython_EXECUTABLE=${Python_EXECUTABLE}
+            -DPython_LIBRARY=${Python_LIBRARY}
+            -DPython_INCLUDE_DIR=${Python_INCLUDE_DIR}
             -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
             -DPThreadsWin32_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}/deps/pthreads-w32
     BUILD_ALWAYS 1)
