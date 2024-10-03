@@ -816,6 +816,10 @@ void GravitySubscriptionManager::addSubscription()
 	{
 		logger->trace("Subscriber already in list");
 	}
+
+    // Send acknowledgement from GravitySubscriptionManager to GravityNode (also for handshake/synchronization purposes)
+    logger->debug("GravitySubscriptionManager: Sending acknowledgement of subscription added to GravityNode");
+    sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
 }
 
 void GravitySubscriptionManager::removeSubscription()
@@ -904,6 +908,10 @@ void GravitySubscriptionManager::removeSubscription()
 			}				
 		}
 	}
+    
+    // Send acknowledgement from GravitySubscriptionManager to GravityNode (also for handshake/synchronization purposes)
+    logger->debug("GravitySubscriptionManager: Sending acknowledgement of subscription removed to GravityNode");
+    sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
 }
 
 void GravitySubscriptionManager::setTimeoutMonitor()

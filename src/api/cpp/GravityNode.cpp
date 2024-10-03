@@ -1431,7 +1431,9 @@ GravityReturnCode GravityNode::registerDataProductInternal(std::string dataProdu
     }
 	sendStringMessage(publishManagerRequestSWL.socket, endpoint, ZMQ_DONTWAIT);
 
+    // Receive connection url from GravityPublishManager for registered dataproduct (also for handshake/synchronization purposes)
 	string connectionURL = readStringMessage(publishManagerRequestSWL.socket);
+    logger->debug("GravityNode: Received acknowledgement from GravityPublishManager about registered dataproduct");
 
 	if (connectionURL.size() == 0)
 	{
@@ -1544,7 +1546,11 @@ GravityReturnCode GravityNode::unregisterDataProduct(string dataProductID)
     {
         sendStringMessage(publishManagerRequestSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(publishManagerRequestSWL.socket, dataProductID, ZMQ_DONTWAIT);
-        readStringMessage(publishManagerRequestSWL.socket);
+        
+        // Receive acknowledgement from GravityPublishManager for handshake/synchronization purposes
+	    readStringMessage(publishManagerRequestSWL.socket);
+        logger->debug("GravityNode: Received acknowledgement from GravityPublishManager about unregistered dataproduct");
+
     	string url = publishMap[dataProductID];
         publishMap.erase(dataProductID);
 		urlInstanceMap.erase(url);
@@ -1748,6 +1754,10 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
+    // Receive acknowledgement from GravitySubscriptionManager for handshake/synchronization purposes
+	readStringMessage(subscriptionManagerSWL.socket);
+    logger->debug("GravityNode: Received acknowledgement from GravitySubscriptionManager about added subscription");
+
 	SubscriptionDetails details;
 	details.dataProductID = dataProductID;
 	details.domain = domain;
@@ -1792,6 +1802,10 @@ GravityReturnCode GravityNode::unsubscribeInternal(string dataProductID, const G
 	memcpy(zmq_msg_data(&msg), &v, sizeof(&subscriber));
 	zmq_sendmsg(subscriptionManagerSWL.socket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
+
+    // Receive acknowledgement from GravitySubscriptionManager for handshake/synchronization purposes
+	readStringMessage(subscriptionManagerSWL.socket);
+    logger->debug("GravityNode: Received acknowledgement from GravitySubscriptionManager about removed subscription");
 
 	list<SubscriptionDetails>::iterator iter = subscriptionList.begin();
 	while (iter != subscriptionList.end())
@@ -2235,7 +2249,9 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
 	zmq_sendmsg(serviceManagerSWL.socket, &msg, ZMQ_DONTWAIT);
 	zmq_msg_close(&msg);
 
+    // Receive connection URL from GravityServiceManager (also for handshake/synchronization purposes)
     string connectionURL = readStringMessage(serviceManagerSWL.socket);	
+    logger->debug("GravityNode: Received acknowledgement from GravityServiceManager about registered service");
 
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
 
@@ -2302,8 +2318,10 @@ GravityReturnCode GravityNode::registerService(string serviceID, GravityTranspor
         // unregister the service from the service manager if we couldn't register with the SD
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
-        // wait for it to return
+
+        // Receive acknowledgement from GravityServiceManager (also for handshake/synchronization purposes)
         readStringMessage(serviceManagerSWL.socket);
+        logger->debug("GravityNode: Received acknowledgement from GravityServiceManager about unregistered service");
     }
     else
     {
@@ -2331,11 +2349,14 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
     {
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
+        
+        // Receive acknowledgement from GravityServiceManager for handshake/synchronization purposes
+        readStringMessage(serviceManagerSWL.socket);
+        logger->debug("GravityNode: Received acknowledgement from GravityServiceManager about unregistered service");
+        
         string url = serviceMap[serviceID];
         serviceMap.erase(serviceID);
 		urlInstanceMap.erase(url);
-
-        string status = readStringMessage(serviceManagerSWL.socket);
 
         if (!serviceDirectoryNode.ipAddress.empty())
         {

@@ -387,8 +387,6 @@ void GravityPublishManager::registerDataProduct()
         }
     }
 
-    sendStringMessage(gravityNodeResponseSocket, connectionURL, ZMQ_DONTWAIT);
-
 	// Create poll item for response to this request
 	zmq_pollitem_t pollItem;
 	pollItem.socket = pubSocket;
@@ -408,15 +406,16 @@ void GravityPublishManager::registerDataProduct()
 
     publishMapByID[dataProductID] = publishDetails;
     publishMapBySocket[pubSocket] = publishDetails;
+    
+    // Send connection URL from GravityPublishManager to GravityNode (also for handshake/synchronization purposes)
+    logger->debug("GravityPublishManager: Sending acknowledgement of dataproduct registered to GravityNode");
+    sendStringMessage(gravityNodeResponseSocket, connectionURL, ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::unregisterDataProduct()
 {
 	// Read the data product id for this request
 	string dataProductID = readStringMessage(gravityNodeResponseSocket);
-
-	// Go ahead and respond since there's nothing to wait for
-	sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
 
     // Remove this data product from our metrics data
     metricsData.remove(dataProductID);
@@ -451,6 +450,10 @@ void GravityPublishManager::unregisterDataProduct()
 			}
 		}
 	}
+    
+    // Send acknowledgement from GravityPublishManager to GravityNode for handshake/synchronization purposes
+    logger->debug("GravityPublishManager: Sending acknowledgement of dataproduct unregistered to GravityNode");
+    sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::setHWM()

@@ -270,8 +270,6 @@ void GravityServiceManager::addService()
         }
     }
 
-    sendStringMessage(gravityNodeSocket, connectionURL, ZMQ_DONTWAIT);
-
 	// Create poll item for response to this request
 	zmq_pollitem_t pollItem;
 	pollItem.socket = serverSocket;
@@ -290,6 +288,10 @@ void GravityServiceManager::addService()
 	serviceMapBySocket[serverSocket] = serviceDetails;
 	serviceMapByServiceID[serviceID] = serviceDetails;
 	serviceRegistrationTimeMap[serviceID] = registrationTime;
+
+    // Send acknowledgement from GravityServiceManager to GravityNode (also for handshake/synchronization purposes)
+    logger->debug("GravityServiceManager: Sending acknowledgement of service added to GravityNode");
+    sendStringMessage(gravityNodeSocket, connectionURL, ZMQ_DONTWAIT);
 }
 
 void GravityServiceManager::removeService()
@@ -323,7 +325,9 @@ void GravityServiceManager::removeService()
 		}
 	}
 
-	sendStringMessage(gravityNodeSocket, "OK", ZMQ_DONTWAIT);
+    // Send acknowledgement from GravityServiceManager to GravityNode (also for handshake/synchronization purposes)
+    logger->debug("GravityServiceManager: Sending acknowledgement of service removed to GravityNode");
+	sendStringMessage(gravityNodeSocket, "", ZMQ_DONTWAIT);
 }
 
 } /* namespace gravity */
