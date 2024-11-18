@@ -49,6 +49,12 @@ GravityPublishManager::GravityPublishManager(void* context)
 
     // Default to no metrics
     metricsEnabled = false;
+	
+	// Default TCP KeepAlive status
+	tcpKeepAliveEnabled = false;
+	tcpKeepAliveTime = -1;
+	tcpKeepAliveProbes = -1;
+	tcpKeepAliveIntvl = -1;
 
 	// Default high water mark
 	publishHWM = 1000;
@@ -152,6 +158,10 @@ void GravityPublishManager::start()
 			else if (command == "set_hwm")
 			{
 				setHWM();
+			}
+			else if (command == "set_tcp_keepalive")
+			{
+				setKeepAlive();
 			}
 			else if (command == "subscribersExist")
 			{
@@ -356,6 +366,18 @@ void GravityPublishManager::registerDataProduct()
 
 	// Set high water mark
 	zmq_setsockopt(pubSocket, ZMQ_SNDHWM, &publishHWM, sizeof(publishHWM));
+	
+	if (transportType == "tcp" && tcpKeepAliveEnabled)
+	{
+		// Enable keepalive 
+		int enable = 1;
+		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE, &enable, sizeof(enable));
+		
+		// Set TCP keep-alive as configured by user settings
+		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_IDLE, &tcpKeepAliveTime, sizeof(tcpKeepAliveTime));
+		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_CNT, &tcpKeepAliveProbes, sizeof(tcpKeepAliveProbes));
+		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_INTVL, &tcpKeepAliveIntvl, sizeof(tcpKeepAliveIntvl));
+	}
 
     string connectionURL;
     if(transportType == "tcp")
@@ -458,6 +480,20 @@ void GravityPublishManager::setHWM()
 	// Read the high water mark setting
 	publishHWM = readIntMessage(gravityNodeResponseSocket);
 
+	// Send ACK
+	sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
+}
+
+void GravityPublishManager::setKeepAlive()
+{
+	// TCP KeepAlive is being enabled
+	tcpKeepAliveEnabled = true;
+	
+	// Get TCP keep-alive settings
+	tcpKeepAliveTime = readIntMessage(gravityNodeResponseSocket);
+	tcpKeepAliveProbes = readIntMessage(gravityNodeResponseSocket);
+	tcpKeepAliveIntvl = readIntMessage(gravityNodeResponseSocket);
+	
 	// Send ACK
 	sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
 }
