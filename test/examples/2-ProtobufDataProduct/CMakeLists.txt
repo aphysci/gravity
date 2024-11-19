@@ -8,8 +8,8 @@ find_package(PThreadsWin32 REQUIRED)
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
 gravity_find_spdlog(ON)
-find_package(GravityKeyValueParser REQUIRED)
-find_package(Gravity REQUIRED)
+find_package(GravityKeyValueParser QUIET)
+find_package(Gravity QUIET)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 

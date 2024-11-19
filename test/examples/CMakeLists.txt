@@ -22,6 +22,7 @@ list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
 set(CMAKE_DEBUG_POSTFIX _d)
 
+include_directories("${CMAKE_BINARY_DIR}")
 add_subdirectory("1-BasicDataProduct")
 add_subdirectory("2-ProtobufDataProduct")
 #add_subdirectory("8-ConfigFile")

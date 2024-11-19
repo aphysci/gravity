@@ -23,8 +23,8 @@ gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURR
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
 set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/deps/protobuf/lib/protobuf-java.jar" ${PUBLIC_JAR})
-string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity.jar")
-string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity${CMAKE_DEBUG_POSTFIX}.jar")
+string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
+string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
 message(STATUS "CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG: ${CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG}")
 
 if (WIN32)
@@ -48,7 +48,11 @@ set(JAVA_SRCS
 set(ORIG_CMAKE_DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set(CMAKE_DEBUG_POSTFIX)
 gravity_add_jar_debug_release(${PROJECT_NAME} ${JAVA_SRCS})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_protos)
+list(APPEND _DEPS ${PROJECT_NAME}_protos)
+if (TARGET gravity-java)
+    list(APPEND _DEPS gravity-java)
+endif()
+add_dependencies(${PROJECT_NAME} ${_DEPS})
 set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 
 gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")

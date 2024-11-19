@@ -9,6 +9,7 @@ project(gravity-meta)
 
 option(GRAVITY_USE_EXTERNAL_PROTOBUF "Download, Build and Use an externally downloaded protobuf build")
 option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downloaded ZeroMQ build")
+option(GRAVITY_USE_EXTERNAL_SPDLOG "Download, build and use an externally downloaded Spdlog build")
 option(BUILD_EXAMPLES "Build Gravity examples" ON)
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
@@ -101,54 +102,67 @@ if (NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
     gravity_find_protobuf(OFF)
 endif()
 
-
 if (NOT GRAVITY_USE_EXTERNAL_ZEROMQ)
     gravity_find_zeromq(OFF)
 endif()
 
+if (NOT GRAVITY_USE_EXTERNAL_SPDLOG)
+    gravity_find_spdlog(OFF)
+endif()
+
 if (WIN32)
-    if (NOT Protobuf_FOUND OR GRAVITY_USING_EXTERNAL_PROTOBUF)
+    if (NOT Protobuf_FOUND OR GRAVITY_USE_EXTERNAL_PROTOBUF)
         add_external_protobuf(Debug)
         add_external_protobuf(Release)
         list(APPEND depends protobuf_Release protobuf_Debug)
         list(APPEND protobuf_depends protobuf_Release protobuf_Debug)
     endif()
-    if (NOT ZeroMQ_FOUND OR GRAVITY_USING_EXTERNAL_ZEROMQ)
+    if (NOT ZeroMQ_FOUND OR GRAVITY_USE_EXTERNAL_ZEROMQ)
         add_external_libzmq(Debug)
         add_external_libzmq(Release)
         list(APPEND depends libzmq_Debug libzmq_Release)
     endif()        
-    add_external_spdlog(Debug)
-    add_external_spdlog(Release)
-    list(APPEND depends spdlog_Debug spdlog_Release)
+    if (NOT spdlog_FOUND OR GRAVITY_USE_EXTERNAL_SPDLOG)
+        add_external_spdlog(Debug)
+        add_external_spdlog(Release)
+        list(APPEND depends spdlog_Debug spdlog_Release)
+    endif()
 else()
-    if (NOT Protobuf_FOUND OR GRAVITY_USING_EXTERNAL_PROTOBUF)
+    if (NOT Protobuf_FOUND OR GRAVITY_USE_EXTERNAL_PROTOBUF)
         add_external_protobuf(${CMAKE_BUILD_TYPE})
         list(APPEND depends protobuf_${CMAKE_BUILD_TYPE})
         list(APPEND protobuf_depends protobuf_${CMAKE_BUILD_TYPE})
     endif()
-    if (NOT ZeroMQ_FOUND OR GRAVITY_USING_EXTERNAL_ZEROMQ)
+    if (NOT ZeroMQ_FOUND OR GRAVITY_USE_EXTERNAL_ZEROMQ)
         add_external_libzmq(${CMAKE_BUILD_TYPE})
         list(APPEND depends libzmq_${CMAKE_BUILD_TYPE})
     endif()
-    add_external_spdlog(Debug)
-    add_external_spdlog(Release)
-    list(APPEND depends spdlog_Debug spdlog_Release)
+    if (NOT spdlog_FOUND OR GRAVITY_USE_EXTERNAL_SPDLOG)
+        add_external_spdlog(${CMAKE_BUILD_TYPE})
+        list(APPEND depends spdlog_${CMAKE_BUILD_TYPE})
+    endif()
 endif()
 
-if (Protobuf_FOUND AND NOT GRAVITY_USING_EXTERNAL_PROTOBUF)
+if (Protobuf_FOUND AND NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
     message(STATUS "Using local protobuf libraries")
 else()
     message(STATUS "Using external protobuf build")
     set(GRAVITY_USING_EXTERNAL_PROTOBUF ON CACHE BOOL "Whether using an external protobuf build")
     mark_as_advanced(GRAVITY_USING_EXTERNAL_PROTOBUF)
 endif()
-if (ZeroMQ_FOUND AND NOT GRAVITY_USING_EXTERNAL_ZEROMQ)
+if (ZeroMQ_FOUND AND NOT GRAVITY_USE_EXTERNAL_ZEROMQ)
     message(STATUS "Using local zeromq libraries")
 else()
     message(STATUS "Using external zeromq build")
     set(GRAVITY_USING_EXTERNAL_ZEROMQ ON CACHE BOOL "Whether using an external zeromq build")
     mark_as_advanced(GRAVITY_USING_EXTERNAL_ZEROMQ)
+endif()
+if (spdlog_FOUND AND NOT GRAVITY_USE_EXTERNAL_SPDLOG)
+    message(STATUS "Using local spdlog libraries")
+else()
+    message(STATUS "Using external spdlog build")
+    set(GRAVITY_USING_EXTERNAL_spdlog ON CACHE BOOL "Whether using an external spdlog build")
+    mark_as_advanced(GRAVITY_USING_EXTERNAL_SPDLOG)
 endif()
 
 find_package(GravityJava)
@@ -229,52 +243,63 @@ if (NOT ZMQ_HOME)
     set(ZMQ_HOME "${CMAKE_INSTALL_PREFIX}/deps/libzmq")
 endif()
 
-ExternalProject_Add(
-    gravity_external 
-    DEPENDS ${depends}
-    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src"
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-    LIST_SEPARATOR |
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
-        -DSKIP_JAVA=${SKIP_JAVA}
-        -DSKIP_PYTHON=${SKIP_PYTHON}
-        -DZMQ_HOME=${ZMQ_HOME}
-        -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
-        -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
-        -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
-        -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
-        -Dprotobuf_MODULE_COMPATIBLE=ON
-        -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
-    INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
-    BUILD_ALWAYS 1)
+if (NOT depends)
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+    add_subdirectory(src)
+    set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
+    add_subdirectory(test/examples)
+    include(CPack)
 
-if (BUILD_EXAMPLES)
+    message(STATUS "No external libraries - doing a toplevel build")
+else()
     ExternalProject_Add(
-        gravity_external_examples 
-        DEPENDS gravity_external
-        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/test/examples"
+        gravity_external 
+        DEPENDS ${depends}
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src"
         LOG_CONFIGURE ON
         LOG_BUILD ON
         LOG_INSTALL ON
         LIST_SEPARATOR |
         CMAKE_ARGS
-	    -DGRAVITY_ROOT=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
             -DSKIP_JAVA=${SKIP_JAVA}
-            -DZMQ_HOME=${ZMQ_HOME}
             -DSKIP_PYTHON=${SKIP_PYTHON}
+            -DZMQ_HOME=${ZMQ_HOME}
             -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
             -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
             -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
             -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
             -Dprotobuf_MODULE_COMPATIBLE=ON
             -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
-            -DPThreadsWin32_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}/deps/pthreads-w32
-    BUILD_ALWAYS 1)
+        INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
+        BUILD_ALWAYS 1)
+
+    if (BUILD_EXAMPLES)
+        ExternalProject_Add(
+            gravity_external_examples 
+            DEPENDS gravity_external
+            SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/test/examples"
+            LOG_CONFIGURE ON
+            LOG_BUILD ON
+            LOG_INSTALL ON
+            LIST_SEPARATOR |
+            CMAKE_ARGS
+            -DGRAVITY_ROOT=${CMAKE_INSTALL_PREFIX}
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+                -DSKIP_JAVA=${SKIP_JAVA}
+                -DZMQ_HOME=${ZMQ_HOME}
+                -DSKIP_PYTHON=${SKIP_PYTHON}
+                -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
+                -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
+                -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
+                -DProtobuf_USE_STATIC_LIBS=${Protobuf_USE_STATIC_LIBS}
+                -Dprotobuf_MODULE_COMPATIBLE=ON
+                -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
+                -DPThreadsWin32_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}/deps/pthreads-w32
+        BUILD_ALWAYS 1)
+    endif()
 endif()
