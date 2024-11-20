@@ -15,7 +15,7 @@ list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/protobuf/cmake" "${ABS_G
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/libzmq/CMake" "${ABS_GRAVITY_ROOT}/deps/libzmq/share/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake" "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake/spdlog")
 
-set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}")
+set(ALT_CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}")
 message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
 
 list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")

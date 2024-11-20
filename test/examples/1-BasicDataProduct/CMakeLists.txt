@@ -19,5 +19,5 @@ add_executable(BasicDataProductSubscriber BasicDataProductSubscriber.cpp)
 set_target_properties(BasicDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(BasicDataProductSubscriber gravity)
 add_dependencies(BasicDataProductSubscriber gravity_protobufs)
-install(TARGETS BasicDataProductPublisher BasicDataProductSubscriber DESTINATION bin)
+install(TARGETS BasicDataProductPublisher BasicDataProductSubscriber DESTINATION "${ALT_CMAKE_INSTALL_PREFIX}/bin")
 

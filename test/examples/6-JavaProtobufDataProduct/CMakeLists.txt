@@ -55,7 +55,7 @@ endif()
 add_dependencies(${PROJECT_NAME} ${_DEPS})
 set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 
-gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+gravity_install_jar(${PROJECT_NAME} DESTINATION "${ALT_CMAKE_INSTALL_PREFIX}/bin")
 
 if (WIN32)
     install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" DESTINATION bin CONFIGURATIONS Debug)
