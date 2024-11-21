@@ -68,14 +68,12 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_DEBUG
-    )
+            JAR_FILE_DEBUG)
     get_property(__FILES_RELEASE
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_RELEASE
-    )
+            JAR_FILE_RELEASE)
     set_property(
         TARGET
             ${_TARGET_NAME}
@@ -83,7 +81,6 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
             INSTALL_DESTINATION
             ${_DESTINATION}
     )
-
     if (__FILES_DEBUG)
         install(
             FILES
