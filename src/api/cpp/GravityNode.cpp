@@ -866,6 +866,9 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			int tcpKeepAliveProbes = getIntParam("TcpKeepAliveProbes", 9);
 			int tcpKeepAliveIntvl = getIntParam("TcpKeepAliveIntvl", 75);
 			
+			logger->info("Enabling TCP publisher Keep-Alive with settings (time={}, probes={}, intvl={}).", 
+								tcpKeepAliveTime, tcpKeepAliveProbes, tcpKeepAliveIntvl);
+			
 			// Send TCP keep-alive settings
 			sendStringMessage(publishManagerRequestSWL.socket, "set_tcp_keepalive", ZMQ_SNDMORE);
 			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveTime, ZMQ_DONTWAIT);
