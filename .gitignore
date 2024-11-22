@@ -1,5 +1,6 @@
 include
 *.tgz
+*.tar.gz
 *.o
 *.exe
 *.d
