@@ -39,7 +39,7 @@ RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./insta
 RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
 
 FROM builder AS tester
-RUN tar -xzvf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz -C /opt/aps
+RUN tar -xzvf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz -C /opt/aps
 WORKDIR /opt/aps/gravity
 ENV LD_LIBRARY_PATH=/opt/aps/gravity/lib
 ENV PYTHONPATH=$LD_LIBRARY_PATH:$LD_LIBRARY_PATH/gravity:/home/aps/git/gravity/test/examples/protobuf
