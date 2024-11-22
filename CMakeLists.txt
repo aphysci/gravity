@@ -249,6 +249,8 @@ if (NOT depends)
     set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
     add_subdirectory(test/examples)
+
+    set(CPACK_GENERATOR "TGZ")
     include(CPack)
 
     message(STATUS "No external libraries - doing a toplevel build")
