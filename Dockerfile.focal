@@ -1,3 +1,10 @@
+# This Dockerfile will build gravity using system dependencies on Ubuntu focal.  The build will be a top-level build
+# so each source file compilation step is shown
+#
+# The recommended command with this file is with the following in the gravity base directory: 
+#   $ docker build -f Dockerfile.focal --output=. . --progress=plain
+# This will place the built tarball in the cwd
+
 FROM ubuntu:20.04 AS builder
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -22,9 +29,8 @@ RUN chown -R aps:aps /home/aps/git/
 USER aps
 RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
 RUN cmake --build . --target install --parallel
-#RUN cp ./$(basename $(cpack -C Release | grep ".tar.gz generated" | sed 's/CPack: - package: //g')) /home/aps/git/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz
 RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz ./gravity
-
+RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz"
 
 FROM scratch
 COPY --from=builder /home/aps/git/*.tar.gz /

@@ -1,8 +1,6 @@
-# This Dockerfile will build gravity using system dependencies on Ubuntu bionic.  The build will be a top-level build
-# so each source file compilation step is shown
-#
+# This Dockerfile will build gravity as well as its dependencies, the latter placed in the 'deps' directory
 # The recommended command with this file is with the following in the gravity base directory: 
-#   $ docker build -f Dockerfile.bionic --output=. . --progress=plain
+#   $ docker build -f Dockerfile.bionic.builddeps --output=. . --progress=plain
 # This will place the built tarball in the cwd
 
 FROM ubuntu:18.04 AS builder
@@ -17,12 +15,8 @@ RUN apt-get update
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3 python3-dev python3-pip build-essential cmake git \
-    lcov doxygen libzmq3-dev protobuf-compiler libprotoc-dev default-jre default-jdk libprotobuf-java \
+    lcov doxygen default-jre default-jdk \
     libboost-dev libbson-dev libbson-1.0-0 curl flex bison swig ninja-build
-
-ADD https://launchpad.net/ubuntu/+archive/primary/+files/libspdlog-dev_1.5.0-1_amd64.deb .
-RUN dpkg --force-all -i libspdlog-dev_1.5.0-1_amd64.deb
-RUN rm /usr/lib/x86_64-linux-gnu/cmake/spdlog/spdlogConfigTargets-none.cmake
 
 RUN adduser --disabled-password --gecos "" --uid 1000 aps
 
@@ -32,10 +26,9 @@ WORKDIR /home/aps/git/gravity/build
 RUN chown -R aps:aps /home/aps/git/
 USER aps
 RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-RUN cmake --build . --target install --parallel
-RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
-RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
-
+RUN cmake --build . --parallel
+RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
+RUN echo "tarball is: gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
 
 FROM scratch
 COPY --from=builder /home/aps/git/*.tar.gz /
