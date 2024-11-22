@@ -16,7 +16,7 @@ RUN echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https:
 RUN apt-get update
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    python3 python3-dev python3-pip build-essential cmake git \
+    python3 python3-dev python3-pip python3-protobuf build-essential cmake git \
     lcov doxygen libzmq3-dev protobuf-compiler libprotoc-dev default-jre default-jdk libprotobuf-java \
     libboost-dev libbson-dev libbson-1.0-0 curl flex bison swig ninja-build
 
@@ -30,13 +30,28 @@ WORKDIR /home/aps/git/gravity
 ADD ./ .
 WORKDIR /home/aps/git/gravity/build
 RUN chown -R aps:aps /home/aps/git/
+RUN mkdir /opt/aps/
+RUN chown -R aps:aps /opt/aps
 USER aps
 RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
 RUN cmake --build . --target install --parallel
 RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
 RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
 
+FROM builder AS tester
+RUN tar -xzvf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz -C /opt/aps
+WORKDIR /opt/aps/gravity
+ENV LD_LIBRARY_PATH=/opt/aps/gravity/lib
+ENV PYTHONPATH=$LD_LIBRARY_PATH:$LD_LIBRARY_PATH/gravity:/home/aps/git/gravity/test/examples/protobuf
+RUN <<EOF
+echo "#!/bin/bash" >> ./test.sh
+echo "/opt/aps/gravity/bin/ServiceDirectory &" >> ./test.sh
+echo "cd /home/aps/git/gravity/test/examples/11-PythonPubSub/ && python3 ./pypub.py" >> ./test.sh
+EOF
 
-FROM scratch
+RUN chmod a+x ./test.sh
+CMD ["/opt/aps/gravity/test.sh"]
+
+FROM scratch AS exporter
 COPY --from=builder /home/aps/git/*.tar.gz /
 
