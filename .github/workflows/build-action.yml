@@ -13,7 +13,7 @@ jobs:
         container: 
           image: ghcr.io/aphysci/gravity_base:bionic
         steps:
-          - uses: actions:checkout@v2
+          - uses: actions/checkout@v4
           - name: build-bionic
             shell: bash
             run: |
