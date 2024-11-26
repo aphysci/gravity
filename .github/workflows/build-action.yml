@@ -11,7 +11,7 @@ jobs:
     build-job-bionic:
         runs-on: ubuntu-latest
         container: 
-          image: gravity_base:bionic
+          image: ghcr.io/aphysci/gravity_base:bionic
         steps:
           - uses: actions/checkout@v4
           - name: build-bionic
