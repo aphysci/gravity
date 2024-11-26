@@ -83,6 +83,7 @@ private:
     std::vector<zmq_pollitem_t> pollItems;
 
 	void setHWM();
+	void setKeepAlive();
 	void subscribersExist();
 	void ready();
 	void registerDataProduct();
@@ -95,6 +96,11 @@ private:
     GravityMetrics metricsData;
 	
 	std::shared_ptr<spdlog::logger> logger;
+	
+	bool tcpKeepAliveEnabled;
+	int tcpKeepAliveTime;
+	int tcpKeepAliveProbes;
+	int tcpKeepAliveIntvl;
 	
 public:
 	/**
