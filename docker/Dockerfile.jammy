@@ -1,9 +1,15 @@
-# This Dockerfile will build gravity using system dependencies on Ubuntu jammy.  The build will be a top-level build
+# This Dockerfile will build or test gravity using system dependencies on Ubuntu jammy.  The build will be a top-level build
 # so each source file compilation step is shown
 #
-# The recommended command with this file is with the following in the gravity base directory: 
-#   $ docker build -f Dockerfile.jammy --output=. . --progress=plain
-# This will place the built tarball in the cwd
+# To Test:
+#   To run the Python Pub-Sub test with this dockerfile use the following in the gravity base directory:
+#       $ docker build --target tester -t gravity:jammy --rm -f docker/Dockerfile.jammy . && docker run --rm -it gravity:jammy
+# 
+# To Build:
+#   The recommended command to build gravity with this Dockerfile is with the following in the gravity base directory: 
+#       $ docker build -f docker/Dockerfile.jammy --output=. . --progress=plain
+#
+#   This will place the built tarball in the cwd
 
 FROM ubuntu:22.04 AS builder
 

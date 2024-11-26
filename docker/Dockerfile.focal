@@ -1,9 +1,15 @@
-# This Dockerfile will build gravity using system dependencies on Ubuntu focal.  The build will be a top-level build
+# This Dockerfile will build or test gravity using system dependencies on Ubuntu focal.  The build will be a top-level build
 # so each source file compilation step is shown
 #
-# The recommended command with this file is with the following in the gravity base directory: 
-#   $ docker build -f Dockerfile.focal --output=. . --progress=plain
-# This will place the built tarball in the cwd
+# To Test:
+#   To run the Python Pub-Sub test with this dockerfile use the following in the gravity base directory:
+#       $ docker build --target tester -t gravity:focal --rm -f docker/Dockerfile.focal . && docker run --rm -it gravity:focal
+# 
+# To Build:
+#   The recommended command to build gravity with this Dockerfile is with the following in the gravity base directory: 
+#       $ docker build -f docker/Dockerfile.focal --output=. . --progress=plain
+#
+#   This will place the built tarball in the cwd
 
 FROM ubuntu:20.04 AS builder
 

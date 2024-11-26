@@ -1,7 +1,15 @@
-# This Dockerfile will build gravity as well as its dependencies, the latter placed in the 'deps' directory
-# The recommended command with this file is with the following in the gravity base directory: 
-#   $ docker build -f Dockerfile.bionic.builddeps --output=. . --progress=plain
-# This will place the built tarball in the cwd
+# This Dockerfile will build or test gravity as well as its dependencies, the latter placed in the 'deps' directory.  
+#
+# To Test:
+#   To run the Python Pub-Sub test with this dockerfile use the following in the gravity base directory:
+#       $ docker build --target tester -t gravity-deps:bionic --rm -f docker/Dockerfile.bionic.builddeps . && docker run --rm -it gravity-deps:bionic
+# 
+# To Build:
+#   The recommended command to build gravity with this Dockerfile is with the following in the gravity base directory: 
+#       $ docker build -f docker/Dockerfile.bionic.builddeps --output=. . --progress=plain
+#
+#   This will place the built tarball in the cwd
+#
 
 FROM ubuntu:18.04 AS builder
 
@@ -24,12 +32,28 @@ WORKDIR /home/aps/git/gravity
 ADD ./ .
 WORKDIR /home/aps/git/gravity/build
 RUN chown -R aps:aps /home/aps/git/
+RUN mkdir /opt/aps/
+RUN chown -R aps:aps /opt/aps
 USER aps
 RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
 RUN cmake --build . --parallel
 RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
 RUN echo "tarball is: gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
 
-FROM scratch
+FROM builder AS tester
+RUN tar -xzvf /home/aps/git/gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz -C /opt/aps
+WORKDIR /opt/aps/gravity
+ENV LD_LIBRARY_PATH=/opt/aps/gravity/lib:/opt/aps/gravity/deps/libzmq/lib/
+ENV PYTHONPATH=$LD_LIBRARY_PATH:$LD_LIBRARY_PATH/gravity:/opt/aps/gravity/deps/protobuf/lib/:/home/aps/git/gravity/test/examples/protobuf
+RUN <<EOF
+echo "#!/bin/bash" >> ./test.sh
+echo "/opt/aps/gravity/bin/ServiceDirectory &" >> ./test.sh
+echo "cd /home/aps/git/gravity/test/examples/11-PythonPubSub/ && python3 ./pypub.py" >> ./test.sh
+EOF
+
+RUN chmod a+x ./test.sh
+CMD ["/opt/aps/gravity/test.sh"]
+
+FROM scratch AS exporter
 COPY --from=builder /home/aps/git/*.tar.gz /
 
