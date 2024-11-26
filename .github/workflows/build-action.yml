@@ -1,0 +1,22 @@
+name: Build Action
+on:
+    push:
+      branches:
+        - master
+    pull_request:
+      branches:
+        - master
+jobs:
+    # The job that will use the container image you just pushed to ghcr.io
+    build-job-bionic:
+        runs-on: ubuntu-latest
+        container: 
+          image: ghcr.io/aphysci/gravity_base:bionic
+        steps:
+          - uses: actions:checkout@v2
+          - name: build-bionic
+            shell: bash
+            run: |
+                echo $(cat /etc/lsb_release)
+                echo pwd
+                echo ${{github.workspace}}
