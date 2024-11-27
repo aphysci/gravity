@@ -47,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/aphysci/gravity_base:focal
-      options: -u aps
     steps:
       -
         name: clone
@@ -60,6 +59,16 @@ jobs:
           echo $(cat /etc/lsb-release)
           cd ${{ github.workspace }}
           pwd
-
-
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-focal
+          path: ${{ github.workspace }}/build/output/*.tar.gz
       
