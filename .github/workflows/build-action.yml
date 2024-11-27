@@ -22,8 +22,8 @@ jobs:
           shell: bash
           options: -v ${{ github.workspace }}:/home/aps/git/gravity
           run: |
+            su aps
             echo $(cat /etc/lsb-release)
-            cd /home/aps/git/gravity
+            cd ~/git/gravity
             ls -lh
-            echo pwd
-            
+            pwd

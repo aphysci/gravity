@@ -29,9 +29,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 ADD https://launchpad.net/ubuntu/+archive/primary/+files/libspdlog-dev_1.5.0-1_amd64.deb .
 RUN dpkg --force-all -i libspdlog-dev_1.5.0-1_amd64.deb
 RUN rm /usr/lib/x86_64-linux-gnu/cmake/spdlog/spdlogConfigTargets-none.cmake
+RUN adduser --disabled-password --gecos "" --uid 1000 aps
 
 FROM base AS builder
-RUN adduser --disabled-password --gecos "" --uid 1000 aps
 WORKDIR /home/aps/git/gravity
 ADD ./ .
 WORKDIR /home/aps/git/gravity/build
