@@ -7,7 +7,7 @@ on:
       branches:
         - master
 jobs:
-  login:
+  login-and-build:
     runs-on: ubuntu-latest
     steps:
       -
@@ -17,16 +17,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-  build-job-bionic:
-    runs-on: ubuntu-latest
-    container: 
-      image: ghcr.io/aphysci/gravity_base:bionic
-    steps:
-      - 
-        name: build-bionic
+      -
+        name: build
+        container:
+          image: ghcr.io/aphysci/gravity_base:bionic
         uses: actions/checkout@v4
         shell: bash
-      run: |
+        run: |
           echo $(cat /etc/lsb_release)
           echo pwd
           echo ${{github.workspace}}
