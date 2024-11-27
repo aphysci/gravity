@@ -21,7 +21,6 @@ jobs:
         name: build
         container:
           image: ghcr.io/aphysci/gravity_base:bionic
-        uses: actions/checkout@v4
         shell: bash
         run: |
           echo $(cat /etc/lsb_release)
