@@ -26,3 +26,6 @@ jobs:
             cd ~/git/gravity
             ls -lh
             pwd
+            mkdir build && cd build
+            pwd
+            cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
