@@ -7,24 +7,12 @@ on:
       branches:
         - master
 jobs:
-  login:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pull Image
-        run: docker pull ghcr.io/aphysci/gravity_base:bionic
   build-bionic:
     runs-on: ubuntu-latest
-    needs: login
     container:
       image: ghcr.io/aphysci/gravity_base:bionic
     steps:
+      - uses: actions/checkout@v4
       -
         name: build
         shell: bash
