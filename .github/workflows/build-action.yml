@@ -59,8 +59,9 @@ jobs:
         run: |
           echo $(cat /etc/lsb-release)
           pwd
-          git config --global --add safe.directory .
-          git status  
+          ls -lh
+          chown -R $USER:$USER .
+          ls -lh
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
