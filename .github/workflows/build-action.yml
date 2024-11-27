@@ -20,9 +20,8 @@ jobs:
           registry: ghcr.io
           image: ghcr.io/aphysci/gravity_base:bionic
           shell: bash
-          options: -v ${{ github.workspace }}:/home/aps/git/gravity
+          options: -v ${{ github.workspace }}:/home/aps/git/gravity -u aps
           run: |
-            runuser aps 
             echo $(cat /etc/lsb-release)
             cd ~/git/gravity
             ls -lh
