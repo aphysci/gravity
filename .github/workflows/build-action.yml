@@ -59,8 +59,8 @@ jobs:
         run: |
           echo $(cat /etc/lsb-release)
           pwd
+          git config --global --add safe.directory .
           mkdir build && cd build
-          git config --global --add safe.directory ${{ github.workspace }}
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
           mkdir output
