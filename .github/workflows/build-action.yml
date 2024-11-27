@@ -29,6 +29,6 @@ jobs:
             mkdir build && cd build
             pwd
             cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-            cmake --build . --target install --parallel
+            cmake --build . --target install --parallel --verbose
             ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
             echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
