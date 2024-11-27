@@ -10,12 +10,20 @@ jobs:
     # The job that will use the container image you just pushed to ghcr.io
     build-job-bionic:
         runs-on: ubuntu-latest
+        steps:
+          -
+            name: Login to GitHub Container Registry
+            uses: docker/login-action@v3
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
         container: 
           image: ghcr.io/aphysci/gravity_base:bionic
-        steps:
-          - uses: actions/checkout@v4
-          - name: build-bionic
-            shell: bash
+          steps:
+            - name: build-bionic
+              uses: actions/checkout@v4
+              shell: bash
             run: |
                 echo $(cat /etc/lsb_release)
                 echo pwd
