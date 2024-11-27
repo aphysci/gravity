@@ -17,6 +17,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull Image
+        run: docker pull ghcr.io/aphysci/gravity_base:bionic
   build-bionic:
     runs-on: ubuntu-latest
     needs: login
@@ -27,6 +29,6 @@ jobs:
         name: build
         shell: bash
         run: |
-          echo $(cat /etc/lsb_release)
+          echo $(cat /etc/lsb-release)
           echo pwd
           echo ${{github.workspace}}
