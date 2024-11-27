@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: addnab/docker-run-action@v3
+      - 
+        name: build
+        uses: addnab/docker-run-action@v3
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -31,7 +33,7 @@ jobs:
             mkdir build && cd build
             pwd
             cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-            cmake --build . --target install --parallel --verbose
+            cmake --build . --target install --parallel
             mkdir output
             ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
             echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
@@ -39,5 +41,25 @@ jobs:
         name: upload
         uses: actions/upload-artifact@v4
         with:
-          name: gravity
+          name: gravity-bionic
           path: ${{ github.workspace }}/build/output/*.tar.gz
+  build-focal:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:focal
+      options: -u aps
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          cd ${{ github.workspace }}
+          pwd
+
+
+      
