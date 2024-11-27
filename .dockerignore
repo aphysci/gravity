@@ -1,0 +1,15 @@
+**/.env
+**/.toolstarget
+**/.vs
+**/.vscode
+**/*.dbmdl
+**/*.jfm
+**/bin
+**/charts
+**/docker-compose*
+**/compose*
+**/node_modules
+**/npm-debug.log
+**/obj
+**/secrets.dev.yaml
+**/values.dev.yaml
