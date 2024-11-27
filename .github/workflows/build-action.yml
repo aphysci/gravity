@@ -32,5 +32,12 @@ jobs:
             pwd
             cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
             cmake --build . --target install --parallel --verbose
-            ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
+            mkdir output
+            ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
             echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity
+          path: ${{ github.workspace }}/build/output/*.tar.gz
