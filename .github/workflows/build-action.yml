@@ -52,6 +52,7 @@ jobs:
         name: clone
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       -
         name: build
