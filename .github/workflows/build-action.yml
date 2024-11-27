@@ -22,7 +22,7 @@ jobs:
           shell: bash
           options: -v ${{ github.workspace }}:/home/aps/git/gravity
           run: |
-            su aps
+            runuser aps 
             echo $(cat /etc/lsb-release)
             cd ~/git/gravity
             ls -lh
