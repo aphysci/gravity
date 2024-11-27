@@ -12,7 +12,12 @@ jobs:
     container:
       image: ghcr.io/aphysci/gravity_base:bionic
     steps:
-      - uses: actions/checkout@v4
+      - 
+        name: clone
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
       -
         name: build
         shell: bash
