@@ -9,16 +9,21 @@ on:
 jobs:
   build-bionic:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/aphysci/gravity_base:bionic
     steps:
       - 
         name: clone
-        uses: actions/checkout@v2
-      -
-        name: build
-        shell: bash
-        run: |
-          echo $(cat /etc/lsb-release)
-          echo pwd
-          echo ${{github.workspace}}
+        uses: actions/checkout@v3
+      - uses: addnab/docker-run-action@v3
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          image: ghcr.io/aphysci/gravity_base:bionic
+          shell: bash
+          options: -v ${{ github.workspace }}:/home/aps/git/gravity
+          run: |
+            echo $(cat /etc/lsb-release)
+            cd /home/aps/git/gravity
+            ls -lh
+            echo pwd
+            
