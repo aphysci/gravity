@@ -7,7 +7,7 @@ on:
       branches:
         - master
 jobs:
-  login-and-build:
+  login:
     runs-on: ubuntu-latest
     steps:
       -
@@ -17,6 +17,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+  build-bionic:
+    runs-on: ubuntu-latest
+    needs: login
+    container:
+      image: ghcr.io/aphysci/gravity_base:bionic
+    steps:
       -
         name: build
         shell: bash
