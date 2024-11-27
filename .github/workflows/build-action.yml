@@ -60,6 +60,7 @@ jobs:
           echo $(cat /etc/lsb-release)
           pwd
           mkdir build && cd build
+          git status /__w/gravity/gravity
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
           mkdir output
