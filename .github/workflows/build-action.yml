@@ -9,6 +9,8 @@ on:
 jobs:
   login-and-build:
     runs-on: ubuntu-latest
+    container:
+          image: ghcr.io/aphysci/gravity_base:bionic
     steps:
       -
         name: Login to GitHub Container Registry
@@ -19,8 +21,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: build
-        container:
-          image: ghcr.io/aphysci/gravity_base:bionic
         shell: bash
         run: |
           echo $(cat /etc/lsb_release)
