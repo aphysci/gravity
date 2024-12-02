@@ -34,6 +34,8 @@ jobs:
             pwd
             cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
             cmake --build . --target install --parallel
+            LD_LIBRARY_PATH=/home/aps/git/gravity/build/install/lib ./install/bin/ServiceDirectory &
+            ctest --verbose
             mkdir output
             ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
             echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
@@ -63,6 +65,8 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
+          LD_LIBRARY_PATH=`pwd`/install/lib ./install/bin/ServiceDirectory &
+          ctest --verbose
           mkdir output
           ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz ./gravity
           echo "tarball is: gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz"
