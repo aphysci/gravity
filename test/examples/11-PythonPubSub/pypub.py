@@ -34,5 +34,3 @@ for i in range (1, 50):
     gdp.data=counterPB
     gn.publish(gdp)
     time.sleep(1)
-
-gn.waitForExit()

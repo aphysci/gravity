@@ -42,18 +42,14 @@ RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./insta
 RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz"
 
 FROM builder AS tester
-RUN tar -xzvf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz -C /opt/aps
-WORKDIR /opt/aps/gravity
-ENV LD_LIBRARY_PATH=/opt/aps/gravity/lib
-ENV PYTHONPATH=$LD_LIBRARY_PATH:$LD_LIBRARY_PATH/gravity:/home/aps/git/gravity/test/examples/protobuf
+ENV LD_LIBRARY_PATH=/home/aps/git/gravity/build/install/lib
 RUN <<EOF
 echo "#!/bin/bash" >> ./test.sh
-echo "/opt/aps/gravity/bin/ServiceDirectory &" >> ./test.sh
-echo "cd /home/aps/git/gravity/test/examples/11-PythonPubSub/ && python3 ./pypub.py" >> ./test.sh
+echo "/home/aps/git/gravity/build/install/bin/ServiceDirectory &" >> ./test.sh
+echo "ctest --verbose" >> ./test.sh
 EOF
-
 RUN chmod a+x ./test.sh
-CMD ["/opt/aps/gravity/test.sh"]
+CMD ["./test.sh"]
 
 FROM scratch AS exporter
 COPY --from=builder /home/aps/git/*.tar.gz /
