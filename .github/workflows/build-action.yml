@@ -76,4 +76,35 @@ jobs:
         with:
           name: gravity-focal
           path: ${{ github.workspace }}/build/output/*.tar.gz
+  build-jammy:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:jammy
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          LD_LIBRARY_PATH=`pwd`/install/lib ./install/bin/ServiceDirectory &
+          ctest --verbose
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-jammy_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-jammy_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-jammy
+          path: ${{ github.workspace }}/build/output/*.tar.gz
       
