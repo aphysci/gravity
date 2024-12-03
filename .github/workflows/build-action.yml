@@ -17,6 +17,9 @@ jobs:
           fetch-depth: 0
       - 
         name: build
+        # The bionic build is run with docker-run-action because standard GitHub actions
+        # use node20 which can't run on bionic
+        # ToDo: verify this will error out properly on failure
         uses: addnab/docker-run-action@v3
         with:
           username: ${{ github.actor }}
@@ -35,8 +38,7 @@ jobs:
             cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
             cmake --build . --target install --parallel
             LD_LIBRARY_PATH=/home/aps/git/gravity/build/install/lib ./install/bin/ServiceDirectory &
-            ctest --verbose
-            mkdir output
+            ctest --verbose && mkdir output
             ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
             echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
       - 

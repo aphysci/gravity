@@ -16,6 +16,7 @@ FROM ubuntu:18.04 AS base
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     openssl libssl-dev ca-certificates gnupg gpg wget
 
+# install the kitware repo to get the latest cmake on bionic
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 RUN echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
@@ -28,12 +29,19 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 ADD https://launchpad.net/ubuntu/+archive/primary/+files/libspdlog-dev_1.5.0-1_amd64.deb .
 RUN dpkg --force-all -i libspdlog-dev_1.5.0-1_amd64.deb
+# delete the binary target for spdlog - it's too new to be linked against on bionic
+# and we just need spdlog in header only form
 RUN rm /usr/lib/x86_64-linux-gnu/cmake/spdlog/spdlogConfigTargets-none.cmake
+
+# note: uid 1001 to match the CI VM user id for the bionic build workaround on GitHub
 RUN adduser --disabled-password --gecos "" --uid 1001 aps
 
 FROM base AS builder
 WORKDIR /home/aps/git/gravity
+
+# Add the gravity source tree as it is locally
 ADD ./ .
+
 WORKDIR /home/aps/git/gravity/build
 RUN chown -R aps:aps /home/aps/git/
 RUN mkdir /opt/aps/
