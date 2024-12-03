@@ -857,6 +857,28 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			sendStringMessage(subscriptionManagerSWL.socket, "set_hwm", ZMQ_SNDMORE);
 			sendIntMessage(subscriptionManagerSWL.socket, subscribeHWM, ZMQ_DONTWAIT);
 		}
+		
+		// Configure TCP keep-alive
+		if (getBoolParam("TcpKeepAliveEnabled", false))
+		{
+			// Get settings
+			int tcpKeepAliveTime = getIntParam("TcpKeepAliveTime", 7200);
+			int tcpKeepAliveProbes = getIntParam("TcpKeepAliveProbes", 9);
+			int tcpKeepAliveIntvl = getIntParam("TcpKeepAliveIntvl", 75);
+			
+			logger->info("Enabling TCP publisher Keep-Alive with settings (time={}, probes={}, intvl={}).", 
+								tcpKeepAliveTime, tcpKeepAliveProbes, tcpKeepAliveIntvl);
+			
+			// Send TCP keep-alive settings
+			sendStringMessage(publishManagerRequestSWL.socket, "set_tcp_keepalive", ZMQ_SNDMORE);
+			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveTime, ZMQ_DONTWAIT);
+			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveProbes, ZMQ_DONTWAIT);
+			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveIntvl, ZMQ_DONTWAIT);
+			
+			// Read ACK
+			readStringMessage(publishManagerRequestSWL.socket);
+		}
+		
 		//get the Domain name of the Service Directory to connect to
 		std::string serviceDirectoryDomain = getStringParam("Domain");
 
