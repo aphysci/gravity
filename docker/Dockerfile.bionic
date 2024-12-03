@@ -27,8 +27,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     lcov doxygen libzmq3-dev protobuf-compiler libprotoc-dev default-jre default-jdk libprotobuf-java \
     libboost-dev libbson-dev libbson-1.0-0 curl flex bison swig ninja-build
 
+# the spdlog in the bionic repo is too old for gravity
 ADD https://launchpad.net/ubuntu/+archive/primary/+files/libspdlog-dev_1.5.0-1_amd64.deb .
 RUN dpkg --force-all -i libspdlog-dev_1.5.0-1_amd64.deb
+
 # delete the binary target for spdlog - it's too new to be linked against on bionic
 # and we just need spdlog in header only form
 RUN rm /usr/lib/x86_64-linux-gnu/cmake/spdlog/spdlogConfigTargets-none.cmake
