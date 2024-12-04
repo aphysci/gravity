@@ -175,7 +175,7 @@ endif()
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake/spdlog")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake" "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib/cmake/spdlog" "${CMAKE_INSTALL_PREFIX}/deps/spdlog/lib64/cmake/spdlog")
 
 string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
 
@@ -291,6 +291,7 @@ else()
             LIST_SEPARATOR |
             CMAKE_ARGS
             -DGRAVITY_ROOT=${CMAKE_INSTALL_PREFIX}
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                 -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
                 -DSKIP_JAVA=${SKIP_JAVA}

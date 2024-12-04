@@ -109,4 +109,36 @@ jobs:
         with:
           name: gravity-jammy
           path: ${{ github.workspace }}/build/output/*.tar.gz
+  build-alma:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:alma
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --parallel
+          LD_LIBRARY_PATH=`pwd`/install/lib ./install/bin/ServiceDirectory &
+          pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest --verbose
+          popd
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-alma
+          path: ${{ github.workspace }}/build/output/*.tar.gz
       
