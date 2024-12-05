@@ -101,7 +101,12 @@ set(SRCS
 
         
 add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf spdlog::spdlog_header_only)
+target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
+if (UNIX)
+	target_link_libraries(${PROTO_LIB_NAME} PUBLIC spdlog::spdlog_header_only)
+else()
+	target_link_libraries(${PROTO_LIB_NAME} PUBLIC spdlog::spdlog)
+endif()
 add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
 install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 

@@ -1,5 +1,15 @@
 
 import time
+import sys
+
+# Temporary workaround: Python3.10 has restructed collections
+# and py-protobuf 2.7.0 (set in GravityExternalUrls.cmake) still uses the old structure
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    import collections
+    import collections.abc
+    setattr(collections, "MutableMapping", collections.abc.MutableMapping)
+    setattr(collections, "MutableSequence", collections.abc.MutableSequence)
+
 from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
