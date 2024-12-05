@@ -165,7 +165,7 @@ jobs:
           export PATH=$PATH:${{ github.workspace }}/build/gravity/deps/libzmq/bin
           export PATH=$PATH:${{ github.workspace }}/build/gravity/deps/pthreads-w32/bin
           ./gravity/bin/ServiceDirectory.exe &
-          pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest --verbose
+          pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
           popd
           mkdir output
           7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
