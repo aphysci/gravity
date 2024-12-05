@@ -156,7 +156,9 @@ jobs:
         # On the Github Windows runner there are two versions of Python installed - and CMake finds the latest
         # while 'python' references the older version.  setuptools (distutils) is used by protobuf 2.7.0
         run: |
-          C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe -m pip install --upgrade setuptools six
+          C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe -m pip install --upgrade setuptools
+          python --version
+          python -m pip install --upgrade six
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
           cmake --build . --config Release
