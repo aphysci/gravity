@@ -159,7 +159,7 @@ jobs:
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
           cmake --build . --config Release
           mkdir output
-          7z -a -r ./output/gravity-$(cat ./install/VERSION.txt)-windows_x64.zip ./gravity
+          7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
       - 
         name: upload
         uses: actions/upload-artifact@v4
