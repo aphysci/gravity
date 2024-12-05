@@ -1,8 +1,24 @@
+# This Dockerfile will build or test gravity on Alma Linux.  Only zeromq will be installed as a system dependency.
+#
+# To Test:
+#   To run the Python Pub-Sub test with this dockerfile use the following in the gravity base directory:
+#       $ docker build --network=host --target tester -t gravity:alma --rm -f docker/Dockerfile.alma . && docker run --network=host --rm -it gravity:alma
+# 
+# To Build:
+#   The recommended command to build gravity with this Dockerfile is with the following in the gravity base directory: 
+#       $ docker build -f docker/Dockerfile.alma --output=. . --progress=plain
+#
+#   This will place the built tarball in the cwd
+
+
 FROM almalinux:latest AS base
 
+# If needed, put ProxyCert.crt in the build context, if missing this shouldn't fail
 COPY ProxyCert.* /etc/pki/ca-trust/source/anchors/
 RUN update-ca-trust
 
+# Install packages and use the CodeReady Builder repository (CRB)
+# See https://wiki.almalinux.org/repos/AlmaLinux.html
 RUN yum -y update && \
     yum -y install epel-release && yum -y update && \
     dnf config-manager --set-enabled crb && \
@@ -12,13 +28,17 @@ RUN yum -y update && \
 
 RUN useradd aps
 
+# Remove ProxyCert since the base stage is a public image
 RUN if [ -f /etc/pki/ca-trust/source/anchors/ProxyCert.crt ]; then \
         rm /etc/pki/ca-trust/source/anchors/ProxyCert.crt && update-ca-trust; \
     fi;
 
 FROM base AS builder
+
+# It's expected that this is a local build here so re-install the ProxyCert
 COPY ProxyCert.* /etc/pki/ca-trust/source/anchors/
 RUN update-ca-trust
+
 WORKDIR /home/aps/git/gravity
 
 # Add the gravity source tree as it is locally

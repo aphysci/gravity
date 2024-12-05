@@ -123,7 +123,7 @@ jobs:
       -
         name: build
         run: |
-          echo $(cat /etc/lsb-release)
+          echo $(cat /etc/os-release)
           pwd
           git config --global --add safe.directory '*'
           mkdir build && cd build
