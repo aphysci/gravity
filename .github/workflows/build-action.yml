@@ -154,7 +154,7 @@ jobs:
         name: build
         shell: bash
         run: |
-          python3 -m pip install --upgrade setuptools
+          C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe -m pip install --upgrade setuptools
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
           cmake --build . --config Release
