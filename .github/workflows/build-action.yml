@@ -141,4 +141,19 @@ jobs:
         with:
           name: gravity-alma
           path: ${{ github.workspace }}/build/output/*.tar.gz
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - 
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - 
+        name: build
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install  -G"Visual Studio 17 2022" -A x64
+          cmake --build . --config Release
       
