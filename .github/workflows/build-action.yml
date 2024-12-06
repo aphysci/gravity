@@ -142,7 +142,7 @@ jobs:
           name: gravity-alma
           path: ${{ github.workspace }}/build/output/*.tar.gz
   build-windows:
-    runs-on: windows-2022
+    runs-on: windows-2019
     steps:
       - 
         name: clone
@@ -154,13 +154,12 @@ jobs:
         name: build
         shell: bash
         # On the Github Windows runner there are two versions of Python installed - and CMake finds the latest
-        # while 'python' references the older version.  setuptools (distutils) is used by protobuf 2.7.0
+        # while 'python' references the older version.  setuptools (distutils) is used by protobuf 3.7.0
         run: |
-          C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe -m pip install --upgrade setuptools six
           python --version
-          python -m pip install --upgrade six
+          python -m pip install --upgrade setuptools six
           mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
+          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
           cmake --build . --config Release
           export PATH=$PATH:${{ github.workspace }}/build/gravity/bin
           export PATH=$PATH:${{ github.workspace }}/build/gravity/deps/spdlog/bin

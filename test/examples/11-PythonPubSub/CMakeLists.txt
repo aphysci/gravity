@@ -13,7 +13,7 @@ add_custom_target(${PROJECT_NAME} ALL DEPENDS "${SRCS}")
 gravity_add_dependency(${PROJECT_NAME})
 set(PY_EXEC python3)
 if (WIN32)
-    set(PY_EXEC C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe)
+    set(PY_EXEC python)
 endif()
 add_test(NAME pypubsub COMMAND ${PY_EXEC} pypub.py WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
 set_property(TEST pypubsub PROPERTY ENVIRONMENT_MODIFICATION  
