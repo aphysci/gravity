@@ -22,30 +22,16 @@
 
 using namespace std;
 
-namespace gravity {
-
-Semaphore::Semaphore()
+namespace gravity
 {
-	sem_init(&semaphore, 0, 1);
-}
 
-Semaphore::Semaphore(int count)
-{
-	sem_init(&semaphore, 0, count);
-}
+Semaphore::Semaphore() { sem_init(&semaphore, 0, 1); }
 
-void Semaphore::Lock()
-{
-	sem_wait(&semaphore);
-}
-void Semaphore::Unlock()
-{
-	sem_post(&semaphore);
-}
+Semaphore::Semaphore(int count) { sem_init(&semaphore, 0, count); }
 
-Semaphore::~Semaphore()
-{
-	sem_destroy(&semaphore);
-}
+void Semaphore::Lock() { sem_wait(&semaphore); }
+void Semaphore::Unlock() { sem_post(&semaphore); }
 
-}//namespace gravity
+Semaphore::~Semaphore() { sem_destroy(&semaphore); }
+
+}  //namespace gravity

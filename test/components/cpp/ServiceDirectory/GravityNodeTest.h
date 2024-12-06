@@ -23,7 +23,7 @@
  *      Author: Chris Brundick
  */
 
- /*
+/*
   * Gravity APIs Tested here:
   * registerDataProduct
   * unregisterDataProduct
@@ -53,7 +53,7 @@
 #include "GravityDataProduct.h"
 #include "Utility.h"
 
-class GravityNodeTest: public gravity::GravitySubscriber, gravity::GravityServiceProvider, gravity::GravityRequestor
+class GravityNodeTest : public gravity::GravitySubscriber, gravity::GravityServiceProvider, gravity::GravityRequestor
 {
 public:
     void setUp();
@@ -62,12 +62,13 @@ public:
     void testServiceManager(void);
     void testRegisterService(void);
     void testDataProduct(void);
-	void testSubscribeDomain(void);
-	void testServiceWithDomain(void);
-	void testComponentID(void);
-    void subscriptionFilled(const std::vector< std::shared_ptr<gravity::GravityDataProduct> >& dataProducts);
+    void testSubscribeDomain(void);
+    void testServiceWithDomain(void);
+    void testComponentID(void);
+    void subscriptionFilled(const std::vector<std::shared_ptr<gravity::GravityDataProduct> >& dataProducts);
     void requestFilled(std::string serviceID, std::string requestID, const gravity::GravityDataProduct& response);
-    std::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID, const gravity::GravityDataProduct& dataProduct);
+    std::shared_ptr<gravity::GravityDataProduct> request(const std::string serviceID,
+                                                         const gravity::GravityDataProduct& dataProduct);
 
 private:
     bool gotResponse();

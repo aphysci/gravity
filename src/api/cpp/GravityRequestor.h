@@ -48,7 +48,8 @@ public:
      * \param requestID ID of the request that was made
      * \param response GravityDataProduct containing the data of the response
      */
-    GRAVITY_API virtual void requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response) = 0;
+    GRAVITY_API virtual void requestFilled(std::string serviceID, std::string requestID,
+                                           const GravityDataProduct& response) = 0;
 
     /**
      * Called when the response to a request has timed out. 
@@ -59,6 +60,5 @@ public:
 };
 
 } /* namespace gravity */
-
 
 #endif /* GRAVITYREQUESTOR_H_ */

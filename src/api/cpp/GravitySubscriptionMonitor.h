@@ -49,7 +49,8 @@ public:
 	 * \param filter the name of the filter registered for this data product
 	 * \param domain the name of the domain for this data product
      */
-	GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) = 0;
+    GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
+                                                 std::string filter, std::string domain) = 0;
 };
 
 } /* namespace gravity */
