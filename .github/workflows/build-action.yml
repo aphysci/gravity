@@ -158,24 +158,26 @@ jobs:
           python-version: '3.7.9' 
       - 
         name: build
-        shell: bash
+        shell: cmd
         run: |
           python --version
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
           cmake --build . --config Release
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/spdlog/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/libzmq/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/pthreads-w32/bin
-          ./gravity/bin/ServiceDirectory &
-          echo "Ran Service Directory ${?}"
-          echo $PATH
-          echo $LD_LIBRARY_PATH
-          ps
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/libzmq/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/pthreads-w32/bin
+          start /B gravity/bin/ServiceDirectory.exe
+          echo "Ran Service Directory"
+          echo %PATH%
           pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
-          popd
+      - 
+        name: archive
+        shell: bash
+        run: |
+          cd build
           mkdir output
           7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
       - 
