@@ -172,7 +172,7 @@ jobs:
           start /B gravity/bin/ServiceDirectory.exe
           echo "Ran Service Directory"
           echo %PATH%
-          pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
+          cd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
       - 
         name: archive
         shell: bash
