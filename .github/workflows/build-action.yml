@@ -165,10 +165,10 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
           cmake --build . --config Release
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{ github.workspace }}/build/gravity/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{ github.workspace }}/build/gravity/deps/spdlog/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{ github.workspace }}/build/gravity/deps/libzmq/bin
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{ github.workspace }}/build/gravity/deps/pthreads-w32/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/spdlog/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/libzmq/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/d/a/gravity/gravity/build/gravity/deps/pthreads-w32/bin
           ./gravity/bin/ServiceDirectory &
           echo "Ran Service Directory ${?}"
           echo $PATH
