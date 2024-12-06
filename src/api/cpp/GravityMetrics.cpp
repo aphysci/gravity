@@ -30,14 +30,12 @@
 
 using namespace std;
 
-namespace gravity {
+namespace gravity
+{
 
 GravityMetrics::GravityMetrics() : startTime(0), endTime(0) {}
 
-GravityMetrics::GravityMetrics(void* socket)
-{
-    populateFromMessage(socket);
-}
+GravityMetrics::GravityMetrics(void* socket) { populateFromMessage(socket); }
 
 GravityMetrics::~GravityMetrics() {}
 
@@ -46,10 +44,7 @@ void GravityMetrics::incrementMessageCount(string dataProductID, int count)
     metrics[dataProductID].messageCount += count;
 }
 
-void GravityMetrics::incrementByteCount(string dataProductID, int count)
-{
-    metrics[dataProductID].byteCount += count;
-}
+void GravityMetrics::incrementByteCount(string dataProductID, int count) { metrics[dataProductID].byteCount += count; }
 
 void GravityMetrics::reset()
 {
@@ -70,17 +65,14 @@ void GravityMetrics::clear()
     endTime = 0;
 }
 
-void GravityMetrics::remove(std::string dataProductID)
-{
-    metrics.erase(dataProductID);
-}
+void GravityMetrics::remove(std::string dataProductID) { metrics.erase(dataProductID); }
 
 int GravityMetrics::getMessageCount(string dataProductID)
 {
     int count = -1;
     if (metrics.count(dataProductID))
     {
-    	count = metrics[dataProductID].messageCount;
+        count = metrics[dataProductID].messageCount;
     }
     return count;
 }
@@ -90,32 +82,23 @@ int GravityMetrics::getByteCount(string dataProductID)
     int count = -1;
     if (metrics.count(dataProductID))
     {
-    	count = metrics[dataProductID].byteCount;
+        count = metrics[dataProductID].byteCount;
     }
     return count;
 }
 
-uint64_t GravityMetrics::getStartTime()
-{
-    return startTime;
-}
+uint64_t GravityMetrics::getStartTime() { return startTime; }
 
-uint64_t GravityMetrics::getEndTime()
-{
-    return endTime;
-}
+uint64_t GravityMetrics::getEndTime() { return endTime; }
 
-void GravityMetrics::done()
-{
-    endTime = gravity::getCurrentTime();
-}
+void GravityMetrics::done() { endTime = gravity::getCurrentTime(); }
 
 double GravityMetrics::getSamplePeriodSeconds()
 {
     double ret = -1;
     if (startTime > 0 && endTime > 0)
     {
-	// convert from us to s
+        // convert from us to s
         ret = ((double)(endTime - startTime)) / 1e6;
     }
     return ret;
@@ -137,8 +120,8 @@ void GravityMetrics::sendAsMessage(void* socket)
             sendIntMessage(socket, it->second.messageCount, ZMQ_SNDMORE);
             sendIntMessage(socket, it->second.byteCount, ZMQ_SNDMORE);
         }
-	sendUint64Message(socket, startTime, ZMQ_SNDMORE);
-	sendUint64Message(socket, endTime, ZMQ_DONTWAIT);
+        sendUint64Message(socket, startTime, ZMQ_SNDMORE);
+        sendUint64Message(socket, endTime, ZMQ_DONTWAIT);
     }
 }
 

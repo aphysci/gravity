@@ -48,10 +48,10 @@ public:
      * \param dataProduct GravityDataProduct with request data
      * \returns GravityDataProduct with the response
      */
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct) = 0;
+    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID,
+                                                        const GravityDataProduct& dataProduct) = 0;
 };
 
 } /* namespace gravity */
-
 
 #endif /* GRAVITYSERVICEPROVIDER_H_ */

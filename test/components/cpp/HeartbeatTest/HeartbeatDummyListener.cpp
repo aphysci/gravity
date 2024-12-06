@@ -37,23 +37,28 @@
 using namespace std;
 using namespace gravity;
 
-class MyHeartbeatListener : public GravityHeartbeatListener {
-	virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
+class MyHeartbeatListener : public GravityHeartbeatListener
+{
+    virtual void MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status);
 };
 
-void MyHeartbeatListener::MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat, std::string status)
+void MyHeartbeatListener::MissedHeartbeat(std::string dataProductID, int microsecond_to_last_heartbeat,
+                                          std::string status)
 {
-	cout << "Dataproduct: " << dataProductID << " missed heartbeat.  Last Heard: " << microsecond_to_last_heartbeat / 1000 << "ms.  Status: " << status << endl;
+    cout << "Dataproduct: " << dataProductID
+         << " missed heartbeat.  Last Heard: " << microsecond_to_last_heartbeat / 1000 << "ms.  Status: " << status
+         << endl;
 }
 
-int main() {
-	GravityNode gn;
-	gn.init("HBListener");
+int main()
+{
+    GravityNode gn;
+    gn.init("HBListener");
 
-	MyHeartbeatListener listener;
-	gn.registerHeartbeatListener("hbdummydpid", 490000, listener);
+    MyHeartbeatListener listener;
+    gn.registerHeartbeatListener("hbdummydpid", 490000, listener);
 
-	gn.waitForExit();
+    gn.waitForExit();
 
-	return 0;
+    return 0;
 }

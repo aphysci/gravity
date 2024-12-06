@@ -24,31 +24,30 @@ using namespace std;
 
 int main()
 {
-  using namespace gravity;
-  GravityNode gn;
-  gn.init("TestLogger");
+    using namespace gravity;
+    GravityNode gn;
+    gn.init("TestLogger");
 
-  cout << "test" << endl;
+    cout << "test" << endl;
 
-  //Log::setLocalLevel(Log::TRACE);
-  //Log::init(gn, "test.log", 43211);
+    //Log::setLocalLevel(Log::TRACE);
+    //Log::init(gn, "test.log", 43211);
 
-  getchar();
+    getchar();
 
-  cout << "finished init" << endl;
+    cout << "finished init" << endl;
 
-  Log::trace("Trace");
+    Log::trace("Trace");
 
-  Log::debug("1+1=%d", (1+1));
+    Log::debug("1+1=%d", (1 + 1));
 
-  //  OtherFunc();
+    //  OtherFunc();
 
-  Log::message("Hi %s", "there");
+    Log::message("Hi %s", "there");
 
-  Log::warning("Warn!!!");
+    Log::warning("Warn!!!");
 
-  Log::critical("1!=2");
+    Log::critical("1!=2");
 
-  Log::fatal("AAAAAaaaaaaahhhhhh....");
-
+    Log::fatal("AAAAAaaaaaaahhhhhh....");
 }

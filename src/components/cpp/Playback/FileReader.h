@@ -23,28 +23,30 @@
 #include <fstream>
 #include <vector>
 
-namespace gravity {
+namespace gravity
+{
 
 class FileReader
 {
 private:
-	std::ifstream archiveFile;
-	std::vector<std::shared_ptr<GravityDataProduct> > dataProducts;
-	std::vector<std::string> dpList;
-	void processArchive();
-	std::shared_ptr<GravityDataProduct> popGravityDataProduct();
-	bool hasData();
-	std::vector<std::string> split(std::string s);
-	int readNextDataProduct();
+    std::ifstream archiveFile;
+    std::vector<std::shared_ptr<GravityDataProduct> > dataProducts;
+    std::vector<std::string> dpList;
+    void processArchive();
+    std::shared_ptr<GravityDataProduct> popGravityDataProduct();
+    bool hasData();
+    std::vector<std::string> split(std::string s);
+    int readNextDataProduct();
 
-	bool swapEndian;
-	void endian_swap(int& i);
+    bool swapEndian;
+    void endian_swap(int& i);
+
 public:
-	FileReader();
-	void init(const std::string& filename, const std::string& dataProductList);
-	virtual ~FileReader();
-	static void* start(void* context);
-	std::shared_ptr<GravityDataProduct> getNextDataProduct();
+    FileReader();
+    void init(const std::string& filename, const std::string& dataProductList);
+    virtual ~FileReader();
+    static void* start(void* context);
+    std::shared_ptr<GravityDataProduct> getNextDataProduct();
 };
 
 } /* namespace gravity */

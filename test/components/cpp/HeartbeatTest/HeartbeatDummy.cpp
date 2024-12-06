@@ -30,17 +30,18 @@
 using namespace std;
 using namespace gravity;
 
-int main() {
-	GravityNode gn;
-	gn.init("hbdummydpid");
+int main()
+{
+    GravityNode gn;
+    gn.init("hbdummydpid");
 
-	cout << "Start" << endl;
+    cout << "Start" << endl;
 
-	gn.startHeartbeat(490000); //About 1/2 second.
+    gn.startHeartbeat(490000);  //About 1/2 second.
 
-	cout << "Started" << endl;
+    cout << "Started" << endl;
 
-	gn.waitForExit();
+    gn.waitForExit();
 
-	return 0;
+    return 0;
 }

@@ -16,7 +16,6 @@
  **
  */
 
-
 #ifndef CPPGRAVITYSUBSCRIBER_H_
 #define CPPGRAVITYSUBSCRIBER_H_
 
@@ -31,12 +30,10 @@ namespace gravity
 class CPPGravitySubscriber : public GravitySubscriber
 {
 public:
-
     virtual ~CPPGravitySubscriber();
-    virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
     virtual int subscriptionFilled(char* array, int arrayLength, int* lengths, int length);
 };
 
-}
+}  // namespace gravity
 #endif /* CPPGRAVITYSUBSCRIBER_H_ */
-

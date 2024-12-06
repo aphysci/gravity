@@ -21,7 +21,8 @@
 
 #include "GravityNode.h"
 
-namespace gravity {
+namespace gravity
+{
 
 #define SPD_LOG_OFF 6
 #define SPD_LOG_CRITICAL 5
@@ -42,8 +43,9 @@ public:
     /**
      * Log Levels
      */
-   enum LogLevel {
-        TRACE ,
+    enum LogLevel
+    {
+        TRACE,
         DEBUG,
         INFO,
         WARNING,
@@ -67,5 +69,5 @@ public:
     GRAVITY_API static void trace(const char* message);
 };
 
-} //Namespace
+}  // namespace gravity
 #endif

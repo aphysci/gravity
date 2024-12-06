@@ -29,9 +29,9 @@ gravity::Semaphore relayLock;
 bool quit = false;
 
 #ifdef WIN32
-#include <windows.h> 
-BOOL WINAPI consoleHandler(DWORD sig) {
-
+#include <windows.h>
+BOOL WINAPI consoleHandler(DWORD sig)
+{
     if (sig == CTRL_C_EVENT)
     {
         relayLock.Lock();
@@ -61,14 +61,14 @@ class Relay : public GravitySubscriber
 {
 private:
     GravityNode gravityNode;
-	shared_ptr<spdlog::logger> logger;
+    shared_ptr<spdlog::logger> logger;
 
 public:
-    Relay() {};
-    virtual ~Relay() {};
+    Relay(){};
+    virtual ~Relay(){};
 
     int run();
-    void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
+    void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int Relay::run()
@@ -79,9 +79,9 @@ int Relay::run()
         cerr << "Failed to initialize " << COMPONENT_ID << ", retrying..." << endl;
         ret = gravityNode.init(COMPONENT_ID);
     }
-	
-	// Get Gravity logger
-	logger = spdlog::get("GravityLogger");
+
+    // Get Gravity logger
+    logger = spdlog::get("GravityLogger");
 
     bool localOnly = gravityNode.getBoolParam("ProvideLocalOnly", true);
 
@@ -104,9 +104,10 @@ int Relay::run()
     }
 
 #ifdef WIN32
-	if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
-		logger->error("ERROR: Could not set control handler - Relay will not be able to unregister when terminated"); 
-	}
+    if (!SetConsoleCtrlHandler(consoleHandler, TRUE))
+    {
+        logger->error("ERROR: Could not set control handler - Relay will not be able to unregister when terminated");
+    }
 #else
     struct sigaction sigIntHandler;
 
@@ -122,8 +123,7 @@ int Relay::run()
     {
         gravity::sleep(1000);
         relayLock.Lock();
-        if (quit)
-            break;
+        if (quit) break;
         relayLock.Unlock();
     }
 
@@ -141,7 +141,7 @@ int Relay::run()
  * Not much happens here, it just passes along the GDP's that it receives.  The main work is done in the ServiceDirectory
  * where it recognizes subscribers that are collocated with the Relay and just provides data from there.
  */
-void Relay::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
+void Relay::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     for (unsigned int i = 0; i < dataProducts.size(); i++)
     {
@@ -154,9 +154,9 @@ void Relay::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataPro
 
 int main(int argc, const char** argv)
 {
-	Relay relay;
+    Relay relay;
 
-	// Need to explicitly call exit here since we're capturing SIGINT and SIGTERM.  Otherwise, if the SD
-	// goes away while we're trying to unregister, this could hang indefinitely.
-	exit(relay.run());
+    // Need to explicitly call exit here since we're capturing SIGINT and SIGTERM.  Otherwise, if the SD
+    // goes away while we're trying to unregister, this could hang indefinitely.
+    exit(relay.run());
 }

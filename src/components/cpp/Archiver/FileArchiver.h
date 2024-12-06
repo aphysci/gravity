@@ -25,26 +25,29 @@
 #include <vector>
 #include "spdlog/spdlog.h"
 
-namespace gravity {
+namespace gravity
+{
 
 class FileArchiver : public GravitySubscriber, GravityServiceProvider
 {
 private:
-	static const char* ComponentName;
-	GravityNode gravityNode;
-	std::ofstream archiveFile;
-	bool suspend;
+    static const char* ComponentName;
+    GravityNode gravityNode;
+    std::ofstream archiveFile;
+    bool suspend;
 
-	std::vector<std::string> split(std::string s);
-	
-	std::shared_ptr<spdlog::logger> logger;
+    std::vector<std::string> split(std::string s);
+
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-	FileArchiver();
-	virtual ~FileArchiver();
+    FileArchiver();
+    virtual ~FileArchiver();
 
-	virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
-	void waitForExit();
+    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID,
+                                                        const GravityDataProduct& dataProduct);
+    void waitForExit();
 };
 
 } /* namespace gravity */

@@ -24,7 +24,8 @@
 #include <set>
 #include "spdlog/spdlog.h"
 
-namespace gravity {
+namespace gravity
+{
 
 using namespace gravity;
 using namespace std;
@@ -32,22 +33,23 @@ using namespace std;
 class FileReplay
 {
 private:
-	static const char* ComponentName;
-	uint64_t firstPublishTime;
-	uint64_t firstDataTime;
+    static const char* ComponentName;
+    uint64_t firstPublishTime;
+    uint64_t firstDataTime;
 
-	FileReader fileReader;
+    FileReader fileReader;
 
-	GravityNode gravityNode;
-	set<string> datatypes;
+    GravityNode gravityNode;
+    set<string> datatypes;
 
-	void processArchive();
-	
-	std::shared_ptr<spdlog::logger> logger;
+    void processArchive();
+
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-	FileReplay();
-	virtual ~FileReplay();
-	void waitForExit();
+    FileReplay();
+    virtual ~FileReplay();
+    void waitForExit();
 };
 
 } /* namespace gravity */

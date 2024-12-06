@@ -26,14 +26,11 @@
 #include "GravityServiceProvider.h"
 #include "Utility.h"
 
-namespace gravity {
+namespace gravity
+{
 
 using namespace std;
 
 GravityServiceProvider::~GravityServiceProvider() {}
 
-}
-
-
-
-
+}  // namespace gravity
