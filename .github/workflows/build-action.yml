@@ -172,6 +172,8 @@ jobs:
           ./gravity/bin/ServiceDirectory &
           echo "Ran Service Directory ${?}"
           echo $PATH
+          echo $LD_LIBRARY_PATH
+          ps
           pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
           popd
           mkdir output
