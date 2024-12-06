@@ -8,8 +8,8 @@ find_package(PThreadsWin32 REQUIRED)
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
 gravity_find_spdlog(ON)
-find_package(GravityKeyValueParser REQUIRED)
-find_package(Gravity REQUIRED)
+find_package(GravityKeyValueParser QUIET)
+find_package(Gravity QUIET)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
@@ -28,4 +28,4 @@ add_executable(ProtobufDataProductSubscriber ProtobufDataProductSubscriber.cpp $
 set_target_properties(ProtobufDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(ProtobufDataProductSubscriber gravity)
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION bin)
+install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION "${ALT_CMAKE_INSTALL_PREFIX}/bin")
