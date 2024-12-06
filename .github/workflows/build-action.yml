@@ -118,7 +118,6 @@ jobs:
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
       -
         name: build
@@ -142,14 +141,14 @@ jobs:
           name: gravity-alma
           path: ${{ github.workspace }}/build/output/*.tar.gz
   build-windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - 
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
+
       # Use a set working python version as newer versions can't seem to load _gravity.pyd on Windows
       - 
         name: setup-python
@@ -163,7 +162,7 @@ jobs:
           python --version
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
+          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
           cmake --build . --config Release
           set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
           set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
@@ -186,11 +185,5 @@ jobs:
         with:
           name: gravity-windows
           path: ${{ github.workspace }}/build/output/*.zip
-      - 
-        name: fail log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gravity-windows-fail-log
-          path: ${{ github.workspace }}/build/py-protobufs-external-prefix/src/py-protobufs-external-stamp/py-protobufs-external-build-*.log
+
       
