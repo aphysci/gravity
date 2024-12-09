@@ -15,13 +15,16 @@ list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/protobuf/cmake" "${ABS_G
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/libzmq/CMake" "${ABS_GRAVITY_ROOT}/deps/libzmq/share/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake" "${ABS_GRAVITY_ROOT}/deps/spdlog/lib/cmake/spdlog")
 
-set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}")
+set(ALT_CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}")
 message(STATUS "Installing to: ${CMAKE_INSTALL_PREFIX}")
 
 list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}/cmake")
 set(CMAKE_DEBUG_POSTFIX _d)
 
+include(CTest)
+
+include_directories("${CMAKE_BINARY_DIR}")
 add_subdirectory("1-BasicDataProduct")
 add_subdirectory("2-ProtobufDataProduct")
 #add_subdirectory("8-ConfigFile")
@@ -39,4 +42,5 @@ endif()
 
 if (NOT SKIP_PYTHON)
     add_subdirectory("11-PythonPubSub")
+    add_subdirectory("12-PythonBasicService")
 endif()

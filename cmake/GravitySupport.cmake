@@ -68,14 +68,12 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_DEBUG
-    )
+            JAR_FILE_DEBUG)
     get_property(__FILES_RELEASE
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_RELEASE
-    )
+            JAR_FILE_RELEASE)
     set_property(
         TARGET
             ${_TARGET_NAME}
@@ -83,7 +81,6 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
             INSTALL_DESTINATION
             ${_DESTINATION}
     )
-
     if (__FILES_DEBUG)
         install(
             FILES
@@ -201,7 +198,20 @@ function(gravity_protobuf_generate)
 
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_GENERATE_EXTENSIONS})
-      list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      set(_tmpbasename "${_basename}")
+      if ("${_ext}" MATCHES ".java$")
+        if (_tmpbasename MATCHES "PB$")
+          string(REPLACE "PB" "Container" _tmpbasename "${_basename}")
+          set(_tmpbasename "com/aphysci/gravity/protobuf/${_tmpbasename}")
+        elseif(_tmpbasename MATCHES "ConfigRequest")
+          set(_tmpbasename "gravity/${_tmpbasename}")
+        elseif (_tmpbasename MATCHES "descriptor$")
+            set(_tmpbasename "com/google/protobuf/DescriptorProtos")
+        endif()
+      endif()
+      set(_tmpstr "${protobuf_generate_PROTOC_OUT_DIR}/${_tmpbasename}${_ext}")
+      string(REPLACE "//" "/" _tmpstr "${_tmpstr}")
+      list(APPEND _generated_srcs "${_tmpstr}")
     endforeach()
     list(APPEND _generated_srcs_all ${_generated_srcs})
     
