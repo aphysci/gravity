@@ -872,8 +872,8 @@ GravityReturnCode GravityNode::init(std::string componentID)
 			
 			// Send TCP keep-alive settings
 			sendStringMessage(publishManagerRequestSWL.socket, "set_tcp_keepalive", ZMQ_SNDMORE);
-			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveTime, ZMQ_DONTWAIT);
-			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveProbes, ZMQ_DONTWAIT);
+			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveTime, ZMQ_SNDMORE);
+			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveProbes, ZMQ_SNDMORE);
 			sendIntMessage(publishManagerRequestSWL.socket, tcpKeepAliveIntvl, ZMQ_DONTWAIT);
 			
 			// Read ACK

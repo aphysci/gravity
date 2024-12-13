@@ -38,4 +38,5 @@ endif()
 
 if (NOT SKIP_PYTHON)
     add_subdirectory("11-PythonPubSub")
+    add_subdirectory("12-PythonBasicService")
 endif()

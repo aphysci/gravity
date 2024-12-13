@@ -8,8 +8,6 @@ project(Gravity)
 set(LIB_NAME gravity)
 set(PROTO_LIB_NAME gravity_protobufs)
 
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
-
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
 gravity_find_spdlog(ON)
@@ -17,6 +15,7 @@ gravity_find_spdlog(ON)
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/protobuf")
+file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/protobuf")
 
 gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_BINARY_DIR}/protobuf" OUT_VAR PROTO_SRCS 
                             EXPORT_MACRO GRAVITY_PROTOBUF_API
@@ -99,14 +98,13 @@ set(SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/Semaphore.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/Utility.cpp")
         
-# create gravity_protobuf library target and link against libprotobuf
+
+        
 add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
-
 add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
 install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 
-# set GRAVITY_PROTOBUF_API compile-time definition
 if (WIN32)
     target_compile_definitions(${PROTO_LIB_NAME} PRIVATE -DGRAVITY_PROTOBUF_API=__declspec\(dllexport\) INTERFACE -DGRAVITY_PROTOBUF_API=__declspec\(dllimport\))
 else()
@@ -116,7 +114,6 @@ endif()
 add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
 include_directories("${CMAKE_BINARY_DIR}")
 add_library(${LIB_NAME} SHARED ${SRCS})
-set_target_properties(${LIB_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN")
 add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})
 target_include_directories(${LIB_NAME} INTERFACE
@@ -124,13 +121,11 @@ target_include_directories(${LIB_NAME} INTERFACE
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${LIB_NAME} PRIVATE spdlog::spdlog_header_only libzmq)
 target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_link_libraries(${LIB_NAME} PUBLIC Ws2_32.lib)
 endif()
-
-target_link_libraries(${LIB_NAME} PUBLIC protobuf::libprotobuf ${PROTO_LIB_NAME} PRIVATE keyvalue_parser )
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog_header_only)
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
@@ -140,14 +135,9 @@ endif()
 install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 install(FILES ${HDRS} DESTINATION include)
 install(FILES ${PROTO_HDRS} DESTINATION include/protobuf)
-
-message(STATUS "GRAVITY_USING_EXTERNAL_ZEROMQ: ${GRAVITY_USING_EXTERNAL_ZEROMQ}")
-message(STATUS "GRAVITY_USING_EXTERNAL_PROTOBUF: ${GRAVITY_USING_EXTERNAL_PROTOBUF}")
-message(STATUS "GRAVITY_USING_EXTERNAL_SPDLOG: ${GRAVITY_USING_EXTERNAL_SPDLOG}")
-
 configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/${PROJECT_NAME}Config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION lib/cmake/gravity)
+    INSTALL_DESTINATION cmake)
 install(EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}Targets.cmake
     DESTINATION lib/cmake/gravity)

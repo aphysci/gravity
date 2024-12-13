@@ -56,7 +56,6 @@ jobs:
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
       -
         name: build
@@ -87,7 +86,6 @@ jobs:
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
       -
         name: build
@@ -118,7 +116,6 @@ jobs:
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
       -
         name: build
@@ -142,22 +139,43 @@ jobs:
           name: gravity-alma
           path: ${{ github.workspace }}/build/output/*.tar.gz
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - 
         name: clone
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
+
+      # Use a set working python version and VS-2019 as newer versions can't seem to load _gravity.pyd on Windows
+      - 
+        name: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7.9' 
       - 
         name: build
+        shell: cmd
+        run: |
+          python --version
+          python -m pip install --upgrade setuptools six
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
+          cmake --build . --config Release
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/libzmq/bin
+          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/pthreads-w32/bin
+          echo %PATH%
+          start /B gravity/bin/ServiceDirectory.exe
+          echo "Ran Service Directory"
+          echo %PATH%
+          cd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
+      - 
+        name: archive
         shell: bash
         run: |
-          C:/hostedtoolcache/windows/Python/3.12.7/x64/python3.exe -m pip install --upgrade setuptools
-          mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
-          cmake --build . --config Release
+          cd build
           mkdir output
           7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
       - 
@@ -166,11 +184,5 @@ jobs:
         with:
           name: gravity-windows
           path: ${{ github.workspace }}/build/output/*.zip
-      - 
-        name: fail log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gravity-windows-fail-log
-          path: ${{ github.workspace }}/build/py-protobufs-external-prefix/src/py-protobufs-external-stamp/py-protobufs-external-build-*.log
+
       

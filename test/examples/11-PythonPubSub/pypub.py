@@ -1,5 +1,6 @@
 
 import time
+
 from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 

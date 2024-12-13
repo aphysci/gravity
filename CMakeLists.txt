@@ -311,7 +311,7 @@ else()
                 -Dprotobuf_MODULE_COMPATIBLE=ON
                 -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
                 -DPThreadsWin32_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
-#            INSTALL_COMMAND ""
+            INSTALL_COMMAND ""
             BUILD_ALWAYS OFF)
     endif()
 endif()
