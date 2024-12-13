@@ -38,7 +38,12 @@
 #include <map>
 #include <string>
 #include "protobuf/GravityMetricsDataPB.pb.h"
-#include "spdlog/spdlog.h"
+
+
+namespace spdlog
+{
+	class logger;
+}
 
 namespace gravity
 {

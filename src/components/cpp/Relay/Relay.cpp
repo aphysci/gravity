@@ -24,6 +24,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "spdlog/spdlog.h"
 
 gravity::Semaphore relayLock;
 bool quit = false;

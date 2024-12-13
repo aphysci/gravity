@@ -24,6 +24,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include "spdlog/spdlog.h"
 
 using namespace gravity;
 using namespace std;

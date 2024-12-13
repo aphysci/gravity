@@ -9,7 +9,7 @@ gravity_find_protobuf(ON)
     
 set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 
-set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/protobuf-java.jar" ${PUBLIC_JAR})
+set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/lib/protobuf-java.jar" ${PUBLIC_JAR})
 set(CMAKE_JAVA_COMPILE_FLAGS -sourcepath "${CMAKE_CURRENT_LIST_DIR}/src/java")
 
 set(JAVA_SRCS

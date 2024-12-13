@@ -66,6 +66,7 @@
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 #include "protobuf/GravityConfigParamPB.pb.h"
 
+#include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/dist_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

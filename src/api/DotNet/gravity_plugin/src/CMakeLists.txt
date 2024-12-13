@@ -7,7 +7,6 @@ find_package(PThreadsWin32 REQUIRED)
 gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
 gravity_find_spdlog(ON)
-find_package(GravityKeyValueParser)
 find_package(Gravity)
 
 set(CMAKE_DEBUG_POSTFIX _d)

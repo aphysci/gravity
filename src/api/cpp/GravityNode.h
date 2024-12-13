@@ -40,7 +40,11 @@
 #include <thread>
 #include <list>
 
-#include "spdlog/spdlog.h"
+
+namespace spdlog
+{
+	class logger;
+}
 
 //This is defined in Windows for NetBIOS in nb30.h
 #ifdef DUPLICATE

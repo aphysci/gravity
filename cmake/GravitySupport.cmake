@@ -16,7 +16,7 @@ macro(gravity_find_protobuf fail_if_missing)
 endmacro()
 
 macro(gravity_find_spdlog fail_if_missing)
-    find_package(spdlog)
+    find_package(spdlog QUIET)
     if (${fail_if_missing} AND NOT spdlog_FOUND)
         message(FATAL_ERROR "Failed to find spdlog library")
     endif()
@@ -218,7 +218,7 @@ function(gravity_protobuf_generate)
     get_target_property(PROTOC_EXE protobuf::protoc LOCATION) 
     add_custom_command(
       OUTPUT ${_generated_srcs}
-      COMMAND  ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib:${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64:${ABS_GRAVITY_ROOT}/deps/protobuf/lib:${ABS_GRAVITY_ROOT}/deps/protobuf/lib64" ${PROTOC_EXE} 
+      COMMAND  ${CMAKE_COMMAND} -E env ${PROTOC_EXE}
       ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc
       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"

@@ -31,6 +31,7 @@
 #include "zmq.h"
 #include <sstream>
 #include <iostream>
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {

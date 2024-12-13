@@ -23,12 +23,17 @@
 extern "C" {
 #endif
 
+
 #ifdef WIN32
-#   ifdef LIBKEYVALUE_PARSER_EXPORTS
-#        define KEYVALUE_API __declspec(dllexport)
-#   else
-#        define KEYVALUE_API __declspec(dllimport)
-#   endif
+#    ifdef LIBKEYVALUE_STATIC
+#		define KEYVALUE_API
+#    else
+#		ifdef LIBKEYVALUE_PARSER_EXPORTS
+#			define KEYVALUE_API __declspec(dllexport)
+#		else
+#			define KEYVALUE_API __declspec(dllimport)
+#		endif
+#    endif
 #else
 #   define KEYVALUE_API
 #endif
