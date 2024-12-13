@@ -4,8 +4,6 @@ on:
       tags:
         - "v*.*.*"
     pull_request:
-      branches:
-        - master
 jobs:
   build-bionic:
     runs-on: ubuntu-latest
