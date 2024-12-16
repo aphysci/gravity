@@ -124,8 +124,8 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --parallel
-          LD_LIBRARY_PATH=`pwd`/install/lib ./install/bin/ServiceDirectory &
-          pushd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest --verbose
+          ./staging/bin/ServiceDirectory &
+          ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build --verbose
           popd
           mkdir output
           ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
