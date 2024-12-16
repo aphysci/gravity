@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-
+include(GNUInstallDirs)
 include(GravitySupport)
 project(PythonBasicService)
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
@@ -13,5 +13,5 @@ if (WIN32)
 endif()
 add_test(NAME pybasicservice COMMAND ${PY_EXEC} requestor.py WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
 set_property(TEST pybasicservice PROPERTY ENVIRONMENT_MODIFICATION
-  "LD_LIBRARY_PATH=string_append:${CMAKE_INSTALL_PREFIX}/lib"
-  "PYTHONPATH=path_list_append:${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_INSTALL_PREFIX}/lib")
+  "LD_LIBRARY_PATH=string_append:${CMAKE_INSTALL_LIBDIR}"
+  "PYTHONPATH=path_list_append:${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_INSTALL_LIBDIR}")
