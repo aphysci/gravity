@@ -4,6 +4,8 @@ on:
       tags:
         - "v*.*.*"
     pull_request:
+defaults:
+    timeout-minutes: 15
 jobs:
   build-bionic:
     runs-on: ubuntu-latest
