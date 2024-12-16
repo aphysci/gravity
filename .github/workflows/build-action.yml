@@ -123,8 +123,8 @@ jobs:
           git config --global --add safe.directory '*'
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-          cmake --build . --parallel
-          ./staging/bin/ServiceDirectory &
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
           ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build --verbose
           mkdir output
           ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
