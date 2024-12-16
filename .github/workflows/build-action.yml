@@ -137,7 +137,7 @@ jobs:
           path: ${{ github.workspace }}/build/output/*.tar.gz
   build-windows:
     runs-on: windows-2019
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - 
         name: clone
@@ -159,7 +159,7 @@ jobs:
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
-          cmake --build . --config Release
+          cmake --build . --config Release --parallel
           set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
           set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
           set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/libzmq/bin
