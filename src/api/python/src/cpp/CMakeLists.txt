@@ -36,4 +36,4 @@ endif()
 
 target_link_libraries(${LIB_NAME} gravity Python::Python)
 gravity_add_dependency(${LIB_NAME})
-install(TARGETS ${LIB_NAME} CONFIGURATIONS ${InstallConfigs} LIBRARY DESTINATION lib/gravity RUNTIME DESTINATION lib/gravity)
+install(TARGETS ${LIB_NAME} CONFIGURATIONS ${InstallConfigs} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/gravity RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/gravity)

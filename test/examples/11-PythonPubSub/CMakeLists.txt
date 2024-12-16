@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.17)
-include(GNUInstallDirs)
-include(GravitySupport)
 project(PythonPubSub)
 
-gravity_find_protobuf(ON)
-gravity_find_spdlog(ON)
+include(GNUInstallDirs)
+include(GravitySupport)
+
+
+find_package(Gravity QUIET)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
@@ -17,5 +18,7 @@ if (WIN32)
 endif()
 add_test(NAME pypubsub COMMAND ${PY_EXEC} pypub.py WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
 set_property(TEST pypubsub PROPERTY ENVIRONMENT_MODIFICATION  
-  "LD_LIBRARY_PATH=string_append:${CMAKE_INSTALL_LIBDIR}:${CMAKE_INSTALL_LIBDIR}/gravity"
-  "PYTHONPATH=string_append:${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_INSTALL_LIBDIR}:${CMAKE_INSTALL_LIBDIR}/gravity:${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/:${CMAKE_CURRENT_LIST_DIR}/../protobuf:${CMAKE_CURRENT_BINARY_DIR}")
+  "LD_LIBRARY_PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
+  "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
+  "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
+)

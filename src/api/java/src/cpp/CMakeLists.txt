@@ -38,11 +38,11 @@ gravity_add_dependency(${LIB_NAME})
 install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../../../cmake/${PROJECT_NAME}Config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION lib/cmake/gravity)
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}Targets.cmake
-    DESTINATION lib/cmake/gravity)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    DESTINATION lib/cmake/gravity)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 
 

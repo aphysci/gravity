@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 project(GravityExamples)
-
+include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 11)
 
 if (NOT GRAVITY_ROOT)
@@ -12,10 +12,9 @@ message(STATUS "GravityRoot: ${GRAVITY_ROOT}")
 get_filename_component(ABS_GRAVITY_ROOT "${GRAVITY_ROOT}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 
 # for GravitySupport.cmake
-list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/lib/cmake/gravity")
+list(APPEND CMAKE_MODULE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/cmake/gravity")
 # for *Config.cmake and the like. this will look in lots of subdirectories therein for the right files.
 list(APPEND CMAKE_PREFIX_PATH "${ABS_GRAVITY_ROOT}")
-
 set(CMAKE_DEBUG_POSTFIX _d)
 
 include(CTest)

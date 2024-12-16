@@ -140,9 +140,9 @@ configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/${PROJEC
     INSTALL_DESTINATION cmake)
 install(EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}Targets.cmake
-    DESTINATION lib/cmake/gravity)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    DESTINATION lib/cmake/gravity)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 
 find_program(GIT_EXE git)
 if (GIT_EXE)

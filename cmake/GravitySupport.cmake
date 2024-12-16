@@ -216,6 +216,7 @@ function(gravity_protobuf_generate)
     list(APPEND _generated_srcs_all ${_generated_srcs})
     
     get_target_property(PROTOC_EXE protobuf::protoc LOCATION)
+
     get_filename_component(PROTOC_EXE_PARENT_DIR ${PROTOC_EXE} DIRECTORY)
     # we add lib64 to the LD_LIBRARY_PATH because the protobuf installation may not correctly set RPATH for
     # multiarch Linux distros.

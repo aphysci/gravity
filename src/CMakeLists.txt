@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 project(gravity)
-
+include(GNUInstallDirs)
 set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
@@ -50,6 +50,6 @@ install(FILES
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravityExternalUrls.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravitySupport.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindGravityJava.cmake" 
-            "${CMAKE_CURRENT_LIST_DIR}/../cmake/UseJavaClassFilelist.cmake" DESTINATION lib/cmake/gravity)
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/UseJavaClassFilelist.cmake" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 
 
