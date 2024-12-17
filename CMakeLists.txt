@@ -59,6 +59,8 @@ macro(add_external_protobuf)
             -Dprotobuf_WITH_ZLIB:BOOL=OFF
 	    ${PROTOBUF_CXX_FLAGS}
         SOURCE_SUBDIR cmake
+        BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
+        INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     )
 endmacro()
 
@@ -78,6 +80,8 @@ macro(add_external_libzmq)
             -DBUILD_STATIC:BOOL=OFF
             -DZMQ_BUILD_TESTS:BOOL=OFF
             -DBUILD_TESTS:BOOL=OFF
+        BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
+        INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     )
 endmacro()
 
@@ -99,6 +103,8 @@ macro(add_external_spdlog)
 	if (UNIX)
 		-DCMAKE_CXX_FLAGS=-fPIC
 	endif()
+        BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
+        INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     )
 endmacro()
 
@@ -284,6 +290,8 @@ else()
             -Dprotobuf_MODULE_COMPATIBLE=ON
             -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
         BUILD_ALWAYS OFF
+        BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
+        INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
         )
 
     install(

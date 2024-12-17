@@ -2873,4 +2873,8 @@ string GravityNode::getCodeString(GravityReturnCode code) {
     return s;
 }
 
+std::shared_ptr<spdlog::logger> GravityNode::getGravityLogger() {
+	return spdlog::get("GravityLogger");
+}
+
 } /* namespace gravity */

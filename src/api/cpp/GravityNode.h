@@ -586,6 +586,11 @@ public:
 	GRAVITY_API GravityReturnCode clearSubscriptionTimeoutMonitor(std::string dataProductID, const GravitySubscriptionMonitor& monitor, 
 			std::string filter="", std::string domain="");
 
+  /**
+   * Get a pointer to the spdlog::logger named "GravityLogger" used internal to the library, for application use. Intended to be used by
+   * other Gravity components such as ServiceDirectory. 
+   */
+    GRAVITY_API std::shared_ptr<spdlog::logger> getGravityLogger();
 };
 
 } /* namespace gravity */
