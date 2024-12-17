@@ -145,12 +145,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Use a set working python version and VS-2019 as newer versions can't seem to load _gravity.pyd on Windows
       - 
         name: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.7.9' 
+          python-version: '3.12.8'
       - 
         name: build
         shell: cmd
@@ -178,49 +177,3 @@ jobs:
         with:
           name: gravity-windows
           path: ${{ github.workspace }}/build/output/*.zip
-  build-windows-2022:
-    runs-on: windows-2022
-    timeout-minutes: 30
-    steps:
-      - 
-        name: clone
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # Use a set working python version and VS-2019 as newer versions can't seem to load _gravity.pyd on Windows
-      - 
-        name: setup-python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.8'
-      - 
-        name: build
-        shell: cmd
-        run: |
-          python --version
-          python -m pip install --upgrade setuptools six
-          mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
-          cmake --build . --target install --config Release
-          echo %PATH%
-          start /B staging/bin/ServiceDirectory.exe
-          echo "Ran Service Directory"
-          echo %PATH%
-          ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build -C Release --verbose
-      - 
-        name: archive
-        shell: bash
-        run: |
-          cd build
-          mkdir output
-          7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
-      - 
-        name: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: gravity-windows
-          path: ${{ github.workspace }}/build/output/*.zip
-
-
-      
