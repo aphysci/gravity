@@ -19,6 +19,7 @@
 #include "GravityLogger.h"
 #include "FileReader.h"
 #include "FileReplay.h"
+#include "SpdLog.h"
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -45,8 +46,12 @@ FileReplay::FileReplay()
 	// Initialize Gravity Node
 	gravityNode.init(FileReplay::ComponentName);
 	
-	// Get logger
-	logger = spdlog::get("GravityLogger");
+    // Get Gravity logger
+    logger = gravityNode.getGravityLogger();
+    if (!logger) {
+        SpdLog::critical("Failed to get GravityLogger");
+        return;
+    }
 
 	// Configure logger to log to console
 	//Log::initAndAddConsoleLogger(FileReplay::ComponentName, Log::MESSAGE);

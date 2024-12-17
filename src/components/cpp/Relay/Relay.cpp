@@ -18,6 +18,7 @@
 
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <SpdLog.h>
 
 #include <iostream>
 #include <sstream>
@@ -81,8 +82,12 @@ int Relay::run()
         ret = gravityNode.init(COMPONENT_ID);
     }
 	
-	// Get Gravity logger
-	logger = spdlog::get("GravityLogger");
+    // Get Gravity logger
+    logger = gravityNode.getGravityLogger();
+    if (!logger) {
+        SpdLog::critical("Failed to get GravityLogger");
+        return 1;
+    }
 
     bool localOnly = gravityNode.getBoolParam("ProvideLocalOnly", true);
 

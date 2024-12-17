@@ -19,12 +19,14 @@
 #include <GravityNode.h>
 #include <GravityConfigParser.h>
 #include <KeyValueParserWrap.h>
+#include <SpdLog.h>
 #include <protobuf/ConfigRequest.pb.h>
 
 #include <iostream>
 #include <vector>
 #include <map>
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/fmt.h"
 
 using namespace gravity;
 using namespace std;
@@ -48,6 +50,7 @@ public:
 	ConfigServer() {}
     virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
     ~ConfigServer() {};
+	
 };
 
 std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serviceID, const GravityDataProduct& dataProduct)
@@ -87,13 +90,12 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 	}
 
 	//Populate Response Message and Send it
-	shared_ptr<spdlog::logger> logger = spdlog::get("GravityLogger");
-	logger->info("Sending Config to {}", cfpb.componentid());
+	SpdLog::info(fmt::format("Sending Config to {}", cfpb.componentid()).c_str());
 	ConfigeResponsePB message;
 	for(std::map<std::string, std::string>::iterator i = key_value_map.begin();
 			i != key_value_map.end(); i++)
 	{
-		logger->info("\t{}={}", i->first, i->second);
+		SpdLog::info(fmt::format("\t{}={}", i->first, i->second).c_str());
 		message.add_key(i->first);
 		message.add_value(i->second);
 	}
