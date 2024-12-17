@@ -129,7 +129,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 		if(broadcast)
 		{
 			//broadcast
-			int bytesSent = sendto(broadcastSocket,broadcastString.c_str(),broadcastMessage.ByteSize(),0,(sockaddr*)&destAddress,sizeof(struct sockaddr_in));
+			int bytesSent = sendto(broadcastSocket,broadcastString.c_str(),broadcastMessage.ByteSizeLong(),0,(sockaddr*)&destAddress,sizeof(struct sockaddr_in));
 			if (bytesSent < 0)
 			{
 				//exit

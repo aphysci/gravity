@@ -239,7 +239,7 @@ TEST_CASE("tests for sending/reading ZMQ messages") {
     GIVEN("sending a non-empty Protobuf from client->service") {
       int bytes = sendProtobufMessage(clientSocket, pb, ZMQ_DONTWAIT); 
       THEN("receive back the correct number of bytes") {
-        CHECK(pb.ByteSize() == bytes);
+        CHECK(pb.ByteSizeLong() == bytes);
       }
     } 
   }
