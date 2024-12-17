@@ -25,8 +25,7 @@
 #include <string>
 #include <map>
 
-namespace gravity
-{
+namespace gravity {
 
 /**
  * Class to parse a .ini config file for a specific gravity component.
@@ -38,21 +37,22 @@ public:
     GravityConfigParser(std::string componentID);
 
     bool hasKey(std::string key);
+    void setDirectory(std::string dir);
 
     /** Update configuration based on .ini file */
-    void ParseConfigFile(const char* config_filename);
+    void parseConfigFile(const char* config_filename);
     /** Update configuration based on Config Service */
-    void ParseConfigService(GravityNode& gn);
+    void parseConfigService(GravityNode &gn);
 
     std::string getString(std::string key, std::string default_value = "");
-
 private:
     std::string componentID;
+    std::string config_dir;
     std::map<std::string, std::string> key_value_map;
 
     static int CONFIG_REQUEST_TIMEOUT;
 };
 
-}  // namespace gravity
+}
 
-#endif  // GRAVITYCONFIGPARSER_H_
+#endif // GRAVITYCONFIGPARSER_H_
