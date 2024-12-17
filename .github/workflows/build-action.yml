@@ -159,9 +159,7 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
           cmake --build . --target install --config Release --parallel
-          echo "Starting Service Directory..."
-          start /B staging/bin/ServiceDirectory.exe
-          echo "Ran Service Directory"
+          start /B gravity/bin/ServiceDirectory.exe
           ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build -C Release --verbose
       - 
         name: archive
