@@ -146,8 +146,8 @@ GRAVITY_API int sendProtobufMessage(void* socket, const google::protobuf::Messag
 {
     // Send data product
     zmq_msg_t data;
-    zmq_msg_init_size(&data, pb.ByteSize());
-    pb.SerializeToArray(zmq_msg_data(&data), pb.ByteSize());
+    zmq_msg_init_size(&data, pb.ByteSizeLong());
+    pb.SerializeToArray(zmq_msg_data(&data), pb.ByteSizeLong());
     int rc = zmq_sendmsg(socket, &data, flags);
     zmq_msg_close(&data);
 
