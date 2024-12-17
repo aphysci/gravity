@@ -137,7 +137,7 @@ jobs:
           path: ${{ github.workspace }}/build/output/*.tar.gz
   build-windows-2019:
     runs-on: windows-2019
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - 
         name: clone
@@ -158,7 +158,7 @@ jobs:
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
-          cmake --build . --target install --config Release
+          cmake --build . --target install --config Release --parallel
           start /B install/bin/ServiceDirectory.exe
           echo "Ran Service Directory"
           ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build -C Release --verbose
