@@ -23,14 +23,19 @@ if (WIN32)
     set(ADDTL_DEFINE -DWIN32)
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+set(SWIG_THREADS_ARG "")
+if (${Python_VERSION} VERSION_LESS "3.7.0")
+    set(SWIG_THREADS_ARG "-threads")
+endif()
+
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/cpp/swig/python" "${CMAKE_BINARY_DIR}/python/gravity")
-add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp" -outdir "${CMAKE_BINARY_DIR}/python/gravity/" -python -threads ${ADDTL_DEFINE} "${CMAKE_CURRENT_LIST_DIR}/gravity.i"
+add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o "${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp" -outdir "${CMAKE_BINARY_DIR}/python/gravity/" -python ${SWIG_THREADS_ARG} ${ADDTL_DEFINE} "${CMAKE_CURRENT_LIST_DIR}/gravity.i"
                     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/gravity.i" 
                     BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/../cpp/gravity_wrap.cpp" "${CMAKE_BINARY_DIR}/cpp/swig/python/gravity_wrap.cpp"
                     SOURCES "${CMAKE_CURRENT_LIST_DIR}/gravity.i")
 
 if (WIN32)
-    find_package(Python REQUIRED COMPONENTS Interpreter Development)
     gravity_find_python_debug(Python_LIBRARY_DEBUG)
     list(APPEND InstallConfigs Release RelWithDebInfo)
     if (Python_LIBRARY_DEBUG)
