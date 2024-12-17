@@ -671,7 +671,13 @@ GravityReturnCode GravityNode::init()
 	//get gravity configuration.
 	parser = new GravityConfigParser("");
 
-	parser->ParseConfigFile("Gravity.ini");
+	auto* config_dir_env = getenv("GRAVITY_CONFIG_DIR");
+	if (config_dir_env)
+	{
+		parser->setDirectory(config_dir_env);
+	}
+
+	parser->parseConfigFile("Gravity.ini");
 
 	std::string id = parser->getString("GravityComponentID","");
 
@@ -724,11 +730,17 @@ GravityReturnCode GravityNode::init(std::string componentID)
 		//Now that Gravity is set up, get gravity configuration.
 		parser = new GravityConfigParser(componentID);
 
-		parser->ParseConfigFile("Gravity.ini");
+		auto* config_dir_env = getenv("GRAVITY_CONFIG_DIR");
+		if (config_dir_env)
+		{
+			parser->setDirectory(config_dir_env);
+		}
+
+		parser->parseConfigFile("Gravity.ini");
 		std::string config_file_name = componentID + ".ini";
 		if(gravity::IsValidFilename(config_file_name))
 		{
-			parser->ParseConfigFile(config_file_name.c_str());
+			parser->parseConfigFile(config_file_name.c_str());
 		}
 
 		// Setup Logging as soon as config parser is available.
@@ -1020,7 +1032,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
 			if(componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
    			{
-   				parser->ParseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
+   				parser->parseConfigService(*this); //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
    			}
 			//parser->ParseCmdLine
 
