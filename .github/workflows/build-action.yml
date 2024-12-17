@@ -205,7 +205,7 @@ jobs:
           python --version
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 12 2022" -A x64 ..
+          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 17 2022" -A x64 ..
           cmake --build . --config Release
           # set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
           # set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
