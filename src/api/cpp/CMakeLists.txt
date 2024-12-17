@@ -129,7 +129,7 @@ target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
-        $<INSTALL_INTERFACE:deps/pthreads-w32/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)

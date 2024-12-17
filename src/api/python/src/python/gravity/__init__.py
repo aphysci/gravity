@@ -15,6 +15,13 @@
 # If not, see <http://www.gnu.org/licenses/>.
 #
 
+import os
+if hasattr(os, "add_dll_directory"):
+    import sys
+    for path in os.environ[ 'path' ].split(';'):
+        if os.path.isdir(path):
+            os.add_dll_directory(path)
+
 from .gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger, SpdLog
 from .GravityDataProduct import GravityDataProduct 
 from .GravityLogHandler import GravityLogHandler

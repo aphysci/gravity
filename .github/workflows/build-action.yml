@@ -159,13 +159,13 @@ jobs:
           python -m pip install --upgrade setuptools six
           mkdir build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
-          cmake --build . --config Release --parallel
-          set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
-          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
-          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/libzmq/bin
-          set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/pthreads-w32/bin
+          cmake --build . --config Release
+          # set PATH=%PATH%;${{ github.workspace }}/build/gravity/bin
+          # set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/spdlog/bin
+          # set PATH=%PATH%;${{ github.workspace }}/build/gravity/deps/libzmq/bin
+          # set PATH=%PATH%;${{ github.workspace }}/staging/deps/pthreads-w32/bin
           echo %PATH%
-          start /B gravity/bin/ServiceDirectory.exe
+          start /B staging/bin/ServiceDirectory.exe
           echo "Ran Service Directory"
           echo %PATH%
           cd gravity_external_examples-prefix/src/gravity_external_examples-build && ctest -C Release --verbose
