@@ -580,61 +580,41 @@ void GravityNode::configSpdLoggers()
 	auto app_console_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppConsoleLogLevel", "off")));
 	auto app_publish_level = spdlog::level::from_str(StringToLowerCase(getStringParam("AppNetworkLogLevel", "off")));
 	
-	bool has_gravity_file_logger = gravity_file_level != SPDLOG_LEVEL_OFF;
-	bool has_app_file_logger = app_file_level != SPDLOG_LEVEL_OFF;
-	bool has_app_console_logger = app_console_level != SPDLOG_LEVEL_OFF;
-	bool has_app_publish_logger = app_publish_level != SPDLOG_LEVEL_OFF;
-	
-	bool has_app_logger = has_app_file_logger || has_app_console_logger || has_app_publish_logger;
-	
 	// Create lists to hold sinks
 	std::list<shared_ptr<spdlog::sinks::sink>> app_sink_list = {};
 	std::list<shared_ptr<spdlog::sinks::sink>> gravity_sink_list = {};
 	
-	// Always create console loggers
+	// Always create all loggers, some may be set to off
 	auto shared_console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
 	auto console_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
 	console_proxy_for_gravity->add_sink(shared_console_sink);
 	console_proxy_for_gravity->set_level(gravity_console_level);
 	gravity_sink_list.push_back(console_proxy_for_gravity);
+	
 	auto console_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
 	console_proxy_for_app->add_sink(shared_console_sink);
 	console_proxy_for_app->set_level(app_console_level);
 	app_sink_list.push_back(console_proxy_for_app);
 	
-	// Configure file logger (if specified)
-	if (has_gravity_file_logger || has_app_file_logger)
-	{
-		string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
-		auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
-		
-		if (has_gravity_file_logger)
-		{
-			auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
-			file_proxy_for_gravity->add_sink(sharedFileSink);
-			file_proxy_for_gravity->set_level(gravity_file_level);
-			gravity_sink_list.push_back(file_proxy_for_gravity);
-		}
-		
-		if (has_app_file_logger)
-		{
-			auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-			file_proxy_for_app->add_sink(sharedFileSink);
-			file_proxy_for_app->set_level(app_file_level);
-			app_sink_list.push_back(file_proxy_for_app);
-		}
-		
-	}
+	string filename = getStringParam("LogDirectory", ".") + file_separator + componentID + ".log";
+	auto sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
 	
-	// Configure publish logger
-	if (has_app_publish_logger)
-	{
-		auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
-		auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
-		publish_proxy_for_app->add_sink(publishSink);
-		publish_proxy_for_app->set_level(app_publish_level);
-		app_sink_list.push_back(publish_proxy_for_app);
-	}
+	auto file_proxy_for_gravity = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_gravity->add_sink(sharedFileSink);
+	file_proxy_for_gravity->set_level(gravity_file_level);
+	gravity_sink_list.push_back(file_proxy_for_gravity);
+		
+	auto file_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	file_proxy_for_app->add_sink(sharedFileSink);
+	file_proxy_for_app->set_level(app_file_level);
+	app_sink_list.push_back(file_proxy_for_app);
+		
+	auto publishSink = std::make_shared<PublishSink<std::mutex>>(this);
+	auto publish_proxy_for_app = std::make_shared<proxy_dist_sink_mt>();
+	publish_proxy_for_app->add_sink(publishSink);
+	publish_proxy_for_app->set_level(app_publish_level);
+	app_sink_list.push_back(publish_proxy_for_app);
 	
 	// Configure GravityLogger.
 	logger = std::make_shared<spdlog::logger>("GravityLogger");
@@ -657,12 +637,9 @@ void GravityNode::configSpdLoggers()
 	app_logger->flush_on(spdlog::level::trace); // logger will flush on all messages
 	app_logger->set_pattern("[%Y-%m-%d %T.%f " + componentID + "-%l] %v");
 	spdlog::register_logger(app_logger);
-	
-	if (has_app_logger)
-	{
-		// Set the ApplicaitonLogger as the default
-		spdlog::set_default_logger(app_logger);
-	}
+
+	// Set the ApplicationLogger as the default
+	spdlog::set_default_logger(app_logger);
 }
 
 GravityReturnCode GravityNode::init()
@@ -1045,6 +1022,16 @@ GravityReturnCode GravityNode::init(std::string componentID)
 	if (iniWarning)
 	{
 			logger->warn("Gravity.ini specifies both Domain and URL. Using URL.");
+	}
+
+	if(componentID != "ServiceDirectory")
+	{
+		// Register subscriber to allow for dynamic logging changes
+		GravityReturnCode ret = registerSpdlogDynamicConfiguration();
+		if (ret!=GravityReturnCodes::SUCCESS)
+		{
+			logger->error(" {}'s Dynamic SpdLog Subscriber not registered ( code: {})", componentID, ret);
+		}
 	}
 
     initLock.Unlock();
@@ -1645,7 +1632,6 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 
     // Send request to service directory
     GravityReturnCode ret = sendRequestToServiceDirectory(request, response);
-
     if (ret == GravityReturnCodes::SUCCESS)
     {
         ComponentDataLookupResponsePB pb;
@@ -1721,7 +1707,8 @@ GravityReturnCode GravityNode::subscribeInternal(string dataProductID, const Gra
 
     GravityReturnCode ret;
     ret = ServiceDirectoryDataProductLookup(dataProductID, publisherInfoPBs, domain);
-    if(ret != GravityReturnCodes::SUCCESS) {
+	if(ret != GravityReturnCodes::SUCCESS) 
+	{
         return ret;
     }
 
@@ -2546,6 +2533,13 @@ GravityReturnCode GravityNode::unregisterHeartbeatListener(string componentID, s
 	readStringMessage(hbSocket);
 
 	return GravityReturnCodes::SUCCESS;
+}
+
+GravityReturnCode GravityNode::registerSpdlogDynamicConfiguration()
+{
+	// Set up the subscriber for any reconfiguration messages
+	spdLogConfigSub.init(componentID);
+	return this->subscribe(gravity::constants::SPD_LOG_CONFIG_DPID, spdLogConfigSub);
 }
 
 GravityReturnCode GravityNode::registerRelay(string dataProductID, const GravitySubscriber& subscriber, bool localOnly, GravityTransportType transportType)

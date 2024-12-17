@@ -32,6 +32,7 @@
 #include "GravitySemaphore.h"
 #include "GravityServiceProvider.h"
 #include "GravitySubscriptionMonitor.h"
+#include "GravitySpdLogConfigSubscriber.h"
 #include "Utility.h"
 #include "CommUtil.h"
 //#include "PublishSink.h"
@@ -211,6 +212,8 @@ private:
 
 	bool defaultCacheLastSentDataprodut;
 	bool defaultReceiveLastSentDataproduct;
+
+    SpdLogConfigSubscriber spdLogConfigSub;
 	
   std::thread subscriptionManagerThread;
 
@@ -499,6 +502,13 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode unregisterHeartbeatListener(std::string componentID, std::string domain = "");
+
+
+	  /**
+     * Registers a subscriber to receive messages about dynamic spdlog changes
+     * \return success flag
+     */
+    GRAVITY_API GravityReturnCode registerSpdlogDynamicConfiguration();
 
     /**
      * Register a Relay that will act as a pass-through for the given dataProductID.  It will be a publisher and subscriber

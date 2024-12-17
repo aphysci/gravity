@@ -1,0 +1,97 @@
+#** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+#**
+#** Gravity is free software; you can redistribute it and/or modify
+#** it under the terms of the GNU Lesser General Public License as published by
+#** the Free Software Foundation; either version 3 of the License, or
+#** (at your option) any later version.
+#**
+#** This program is distributed in the hope that it will be useful,
+#** but WITHOUT ANY WARRANTY; without even the implied warranty of
+#** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#** GNU Lesser General Public License for more details.
+#**
+#** You should have received a copy of the GNU Lesser General Public
+#** License along with this program;
+#** If not, see <http://www.gnu.org/licenses/>.
+#**
+
+# @configure_input@
+
+# Package-related substitution variables
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+
+# Prefix-related substitution variables
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# Tool-related substitution variables
+CC             = @CC@
+CXX            = @CXX@
+DEFS           = @DEFS@
+LIBS           = @LIBS@
+AC_CFLAGS      = @CFLAGS@
+AC_CPPFLAGS    = @CPPFLAGS@
+INSTALL        = @INSTALL@
+INSTALL_DATA   = @INSTALL_DATA@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+AC_LDFLAGS     = @LDFLAGS@
+LEX            = @LEX@
+YACC           = @YACC@
+
+# VPATH-related substitution variables
+top_builddir   = @top_builddir@
+builddir       = @builddir@
+srcdir         = @srcdir@
+VPATH          = @srcdir@ 
+
+CC=$(CXX)
+GRAVLIB_DIR=../../../src/api/cpp/
+COMPONENT_DIR=../../../src/components/cpp
+SERVICEDIRECTORY_LOCATION=$(COMPONENT_DIR)/ServiceDirectory
+
+#OS Specific
+SYSTEM:=$(strip $(shell uname -s))
+#SYSTEM:=LINUX
+#SYSTEM=MINGW32_NT-6.1
+#WARNING: DON'T PUT SPACES OR QUOTES IN COMPARISON STRING!!!
+ifneq (,$(findstring MINGW32_NT,$(SYSTEM)))
+	OS_SPECIFIC_LIBS = -Wl,-Bdynamic -lzmq -lwsock32 -lpthread
+	OS_EXE_EXT=.exe
+windows: all;
+else ifneq (,$(findstring Linux,$(SYSTEM)))
+ifneq (,$(findstring lsodium,$(LIBS)))
+	OS_SPECIFIC_LIBS = -lzmq -lsodium -Wl,-Bdynamic -lrt -lpthread
+else
+	OS_SPECIFIC_LIBS = -lzmq -Wl,-Bdynamic -lrt -lpthread
+endif
+	OS_EXE_EXT=
+linux: all;
+else
+ostype: ; @echo "ERROR UNKNOWN OS: " $(SYSTEM);
+endif
+
+INCLUDES=-I$(GRAVLIB_DIR) $(AC_CPPFLAGS)
+CFLAGS=-std=c++11 -L$(GRAVLIB_DIR) -L../../../src/keyvalue_parser/ $(AC_LDFLAGS) $(AC_CFLAGS)
+LIBS=-lgravity -lkeyvalue_parser -lprotobuf $(OS_SPECIFIC_LIBS)
+
+all: SpdlogDynamicConfiguration$(OS_EXE_EXT)
+
+#Compile each cpp file to a separate executable.
+SpdlogDynamicConfiguration$(OS_EXE_EXT):SpdlogDynamicConfiguration.cpp
+	$(CC) -o $@ $< $(INCLUDES) $(CFLAGS) $(LIBS)
+
+components: ServiceDirectory$(OS_EXE_EXT)
+
+ServiceDirectory$(OS_EXE_EXT):
+	@cd $(SERVICEDIRECTORY_LOCATION); \
+	make
+
+clean:
+	@rm -rf *.o *.exe SpdlogDynamicConfiguration
+
+run: components SpdlogDynamicConfiguration$(OS_EXE_EXT)
+	./run.sh

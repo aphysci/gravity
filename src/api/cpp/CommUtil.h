@@ -60,6 +60,7 @@ namespace gravity
         const std::string METRICS_DATA_DPID = "GravityMetricsData";
 	const std::string GRAVITY_SETTINGS_DPID = "GRAVITY_SETTINGS";
 	const std::string GRAVITY_LOGGER_DPID = "GRAVITY_LOGGER";
+        const std::string SPD_LOG_CONFIG_DPID = "GravitySpdLogConfig";
     }
 
 /**
