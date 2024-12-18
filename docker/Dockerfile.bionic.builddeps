@@ -36,7 +36,7 @@ RUN mkdir /opt/aps/
 RUN chown -R aps:aps /opt/aps
 USER aps
 RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-RUN cmake --build . --parallel
+RUN cmake --build . --target install --parallel
 RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
 RUN echo "tarball is: gravity-deps-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
 
@@ -45,7 +45,7 @@ ENV LD_LIBRARY_PATH=/home/aps/git/gravity/build/install/lib
 RUN <<EOF
 echo "#!/bin/bash" >> ./test.sh
 echo "/home/aps/git/gravity/build/install/bin/ServiceDirectory &" >> ./test.sh
-echo "ctest --verbose" >> ./test.sh
+echo "ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build/ --verbose" >> ./test.sh
 EOF
 RUN chmod a+x ./test.sh
 CMD ["./test.sh"]
