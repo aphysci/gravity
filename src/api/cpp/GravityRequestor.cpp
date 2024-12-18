@@ -27,7 +27,8 @@
 #include "GravityLogger.h"
 #include "spdlog/spdlog.h"
 
-namespace gravity {
+namespace gravity
+{
 
 using namespace std;
 
@@ -38,8 +39,4 @@ GRAVITY_API void GravityRequestor::requestTimeout(std::string serviceID, std::st
     spdlog::get("GravityLogger")->warn("Request timed out: service id = {}, request id = {}", serviceID, requestID);
 }
 
-}
-
-
-
-
+}  // namespace gravity

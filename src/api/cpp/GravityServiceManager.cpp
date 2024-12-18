@@ -28,195 +28,196 @@
 #include "CommUtil.h"
 #include <sstream>
 
-namespace gravity {
+namespace gravity
+{
 
 using namespace std;
 
 GravityServiceManager::GravityServiceManager(void* context)
 {
-	this->context = context;
-	logger = spdlog::get("GravityLogger");
+    this->context = context;
+    logger = spdlog::get("GravityLogger");
 }
 
 GravityServiceManager::~GravityServiceManager() {}
 
 void GravityServiceManager::start()
 {
-	// Messages
-	zmq_msg_t message;
+    // Messages
+    zmq_msg_t message;
 
-	// Set up the inproc socket to listen for to requests messages from the GravityNode
-	gravityNodeSocket = zmq_socket(context, ZMQ_REP);
-	zmq_bind(gravityNodeSocket, SERVICE_MGR_URL);
+    // Set up the inproc socket to listen for to requests messages from the GravityNode
+    gravityNodeSocket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(gravityNodeSocket, SERVICE_MGR_URL);
 
-	// Always have at least the gravity node to poll
-	zmq_pollitem_t pollItem;
-	pollItem.socket = gravityNodeSocket;
-	pollItem.events = ZMQ_POLLIN;
-	pollItem.fd = 0;
-	pollItem.revents = 0;
-	pollItems.push_back(pollItem);
+    // Always have at least the gravity node to poll
+    zmq_pollitem_t pollItem;
+    pollItem.socket = gravityNodeSocket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
+    pollItems.push_back(pollItem);
 
-	void* configureSocket=zmq_socket(context,ZMQ_SUB);
-	zmq_connect(configureSocket,"inproc://gravity_service_manager_configure");
-	zmq_setsockopt(configureSocket, ZMQ_SUBSCRIBE, NULL, 0);
+    void* configureSocket = zmq_socket(context, ZMQ_SUB);
+    zmq_connect(configureSocket, "inproc://gravity_service_manager_configure");
+    zmq_setsockopt(configureSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-	// Always have at least the gravity node to poll
-	zmq_pollitem_t configItem;
-	configItem.socket = configureSocket;
-	configItem.events = ZMQ_POLLIN;
-	configItem.fd = 0;
-	configItem.revents = 0;
+    // Always have at least the gravity node to poll
+    zmq_pollitem_t configItem;
+    configItem.socket = configureSocket;
+    configItem.events = ZMQ_POLLIN;
+    configItem.fd = 0;
+    configItem.revents = 0;
 
-	ready();
+    ready();
 
-	string domain="";
-	string componentID="";
+    string domain = "";
+    string componentID = "";
 
-	//receive Gravity node parameters
-	bool configured = false;
-	while(!configured)
-	{
-		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&configItem, 1, -1); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1)
-		{
-		    // Interrupted
-                    if (errno == EINTR)
-                        continue;
-                    // Error
-		    break;
-		}
+    //receive Gravity node parameters
+    bool configured = false;
+    while (!configured)
+    {
+        // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&configItem, 1, -1);  // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            // Interrupted
+            if (errno == EINTR) continue;
+            // Error
+            break;
+        }
 
-		// Process new subscription requests from the gravity node
-		if (configItem.revents & ZMQ_POLLIN)
-		{
-			string command = readStringMessage(configureSocket);
-			if(command == "configure")
-			{
-				//receive Gravity node details
-				domain.assign(readStringMessage(configureSocket));
-				componentID.assign(readStringMessage(configureSocket));
+        // Process new subscription requests from the gravity node
+        if (configItem.revents & ZMQ_POLLIN)
+        {
+            string command = readStringMessage(configureSocket);
+            if (command == "configure")
+            {
+                //receive Gravity node details
+                domain.assign(readStringMessage(configureSocket));
+                componentID.assign(readStringMessage(configureSocket));
 
-				configured=true;
-			}
-		}
-	}
+                configured = true;
+            }
+        }
+    }
 
-	zmq_close(configureSocket);
+    zmq_close(configureSocket);
 
-	// Process forever...
-	while (true)
-	{
-		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1)
-		{
-                    // Interrupted
-                    if (errno == EINTR)
-                        continue;
-                    // Error
-                    break;
-		}
+    // Process forever...
+    while (true)
+    {
+        // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&pollItems[0], pollItems.size(), -1);  // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            // Interrupted
+            if (errno == EINTR) continue;
+            // Error
+            break;
+        }
 
-		// Process new subscription requests from the gravity node
-		if (pollItems[0].revents & ZMQ_POLLIN)
-		{
-			// Get new GravityNode request
-			string command = readStringMessage(gravityNodeSocket);
+        // Process new subscription requests from the gravity node
+        if (pollItems[0].revents & ZMQ_POLLIN)
+        {
+            // Get new GravityNode request
+            string command = readStringMessage(gravityNodeSocket);
 
-			// message from gravity node should be either a request or kill
-			if (command == "register")
-			{
-				addService();
-			}
-			else if (command == "unregister")
-			{
-				removeService();
-			}
-			else if (command == "kill")
-			{
-				break;
-			}
-			else
-			{
-				logger->warn("GravityServiceManager received unknown command '{}' from GravityNode", command);
-			}
-		}
+            // message from gravity node should be either a request or kill
+            if (command == "register")
+            {
+                addService();
+            }
+            else if (command == "unregister")
+            {
+                removeService();
+            }
+            else if (command == "kill")
+            {
+                break;
+            }
+            else
+            {
+                logger->warn("GravityServiceManager received unknown command '{}' from GravityNode", command);
+            }
+        }
 
-		// Check for service requests
-		for (unsigned int i = 1; i < pollItems.size(); i++)
-		{
-			if (pollItems[i].revents & ZMQ_POLLIN)
-			{
-				logger->trace("Received a service request on {}", serviceMapBySocket[pollItems[i].socket]->url);
-				// Read response data product from socket
-				zmq_msg_init(&message);
-				zmq_recvmsg(pollItems[i].socket, &message, 0);
-				// Create new GravityDataProduct from the incoming message
-				GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
-				// Clean up message
-				zmq_msg_close(&message);
-				
-				std::shared_ptr<GravityDataProduct> response;
-				std::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];				
-				if (dataProduct.getRegistrationTime() != 0 && dataProduct.getRegistrationTime() != serviceRegistrationTimeMap[serviceDetails->serviceID])
-				{
-					// Invalid request - likely due to a stale service directory entry
-					response = std::shared_ptr<GravityDataProduct>(new GravityDataProduct(serviceDetails->serviceID));
-				}
-				else
-				{
-					logger->trace("Sending request to provider for serviceID = '{}'", serviceDetails->serviceID);
-					response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
-				}
+        // Check for service requests
+        for (unsigned int i = 1; i < pollItems.size(); i++)
+        {
+            if (pollItems[i].revents & ZMQ_POLLIN)
+            {
+                logger->trace("Received a service request on {}", serviceMapBySocket[pollItems[i].socket]->url);
+                // Read response data product from socket
+                zmq_msg_init(&message);
+                zmq_recvmsg(pollItems[i].socket, &message, 0);
+                // Create new GravityDataProduct from the incoming message
+                GravityDataProduct dataProduct(zmq_msg_data(&message), zmq_msg_size(&message));
+                // Clean up message
+                zmq_msg_close(&message);
 
-				response->setComponentId(componentID);
-				response->setDomain(domain);
-				response->setRegistrationTime(serviceRegistrationTimeMap[serviceDetails->serviceID]);
+                std::shared_ptr<GravityDataProduct> response;
+                std::shared_ptr<ServiceDetails> serviceDetails = serviceMapBySocket[pollItems[i].socket];
+                if (dataProduct.getRegistrationTime() != 0 &&
+                    dataProduct.getRegistrationTime() != serviceRegistrationTimeMap[serviceDetails->serviceID])
+                {
+                    // Invalid request - likely due to a stale service directory entry
+                    response = std::shared_ptr<GravityDataProduct>(new GravityDataProduct(serviceDetails->serviceID));
+                }
+                else
+                {
+                    logger->trace("Sending request to provider for serviceID = '{}'", serviceDetails->serviceID);
+                    response = serviceDetails->server->request(serviceDetails->serviceID, dataProduct);
+                }
 
-				sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
-			}
-		}
-	}
+                response->setComponentId(componentID);
+                response->setDomain(domain);
+                response->setRegistrationTime(serviceRegistrationTimeMap[serviceDetails->serviceID]);
 
-	// Clean up all our open sockets
-	for (map<void*,std::shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin(); iter != serviceMapBySocket.end(); iter++)
-	{
-		void* socket = iter->first;
-		zmq_close(socket);
-	}
+                sendGravityDataProduct(pollItems[i].socket, *response, ZMQ_DONTWAIT);
+            }
+        }
+    }
 
-	serviceMapBySocket.clear();
-	serviceMapByServiceID.clear();
+    // Clean up all our open sockets
+    for (map<void*, std::shared_ptr<ServiceDetails> >::iterator iter = serviceMapBySocket.begin();
+         iter != serviceMapBySocket.end(); iter++)
+    {
+        void* socket = iter->first;
+        zmq_close(socket);
+    }
 
-	zmq_close(gravityNodeSocket);
+    serviceMapBySocket.clear();
+    serviceMapByServiceID.clear();
+
+    zmq_close(gravityNodeSocket);
 }
 
 void GravityServiceManager::ready()
 {
-	// Create the request socket
-	void* initSocket = zmq_socket(context, ZMQ_REQ);
+    // Create the request socket
+    void* initSocket = zmq_socket(context, ZMQ_REQ);
 
-	// Connect to service
-	zmq_connect(initSocket, "inproc://gravity_init");
+    // Connect to service
+    zmq_connect(initSocket, "inproc://gravity_init");
 
-	// Send request to service provider
-	sendStringMessage(initSocket, "GravityServiceManager", ZMQ_DONTWAIT);
+    // Send request to service provider
+    sendStringMessage(initSocket, "GravityServiceManager", ZMQ_DONTWAIT);
 
-	zmq_close(initSocket);
+    zmq_close(initSocket);
 }
 
 void GravityServiceManager::addService()
 {
-	// Read the serive id for this request
-	string serviceID = readStringMessage(gravityNodeSocket);
+    // Read the serive id for this request
+    string serviceID = readStringMessage(gravityNodeSocket);
 
     // Read the publish transport type
     string transportType = readStringMessage(gravityNodeSocket);
 
     int minPort = 0, maxPort = 0;
-    if(transportType == "tcp")
+    if (transportType == "tcp")
     {
         minPort = readIntMessage(gravityNodeSocket);
         maxPort = readIntMessage(gravityNodeSocket);
@@ -225,23 +226,23 @@ void GravityServiceManager::addService()
     // Read the publish transport type
     string endpoint = readStringMessage(gravityNodeSocket);
 
-	// Read the registration time
-	uint32_t registrationTime = readUint32Message(gravityNodeSocket);
+    // Read the registration time
+    uint32_t registrationTime = readUint32Message(gravityNodeSocket);
 
-	// Read the server pointer
-	zmq_msg_t msg;
-	zmq_msg_init(&msg);
-	zmq_recvmsg(gravityNodeSocket, &msg, -1);
-	GravityServiceProvider* server;
-	memcpy(&server, zmq_msg_data(&msg), zmq_msg_size(&msg));
-	zmq_msg_close(&msg);
+    // Read the server pointer
+    zmq_msg_t msg;
+    zmq_msg_init(&msg);
+    zmq_recvmsg(gravityNodeSocket, &msg, -1);
+    GravityServiceProvider* server;
+    memcpy(&server, zmq_msg_data(&msg), zmq_msg_size(&msg));
+    zmq_msg_close(&msg);
 
-	std::shared_ptr<ServiceDetails> serviceDetails;
+    std::shared_ptr<ServiceDetails> serviceDetails;
 
-	// Create the response socket
-	void* serverSocket = zmq_socket(context, ZMQ_REP);
+    // Create the response socket
+    void* serverSocket = zmq_socket(context, ZMQ_REP);
     string connectionURL;
-    if(transportType == "tcp")
+    if (transportType == "tcp")
     {
         int port = bindFirstAvailablePort(serverSocket, endpoint, minPort, maxPort);
         if (port < 0)
@@ -272,58 +273,58 @@ void GravityServiceManager::addService()
 
     sendStringMessage(gravityNodeSocket, connectionURL, ZMQ_DONTWAIT);
 
-	// Create poll item for response to this request
-	zmq_pollitem_t pollItem;
-	pollItem.socket = serverSocket;
-	pollItem.events = ZMQ_POLLIN;
-	pollItem.fd = 0;
-	pollItem.revents = 0;
-	pollItems.push_back(pollItem);
+    // Create poll item for response to this request
+    zmq_pollitem_t pollItem;
+    pollItem.socket = serverSocket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
+    pollItems.push_back(pollItem);
 
-	// Create request details
-	serviceDetails.reset(new ServiceDetails());
-	serviceDetails->serviceID = serviceID;
-	serviceDetails->url = connectionURL;
-	serviceDetails->pollItem = pollItem;
-	serviceDetails->server = server;
+    // Create request details
+    serviceDetails.reset(new ServiceDetails());
+    serviceDetails->serviceID = serviceID;
+    serviceDetails->url = connectionURL;
+    serviceDetails->pollItem = pollItem;
+    serviceDetails->server = server;
 
-	serviceMapBySocket[serverSocket] = serviceDetails;
-	serviceMapByServiceID[serviceID] = serviceDetails;
-	serviceRegistrationTimeMap[serviceID] = registrationTime;
+    serviceMapBySocket[serverSocket] = serviceDetails;
+    serviceMapByServiceID[serviceID] = serviceDetails;
+    serviceRegistrationTimeMap[serviceID] = registrationTime;
 }
 
 void GravityServiceManager::removeService()
 {
-	// Read the service id for this request
-	string serviceID = readStringMessage(gravityNodeSocket);
+    // Read the service id for this request
+    string serviceID = readStringMessage(gravityNodeSocket);
 
-	// If service ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
-	if (serviceMapByServiceID.count(serviceID))
-	{
-	    std::shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
-		void* socket = serviceDetails->pollItem.socket;
-		serviceMapBySocket.erase(socket);
-		serviceMapByServiceID.erase(serviceID);
-		serviceRegistrationTimeMap.erase(serviceID);
-		zmq_unbind(socket, serviceDetails->url.c_str());
-		zmq_close(socket);
+    // If service ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
+    if (serviceMapByServiceID.count(serviceID))
+    {
+        std::shared_ptr<ServiceDetails> serviceDetails = serviceMapByServiceID[serviceID];
+        void* socket = serviceDetails->pollItem.socket;
+        serviceMapBySocket.erase(socket);
+        serviceMapByServiceID.erase(serviceID);
+        serviceRegistrationTimeMap.erase(serviceID);
+        zmq_unbind(socket, serviceDetails->url.c_str());
+        zmq_close(socket);
 
-		// Remove from poll items
-		vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
-		while (iter != pollItems.end())
-		{
-			if (iter->socket == socket)
-			{
-				iter = pollItems.erase(iter);
-			}
-			else
-			{
-				iter++;
-			}
-		}
-	}
+        // Remove from poll items
+        vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
+        while (iter != pollItems.end())
+        {
+            if (iter->socket == socket)
+            {
+                iter = pollItems.erase(iter);
+            }
+            else
+            {
+                iter++;
+            }
+        }
+    }
 
-	sendStringMessage(gravityNodeSocket, "OK", ZMQ_DONTWAIT);
+    sendStringMessage(gravityNodeSocket, "OK", ZMQ_DONTWAIT);
 }
 
 } /* namespace gravity */
