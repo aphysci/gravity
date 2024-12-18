@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.17)
 
 project(JavaProtobufDataProduct)
-
+include(GNUInstallDirs)
 include(GravitySupport)
 
-gravity_find_protobuf(ON)
-gravity_find_zeromq(ON)
-gravity_find_spdlog(ON)
+find_package(Gravity QUIET)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
@@ -18,13 +16,13 @@ include(UseJava)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
-gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../protobuf" GENERATE_EXTENSIONS .java OUT_VAR PROTO_SRCS PROTOS ${PROTO_FILES})
+gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}" GENERATE_EXTENSIONS .java OUT_VAR PROTO_SRCS PROTOS ${PROTO_FILES})
 
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
-set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/deps/protobuf/lib/protobuf-java.jar" ${PUBLIC_JAR})
-string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
-string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/lib/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
+set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
+string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
+string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
 message(STATUS "CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG: ${CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG}")
 
 if (WIN32)
@@ -55,7 +53,7 @@ endif()
 add_dependencies(${PROJECT_NAME} ${_DEPS})
 set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 
-gravity_install_jar(${PROJECT_NAME} DESTINATION "${ALT_CMAKE_INSTALL_PREFIX}/bin")
+#gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 if (WIN32)
     install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" DESTINATION bin CONFIGURATIONS Debug)

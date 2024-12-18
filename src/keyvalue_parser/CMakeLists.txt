@@ -30,10 +30,12 @@ if (NOT Yacc_CMD)
     message(FATAL_ERROR "Could not locate yacc cmd")
 endif()
 
-add_definitions(-DLIBKEYVALUE_PARSER_EXPORTS)
 set(SRCS keyvalue_parser.h keyvalue_parser.c params.h "${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/y.tab.c")
 set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/lex.yy.c" "${CMAKE_CURRENT_LIST_DIR}/y.tab.c" PROPERTIES GENERATED ON)
-add_library(${LIB_NAME} SHARED ${SRCS})
+add_library(${LIB_NAME} STATIC ${SRCS})
+target_compile_definitions(${LIB_NAME} PUBLIC "-DLIBKEYVALUE_STATIC")
+set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 gravity_add_dependency(${LIB_NAME})
 
 if (WIN32)
@@ -44,18 +46,17 @@ else()
     add_dependencies(${LIB_NAME} RunLexYacc)
 endif()
 
-target_include_directories(${LIB_NAME} INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include>
-)
+
+target_include_directories(${LIB_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                                         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets RUNTIME DESTINATION bin ARCHIVE DESTINATION lib)
-install(FILES keyvalue_parser.h DESTINATION include)
+#install(FILES keyvalue_parser.h DESTINATION include)
 configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../cmake/${PROJECT_NAME}Config.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION cmake)
+   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(EXPORT ${PROJECT_NAME}-targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    DESTINATION cmake)
+   FILE ${PROJECT_NAME}Targets.cmake
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    DESTINATION cmake)
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)

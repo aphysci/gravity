@@ -18,6 +18,7 @@
 
 #include "GravityLogger.h"
 #include "FileArchiver.h"
+#include "SpdLog.h"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -42,8 +43,12 @@ FileArchiver::FileArchiver()
 	// Initialize Gravity Node
 	gravityNode.init(FileArchiver::ComponentName);
 	
-	// Get logger
-	logger = spdlog::get("GravityLogger");
+	// Get Gravity logger
+	logger = gravityNode.getGravityLogger();
+	if (!logger) {
+		SpdLog::critical("Failed to get GravityLogger");
+		return;
+	}
 
 	// Configure logger to log to console
 	//Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);

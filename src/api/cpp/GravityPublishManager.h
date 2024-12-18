@@ -38,7 +38,12 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "spdlog/spdlog.h"
+
+
+namespace spdlog
+{
+	class logger;
+}
 
 #define PUB_MGR_REQ_URL "inproc://gravity_publish_manager_request"
 #define PUB_MGR_PUB_URL "inproc://gravity_publish_manager_publish"

@@ -53,7 +53,6 @@ private:
 	void parseValidDomains(std::string domainString,unsigned int num);
 	bool isValidDomain(std::string domain);
 
-	std::shared_ptr<spdlog::logger> logger;
 
 public:
 	ServiceDirectoryUDPReceiver(void* context);

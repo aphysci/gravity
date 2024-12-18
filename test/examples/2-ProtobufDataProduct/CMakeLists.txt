@@ -1,19 +1,19 @@
 cmake_minimum_required(VERSION 3.17)
-
 project(ProtoBufDataProduct)
+#
+# see CMakeLists.txt on how to set up CMAKE_PREFIX_PATH and CMAKE_MODULE_PATH
+#
 
+# for gravity_protobuf_generate
 include(GravitySupport)
 
-find_package(PThreadsWin32 REQUIRED)
-gravity_find_protobuf(ON)
-gravity_find_zeromq(ON)
-gravity_find_spdlog(ON)
-find_package(GravityKeyValueParser QUIET)
+
+find_package(spdlog REQUIRED)
 find_package(Gravity QUIET)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
-gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../protobuf" OUT_VAR PROTO_SRCS 
+gravity_protobuf_generate(APPEND_PATH PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR} OUT_VAR PROTO_SRCS
                             PROTOS ${PROTO_FILES})
 
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
@@ -21,11 +21,13 @@ add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 set(CMAKE_DEBUG_POSTFIX _d)
 add_executable(ProtobufDataProductPublisher ProtobufDataProductPublisher.cpp ${PROTO_SRCS})
 set_target_properties(ProtobufDataProductPublisher PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(ProtobufDataProductPublisher gravity)
+target_link_libraries(ProtobufDataProductPublisher PUBLIC gravity PRIVATE spdlog::spdlog_header_only)
+target_include_directories(ProtobufDataProductPublisher PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(ProtobufDataProductPublisher ${PROJECT_NAME}_protos)
 
 add_executable(ProtobufDataProductSubscriber ProtobufDataProductSubscriber.cpp ${PROTO_SRCS})
 set_target_properties(ProtobufDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(ProtobufDataProductSubscriber gravity)
+target_link_libraries(ProtobufDataProductSubscriber PUBLIC gravity PRIVATE spdlog::spdlog_header_only)
+target_include_directories(ProtobufDataProductSubscriber PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
-install(TARGETS ProtobufDataProductPublisher ProtobufDataProductSubscriber DESTINATION "${ALT_CMAKE_INSTALL_PREFIX}/bin")
+

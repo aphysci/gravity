@@ -41,6 +41,6 @@ else()
 endif()
 
 gravity_add_dependency(${PROJECT_NAME})
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/gravity"  CONFIGURATIONS ${InstallConfigs} DESTINATION lib/  FILES_MATCHING PATTERN "*.py")
-install(DIRECTORY "${CMAKE_BINARY_DIR}/python/gravity" CONFIGURATIONS ${InstallConfigs} DESTINATION lib/ FILES_MATCHING PATTERN "*.py")
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../python/gravity"  CONFIGURATIONS ${InstallConfigs} DESTINATION ${CMAKE_INSTALL_LIBDIR}  FILES_MATCHING PATTERN "*.py")
+install(DIRECTORY "${CMAKE_BINARY_DIR}/python/gravity" CONFIGURATIONS ${InstallConfigs} DESTINATION ${CMAKE_INSTALL_LIBDIR} FILES_MATCHING PATTERN "*.py")
 													                 

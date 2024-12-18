@@ -30,6 +30,7 @@
 #include <sstream>
 
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {

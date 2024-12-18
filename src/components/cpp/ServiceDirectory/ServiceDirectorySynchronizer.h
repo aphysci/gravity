@@ -76,7 +76,6 @@ private:
 									ProductChange_RegistrationType type, uint64_t timestamp);
 	void createUnregistrationRequest(std::string productID, std::string url, std::string domain, ProductChange_RegistrationType type, uint32_t regTime);
 	
-	std::shared_ptr<spdlog::logger> logger;
 
 public:
 	ServiceDirectorySynchronizer(void* context, std::string url);

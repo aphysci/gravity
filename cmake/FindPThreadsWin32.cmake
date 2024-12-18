@@ -12,7 +12,7 @@ if (WIN32)
         find_file(PThreadsWin32Dll NAMES pthreadVC2.dll PATHS "${PThreadsWin32_DIR}/Pre-built.2/dll/x64")
 
         if (PThreadsWin32Lib AND PThreadsWin32Dll)
-            set(PThreadsWin32_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/deps/pthreads-w32" CACHE PATH "PThreadsWin32 Directory" FORCE)
+            set(PThreadsWin32_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "PThreadsWin32 Directory" FORCE)
             file(MAKE_DIRECTORY "${PThreadsWin32_INSTALL_DIR}/bin" "${PThreadsWin32_INSTALL_DIR}/lib")
             file(COPY "${PThreadsWin32Lib}" DESTINATION "${PThreadsWin32_INSTALL_DIR}/lib")
             file(COPY "${PThreadsWin32Dll}" DESTINATION "${PThreadsWin32_INSTALL_DIR}/bin")
