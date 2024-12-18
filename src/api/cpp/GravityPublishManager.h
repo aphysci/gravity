@@ -39,15 +39,14 @@
 #include <map>
 #include <string>
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 #define PUB_MGR_REQ_URL "inproc://gravity_publish_manager_request"
 #define PUB_MGR_PUB_URL "inproc://gravity_publish_manager_publish"
-#define PUB_MGR_HB_URL  "inproc://gravity_heartbeat_publish"
+#define PUB_MGR_HB_URL "inproc://gravity_heartbeat_publish"
 
 namespace gravity
 {
@@ -55,7 +54,7 @@ namespace gravity
 typedef struct CacheValue
 {
     std::string filterText;
-    char *value;
+    char* value;
     int size;
     uint64_t timestamp;
 } CacheValue;
@@ -64,8 +63,8 @@ typedef struct PublishDetails
 {
     std::string url;
     std::string dataProductID;
-	bool cacheLastValue;
-	std::map<std::string,std::shared_ptr<CacheValue> > lastCachedValues;
+    bool cacheLastValue;
+    std::map<std::string, std::shared_ptr<CacheValue> > lastCachedValues;
     zmq_pollitem_t pollItem;
     void* socket;
     bool hasSubscribers;
@@ -78,52 +77,52 @@ typedef struct PublishDetails
 class GravityPublishManager
 {
 private:
-	void* context;
+    void* context;
     void* gravityMetricsSocket;
     void* metricsPublishSocket;
-	void* gravityNodeResponseSocket;
+    void* gravityNodeResponseSocket;
     void* gravityNodeSubscribeSocket;
-    std::map<void*,std::shared_ptr<PublishDetails> > publishMapBySocket;
-    std::map<std::string,std::shared_ptr<PublishDetails> > publishMapByID;
+    std::map<void*, std::shared_ptr<PublishDetails> > publishMapBySocket;
+    std::map<std::string, std::shared_ptr<PublishDetails> > publishMapByID;
     std::vector<zmq_pollitem_t> pollItems;
 
-	void setHWM();
-	void setKeepAlive();
-	void subscribersExist();
-	void ready();
-	void registerDataProduct();
-	void unregisterDataProduct();
-	void publish(void* requestSocket);
-    void publish(void* socket, const std::string &filterText, const void *data, int size);
+    void setHWM();
+    void setKeepAlive();
+    void subscribersExist();
+    void ready();
+    void registerDataProduct();
+    void unregisterDataProduct();
+    void publish(void* requestSocket);
+    void publish(void* socket, const std::string& filterText, const void* data, int size);
 
-	int publishHWM;
+    int publishHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
-	
-	std::shared_ptr<spdlog::logger> logger;
-	
-	bool tcpKeepAliveEnabled;
-	int tcpKeepAliveTime;
-	int tcpKeepAliveProbes;
-	int tcpKeepAliveIntvl;
-	
+
+    std::shared_ptr<spdlog::logger> logger;
+
+    bool tcpKeepAliveEnabled;
+    int tcpKeepAliveTime;
+    int tcpKeepAliveProbes;
+    int tcpKeepAliveIntvl;
+
 public:
-	/**
+    /**
 	 * Constructor GravityPublishManager
 	 * \param context The zmq context in which the inproc socket will be established with the GravityNode
 	 */
-	GravityPublishManager(void* context);
+    GravityPublishManager(void* context);
 
-	/**
+    /**
 	 * Default destructor
 	 */
-	virtual ~GravityPublishManager();
+    virtual ~GravityPublishManager();
 
-	/**
+    /**
 	 * Starts the GravityPublishManager which will run forever, sending updates to new subscribers.
 	 * Should be executed from GravityNode in its own thread with a shared zmq context.
 	 */
-	void start();
+    void start();
 };
 
 } /* namespace gravity */

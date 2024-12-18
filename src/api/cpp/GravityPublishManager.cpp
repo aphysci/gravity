@@ -37,49 +37,49 @@ namespace gravity
 
 using namespace std;
 
-bool sortCacheValues (const std::shared_ptr<CacheValue> &i, const std::shared_ptr<CacheValue> &j)
+bool sortCacheValues(const std::shared_ptr<CacheValue>& i, const std::shared_ptr<CacheValue>& j)
 {
     return i->timestamp < j->timestamp;
 }
 
 GravityPublishManager::GravityPublishManager(void* context)
 {
-	// This is the zmq context that is shared with the GravityNode. Must use
-	// a shared context to establish an inproc socket.
-	this->context = context;
+    // This is the zmq context that is shared with the GravityNode. Must use
+    // a shared context to establish an inproc socket.
+    this->context = context;
 
     // Default to no metrics
     metricsEnabled = false;
-	
-	// Default TCP KeepAlive status
-	tcpKeepAliveEnabled = false;
-	tcpKeepAliveTime = -1;
-	tcpKeepAliveProbes = -1;
-	tcpKeepAliveIntvl = -1;
 
-	// Default high water mark
-	publishHWM = 1000;
-	
-	// Get the gravity logger
-	logger = spdlog::get("GravityLogger");
+    // Default TCP KeepAlive status
+    tcpKeepAliveEnabled = false;
+    tcpKeepAliveTime = -1;
+    tcpKeepAliveProbes = -1;
+    tcpKeepAliveIntvl = -1;
+
+    // Default high water mark
+    publishHWM = 1000;
+
+    // Get the gravity logger
+    logger = spdlog::get("GravityLogger");
 }
 
 GravityPublishManager::~GravityPublishManager() {}
 
 void GravityPublishManager::start()
 {
-	// Messages
-	zmq_msg_t event;
+    // Messages
+    zmq_msg_t event;
 
-	// Set up the inproc sockets to subscribe and unsubscribe to messages from
-	// the GravityNode
-	gravityNodeResponseSocket = zmq_socket(context, ZMQ_REP);
-	zmq_bind(gravityNodeResponseSocket, PUB_MGR_REQ_URL);
+    // Set up the inproc sockets to subscribe and unsubscribe to messages from
+    // the GravityNode
+    gravityNodeResponseSocket = zmq_socket(context, ZMQ_REP);
+    zmq_bind(gravityNodeResponseSocket, PUB_MGR_REQ_URL);
 
-	gravityNodeSubscribeSocket = zmq_socket(context, ZMQ_SUB);
+    gravityNodeSubscribeSocket = zmq_socket(context, ZMQ_SUB);
     zmq_connect(gravityNodeSubscribeSocket, PUB_MGR_PUB_URL);
-	// Create the socket to receive heartbeat publish messages
-	zmq_bind(gravityNodeSubscribeSocket,PUB_MGR_HB_URL);
+    // Create the socket to receive heartbeat publish messages
+    zmq_bind(gravityNodeSubscribeSocket, PUB_MGR_HB_URL);
     zmq_setsockopt(gravityNodeSubscribeSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
     // Setup socket to respond to metrics requests
@@ -91,13 +91,13 @@ void GravityPublishManager::start()
     zmq_connect(metricsPublishSocket, GRAVITY_METRICS_PUB);
     zmq_setsockopt(metricsPublishSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-	// Configure polling on our sockets
-	zmq_pollitem_t pollItemResponse;
-	pollItemResponse.socket = gravityNodeResponseSocket;
-	pollItemResponse.events = ZMQ_POLLIN;
-	pollItemResponse.fd = 0;
-	pollItemResponse.revents = 0;
-	pollItems.push_back(pollItemResponse);
+    // Configure polling on our sockets
+    zmq_pollitem_t pollItemResponse;
+    pollItemResponse.socket = gravityNodeResponseSocket;
+    pollItemResponse.events = ZMQ_POLLIN;
+    pollItemResponse.fd = 0;
+    pollItemResponse.revents = 0;
+    pollItems.push_back(pollItemResponse);
 
     zmq_pollitem_t pollItemSubscribe;
     pollItemSubscribe.socket = gravityNodeSubscribeSocket;
@@ -122,78 +122,78 @@ void GravityPublishManager::start()
     metricsPollItem.revents = 0;
     pollItems.push_back(metricsPollItem);
 
-	ready();
+    ready();
 
-	// Process forever...
-	while (true)
-	{
-		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItems[0], pollItems.size(), -1); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1)
-		{
-                    // Interrupted
-                    if (errno == EINTR)
-                    {
-                        continue;
-                    }
-                    // Error
-                    break;
-		}
+    // Process forever...
+    while (true)
+    {
+        // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&pollItems[0], pollItems.size(), -1);  // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            // Interrupted
+            if (errno == EINTR)
+            {
+                continue;
+            }
+            // Error
+            break;
+        }
 
-		// Process new requests from the gravity node
-		if (pollItems[0].revents & ZMQ_POLLIN)
-		{
-			// Get new GravityNode request
-			string command = readStringMessage(gravityNodeResponseSocket);
-			logger->trace("GravityPublishManager, pollItems[0], command = {}", command);
+        // Process new requests from the gravity node
+        if (pollItems[0].revents & ZMQ_POLLIN)
+        {
+            // Get new GravityNode request
+            string command = readStringMessage(gravityNodeResponseSocket);
+            logger->trace("GravityPublishManager, pollItems[0], command = {}", command);
 
-			// message from gravity node on this socket
-			if (command == "register")
-			{
-				registerDataProduct();
-			}
-			else if (command == "unregister")
-			{
-			    unregisterDataProduct();
-			}
-			else if (command == "set_hwm")
-			{
-				setHWM();
-			}
-			else if (command == "set_tcp_keepalive")
-			{
-				setKeepAlive();
-			}
-			else if (command == "subscribersExist")
-			{
-				subscribersExist();
-			}
-			else
-			{
-				logger->warn("GravityPublishManager received unknown command '{}' from GravityNode", command);
-			}
-		}
+            // message from gravity node on this socket
+            if (command == "register")
+            {
+                registerDataProduct();
+            }
+            else if (command == "unregister")
+            {
+                unregisterDataProduct();
+            }
+            else if (command == "set_hwm")
+            {
+                setHWM();
+            }
+            else if (command == "set_tcp_keepalive")
+            {
+                setKeepAlive();
+            }
+            else if (command == "subscribersExist")
+            {
+                subscribersExist();
+            }
+            else
+            {
+                logger->warn("GravityPublishManager received unknown command '{}' from GravityNode", command);
+            }
+        }
 
-		if (pollItems[1].revents & ZMQ_POLLIN)
-		{
+        if (pollItems[1].revents & ZMQ_POLLIN)
+        {
             // Get new GravityNode request
             string command = readStringMessage(gravityNodeSubscribeSocket);
             logger->trace("GravityPublishManager, pollItems[1], command = {}", command);
 
-			// message from gravity node should be either a publish or kill request
-			if (command == "publish")
-			{
-				publish(pollItems[1].socket);
-			}
-			else if (command == "kill")
-			{
-				break;
-			}
-			else
-			{
+            // message from gravity node should be either a publish or kill request
+            if (command == "publish")
+            {
+                publish(pollItems[1].socket);
+            }
+            else if (command == "kill")
+            {
+                break;
+            }
+            else
+            {
                 logger->error("Received unknown publish command {}", command);
-			}
-		}
+            }
+        }
 
         if (pollItems[2].revents & ZMQ_POLLIN)
         {
@@ -247,107 +247,113 @@ void GravityPublishManager::start()
             }
         }
 
-		// Check for publish updates
-		for (unsigned int i = 4; i < pollItems.size(); i++)
-		{
-			if (pollItems[i].revents & ZMQ_POLLIN)
-			{
-				// Read whether it's a new subscription from socket
-				zmq_msg_init(&event);
-				zmq_recvmsg(pollItems[i].socket, &event, 0);
-				bool newsub = *((char*)zmq_msg_data(&event)) == 1;  //This message is coming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.
-				zmq_msg_close(&event);
+        // Check for publish updates
+        for (unsigned int i = 4; i < pollItems.size(); i++)
+        {
+            if (pollItems[i].revents & ZMQ_POLLIN)
+            {
+                // Read whether it's a new subscription from socket
+                zmq_msg_init(&event);
+                zmq_recvmsg(pollItems[i].socket, &event, 0);
+                bool newsub =
+                    *((char*)zmq_msg_data(&event)) ==
+                    1;  //This message is coming from ZMQ.  The subscriber doesn't send messages on a subscribed socket.
+                zmq_msg_close(&event);
 
-				if (newsub)
-				{					
-				    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
-                                    pd->hasSubscribers = true;
-				    // can't log here because the network logging uses this code - any logs here will result in an
-				    // infinite loop, or a deadlock.
-				    // This message can be useful though, so leaving it in, but commented out.
-				    //logger->debug("got a new subscriber for {}, resending {} values.", pd->dataProductID, pd->lastCachedValues.size());
+                if (newsub)
+                {
+                    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
+                    pd->hasSubscribers = true;
+                    // can't log here because the network logging uses this code - any logs here will result in an
+                    // infinite loop, or a deadlock.
+                    // This message can be useful though, so leaving it in, but commented out.
+                    //logger->debug("got a new subscriber for {}, resending {} values.", pd->dataProductID, pd->lastCachedValues.size());
 
-				    list<std::shared_ptr<CacheValue> > values;
-				    for (map<string,std::shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin(); iter != pd->lastCachedValues.end(); iter++)
-				        values.push_back(iter->second);
+                    list<std::shared_ptr<CacheValue> > values;
+                    for (map<string, std::shared_ptr<CacheValue> >::iterator iter = pd->lastCachedValues.begin();
+                         iter != pd->lastCachedValues.end(); iter++)
+                        values.push_back(iter->second);
 
-					
-				    // we shouldn't be doing this often, so just sort these when we need it.
+                    // we shouldn't be doing this often, so just sort these when we need it.
                     values.sort(sortCacheValues);
-				    for (list<std::shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end(); iter++)
-					{
-						//we have a new subscriber and are going to send it the last cached data product value. 
-						char* bytes = (*iter)->value;
-						int size = (*iter)->size;
-						//Deserialize cache bytes to a data product and mark cached
-						GravityDataProduct dataProduct(bytes, size);
-						dataProduct.setIsCachedDataproduct(true);
-						int newSize = dataProduct.getSize();
-						//Serialize back to send over socket
-						char* newBytes = new char[newSize];
-						dataProduct.serializeToArray(newBytes);		
-						// See comment above re the use of log statements in this section of code
-						//logger->trace("Publishing data product {}..., Which is cached? {}", dataProduct.getDataProductID(),dataProduct.isCachedDataproduct() ? "true" : "false");
-				        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
-				        delete[] newBytes;
-					}
-				} else {
-				    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
-                                    pd->hasSubscribers = false;
-    				    // See comment above re the use of log statements in this section of code
-				    //logger->debug("no more subscribers for {} ", pd->dataProductID);
-				}
-			}
-		}
-	}
+                    for (list<std::shared_ptr<CacheValue> >::iterator iter = values.begin(); iter != values.end();
+                         iter++)
+                    {
+                        //we have a new subscriber and are going to send it the last cached data product value.
+                        char* bytes = (*iter)->value;
+                        int size = (*iter)->size;
+                        //Deserialize cache bytes to a data product and mark cached
+                        GravityDataProduct dataProduct(bytes, size);
+                        dataProduct.setIsCachedDataproduct(true);
+                        int newSize = dataProduct.getSize();
+                        //Serialize back to send over socket
+                        char* newBytes = new char[newSize];
+                        dataProduct.serializeToArray(newBytes);
+                        // See comment above re the use of log statements in this section of code
+                        //logger->trace("Publishing data product {}..., Which is cached? {}", dataProduct.getDataProductID(),dataProduct.isCachedDataproduct() ? "true" : "false");
+                        publish(pd->socket, (*iter)->filterText, newBytes, newSize);
+                        delete[] newBytes;
+                    }
+                }
+                else
+                {
+                    std::shared_ptr<PublishDetails> pd = publishMapBySocket[pollItems[i].socket];
+                    pd->hasSubscribers = false;
+                    // See comment above re the use of log statements in this section of code
+                    //logger->debug("no more subscribers for {} ", pd->dataProductID);
+                }
+            }
+        }
+    }
 
-	// Clean up any pub sockets
-	for (map<void*,std::shared_ptr<PublishDetails> >::iterator iter = publishMapBySocket.begin(); iter != publishMapBySocket.end(); iter++)
-	{
-	    std::shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
-		zmq_close(pubDetails->pollItem.socket);
-        for (map<string,std::shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin(); valIter != pubDetails->lastCachedValues.end(); valIter++)
-            delete [] valIter->second->value;
+    // Clean up any pub sockets
+    for (map<void*, std::shared_ptr<PublishDetails> >::iterator iter = publishMapBySocket.begin();
+         iter != publishMapBySocket.end(); iter++)
+    {
+        std::shared_ptr<PublishDetails> pubDetails = publishMapBySocket[iter->second->socket];
+        zmq_close(pubDetails->pollItem.socket);
+        for (map<string, std::shared_ptr<CacheValue> >::iterator valIter = pubDetails->lastCachedValues.begin();
+             valIter != pubDetails->lastCachedValues.end(); valIter++)
+            delete[] valIter->second->value;
         pubDetails->lastCachedValues.clear();
-	}
+    }
 
-	publishMapBySocket.clear();
-	publishMapByID.clear();
+    publishMapBySocket.clear();
+    publishMapByID.clear();
 
     zmq_close(gravityNodeResponseSocket);
-	zmq_close(gravityNodeSubscribeSocket);
+    zmq_close(gravityNodeSubscribeSocket);
     zmq_close(gravityMetricsSocket);
     zmq_close(metricsPublishSocket);
 }
 
 void GravityPublishManager::ready()
 {
-	// Create the request socket
-	void* initSocket = zmq_socket(context, ZMQ_REQ);
+    // Create the request socket
+    void* initSocket = zmq_socket(context, ZMQ_REQ);
 
-	// Connect to service
-	zmq_connect(initSocket, "inproc://gravity_init");
+    // Connect to service
+    zmq_connect(initSocket, "inproc://gravity_init");
 
-	// Send request to service provider
-	sendStringMessage(initSocket, "GravityPublishManager", ZMQ_DONTWAIT);
+    // Send request to service provider
+    sendStringMessage(initSocket, "GravityPublishManager", ZMQ_DONTWAIT);
 
-	zmq_close(initSocket);
+    zmq_close(initSocket);
 }
 
 void GravityPublishManager::registerDataProduct()
 {
+    // Read the data product id for this request
+    string dataProductID = readStringMessage(gravityNodeResponseSocket);
 
-	// Read the data product id for this request
-	string dataProductID = readStringMessage(gravityNodeResponseSocket);
+    //Read flag to cache last sent data product or not
+    bool cacheLastValue = readIntMessage(gravityNodeResponseSocket);
 
-	//Read flag to cache last sent data product or not
-	bool cacheLastValue = readIntMessage(gravityNodeResponseSocket);
-
-	// Read the publish transport type
-	string transportType = readStringMessage(gravityNodeResponseSocket);
+    // Read the publish transport type
+    string transportType = readStringMessage(gravityNodeResponseSocket);
 
     int minPort = 0, maxPort = 0;
-    if(transportType == "tcp")
+    if (transportType == "tcp")
     {
         minPort = readIntMessage(gravityNodeResponseSocket);
         maxPort = readIntMessage(gravityNodeResponseSocket);
@@ -365,23 +371,23 @@ void GravityPublishManager::registerDataProduct()
     int verbose = 1;
     zmq_setsockopt(pubSocket, ZMQ_XPUB_VERBOSE, &verbose, sizeof(verbose));
 
-	// Set high water mark
-	zmq_setsockopt(pubSocket, ZMQ_SNDHWM, &publishHWM, sizeof(publishHWM));
-	
-	if (transportType == "tcp" && tcpKeepAliveEnabled)
-	{
-		// Enable keepalive 
-		int enable = 1;
-		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE, &enable, sizeof(enable));
-		
-		// Set TCP keep-alive as configured by user settings
-		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_IDLE, &tcpKeepAliveTime, sizeof(tcpKeepAliveTime));
-		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_CNT, &tcpKeepAliveProbes, sizeof(tcpKeepAliveProbes));
-		zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_INTVL, &tcpKeepAliveIntvl, sizeof(tcpKeepAliveIntvl));
-	}
+    // Set high water mark
+    zmq_setsockopt(pubSocket, ZMQ_SNDHWM, &publishHWM, sizeof(publishHWM));
+
+    if (transportType == "tcp" && tcpKeepAliveEnabled)
+    {
+        // Enable keepalive
+        int enable = 1;
+        zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE, &enable, sizeof(enable));
+
+        // Set TCP keep-alive as configured by user settings
+        zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_IDLE, &tcpKeepAliveTime, sizeof(tcpKeepAliveTime));
+        zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_CNT, &tcpKeepAliveProbes, sizeof(tcpKeepAliveProbes));
+        zmq_setsockopt(pubSocket, ZMQ_TCP_KEEPALIVE_INTVL, &tcpKeepAliveIntvl, sizeof(tcpKeepAliveIntvl));
+    }
 
     string connectionURL;
-    if(transportType == "tcp")
+    if (transportType == "tcp")
     {
         int port = bindFirstAvailablePort(pubSocket, endpoint, minPort, maxPort);
         if (port < 0)
@@ -412,22 +418,22 @@ void GravityPublishManager::registerDataProduct()
 
     sendStringMessage(gravityNodeResponseSocket, connectionURL, ZMQ_DONTWAIT);
 
-	// Create poll item for response to this request
-	zmq_pollitem_t pollItem;
-	pollItem.socket = pubSocket;
-	pollItem.events = ZMQ_POLLIN;
-	pollItem.fd = 0;
-	pollItem.revents = 0;
-	pollItems.push_back(pollItem);
+    // Create poll item for response to this request
+    zmq_pollitem_t pollItem;
+    pollItem.socket = pubSocket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
+    pollItems.push_back(pollItem);
 
     // Track dataProductID->socket mapping
-	std::shared_ptr<PublishDetails> publishDetails = std::shared_ptr<PublishDetails>(new PublishDetails);
+    std::shared_ptr<PublishDetails> publishDetails = std::shared_ptr<PublishDetails>(new PublishDetails);
     publishDetails->url = connectionURL;
     publishDetails->dataProductID = dataProductID;
     publishDetails->socket = pubSocket;
-	publishDetails->pollItem = pollItem;
-	publishDetails->cacheLastValue = cacheLastValue;
-	publishDetails->hasSubscribers = false;
+    publishDetails->pollItem = pollItem;
+    publishDetails->cacheLastValue = cacheLastValue;
+    publishDetails->hasSubscribers = false;
 
     publishMapByID[dataProductID] = publishDetails;
     publishMapBySocket[pubSocket] = publishDetails;
@@ -435,68 +441,69 @@ void GravityPublishManager::registerDataProduct()
 
 void GravityPublishManager::unregisterDataProduct()
 {
-	// Read the data product id for this request
-	string dataProductID = readStringMessage(gravityNodeResponseSocket);
+    // Read the data product id for this request
+    string dataProductID = readStringMessage(gravityNodeResponseSocket);
 
-	// Go ahead and respond since there's nothing to wait for
-	sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
+    // Go ahead and respond since there's nothing to wait for
+    sendStringMessage(gravityNodeResponseSocket, "", ZMQ_DONTWAIT);
 
     // Remove this data product from our metrics data
     metricsData.remove(dataProductID);
 
-	// If data product ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
-	if (publishMapByID.count(dataProductID))
-	{
-	    std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
-		void* socket = publishDetails->pollItem.socket;
-		publishMapBySocket.erase(socket);
-		publishMapByID.erase(dataProductID);
-		zmq_unbind(socket, publishDetails->url.c_str());
-		zmq_close(socket);
+    // If data product ID exists, clean up and remove socket. Otherwise, likely a duplicate unregister request
+    if (publishMapByID.count(dataProductID))
+    {
+        std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductID];
+        void* socket = publishDetails->pollItem.socket;
+        publishMapBySocket.erase(socket);
+        publishMapByID.erase(dataProductID);
+        zmq_unbind(socket, publishDetails->url.c_str());
+        zmq_close(socket);
 
-		// delete any cached values.
-        for (map<string,std::shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin(); iter != publishDetails->lastCachedValues.end(); iter++)
-		    delete [] iter->second->value;
+        // delete any cached values.
+        for (map<string, std::shared_ptr<CacheValue> >::iterator iter = publishDetails->lastCachedValues.begin();
+             iter != publishDetails->lastCachedValues.end(); iter++)
+            delete[] iter->second->value;
         publishDetails->lastCachedValues.clear();
         publishDetails->hasSubscribers = false;
 
-		// Remove from poll items
-		vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
-		while (iter != pollItems.end())
-		{
-			if (iter->socket == socket)
-			{
-				iter = pollItems.erase(iter);
-			}
-			else
-			{
-				iter++;
-			}
-		}
-	}
+        // Remove from poll items
+        vector<zmq_pollitem_t>::iterator iter = pollItems.begin();
+        while (iter != pollItems.end())
+        {
+            if (iter->socket == socket)
+            {
+                iter = pollItems.erase(iter);
+            }
+            else
+            {
+                iter++;
+            }
+        }
+    }
 }
 
 void GravityPublishManager::setHWM()
 {
-	// Read the high water mark setting
-	publishHWM = readIntMessage(gravityNodeResponseSocket);
+    // Read the high water mark setting
+    publishHWM = readIntMessage(gravityNodeResponseSocket);
 
-	// Send ACK
-	sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
+    // Send ACK
+    sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::setKeepAlive()
 {
-	// TCP KeepAlive is being enabled
-	tcpKeepAliveEnabled = true;
-	
-	// Get TCP keep-alive settings
-	tcpKeepAliveTime = readIntMessage(gravityNodeResponseSocket);
-	tcpKeepAliveProbes = readIntMessage(gravityNodeResponseSocket);
-	tcpKeepAliveIntvl = readIntMessage(gravityNodeResponseSocket);
-	
-	// Send ACK
-	sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
+    // TCP KeepAlive is being enabled
+    tcpKeepAliveEnabled = true;
+
+    // Get TCP keep-alive settings
+    tcpKeepAliveTime = readIntMessage(gravityNodeResponseSocket);
+    tcpKeepAliveProbes = readIntMessage(gravityNodeResponseSocket);
+    tcpKeepAliveIntvl = readIntMessage(gravityNodeResponseSocket);
+
+    // Send ACK
+    sendStringMessage(gravityNodeResponseSocket, "ACK", ZMQ_DONTWAIT);
 }
 
 void GravityPublishManager::publish(void* requestSocket)
@@ -504,7 +511,7 @@ void GravityPublishManager::publish(void* requestSocket)
     // Read the filter text
     string dataProductId = readStringMessage(requestSocket);
     uint64_t timestamp = readUint64Message(requestSocket);
-    string filterText    = readStringMessage(requestSocket);
+    string filterText = readStringMessage(requestSocket);
 
     // Read the data product
     zmq_msg_t msg;
@@ -512,11 +519,10 @@ void GravityPublishManager::publish(void* requestSocket)
     zmq_recvmsg(requestSocket, &msg, -1);
     size_t gdbSize = zmq_msg_size(&msg);
     // make a copy to hold for new subscribers below
-    char *bytes = new char[gdbSize];
+    char* bytes = new char[gdbSize];
     memcpy(bytes, zmq_msg_data(&msg), gdbSize);
     zmq_msg_close(&msg);
 
-	
     std::shared_ptr<PublishDetails> publishDetails = publishMapByID[dataProductId];
     if (!publishDetails)
     {
@@ -525,28 +531,32 @@ void GravityPublishManager::publish(void* requestSocket)
     }
 
     // delete any old data and ...
-    if (publishDetails->lastCachedValues.count(filterText) > 0) {
-        delete [] publishDetails->lastCachedValues[filterText]->value;
+    if (publishDetails->lastCachedValues.count(filterText) > 0)
+    {
+        delete[] publishDetails->lastCachedValues[filterText]->value;
     }
 
-	//cache new data unless publisher specified not to
-	if(publishDetails->cacheLastValue){
-		logger->trace("Cache last data product value for {}", dataProductId);
-		// ... save new data for late subscribers
-		std::shared_ptr<CacheValue> val = std::shared_ptr<CacheValue>(new CacheValue);
-		val->filterText = filterText;
-		val->value = bytes;
-		val->size = gdbSize;
-		val->timestamp = timestamp;
-		publishDetails->lastCachedValues[filterText] = val;
-	
-	}else{
-		logger->trace("We are not caching data products");
-	}
+    //cache new data unless publisher specified not to
+    if (publishDetails->cacheLastValue)
+    {
+        logger->trace("Cache last data product value for {}", dataProductId);
+        // ... save new data for late subscribers
+        std::shared_ptr<CacheValue> val = std::shared_ptr<CacheValue>(new CacheValue);
+        val->filterText = filterText;
+        val->value = bytes;
+        val->size = gdbSize;
+        val->timestamp = timestamp;
+        publishDetails->lastCachedValues[filterText] = val;
+    }
+    else
+    {
+        logger->trace("We are not caching data products");
+    }
     publish(publishDetails->socket, filterText, bytes, gdbSize);
 
-    if (!publishDetails->cacheLastValue){
-        delete [] bytes;
+    if (!publishDetails->cacheLastValue)
+    {
+        delete[] bytes;
     }
 
     if (metricsEnabled)
@@ -556,9 +566,8 @@ void GravityPublishManager::publish(void* requestSocket)
     }
 }
 
-void GravityPublishManager::publish(void* socket, const string &filterText, const void *bytes, int size)
+void GravityPublishManager::publish(void* socket, const string& filterText, const void* bytes, int size)
 {
-
     // Create message & send filter text
     sendStringMessage(socket, filterText, ZMQ_SNDMORE);
 
@@ -571,7 +580,6 @@ void GravityPublishManager::publish(void* socket, const string &filterText, cons
 
     // Clean up
     zmq_msg_close(&data);
-
 }
 
 void GravityPublishManager::subscribersExist()
@@ -581,12 +589,14 @@ void GravityPublishManager::subscribersExist()
     string ret;
     if (!publishDetails)
     {
-        ret = "Unknown data product id: "+dataProductID ;  // Note: this string is used in GravityNode to set the error code
-    } else {
+        ret = "Unknown data product id: " +
+              dataProductID;  // Note: this string is used in GravityNode to set the error code
+    }
+    else
+    {
         ret = publishDetails->hasSubscribers ? "Y" : "N";
     }
     sendStringMessage(gravityNodeResponseSocket, ret, ZMQ_DONTWAIT);
 }
-
 
 } /* namespace gravity */

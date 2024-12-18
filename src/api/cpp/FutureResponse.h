@@ -39,20 +39,20 @@ namespace gravity
 class FutureResponse : public GravityDataProduct
 {
 private:
-	friend class GravityNode;
+    friend class GravityNode;
 
-	/**
+    /**
 	 * Private constructor
-	 */ 
+	 */
     FutureResponse(std::string url);
 
-  /**
+    /**
    * Get socket URL
    */
-	std::string getUrl() const;
+    std::string getUrl() const;
 
 public:
-	/**
+    /**
      * Constructor that deserializes this FutureResponse from array of bytes
      * \param arrayPtr pointer to array of bytes containing serialized FutureResponse
      * \param size size of serialized data
@@ -65,10 +65,10 @@ public:
      */
     GRAVITY_API virtual ~FutureResponse();
 
-	/**
+    /**
 	 * Method for setting the GravityDataProduct response object to be returned to requestor
 	 */
-	GRAVITY_API void setResponse(const GravityDataProduct& response);
+    GRAVITY_API void setResponse(const GravityDataProduct& response);
 };
 
 } /* namespace gravity */

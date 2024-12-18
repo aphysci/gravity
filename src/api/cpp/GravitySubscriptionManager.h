@@ -43,10 +43,9 @@
 #include "DomainDataKey.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 namespace gravity
@@ -59,89 +58,91 @@ namespace gravity
 class GravitySubscriptionManager
 {
 private:
-	typedef struct TimeoutMonitor
-	{
-		GravitySubscriptionMonitor* monitor;
-		int timeout;
-		uint64_t endTime;
-		int64_t lastReceived;
-	} TimeoutMonitor;
+    typedef struct TimeoutMonitor
+    {
+        GravitySubscriptionMonitor *monitor;
+        int timeout;
+        uint64_t endTime;
+        int64_t lastReceived;
+    } TimeoutMonitor;
 
     typedef struct SubscriptionDetails
     {
         std::string domain;
         std::string dataProductID;
         std::string filter;
-		bool receiveCachedDataProducts;
+        bool receiveCachedDataProducts;
         std::map<std::string, zmq_pollitem_t> pollItemMap;
-		std::map<void*, std::string> socketToUrlMap;
-        std::set<GravitySubscriber*> subscribers;
-		std::set<std::shared_ptr<TimeoutMonitor> > monitors;
-		zmq_pollitem_t publisherUpdatePollItem;
-	} SubscriptionDetails;
+        std::map<void *, std::string> socketToUrlMap;
+        std::set<GravitySubscriber *> subscribers;
+        std::set<std::shared_ptr<TimeoutMonitor> > monitors;
+        zmq_pollitem_t publisherUpdatePollItem;
+    } SubscriptionDetails;
 
-	void* context;
-	void* gravityNodeSocket;
-    void* gravityMetricsSocket;
-	std::map<DomainDataKey, std::map<std::string, std::shared_ptr<SubscriptionDetails> > > subscriptionMap;
-    std::map<void*,std::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
-	std::map<void*,uint32_t> socketVerificationMap;
-	//std::map<DomainDataKey, std::map<std::string, zmq_pollitem_t> > publisherUpdateMap;
-    std::map<void*,std::shared_ptr<GravityDataProduct> > lastCachedValueMap;
-	std::vector<zmq_pollitem_t> pollItems;
+    void *context;
+    void *gravityNodeSocket;
+    void *gravityMetricsSocket;
+    std::map<DomainDataKey, std::map<std::string, std::shared_ptr<SubscriptionDetails> > > subscriptionMap;
+    std::map<void *, std::shared_ptr<SubscriptionDetails> > subscriptionSocketMap;
+    std::map<void *, uint32_t> socketVerificationMap;
+    //std::map<DomainDataKey, std::map<std::string, zmq_pollitem_t> > publisherUpdateMap;
+    std::map<void *, std::shared_ptr<GravityDataProduct> > lastCachedValueMap;
+    std::vector<zmq_pollitem_t> pollItems;
 
-	// Info for this node - not subscription specific
-	std::string domain;
-	std::string componentID;
-	std::string ipAddress;
+    // Info for this node - not subscription specific
+    std::string domain;
+    std::string componentID;
+    std::string ipAddress;
 
-	// Service Directory Location
-	std::string serviceDirectoryUrl;
+    // Service Directory Location
+    std::string serviceDirectoryUrl;
 
-	void setHWM();
-	void addSubscription();
-	void removeSubscription();
-	int readSubscription(void *socket, std::string &filterText, std::shared_ptr<GravityDataProduct> &dataProduct);
-	void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
-	void removePollItem(zmq_pollitem_t &pollItem);
-	void ready();
-	void setTimeoutMonitor();
-	void clearTimeoutMonitor();
-	void calculateTimeout();
-	void trimPublishers(const std::list<gravity::PublisherInfoPB>& fullList, std::list<gravity::PublisherInfoPB>& trimmedList);
-	void unsubscribeFromPollItem(zmq_pollitem_t pollItem, std::string filterText);
-	void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string domain, std::string url, uint32_t regTime);
+    void setHWM();
+    void addSubscription();
+    void removeSubscription();
+    int readSubscription(void *socket, std::string &filterText, std::shared_ptr<GravityDataProduct> &dataProduct);
+    void *setupSubscription(const std::string &url, const std::string &filter, zmq_pollitem_t &pollItem);
+    void removePollItem(zmq_pollitem_t &pollItem);
+    void ready();
+    void setTimeoutMonitor();
+    void clearTimeoutMonitor();
+    void calculateTimeout();
+    void trimPublishers(const std::list<gravity::PublisherInfoPB> &fullList,
+                        std::list<gravity::PublisherInfoPB> &trimmedList);
+    void unsubscribeFromPollItem(zmq_pollitem_t pollItem, std::string filterText);
+    void notifyServiceDirectoryOfStaleEntry(std::string dataProductId, std::string domain, std::string url,
+                                            uint32_t regTime);
 
-	int pollTimeout;
-	std::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
-	std::shared_ptr<SubscriptionDetails> currMonitorDetails;
+    int pollTimeout;
+    std::shared_ptr<TimeoutMonitor> currTimeoutMonitor;
+    std::shared_ptr<SubscriptionDetails> currMonitorDetails;
 
-	int subscribeHWM;
+    int subscribeHWM;
     bool metricsEnabled;
     GravityMetrics metricsData;
     void collectMetrics(std::vector<std::shared_ptr<GravityDataProduct> > dataProducts);
-	
-	// Logger
-	std::shared_ptr<spdlog::logger> logger;
-	
+
+    // Logger
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-	/**
+    /**
 	 * Constructor GravitySubscriptionManager
 	 * \param context The zmq context in which the inproc socket will be established with the GravityNode
 	 */
-	GravitySubscriptionManager(void* context);
+    GravitySubscriptionManager(void *context);
 
-	/**
+    /**
 	 * Default destructor
 	 */
-	virtual ~GravitySubscriptionManager();
+    virtual ~GravitySubscriptionManager();
 
-	/**
+    /**
 	 * Starts the GravitySubscriptionManager which will run forever, managing subscriptions and
 	 * passing published data to the defined subscribers. Should be executed from GravityNode in
 	 * its own thread with a shared zmq context.
 	 */
-	void start();
+    void start();
 };
 
 } /* namespace gravity */

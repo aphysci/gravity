@@ -18,7 +18,6 @@
 
 #include "GravityLogger.h"
 #include "FileArchiver.h"
-#include "SpdLog.h"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -30,86 +29,81 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-	gravity::FileArchiver archiver;
-	archiver.waitForExit();
+    gravity::FileArchiver archiver;
+    archiver.waitForExit();
 }
 
-namespace gravity {
+namespace gravity
+{
 
 const char* FileArchiver::ComponentName = "FileArchiver";
 
 FileArchiver::FileArchiver()
 {
-	// Initialize Gravity Node
-	gravityNode.init(FileArchiver::ComponentName);
-	
-	// Get Gravity logger
-	logger = gravityNode.getGravityLogger();
-	if (!logger) {
-		SpdLog::critical("Failed to get GravityLogger");
-		return;
-	}
+    // Initialize Gravity Node
+    gravityNode.init(FileArchiver::ComponentName);
 
-	// Configure logger to log to console
-	//Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);
+    // Get logger
+    logger = spdlog::get("GravityLogger");
 
-	// Open archive file
-	string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
-	if (filename == "auto")
-	{
-		time_t now;
-		struct tm ts;
-		char fname[80];
-		time(&now);
-		ts = *localtime(&now);
-		strftime(fname, sizeof(fname), "archive_%Y%m%d_%H%M%S.bin", &ts);
-		//cout << "fname = '" << fname << "'" << endl;
-		archiveFile.open(fname, ios::out | ios::binary);
-	}
-	else
-	{
-		archiveFile.open(filename.c_str(), ios::out | ios::binary);
-	}
+    // Configure logger to log to console
+    //Log::initAndAddConsoleLogger(FileArchiver::ComponentName, Log::MESSAGE);
 
-	// Write value (1) to endian-ness check when read
-	int value = 1;
-        archiveFile.write((char*)&value, sizeof(value));
+    // Open archive file
+    string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
+    if (filename == "auto")
+    {
+        time_t now;
+        struct tm ts;
+        char fname[80];
+        time(&now);
+        ts = *localtime(&now);
+        strftime(fname, sizeof(fname), "archive_%Y%m%d_%H%M%S.bin", &ts);
+        //cout << "fname = '" << fname << "'" << endl;
+        archiveFile.open(fname, ios::out | ios::binary);
+    }
+    else
+    {
+        archiveFile.open(filename.c_str(), ios::out | ios::binary);
+    }
 
-	// Get list of data products to archive
-	string dpList = gravityNode.getStringParam("DataProductList", "");
+    // Write value (1) to endian-ness check when read
+    int value = 1;
+    archiveFile.write((char*)&value, sizeof(value));
 
-	// allow starting suspended
-	suspend = gravityNode.getBoolParam("StartSuspended", false);
+    // Get list of data products to archive
+    string dpList = gravityNode.getStringParam("DataProductList", "");
 
-	gravityNode.registerService("FileArchiverControlRequest", GravityTransportTypes::TCP, *this);
+    // allow starting suspended
+    suspend = gravityNode.getBoolParam("StartSuspended", false);
 
-	// Subscribe to each data product
-	vector<string> dps = split(dpList);
-	for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
-	{
-	    gravityNode.subscribe(*iter, *this);
-	}
+    gravityNode.registerService("FileArchiverControlRequest", GravityTransportTypes::TCP, *this);
+
+    // Subscribe to each data product
+    vector<string> dps = split(dpList);
+    for (vector<string>::iterator iter = dps.begin(); iter != dps.end(); iter++)
+    {
+        gravityNode.subscribe(*iter, *this);
+    }
 }
 
-FileArchiver::~FileArchiver()
-{
-}
+FileArchiver::~FileArchiver() {}
 
 vector<string> FileArchiver::split(string s)
 {
-	vector<string> tokens;
+    vector<string> tokens;
 
-	std::istringstream iss(s);
-	std::string tok;
-	while (getline(iss, tok, ','))
-	{
-		// trim any spaces from the ends
-		tok.erase(tok.find_last_not_of(" ") + 1);
-		tok.erase(0, tok.find_first_not_of(" "));
-		tokens.push_back(tok);
-	}
+    std::istringstream iss(s);
+    std::string tok;
+    while (getline(iss, tok, ','))
+    {
+        // trim any spaces from the ends
+        tok.erase(tok.find_last_not_of(" ") + 1);
+        tok.erase(0, tok.find_first_not_of(" "));
+        tokens.push_back(tok);
+    }
 
-	return tokens;
+    return tokens;
 }
 
 void FileArchiver::subscriptionFilled(const vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
@@ -135,7 +129,8 @@ void FileArchiver::subscriptionFilled(const vector<std::shared_ptr<GravityDataPr
     }
 }
 
-std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID, const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serviceID,
+                                                          const GravityDataProduct& dataProduct)
 {
     logger->debug("Received service request of type '{}'", serviceID);
     FileArchiverControlResponsePB faResponse;
@@ -157,14 +152,12 @@ std::shared_ptr<GravityDataProduct> FileArchiver::request(const std::string serv
         }
     }
 
-    std::shared_ptr<GravityDataProduct> gdpResponse = std::shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
+    std::shared_ptr<GravityDataProduct> gdpResponse =
+        std::shared_ptr<GravityDataProduct>(new GravityDataProduct("FileArchiverControlResponse"));
     gdpResponse->setData(faResponse);
     return gdpResponse;
 }
 
-void FileArchiver::waitForExit()
-{
-	gravityNode.waitForExit();
-}
+void FileArchiver::waitForExit() { gravityNode.waitForExit(); }
 
 } /* namespace gravity */
