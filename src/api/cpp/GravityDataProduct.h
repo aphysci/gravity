@@ -45,11 +45,12 @@ class GravityNode;
 class GravityDataProduct
 {
 protected:
-    std::shared_ptr<GravityDataProductPB> gravityDataProductPB; ///< internal protobuf representation of data product
+    std::shared_ptr<GravityDataProductPB> gravityDataProductPB;  ///< internal protobuf representation of data product
     friend class GravityNode;
     friend class GravityMetricsManager;
-	friend class GravityServiceManager;
+    friend class GravityServiceManager;
     friend void* Heartbeat(void*);
+
 public:
     /**
      * Default Constructor
@@ -83,7 +84,7 @@ public:
      */
     GRAVITY_API uint64_t getGravityTimestamp() const;
 
-	/**
+    /**
      * Method to return the timestamp associated with the receipt of this data product
      *  Represents Microseconds since the Unix Epoch
      * \return received timestamp for data (0 if not received via subscription)
@@ -168,48 +169,48 @@ public:
      * \param gdp GravityDataProduct to compare with this one.
      * \return true if the two GravityDataProducts are equivalent, false otherwise.
      */
-    GRAVITY_API bool operator==(const GravityDataProduct &gdp) const;
+    GRAVITY_API bool operator==(const GravityDataProduct& gdp) const;
 
     /**
      * Check non-equivalence between two GravityDataProducts. 
      * \param gdp GravityDataProduct to compare with this one.
      * \return true if the two GravityDataProducts are not equivalent, false otherwise.
      */
-    GRAVITY_API bool operator!=(const GravityDataProduct &gdp) const;
+    GRAVITY_API bool operator!=(const GravityDataProduct& gdp) const;
 
-	/**
+    /**
 	 * Get the component ID of the GravityNode that produced this data product
 	 * \return component ID of the source GravityNode
 	 */
-	GRAVITY_API std::string getComponentId() const;
+    GRAVITY_API std::string getComponentId() const;
 
-	/**
+    /**
 	 * Get the domain of the GravityNode that produced this data product
 	 * \return domain of the source GravityNode
 	 */
-	GRAVITY_API std::string getDomain() const;
+    GRAVITY_API std::string getDomain() const;
 
-	/**
+    /**
 	 * Get the flag indicating if this is a "future" response
 	 * \return future response flag
 	 */
-	GRAVITY_API bool isFutureResponse() const;
+    GRAVITY_API bool isFutureResponse() const;
 
-	/**
+    /**
 	* Get the flag indicated if this was a cached data product.	
 	*/
-	GRAVITY_API bool isCachedDataproduct() const;
-	
-	/**
+    GRAVITY_API bool isCachedDataproduct() const;
+
+    /**
 	* Sets the flag indicating this data product is cached	
 	*/
-	GRAVITY_API void setIsCachedDataproduct(bool cached);
+    GRAVITY_API void setIsCachedDataproduct(bool cached);
 
-	/**
+    /**
 	 * Get the url for the REP socket of a future response
 	 * \return url for REP socket of future response
 	 */
-	GRAVITY_API std::string getFutureSocketUrl() const;
+    GRAVITY_API std::string getFutureSocketUrl() const;
 
     /**
      * Set the timestamp on this GravityDataProduct (typically set by infrastructure at publish)
@@ -217,7 +218,7 @@ public:
      */
     GRAVITY_API void setTimestamp(uint64_t ts) const { gravityDataProductPB->set_timestamp(ts); }
 
-	/**
+    /**
      * Set the received timestamp on this GravityDataProduct (typically set by infrastructure on receipt)
      * \param ts Received timestamp (epoch microseconds) for this GravityDataProduct
      */
@@ -227,56 +228,59 @@ public:
      * Set the component id on this GravityDataProduct (typically set by infrastructure at publish)
      * \param componentId ID of the component that produces this GravityDataProduct
      */
-	GRAVITY_API void setComponentId(std::string componentId) const { gravityDataProductPB->set_componentid(componentId);}
+    GRAVITY_API void setComponentId(std::string componentId) const
+    {
+        gravityDataProductPB->set_componentid(componentId);
+    }
 
     /**
      * Set the domain on this GravityDataProduct (typically set by infrastructure at publish)
      * \param domain name of the domain on which this GravityDataProduct is produced
      */
-	GRAVITY_API void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain);}
+    GRAVITY_API void setDomain(std::string domain) const { gravityDataProductPB->set_domain(domain); }
 
-	/**
+    /**
 	 * Get the flag indicating if this message has been relayed by a Relay component
 	 */
-	GRAVITY_API bool isRelayedDataproduct() const;
+    GRAVITY_API bool isRelayedDataproduct() const;
 
-	/**
+    /**
 	 * Set the flag indicating whether this message has been relayed or has come from the original source
 	 */
-	GRAVITY_API void setIsRelayedDataproduct(bool relayed);
+    GRAVITY_API void setIsRelayedDataproduct(bool relayed);
 
-	/**
+    /**
 	 * Set the data protocol in this data product (for instance, protobuf2)
 	 */
-	GRAVITY_API void setProtocol(const std::string& protocol);
+    GRAVITY_API void setProtocol(const std::string& protocol);
 
-	/**
+    /**
 	 * Get the data protocol in this data product (for instance, protobuf2)
 	 */
-	GRAVITY_API const std::string& getProtocol() const;
+    GRAVITY_API const std::string& getProtocol() const;
 
-	/**
+    /**
 	 * Set the type of data in this data product (for instance, the full protobuf type name)
 	 */
-	GRAVITY_API void setTypeName(const std::string& dataType);
+    GRAVITY_API void setTypeName(const std::string& dataType);
 
-	/**
+    /**
 	 * Get the type of data in this data product (for instance, the full protobuf type name)
 	 */
-	GRAVITY_API const std::string& getTypeName() const;
+    GRAVITY_API const std::string& getTypeName() const;
 
-	/**
+    /**
 	* Method to return the time associated with the registration of this data product
 	*  Represents Seconds since the Unix Epoch
 	* \return registration time for data (0 if not set)
 	*/
-	GRAVITY_API uint32_t getRegistrationTime() const;
+    GRAVITY_API uint32_t getRegistrationTime() const;
 
-	/**
+    /**
 	* Set the registration time on this GravityDataProduct (typically set by infrastructure when created)
 	* \param ts Registration time (epoch seconds) for this GravityDataProduct
 	*/
-	GRAVITY_API void setRegistrationTime(uint32_t ts) const { gravityDataProductPB->set_registration_time(ts); }
+    GRAVITY_API void setRegistrationTime(uint32_t ts) const { gravityDataProductPB->set_registration_time(ts); }
 };
 
 } /* namespace gravity */

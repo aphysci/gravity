@@ -37,30 +37,28 @@ namespace gravity
 class ServiceDirectoryUDPReceiver
 {
 private:
-	static const int MAX_RECEIVE_COUNT = 3;
+    static const int MAX_RECEIVE_COUNT = 3;
 
-	void* context;
-	void* sdSocket;
-	std::string ourDomain;
-	std::string ourUrl;
-	unsigned int port;
-	int receiveSocket;
+    void* context;
+    void* sdSocket;
+    std::string ourDomain;
+    std::string ourUrl;
+    unsigned int port;
+    int receiveSocket;
 
-	std::vector<std::string> validDomains;
+    std::vector<std::string> validDomains;
 
-	void receiveReceiverParameters();
-	int initReceiveSocket();
-	void parseValidDomains(std::string domainString,unsigned int num);
-	bool isValidDomain(std::string domain);
-
+    void receiveReceiverParameters();
+    int initReceiveSocket();
+    void parseValidDomains(std::string domainString, unsigned int num);
+    bool isValidDomain(std::string domain);
 
 public:
-	ServiceDirectoryUDPReceiver(void* context);
+    ServiceDirectoryUDPReceiver(void* context);
 
-	virtual ~ServiceDirectoryUDPReceiver();
+    virtual ~ServiceDirectoryUDPReceiver();
 
-	void start();
-
+    void start();
 };
 } /*namespace gravity*/
-#endif //SERVICEDIRECTORYUDPRECEIVER__H__
+#endif  //SERVICEDIRECTORYUDPRECEIVER__H__

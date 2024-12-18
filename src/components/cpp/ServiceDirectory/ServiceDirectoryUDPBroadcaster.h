@@ -40,38 +40,36 @@
 #endif
 #include "spdlog/spdlog.h"
 
-namespace gravity{
-
+namespace gravity
+{
 
 class ServiceDirectoryUDPBroadcaster
 {
 private:
-	void* context;
-	std::string domainName;
-	std::string url;
-	std::string broadcastIP;
-	unsigned int port;
-	unsigned int broadcastRate;
-	int broadcastSocket;
-	struct sockaddr_in destAddress;
-	static bool loop;
-	void* sdSocket;
-	time_t starttime;
+    void* context;
+    std::string domainName;
+    std::string url;
+    std::string broadcastIP;
+    unsigned int port;
+    unsigned int broadcastRate;
+    int broadcastSocket;
+    struct sockaddr_in destAddress;
+    static bool loop;
+    void* sdSocket;
+    time_t starttime;
 
-	void receiveBroadcastParameters();
-	int initBroadcastSocket();
+    void receiveBroadcastParameters();
+    int initBroadcastSocket();
 
 public:
-	ServiceDirectoryUDPBroadcaster(void* context);
+    ServiceDirectoryUDPBroadcaster(void* context);
 
-	virtual ~ServiceDirectoryUDPBroadcaster();
+    virtual ~ServiceDirectoryUDPBroadcaster();
 
-	void start();
+    void start();
 
-	void setDomainName(std::string domain){domainName=domain;};
-	void setBroadcastRate(u_int rate){broadcastRate=rate;};
-
-
+    void setDomainName(std::string domain) { domainName = domain; };
+    void setBroadcastRate(u_int rate) { broadcastRate = rate; };
 };
-}/* namespace gravity */
-#endif //SERVICEDIRECTORYUDPBROADCASTER__H__
+} /* namespace gravity */
+#endif  //SERVICEDIRECTORYUDPBROADCASTER__H__

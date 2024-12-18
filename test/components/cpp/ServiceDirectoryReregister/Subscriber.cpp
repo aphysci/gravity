@@ -29,65 +29,64 @@ using namespace gravity;
 class SimpleGravitySubscriber : public GravitySubscriber
 {
 public:
-	virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
-	bool done;
+    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+    bool done;
 };
 
 int main()
 {
-	GravityNode gn;
-	const std::string dataProductID = "DataProduct";
+    GravityNode gn;
+    const std::string dataProductID = "DataProduct";
 
-	//Initialize gravity, giving this node a componentID.
-	GravityReturnCode ret = gn.init("Subscriber");
-	int numTries = 3;
-	while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
-	{
-	    Log::warning("Error during init, retrying...");
-	    ret = gn.init("Subscriber");
-	}
-	if (ret != GravityReturnCodes::SUCCESS)
-	{
-		Log::fatal("Could not initialize GravityNode, return code is %d", ret);
-		exit(1);
-	}
+    //Initialize gravity, giving this node a componentID.
+    GravityReturnCode ret = gn.init("Subscriber");
+    int numTries = 3;
+    while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
+    {
+        Log::warning("Error during init, retrying...");
+        ret = gn.init("Subscriber");
+    }
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        Log::fatal("Could not initialize GravityNode, return code is %d", ret);
+        exit(1);
+    }
 
-	//Subscribe to the counter.
-	SimpleGravitySubscriber hwSubscriber;
+    //Subscribe to the counter.
+    SimpleGravitySubscriber hwSubscriber;
     hwSubscriber.done = false;
-	ret = gn.subscribe(dataProductID, hwSubscriber);
-	if (ret != GravityReturnCodes::SUCCESS)
-	{
-		Log::critical("Could not subscribe to data product with id %s, return code was %d", dataProductID.c_str(), ret);
-		exit(1);
-	}
+    ret = gn.subscribe(dataProductID, hwSubscriber);
+    if (ret != GravityReturnCodes::SUCCESS)
+    {
+        Log::critical("Could not subscribe to data product with id %s, return code was %d", dataProductID.c_str(), ret);
+        exit(1);
+    }
 
     int tries = 0;
-	while(!hwSubscriber.done && tries++ < 30)
-	{
-	    Log::trace("done = %d, tries = %d", hwSubscriber.done, tries);
-	    gravity::sleep(1000);
-	}
+    while (!hwSubscriber.done && tries++ < 30)
+    {
+        Log::trace("done = %d, tries = %d", hwSubscriber.done, tries);
+        gravity::sleep(1000);
+    }
 
-	// make sure we finished
-	GRAVITY_TEST(tries < 30);
+    // make sure we finished
+    GRAVITY_TEST(tries < 30);
 
-	gn.unsubscribe(dataProductID, hwSubscriber);
+    gn.unsubscribe(dataProductID, hwSubscriber);
 }
 
-void SimpleGravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravitySubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
-			i != dataProducts.end(); i++)
-	{
-		//Get a raw message
-		int counter;
-		(*i)->getData(&counter, sizeof(int));
+    for (std::vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+         i != dataProducts.end(); i++)
+    {
+        //Get a raw message
+        int counter;
+        (*i)->getData(&counter, sizeof(int));
 
-		//Output the message
-		Log::warning("Got message: %d", counter);
+        //Output the message
+        Log::warning("Got message: %d", counter);
 
-		if (counter > 20)
-		    done = true;
-	}
+        if (counter > 20) done = true;
+    }
 }

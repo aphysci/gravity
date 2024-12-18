@@ -55,46 +55,46 @@ namespace gravity
 class GravityMetricsManager
 {
 private:
-	void* context;
-	void* metricsControlSocket;
-	void* pubMetricsSocket;
-	void* subMetricsSocket;
-	void* metricsPubSocket;
-	std::vector<zmq_pollitem_t> pollItems;
+    void* context;
+    void* metricsControlSocket;
+    void* pubMetricsSocket;
+    void* subMetricsSocket;
+    void* metricsPubSocket;
+    std::vector<zmq_pollitem_t> pollItems;
 
-	void ready();
-	void publishMetricsReport();
+    void ready();
+    void publishMetricsReport();
 
-	bool metricsEnabled;
-	int samplePeriod;
-	int samplesPerPublish;
-	std::string componentID;
-	std::string ipAddr;
-	int regTimestamp;
-	std::map<std::pair<std::string,GravityMetricsPB_MessageType>,  GravityMetricsPB> metricsData;
+    bool metricsEnabled;
+    int samplePeriod;
+    int samplesPerPublish;
+    std::string componentID;
+    std::string ipAddr;
+    int regTimestamp;
+    std::map<std::pair<std::string, GravityMetricsPB_MessageType>, GravityMetricsPB> metricsData;
 
-	void collectMetrics(void* socket, GravityMetricsPB_MessageType type);
-	void publishMetrics();
-	
-	std::shared_ptr<spdlog::logger> logger;
-	
+    void collectMetrics(void* socket, GravityMetricsPB_MessageType type);
+    void publishMetrics();
+
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-	/**
+    /**
 	 * Constructor GravityMetricsManager
 	 * \param context The zmq context in which the inproc socket will be established with the GravityNode
 	 */
-	GravityMetricsManager(void* context);
+    GravityMetricsManager(void* context);
 
-	/**
+    /**
 	 * Default destructor
 	 */
-	virtual ~GravityMetricsManager();
+    virtual ~GravityMetricsManager();
 
-	/**
+    /**
 	 * Starts the GravityMetricsManager which will run forever
 	 * Should be executed from GravityNode in its own thread with a shared zmq context.
 	 */
-	void start();
+    void start();
 };
 
 } /* namespace gravity */

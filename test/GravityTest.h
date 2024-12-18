@@ -22,22 +22,25 @@
 #include <sstream>
 #include <ostream>
 
-#define GRAVITY_TEST_EQUALS(a,b) do { \
-    if ( !( (a) == (b) ) ) \
-    { \
-        std::cerr << "Gravity assertion failed, " << a << " != " << b << " at " << __FILE__ << ":" << __LINE__ << std::endl; \
-        exit(1); \
-    } \
-} while (0)
+#define GRAVITY_TEST_EQUALS(a, b)                                                                                  \
+    do                                                                                                             \
+    {                                                                                                              \
+        if (!((a) == (b)))                                                                                         \
+        {                                                                                                          \
+            std::cerr << "Gravity assertion failed, " << a << " != " << b << " at " << __FILE__ << ":" << __LINE__ \
+                      << std::endl;                                                                                \
+            exit(1);                                                                                               \
+        }                                                                                                          \
+    } while (0)
 
-#define GRAVITY_TEST(a) do { \
-    if ( !( a ) ) \
-    { \
-        std::cerr << "Gravity assertion failed at " << __FILE__ << ":" << __LINE__ << std::endl; \
-        exit(1); \
-    } \
-} while (0)
-
-
+#define GRAVITY_TEST(a)                                                                              \
+    do                                                                                               \
+    {                                                                                                \
+        if (!(a))                                                                                    \
+        {                                                                                            \
+            std::cerr << "Gravity assertion failed at " << __FILE__ << ":" << __LINE__ << std::endl; \
+            exit(1);                                                                                 \
+        }                                                                                            \
+    } while (0)
 
 #endif

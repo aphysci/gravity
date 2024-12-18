@@ -27,31 +27,29 @@
 
 using namespace std;
 
-namespace gravity {
+namespace gravity
+{
 
 FutureResponse::FutureResponse(string url) : GravityDataProduct("FutureResponse")
-{	
-	// Populate protobuf with future response specific fields
-	gravityDataProductPB->set_future_response(true);
-	gravityDataProductPB->set_future_socket_url(url);
+{
+    // Populate protobuf with future response specific fields
+    gravityDataProductPB->set_future_response(true);
+    gravityDataProductPB->set_future_socket_url(url);
 }
 
 FutureResponse::FutureResponse(const void* arrayPtr, int size) : GravityDataProduct(arrayPtr, size) {}
 
 FutureResponse::~FutureResponse() {}
 
-string FutureResponse::getUrl() const
-{
-	return gravityDataProductPB->future_socket_url();
-}
+string FutureResponse::getUrl() const { return gravityDataProductPB->future_socket_url(); }
 
 void FutureResponse::setResponse(const GravityDataProduct& response)
 {
-	int size = response.getSize();
-	char* data = new char[size];
-	response.serializeToArray(data);
-	setData(data, size);
-	delete [] data;
+    int size = response.getSize();
+    char* data = new char[size];
+    response.serializeToArray(data);
+    setData(data, size);
+    delete[] data;
 }
 
 } /* namespace gravity */
