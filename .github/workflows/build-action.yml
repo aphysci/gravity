@@ -7,38 +7,29 @@ on:
 jobs:
   build-bionic:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:bionic
     steps:
-      - 
-        name: clone
-        uses: actions/checkout@v3
+      - name: clone
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - 
+      -
         name: build
-        # The bionic build is run with docker-run-action because standard GitHub actions
-        # use node20 which can't run on bionic
-        # ToDo: verify this will error out properly on failure
-        uses: addnab/docker-run-action@v3
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
-          image: ghcr.io/aphysci/gravity_base:bionic
-          shell: bash
-          options: -v ${{ github.workspace }}:/home/aps/git/gravity -u aps
-          run: |
-            echo $(cat /etc/lsb-release)
-            cd ~/git/gravity
-            ls -lh
-            pwd
-            mkdir build && cd build
-            pwd
-            cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-            cmake --build . --target install --parallel
-            ./install/bin/ServiceDirectory &
-            ctest --verbose && mkdir output
-            ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
-            echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
+        run: |
+          false
+          echo $(cat /etc/lsb-release)
+          cd ~/git/gravity
+          ls -lh
+          pwd
+          mkdir build && cd build
+          pwd
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --verbose && mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
       - 
         name: upload
         uses: actions/upload-artifact@v4
