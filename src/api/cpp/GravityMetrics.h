@@ -50,7 +50,6 @@ private:
     std::map<std::string, MetricsSample> metrics;
     uint64_t startTime;
     uint64_t endTime;
-
 public:
     /**
      * Creates an empty GravityMetrics object

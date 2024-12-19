@@ -39,52 +39,49 @@
 #include "protobuf/ServiceDirectoryUnregistrationPB.pb.h"
 #include "spdlog/spdlog.h"
 
-namespace gravity
-{
+namespace gravity{
 
 typedef struct SyncInitDetails
 {
-    void* context;
-    std::string url;
+	void* context;
+	std::string url;
 } SyncInitDetails;
 
 typedef struct SyncDomainDetails
 {
-    std::string domain;
-    std::string ipAddress;
-    void* socket;
-    bool initialized;
-    ServiceDirectoryMapPB providerMap;
-    uint32_t registrationTime;
+	std::string domain;
+	std::string ipAddress;
+	void* socket;
+	bool initialized;
+	ServiceDirectoryMapPB providerMap;
+	uint32_t registrationTime;
 } SyncDomainDetails;
 
 class ServiceDirectorySynchronizer
 {
 private:
-    void* context;
-    std::string ownURL;
-    void* commandSocket;
-    void* requestSocket;
-    std::vector<zmq_pollitem_t> pollItems;
-    std::map<std::string, std::shared_ptr<SyncDomainDetails> > syncMap;  // key: domain name
-    std::map<void*, std::shared_ptr<SyncDomainDetails> > socketToDomainDetailsMap;
-    std::queue<std::shared_ptr<GravityDataProduct> > registrationUpdates;
-    bool pendingResponse;
+	void* context;
+	std::string ownURL;
+	void* commandSocket;
+	void* requestSocket;
+	std::vector<zmq_pollitem_t> pollItems;
+	std::map<std::string, std::shared_ptr<SyncDomainDetails> > syncMap; // key: domain name
+	std::map<void*, std::shared_ptr<SyncDomainDetails> > socketToDomainDetailsMap;
+	std::queue<std::shared_ptr<GravityDataProduct> > registrationUpdates;
+	bool pendingResponse;
 
-    void printMap(ServiceDirectoryMapPB providerMap);
+	void printMap(ServiceDirectoryMapPB providerMap);
 
-    void createRegistrationRequest(std::string productID, std::string url, std::string componentID, std::string domain,
-                                   ProductChange_RegistrationType type, uint64_t timestamp);
-    void createUnregistrationRequest(std::string productID, std::string url, std::string domain,
-                                     ProductChange_RegistrationType type, uint32_t regTime);
-
-    std::shared_ptr<spdlog::logger> logger;
+	void createRegistrationRequest(std::string productID, std::string url, std::string componentID, std::string domain, 
+									ProductChange_RegistrationType type, uint64_t timestamp);
+	void createUnregistrationRequest(std::string productID, std::string url, std::string domain, ProductChange_RegistrationType type, uint32_t regTime);
+	
 
 public:
-    ServiceDirectorySynchronizer(void* context, std::string url);
-    virtual ~ServiceDirectorySynchronizer();
+	ServiceDirectorySynchronizer(void* context, std::string url);
+	virtual ~ServiceDirectorySynchronizer();
 
-    void start();
+	void start();
 };
-} /* namespace gravity */
-#endif  //SERVICEDIRECTORYSYNCHRONIZER__H__
+}/* namespace gravity */
+#endif //SERVICEDIRECTORYSYNCHRONIZER__H__

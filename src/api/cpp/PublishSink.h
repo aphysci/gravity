@@ -26,67 +26,69 @@
 
 namespace gravity
 {
-
-template <typename Mutex>
+	
+template<typename Mutex>
 class proxy_dist_sink : public spdlog::sinks::dist_sink<Mutex>
 {
     using BaseSink = spdlog::sinks::dist_sink<Mutex>;
 
 protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override
+    void sink_it_(const spdlog::details::log_msg &msg) override
     {
-        if (BaseSink::should_log(msg.level))
-        {
+        if (BaseSink::should_log(msg.level)) 
+		{
             BaseSink::sink_it_(msg);
         }
     }
 };
-
-template <typename Mutex>
+	
+template<typename Mutex>
 class PublishSink : public spdlog::sinks::base_sink<Mutex>
 {
 private:
-    GravityNode* gn;
-    std::mutex lock;
-    bool init;
-
-    bool checkInit()
-    {
-        std::lock_guard<std::mutex> guard(lock);
-        if (!init)
-        {
-            //GravityReturnCode ret  = gn->registerDataProduct(gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP);
-            GravityReturnCode ret = gn->registerDataProductInternal(
-                gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP, false, false, false, true);
-            init = ret == GravityReturnCodes::SUCCESS;
-        }
-        return init;
-    }
-
+	GravityNode* gn;
+	std::mutex lock;
+	bool init;
+	
+	bool checkInit()
+	{
+		std::lock_guard<std::mutex> guard(lock);
+		if (!init)
+		{
+			//GravityReturnCode ret  = gn->registerDataProduct(gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP);
+			GravityReturnCode ret  = gn->registerDataProductInternal(gravity::constants::GRAVITY_LOGGER_DPID, GravityTransportTypes::TCP, false, false, false, true);
+			init = ret == GravityReturnCodes::SUCCESS;
+		}
+		return init;
+	}
+	
 public:
-    PublishSink(GravityNode* gn) : init(false) { this->gn = gn; }
-
+	PublishSink(GravityNode* gn) : init(false)
+	{
+		this->gn = gn;
+	}
+	
 protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
-        if (checkInit())
-        {
-            // Format message
-            spdlog::memory_buf_t formatted;
-            spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
+		if (checkInit())
+		{
+			// Format message
+			spdlog::memory_buf_t formatted;
+			spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
-            GravityDataProduct dp(gravity::constants::GRAVITY_LOGGER_DPID);
-            gravity::GravityLogMessagePB logMessage;
-            logMessage.set_level(spdlog::level::to_string_view(msg.level).data());
-            logMessage.set_message(fmt::to_string(formatted));
-            dp.setData(logMessage);
-            gn->publish(dp);
-        }
+			GravityDataProduct dp(gravity::constants::GRAVITY_LOGGER_DPID);
+			gravity::GravityLogMessagePB logMessage;
+			logMessage.set_level(spdlog::level::to_string_view(msg.level).data());
+			logMessage.set_message(fmt::to_string(formatted));
+			dp.setData(logMessage);
+			gn->publish(dp);
+		}
     }
 
-    void flush_() override
+    void flush_() override 
     {
-        // Nothing to do here
+		// Nothing to do here
     }
 };
-}  // namespace gravity
+}

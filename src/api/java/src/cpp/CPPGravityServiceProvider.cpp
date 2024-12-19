@@ -22,10 +22,10 @@
 
 using namespace gravity;
 
-CPPGravityServiceProvider::~CPPGravityServiceProvider() {}
+CPPGravityServiceProvider::~CPPGravityServiceProvider()
+{}
 
-std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID,
-                                                                       const GravityDataProduct& dataProduct)
+std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
     unsigned char* array = new unsigned char[dataProduct.getSize()];
     dataProduct.serializeToArray(array);
@@ -34,9 +34,9 @@ std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std
     return ret;
 }
 
-std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, char* array,
-                                                                       int length)
+std::shared_ptr<GravityDataProduct> CPPGravityServiceProvider::request(const std::string serviceID, char* array, int length)
 {
     std::shared_ptr<GravityDataProduct> ret(new GravityDataProduct("CPP RESPONSE"));
     return ret;
 }
+

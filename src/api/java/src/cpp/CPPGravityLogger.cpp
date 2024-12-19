@@ -20,6 +20,11 @@
 
 using namespace gravity;
 
-CPPGravityLogger::~CPPGravityLogger() {}
+CPPGravityLogger::~CPPGravityLogger()
+{}
 
-void CPPGravityLogger::Log(int level, const char* messagestr) {}
+void CPPGravityLogger::Log(int level, const char* messagestr)
+{
+}
+
+

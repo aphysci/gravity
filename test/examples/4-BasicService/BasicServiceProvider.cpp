@@ -29,60 +29,58 @@ using namespace std;
 class MultiplicationServiceProvider : public GravityServiceProvider
 {
 public:
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID,
-                                                        const GravityDataProduct& dataProduct);
+	virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 };
 
-std::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID,
-                                                                           const GravityDataProduct& dataProduct)
+
+std::shared_ptr<GravityDataProduct> MultiplicationServiceProvider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
-    //Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
-    if (dataProduct.getDataProductID() != "Multiplication")
-    {
-        spdlog::error("Request is not for multiplication!");
-        return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
-    }
+	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
+	if(dataProduct.getDataProductID() != "Multiplication") {
+		spdlog::error("Request is not for multiplication!");
+		return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
+	}
 
-    //Get the parameters for this request.
-    MultiplicationOperandsPB params;
-    dataProduct.populateMessage(params);
+	//Get the parameters for this request.
+	MultiplicationOperandsPB params;
+	dataProduct.populateMessage(params);
 
-    spdlog::warn("Request received: {} x {}", params.multiplicand_a(), params.multiplicand_b());
+	spdlog::warn("Request received: {} x {}", params.multiplicand_a(), params.multiplicand_b());
 
-    //Do the calculation
-    int result = params.multiplicand_a() * params.multiplicand_b();
+	//Do the calculation
+	int result = params.multiplicand_a() * params.multiplicand_b();
 
-    //Return the results to the requestor
-    MultiplicationResultPB resultPB;
-    resultPB.set_result(result);
+	//Return the results to the requestor
+	MultiplicationResultPB resultPB;
+	resultPB.set_result(result);
 
-    std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
-    resultDP->setData(resultPB);
+	std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("MultiplicationResult"));
+	resultDP->setData(resultPB);
 
-    return resultDP;
+	return resultDP;
 }
 
 int main()
 {
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    gn.init("MultiplicationComponent");
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	gn.init("MultiplicationComponent");
 
-    MultiplicationServiceProvider msp;
-    gn.registerService(
-        //This identifies the Service to the service directory so that others can
-        // make a request to it.
-        "Multiplication",
-        //Assign a transport type to the socket (almost always tcp, unless you are only
-        //using the gravity data product between two processes on the same computer).
-        GravityTransportTypes::TCP,
-        //Give an instance of the multiplication service class to be called when a request is made for multiplication.
-        msp);
+	MultiplicationServiceProvider msp;
+	gn.registerService(
+						//This identifies the Service to the service directory so that others can
+						// make a request to it.
+						"Multiplication",
+						//Assign a transport type to the socket (almost always tcp, unless you are only
+						//using the gravity data product between two processes on the same computer).
+						GravityTransportTypes::TCP,
+						//Give an instance of the multiplication service class to be called when a request is made for multiplication.
+						msp);
 
-    //Wait for us to exit (Ctrl-C or being killed).
-    gn.waitForExit();
+	//Wait for us to exit (Ctrl-C or being killed).
+	gn.waitForExit();
 
-    //Currently this will never be hit because we will have been killed (unfortunately).
-    //This tells the service directory that the multiplication service is no longer available.
-    gn.unregisterService("Multiplication");
+	//Currently this will never be hit because we will have been killed (unfortunately).
+	//This tells the service directory that the multiplication service is no longer available.
+	gn.unregisterService("Multiplication");
 }

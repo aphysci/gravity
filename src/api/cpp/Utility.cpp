@@ -26,11 +26,11 @@
 #include <Windows.h>
 #include <time.h>
 #include <algorithm>
-#if _MSC_VER < 1910 && !defined(_CRT_NO_TIME_T)
+#if _MSC_VER < 1910 && !defined(_CRT_NO_TIME_T) 
 struct timespec
 {
-    time_t tv_sec;   // Seconds - >= 0
-    time_t tv_nsec;  // Nanoseconds - [0, 999999999]
+	time_t tv_sec; // Seconds - >= 0
+	time_t tv_nsec; // Nanoseconds - [0, 999999999]
 };
 #endif
 #else
@@ -38,102 +38,112 @@ struct timespec
 #include <unistd.h>
 #endif
 
-namespace gravity
-{
+namespace gravity {
 
 // String Conversions
 GRAVITY_API std::string StringToLowerCase(std::string str)
 {
-    std::use_facet<std::ctype<char> >(std::locale(""))
-        .tolower(&str[0], &str[0] + str.length());  //Convert to lowercase.
-    return str;
+	std::use_facet< std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + str.length()); //Convert to lowercase.
+	return str;
 }
 GRAVITY_API char* StringToLowerCase(char* str, int leng)
 {
-    std::use_facet<std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + leng);  //Convert to lowercase.
+	std::use_facet< std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + leng); //Convert to lowercase.
 
-    return str;
+	return str;
 }
 
-GRAVITY_API std::string StringCopyToLowerCase(const std::string& str)
+GRAVITY_API std::string StringCopyToLowerCase(const std::string &str)
 {
-    std::string copy = str;
-    return StringToLowerCase(copy);
+	std::string copy = str;
+	return StringToLowerCase(copy);
 }
 
 GRAVITY_API int StringToInt(std::string str, int default_value)
 {
-    int ret_val;
-    std::stringstream ss(str);
-    ss >> ret_val;
-    if (ss.fail()) ret_val = default_value;
-    return ret_val;
+	int ret_val;
+	std::stringstream ss(str);
+	ss >> ret_val;
+	if(ss.fail())
+		ret_val = default_value;
+	return ret_val;
 }
 
 GRAVITY_API double StringToDouble(std::string str, double default_value)
 {
-    double ret_val;
-    std::stringstream ss(str);
-    ss >> ret_val;
-    if (ss.fail()) ret_val = default_value;
-    return ret_val;
+	double ret_val;
+	std::stringstream ss(str);
+	ss >> ret_val;
+	if(ss.fail())
+		ret_val = default_value;
+	return ret_val;
 }
 
 //Trimming
-std::string& trim_right_inplace(  //TODO confirm removal from GRAVITY_API
-    std::string& s, const std::string& delimiters = " \f\n\r\t\v")
+std::string& trim_right_inplace( //TODO confirm removal from GRAVITY_API
+  std::string&       s,
+  const std::string& delimiters = " \f\n\r\t\v" )
 {
-    return s.erase(s.find_last_not_of(delimiters) + 1);
+  return s.erase( s.find_last_not_of( delimiters ) + 1 );
 }
 
-std::string& trim_left_inplace(  //TODO confirm removal from GRAVITY_API
-    std::string& s, const std::string& delimiters = " \f\n\r\t\v")
+std::string& trim_left_inplace(//TODO confirm removal from GRAVITY_API
+  std::string&       s,
+  const std::string& delimiters = " \f\n\r\t\v" )
 {
-    return s.erase(0, s.find_first_not_of(delimiters));
+  return s.erase( 0, s.find_first_not_of( delimiters ) );
 }
 
-GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters)
+GRAVITY_API std::string& trim(
+  std::string&       s,
+  const std::string& delimiters)
 {
-    return trim_left_inplace(trim_right_inplace(s, delimiters), delimiters);
+  return trim_left_inplace( trim_right_inplace( s, delimiters ), delimiters );
 }
 
 GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
 {
     //necessary check - otherwise program crashes
-    if (oldValue.empty()) return;
+    if (oldValue.empty())
+      return;
     auto pos = target.find(oldValue);
-    while (pos != std::string::npos)
-    {
-        target.replace(pos, oldValue.size(), newValue);
-        pos = target.find(oldValue);
+    while(pos != std::string::npos) {
+      target.replace(pos, oldValue.size(), newValue);
+      pos = target.find(oldValue);
     }
 }
+
 
 // OS
 GRAVITY_API bool IsValidFilename(const std::string filename)
 {
-    char restrictedChars[] = "/\\?%*:|\"<>";
-    const size_t numRChars = 10;
-    size_t numDots = 0;
+	char restrictedChars[] = "/\\?%*:|\"<>";
+	const size_t numRChars = 10;
+	size_t numDots = 0;
 
-    for (size_t i = 0; i < filename.length(); i++)
-    {
-        if (filename[i] < 31) return false;
+	for(size_t i = 0; i < filename.length(); i++)
+	{
+		if(filename[i] < 31)
+			return false;
 
-        for (size_t r = 0; r < numRChars; r++)
-            if (filename[i] == restrictedChars[r]) return false;
+		for(size_t r = 0; r < numRChars; r++)
+			if(filename[i] == restrictedChars[r])
+				return false;
 
-        if (filename[i] == '.') numDots++;
-    }
+		if(filename[i] == '.')
+			numDots++;
+	}
 
-    //TODO: on windows check for specific restrictions (cannot be complete first segment before .):
-    //CON, PRN, AUX, CLOCK$, NUL, COM0, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, LPT0, LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, and LPT9.
-    //And not the following for NTFS: $Mft, $MftMirr, $LogFile, $Volume, $AttrDef, $Bitmap, $Boot, $BadClus, $Secure, $Upcase, $Extend, $Quota, $ObjId and $Reparse
+	//TODO: on windows check for specific restrictions (cannot be complete first segment before .):
+	//CON, PRN, AUX, CLOCK$, NUL, COM0, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, LPT0, LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, and LPT9.
+	//And not the following for NTFS: $Mft, $MftMirr, $LogFile, $Volume, $AttrDef, $Bitmap, $Boot, $BadClus, $Secure, $Upcase, $Extend, $Quota, $ObjId and $Reparse
 
-    if (numDots == filename.length()) return false;  //We can't be all dots.
+	if(numDots == filename.length())
+		return false;  //We can't be all dots.
 
-    return true;
+	return true;
 }
+
 
 //Replace the clock_gettime for Windows.
 #ifdef WIN32
@@ -161,29 +171,26 @@ getFILETIMEoffset()
 }
 
 //T. Ludwinski: changed timeval to timespec and microseconds to nanoseconds
-int clock_gettime(int X, struct timespec* tv)
+int
+clock_gettime(int X, struct timespec *tv)
 {
-    LARGE_INTEGER t;
-    FILETIME f;
-    double nanoseconds;
-    static LARGE_INTEGER offset;
-    static double frequencyToNanoseconds;
-    static int initialized = 0;
-    static BOOL usePerformanceCounter = 0;
-    static LARGE_INTEGER startTime;
+    LARGE_INTEGER           t;
+    FILETIME            f;
+    double                  nanoseconds;
+    static LARGE_INTEGER    offset;
+    static double           frequencyToNanoseconds;
+    static int              initialized = 0;
+    static BOOL             usePerformanceCounter = 0;
+    static LARGE_INTEGER 	startTime;
 
-    if (!initialized)
-    {
+    if (!initialized) {
         LARGE_INTEGER performanceFrequency;
         initialized = 1;
         usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
-        if (usePerformanceCounter)
-        {
+        if (usePerformanceCounter) {
             QueryPerformanceCounter(&offset);
             frequencyToNanoseconds = (double)performanceFrequency.QuadPart / 1000000000.;
-        }
-        else
-        {
+        } else {
             offset = getFILETIMEoffset();
             frequencyToNanoseconds = .01;
         }
@@ -193,13 +200,11 @@ int clock_gettime(int X, struct timespec* tv)
         startTime.QuadPart <<= 32;
         startTime.QuadPart |= f.dwLowDateTime;
 
-        startTime.QuadPart -= 116444736000000000ULL;    //Convert from Window time to UTC (100ns)
-        startTime.QuadPart = startTime.QuadPart * 100;  //To nanoseconds
+        startTime.QuadPart -= 116444736000000000ULL; //Convert from Window time to UTC (100ns)
+        startTime.QuadPart = startTime.QuadPart * 100; //To nanoseconds
     }
-    if (usePerformanceCounter)
-        QueryPerformanceCounter(&t);
-    else
-    {
+    if (usePerformanceCounter) QueryPerformanceCounter(&t);
+    else {
         GetSystemTimeAsFileTime(&f);
         t.QuadPart = f.dwHighDateTime;
         t.QuadPart <<= 32;
@@ -209,7 +214,7 @@ int clock_gettime(int X, struct timespec* tv)
     t.QuadPart -= offset.QuadPart;
     nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
     nanoseconds += startTime.QuadPart;
-    t.QuadPart = (LONGLONG)nanoseconds;
+    t.QuadPart = (LONGLONG) nanoseconds;
     tv->tv_sec = t.QuadPart / 1000000000LL;
     tv->tv_nsec = t.QuadPart % 1000000000LL;
     return (0);
@@ -220,19 +225,19 @@ GRAVITY_API uint64_t getCurrentTime()
 {
     timespec ts;
     clock_gettime(0, &ts);
-    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;  //in microseconds
+    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL; //in microseconds
 }
 
 GRAVITY_API unsigned int sleep(int milliseconds)
 {
-    // If sleep time < 0, set it to 0
-    milliseconds = std::max(0, milliseconds);
+	// If sleep time < 0, set it to 0
+	milliseconds = std::max(0, milliseconds);
 #ifdef WIN32
-    Sleep(milliseconds);
-    return 0;
+	Sleep(milliseconds);
+	return 0;
 #else
-    return usleep(milliseconds * 1000);  //Maybe replace this guy with clock_nanosleep???
+	return usleep(milliseconds*1000); //Maybe replace this guy with clock_nanosleep???
 #endif
 }
 
-}  // namespace gravity
+}

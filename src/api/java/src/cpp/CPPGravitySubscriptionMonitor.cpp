@@ -21,15 +21,13 @@
 
 using namespace gravity;
 
-CPPGravitySubscriptionMonitor::~CPPGravitySubscriptionMonitor() {}
+CPPGravitySubscriptionMonitor::~CPPGravitySubscriptionMonitor()
+{}
 
-void CPPGravitySubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
-                                                        std::string filter, std::string domain)
+void CPPGravitySubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain)
 {
-    subscriptionTimeoutJava(dataProductID, milliSecondsSinceLast, filter, domain);
+	subscriptionTimeoutJava(dataProductID,milliSecondsSinceLast,filter,domain);
 }
 
-void CPPGravitySubscriptionMonitor::subscriptionTimeoutJava(const std::string& dataProductID, int milliSecondsSinceLast,
-                                                            const std::string& filter, const std::string& domain)
-{
-}
+void CPPGravitySubscriptionMonitor::subscriptionTimeoutJava(const std::string& dataProductID, int milliSecondsSinceLast, const std::string& filter, const std::string& domain)
+{}

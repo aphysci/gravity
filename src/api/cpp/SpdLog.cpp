@@ -21,14 +21,32 @@
 
 using namespace gravity;
 
-void SpdLog::critical(const char* message) { spdlog::critical(message); }
+void SpdLog::critical(const char* message)
+{
+	spdlog::critical(message);
+}
 
-void SpdLog::error(const char* message) { spdlog::error(message); }
+void SpdLog::error(const char* message)
+{
+	spdlog::error(message);
+}
 
-void SpdLog::warn(const char* message) { spdlog::warn(message); }
+void SpdLog::warn(const char* message)
+{
+	spdlog::warn(message);
+}
 
-void SpdLog::info(const char* message) { spdlog::info(message); }
+void SpdLog::info(const char* message)
+{
+	spdlog::info(message);
+}
 
-void SpdLog::debug(const char* message) { spdlog::debug(message); }
+void SpdLog::debug(const char* message)
+{
+	spdlog::debug(message);
+}
 
-void SpdLog::trace(const char* message) { spdlog::trace(message); }
+void SpdLog::trace(const char* message)
+{
+	spdlog::trace(message);
+}

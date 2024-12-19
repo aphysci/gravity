@@ -41,38 +41,39 @@ namespace gravity
 
 enum RegistrationType
 {
-    SERVICE,
-    DATA
+	SERVICE,
+	DATA
 };
 
 enum ChangeType
 {
-    REMOVE,
-    ADD
+	REMOVE,
+	ADD
 };
 
 class ServiceDirectory : GravityServiceProvider
 {
 private:
-    // domain name for this service directory
-    std::string domain;
 
-    // dataProductMap <domain, map<dataProductID, list<publishers> > >
-    std::map<std::string, std::map<std::string, std::list<gravity::PublisherInfoPB> > > dataProductMap;
+	// domain name for this service directory
+	std::string domain;
 
-    // serviceMap <domain, map<serviceID, serviceProvider> >
-    std::map<std::string, std::map<std::string, std::string> > serviceMap;
+	// dataProductMap <domain, map<dataProductID, list<publishers> > >
+	std::map<std::string, std::map<std::string, std::list<gravity::PublisherInfoPB> > > dataProductMap;
 
-    // mapping from URL to name of publisher/service provider
-    std::map<std::string, std::string> urlToComponentMap;
+	// serviceMap <domain, map<serviceID, serviceProvider> >
+	std::map<std::string, std::map<std::string, std::string> > serviceMap;
 
-    // mapping from URL to registered timestamp
-    std::map<std::string, uint64_t> registrationInstanceMap;
+	// mapping from URL to name of publisher/service provider
+	std::map<std::string, std::string> urlToComponentMap;
 
-    // mapping from Domain to URL
-    std::map<std::string, std::string> domainMap;
+	// mapping from URL to registered timestamp
+	std::map<std::string, uint64_t> registrationInstanceMap;
 
-    // own GravityNode
+	// mapping from Domain to URL
+	std::map<std::string, std::string> domainMap;
+
+	// own GravityNode
     GravityNode gn;
 
     bool registeredPublishersReady, registeredPublishersProcessed;
@@ -81,24 +82,21 @@ private:
     // needed to manage objects accessed from ServiceProvider thread
     Semaphore lock;
 
-    void* context;
-    SocketWithLock udpBroadcastSocket;
-    SocketWithLock udpReceiverSocket;
-    void* synchronizerSocket;
+	void* context;
+	SocketWithLock udpBroadcastSocket;
+	SocketWithLock udpReceiverSocket;
+	void* synchronizerSocket;
 
-    void sendBroadcasterParameters(std::string sdDomain, std::string url, std::string ip, unsigned int port,
-                                   unsigned int rate);
-    void sendReceiverParameters(std::string sdDomain, std::string url, unsigned int port, unsigned int numValidDomains,
-                                std::string validDomains);
-    void publishDomainUpdateMessage(std::string updateDomain, std::string url, ChangeType type);
+	void sendBroadcasterParameters(std::string sdDomain, std::string url, std::string ip, unsigned int port, unsigned int rate);
+	void sendReceiverParameters(std::string sdDomain, std::string url, unsigned int port, unsigned int numValidDomains, std::string validDomains);
+	void publishDomainUpdateMessage(std::string updateDomain, std::string url, ChangeType type);
 
-    void updateProductLocations(std::string productID, std::string url, uint64_t timestamp, ChangeType changeType,
-                                RegistrationType registrationType);
-    void updateProductLocations();
-    std::shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
-
-    // Gravity logger
-    std::shared_ptr<spdlog::logger> logger;
+	void updateProductLocations(std::string productID, std::string url, uint64_t timestamp, ChangeType changeType, RegistrationType registrationType);
+	void updateProductLocations();
+	std::shared_ptr<ServiceDirectoryMapPB> createOwnProviderMap();
+	
+	// Gravity logger
+	std::shared_ptr<spdlog::logger> logger;
 
 public:
     virtual ~ServiceDirectory();
@@ -110,8 +108,8 @@ private:
     void handleLookup(const GravityDataProduct& request, GravityDataProduct& response);
     void handleRegister(const GravityDataProduct& request, GravityDataProduct& response);
     void handleUnregister(const GravityDataProduct& request, GravityDataProduct& response);
-    void addPublishers(const std::string& dataProductID, GravityDataProduct& response, const std::string& domain);
-    void purgeObsoletePublishers(const std::string& dataProductID, const std::string& url);
+    void addPublishers(const std::string &dataProductID, GravityDataProduct &response, const std::string &domain);
+	void purgeObsoletePublishers(const std::string &dataProductID, const std::string &url);
 };
 
 } /* namespace gravity */

@@ -16,15 +16,18 @@
  **
  */
 
+
+
 #include "CPPGravitySubscriber.h"
 #include <iostream>
 #include <memory>
 
 using namespace gravity;
 
-CPPGravitySubscriber::~CPPGravitySubscriber() {}
+CPPGravitySubscriber::~CPPGravitySubscriber()
+{}
 
-void CPPGravitySubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
+void CPPGravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
     int* lengths = new int[dataProducts.size()];
     int arrayLength = 0;
@@ -41,8 +44,12 @@ void CPPGravitySubscriber::subscriptionFilled(const std::vector<std::shared_ptr<
         offset += lengths[index];
     }
     subscriptionFilled((char*)array, arrayLength, lengths, dataProducts.size());
-    delete[] lengths;
-    delete[] array;
+	delete[] lengths;
+	delete[] array;
 }
 
-int CPPGravitySubscriber::subscriptionFilled(char* array, int arrayLength, int* lengths, int length) { return 0; }
+int CPPGravitySubscriber::subscriptionFilled(char* array, int arrayLength, int* lengths, int length)
+{
+    return 0;
+}
+

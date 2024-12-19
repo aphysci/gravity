@@ -16,6 +16,7 @@
  **
  */
 
+
 #ifndef CPPGRAVITYLOGGER_H_
 #define CPPGRAVITYLOGGER_H_
 
@@ -30,9 +31,11 @@ namespace gravity
 class CPPGravityLogger : public Logger
 {
 public:
+
     virtual ~CPPGravityLogger();
     virtual void Log(int level, const char* messagestr);
 };
 
-}  // namespace gravity
+}
 #endif /* CPPGRAVITYLOGGER_H_ */
+

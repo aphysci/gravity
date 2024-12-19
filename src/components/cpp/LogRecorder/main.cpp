@@ -22,13 +22,13 @@
 
 int main()
 {
-    using namespace gravity;
-    GravityNode gn;
-    gn.init("GravityLogRecorder");
+  using namespace gravity;
+  GravityNode gn;
+  gn.init("GravityLogRecorder");
 
-    LogRecorder lr(&gn, "MyBase");
+  LogRecorder lr(&gn, "MyBase");
 
-    lr.start();
+  lr.start();
 
-    gn.waitForExit();
+  gn.waitForExit();
 }

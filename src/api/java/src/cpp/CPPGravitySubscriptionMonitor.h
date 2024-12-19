@@ -27,12 +27,10 @@ namespace gravity
 class CPPGravitySubscriptionMonitor : public GravitySubscriptionMonitor
 {
 public:
-    virtual ~CPPGravitySubscriptionMonitor();
-    virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter,
-                                     std::string domain);
-    virtual void subscriptionTimeoutJava(const std::string& dataProductID, int milliSecondsSinceLast,
-                                         const std::string& filter, const std::string& domain);
+	virtual ~CPPGravitySubscriptionMonitor();
+	virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain);
+	virtual void subscriptionTimeoutJava(const std::string& dataProductID, int milliSecondsSinceLast, const std::string& filter, const std::string& domain);
 };
-}  // namespace gravity
+}
 
 #endif /* CPPGRAVITYSUBSCRIPTIONMONITOR_H_ */

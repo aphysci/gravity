@@ -19,6 +19,7 @@
 #include "GravityLogger.h"
 #include "FileReader.h"
 #include "FileReplay.h"
+#include "SpdLog.h"
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -32,42 +33,45 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    gravity::FileReplay replay;
-    replay.waitForExit();
+	gravity::FileReplay replay;
+	replay.waitForExit();
 }
 
-namespace gravity
-{
+namespace gravity {
 
 const char* FileReplay::ComponentName = "FileReplay";
 
 FileReplay::FileReplay()
 {
-    // Initialize Gravity Node
-    gravityNode.init(FileReplay::ComponentName);
+	// Initialize Gravity Node
+	gravityNode.init(FileReplay::ComponentName);
+	
+    // Get Gravity logger
+    logger = gravityNode.getGravityLogger();
+    if (!logger) {
+        SpdLog::critical("Failed to get GravityLogger");
+        return;
+    }
 
-    // Get logger
-    logger = spdlog::get("GravityLogger");
+	// Configure logger to log to console
+	//Log::initAndAddConsoleLogger(FileReplay::ComponentName, Log::MESSAGE);
 
-    // Configure logger to log to console
-    //Log::initAndAddConsoleLogger(FileReplay::ComponentName, Log::MESSAGE);
+	// Initialize firstPublishTime
+	firstPublishTime = 0;
+	firstDataTime = 0;
 
-    // Initialize firstPublishTime
-    firstPublishTime = 0;
-    firstDataTime = 0;
+	// Get archive filename
+	string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
 
-    // Get archive filename
-    string filename = gravityNode.getStringParam("ArchiveFilename", "archive.bin");
+	string dpList = gravityNode.getStringParam("DataProductList", "");
 
-    string dpList = gravityNode.getStringParam("DataProductList", "");
+	// Kick off the thread to start reading the file
+	fileReader.init(filename, dpList);
+  std::thread readerThread(&FileReader::start, &fileReader);
+  readerThread.detach();
 
-    // Kick off the thread to start reading the file
-    fileReader.init(filename, dpList);
-    std::thread readerThread(&FileReader::start, &fileReader);
-    readerThread.detach();
-
-    // Start processing the archive file
-    processArchive();
+	// Start processing the archive file
+	processArchive();
 }
 
 FileReplay::~FileReplay() {}
@@ -103,9 +107,9 @@ void FileReplay::processArchive()
             uint64_t elapsedTime = gravity::getCurrentTime() - firstPublishTime;
             if (elapsedTime < timeToWait)
             {
-                logger->debug("waiting {}", timeToWait - elapsedTime);
+				logger->debug("waiting {}", timeToWait-elapsedTime);
 #ifdef WIN32
-                gravity::sleep((timeToWait - elapsedTime) / 1000);
+				gravity::sleep( (timeToWait-elapsedTime) / 1000 );
 #else
                 usleep(timeToWait - elapsedTime);
 #endif
@@ -116,13 +120,16 @@ void FileReplay::processArchive()
         logger->debug("publishing {}", gdp->getDataProductID());
         gravityNode.publish(*gdp);
 
-        // Get the next one
-        gdp = fileReader.getNextDataProduct();
+	// Get the next one
+	gdp = fileReader.getNextDataProduct();
     }
 
     logger->info("Reached end of archive");
 }
 
-void FileReplay::waitForExit() { gravityNode.waitForExit(); }
+void FileReplay::waitForExit()
+{
+	gravityNode.waitForExit();
+}
 
 } /* namespace gravity */

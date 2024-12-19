@@ -27,9 +27,9 @@ using namespace gravity;
 
 int main()
 {
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    GravityReturnCode ret = gn.init("Requestor");
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	GravityReturnCode ret = gn.init("Requestor");
     int numTries = 3;
     while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
     {
@@ -42,16 +42,17 @@ int main()
         exit(1);
     }
 
-    GravityDataProduct request("Counter");
+
+	GravityDataProduct request("Counter");
 
     int counter = 0;
     int tries = 0;
-    while (counter < 20 && tries++ < 30)
-    {
-        std::shared_ptr<GravityDataProduct> countReq = gn.request("Counter",  //Service Name
-                                                                  request,    //Request
-                                                                  3000);      //Timeout in milliseconds
-        if (countReq == NULL)
+	while(counter < 20 && tries++ < 30)
+	{
+	    std::shared_ptr<GravityDataProduct> countReq = gn.request("Counter", //Service Name
+                                                             request, //Request
+                                                             3000); //Timeout in milliseconds
+        if(countReq == NULL)
         {
             Log::critical("Request Returned NULL!");
         }
@@ -62,10 +63,10 @@ int main()
         }
 
         gravity::sleep(1000);
-    }
+	}
 
     // make sure we finished
     GRAVITY_TEST(tries < 30);
 
-    return 0;
+	return 0;
 }

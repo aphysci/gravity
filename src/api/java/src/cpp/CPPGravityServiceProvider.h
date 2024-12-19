@@ -16,6 +16,7 @@
  **
  */
 
+
 #ifndef CPPGRAVITYSERVICEPROVIDER_H_
 #define CPPGRAVITYSERVICEPROVIDER_H_
 
@@ -30,11 +31,12 @@ namespace gravity
 class CPPGravityServiceProvider : public GravityServiceProvider
 {
 public:
+
     virtual ~CPPGravityServiceProvider();
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID,
-                                                        const GravityDataProduct& dataProduct);
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, char* array, int length);
+    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    virtual std::shared_ptr<GravityDataProduct>  request(const std::string serviceID, char* array, int length);
 };
 
-}  // namespace gravity
+}
 #endif /* CPPGRAVITYSERVICEPROVIDER_H_ */
+

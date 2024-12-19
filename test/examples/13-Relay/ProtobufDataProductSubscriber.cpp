@@ -31,40 +31,38 @@ using namespace std;
 class SimpleGravityCounterSubscriber : public GravitySubscriber
 {
 public:
-    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
 int main()
 {
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    gn.init("Subscriber");
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	gn.init("Subscriber");
 
-    //Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).
-    SimpleGravityCounterSubscriber counterSubscriber;
-    //Subscribe a SimpleGravityCounterSubscriber to the counter data product.
-    gn.subscribe("BasicCounterDataProduct", counterSubscriber);
+	//Declare an object of type SimpleGravityCounterSubscriber (this also initilizes the total count to 0).
+	SimpleGravityCounterSubscriber counterSubscriber;
+	//Subscribe a SimpleGravityCounterSubscriber to the counter data product.
+	gn.subscribe("BasicCounterDataProduct", counterSubscriber);
 
-    //Wait for us to exit (Ctrl-C or being killed).
-    gn.waitForExit();
+	//Wait for us to exit (Ctrl-C or being killed).
+	gn.waitForExit();
 
-    //Currently this will never be hit because we will have been killed (unfortunately).
-    //But this shouldn't make a difference because the OS should close the socket and free all resources.
-    gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);
+	//Currently this will never be hit because we will have been killed (unfortunately).
+	//But this shouldn't make a difference because the OS should close the socket and free all resources.
+	gn.unsubscribe("BasicCounterDataProduct", counterSubscriber);
 }
 
-void SimpleGravityCounterSubscriber::subscriptionFilled(
-    const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
+void SimpleGravityCounterSubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    for (std::vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
-         i != dataProducts.end(); i++)
-    {
-        //Get the protobuf object from the message
-        BasicCounterDataProductPB counterDataPB;
-        (*i)->populateMessage(counterDataPB);
+	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+			i != dataProducts.end(); i++)
+	{
+		//Get the protobuf object from the message
+		BasicCounterDataProductPB counterDataPB;
+		(*i)->populateMessage(counterDataPB);
 
-        //Process the message
-        spdlog::warn("Current Count: {}, message was relayed = {}", counterDataPB.count(),
-                     (*i)->isRelayedDataproduct() ? "true" : "false");
-    }
+		//Process the message
+		spdlog::warn("Current Count: {}, message was relayed = {}", counterDataPB.count(), (*i)->isRelayedDataproduct() ? "true" : "false");
+	}
 }

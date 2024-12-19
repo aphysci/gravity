@@ -34,38 +34,35 @@
 namespace gravity
 {
 /** For passing Data to the HB threads. */
-struct HBParams
-{
-    void* zmq_context;
-    uint64_t interval_in_microseconds;
-    //unsigned short port;
-    std::string componentID;
-    std::string endpoint;
-    int minPort;
-    int maxPort;
-    uint32_t registrationTime;
+struct HBParams {
+	void* zmq_context;
+	uint64_t interval_in_microseconds;
+	//unsigned short port;
+	std::string componentID;
+	std::string endpoint;
+	int minPort;
+	int maxPort;
+	uint32_t registrationTime;
 };
 
-struct HBListenerContext
-{
-    void* zmq_context;
+struct HBListenerContext {
+	void* zmq_context;
 };
 
-struct ExpectedMessageQueueElement
-{
-    uint64_t expectedTime;                //Absolute (Maximum amount we can wait).
-    uint64_t lastHeartbeatTime;           //Absolute
-    int64_t timetowaitBetweenHeartbeats;  //In Microseconds
-    std::string dataproductID;
-    void* socket;
+struct ExpectedMessageQueueElement {
+	uint64_t expectedTime; //Absolute (Maximum amount we can wait).
+	uint64_t lastHeartbeatTime; //Absolute
+	int64_t timetowaitBetweenHeartbeats; //In Microseconds
+	std::string dataproductID;
+	void* socket;
 };
 
 struct EMQComparator
 {
-    bool operator()(ExpectedMessageQueueElement* a, ExpectedMessageQueueElement* b)
-    {
-        return a->expectedTime > b->expectedTime;
-    }
+	bool operator() (ExpectedMessageQueueElement* a, ExpectedMessageQueueElement* b)
+	{
+		return a->expectedTime > b->expectedTime;
+	}
 };
 
 /**
@@ -74,17 +71,15 @@ struct EMQComparator
 class Heartbeat : public GravitySubscriber
 {
 private:
-    static Semaphore heartbeatLock;
-    static bool heartbeatRunning;
-
+	static Semaphore heartbeatLock;
+	static bool heartbeatRunning;
 public:
-    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+    virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 
     static void* HeartbeatListenerThrFunc(void* thread_context);
 
-    static std::list<ExpectedMessageQueueElement> queueElements;  //This is so we can reuse these guys.
-    static std::priority_queue<ExpectedMessageQueueElement*, std::vector<ExpectedMessageQueueElement*>, EMQComparator>
-        messageTimes;
+    static std::list<ExpectedMessageQueueElement> queueElements; //This is so we can reuse these guys.
+    static std::priority_queue<ExpectedMessageQueueElement*, std::vector<ExpectedMessageQueueElement*>, EMQComparator> messageTimes;
     static std::map<std::string, GravityHeartbeatListener*> listener;
 
     static Semaphore lock;
@@ -92,12 +87,12 @@ public:
     /**
      * Set of data product IDs that we have received subscriptions (heartbeats) for
      */
-    static std::set<std::string> filledHeartbeats;
+    static std::set<std::string> filledHeartbeats;	
 
-    static void setHeartbeatRunning(bool running);
-    static bool isHeartbeatRunning();
+	static void setHeartbeatRunning(bool running);
+	static bool isHeartbeatRunning();
 };
 
-}  //namespace gravity
+} //namespace gravity
 
-#endif  //GRAVITY_HEARTBEAT_H__
+#endif //GRAVITY_HEARTBEAT_H__

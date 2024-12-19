@@ -27,55 +27,57 @@ using namespace gravity;
 
 int main()
 {
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    gn.init("SimpleGravityComponentID");
 
-    gn.registerDataProduct(
-        //This identifies the Data Product to the service directory so that others can
-        // subscribe to it.  (See BasicDataProductSubscriber.cpp).
-        "BasicCounterDataProduct",
-        //Assign a transport type to the socket (almost always tcp, unless you are only
-        //using the gravity data product between two processes on the same computer).
-        GravityTransportTypes::TCP);
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	gn.init("SimpleGravityComponentID");
 
-    //Register a second data product (for kicks).
-    gn.registerDataProduct("HelloWorldDataProduct", GravityTransportTypes::TCP);
+	gn.registerDataProduct(
+							//This identifies the Data Product to the service directory so that others can
+							// subscribe to it.  (See BasicDataProductSubscriber.cpp).
+							"BasicCounterDataProduct",
+							//Assign a transport type to the socket (almost always tcp, unless you are only
+							//using the gravity data product between two processes on the same computer).
+							GravityTransportTypes::TCP);
 
-    bool quit = false;  //TODO: set this when you want the program to quit if you need to clean up before exiting.
-    int count = 1;
-    while (!quit)
-    {
-        //Create a data product to send across the network of type "BasicCounterDataProduct".
-        GravityDataProduct counterDataProduct(
-            "BasicCounterDataProduct");  //In order to publish, the DataProductID must match one of the registered types.
+	//Register a second data product (for kicks).
+	gn.registerDataProduct("HelloWorldDataProduct", GravityTransportTypes::TCP);
 
-        //Initialize our message
-        BasicCounterDataProductPB counterDataPB;
-        counterDataPB.set_count(count);
+	bool quit = false; //TODO: set this when you want the program to quit if you need to clean up before exiting.
+	int count = 1;
+	while(!quit)
+	{
+		//Create a data product to send across the network of type "BasicCounterDataProduct".
+		GravityDataProduct counterDataProduct("BasicCounterDataProduct"); //In order to publish, the DataProductID must match one of the registered types.
 
-        //Put message into data product
-        counterDataProduct.setData(counterDataPB);
+		//Initialize our message
+		BasicCounterDataProductPB counterDataPB;
+		counterDataPB.set_count(count);
 
-        //Publish the data product.
-        gn.publish(counterDataProduct);
+		//Put message into data product
+		counterDataProduct.setData(counterDataPB);
 
-        //Increment count
-        count++;
-        if (count > 50) count = 1;
+		//Publish the data product.
+		gn.publish(counterDataProduct);
 
-        //Create a second Data Product without using protobufs.
-        GravityDataProduct helloWorldDataProduct("HelloWorldDataProduct");
-        std::string data = "Hello World";
-        helloWorldDataProduct.setData(data.c_str(), data.length());
+		//Increment count
+		count++;
+		if(count > 50)
+			count = 1;
 
-        //Publish the second data product.
-        gn.publish(helloWorldDataProduct);
+		//Create a second Data Product without using protobufs.
+		GravityDataProduct helloWorldDataProduct("HelloWorldDataProduct");
+		std::string data = "Hello World";
+		helloWorldDataProduct.setData(data.c_str(), data.length());
 
-        //A little logging is always nice.  Use gravity.ini to control which logs get written.
-        spdlog::warn("Published message1 with count {} and message2 with data {}", count, data);
+		//Publish the second data product.
+		gn.publish(helloWorldDataProduct);
 
-        //Sleep for 1 second.
-        gravity::sleep(1000);
-    }
+		//A little logging is always nice.  Use gravity.ini to control which logs get written.
+		spdlog::warn("Published message1 with count {} and message2 with data {}", count, data);
+
+		//Sleep for 1 second.
+		gravity::sleep(1000);
+	}
+
 }

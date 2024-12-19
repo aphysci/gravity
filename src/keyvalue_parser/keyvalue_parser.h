@@ -20,38 +20,42 @@
 #define __KEYVALUE_PARSER_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
+
 
 #ifdef WIN32
-#ifdef LIBKEYVALUE_PARSER_EXPORTS
-#define KEYVALUE_API __declspec(dllexport)
+#    ifdef LIBKEYVALUE_STATIC
+#		define KEYVALUE_API
+#    else
+#		ifdef LIBKEYVALUE_PARSER_EXPORTS
+#			define KEYVALUE_API __declspec(dllexport)
+#		else
+#			define KEYVALUE_API __declspec(dllimport)
+#		endif
+#    endif
 #else
-#define KEYVALUE_API __declspec(dllimport)
-#endif
-#else
-#define KEYVALUE_API
+#   define KEYVALUE_API
 #endif
 
-    typedef void* keyvalue_handle_t;
-    typedef void keyvalue_type_t;
+typedef void* keyvalue_handle_t;
+typedef void keyvalue_type_t;
 
-    /* Open a keyvalue file and return a handle to it
+/* Open a keyvalue file and return a handle to it
  */
-    KEYVALUE_API keyvalue_handle_t keyvalue_open(const char* fn, const char* const sections[]);
+KEYVALUE_API keyvalue_handle_t keyvalue_open(const char *fn, const char* const sections[] );
 
-    /* Get all the keys parsed
+/* Get all the keys parsed
  */
-    KEYVALUE_API const char** keyvalue_getkeys(keyvalue_handle_t kv_handle);
+KEYVALUE_API const char**  keyvalue_getkeys(keyvalue_handle_t kv_handle );
 
-    /* Get a value given a key
+/* Get a value given a key
  */
-    KEYVALUE_API const char* keyvalue_getstring(keyvalue_handle_t kv_handle, const char* key);
+KEYVALUE_API const char* keyvalue_getstring(keyvalue_handle_t kv_handle, const char *key);
 
-    /* Close a keyvalue file handle
+/* Close a keyvalue file handle
  */
-    KEYVALUE_API void keyvalue_close(keyvalue_handle_t kv_handle);
+KEYVALUE_API void keyvalue_close(keyvalue_handle_t kv_handle);
 
 #ifdef __cplusplus
 }

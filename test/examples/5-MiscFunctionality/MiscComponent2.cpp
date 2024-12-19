@@ -27,73 +27,72 @@ using namespace std;
 class MiscHBListener : public GravityHeartbeatListener
 {
 public:
-    virtual void MissedHeartbeat(std::string dataProductID, int64_t microsecond_to_last_heartbeat,
-                                 int64_t& interval_in_microseconds);
-    virtual void ReceivedHeartbeat(std::string dataProductID, int64_t& interval_in_microseconds);
+	virtual void MissedHeartbeat(std::string dataProductID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds);
+	virtual void ReceivedHeartbeat(std::string dataProductID, int64_t& interval_in_microseconds);
 };
 
-void MiscHBListener::MissedHeartbeat(std::string dataProductID, int64_t microsecond_to_last_heartbeat,
-                                     int64_t& interval_in_microseconds)
+void MiscHBListener::MissedHeartbeat(std::string dataProductID, int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds)
 {
-    spdlog::warn("Missed Heartbeat.  Last heartbeat {} microseconds ago.  ", microsecond_to_last_heartbeat);
+	spdlog::warn("Missed Heartbeat.  Last heartbeat {} microseconds ago.  ", microsecond_to_last_heartbeat);
 }
 
 void MiscHBListener::ReceivedHeartbeat(std::string dataProductID, int64_t& interval_in_microseconds)
 {
-    spdlog::warn("Received Heartbeat.");
-    // Now that we've received one, change the interval to 10 seconds.
-    interval_in_microseconds = 10 * 1000000;
+	spdlog::warn("Received Heartbeat.");
+	// Now that we've received one, change the interval to 10 seconds.
+	interval_in_microseconds = 10 * 1000000;
 }
 
 //Declare a class for receiving Published messages.
 class MiscGravitySubscriber : public GravitySubscriber
 {
 public:
-    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+	virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
-void MiscGravitySubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
+void MiscGravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts)
 {
-    for (std::vector<std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
-         i != dataProducts.end(); i++)
-    {
-        //Get a raw message
-        int size = (*i)->getDataSize();
-        char* message = new char[size + 1];
-        (*i)->getData(message, size);
-        message[size] = 0;  // null terminate
+	for(std::vector< std::shared_ptr<GravityDataProduct> >::const_iterator i = dataProducts.begin();
+			i != dataProducts.end(); i++)
+	{
+		//Get a raw message
+		int size = (*i)->getDataSize();
+		char* message = new char[size+1];
+		(*i)->getData(message, size);
+		message[size] = 0; // null terminate
 
-        //Output the message
-        spdlog::warn("Got message: {}", message);
-        //Don't forget to free the memory we allocated.
-        delete[] message;
-    }
+		//Output the message
+		spdlog::warn("Got message: {}", message);
+		//Don't forget to free the memory we allocated.
+		delete[] message;
+	}
 }
 
 int main()
 {
-    using namespace gravity;
+	using namespace gravity;
 
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    gn.init("MiscGravityComponentID2");
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	gn.init("MiscGravityComponentID2");
 
-    //Get a parameter from either the Gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.
-    int interval = gn.getIntParam("HeartbeatInterval",  //Param Name
-                                  500000);              //Default value.
+	//Get a parameter from either the Gravity.ini config file, the MiscGravityComponentID.ini config file, or the config service.
+	int interval = gn.getIntParam("HeartbeatInterval", //Param Name
+									500000); //Default value.
 
-    //Get another parameter from gravity.
-    bool listen_for_heartbeat = gn.getBoolParam("HeartbeatListener", true);
-    MiscHBListener hbl;
+	//Get another parameter from gravity.
+	bool listen_for_heartbeat = gn.getBoolParam("HeartbeatListener", true);
+	MiscHBListener hbl;
 
-    if (listen_for_heartbeat) gn.registerHeartbeatListener("MiscGravityComponentID1", interval, hbl);
+	if(listen_for_heartbeat)
+		gn.registerHeartbeatListener("MiscGravityComponentID1", interval, hbl);
 
-        // IPC isn't supported in Windows.
+	// IPC isn't supported in Windows.
 #ifndef WIN32
-    //Subscribe to the IPC data product.
-    MiscGravitySubscriber ipcSubscriber;
-    gn.subscribe("IPCDataProduct", ipcSubscriber);
+	//Subscribe to the IPC data product.
+	MiscGravitySubscriber ipcSubscriber;
+	gn.subscribe("IPCDataProduct", ipcSubscriber);
 #endif
 
-    gn.waitForExit();
+	gn.waitForExit();
 }

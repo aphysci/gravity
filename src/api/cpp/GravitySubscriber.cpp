@@ -27,10 +27,13 @@
 
 #include <memory>
 
-namespace gravity
-{
+namespace gravity {
 
 GravitySubscriber::~GravitySubscriber() {}
 //TODO: REMOVE IMPLEMENTATION
-void GravitySubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts) {}
-}  // namespace gravity
+void GravitySubscriber::subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts) {}
+}
+
+
+
+

@@ -31,18 +31,17 @@
 using namespace std;
 using namespace gravity;
 
-int main()
-{
-    GravityNode gn;
-    gn.init("ConfigTest");
+int main() {
+	GravityNode gn;
+	gn.init("ConfigTest");
 
-    cout << "LocalLogLevel=" << gn.getStringParam("LocalLogLevel") << endl;
-    cout << "NetLogLevel=" << gn.getStringParam("NetLogLevel") << endl;
+	cout << "LocalLogLevel=" << gn.getStringParam("LocalLogLevel") << endl;
+	cout << "NetLogLevel=" << gn.getStringParam("NetLogLevel") << endl;
 
-    cout << "Override=" << gn.getStringParam("Override") << endl;
-    cout << "NonOverride=" << gn.getStringParam("NonOverride") << endl;
+	cout << "Override=" << gn.getStringParam("Override")  << endl;
+	cout << "NonOverride=" << gn.getStringParam("NonOverride")  << endl;
 
-    cout << "Param1=" << gn.getStringParam("Param1") << endl;
+	cout << "Param1=" << gn.getStringParam("Param1") << endl;
 
-    return 0;
+	return 0;
 }

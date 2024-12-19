@@ -30,9 +30,10 @@
 #include <vector>
 #include "GravityNode.h"
 
+
 namespace spdlog
 {
-class logger;
+	class logger;
 }
 
 namespace gravity
@@ -40,50 +41,50 @@ namespace gravity
 
 typedef struct RequestDetails
 {
-    std::string serviceID;
-    std::string requestID;
-    int64_t timeoutTimeMilliseconds;
-    GravityRequestor* requestor;
-    uint32_t registrationTime;
-    std::string url;
+	std::string serviceID;
+	std::string requestID;
+	int64_t timeoutTimeMilliseconds;
+	GravityRequestor* requestor;
+	uint32_t registrationTime;
+	std::string url;
 } RequestDetails;
 
 class GravityRequestManager
 {
 private:
-    void* context;
-    void* gravityNodeSocket;
-    void* gravityResponseSocket;
-    std::map<void*, std::shared_ptr<RequestDetails> > requestMap;
-    std::vector<zmq_pollitem_t> pollItems;
-    std::map<std::string, void*> futureResponseUrlToSocketMap;
-    void processRequest();
-    void createFutureResponse();
-    void sendFutureResponse();
-    void ready();
+	void* context;
+	void* gravityNodeSocket;
+	void* gravityResponseSocket;
+	std::map<void*,std::shared_ptr<RequestDetails> > requestMap;
+	std::vector<zmq_pollitem_t> pollItems;
+	std::map<std::string,void*> futureResponseUrlToSocketMap;
+	void processRequest();
+	void createFutureResponse();
+	void sendFutureResponse();
+	void ready();
 
-    std::string serviceDirectoryUrl;
-    void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url, uint32_t regTime);
-
-    std::shared_ptr<spdlog::logger> logger;
-
+	std::string serviceDirectoryUrl;
+	void notifyServiceDirectoryOfStaleEntry(std::string serviceId, std::string url, uint32_t regTime);
+	
+	std::shared_ptr<spdlog::logger> logger;
+	
 public:
-    /**
+	/**
 	 * Constructor GravityRequestManager
 	 * \param context The zmq context in which the socket will be established with the service provider
 	 */
-    GravityRequestManager(void* context);
+	GravityRequestManager(void* context);
 
-    /**
+	/**
 	 * Default destructor
 	 */
-    virtual ~GravityRequestManager();
+	virtual ~GravityRequestManager();
 
-    /**
+	/**
 	 * Starts the GravityRequestManager which will manage the request/response communication with
 	 * the service provider
 	 */
-    void start();
+	void start();
 };
 
 } /* namespace gravity */

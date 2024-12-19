@@ -28,34 +28,32 @@ class Provider : public GravityServiceProvider
 {
 public:
     int counter;
-    virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID,
-                                                        const GravityDataProduct& dataProduct);
+	virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 };
 
-std::shared_ptr<GravityDataProduct> Provider::request(const std::string serviceID,
-                                                      const GravityDataProduct& dataProduct)
+
+std::shared_ptr<GravityDataProduct> Provider::request(const std::string serviceID, const GravityDataProduct& dataProduct)
 {
-    //Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
-    if (dataProduct.getDataProductID() != "Counter")
-    {
-        Log::critical("Request is not for counter!");
-        return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
-    }
+	//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
+	if(dataProduct.getDataProductID() != "Counter") {
+		Log::critical("Request is not for counter!");
+		return std::shared_ptr<GravityDataProduct>(new GravityDataProduct("BadRequest"));
+	}
 
-    Log::warning("Request received");
+	Log::warning("Request received");
 
-    std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("Result"));
-    resultDP->setData(&counter, sizeof(int));
-    counter++;
+	std::shared_ptr<GravityDataProduct> resultDP(new GravityDataProduct("Result"));
+	resultDP->setData(&counter, sizeof(int));
+	counter++;
 
-    return resultDP;
+	return resultDP;
 }
 
 int main()
 {
-    GravityNode gn;
-    //Initialize gravity, giving this node a componentID.
-    GravityReturnCode ret = gn.init("Provider");
+	GravityNode gn;
+	//Initialize gravity, giving this node a componentID.
+	GravityReturnCode ret = gn.init("Provider");
     int numTries = 3;
     while (ret != GravityReturnCodes::SUCCESS && numTries-- > 0)
     {
@@ -68,20 +66,20 @@ int main()
         exit(1);
     }
 
-    Provider msp;
-    msp.counter = 0;
-    gn.registerService(
-        //This identifies the Service to the service directory so that others can
-        // make a request to it.
-        "Counter",
-        //Assign a transport type to the socket (almost always tcp, unless you are only
-        //using the gravity data product between two processes on the same computer).
-        GravityTransportTypes::TCP,
-        //Give an instance of the service class to be called when a request is made.
-        msp);
+	Provider msp;
+	msp.counter = 0;
+	gn.registerService(
+						//This identifies the Service to the service directory so that others can
+						// make a request to it.
+						"Counter",
+						//Assign a transport type to the socket (almost always tcp, unless you are only
+						//using the gravity data product between two processes on the same computer).
+						GravityTransportTypes::TCP,
+						//Give an instance of the service class to be called when a request is made.
+						msp);
 
-    //Wait for us to exit (Ctrl-C or being killed).
-    gn.waitForExit();
+	//Wait for us to exit (Ctrl-C or being killed).
+	gn.waitForExit();
 
-    gn.unregisterService("Counter");
+	gn.unregisterService("Counter");
 }

@@ -27,8 +27,7 @@
 
 //class GravityNode {};
 
-namespace gravity
-{
+namespace gravity {
 
 #define GRAVITY_LOG_FATAL 0
 #define GRAVITY_LOG_CRITICAL 1
@@ -44,8 +43,7 @@ namespace gravity
 /**
  * Interface for a log writer.
  */
-class Logger
-{
+class Logger {
 public:
     /** 
      * Called by the logger when the user logs at a level which the instance of this class is set to log at.  
@@ -67,15 +65,14 @@ public:
     /**
      * Log Levels
      */
-    enum LogLevel
-    {
-        NONE = 0,                              ///< logging is off
-        FATAL = 1,                             ///< only log fatal level messages
-        CRITICAL = 1 << GRAVITY_LOG_CRITICAL,  ///< log critical level messages and above
-        WARNING = 1 << GRAVITY_LOG_WARNING,    ///< log warning level messages and above
-        MESSAGE = 1 << GRAVITY_LOG_MESSAGE,    ///< log message level  messages and above
-        DEBUG = 1 << GRAVITY_LOG_DEBUG,        ///< log debug level messages and above
-        TRACE = 1 << GRAVITY_LOG_TRACE         ///< log trace level messages and above
+    enum LogLevel {
+        NONE = 0, ///< logging is off
+        FATAL = 1, ///< only log fatal level messages
+        CRITICAL = 1 << GRAVITY_LOG_CRITICAL, ///< log critical level messages and above
+        WARNING = 1 << GRAVITY_LOG_WARNING, ///< log warning level messages and above
+        MESSAGE = 1 << GRAVITY_LOG_MESSAGE, ///< log message level  messages and above
+        DEBUG = 1 << GRAVITY_LOG_DEBUG, ///< log debug level messages and above
+        TRACE = 1 << GRAVITY_LOG_TRACE ///< log trace level messages and above
     };
     /**
      * @name Helper functions
@@ -89,7 +86,7 @@ public:
      * This function is not case sensitive.
      */
     GRAVITY_API static LogLevel LogStringToLevel(const char* string);
-    /** @} */  //Helper functions
+    /** @} */ //Helper functions
 
     /**
      * Initialize a Logger to log to a file.  
@@ -100,8 +97,7 @@ public:
      * \param local_log_level          The initial local logging level.
      * \param close_file_after_write   Boolean that indicates whether the log file should be kept open between writes.  Defaults to false.
      */
-    GRAVITY_API static void initAndAddFileLogger(const char* directory, const char* comp_id, LogLevel local_log_level,
-                                                 bool close_file_after_write = false);
+    GRAVITY_API static void initAndAddFileLogger(const char* directory, const char* comp_id, LogLevel local_log_level, bool close_file_after_write = false);
 
     /**
      * Initialize a Logger to log to the console.
@@ -140,7 +136,7 @@ public:
     GRAVITY_API static void debug(const char* message, ...);
     GRAVITY_API static void trace(const char* message, ...);
 
-    /** @} */  //Logging Functions
+    /** @} */ //Logging Functions
 
     /**
      * Removes the specified Logger.
@@ -152,13 +148,12 @@ public:
      * Return the number of open loggers.
      */
     GRAVITY_API static int NumberOfLoggers();
-
 private:
     /**
      * Calls the Logger::Log function for each initialized Logger 
      */
     static void vLog(int level, const char* format, va_list args);
-
+    
     /**
      * Returns the LogLevel enum as an int.
      */
@@ -169,9 +164,9 @@ private:
     /**
      * List of all initialized Loggers.
      */
-    static std::list<std::pair<Logger*, int> > loggers;
+    static std::list< std::pair<Logger*, int> > loggers;
     static Semaphore lock;
 };
 
-}  // namespace gravity
+} //Namespace
 #endif

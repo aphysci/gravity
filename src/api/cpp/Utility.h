@@ -25,38 +25,37 @@
  * Mark functions that are part of the public API.
  */
 #ifdef _WIN32
-#if _WIN32 != __MINGW32__
-#ifdef GRAVITY_EXPORTS
-#define GRAVITY_API __declspec(dllexport)
+#    if _WIN32 != __MINGW32__
+#        ifdef GRAVITY_EXPORTS
+#            define GRAVITY_API __declspec(dllexport)
+#        else
+#            define GRAVITY_API __declspec(dllimport)
+#        endif
+#    else
+#        define GRAVITY_API
+#    endif
 #else
-#define GRAVITY_API __declspec(dllimport)
-#endif
-#else
-#define GRAVITY_API
-#endif
-#else
-#define GRAVITY_API
+#    define GRAVITY_API
 #endif
 
-namespace gravity
-{
+namespace gravity {
 
 /**
  * @name String conversion and helper functions
  * @{
- */
-GRAVITY_API std::string StringToLowerCase(std::string str);  ///< Return lowercase string
-GRAVITY_API char* StringToLowerCase(char* str, int leng);    ///< In-place modification and returns ptr to string
-GRAVITY_API std::string StringCopyToLowerCase(const std::string& str);     ///< \TODO remove, same as StringToLowerCase
-GRAVITY_API int StringToInt(std::string str, int default_value);           ///< Return an integer.
-GRAVITY_API double StringToDouble(std::string str, double default_value);  ///< Return a double
+ */ 
+GRAVITY_API std::string StringToLowerCase(std::string str); ///< Return lowercase string
+GRAVITY_API char* StringToLowerCase(char* str, int leng); ///< In-place modification and returns ptr to string
+GRAVITY_API std::string StringCopyToLowerCase(const std::string &str); ///< \TODO remove, same as StringToLowerCase
+GRAVITY_API int StringToInt(std::string str, int default_value); ///< Return an integer.
+GRAVITY_API double StringToDouble(std::string str, double default_value); ///< Return a double
 /**
  * Trim a string.
  * \param s string that will be modified
  * \param delimiters characters to remove from the right and left of the string
  * \return also return a reference to the modified string
  */
-GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v");
+GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " \f\n\r\t\v" );
 
 /**
  * Replace substrings in a string.
@@ -65,9 +64,9 @@ GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters = " 
  * \param newValue replacement substring
  */
 GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue);
-/** @} */  //String conversion and helper functions
+/** @} */ //String conversion and helper functions
 
-GRAVITY_API bool IsValidFilename(const std::string filename);  ///< Return if filename is valid, which is OS dependent
+GRAVITY_API bool IsValidFilename(const std::string filename); ///< Return if filename is valid, which is OS dependent
 
 /**
  * @name Time functions
@@ -78,10 +77,10 @@ GRAVITY_API bool IsValidFilename(const std::string filename);  ///< Return if fi
  * \TODO place an ifdef around this
  */
 GRAVITY_API uint64_t getCurrentTime();
-/** @} */  //Time functions
+/** @} */ //Time functions
 
 GRAVITY_API unsigned int sleep(int milliseconds);
 
-}  // namespace gravity
+}
 
-#endif  //GRAVITY_UTILITY_H__
+#endif //GRAVITY_UTILITY_H__

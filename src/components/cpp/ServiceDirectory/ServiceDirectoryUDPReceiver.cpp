@@ -26,11 +26,12 @@
 #include "ServiceDirectoryUDPReceiver.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "SpdLog.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <errno.h>
-#include <set>
+#include<set>
 #ifdef _WIN32
 #include <winSock2.h>
 #include <WS2tcpip.h>
@@ -43,369 +44,375 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
+#include "spdlog/fmt/fmt.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
 using namespace std;
 
+
 namespace gravity
 {
 
-map<string, unsigned int> receivedCountMap;
-map<string, unsigned int> broadcastRateMap;
-map<string, struct timeval> expectedMsgTimeMap;
+map<string,unsigned int> receivedCountMap;
+map<string,unsigned int> broadcastRateMap;
+map<string,struct timeval> expectedMsgTimeMap;
 map<string, int64_t> connectedDomainMap;
 
 ServiceDirectoryUDPReceiver::ServiceDirectoryUDPReceiver(void* context)
 {
-    this->context = context;
-    logger = spdlog::get("GravityLogger");
+	this->context = context;
 }
 
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
-#ifdef _WIN32
-    closesocket(receiveSocket);
-#else
-    close(receiveSocket);
-#endif
-    zmq_close(sdSocket);
+	#ifdef _WIN32
+	closesocket(receiveSocket);
+	#else
+	close(receiveSocket);
+	#endif
+	zmq_close(sdSocket);
 };
+
 
 void ServiceDirectoryUDPReceiver::start()
 {
-    sdSocket = zmq_socket(context, ZMQ_REP);
-    zmq_connect(sdSocket, "inproc://service_directory_udp_receive");
-    zmq_setsockopt(sdSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-    void* domainSocket = zmq_socket(context, ZMQ_PUB);
-    zmq_connect(domainSocket, "inproc://service_directory_domain_socket");
+	sdSocket = zmq_socket(context,ZMQ_REP);
+	zmq_connect(sdSocket,"inproc://service_directory_udp_receive");
+	zmq_setsockopt(sdSocket,ZMQ_SUBSCRIBE,NULL,0);
 
-    // Poll the service directory node
-    zmq_pollitem_t pollItem;
-    pollItem.socket = sdSocket;
-    pollItem.events = ZMQ_POLLIN;
-    pollItem.fd = 0;
-    pollItem.revents = 0;
+	void* domainSocket = zmq_socket(context,ZMQ_PUB);
+	zmq_connect(domainSocket,"inproc://service_directory_domain_socket");
+	
 
-    bool waiting = true;
-    // Wait for command to start reciever
-    // Start polling socket(s), blocking while we wait
-    while (waiting)
-    {
-        int rc = zmq_poll(&pollItem, 1, -1);  // 0 --> return immediately, -1 --> blocks
-        if (rc == -1)
-        {
-            logger->critical("Interrupted, exiting (rc = {})", rc);
-            // Interrupted
-            return;
-        }
+	// Poll the service directory node
+	zmq_pollitem_t pollItem;
+	pollItem.socket = sdSocket;
+	pollItem.events = ZMQ_POLLIN;
+	pollItem.fd = 0;
+	pollItem.revents = 0;
 
-        if (pollItem.revents & ZMQ_POLLIN)
-        {
-            string command = readStringMessage(sdSocket);
+	bool waiting = true;
+	// Wait for command to start reciever
+	// Start polling socket(s), blocking while we wait
+	while(waiting)
+	{
 
-            if (command == "receive")
-            {
-                receiveReceiverParameters();
-                if (initReceiveSocket() < 0)
-                {
-                    logger->critical("UDP Receiver init error");
-                }
-                waiting = false;
-            }
-        }
-    }
+		int rc = zmq_poll(&pollItem, 1, -1); // 0 --> return immediately, -1 --> blocks
+		if (rc == -1)
+		{
+			SpdLog::critical(fmt::format("Interrupted, exiting (rc = {})", rc).c_str());
+			// Interrupted
+			return;
+		}
 
-    char recvString[MAXRECVSTRING + 1]; /* Buffer for received string */
-    int recvStringLen;                  /* Length of received string */
-    ServiceDirectoryBroadcastPB broadcastPB;
+		if (pollItem.revents & ZMQ_POLLIN)
+		{
+			string command = readStringMessage(sdSocket);
 
-    struct timeval currTime;
-    struct timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
+			if (command == "receive")
+			{
+				receiveReceiverParameters();
+				if(initReceiveSocket()<0)
+				{
+					SpdLog::critical("UDP Receiver init error");
+				}
+				waiting = false;
+			}
+		}
+	}
 
-    //set socket to block forever initially
+	char recvString[MAXRECVSTRING+1]; /* Buffer for received string */
+    int recvStringLen;                /* Length of received string */
+	ServiceDirectoryBroadcastPB broadcastPB;
+
+	struct timeval currTime;
+	struct timeval timeout;
+	timeout.tv_sec=0;
+	timeout.tv_usec=0;
+
+	//set socket to block forever initially
 #ifdef _WIN32
-    unsigned int timeout_int = timevalToMilliSeconds(&timeout);
-    setsockopt(receiveSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_int, sizeof(unsigned int));
+	unsigned int timeout_int = timevalToMilliSeconds(&timeout);
+	setsockopt(receiveSocket,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
 #else
-    //set socket to block forever initially
-    setsockopt(receiveSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
+	//set socket to block forever initially
+	setsockopt(receiveSocket,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
 #endif
 
-    while (true)
-    {
-        memset(recvString, 0, MAXRECVSTRING + 1);
+	while(true)
+	{
+		memset(recvString,0,MAXRECVSTRING+1);
 
-        /* Receive a broadcast message or timeout */
-        recvStringLen = recvfrom(receiveSocket, recvString, MAXRECVSTRING, 0, NULL, 0);
-        //get the current time
-        gettimeofday(&currTime, NULL);
+		/* Receive a broadcast message or timeout */
+	    recvStringLen = recvfrom(receiveSocket, recvString, MAXRECVSTRING, 0, NULL, 0);
+		//get the current time
+		gettimeofday(&currTime,NULL);
+	
+		if(recvStringLen == 0)
+		{
+			// Don't know why this would happen, just ignore this case.
+			continue;
+		}
 
-        if (recvStringLen == 0)
-        {
-            // Don't know why this would happen, just ignore this case.
-            continue;
-        }
+		//check for socket error
+		else if(recvStringLen < 0)
+		{
+			if (!(errno == EAGAIN || errno == EWOULDBLOCK))
+			{
+				SpdLog::critical(fmt::format("recv() error, errno: {}", errno).c_str());
+				break;
+			}
+		}
+		else //we received a message
+		{
+			broadcastPB.ParseFromArray(recvString,recvStringLen);
+			//printByteBuffer(recvString,recvStringLen);
 
-        //check for socket error
-        else if (recvStringLen < 0)
-        {
-            if (!(errno == EAGAIN || errno == EWOULDBLOCK))
-            {
-                logger->critical("recv() error, errno: {}", errno);
-                break;
-            }
-        }
-        else  //we received a message
-        {
-            broadcastPB.ParseFromArray(recvString, recvStringLen);
-            //printByteBuffer(recvString,recvStringLen);
+			//Log a warning if we received the same domain from a different url
+			if((ourDomain.compare(broadcastPB.domain())==0) && ourUrl.compare(broadcastPB.url())!=0)
+			{
+				SpdLog::warn(fmt::format("Duplicate Domain: {}, {}",ourDomain,broadcastPB.url()).c_str());
+			}
+			
+			//ignore messages from our domain name or invalid domains
+			if((ourDomain.compare(broadcastPB.domain())!=0) && isValidDomain(broadcastPB.domain()))
+			{
+				//SpdLog::trace(fmt::format("Received UDP Broadcast Message for Domain: {}",broadcastPB.domain()).c_str());
 
-            //Log a warning if we received the same domain from a different url
-            if ((ourDomain.compare(broadcastPB.domain()) == 0) && ourUrl.compare(broadcastPB.url()) != 0)
-            {
-                logger->warn("Duplicate Domain: {}, {}", ourDomain, broadcastPB.url());
-            }
+				//if first time seeing domain
+				if(receivedCountMap.find(broadcastPB.domain())==receivedCountMap.end())
+				{
+					receivedCountMap[broadcastPB.domain()]=1;
+					broadcastRateMap[broadcastPB.domain()]=broadcastPB.rate();
+				}
+				else
+				{
+					unsigned int count = receivedCountMap.at(broadcastPB.domain());
+					count++;
 
-            //ignore messages from our domain name or invalid domains
-            if ((ourDomain.compare(broadcastPB.domain()) != 0) && isValidDomain(broadcastPB.domain()))
-            {
-                //logger->trace("Received UDP Broadcast Message for Domain: {}",broadcastPB.domain());
+					//if enough broadcasts have been seen
+					if(count >= (unsigned int) MAX_RECEIVE_COUNT)
+					{
+						//cap the count
+						count = MAX_RECEIVE_COUNT;
 
-                //if first time seeing domain
-                if (receivedCountMap.find(broadcastPB.domain()) == receivedCountMap.end())
-                {
-                    receivedCountMap[broadcastPB.domain()] = 1;
-                    broadcastRateMap[broadcastPB.domain()] = broadcastPB.rate();
-                }
-                else
-                {
-                    unsigned int count = receivedCountMap.at(broadcastPB.domain());
-                    count++;
+						//check whether we have already connected with this domain
+						if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end())
+						{
+							// add domain to the connected list
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
+							
+							// Inform SD of new connection
+							SpdLog::trace("Sending domain Add command to synchronizer thread");
+							sendStringMessage(domainSocket,"Add",ZMQ_SNDMORE);
+							sendStringMessage(domainSocket,broadcastPB.domain(),ZMQ_SNDMORE);
+							sendStringMessage(domainSocket,broadcastPB.url(),ZMQ_DONTWAIT);
+						}
+						else if (connectedDomainMap[broadcastPB.domain()] != broadcastPB.starttime())
+						{
+							// update domain time
+							connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
-                    //if enough broadcasts have been seen
-                    if (count >= (unsigned int)MAX_RECEIVE_COUNT)
-                    {
-                        //cap the count
-                        count = MAX_RECEIVE_COUNT;
+							// Inform SD of updated connection
+							SpdLog::trace("Sending domain Update command to synchronizer thread");
+							sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
+							sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
+						}
+					}
+					//update count for domain
+					receivedCountMap[broadcastPB.domain()]=count; 
+				}
+				//insert new expected time for domain
+				expectedMsgTimeMap[broadcastPB.domain()]=addTime(&currTime,broadcastPB.rate());
+			}
+		}
 
-                        //check whether we have already connected with this domain
-                        if (connectedDomainMap.find(broadcastPB.domain()) == connectedDomainMap.end())
-                        {
-                            // add domain to the connected list
-                            connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
+		timeout.tv_sec=0;
+		timeout.tv_usec=0;
+		
+		set<string>removeSet;
+		for(map<string,struct timeval>::iterator iter=expectedMsgTimeMap.begin();iter != expectedMsgTimeMap.end();++iter)
+		{
+			bool removed = false;
+			//check if we missed a message
+			if(timevalcmp(&(iter->second),&currTime) <= 0)
+			{
+				int count = receivedCountMap.at(iter->first);
+				count--;
+				//if we have missed enough messages
+				if(count <=0)
+				{
+					//check whether we have already connected with this domain
+					if (connectedDomainMap.find(iter->first) != connectedDomainMap.end())
+					{
+						// inform Service Directory to remove domain
+						sendStringMessage(domainSocket,"Remove",ZMQ_SNDMORE);
+						sendStringMessage(domainSocket,iter->first,ZMQ_DONTWAIT);
+						connectedDomainMap.erase(iter->first);
+					}
 
-                            // Inform SD of new connection
-                            logger->trace("Sending domain Add command to synchronizer thread");
-                            sendStringMessage(domainSocket, "Add", ZMQ_SNDMORE);
-                            sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
-                            sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
-                        }
-                        else if (connectedDomainMap[broadcastPB.domain()] != broadcastPB.starttime())
-                        {
-                            // update domain time
-                            connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
+					// remove domain from data sets
+					receivedCountMap.erase(iter->first);
+					broadcastRateMap.erase(iter->first);
+					removeSet.insert(iter->first);
+					removed = true;
+				}
+				else
+				{
+					//set new expected message time for missed doamin
+					expectedMsgTimeMap[iter->first]=addTime(&(iter->second),broadcastRateMap.at(iter->first));
+					receivedCountMap[iter->first]=count;
+				}
+			}
 
-                            // Inform SD of updated connection
-                            logger->trace("Sending domain Update command to synchronizer thread");
-                            sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
-                            sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
-                            sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
-                        }
-                    }
-                    //update count for domain
-                    receivedCountMap[broadcastPB.domain()] = count;
-                }
-                //insert new expected time for domain
-                expectedMsgTimeMap[broadcastPB.domain()] = addTime(&currTime, broadcastPB.rate());
-            }
-        }
+			if(!removed)
+			{
+				struct timeval* nextTime = &(iter->second);
 
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 0;
+				struct timeval timeToWait = subtractTime(nextTime,&currTime);
+				struct timeval zeroTime;
+				zeroTime.tv_sec=0;
+				zeroTime.tv_usec=0;
+				//if the time to wait is less then the current timeout
+				if((timevalcmp(&zeroTime,&timeout)==0) || (timevalcmp(&timeToWait,&timeout) < 0))
+				{
+					timeout=timeToWait;
+				}
+			}
+		}
 
-        set<string> removeSet;
-        for (map<string, struct timeval>::iterator iter = expectedMsgTimeMap.begin(); iter != expectedMsgTimeMap.end();
-             ++iter)
-        {
-            bool removed = false;
-            //check if we missed a message
-            if (timevalcmp(&(iter->second), &currTime) <= 0)
-            {
-                int count = receivedCountMap.at(iter->first);
-                count--;
-                //if we have missed enough messages
-                if (count <= 0)
-                {
-                    //check whether we have already connected with this domain
-                    if (connectedDomainMap.find(iter->first) != connectedDomainMap.end())
-                    {
-                        // inform Service Directory to remove domain
-                        sendStringMessage(domainSocket, "Remove", ZMQ_SNDMORE);
-                        sendStringMessage(domainSocket, iter->first, ZMQ_DONTWAIT);
-                        connectedDomainMap.erase(iter->first);
-                    }
-
-                    // remove domain from data sets
-                    receivedCountMap.erase(iter->first);
-                    broadcastRateMap.erase(iter->first);
-                    removeSet.insert(iter->first);
-                    removed = true;
-                }
-                else
-                {
-                    //set new expected message time for missed doamin
-                    expectedMsgTimeMap[iter->first] = addTime(&(iter->second), broadcastRateMap.at(iter->first));
-                    receivedCountMap[iter->first] = count;
-                }
-            }
-
-            if (!removed)
-            {
-                struct timeval* nextTime = &(iter->second);
-
-                struct timeval timeToWait = subtractTime(nextTime, &currTime);
-                struct timeval zeroTime;
-                zeroTime.tv_sec = 0;
-                zeroTime.tv_usec = 0;
-                //if the time to wait is less then the current timeout
-                if ((timevalcmp(&zeroTime, &timeout) == 0) || (timevalcmp(&timeToWait, &timeout) < 0))
-                {
-                    timeout = timeToWait;
-                }
-            }
-        }
-
-        //remove any leftover domains from the expected message time map
-        for (set<string>::iterator iter = removeSet.begin(); iter != removeSet.end(); ++iter)
-        {
-            expectedMsgTimeMap.erase(*iter);
-        }
-
-#ifdef _WIN32
-        //select(receiveSocket,&fds,NULL,NULL,&timeout);
-        timeout_int = timevalToMilliSeconds(&timeout);
-        setsockopt(receiveSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_int, sizeof(unsigned int));
-#else
-        //set socket to block until the timeout
-        setsockopt(receiveSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
-#endif
-    }
+		//remove any leftover domains from the expected message time map
+		for(set<string>::iterator iter = removeSet.begin(); iter != removeSet.end(); ++iter)
+		{
+			expectedMsgTimeMap.erase(*iter);
+		}
 
 #ifdef _WIN32
-    closesocket(receiveSocket);
+		//select(receiveSocket,&fds,NULL,NULL,&timeout);
+		timeout_int = timevalToMilliSeconds(&timeout);
+		setsockopt(receiveSocket,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout_int,sizeof(unsigned int));
 #else
-    close(receiveSocket);
+		//set socket to block until the timeout
+		setsockopt(receiveSocket,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
 #endif
-    zmq_close(sdSocket);
+	}
+
+	#ifdef _WIN32
+	closesocket(receiveSocket);
+	#else
+	close(receiveSocket);
+	#endif
+	zmq_close(sdSocket);
 }
 
 void ServiceDirectoryUDPReceiver::receiveReceiverParameters()
 {
-    ourDomain = readStringMessage(sdSocket);
-    ourUrl = readStringMessage(sdSocket);
+	ourDomain = readStringMessage(sdSocket);
+	ourUrl = readStringMessage(sdSocket);
 
-    //receive port
-    zmq_msg_t msg;
-    zmq_msg_init(&msg);
-    zmq_recvmsg(sdSocket, &msg, ZMQ_DONTWAIT);
-    std::memcpy(&port, zmq_msg_data(&msg), sizeof(unsigned int));
-    zmq_msg_close(&msg);
+	//receive port
+	zmq_msg_t msg;
+	zmq_msg_init(&msg);
+	zmq_recvmsg(sdSocket,&msg,ZMQ_DONTWAIT);
+	std::memcpy(&port,zmq_msg_data(&msg),sizeof(unsigned int));
+	zmq_msg_close(&msg);
 
-    //receive number of valid domains
-    unsigned int numDomains = 0;
-    zmq_msg_t msg2;
-    zmq_msg_init(&msg2);
-    zmq_recvmsg(sdSocket, &msg2, ZMQ_DONTWAIT);
-    std::memcpy(&numDomains, zmq_msg_data(&msg2), sizeof(unsigned int));
-    zmq_msg_close(&msg2);
+	//receive number of valid domains
+	unsigned int numDomains = 0;
+	zmq_msg_t msg2;
+	zmq_msg_init(&msg2);
+	zmq_recvmsg(sdSocket,&msg2,ZMQ_DONTWAIT);
+	std::memcpy(&numDomains,zmq_msg_data(&msg2),sizeof(unsigned int));
+	zmq_msg_close(&msg2);
 
-    //recieve csv list of domains
-    zmq_msg_t msg3;
-    zmq_msg_init(&msg3);
-    zmq_recvmsg(sdSocket, &msg3, ZMQ_DONTWAIT);
-    int size = zmq_msg_size(&msg3);
-    char* domains = (char*)malloc(size + 1);
-    std::memcpy(domains, zmq_msg_data(&msg3), size);
-    domains[size] = 0;
-    string domainsString;
-    domainsString.assign(domains);
-    std::free(domains);
+	//recieve csv list of domains
+	zmq_msg_t msg3;
+	zmq_msg_init(&msg3);
+	zmq_recvmsg(sdSocket,&msg3,ZMQ_DONTWAIT);
+	int size = zmq_msg_size(&msg3);
+	char* domains = (char*) malloc(size+1);
+	std::memcpy(domains,zmq_msg_data(&msg3),size);
+	domains[size]=0;
+	string domainsString;
+	domainsString.assign(domains);
+	std::free(domains);
 
-    parseValidDomains(domainsString, numDomains);
+	parseValidDomains(domainsString,numDomains);
 
-    sendStringMessage(sdSocket, "ACK", ZMQ_DONTWAIT);
+	sendStringMessage(sdSocket,"ACK",ZMQ_DONTWAIT);
+
 }
 
 int ServiceDirectoryUDPReceiver::initReceiveSocket()
-{
-    /* Socket */
+{                     
+	/* Socket */
     struct sockaddr_in broadcastAddr; /* Broadcast Address */
 
     /* Create a best-effort datagram socket using UDP */
     if ((receiveSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        logger->critical("Receiver: socket() failed");
-        return receiveSocket;
+		SpdLog::critical("Receiver: socket() failed");
+		return receiveSocket;
     }
 
-    //set socket to be re-usable. Must be set for all other listeners for this port
-    int one = 1;
-    setsockopt(receiveSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&one, sizeof(one));
+	//set socket to be re-usable. Must be set for all other listeners for this port
+	int one = 1;
+	setsockopt(receiveSocket,SOL_SOCKET,SO_REUSEADDR,(const char*)&one,sizeof(one));
 
     /* Construct bind structure */
-    memset(&broadcastAddr, 0, sizeof(broadcastAddr));  /* Zero out structure */
-    broadcastAddr.sin_family = AF_INET;                /* Internet address family */
-    broadcastAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
-    broadcastAddr.sin_port = htons(port);              /* Broadcast port */
+    memset(&broadcastAddr, 0, sizeof(broadcastAddr));   /* Zero out structure */
+    broadcastAddr.sin_family = AF_INET;                 /* Internet address family */
+    broadcastAddr.sin_addr.s_addr = htonl(INADDR_ANY);  /* Any incoming interface */
+    broadcastAddr.sin_port = htons(port);      /* Broadcast port */                                                                                                                                                     
 
     /* Bind to the broadcast port */
 #ifdef _WIN32
-    int rc = bind((SOCKET)receiveSocket, (const struct sockaddr*)&broadcastAddr, (int)sizeof(broadcastAddr));
+	int rc = bind((SOCKET)receiveSocket, (const struct sockaddr *) &broadcastAddr, (int)sizeof(broadcastAddr));
 #else
-    int rc = bind(receiveSocket, (struct sockaddr*)&broadcastAddr, sizeof(broadcastAddr));
+	int rc = bind(receiveSocket, (struct sockaddr *) &broadcastAddr, sizeof(broadcastAddr));
 #endif
-    if (rc < 0)
+	if (rc < 0)
     {
-        logger->critical("Receiver: bind() failed");
-        return rc;
+		SpdLog::critical("Receiver: bind() failed");
+		return rc;
     }
 
-    return receiveSocket;
+	return receiveSocket;
 }
 
-void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString, unsigned int numDomains)
+
+void ServiceDirectoryUDPReceiver::parseValidDomains(string domainString,unsigned int numDomains)
 {
-    int start = 0;
-    unsigned int end = domainString.find(",", start);
+	int start=0;
+	unsigned int end = domainString.find(",",start);
 
-    for (unsigned int i = 0; i < numDomains; i++)
-    {
-        if (end == string::npos)
-        {
-            end = domainString.length();
-        }
-        string sub = domainString.substr(start, end - start);
-        validDomains.push_back(sub);
+	for(unsigned int i = 0; i < numDomains; i++)
+	{
+		if(end == string::npos)
+		{
+			end = domainString.length();
+		}
+		string sub = domainString.substr(start,end-start);
+		validDomains.push_back(sub);
 
-        start = end + 1;
-        end = domainString.find(",", start);
-    }
+		start=end+1;
+		end = domainString.find(",",start);
+	}
 }
 
 bool ServiceDirectoryUDPReceiver::isValidDomain(string domain)
 {
-    for (vector<string>::iterator iter = validDomains.begin(); iter != validDomains.end(); ++iter)
-    {
-        if ((domain.compare(*iter) == 0) || ((*iter).compare("*") == 0))
-        {
-            return true;
-        }
-    }
+	for(vector<string>::iterator iter = validDomains.begin();iter!=validDomains.end();++iter)
+	{
+		if((domain.compare(*iter)==0)||((*iter).compare("*")==0))
+		{
+			return true;
+		}
+	}
 
-    return false;
+	return false;
 }
 
-} /*namespace gravity*/
+}/*namespace gravity*/

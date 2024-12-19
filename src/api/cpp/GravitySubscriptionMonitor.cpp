@@ -25,12 +25,13 @@
 
 #include "GravitySubscriptionMonitor.h"
 
-namespace gravity
-{
+namespace gravity {
+
 
 GravitySubscriptionMonitor::~GravitySubscriptionMonitor() {}
-void GravitySubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
-                                                     std::string filter, std::string domain)
-{
+void GravitySubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast, std::string filter, std::string domain) {}
 }
-}  // namespace gravity
+
+
+
+

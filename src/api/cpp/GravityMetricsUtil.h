@@ -36,5 +36,6 @@ extern const char* GRAVITY_PUB_METRICS_REQ;
 extern const char* GRAVITY_SUB_METRICS_REQ;
 extern const char* GRAVITY_METRICS_PUB;
 
+
 } /* namespace gravity */
 #endif /* GRAVITYMETRICSUTIL_H_ */

@@ -30,9 +30,10 @@
 #include <vector>
 #include "GravityNode.h"
 
+
 namespace spdlog
 {
-class logger;
+	class logger;
 }
 
 #define SERVICE_MGR_URL "inproc://gravity_service_manager"
@@ -42,7 +43,7 @@ namespace gravity
 
 typedef struct ServiceDetails
 {
-    std::string serviceID;
+	std::string serviceID;
     std::string url;
     zmq_pollitem_t pollItem;
     GravityServiceProvider* server;
@@ -51,33 +52,32 @@ typedef struct ServiceDetails
 class GravityServiceManager
 {
 private:
-    void* context;
-    void* gravityNodeSocket;
-    std::map<void*, std::shared_ptr<ServiceDetails> > serviceMapBySocket;
-    std::map<std::string, std::shared_ptr<ServiceDetails> > serviceMapByServiceID;
-    std::map<std::string, uint32_t> serviceRegistrationTimeMap;
-    std::vector<zmq_pollitem_t> pollItems;
-    void addService();
-    void removeService();
-    void ready();
-    std::shared_ptr<spdlog::logger> logger;
-
+	void* context;
+	void* gravityNodeSocket;
+	std::map<void*,std::shared_ptr<ServiceDetails> > serviceMapBySocket;
+	std::map<std::string, std::shared_ptr<ServiceDetails> > serviceMapByServiceID;
+	std::map<std::string, uint32_t> serviceRegistrationTimeMap;
+	std::vector<zmq_pollitem_t> pollItems;
+	void addService();
+	void removeService();
+	void ready();
+	std::shared_ptr<spdlog::logger> logger;
 public:
-    /**
+	/**
 	 * Constructor GravityServiceManager
 	 * \param context The zmq context used for connections
 	 */
-    GravityServiceManager(void* context);
+	GravityServiceManager(void* context);
 
-    /**
+	/**
 	 * Default destructor
 	 */
-    virtual ~GravityServiceManager();
+	virtual ~GravityServiceManager();
 
-    /**
+	/**
 	 * Starts the GravityServiceManager which will manage the communication with the service client
 	 */
-    void start();
+	void start();
 };
 
 } /* namespace gravity */

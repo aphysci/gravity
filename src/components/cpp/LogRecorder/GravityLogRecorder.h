@@ -21,10 +21,9 @@
 #include "protobuf/GravityLogMessagePB.pb.h"
 #include <string>
 
-namespace gravity
-{
+namespace gravity {
 
-#define NUM_LOGS_BEFORE_ROTATE (1000000 / 81)  //About 1MB.  (1Mil chars / 81 (chars/line))
+#define NUM_LOGS_BEFORE_ROTATE (1000000/81) //About 1MB.  (1Mil chars / 81 (chars/line))
 
 class LogRecorder : public GravitySubscriber
 {
@@ -43,8 +42,7 @@ public:
     /**
      * Writes to the Log.
      */
-    virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
-
+    virtual void subscriptionFilled(const std::vector< std::shared_ptr<GravityDataProduct> >& dataProducts);
 private:
     GravityNode* grav_node;
     FILE* log_file;
@@ -58,4 +56,4 @@ private:
     void rotateLogs();
 };
 
-}  // namespace gravity
+}

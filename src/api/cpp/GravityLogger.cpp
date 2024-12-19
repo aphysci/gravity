@@ -39,8 +39,7 @@ using namespace gravity;
 /**
  * Logs to a file
  */
-class FileLogger : public Logger
-{
+class FileLogger : public Logger {
 public:
     FileLogger(const string& log_dir, const string& comp_id, bool close_file);
     /*
@@ -48,13 +47,8 @@ public:
      */
     virtual void Log(int level, const char* messagestr);
     virtual ~FileLogger();
-
 protected:
-    FileLogger(const string& comp_id)
-    {
-        component_id = comp_id;
-        close_file_after_write = false;
-    }  // always keep open here
+    FileLogger(const string& comp_id) {component_id = comp_id; close_file_after_write = false;}  // always keep open here
     string filename;
     FILE* log_file;
     string component_id;
@@ -70,17 +64,17 @@ FileLogger::FileLogger(const string& log_dir, const string& comp_id, bool close_
 #else
     string sep_str = "/";
 #endif
-    if (log_dir.length() == 0 || log_dir.compare(log_dir.length() - sep_str.length(), sep_str.length(), sep_str) == 0)
+    if (log_dir.length() == 0 || log_dir.compare (log_dir.length() - sep_str.length(), sep_str.length(), sep_str) == 0)
         filename = log_dir + component_id + ".log";
     else
         filename = log_dir + sep_str + component_id + ".log";
 
     log_file = fopen(filename.c_str(), "a");
-    if (log_file == NULL)
+    if(log_file == NULL)
     {
         cerr << "[Log::init] Could not open log file: " << filename << endl;
         log_file = fopen("Gravity.log", "a");
-        if (log_file == NULL)
+        if(log_file == NULL)
         {
             log_file = fopen("/dev/null", "a");
             cerr << "[Log::init] Could not open log file: Gravity.log" << endl;
@@ -96,19 +90,19 @@ void FileLogger::Log(int level, const char* messagestr)
 {
     //Format the Logs nicely.
     char timestr[100];
-    struct tm* timeinfo;
+    struct tm * timeinfo;
     time_t rawtime;
     string format = "%m/%d/%y %H:%M:%S";
 
 #ifdef WIN32
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+    time ( &rawtime );
+    timeinfo = localtime( &rawtime );
     strftime(timestr, 100, format.c_str(), timeinfo);
 #else
-    struct timeval tv;
+    struct timeval  tv;
     gettimeofday(&tv, NULL);
     rawtime = tv.tv_sec;
-    timeinfo = localtime(&rawtime);
+    timeinfo = localtime( &rawtime );
     format = format + ".%%06u";
     char buffer[100];
     strftime(buffer, 100, format.c_str(), timeinfo);
@@ -118,11 +112,11 @@ void FileLogger::Log(int level, const char* messagestr)
     if (close_file_after_write)
     {
         log_file = fopen(filename.c_str(), "a");
-        if (log_file == NULL)
+        if(log_file == NULL)
         {
             cerr << "[Log::init] Could not open log file: " << filename << endl;
             log_file = fopen("Gravity.log", "a");
-            if (log_file == NULL)
+            if(log_file == NULL)
             {
                 log_file = fopen("/dev/null", "a");
                 cerr << "[Log::init] Could not open log file: Gravity.log" << endl;
@@ -135,7 +129,7 @@ void FileLogger::Log(int level, const char* messagestr)
     fputs(messagestr, log_file);
     fputs("\n", log_file);
 
-    fflush(log_file);  //I'm not sure when or how often this should be called.
+    fflush(log_file); //I'm not sure when or how often this should be called.
 
     if (close_file_after_write)
     {
@@ -143,10 +137,12 @@ void FileLogger::Log(int level, const char* messagestr)
     }
 }
 
-FileLogger::~FileLogger() { fclose(log_file); }
+FileLogger::~FileLogger()
+{
+    fclose(log_file);
+}
 
-void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level,
-                               bool close_file_after_write)
+void Log::initAndAddFileLogger(const char* log_dir, const char* comp_id, LogLevel local_log_level, bool close_file_after_write)
 {
     Log::initAndAddLogger(new FileLogger(log_dir, comp_id, close_file_after_write), local_log_level);
 }
@@ -162,8 +158,7 @@ public:
 
 ConsoleLogger::ConsoleLogger(const string& comp_id) : FileLogger(comp_id)
 {
-    log_file =
-        stdout;  //fdopen(dup(STDOUT_FILENO), "w"); //Duplicate the file handle so we can close it after we're done with it.
+    log_file = stdout; //fdopen(dup(STDOUT_FILENO), "w"); //Duplicate the file handle so we can close it after we're done with it.
     //I hope this is the right way to do this.
 }
 
@@ -177,7 +172,7 @@ void Log::initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level)
 //
 
 //Initialize
-std::list<std::pair<Logger*, int> > Log::loggers;
+std::list< std::pair<Logger*, int> > Log::loggers;
 Semaphore Log::lock;
 
 void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
@@ -187,11 +182,11 @@ void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
     //safeguard against adding duplicate logger
     for (auto i = loggers.begin(); i != loggers.end(); ++i)
     {
-        if (i->first == logger)
-        {
-            lock.Unlock();
-            return;
-        }
+      if (i->first == logger)
+      {
+        lock.Unlock();
+        return;
+      }
     }
 
     loggers.push_back(make_pair(logger, Log::LevelToInt(log_level)));
@@ -200,38 +195,38 @@ void Log::initAndAddLogger(Logger* logger, LogLevel log_level)
 
 void Log::RemoveLogger(Logger* logger)
 {
-    lock.Lock();
-    std::list<std::pair<Logger*, int> >::iterator i = loggers.begin();
-    while (i != loggers.end())
-    {
-        if (i->first == logger)
-        {
-            delete i->first;
-            i = loggers.erase(i);
-        }
-        else
-        {
-            i++;
-        }
-    }
-    lock.Unlock();
+  lock.Lock();
+  std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+	while(i != loggers.end())
+	{
+		if(i->first == logger)
+		{
+      delete i->first;
+			i = loggers.erase(i);
+		}
+		else
+		{
+		    i++;
+		}
+	}
+  lock.Unlock();
 }
 
 const char* Log::LogLevelToString(LogLevel level)
 {
-    if (level == Log::FATAL)
+    if(level == Log::FATAL)
         return "FATAL";
-    else if (level == Log::CRITICAL)
+    else if(level == Log::CRITICAL)
         return "CRITICAL";
-    else if (level == Log::WARNING)
+    else if(level == Log::WARNING)
         return "WARNING";
-    else if (level == Log::MESSAGE)
+    else if(level == Log::MESSAGE)
         return "MESSAGE";
-    else if (level == Log::DEBUG)
+    else if(level == Log::DEBUG)
         return "DEBUG";
-    else if (level == Log::TRACE)
+    else if(level == Log::TRACE)
         return "TRACE";
-    return "";  //Get Rid of Warning.
+    return ""; //Get Rid of Warning.
 }
 
 Log::LogLevel Log::LogStringToLevel(const char* level)
@@ -239,17 +234,17 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
     char* llevel = strdup(level);
     StringToLowerCase(llevel, strlen(llevel));
     Log::LogLevel ret = Log::NONE;
-    if (strcmp(llevel, "fatal") == 0)
+    if(strcmp(llevel, "fatal") == 0)
         ret = Log::FATAL;
-    else if (strcmp(llevel, "critical") == 0)
+    else if(strcmp(llevel, "critical") == 0)
         ret = Log::CRITICAL;
-    else if (strcmp(llevel, "warning") == 0)
+    else if(strcmp(llevel, "warning") == 0)
         ret = Log::WARNING;
-    else if (strcmp(llevel, "message") == 0)
+    else if(strcmp(llevel, "message") == 0)
         ret = Log::MESSAGE;
-    else if (strcmp(llevel, "debug") == 0)
+    else if(strcmp(llevel, "debug") == 0)
         ret = Log::DEBUG;
-    else if (strcmp(llevel, "trace") == 0)
+    else if(strcmp(llevel, "trace") == 0)
         ret = Log::TRACE;
     free(llevel);
     return ret;
@@ -257,12 +252,13 @@ Log::LogLevel Log::LogStringToLevel(const char* level)
 
 int32_t Log::detectPercentN(const char* format)
 {
+
     const char subspecs[] = {// flags
                              '-', '+', '0', ' ', '#',
                              // width/precision
                              '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '*',
                              // modifiers
-                             'h', 'l', 'L', 'z', 'j', 't'};
+                             'h', 'l', 'L', 'z', 'j', 't' };
     size_t pos = 0;
     std::string checkStr(format);
     while (pos < checkStr.length())
@@ -285,9 +281,9 @@ int32_t Log::detectPercentN(const char* format)
 void Log::vLog(int level, const char* format, va_list args)
 {
     lock.Lock();
-    std::list<std::pair<Logger*, int> >::const_iterator i = loggers.begin();
-    std::list<std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
-    if (i != l_end)
+    std::list< std::pair<Logger*, int> >::const_iterator i = loggers.begin();
+    std::list< std::pair<Logger*, int> >::const_iterator l_end = loggers.end();
+    if(i != l_end)
     {
         const uint32_t maxStrLen = 4096;
         char messageStr[maxStrLen];
@@ -313,15 +309,16 @@ void Log::vLog(int level, const char* format, va_list args)
         else
         {
             vsnprintf(messageStr, maxStrLen, format, args);
-            // make sure null terminated
-            messageStr[maxStrLen - 1] = (char)NULL;
+			// make sure null terminated
+			messageStr[maxStrLen-1] = (char)NULL;
         }
 
         do
         {
-            if (i->second & level) i->first->Log(level, messageStr);
+            if(i->second & level)
+                i->first->Log(level, messageStr);
             i++;
-        } while (i != l_end);
+        } while(i != l_end);
     }
     lock.Unlock();
 }
@@ -329,7 +326,7 @@ void Log::vLog(int level, const char* format, va_list args)
 int Log::LevelToInt(LogLevel level)
 {
     int int_level;
-    switch (level)
+    switch(level)
     {
         case FATAL:
             int_level = FATAL;
@@ -350,107 +347,103 @@ int Log::LevelToInt(LogLevel level)
             int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
             break;
         case NONE:
-            int_level = 0;
-            break;
+        	int_level = 0;
+        	break;
         default:
-            int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
-            break;
+        	int_level = FATAL | CRITICAL | WARNING | MESSAGE | DEBUG | TRACE;
+        	break;
     }
 
     return int_level;
 }
 
+
 void Log::CloseLoggers()
 {
     lock.Lock();
-    std::list<std::pair<Logger*, int> >::iterator i = loggers.begin();
-
+    std::list< std::pair<Logger*, int> >::iterator i = loggers.begin();
+    
     //Remove all Loggers
-    while (i != loggers.end())
+    while(i != loggers.end())  
     {
-        delete i->first;
-        i = loggers.erase(i);
+      delete i->first;
+			i = loggers.erase(i);
     }
     lock.Unlock();
 }
 
 int Log::NumberOfLoggers()
 {
-    lock.Lock();
-    int size = loggers.size();
-    lock.Unlock();
-    return size;
+  lock.Lock();
+  int size = loggers.size();
+  lock.Unlock(); 
+  return size;
 }
 
 //Using functions instead of macros so we can use namespaces.
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_FATAL
-void Log::fatal(const char* message, ...)
-{
+void Log::fatal(const char* message, ...) {
     va_list args;
-    va_start(args, message);
+    va_start ( args, message );
     Log::vLog(FATAL, message, args);
-    va_end(args);
+    va_end ( args );
 }
 #else
-void Log::fatal(const char* message, ...) {}
+void Log::fatal(const char* message, ...) { }
 #endif
 
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_CRITICAL
-void Log::critical(const char* message, ...)
-{
+void Log::critical(const char* message, ...) {
     va_list args1;
-    va_start(args1, message);
+    va_start ( args1, message );
     Log::vLog(CRITICAL, message, args1);
-    va_end(args1);
+    va_end ( args1 );
 }
 #else
-void Log::critical(const char* message, ...) {}
+void Log::critical(const char* message, ...) { }
 #endif
 
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_WARNING
-void Log::warning(const char* message, ...)
-{
+void Log::warning(const char* message, ...) {
     va_list args;
-    va_start(args, message);
+    va_start ( args, message );
     Log::vLog(WARNING, message, args);
-    va_end(args);
+    va_end ( args );
 }
 #else
-void Log::warning(const char* message, ...) {}
+void Log::warning(const char* message, ...) { }
 #endif
 
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_MESSAGE
-void Log::message(const char* message, ...)
-{
+void Log::message(const char* message, ...) {
     va_list args;
-    va_start(args, message);
+    va_start ( args, message );
     Log::vLog(MESSAGE, message, args);
-    va_end(args);
+    va_end ( args );
 }
 #else
-void Log::message(const char* message, ...) {}
+void Log::message(const char* message, ...) { }
 #endif
 
+
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_DEBUG
-void Log::debug(const char* message, ...)
-{
+void Log::debug(const char* message, ...) {
     va_list args;
-    va_start(args, message);
+    va_start ( args, message );
     Log::vLog(DEBUG, message, args);
-    va_end(args);
+    va_end ( args );
 }
 #else
-void Log::debug(const char* message, ...) {}
+void Log::debug(const char* message, ...) { }
 #endif
 
 #if COMPILE_GRAVITY_LOGGING_LEVEL >= GRAVITY_LOG_TRACE
-void Log::trace(const char* message, ...)
-{
+void Log::trace(const char* message, ...) {
     va_list args;
-    va_start(args, message);
+    va_start ( args, message );
     Log::vLog(TRACE, message, args);
-    va_end(args);
+    va_end ( args );
 }
 #else
-void Log::trace(const char* message, ...) {}
+void Log::trace(const char* message, ...) { }
 #endif
