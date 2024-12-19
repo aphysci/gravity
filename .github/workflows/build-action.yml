@@ -27,11 +27,8 @@ jobs:
         name: build
         run: |
           echo $(cat /etc/lsb-release)
-          cd ~/git/gravity
-          ls -lh
           pwd
-          mkdir build && cd build
-          pwd
+          git config --global --add safe.directory '*'
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
           ./install/bin/ServiceDirectory &
