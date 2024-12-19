@@ -12,6 +12,11 @@ gravity_find_protobuf(ON)
 gravity_find_zeromq(ON)
 gravity_find_spdlog(ON)
 
+add_compile_options(
+		$<$<C_COMPILER_ID:GNU>:-Wall>
+		$<$<C_COMPILER_ID:Clang>:-Wall>
+)
+
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobufs/*.proto")
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/protobuf")

@@ -2760,6 +2760,7 @@ string GravityNode::getIP()
         serv.sin_port = htons(otherPort);
 
         int err = connect(sock, (const sockaddr*)&serv, sizeof(serv));
+        (void) err; // in case assert is compiled out
         assert(err != -1);
 
         sockaddr_in name;
@@ -2768,6 +2769,7 @@ string GravityNode::getIP()
         assert(err != -1);
 
         const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, buflen);
+        (void) p; // in case assert is compiled out
         assert(p);
 
 #ifdef WIN32
