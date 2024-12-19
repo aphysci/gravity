@@ -65,11 +65,9 @@ namespace GravityReturnCodes
 {
     /**
      * Return codes used on a Gravity system.
+     * If you add to this list, also add to GravityNode::getCodeString()
      */
     GRAVITY_API enum Codes {
-        /*
-         * If you add to this list, also add to GravityNode::getCodeString()
-         */
         SUCCESS = 0,                ///< The request was successful
         FAILURE = -1,               ///< The request failed
         NO_SERVICE_DIRECTORY = -2,  ///< Could not find Service Directory
@@ -98,8 +96,8 @@ typedef GravityReturnCodes::Codes GravityReturnCode;
 namespace GravityTransportTypes
 {
     /**
-    * Network transport protocols available on a Gravity system. 
-    */
+     * Network transport protocols available on a Gravity system.
+     */
     enum Types
     {
         TCP = 0,     ///< Transmission Control Protocol
@@ -119,21 +117,8 @@ typedef struct SocketWithLock
     Semaphore lock;
 } SocketWithLock;
 
-/*
-typedef struct GravityINIConfig
-{
-	void* context;
-    std::string domain;
-    int port;
-    int timeout;
-    GravityNode *gravityNode;
-    std::string componentId;
-} GravityINIConfig;
-*/
-
 class GravityConfigParser;
 class FutureResponse;
-//template<typename Mutex> class PublishSink;
 
 /**
  * A component that provides a simple interface point to a Gravity-enabled application
@@ -149,20 +134,20 @@ private:
     std::set<std::string> gravityNode_ReservedDataProductIDs;
 
     /**
-   * Domain change listener for a GravityNode.
-   */
+     * Domain change listener for a GravityNode.
+     */
     class GravityNodeDomainListener
     {
     public:
         /**
-     * Return the current Gravity domain.
-     */
+         * Return the current Gravity domain.
+         */
         std::string getDomainUrl();
 
         /**
-     * Listen for and implement a gravity domain change for the given GravityNode.
-     * Continues until the it is interruption or receives a kill command. 
-     */
+         * Listen for and implement a gravity domain change for the given GravityNode.
+         * Continues until the it is interruption or receives a kill command.
+         */
         void start();
 
         GravityNodeDomainListener(void* context);
@@ -390,7 +375,7 @@ public:
      * \param dataProduct GravityDataProduct for which to check for the presence of subscribers
 	 * \param hasSubscribersOut (output only) false if there are no subscribers, otherwise true
      * \return success flag
-     **/
+     */
     GRAVITY_API GravityReturnCode subscribersExist(std::string dataProductID, bool& hasSubscribersOut);
 
     /**
@@ -465,6 +450,7 @@ public:
      * \return success flag
      */
     GRAVITY_API GravityReturnCode registerDataProduct(std::string dataProductID, GravityTransportType transportType);
+
     /**
      * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
@@ -481,6 +467,7 @@ public:
      * \param dataProductID string ID used to uniquely identify this published data product
      */
     GRAVITY_API GravityReturnCode unregisterDataProduct(std::string dataProductID);
+
     /**
      * Register as a service provider with Gravity, and optionally, the Service Directory
      * \param serviceID Unique ID with which to register this service
@@ -490,6 +477,7 @@ public:
      */
     GRAVITY_API GravityReturnCode registerService(std::string serviceID, GravityTransportType transportType,
                                                   const GravityServiceProvider& server);
+
     /**
      * Unregister as a service provider with the Gravity Service Directory
      * \param serviceID Unique ID with which the service was originally registered
@@ -567,13 +555,13 @@ public:
     GRAVITY_API std::string getCodeString(GravityReturnCode code);
 
     /**
-	* Utility method to get the host machine's IP address
-	**/
+	 * Utility method to get the host machine's IP address
+	 */
     GRAVITY_API std::string getIP();
 
     /**
 	 * Returns the domain with which this node is associated
-	 **/
+	 */
     GRAVITY_API std::string getDomain();
 
     /**
@@ -583,33 +571,33 @@ public:
 
     /**
 	 * Send a FutureResponse
-   * \return success flag
+     * \return success flag
 	 */
     GRAVITY_API GravityReturnCode sendFutureResponse(const FutureResponse& futureResponse);
 
     /**
-   * Setup a GravitySubscriptionMonitor to receive subscription timeout information through the Gravity Service Directory.
-   * \param dataProductID the ID of the data product to monitor 
-   * \param milliSecondTimeout the time elapsed since receiving a new data product that qualifies as a subscription timeout 
-   * \return success flag
-   */
+     * Setup a GravitySubscriptionMonitor to receive subscription timeout information through the Gravity Service Directory.
+     * \param dataProductID the ID of the data product to monitor
+     * \param milliSecondTimeout the time elapsed since receiving a new data product that qualifies as a subscription timeout
+     * \return success flag
+     */
     GRAVITY_API GravityReturnCode setSubscriptionTimeoutMonitor(std::string dataProductID,
                                                                 const GravitySubscriptionMonitor& monitor,
                                                                 int milliSecondTimeout, std::string filter = "",
                                                                 std::string domain = "");
 
     /**
-   * Remove the given dataProductID from the given GravitySubscriptionMonitor. 
-   * \return success  flag
-   */
+     * Remove the given dataProductID from the given GravitySubscriptionMonitor.
+     * \return success  flag
+     */
     GRAVITY_API GravityReturnCode clearSubscriptionTimeoutMonitor(std::string dataProductID,
                                                                   const GravitySubscriptionMonitor& monitor,
                                                                   std::string filter = "", std::string domain = "");
 
     /**
-   * Get a pointer to the spdlog::logger named "GravityLogger" used internal to the library, for application use. Intended to be used by
-   * other Gravity components such as ServiceDirectory. 
-   */
+     * Get a pointer to the spdlog::logger named "GravityLogger" used internal to the library, for application use. Intended to be used by
+     * other Gravity components such as ServiceDirectory.
+     */
     GRAVITY_API std::shared_ptr<spdlog::logger> getGravityLogger();
 };
 
