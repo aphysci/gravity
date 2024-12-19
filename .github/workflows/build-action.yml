@@ -7,38 +7,35 @@ on:
 jobs:
   build-bionic:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:bionic
+      volumes:
+        - /node20217:/node20217:rw,rshared
+        - /node20217:/__e/node20:ro,rshared
     steps:
-      - 
-        name: clone
+      - name: install nodejs20glibc2.17
+        run: |
+          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
+          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
+          ldd /__e/node20/bin/node
+
+      - name: clone
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - 
+      -
         name: build
-        # The bionic build is run with docker-run-action because standard GitHub actions
-        # use node20 which can't run on bionic
-        # ToDo: verify this will error out properly on failure
-        uses: addnab/docker-run-action@v3
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
-          image: ghcr.io/aphysci/gravity_base:bionic
-          shell: bash
-          options: -v ${{ github.workspace }}:/home/aps/git/gravity -u aps
-          run: |
-            echo $(cat /etc/lsb-release)
-            cd ~/git/gravity
-            ls -lh
-            pwd
-            mkdir build && cd build
-            pwd
-            cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
-            cmake --build . --target install --parallel
-            ./install/bin/ServiceDirectory &
-            ctest --verbose && mkdir output
-            ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
-            echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --verbose && mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
       - 
         name: upload
         uses: actions/upload-artifact@v4
