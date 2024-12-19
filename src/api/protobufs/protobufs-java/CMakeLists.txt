@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 3.17)
 
-include(FetchContent)
-include(GravitySupport)
-
 project(protobufs-java)
+
+
+include(GNUInstallDirs)
+include(FetchContent)
 
 if (NOT Protobufs_SRC_DIR)
     message(FATAL_ERROR "Protobufs_SRC_DIR not set")
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
+
+include(GravitySupport)
+
 
 find_package(GravityJava REQUIRED)
 include(UseJava)
@@ -39,7 +42,6 @@ foreach(file ${Java_SRCS})
     endif()
 endforeach()
 
-        
 add_jar(protobuf-java ${Generated_Java} ${Java_SRCS})
 add_dependencies(protobuf-java ${PROJECT_NAME}_protos)
-install_jar(protobuf-java "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib")
+install_jar(protobuf-java "${CMAKE_INSTALL_LIBDIR}")

@@ -17,9 +17,9 @@ gravity_add_jar_debug_release(MATLABProtobufGenerator MATLABProtobufGenerator.ja
 gravity_add_jar_debug_release(MATLABGravityNode MATLABGravityNode.java)
 set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 
-gravity_install_jar(MATLABGravitySubscriber DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/MATLAB/")
-gravity_install_jar(MATLABProtobufGenerator DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/MATLAB/")
-gravity_install_jar(MATLABGravityNode DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/MATLAB/")
+gravity_install_jar(MATLABGravitySubscriber DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/MATLAB/")
+gravity_install_jar(MATLABProtobufGenerator DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/MATLAB/")
+gravity_install_jar(MATLABGravityNode DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/MATLAB/")
 install(FILES guava-13.0.1.jar LICENSE-2.0.txt DESTINATION lib/MATLAB/)
 file(GLOB M_FILES "${CMAKE_CURRENT_LIST_DIR}/*.m")
 if (M_FILES)

@@ -21,6 +21,7 @@
 #include <GravityNode.h>
 #include <GravityLogger.h>
 #include <Utility.h>
+#include "spdlog/spdlog.h"
 
 int main()
 {

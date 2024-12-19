@@ -32,6 +32,7 @@
 
 #include <memory>
 #include <algorithm>
+#include "spdlog/spdlog.h"
 
 namespace gravity
 {

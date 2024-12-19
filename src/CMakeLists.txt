@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.17)
 
 project(gravity)
-
+include(GNUInstallDirs)
 set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/cmake" "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/deps/libzmq/CMake" "${CMAKE_INSTALL_PREFIX}/deps/libzmq/share/cmake")
+set(GRAVITY_USING_EXTERNAL_PROTOBUF ${GRAVITY_USE_EXTERNAL_PROTOBUF})
+set(GRAVITY_USING_EXTERNAL_ZEROMQ ${GRAVITY_USE_EXTERNAL_ZEROMQ})
+set(GRAVITY_USING_EXTERNAL_SPDLOG ${GRAVITY_USE_EXTERNAL_SPDLOG})
 
 if (NOT SKIP_JAVA)
     find_package(GravityJava REQUIRED)
@@ -30,6 +31,7 @@ if (NOT SKIP_JAVA)
     add_subdirectory(api/java)
     add_subdirectory(api/MATLAB)
 endif()
+
 add_subdirectory(components/cpp/ServiceDirectory)
 add_subdirectory(components/cpp/Archiver)
 add_subdirectory(components/cpp/ConfigServer)
@@ -48,6 +50,6 @@ install(FILES
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravityExternalUrls.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/GravitySupport.cmake" 
             "${CMAKE_CURRENT_LIST_DIR}/../cmake/FindGravityJava.cmake" 
-            "${CMAKE_CURRENT_LIST_DIR}/../cmake/UseJavaClassFilelist.cmake" DESTINATION cmake)
+            "${CMAKE_CURRENT_LIST_DIR}/../cmake/UseJavaClassFilelist.cmake" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 
 

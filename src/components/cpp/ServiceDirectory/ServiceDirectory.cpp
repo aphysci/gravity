@@ -29,6 +29,7 @@
 #include "ServiceDirectorySynchronizer.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "SpdLog.h"
 
 #include "protobuf/ServiceDirectoryMapPB.pb.h"
 #include "protobuf/ServiceDirectoryRegistrationPB.pb.h"
@@ -181,7 +182,12 @@ void ServiceDirectory::start()
     gn.init("ServiceDirectory");
 
     // Get Gravity logger
-    logger = spdlog::get("GravityLogger");
+    logger = gn.getGravityLogger();
+    if (!logger)
+    {
+        SpdLog::critical("Failed to get GravityLogger");
+        return;
+    }
 
     std::string sdURL = gn.getStringParam("ServiceDirectoryUrl", "tcp://*:5555");
     replaceAll(sdURL, "localhost", "127.0.0.1");
