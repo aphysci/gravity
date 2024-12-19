@@ -39,10 +39,9 @@
 #include <map>
 #include <string>
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 #define PUB_MGR_REQ_URL "inproc://gravity_publish_manager_request"

@@ -39,10 +39,9 @@
 #include <string>
 #include "protobuf/GravityMetricsDataPB.pb.h"
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 namespace gravity

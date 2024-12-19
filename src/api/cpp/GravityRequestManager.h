@@ -30,10 +30,9 @@
 #include <vector>
 #include "GravityNode.h"
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 namespace gravity

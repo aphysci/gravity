@@ -43,10 +43,9 @@
 #include "DomainDataKey.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
 
-
 namespace spdlog
 {
-	class logger;
+class logger;
 }
 
 namespace gravity
