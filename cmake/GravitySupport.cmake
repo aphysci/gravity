@@ -16,7 +16,7 @@ macro(gravity_find_protobuf fail_if_missing)
 endmacro()
 
 macro(gravity_find_spdlog fail_if_missing)
-    find_package(spdlog)
+    find_package(spdlog QUIET)
     if (${fail_if_missing} AND NOT spdlog_FOUND)
         message(FATAL_ERROR "Failed to find spdlog library")
     endif()
@@ -68,14 +68,12 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_DEBUG
-    )
+            JAR_FILE_DEBUG)
     get_property(__FILES_RELEASE
         TARGET
             ${_TARGET_NAME}
         PROPERTY
-            INSTALL_FILES_RELEASE
-    )
+            JAR_FILE_RELEASE)
     set_property(
         TARGET
             ${_TARGET_NAME}
@@ -83,7 +81,6 @@ function(GRAVITY_INSTALL_JAR _TARGET_NAME)
             INSTALL_DESTINATION
             ${_DESTINATION}
     )
-
     if (__FILES_DEBUG)
         install(
             FILES
@@ -201,14 +198,31 @@ function(gravity_protobuf_generate)
 
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_GENERATE_EXTENSIONS})
-      list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      set(_tmpbasename "${_basename}")
+      if ("${_ext}" MATCHES ".java$")
+        if (_tmpbasename MATCHES "PB$")
+          string(REPLACE "PB" "Container" _tmpbasename "${_basename}")
+          set(_tmpbasename "com/aphysci/gravity/protobuf/${_tmpbasename}")
+        elseif(_tmpbasename MATCHES "ConfigRequest")
+          set(_tmpbasename "gravity/${_tmpbasename}")
+        elseif (_tmpbasename MATCHES "descriptor$")
+            set(_tmpbasename "com/google/protobuf/DescriptorProtos")
+        endif()
+      endif()
+      set(_tmpstr "${protobuf_generate_PROTOC_OUT_DIR}/${_tmpbasename}${_ext}")
+      string(REPLACE "//" "/" _tmpstr "${_tmpstr}")
+      list(APPEND _generated_srcs "${_tmpstr}")
     endforeach()
     list(APPEND _generated_srcs_all ${_generated_srcs})
     
-    get_target_property(PROTOC_EXE protobuf::protoc LOCATION) 
+    get_target_property(PROTOC_EXE protobuf::protoc LOCATION)
+
+    get_filename_component(PROTOC_EXE_PARENT_DIR ${PROTOC_EXE} DIRECTORY)
+    # we add lib64 to the LD_LIBRARY_PATH because the protobuf installation may not correctly set RPATH for
+    # multiarch Linux distros.
     add_custom_command(
       OUTPUT ${_generated_srcs}
-      COMMAND  ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib:${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib64:${ABS_GRAVITY_ROOT}/deps/protobuf/lib:${ABS_GRAVITY_ROOT}/deps/protobuf/lib64" ${PROTOC_EXE} 
+      COMMAND  ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${PROTOC_EXE_PARENT_DIR}/../lib64" ${PROTOC_EXE}
       ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc
       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"

@@ -18,12 +18,14 @@
 
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <SpdLog.h>
 
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <memory>
+#include "spdlog/spdlog.h"
 
 gravity::Semaphore relayLock;
 bool quit = false;
@@ -81,7 +83,12 @@ int Relay::run()
     }
 
     // Get Gravity logger
-    logger = spdlog::get("GravityLogger");
+    logger = gravityNode.getGravityLogger();
+    if (!logger)
+    {
+        SpdLog::critical("Failed to get GravityLogger");
+        return 1;
+    }
 
     bool localOnly = gravityNode.getBoolParam("ProvideLocalOnly", true);
 

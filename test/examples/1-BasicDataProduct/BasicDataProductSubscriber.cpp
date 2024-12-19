@@ -21,6 +21,7 @@
 #include <GravityLogger.h>
 #include <Utility.h>
 #include <memory>
+#include "spdlog/spdlog.h"
 
 using namespace gravity;
 
