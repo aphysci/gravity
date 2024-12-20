@@ -685,7 +685,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
         else
         {
             this->componentID = fallback_component_id;
-            // TODO: log that we're using a fallback component ID
         }
         // update the parser's componentID
         parser->setComponentID(this->componentID);
