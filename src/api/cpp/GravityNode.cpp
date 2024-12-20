@@ -656,39 +656,6 @@ void GravityNode::configSpdLoggers()
         spdlog::set_default_logger(app_logger);
     }
 }
-//
-//GravityReturnCode GravityNode::init()
-//{
-//    ////////////////////////////////////////////////////////
-//    //get gravity configuration.
-//
-//    if (id != "")
-//    {
-//        return init(id);
-//    }
-//    else
-//    {
-//        componentID = "GravityNode";
-//        //Setup Logging if enabled.
-//        if (!logInitialized)
-//        {
-//            Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "none").c_str());
-//            if (local_log_level != Log::NONE)
-//                Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-//                                          local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-//
-//            Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "none").c_str());
-//            if (console_log_level != Log::NONE) Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-//
-//            //log an error indicating the componentID was missing
-//            logger->error(
-//                "Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
-//
-//            logInitialized = true;
-//        }
-//        return init(componentID);
-//    }
-//}
 
 GravityReturnCode GravityNode::init(std::string componentID)
 {
