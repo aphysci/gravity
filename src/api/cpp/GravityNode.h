@@ -302,6 +302,8 @@ public:
     /**
     * Constructor that also calls init(), passing the component ID.
     * \param componentID ID of the component to initialize
+    * \note Setting the GRAVITY_CONFIG_DIR environment variable will cause GravityNode to look in
+    * a different directory for configuration files than the current directory.
     */
     GRAVITY_API GravityNode(std::string componentID);
 
@@ -316,6 +318,8 @@ public:
      * \return GravityReturnCode code to identify any errors that occur during initialization
      * \note If componentID is an empty string (the default), the component ID will be inferred
      * from the "GravityComponentID" located in the default configuration file.
+     * \note Setting the GRAVITY_CONFIG_DIR environment variable will cause GravityNode to look in
+     * a different directory for configuration files than the current directory.
      */
     GRAVITY_API GravityReturnCode init(std::string componentID = "");
 
