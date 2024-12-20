@@ -430,8 +430,6 @@ GravityNode::GravityNode()
     logInitialized = false;
     listenerEnabled = false;
     heartbeatStarted = false;
-
-    parser = NULL;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -452,8 +450,6 @@ GravityNode::GravityNode(std::string componentID)
     initialized = false;
     logInitialized = false;
     heartbeatStarted = false;
-
-    parser = NULL;
 
     init(componentID);
 }
@@ -991,7 +987,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
                 parser->parseConfigService(
                     *this);  //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
             }
-            //parser->ParseCmdLine
 
             configureServiceManager();
             configureSubscriptionManager();
