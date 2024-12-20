@@ -43,12 +43,17 @@ void GravityConfigParser::setDirectory(std::string dir)
 	config_dir = dir;
 }
 
+void GravityConfigParser::setComponentID(std::string componentID)
+{
+    this->componentID = componentID;
+}
+
 GravityConfigParser::GravityConfigParser(std::string componentID)
 {
 	this->componentID = componentID;
 }
 
-void GravityConfigParser::parseConfigFile(const char* config_filename)
+void GravityConfigParser::parseConfigFile(std::string config_filename)
 {
     std::vector<const char *> sections;
 
@@ -57,7 +62,7 @@ void GravityConfigParser::parseConfigFile(const char* config_filename)
     sections.push_back(NULL);
 
 	std::string path = config_dir;
-	if (path.rfind('/') != 0)
+	if (path.rfind('/') != std::string::npos)
 	{
 		path += "/";
 	}
@@ -74,6 +79,14 @@ void GravityConfigParser::parseConfigFile(const char* config_filename)
         std::string key_lower = StringCopyToLowerCase(*i);
 	    key_value_map[key_lower] = value;
 	}
+}
+
+void GravityConfigParser::parseComponentConfigFile()
+{
+    if (this->componentID != "")
+    {
+        parseConfigFile(this->componentID + ".ini");
+    }
 }
 
 

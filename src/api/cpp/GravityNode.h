@@ -250,7 +250,7 @@ private:
     std::string myDomain;
     std::string componentID;
     std::map<std::string, uint32_t> dataRegistrationTimeMap;  // Maps data product id to registration time
-    GravityConfigParser* parser;
+    std::unique_ptr<GravityConfigParser> parser;
 
     GravityConfigParamPB configParamPB;
     GravityDataProduct settingsGDP = GravityDataProduct(gravity::constants::GRAVITY_SETTINGS_DPID);
@@ -295,14 +295,14 @@ private:
 
 public:
     /**
-     * Default Constructor
+     * Default Constructor. Does not call init().
      */
     GRAVITY_API GravityNode();
 
     /**
-	* Constructor that also initializes
-	* \param componentID ID of the component to initialize
-	*/
+    * Constructor that also calls init(), passing the component ID.
+    * \param componentID ID of the component to initialize
+    */
     GRAVITY_API GravityNode(std::string componentID);
 
     /**
@@ -312,17 +312,12 @@ public:
 
     /**
      * Initialize the Gravity infrastructure.
-	   * Reads the ComponentID from the Gravity.ini file.
-     * \return GravityReturnCode code to identify any errors that occur during initialization
-     */
-    GRAVITY_API GravityReturnCode init();
-
-    /**
-     * Initialize the Gravity infrastructure.
      * \copydetails GravityNode(std::string)
      * \return GravityReturnCode code to identify any errors that occur during initialization
+     * \note If componentID is an empty string (the default), the component ID will be inferred
+     * from the "GravityComponentID" located in the default configuration file.
      */
-    GRAVITY_API GravityReturnCode init(std::string componentID);
+    GRAVITY_API GravityReturnCode init(std::string componentID = "");
 
     /**
      * Wait for the GravityNode to exit.
