@@ -144,6 +144,7 @@ jobs:
           cmake --build . --target install --parallel
           ./install/bin/ServiceDirectory &
           ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build --verbose
+          ctest --test-dir gravity_external-prefix/src/gravity_external-build --verbose
           mkdir output
           ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
           echo "tarball is: gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz"
@@ -186,6 +187,7 @@ jobs:
           cmake --build . --target install --config Release --parallel
           start /B gravity/bin/ServiceDirectory.exe
           ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build -C Release --verbose
+          ctest --test-dir gravity_external-prefix/src/gravity_external-build -C Release --verbose
       - 
         name: archive
         shell: bash
