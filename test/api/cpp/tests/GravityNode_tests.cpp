@@ -177,11 +177,11 @@ TEST_CASE("Tests without the mocking framework")
                          public GravitySubscriptionMonitor
         {
         public:
-            GRAVITY_API virtual void subscriptionFilled(
+            virtual void subscriptionFilled(
                 const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
             {
             }
-            GRAVITY_API virtual void requestFilled(std::string serviceID, std::string requestID,
+            virtual void requestFilled(std::string serviceID, std::string requestID,
                                                    const GravityDataProduct& response)
             {
             }
@@ -190,12 +190,12 @@ TEST_CASE("Tests without the mocking framework")
             {
                 return std::shared_ptr<GravityDataProduct>(NULL);
             }
-            GRAVITY_API virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) {}
-            GRAVITY_API virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat,
+            virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) {}
+            virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat,
                                                      int64_t& interval_in_microseconds)
             {
             }
-            GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
+            virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
                                                          std::string filter, std::string domain)
             {
             }
