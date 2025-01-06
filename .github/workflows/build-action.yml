@@ -143,8 +143,7 @@ jobs:
           cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
           cmake --build . --target install --parallel
           ./install/bin/ServiceDirectory &
-          ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build --verbose
-          ctest --test-dir gravity_external-prefix/src/gravity_external-build --verbose
+          ctest --test-dir gravity_external_examples_tests-prefix/src/gravity_external_examples_tests-build --verbose
           mkdir output
           ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
           echo "tarball is: gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz"
@@ -186,8 +185,7 @@ jobs:
           cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
           cmake --build . --target install --config Release --parallel
           start /B gravity/bin/ServiceDirectory.exe
-          ctest --test-dir gravity_external_examples-prefix/src/gravity_external_examples-build -C Release --verbose
-          ctest --test-dir gravity_external-prefix/src/gravity_external-build -C Release --verbose
+          ctest --test-dir gravity_external_examples_tests-prefix/src/gravity_external_examples_tests-build -C Release --verbose
       - 
         name: archive
         shell: bash

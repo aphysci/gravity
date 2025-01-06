@@ -11,7 +11,7 @@ find_package(ZeroMQ)
 option(GRAVITY_USE_EXTERNAL_PROTOBUF "Download, Build and Use an externally downloaded protobuf build")
 option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downloaded ZeroMQ build")
 option(GRAVITY_USE_EXTERNAL_SPDLOG "Download, build and use an externally downloaded Spdlog build")
-option(BUILD_EXAMPLES "Build Gravity examples" ON)
+option(BUILD_EXAMPLES_TESTS "Build Gravity examples and tests" ON)
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
@@ -263,9 +263,8 @@ if (NOT depends)
     add_subdirectory(src)
     set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
-    include(CTest)
-    add_subdirectory(test/api/cpp)
-    add_subdirectory(test/examples)
+    
+    add_subdirectory(test)
 
     set(CPACK_GENERATOR "TGZ")
     include(CPack)
@@ -302,11 +301,13 @@ else()
     )
 
 
-    if (BUILD_EXAMPLES)
+
+
+    if (BUILD_EXAMPLES_TESTS)
         ExternalProject_Add(
-            gravity_external_examples 
+            gravity_external_examples_tests
             DEPENDS gravity_external
-            SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/test/examples"
+            SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/test/"
             LIST_SEPARATOR |
             CMAKE_ARGS
                 -DGRAVITY_ROOT=${PUBLIC_STAGING_DIR}

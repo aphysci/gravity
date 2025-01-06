@@ -26,7 +26,12 @@ target_include_directories(unit_tests PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(unit_tests ${PROJECT_NAME}_protos)
 
 add_test(unit_tests ${CMAKE_CURRENT_BINARY_DIR}/unit_tests)
-set_tests_properties(unit_tests PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
-                                            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+set_tests_properties(unit_tests PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+set_property(TEST unit_tests PROPERTY ENVIRONMENT_MODIFICATION  
+                                            "LD_LIBRARY_PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
+                                            "PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_BINDIR}"
+                                            "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
+                                            "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
+                                          )
 
 
