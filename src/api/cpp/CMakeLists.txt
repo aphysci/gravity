@@ -117,7 +117,7 @@ add_library(${LIB_NAME} SHARED ${SRCS})
 add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})
 target_include_directories(${LIB_NAME} INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
