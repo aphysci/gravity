@@ -264,6 +264,7 @@ if (NOT depends)
     set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
     
+    include(CTest)
     add_subdirectory(test)
 
     set(CPACK_GENERATOR "TGZ")

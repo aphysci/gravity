@@ -29,4 +29,7 @@ endif()
 
 include_directories("${CMAKE_BINARY_DIR}")
 add_subdirectory(api/cpp)
+if (NOT SKIP_JAVA)
+    add_subdirectory(api/java)
+endif()
 add_subdirectory(examples)
