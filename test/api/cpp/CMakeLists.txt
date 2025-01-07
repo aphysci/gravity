@@ -30,8 +30,6 @@ set_tests_properties(unit_tests PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_LIS
 set_property(TEST unit_tests PROPERTY ENVIRONMENT_MODIFICATION  
                                             "LD_LIBRARY_PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
                                             "PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_BINDIR}"
-                                            "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
-                                            "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
                                           )
 
 
