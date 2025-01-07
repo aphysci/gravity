@@ -6,20 +6,15 @@ include(GravitySupport)
 
 find_package(Gravity QUIET)
 
-set(LOCAL_PROTOBUF_JAR)
-if (GRAVITY_USING_EXTERNAL_PROTOBUF)
-    set(LOCAL_PROTOBUF_JAR "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar")
-endif()
-set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${LOCAL_PROTOBUF_JAR}")
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
 file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/*.proto")
-
 gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}" GENERATE_EXTENSIONS .java OUT_VAR PROTO_SRCS PROTOS ${PROTO_FILES})
-
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
+set(LOCAL_PROTOBUF_JAR "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar")
+set(PUBLIC_JAR "/usr/share/java/protobuf.jar")
 set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
@@ -42,7 +37,7 @@ set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 #                    and java.library.path needs to have the libzmq directory even if in a system location
 set(CP_FOR_TEST)
 list(APPEND CP_FOR_TEST "${CMAKE_CURRENT_BINARY_DIR}/JavaUnitTests.jar")
-if (LOCAL_PROTOBUF_JAR)
+if (GRAVITY_USING_EXTERNAL_PROTOBUF)
     list(APPEND CP_FOR_TEST "${LOCAL_PROTOBUF_JAR}")
 else()
     list(APPEND CP_FOR_TEST "${PUBLIC_JAR}")
