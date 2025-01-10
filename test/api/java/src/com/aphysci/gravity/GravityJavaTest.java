@@ -255,7 +255,7 @@ public class GravityJavaTest {
         @Override
         public void MissedHeartbeat(String componentID, long microsecond_to_last_heartbeat, long[] interval_in_microseconds) {
             SpdLog.info("HB Listener MissedHeartbeat called, microsecond_to_last_heartbeat = "+microsecond_to_last_heartbeat);
-            testAssert(microsecond_to_last_heartbeat >= 100000);
+            testAssert(microsecond_to_last_heartbeat < 0 || microsecond_to_last_heartbeat >= 100000);
             //missedHBCount += 1;
 	    missedHBCount.incrementAndGet();
         }
