@@ -47,7 +47,9 @@ public class GravityJavaTest {
     private static void testHB(GravityNode gravityNode) {
         GravityHeartbeatListener hbListener = new TestHBListener();
         gravityNode.startHeartbeat(100000); // .1 seconds
+        Thread.sleep(1000);
         gravityNode.registerHeartbeatListener("TestNode", 100000, hbListener);
+        Thread.sleep(1000);
         int count = 0;
         while (count < 10 && receivedHBCount.get() < 5) {
             count += 1;
