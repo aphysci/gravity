@@ -16,11 +16,19 @@ FROM ubuntu:18.04 AS base
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     openssl libssl-dev ca-certificates gnupg gpg wget
 
+# If needed, put ProxyCert.crt in the build context, if missing this shouldn't fail
+COPY ProxyCert.* /usr/local/share/ca-certificates
+RUN update-ca-certificates
+
 # install the kitware repo to get the latest cmake on bionic
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 RUN echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
 RUN apt-get update
+
+# install the latest git
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:git-core/ppa
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3 python3-dev python3-pip python3-protobuf build-essential cmake git \
@@ -37,6 +45,11 @@ RUN rm /usr/lib/x86_64-linux-gnu/cmake/spdlog/spdlogConfigTargets-none.cmake
 
 # note: uid 1001 to match the CI VM user id for the bionic build workaround on GitHub
 RUN adduser --disabled-password --gecos "" --uid 1001 aps
+
+# Remove ProxyCert since the base stage is a public image
+RUN if [ -f /usr/local/share/ca-certificates/ProxyCert.crt ]; then \
+        rm /usr/local/share/ca-certificates/ProxyCert.crt && update-ca-certificates; \
+    fi;
 
 FROM base AS builder
 WORKDIR /home/aps/git/gravity

@@ -51,7 +51,8 @@ set(SWIG_JAVA_SRCS
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityNode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityReturnCode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityTransportType.java"
-	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java")
+	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java"
+	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/SpdLog.java")
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
 set(SWIG_CONFIG_JAVA_SRCS "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity.java"
