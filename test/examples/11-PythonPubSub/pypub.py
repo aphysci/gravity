@@ -1,5 +1,6 @@
 
 import time
+
 from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
 
@@ -29,10 +30,8 @@ gn.subscribe("PythonGDP", mySub)
 
 counterPB = BasicCounterDataProductPB()
 gdp = GravityDataProduct("PythonGDP")
-for i in range (1, 50):
+for i in range (1, 10):
     counterPB.count = i
     gdp.data=counterPB
     gn.publish(gdp)
     time.sleep(1)
-
-gn.waitForExit()

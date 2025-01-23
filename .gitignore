@@ -1,5 +1,6 @@
 include
 *.tgz
+*.tar.gz
 *.o
 *.exe
 *.d
@@ -23,3 +24,5 @@ Documents/html_gravity/**
 cmake_build
 install
 build
+.vscode
+.vs

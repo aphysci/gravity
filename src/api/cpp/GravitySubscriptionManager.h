@@ -42,7 +42,11 @@
 #include "GravityMetrics.h"
 #include "DomainDataKey.h"
 #include "protobuf/ComponentDataLookupResponsePB.pb.h"
-#include "spdlog/spdlog.h"
+
+namespace spdlog
+{
+class logger;
+}
 
 namespace gravity
 {

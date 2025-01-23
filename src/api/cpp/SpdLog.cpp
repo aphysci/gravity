@@ -17,6 +17,7 @@
  */
 
 #include "SpdLog.h"
+#include "spdlog/spdlog.h"
 
 using namespace gravity;
 

@@ -101,7 +101,7 @@ set(SRCS
 
         
 add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf spdlog::spdlog)
+target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
 add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
 install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
 
@@ -117,7 +117,7 @@ add_library(${LIB_NAME} SHARED ${SRCS})
 add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})
 target_include_directories(${LIB_NAME} INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -125,11 +125,11 @@ target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_link_libraries(${LIB_NAME} PUBLIC Ws2_32.lib)
 endif()
-target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} keyvalue_parser protobuf::libprotobuf libzmq)
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog_header_only)
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
-        $<INSTALL_INTERFACE:deps/pthreads-w32/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
@@ -140,9 +140,9 @@ configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/${PROJEC
     INSTALL_DESTINATION cmake)
 install(EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}Targets.cmake
-    DESTINATION cmake)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    DESTINATION cmake)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gravity)
 
 find_program(GIT_EXE git)
 if (GIT_EXE)
@@ -155,7 +155,7 @@ if (GIT_EXE)
         message(STATUS "${GIT_EXE} FAILED: ${STATUS}")
     else()
         message(STATUS "${GIT_EXE} SUCCESS: ${OUTPUT2}")
-        add_custom_command(TARGET ${LIB_NAME} POST_BUILD COMMAND "${GIT_EXE}" describe --tag > "${CMAKE_BINARY_DIR}/VERSION.txt")
+        add_custom_command(TARGET ${LIB_NAME} POST_BUILD COMMAND "${GIT_EXE}" describe --tag --dirty > "${CMAKE_BINARY_DIR}/VERSION.txt")
         INSTALL(FILES "${CMAKE_BINARY_DIR}/VERSION.txt" DESTINATION .)
     endif()
 endif()

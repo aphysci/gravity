@@ -51,6 +51,17 @@ add_custom_target(${PROJECT_NAME} ALL COMMAND ${SWIG_EXECUTABLE} -c++ -o
                     "$<$<NOT:$<CONFIG:Debug>>:${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i>$<$<CONFIG:Debug>:${CMAKE_CURRENT_LIST_DIR}/cmake_gravity_d.i>"
                     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i" 
                     BYPRODUCTS "${CMAKE_BINARY_DIR}/cpp/swig/java/gravity_wrap.cpp" "${CMAKE_BINARY_DIR}/cpp/swig/java/gravity_wrap_d.cpp" "${CMAKE_BINARY_DIR}/cpp/swig/java/gravity_wrap.h" "${CMAKE_BINARY_DIR}/cpp/swig/java/gravity_wrap_d.h"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravityHeartbeatListener.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravityLogger.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravityRequestor.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravityServiceProvider.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravitySubscriber.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/CPPGravitySubscriptionMonitor.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityNode.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityReturnCode.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityTransportType.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java"
+                    "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/SpdLog.java"
                     SOURCES "$<$<NOT:$<CONFIG:Debug>>:${CMAKE_CURRENT_LIST_DIR}/cmake_gravity.i>$<$<CONFIG:Debug>:${CMAKE_CURRENT_LIST_DIR}/cmake_gravity_d.i>")
 
 gravity_add_dependency(${PROJECT_NAME})

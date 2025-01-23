@@ -20,8 +20,9 @@
 #define DOMAINDATAKEY_H_
 
 #include <string>
+#include "Utility.h"
 
-class DomainDataKey
+class GRAVITY_API DomainDataKey
 {
 private:
     std::string domain;

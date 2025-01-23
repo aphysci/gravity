@@ -29,7 +29,11 @@
 #include <zmq.h>
 #include <vector>
 #include "GravityNode.h"
-#include "spdlog/spdlog.h"
+
+namespace spdlog
+{
+class logger;
+}
 
 namespace gravity
 {

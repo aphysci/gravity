@@ -61,8 +61,6 @@ private:
     void receiveBroadcastParameters();
     int initBroadcastSocket();
 
-    std::shared_ptr<spdlog::logger> logger;
-
 public:
     ServiceDirectoryUDPBroadcaster(void* context);
 

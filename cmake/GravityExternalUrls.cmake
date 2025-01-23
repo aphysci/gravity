@@ -3,8 +3,8 @@
 #
 
 ## Protobuf version requirements
-# This is the earliest version of protobuf that will build with VS 2022, it is incompatible with VS2013
-set(protobuf_url "https://github.com/protocolbuffers/protobuf/archive/v3.7.0.zip")
+# This is the earliest version of protobuf that will build with VS 2022 and Python 3.10
+set(protobuf_url "https://github.com/protocolbuffers/protobuf/archive/v3.8.0.zip")
 
 
 ## ZeroMQ version requirements

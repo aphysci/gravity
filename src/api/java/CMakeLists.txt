@@ -6,10 +6,11 @@ find_package(GravityJava REQUIRED)
 include(UseJava)
 
 gravity_find_protobuf(ON)
-    
+
+# TODO check GRAVITY_USING_EXTERNAL_PROTOBUF
 set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 
-set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/deps/protobuf/lib/protobuf-java.jar" ${PUBLIC_JAR})
+set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
 set(CMAKE_JAVA_COMPILE_FLAGS -sourcepath "${CMAKE_CURRENT_LIST_DIR}/src/java")
 
 set(JAVA_SRCS
@@ -50,7 +51,8 @@ set(SWIG_JAVA_SRCS
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityNode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityReturnCode.java"
 	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/GravityTransportType.java"
-	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java")
+	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/Log.java"
+	"${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/SpdLog.java")
 set_source_files_properties(${SWIG_JAVA_SRCS} PROPERTIES GENERATED TRUE)
 
 set(SWIG_CONFIG_JAVA_SRCS "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravity.java"
@@ -72,5 +74,6 @@ gravity_add_jar_debug_release(${PROJECT_NAME} SOURCES ${JAVA_SRCS} ${JAVA_PROTO_
             "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityConstants.java"
             OUTPUT_NAME gravity)
 
-gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+
+gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 gravity_add_dependency(${PROJECT_NAME})

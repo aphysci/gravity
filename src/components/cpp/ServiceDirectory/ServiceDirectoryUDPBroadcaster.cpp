@@ -26,6 +26,8 @@
 #include "ServiceDirectoryUDPBroadcaster.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "SpdLog.h"
+#include "spdlog/fmt/fmt.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,11 +40,7 @@ using namespace std;
 
 namespace gravity
 {
-ServiceDirectoryUDPBroadcaster::ServiceDirectoryUDPBroadcaster(void *context)
-{
-    this->context = context;
-    logger = spdlog::get("GravityLogger");
-}
+ServiceDirectoryUDPBroadcaster::ServiceDirectoryUDPBroadcaster(void *context) { this->context = context; }
 
 ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster()
 {
@@ -81,7 +79,7 @@ void ServiceDirectoryUDPBroadcaster::start()
         int rc = zmq_poll(&pollItem, 1, block);  // 0 --> return immediately, -1 --> blocks
         if (rc == -1)
         {
-            logger->debug("Interrupted, exiting (rc = {})", rc);
+            SpdLog::debug(fmt::format("Interrupted, exiting (rc = {})", rc).c_str());
             // Interrupted
             break;
         }
@@ -92,7 +90,7 @@ void ServiceDirectoryUDPBroadcaster::start()
 
             if (command == "broadcast")
             {
-                logger->info("Initializing Service Directory Broadcast");
+                SpdLog::info("Initializing Service Directory Broadcast");
                 block = 0;
                 //read broadcast parameters
                 receiveBroadcastParameters();
@@ -105,7 +103,7 @@ void ServiceDirectoryUDPBroadcaster::start()
                 rc = initBroadcastSocket();
                 if (rc < 0)
                 {
-                    logger->critical("Broadcast: Socket Init Error: {}", broadcastSocket);
+                    SpdLog::critical(fmt::format("Broadcast: Socket Init Error: {}", broadcastSocket).c_str());
                 }
                 broadcast = true;
             }
@@ -132,7 +130,7 @@ void ServiceDirectoryUDPBroadcaster::start()
             if (bytesSent < 0)
             {
                 //exit
-                logger->critical("Broadcast: sendto() Error");
+                SpdLog::critical("Broadcast: sendto() Error");
                 break;
             }
 #ifdef _WIN32
@@ -157,7 +155,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
     domainName = readStringMessage(sdSocket);
     url = readStringMessage(sdSocket);
     broadcastIP = readStringMessage(sdSocket);
-    logger->info("Broadcast params: domain '{}' url '{}' ip: '{}'", domainName, url, broadcastIP);
+    SpdLog::info(fmt::format("Broadcast params: domain '{}' url '{}' ip: '{}'", domainName, url, broadcastIP).c_str());
 
     //receive port
     zmq_msg_t msg;
@@ -179,7 +177,7 @@ void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
     //if windows and broadcasting on loopback
     if (url.find("127.0.0.1") != std::string::npos)
     {
-        logger->warn("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
+        SpdLog::warn("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
     }
 #endif
 }
@@ -205,7 +203,7 @@ int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
             ip = "255.255.255.255";
         }
     }
-    logger->debug("Using broadcast IP {}", ip);
+    SpdLog::debug(fmt::format("Using broadcast IP {}", ip).c_str());
     destAddr->sin_addr.s_addr = inet_addr(ip.c_str());
 
     memcpy(&destAddress, destAddr, sizeof(struct sockaddr_in));

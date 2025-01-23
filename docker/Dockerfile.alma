@@ -1,0 +1,68 @@
+# This Dockerfile will build or test gravity on Alma Linux.  Only zeromq will be installed as a system dependency.
+#
+# To Test:
+#   To run the Python Pub-Sub test with this dockerfile use the following in the gravity base directory:
+#       $ docker build --network=host --target tester -t gravity:alma --rm -f docker/Dockerfile.alma . && docker run --network=host --rm -it gravity:alma
+# 
+# To Build:
+#   The recommended command to build gravity with this Dockerfile is with the following in the gravity base directory: 
+#       $ docker build -f docker/Dockerfile.alma --output=. . --progress=plain
+#
+#   This will place the built tarball in the cwd
+
+
+FROM almalinux:latest AS base
+
+# If needed, put ProxyCert.crt in the build context, if missing this shouldn't fail
+COPY ProxyCert.* /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust
+
+# Install packages and use the CodeReady Builder repository (CRB)
+# See https://wiki.almalinux.org/repos/AlmaLinux.html
+RUN yum -y update && \
+    yum -y install epel-release && yum -y update && \
+    dnf config-manager --set-enabled crb && \
+    yum -y install gcc gcc-c++ make wget tar python3 python3-devel java-11-openjdk-devel git cmake boost-devel \
+    libbson-devel flex bison swig zeromq-devel ninja-build  && \
+    yum clean all
+
+RUN useradd aps
+
+# Remove ProxyCert since the base stage is a public image
+RUN if [ -f /etc/pki/ca-trust/source/anchors/ProxyCert.crt ]; then \
+        rm /etc/pki/ca-trust/source/anchors/ProxyCert.crt && update-ca-trust; \
+    fi;
+
+FROM base AS builder
+
+# It's expected that this is a local build here so re-install the ProxyCert
+COPY ProxyCert.* /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust
+
+WORKDIR /home/aps/git/gravity
+
+# Add the gravity source tree as it is locally
+ADD ./ .
+    
+WORKDIR /home/aps/git/gravity/build
+RUN chown -R aps:aps /home/aps/git/
+USER aps
+RUN cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+RUN cmake --build . --parallel
+RUN ln -sf ./install ./gravity && tar -czvhf /home/aps/git/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
+RUN echo "tarball is: gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz"
+
+FROM builder AS tester
+ENV LD_LIBRARY_PATH=/home/aps/git/gravity/build/install/lib:/home/aps/git/gravity/build/install/deps/spdlog/lib64
+RUN <<EOF
+echo "#!/bin/bash" >> ./test.sh
+echo "/home/aps/git/gravity/build/install/bin/ServiceDirectory &" >> ./test.sh
+echo "cd /home/aps/git/gravity/build/gravity_external_examples-prefix/src/gravity_external_examples-build && ctest --verbose" >> ./test.sh
+EOF
+RUN chmod a+x ./test.sh
+CMD ["./test.sh"]
+
+FROM scratch AS exporter
+COPY --from=builder /home/aps/git/*.tar.gz /
+
+

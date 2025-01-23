@@ -1,0 +1,208 @@
+name: Build Action
+on:
+    push:
+      tags:
+        - "v*.*.*"
+    pull_request:
+jobs:
+  build-bionic:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:bionic
+      volumes:
+        - /node20217:/node20217:rw,rshared
+        - /node20217:/__e/node20:ro,rshared
+    steps:
+      - name: install nodejs20glibc2.17
+        run: |
+          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
+          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
+          ldd /__e/node20/bin/node
+
+      - name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          git status
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --verbose && mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-bionic_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-bionic
+          path: ${{ github.workspace }}/build/output/*.tar.gz
+      - 
+        name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ github.workspace }}/build/output/*.tar.gz
+
+  build-focal:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:focal
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --verbose
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-focal_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-focal
+          path: ${{ github.workspace }}/build/output/*.tar.gz
+      - 
+        name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ github.workspace }}/build/output/*.tar.gz
+      
+  build-jammy:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:jammy
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/lsb-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --verbose
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-jammy_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-jammy_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-jammy
+          path: ${{ github.workspace }}/build/output/*.tar.gz
+      - 
+        name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ github.workspace }}/build/output/*.tar.gz
+
+  build-alma:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aphysci/gravity_base:alma
+    steps:
+      -
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: build
+        run: |
+          echo $(cat /etc/os-release)
+          pwd
+          git config --global --add safe.directory '*'
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake --build . --target install --parallel
+          ./install/bin/ServiceDirectory &
+          ctest --test-dir gravity_external_examples_tests-prefix/src/gravity_external_examples_tests-build --verbose
+          mkdir output
+          ln -sf ./install ./gravity && tar -czvhf ./output/gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz ./gravity
+          echo "tarball is: gravity-$(cat ./install/VERSION.txt)-alma_amd64.tar.gz"
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-alma
+          path: ${{ github.workspace }}/build/output/*.tar.gz
+      - 
+        name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ github.workspace }}/build/output/*.tar.gz
+
+  build-windows-2019:
+    runs-on: windows-2019
+    timeout-minutes: 60
+    steps:
+      - 
+        name: clone
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # Use a set working python version and VS-2019 as newer versions can't seem to load _gravity.pyd on Windows
+      - 
+        name: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7.9'
+      - 
+        name: build
+        shell: cmd
+        run: |
+          python --version
+          python -m pip install --upgrade setuptools six
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=gravity  -G"Visual Studio 16 2019" -A x64 ..
+          cmake --build . --target install --config Release --parallel
+          start /B gravity/bin/ServiceDirectory.exe
+          ctest --test-dir gravity_external_examples_tests-prefix/src/gravity_external_examples_tests-build -C Release --verbose
+      - 
+        name: archive
+        shell: bash
+        run: |
+          cd build
+          mkdir output
+          7z a -r ./output/gravity-$(cat ./gravity/VERSION.txt)-windows_x64.zip gravity/*
+      - 
+        name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-windows
+          path: ${{ github.workspace }}/build/output/*.zip
+      - 
+        name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ github.workspace }}/build/output/*.zip

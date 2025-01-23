@@ -26,6 +26,7 @@
 #include "ServiceDirectoryUDPReceiver.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "SpdLog.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -43,6 +44,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
+#include "spdlog/fmt/fmt.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"
 
 using namespace std;
@@ -55,11 +57,7 @@ map<string, unsigned int> broadcastRateMap;
 map<string, struct timeval> expectedMsgTimeMap;
 map<string, int64_t> connectedDomainMap;
 
-ServiceDirectoryUDPReceiver::ServiceDirectoryUDPReceiver(void* context)
-{
-    this->context = context;
-    logger = spdlog::get("GravityLogger");
-}
+ServiceDirectoryUDPReceiver::ServiceDirectoryUDPReceiver(void* context) { this->context = context; }
 
 ServiceDirectoryUDPReceiver::~ServiceDirectoryUDPReceiver()
 {
@@ -95,7 +93,7 @@ void ServiceDirectoryUDPReceiver::start()
         int rc = zmq_poll(&pollItem, 1, -1);  // 0 --> return immediately, -1 --> blocks
         if (rc == -1)
         {
-            logger->critical("Interrupted, exiting (rc = {})", rc);
+            SpdLog::critical(fmt::format("Interrupted, exiting (rc = {})", rc).c_str());
             // Interrupted
             return;
         }
@@ -109,7 +107,7 @@ void ServiceDirectoryUDPReceiver::start()
                 receiveReceiverParameters();
                 if (initReceiveSocket() < 0)
                 {
-                    logger->critical("UDP Receiver init error");
+                    SpdLog::critical("UDP Receiver init error");
                 }
                 waiting = false;
             }
@@ -154,7 +152,7 @@ void ServiceDirectoryUDPReceiver::start()
         {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK))
             {
-                logger->critical("recv() error, errno: {}", errno);
+                SpdLog::critical(fmt::format("recv() error, errno: {}", errno).c_str());
                 break;
             }
         }
@@ -166,13 +164,13 @@ void ServiceDirectoryUDPReceiver::start()
             //Log a warning if we received the same domain from a different url
             if ((ourDomain.compare(broadcastPB.domain()) == 0) && ourUrl.compare(broadcastPB.url()) != 0)
             {
-                logger->warn("Duplicate Domain: {}, {}", ourDomain, broadcastPB.url());
+                SpdLog::warn(fmt::format("Duplicate Domain: {}, {}", ourDomain, broadcastPB.url()).c_str());
             }
 
             //ignore messages from our domain name or invalid domains
             if ((ourDomain.compare(broadcastPB.domain()) != 0) && isValidDomain(broadcastPB.domain()))
             {
-                //logger->trace("Received UDP Broadcast Message for Domain: {}",broadcastPB.domain());
+                //SpdLog::trace(fmt::format("Received UDP Broadcast Message for Domain: {}",broadcastPB.domain()).c_str());
 
                 //if first time seeing domain
                 if (receivedCountMap.find(broadcastPB.domain()) == receivedCountMap.end())
@@ -198,7 +196,7 @@ void ServiceDirectoryUDPReceiver::start()
                             connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
                             // Inform SD of new connection
-                            logger->trace("Sending domain Add command to synchronizer thread");
+                            SpdLog::trace("Sending domain Add command to synchronizer thread");
                             sendStringMessage(domainSocket, "Add", ZMQ_SNDMORE);
                             sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
                             sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
@@ -209,7 +207,7 @@ void ServiceDirectoryUDPReceiver::start()
                             connectedDomainMap[broadcastPB.domain()] = broadcastPB.starttime();
 
                             // Inform SD of updated connection
-                            logger->trace("Sending domain Update command to synchronizer thread");
+                            SpdLog::trace("Sending domain Update command to synchronizer thread");
                             sendStringMessage(domainSocket, "Update", ZMQ_SNDMORE);
                             sendStringMessage(domainSocket, broadcastPB.domain(), ZMQ_SNDMORE);
                             sendStringMessage(domainSocket, broadcastPB.url(), ZMQ_DONTWAIT);
@@ -347,7 +345,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
     /* Create a best-effort datagram socket using UDP */
     if ((receiveSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        logger->critical("Receiver: socket() failed");
+        SpdLog::critical("Receiver: socket() failed");
         return receiveSocket;
     }
 
@@ -369,7 +367,7 @@ int ServiceDirectoryUDPReceiver::initReceiveSocket()
 #endif
     if (rc < 0)
     {
-        logger->critical("Receiver: bind() failed");
+        SpdLog::critical("Receiver: bind() failed");
         return rc;
     }
 
