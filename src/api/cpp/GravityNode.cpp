@@ -2433,7 +2433,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
                 }
             }
         }
-		urlInstanceMap.erase(url);
+        urlInstanceMap.erase(url);
     }
     serviceManagerSWL.lock.Unlock();
 
