@@ -2380,6 +2380,11 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
         string url = serviceMap[serviceID];
+        if (urlInstanceMap.count(url) == 0)
+        {
+            return GravityReturnCodes::REGISTRATION_CONFLICT;
+        }
+
         serviceMap.erase(serviceID);
 
         string status = readStringMessage(serviceManagerSWL.socket);
