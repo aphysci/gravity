@@ -26,6 +26,8 @@
 #include "ServiceDirectoryUDPBroadcaster.h"
 #include "GravityLogger.h"
 #include "CommUtil.h"
+#include "SpdLog.h"
+#include "spdlog/fmt/fmt.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,195 +40,188 @@ using namespace std;
 
 namespace gravity
 {
-ServiceDirectoryUDPBroadcaster::ServiceDirectoryUDPBroadcaster(void* context)
-{
-	this->context = context;
-	logger = spdlog::get("GravityLogger");
-}
+ServiceDirectoryUDPBroadcaster::ServiceDirectoryUDPBroadcaster(void *context) { this->context = context; }
 
 ServiceDirectoryUDPBroadcaster::~ServiceDirectoryUDPBroadcaster()
 {
-	//close sockets
-	#ifdef _WIN32
-	closesocket(broadcastSocket);
-	#else
-	close(broadcastSocket);
-	#endif
-	zmq_close(sdSocket);
+//close sockets
+#ifdef _WIN32
+    closesocket(broadcastSocket);
+#else
+    close(broadcastSocket);
+#endif
+    zmq_close(sdSocket);
 };
-
 
 void ServiceDirectoryUDPBroadcaster::start()
 {
     starttime = time(NULL);
-	sdSocket = zmq_socket(context,ZMQ_REP);
-	zmq_connect(sdSocket,"inproc://service_directory_udp_broadcast");
-	zmq_setsockopt(sdSocket,ZMQ_SUBSCRIBE,NULL,0);
+    sdSocket = zmq_socket(context, ZMQ_REP);
+    zmq_connect(sdSocket, "inproc://service_directory_udp_broadcast");
+    zmq_setsockopt(sdSocket, ZMQ_SUBSCRIBE, NULL, 0);
 
-	// Poll the gravity node
-	zmq_pollitem_t pollItem;
-	pollItem.socket = sdSocket;
-	pollItem.events = ZMQ_POLLIN;
-	pollItem.fd = 0;
-	pollItem.revents = 0;
+    // Poll the gravity node
+    zmq_pollitem_t pollItem;
+    pollItem.socket = sdSocket;
+    pollItem.events = ZMQ_POLLIN;
+    pollItem.fd = 0;
+    pollItem.revents = 0;
 
-	int block = -1;
+    int block = -1;
 
+    ServiceDirectoryBroadcastPB broadcastMessage;
+    string broadcastString;
 
-	ServiceDirectoryBroadcastPB broadcastMessage;
-	string broadcastString;
+    bool broadcast = false;
+    while (true)
+    {
+        // Start polling socket(s), blocking while we wait
+        int rc = zmq_poll(&pollItem, 1, block);  // 0 --> return immediately, -1 --> blocks
+        if (rc == -1)
+        {
+            SpdLog::debug(fmt::format("Interrupted, exiting (rc = {})", rc).c_str());
+            // Interrupted
+            break;
+        }
 
-	bool broadcast = false;
-	while(true)
-	{
-		// Start polling socket(s), blocking while we wait
-		int rc = zmq_poll(&pollItem, 1, block); // 0 --> return immediately, -1 --> blocks
-		if (rc == -1)
-		{
-			logger->debug("Interrupted, exiting (rc = {})", rc);
-			// Interrupted
-			break;
-		}
+        if (pollItem.revents & ZMQ_POLLIN)
+        {
+            string command = readStringMessage(sdSocket);
 
-		if (pollItem.revents & ZMQ_POLLIN)
-		{
-			string command = readStringMessage(sdSocket);
+            if (command == "broadcast")
+            {
+                SpdLog::info("Initializing Service Directory Broadcast");
+                block = 0;
+                //read broadcast parameters
+                receiveBroadcastParameters();
+                broadcastMessage.set_id("");
+                broadcastMessage.set_domain(domainName);
+                broadcastMessage.set_url(url);
+                broadcastMessage.set_rate(broadcastRate);
+                broadcastMessage.set_starttime(starttime);
+                broadcastMessage.SerializeToString(&broadcastString);
+                rc = initBroadcastSocket();
+                if (rc < 0)
+                {
+                    SpdLog::critical(fmt::format("Broadcast: Socket Init Error: {}", broadcastSocket).c_str());
+                }
+                broadcast = true;
+            }
+            else if (command == "stop")
+            {
+#ifdef _WIN32
+                closesocket(broadcastSocket);
+#else
+                close(broadcastSocket);
+#endif
+                block = -1;
+                broadcast = false;
+            }
+            else if (command == "kill")
+            {
+                break;
+            }
+        }
+        if (broadcast)
+        {
+            //broadcast
+            int bytesSent = sendto(broadcastSocket, broadcastString.c_str(), broadcastMessage.ByteSizeLong(), 0,
+                                   (sockaddr *)&destAddress, sizeof(struct sockaddr_in));
+            if (bytesSent < 0)
+            {
+                //exit
+                SpdLog::critical("Broadcast: sendto() Error");
+                break;
+            }
+#ifdef _WIN32
+            Sleep(broadcastRate * 1000);
+#else
+            usleep(broadcastRate * 1000000);  //Maybe replace this guy with clock_nanosleep???
+#endif
+        }
+    }
 
-			if (command == "broadcast")
-			{
-				logger->info("Initializing Service Directory Broadcast");
-				block = 0;
-				//read broadcast parameters
-				receiveBroadcastParameters();
-				broadcastMessage.set_id("");
-				broadcastMessage.set_domain(domainName);
-				broadcastMessage.set_url(url);
-				broadcastMessage.set_rate(broadcastRate);
-				broadcastMessage.set_starttime(starttime);
-				broadcastMessage.SerializeToString(&broadcastString);
-				rc = initBroadcastSocket();
-				if (rc < 0)
-				{
-					logger->critical("Broadcast: Socket Init Error: {}", broadcastSocket);
-				}
-				broadcast = true;
-			}
-			else if (command == "stop")
-			{
-				#ifdef _WIN32
-				closesocket(broadcastSocket);
-				#else
-				close(broadcastSocket);
-				#endif
-				block = -1;
-				broadcast = false;
-			}
-			else if(command =="kill")
-			{
-				break;
-			}
-		}
-		if(broadcast)
-		{
-			//broadcast
-			int bytesSent = sendto(broadcastSocket,broadcastString.c_str(),broadcastMessage.ByteSizeLong(),0,(sockaddr*)&destAddress,sizeof(struct sockaddr_in));
-			if (bytesSent < 0)
-			{
-				//exit
-				logger->critical("Broadcast: sendto() Error");
-				break;
-			}
-			#ifdef _WIN32
-			Sleep(broadcastRate*1000);
-			#else
-			usleep(broadcastRate*1000000); //Maybe replace this guy with clock_nanosleep???
-			#endif
-		}
-	}
-
-	//close sockets
-	#ifdef _WIN32
-	closesocket(broadcastSocket);
-	#else
-	close(broadcastSocket);
-	#endif
-	zmq_close(sdSocket);
-
+//close sockets
+#ifdef _WIN32
+    closesocket(broadcastSocket);
+#else
+    close(broadcastSocket);
+#endif
+    zmq_close(sdSocket);
 }
 
 void ServiceDirectoryUDPBroadcaster::receiveBroadcastParameters()
 {
-	domainName = readStringMessage(sdSocket);
-	url = readStringMessage(sdSocket);
-	broadcastIP = readStringMessage(sdSocket);
-	logger->info("Broadcast params: domain '{}' url '{}' ip: '{}'", domainName, url, broadcastIP);
+    domainName = readStringMessage(sdSocket);
+    url = readStringMessage(sdSocket);
+    broadcastIP = readStringMessage(sdSocket);
+    SpdLog::info(fmt::format("Broadcast params: domain '{}' url '{}' ip: '{}'", domainName, url, broadcastIP).c_str());
 
-	//receive port
-	zmq_msg_t msg;
-	zmq_msg_init(&msg);
-	zmq_recvmsg(sdSocket,&msg,ZMQ_DONTWAIT);
-	memcpy(&port,zmq_msg_data(&msg),sizeof(unsigned int));
-	zmq_msg_close(&msg);
+    //receive port
+    zmq_msg_t msg;
+    zmq_msg_init(&msg);
+    zmq_recvmsg(sdSocket, &msg, ZMQ_DONTWAIT);
+    memcpy(&port, zmq_msg_data(&msg), sizeof(unsigned int));
+    zmq_msg_close(&msg);
 
-	//receive broadcast rate
-	zmq_msg_t msg2;
-	zmq_msg_init(&msg2);
-	zmq_recvmsg(sdSocket,&msg2,ZMQ_DONTWAIT);
-	memcpy(&broadcastRate,zmq_msg_data(&msg2),sizeof(unsigned int));
-	zmq_msg_close(&msg2);
+    //receive broadcast rate
+    zmq_msg_t msg2;
+    zmq_msg_init(&msg2);
+    zmq_recvmsg(sdSocket, &msg2, ZMQ_DONTWAIT);
+    memcpy(&broadcastRate, zmq_msg_data(&msg2), sizeof(unsigned int));
+    zmq_msg_close(&msg2);
 
-	sendStringMessage(sdSocket,"ACK",ZMQ_DONTWAIT);
+    sendStringMessage(sdSocket, "ACK", ZMQ_DONTWAIT);
 
 #ifdef _WIN32
-	//if windows and broadcasting on loopback
-	if(url.find("127.0.0.1")!=std::string::npos)
-	{
-		logger->warn("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
-	}
+    //if windows and broadcasting on loopback
+    if (url.find("127.0.0.1") != std::string::npos)
+    {
+        SpdLog::warn("Windows bug: Broadcasting Domain on loopback interface may block other broadcast messages");
+    }
 #endif
-
 }
 
 int ServiceDirectoryUDPBroadcaster::initBroadcastSocket()
 {
-	struct sockaddr_storage destStorage;
-	std::memset(&destStorage,0,sizeof(destStorage));
+    struct sockaddr_storage destStorage;
+    std::memset(&destStorage, 0, sizeof(destStorage));
 
-	struct sockaddr_in *destAddr = (struct sockaddr_in*) &destStorage;
-	destAddr->sin_family=AF_INET;
-	destAddr->sin_port=htons(port);
+    struct sockaddr_in *destAddr = (struct sockaddr_in *)&destStorage;
+    destAddr->sin_family = AF_INET;
+    destAddr->sin_port = htons(port);
 
-	string ip = broadcastIP;
-	if (ip.size() == 0)
-	{
-	    if(url.find("127.0.0.1")!=std::string::npos)
-	    {
-	        ip = "127.255.255.255";
-	    }
-	    else
-	    {
-	        ip = "255.255.255.255";
-	    }
-	}
-	logger->debug("Using broadcast IP {}", ip);
-	destAddr->sin_addr.s_addr = inet_addr(ip.c_str());
+    string ip = broadcastIP;
+    if (ip.size() == 0)
+    {
+        if (url.find("127.0.0.1") != std::string::npos)
+        {
+            ip = "127.255.255.255";
+        }
+        else
+        {
+            ip = "255.255.255.255";
+        }
+    }
+    SpdLog::debug(fmt::format("Using broadcast IP {}", ip).c_str());
+    destAddr->sin_addr.s_addr = inet_addr(ip.c_str());
 
-	memcpy(&destAddress,destAddr,sizeof(struct sockaddr_in));
+    memcpy(&destAddress, destAddr, sizeof(struct sockaddr_in));
 
-	broadcastSocket = socket(destAddress.sin_family,SOCK_DGRAM,IPPROTO_UDP);
+    broadcastSocket = socket(destAddress.sin_family, SOCK_DGRAM, IPPROTO_UDP);
 
-	if(broadcastSocket < 0)
-	{
-		return -1;
-	}
+    if (broadcastSocket < 0)
+    {
+        return -1;
+    }
 
-	int broadcastPerm=1;
+    int broadcastPerm = 1;
 
-	if(setsockopt(broadcastSocket,SOL_SOCKET,SO_BROADCAST,(char *)&broadcastPerm,sizeof(broadcastPerm)) != 0)
-	{
-		return -1;
-	}
+    if (setsockopt(broadcastSocket, SOL_SOCKET, SO_BROADCAST, (char *)&broadcastPerm, sizeof(broadcastPerm)) != 0)
+    {
+        return -1;
+    }
 
-	return broadcastSocket;
+    return broadcastSocket;
 }
-}/*namespace gravity*/
+} /*namespace gravity*/
