@@ -33,7 +33,7 @@ jobs:
           git config --global --add safe.directory '*'
           git status
           mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja ..
+          cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -GNinja -DGRAVITY_USE_EXTERNAL_PROTOBUF=ON ..
           cmake --build . --target install --parallel
           ./install/bin/ServiceDirectory &
           ctest --verbose && mkdir output
