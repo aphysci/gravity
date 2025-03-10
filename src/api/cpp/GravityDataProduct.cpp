@@ -72,10 +72,10 @@ void GravityDataProduct::setData(const void* data, int size)
 
 void GravityDataProduct::setData(const google::protobuf::Message& data)
 {
-    char* vdata = (char*)malloc(data.ByteSize());
-    data.SerializeToArray(vdata, data.ByteSize());
+    char* vdata = (char*)malloc(data.ByteSizeLong());
+    data.SerializeToArray(vdata, data.ByteSizeLong());
     delete gravityDataProductPB->release_data();  //Looking at the protobuf, this seems necessary.
-    gravityDataProductPB->set_data(vdata, data.ByteSize());
+    gravityDataProductPB->set_data(vdata, data.ByteSizeLong());
     free(vdata);
     // Also implicitly set the message protocol and data_type.
     gravityDataProductPB->set_protocol("protobuf2");
@@ -96,7 +96,7 @@ bool GravityDataProduct::populateMessage(google::protobuf::Message& data) const
     return data.ParseFromArray((void*)gravityDataProductPB->data().c_str(), getDataSize());
 }
 
-int GravityDataProduct::getSize() const { return gravityDataProductPB->ByteSize(); }
+int GravityDataProduct::getSize() const { return gravityDataProductPB->ByteSizeLong(); }
 
 void GravityDataProduct::parseFromArray(const void* arrayPtr, int size)
 {
@@ -105,7 +105,7 @@ void GravityDataProduct::parseFromArray(const void* arrayPtr, int size)
 
 bool GravityDataProduct::serializeToArray(void* arrayPtr) const
 {
-    return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSize());
+    return gravityDataProductPB->SerializeToArray(arrayPtr, gravityDataProductPB->ByteSizeLong());
 }
 
 bool GravityDataProduct::operator==(const GravityDataProduct& gdp) const
