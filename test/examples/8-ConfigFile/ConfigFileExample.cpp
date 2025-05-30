@@ -20,6 +20,7 @@
 #include <sstream>
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <spdlog/spdlog.h>
 #include <Utility.h>
 
 int main()

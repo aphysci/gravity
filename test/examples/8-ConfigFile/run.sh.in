@@ -19,8 +19,11 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+EXAMPLE_BIN_DIR=@GravityExamples_BINARY_DIR@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
+CS_BIN_DIR=@ConfigServer_BINARY_DIR@
 
 export PATH=$PATH:../../../src/components/cpp/ConfigServer:../../../src/components/cpp/ServiceDirectory
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
@@ -36,18 +39,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-ServiceDirectory &
+$SD_BIN_DIR/ServiceDirectory &
 SDPID=$!
 
 # sleep for a second to give the service directory a chance to start up
 sleep 1
 
-ConfigServer &
+$CS_BIN_DIR/ConfigServer &
 CSPID=$!
 
 # ConfigServer needs to be up and registered before client code calls init
 sleep 20
 
-./ConfigFileExample
+$EXAMPLE_BIN_DIR/8-ConfigFile/ConfigFileExample
 
 cleanup

@@ -4,7 +4,10 @@ project(GravityExamples)
 
 add_subdirectory("1-BasicDataProduct")
 add_subdirectory("2-ProtobufDataProduct")
-#add_subdirectory("8-ConfigFile")
+add_subdirectory("3-MultipleDataProduct")
+add_subdirectory("4-BasicService")
+add_subdirectory("5-MiscFunctionality")
+add_subdirectory("8-ConfigFile")
 
 if (NOT SKIP_JAVA)
     add_subdirectory("6-JavaProtobufDataProduct")
