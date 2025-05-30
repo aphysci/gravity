@@ -19,8 +19,10 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+EXAMPLE_BIN_DIR=@GravityExamples_BINARY_DIR@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 
 export PATH=$PATH:../../../src/components/cpp/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
@@ -37,30 +39,30 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-./ProtobufDataProductPublisher &
+$EXAMPLE_BIN_DIR/9-Domains/ProtobufDataProductPublisher &
 PUBPID=$!
 
-./ProtobufDataProductSubscriber &
+$EXAMPLE_BIN_DIR/9-Domains/ProtobufDataProductSubscriber &
 SUBPID=$!
 
-sleep 10
+sleep 20
 
-ServiceDirectory &
+$SD_BIN_DIR/ServiceDirectory &
 SDPID=$!
 
-sleep 10
+sleep 30
 
 kill $SDPID $PUBPID
 echo Killed ServiceDirectory and ProtobufDataProductPublisher
 sleep 10
 
 echo Restarting ServiceDirectory and ProtobufDataProductPublisher
-./ProtobufDataProductPublisher &
+$EXAMPLE_BIN_DIR/9-Domains/ProtobufDataProductPublisher &
 PUBPID=$!
-ServiceDirectory &
+$SD_BIN_DIR/ServiceDirectory &
 SDPID=$!
 
-sleep 30
+sleep 10
 
 cleanup
 

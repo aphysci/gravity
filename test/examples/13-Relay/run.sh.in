@@ -19,8 +19,12 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+EXAMPLE_BIN_DIR=@GravityExamples_BINARY_DIR@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
+REL_BIN_DIR=@Relay_BINARY_DIR@
+
 
 export PATH=$PATH:../../../src/components/cpp/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
@@ -40,21 +44,21 @@ cleanup()
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-ServiceDirectory &
+$SD_BIN_DIR/ServiceDirectory &
 SDPID=$!
 
 # sleep for a second to give the service directory a chance to start up
 sleep 1
 
-./ProtobufDataProductPublisher &
+$EXAMPLE_BIN_DIR/13-Relay/ProtobufDataProductPublisher &
 PUBPID=$!
 
-./ProtobufDataProductSubscriber &
+$EXAMPLE_BIN_DIR/13-Relay/ProtobufDataProductSubscriber &
 SUBPID=$!
 
 sleep 3
 
-Relay &
+$REL_BIN_DIR/Relay &
 RPID=$!
 
 sleep 10
