@@ -76,10 +76,12 @@ int main()
         count++;
         if (count > 50) count = 1;
 
+	//Turns archiving on and off every 5 count (on->off->on....)
         if (count % 5 == 0)
         {
             GravityDataProduct gdp("FileArchiverControlRequest");
             FileArchiverControlRequestPB request;
+	    //Suspend flag turns off further input into the archiver
             request.set_suspend(suspend);
             suspend = !suspend;
             gdp.setData(request);
