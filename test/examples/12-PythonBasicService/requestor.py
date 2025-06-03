@@ -1,7 +1,7 @@
 
 import time
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, GravityServiceProvider, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, GravityServiceProvider, SpdLog
 from Multiplication_pb2 import MultiplicationOperandsPB, MultiplicationResultPB
 
 done = False
@@ -15,28 +15,28 @@ class MyRequestorProvider(GravityRequestor, GravityServiceProvider):
     def requestFilled(self, serviceID, requestID, response):
         multResponse = MultiplicationResultPB()
         response.populateMessage(multResponse)
-        Log.message("made it to request filled with request GDP ID = "+response.dataProductID +" and response = " + str(multResponse.result))
+        SpdLog.warn("made it to request filled with request GDP ID = "+response.dataProductID +" and response = " + str(multResponse.result))
         global done
         done = True
 
     def request(self, serviceID, dataProduct):
-        Log.message("made it to my request!")
-        Log.message("for serviceID = "+serviceID)
+        SpdLog.warn("made it to my request!")
+        SpdLog.warn("for serviceID = "+serviceID)
         operands = MultiplicationOperandsPB()
-        Log.message(str(type(operands)))
+        SpdLog.warn(str(type(operands)))
         dataProduct.populateMessage(operands)
-        Log.message("have operands = "+str([operands.multiplicand_a, operands.multiplicand_b]))
+        SpdLog.warn("have operands = "+str([operands.multiplicand_a, operands.multiplicand_b]))
 
         multResponse = MultiplicationResultPB()
         multResponse.result = operands.multiplicand_a * operands.multiplicand_b
         gdp = GravityDataProduct("MultResponse")
         gdp.data = multResponse
-        Log.message("returning response with result = "+str(multResponse.result))
+        SpdLog.warn("returning response with result = "+str(multResponse.result))
         return gdp
 
 gn = GravityNode()
 while gn.init("PyRequest") != gravity.SUCCESS:
-    Log.warning("failed to init, retrying...")
+    SpdLog.warn("failed to init, retrying...")
     time.sleep(1)
 
 requestorProvider = MyRequestorProvider()
@@ -58,10 +58,10 @@ operands.multiplicand_a = 5
 operands.multiplicand_b = 6
 gdp.data=operands
 gdpResp = gn.request("Multiplication", gdp)
-Log.message("received GDP response")
+SpdLog.warn("received GDP response")
 multResponse = MultiplicationResultPB()
 gdpResp.populateMessage(multResponse)
-Log.message("made it to request filled with request GDP ID = "+gdpResp.dataProductID +" and response = " + str(multResponse.result))
+SpdLog.warn("made it to request filled with request GDP ID = "+gdpResp.dataProductID +" and response = " + str(multResponse.result))
 
 
 
