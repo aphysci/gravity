@@ -1,0 +1,68 @@
+/** (C) Copyright 2013, Applied Physical Sciences Corp., A General Dynamics Company
+ **
+ ** Gravity is free software; you can redistribute it and/or modify
+ ** it under the terms of the GNU Lesser General Public License as published by
+ ** the Free Software Foundation; either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU Lesser General Public License for more details.
+ **
+ ** You should have received a copy of the GNU Lesser General Public
+ ** License along with this program;
+ ** If not, see <http://www.gnu.org/licenses/>.
+ **
+ */
+
+syntax = "proto2";
+option optimize_for = SPEED;
+option java_outer_classname = "ServiceDirectoryMapContainer";
+option java_package = "com.aphysci.gravity.protobuf";
+
+package gravity;
+
+message ProductLocations
+{
+	optional string product_id = 1;
+	repeated string url = 2;
+	repeated string component_id = 3;
+	repeated string domain_id = 4;
+	repeated uint64 timestamp = 5;
+}
+
+message ProductChange
+{
+	enum RegistrationType
+	{
+		DATA = 0;
+		SERVICE = 1;
+	}	
+	
+    enum ChangeType
+	{
+		REMOVE = 0;
+		ADD = 1;
+	}
+	
+	optional string product_id = 1;
+	optional string url = 2;
+	optional RegistrationType registration_type = 3;
+	optional ChangeType change_type = 4;
+	optional string component_id = 5;
+	optional uint64 timestamp = 6;
+}
+
+message ServiceDirectoryMapPB
+{
+	// Current state
+	repeated ProductLocations service_provider = 1;
+	repeated ProductLocations data_provider = 2;
+   
+	// Changes since last 
+	optional ProductChange change = 3;
+
+	// Service Directories Domain
+	optional string domain = 4;
+}
