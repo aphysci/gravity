@@ -20,22 +20,25 @@
 
 # Tool-related substitution variables
 GRAVITY_ROOT=../../..
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
-WITHOUT_PYTHON=@WITHOUT_PYTHON@
-PYTHON=@PYTHON@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+WITHOUT_PYTHON=@SKIP_PYTHON@
+PYTHON=python3
 TERM=gnome-terminal
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
+CM_INST_PRE=@CMAKE_INSTALL_PREFIX@
+CM_LIB_DIR=@CMAKE_INSTALL_LIBDIR@
 
-if test $WITHOUT_PYTHON = no;
+if test $WITHOUT_PYTHON = OFF;
 then
 
    export PATH=$PATH:$GRAVITY_ROOT/src/components/cpp/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:$GRAVITY_ROOT/src/api/cpp:$GRAVITY_ROOT/src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
-   export PYTHONPATH=$PYTHONPATH:$GRAVITY_ROOT/lib
+   export PYTHONPATH=$PYTHONPATH:$CM_INST_PRE/$CM_LIB_DIR
 
-   @PROTOC@ --proto_path=. --python_out=. DataPoint.proto || exit
+   protoc --proto_path=. --python_out=. DataPoint.proto || exit
 
-   $TERM -- /bin/bash -c "echo -ne '\033]0;Service Directory \007'; ServiceDirectory ; read -p 'Press return to exit'" &
+   $TERM -- /bin/bash -c "echo -ne '\033]0;Service Directory \007'; $SD_BIN_DIR/ServiceDirectory ; read -p 'Press return to exit'" &
    $TERM -- /bin/bash -c "echo -ne '\033]0;Publisher \007'; $PYTHON pub.py 500 ; read -p 'Press return to exit'" &
    $TERM -- /bin/bash -c "echo -ne '\033]0;Anomaly Detector \007'; $PYTHON detect.py ; read -p 'Press return to exit'" &
 

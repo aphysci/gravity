@@ -14,9 +14,13 @@ add_subdirectory("13-Relay")
 
 if (NOT SKIP_JAVA)
     add_subdirectory("6-JavaProtobufDataProduct")
+    add_subdirectory("7-JavaBasicService")
+
+
 endif()
 
 if (NOT SKIP_PYTHON)
     add_subdirectory("11-PythonPubSub")
     add_subdirectory("12-PythonBasicService")
+    add_subdirectory("14-AnomalyDetection")
 endif()

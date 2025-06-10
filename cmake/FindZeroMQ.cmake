@@ -139,6 +139,8 @@ if(ZeroMQ_LIBRARY)
           IMPORTED_CONFIGURATIONS RELEASE)
         set_target_properties(libzmq PROPERTIES
           IMPORTED_LOCATION_RELEASE "${ZeroMQ_LIBRARY_RELEASE}")
+      cmake_path(GET ZeroMQ_LIBRARY_RELEASE PARENT_PATH ZeroMQ_PARENT_DIRECTORY)
+      set(ZeroMQ_PARENT_DIRECTORY "${ZeroMQ_PARENT_DIRECTORY}" CACHE ON FILEPATH)
       endif()
       if(EXISTS "${ZeroMQ_LIBRARY_DEBUG}")
         set_property(TARGET libzmq APPEND PROPERTY

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(JavaProtobufDataProduct)
+project(JavaBasicService)
 include(GNUInstallDirs)
 include(GravitySupport)
 
@@ -33,14 +33,14 @@ if (WIN32)
     get_target_property(Protobuf_LIBRARY_RELEASE protobuf::libprotobuf LOCATION_RELEASE)
     get_filename_component(LOCAL_PROTOBUF_RUNTIME_DIR "${Protobuf_LIBRARY_RELEASE}" DIRECTORY)
     
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductDebug.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" @ONLY)
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductRelease.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" @ONLY)
+    #configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductDebug.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" @ONLY)
+    #configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductRelease.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" @ONLY)
     
 endif()
 
 set(JAVA_SRCS 
-        src/JavaProtobufDataProductPublisher.java
-        src/JavaProtobufDataProductSubscriber.java
+	src/BasicServiceProvider.java
+	src/BasicServiceRequestor.java
         ${PROTO_SRCS})
 
 set(ORIG_CMAKE_DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
@@ -55,9 +55,9 @@ set(CMAKE_DEBUG_POSTFIX ${ORIG_CMAKE_DEBUG_POSTFIX})
 
 gravity_install_jar(${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
-if (WIN32)
-    install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" DESTINATION bin CONFIGURATIONS Debug)
-    install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" DESTINATION bin CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
-endif()
+#if (WIN32)
+#install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" DESTINATION bin CONFIGURATIONS Debug)
+#install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" DESTINATION bin CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
+#endif()
 
-configure_file(run.sh.in ../../../../test/examples/6-JavaProtobufDataProduct/run.sh)
+configure_file(run.sh.in ../../../../test/examples/7-JavaBasicService/run.sh)

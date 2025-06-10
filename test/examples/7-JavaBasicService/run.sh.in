@@ -19,27 +19,32 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-JAVAPROTOBUF_DIR=@JAVAPROTOBUF_DIR@
-WITHOUT_JAVA=@WITHOUT_JAVA@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+ZMQ_PAR_DIR=@ZeroMQ_PARENT_DIRECTORY@
+JAVAPROTOBUF_DIR=@JAVA_PROTOBUF_JAR@
+WITHOUT_JAVA=@SKIP_JAVA@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
+CM_INST_PRE=@CMAKE_INSTALL_PREFIX@
+CM_INST_LIB=@CMAKE_INSTALL_LIBDIR@
+SEV_BIN_DIR=@JavaBasicService_BINARY_DIR@
 
-if test $WITHOUT_JAVA = no;
+
+if test $WITHOUT_JAVA = OFF;
 then
 
    export PATH=$PATH:../../../src/api/java:../../../src/components/cpp/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR
 
-   ServiceDirectory &
+  $SD_BIN_DIR/ServiceDirectory &
    SDPID=$!
-   java -cp build:$JAVAPROTOBUF_DIR:../../../src/api/java/gravity.jar -Djava.library.path=../../../src/api/java:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR BasicServiceProvider &
+   java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar:$JAVA_PROTOBUF_JAR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR BasicServiceProvider &
    JDPPID=$!
 
    # sleep for a second to give the publisher a chance to register its data product
    sleep 1
 
-   java -cp build:$JAVAPROTOBUF_DIR:../../../src/api/java/gravity.jar -Djava.library.path=../../../src/api/java:$ZMQ_LIB_DIR BasicServiceRequestor
+   java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar:$JAVA_PROTOBUF_JAR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR BasicServiceRequestor
 
    kill $SDPID
    kill $JDPPID
