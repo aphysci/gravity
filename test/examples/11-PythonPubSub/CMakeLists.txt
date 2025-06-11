@@ -24,4 +24,4 @@ set_property(TEST pypubsub PROPERTY ENVIRONMENT_MODIFICATION
   "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
 )
 
-configure_file(run.sh.in ../../../../test/examples/11-PythonPubSub/run.sh)
+configure_file(run.sh.in ${PythonPubSub_SOURCE_DIR}/run.sh)

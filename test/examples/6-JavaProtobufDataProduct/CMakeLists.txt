@@ -60,4 +60,4 @@ if (WIN32)
     install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" DESTINATION bin CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
 endif()
 
-configure_file(run.sh.in ../../../../test/examples/6-JavaProtobufDataProduct/run.sh)
+configure_file(run.sh.in ${JavaProtobufDataProduct_SOURCE_DIR}/run.sh)

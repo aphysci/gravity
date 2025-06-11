@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Domains)
+project(RelayExample)
 #
 # see CMakeLists.txt on how to set up CMAKE_PREFIX_PATH and CMAKE_MODULE_PATH
 #

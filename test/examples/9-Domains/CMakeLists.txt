@@ -31,4 +31,4 @@ target_link_libraries(ProtobufDataProductSubscriber PUBLIC gravity PRIVATE spdlo
 target_include_directories(ProtobufDataProductSubscriber PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
 
-configure_file(run.sh.in ../../../../test/examples/9-Domains/run.sh)
+configure_file(run.sh.in ${Domains_SOURCE_DIR}/run.sh)

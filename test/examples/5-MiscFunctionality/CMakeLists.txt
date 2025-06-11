@@ -20,5 +20,5 @@ add_executable(MiscComponent2 MiscComponent2.cpp)
 set_target_properties(MiscComponent2 PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(MiscComponent2 gravity spdlog::spdlog_header_only)
 
-configure_file(run.sh.in ../../../../test/examples/5-MiscFunctionality/run.sh)
+configure_file(run.sh.in ${MiscFunctionality_SOURCE_DIR}/run.sh)
 

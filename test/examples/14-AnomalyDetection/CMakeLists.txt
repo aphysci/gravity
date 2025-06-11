@@ -25,5 +25,5 @@ set_property(TEST pybasicservice PROPERTY ENVIRONMENT_MODIFICATION
   "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
 )
 
-configure_file(train.sh.in ../../../../test/examples/14-AnomalyDetection/train.sh)
-configure_file(detect.sh.in ../../../../test/examples/14-AnomalyDetection/detect.sh)
+configure_file(train.sh.in ${AnomalyDetection_SOURCE_DIR}/train.sh)
+configure_file(detect.sh.in ${AnomalyDetection_SOURCE_DIR}/detect.sh)

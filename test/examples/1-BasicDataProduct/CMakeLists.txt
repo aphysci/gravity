@@ -20,4 +20,4 @@ add_executable(BasicDataProductSubscriber BasicDataProductSubscriber.cpp)
 set_target_properties(BasicDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(BasicDataProductSubscriber gravity spdlog::spdlog_header_only)
 
-configure_file(run.sh.in ../../../../test/examples/1-BasicDataProduct/run.sh)
+configure_file(run.sh.in ${BasicDataProduct_SOURCE_DIR}/run.sh)

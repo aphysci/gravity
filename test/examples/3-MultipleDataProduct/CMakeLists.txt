@@ -29,6 +29,6 @@ add_executable(MultipleDataProductSubscriber MultipleDataProductSubscriber.cpp $
 set_target_properties(MultipleDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(MultipleDataProductSubscriber PUBLIC gravity PRIVATE spdlog::spdlog_header_only)
 target_include_directories(MultipleDataProductSubscriber PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
+add_dependencies(MultipleDataProductSubscriber ${PROJECT_NAME}_protos)
 
-configure_file(run.sh.in ../../../../test/examples/3-MultipleDataProduct/run.sh)
+configure_file(run.sh.in ${MultipleDataProduct_SOURCE_DIR}/run.sh)

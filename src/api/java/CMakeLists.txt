@@ -8,7 +8,7 @@ include(UseJava)
 gravity_find_protobuf(ON)
 
 # TODO check GRAVITY_USING_EXTERNAL_PROTOBUF
-set(PUBLIC_JAR  "${JAVA_PROTOBUF_JAR}")
+set(PUBLIC_JAR "${JAVA_PROTOBUF_JAR}" "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 
 set(CMAKE_JAVA_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
 
@@ -75,5 +75,4 @@ gravity_add_jar_debug_release(${PROJECT_NAME} SOURCES ${JAVA_SRCS} ${JAVA_PROTO_
             "${CMAKE_BINARY_DIR}/java/com/aphysci/gravity/swig/gravityConstants.java"
             OUTPUT_NAME gravity
 	    OUTPUT_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-    # gravity_install_jar(${PROJECT_NAME}  DESTINATION "/home/flinker/Gravity/build/install/lib")
     gravity_add_dependency(${PROJECT_NAME})

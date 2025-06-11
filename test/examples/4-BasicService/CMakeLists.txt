@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(BasicSevice)
+project(BasicService)
 #
 # see CMakeLists.txt on how to set up CMAKE_PREFIX_PATH and CMAKE_MODULE_PATH
 #
@@ -31,5 +31,5 @@ target_link_libraries(BasicServiceRequestor PUBLIC gravity PRIVATE spdlog::spdlo
 target_include_directories(BasicServiceRequestor PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(BasicServiceRequestor ${PROJECT_NAME}_protos)
 
-configure_file(run.sh.in ../../../../test/examples/4-BasicService/run.sh)
+configure_file(run.sh.in ${BasicService_SOURCE_DIR}/run.sh)
 
