@@ -100,7 +100,7 @@ namespace GravityTransportTypes
     /**
      * Network transport protocols available on a Gravity system.
      */
-    enum Types
+    enum Types : uint8_t
     {
         TCP = 0,     ///< Transmission Control Protocol
         INPROC = 1,  ///< In-process (Inter-thread) Communication
@@ -435,7 +435,7 @@ public:
     /**
      * Get the ID of this gravity node (given in the init function).
      */
-    GRAVITY_API std::string getComponentID();
+    GRAVITY_API std::string & getComponentID() const;
 
     /**
      * @name Registration functions
@@ -604,7 +604,10 @@ public:
 };
 
 std::unique_ptr<GravityNode> newGravityNode();
-std::unique_ptr<GravityNode> rustInit(std::unique_ptr<GravityNode> gn, const std::string &componentID, GravityReturnCode &ret);
+GravityReturnCode rustInit(const std::unique_ptr<GravityNode> &gn, const std::string &componentID);
+std::unique_ptr<std::string> rustGetComponentID(const std::unique_ptr<GravityNode>& gn);
+GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string & dataProductID, GravityTransportType transportType);
+GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp);
 
 } /* namespace gravity */
 #endif /* GRAVITYNODE_H_ */

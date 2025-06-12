@@ -43,7 +43,7 @@ public:
     /**
      * Log Levels
      */
-    enum LogLevel
+    enum LogLevel : int8_t
     {
         TRACE,
         DEBUG,
