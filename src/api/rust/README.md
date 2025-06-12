@@ -21,8 +21,10 @@ It is also possible to use subclasses with autocxx, but generating these binding
 
 Another thought is use autocxx for strictly the subclass stuff, and then manually  bind the rest, in case the above does not work. 
 
-> [!NOTE]
-> Using manual bindings (cxx) means that all member functions must be const, so instead 
-> of doing gn.init(), you would do init(&gn). 
+## Current Updates
 
-June 10, 2025
+I have included a wrapper on each end (C++ and Rust). This makes the code feel like true Rust code, while not having to impact any of the source code.
+
+The provided stuff here will in fact make a gravity node publish a basic string data product successfully. Rust stuff cannot yet subscribe. Stay tuned. The next steps that I will take are either do the protobufs or work with the subscriber. Neither are easy since there is not support for a vector of shared pointers yet, nor protobuf, so some janky work-arounds are in order for sure! Exciting :/
+
+June 12, 2025
