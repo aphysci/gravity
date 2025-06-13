@@ -31,4 +31,4 @@ target_link_libraries(ReplayTest PUBLIC gravity PRIVATE spdlog::spdlog_header_on
 target_include_directories(ReplayTest PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(ReplayTest ${PROJECT_NAME}_protos)
 
-configure_file(run.sh.in ../../../../test/examples/10-Archiving/run.sh)
+configure_file(run.sh.in ${Archiving_SOURCE_DIR}/run.sh)
