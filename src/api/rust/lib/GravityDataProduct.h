@@ -282,8 +282,7 @@ public:
 	*/
     GRAVITY_API void setRegistrationTime(uint32_t ts) const { gravityDataProductPB->set_registration_time(ts); }
 };
-    std::unique_ptr<GravityDataProduct> newGravityDataProduct(const std::string& dataProductId);
-    void rustSetData(const std::unique_ptr<GravityDataProduct> &gdp, const char *data, int size);
-
+    
+    
 } /* namespace gravity */
 #endif /* GRAVITYDATAPRODUCT_H_ */

@@ -40,9 +40,7 @@ mod ffi {
     }
     #[namespace = "gravity"]
     unsafe extern "C++" {
-        include!("/home/anson/gravity/src/api/rust/lib/GravityNode.h");
-        include!("/home/anson/gravity/src/api/rust/lib/GravityDataProduct.h");
-        include!("/home/anson/gravity/src/api/rust/lib/SpdLog.h");
+        include!("/home/anson/gravity/src/api/rust/lib/shims.h");
 
         type GravityReturnCode;
         type GravityTransportType;
@@ -69,12 +67,25 @@ mod ffi {
         #[rust_name = "GravityDataProduct"]
         fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GravityDataProduct>;
         
-        #[rust_name = "setData"]
+        #[rust_name = "setDataBasic"]
         unsafe fn rustSetData(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
     
-        #[rust_name = "setDataProto"]
+        #[rust_name = "setData"]
         unsafe fn rustSetDataProto(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
+    
+            
+    }
+
+    unsafe extern "C++" {
+        //spdlog
+        include!("/home/anson/gravity/src/api/rust/lib/shims.h");
         
+        fn spdlog_critical(message: &CxxString);
+        fn spdlog_error(message: &CxxString);
+        fn spdlog_warn(message: &CxxString);
+        fn spdlog_info(message: &CxxString);
+        fn spdlog_debug(message: &CxxString);
+        fn spdlog_trace(message: &CxxString);
     }
 
 }

@@ -603,11 +603,6 @@ public:
     GRAVITY_API std::shared_ptr<spdlog::logger> getGravityLogger();
 };
 
-std::unique_ptr<GravityNode> newGravityNode();
-GravityReturnCode rustInit(const std::unique_ptr<GravityNode> &gn, const std::string &componentID);
-std::unique_ptr<std::string> rustGetComponentID(const std::unique_ptr<GravityNode>& gn);
-GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string & dataProductID, GravityTransportType transportType);
-GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp);
 
 } /* namespace gravity */
 #endif /* GRAVITYNODE_H_ */
