@@ -1,8 +1,15 @@
+use core::{ffi::c_void, time};
+use std::ffi::c_char;
+use protobuf::Message;
+
 pub use ffi::*;
+use cxx::{let_cxx_string, CxxString, UniquePtr};
+
 
 #[cxx::bridge]
 mod ffi {
-
+    #[namespace = "gravity"]
+    #[derive(Debug)]
     enum GravityReturnCode {
         SUCCESS = 0,                ///< The request was successful
         FAILURE = -1,               ///< The request failed
@@ -23,20 +30,51 @@ mod ffi {
             -13,  ///< The GravityNode has not successfully completed initialization yet (i.e. init has not been called or did not succeed).
         RESERVED_DATA_PRODUCT_ID = -14, 
     }
-
+    #[namespace = "gravity"]
+    enum GravityTransportType {
+        TCP = 0,     ///< Transmission Control Protocol
+        INPROC = 1,  ///< In-process (Inter-thread) Communication
+        PGM = 2,     ///< Pragmatic General Multicast Protocol
+        EPGM = 3,    ///< Encapsulated PGM
+        IPC = 4,  //< Inter-Process Communication
+    }
+    #[namespace = "gravity"]
     unsafe extern "C++" {
-        type GravityReturnCode;
-        type GravityNode; 
-        // type GravitySubscriber;
-        // type GravityDataProduct;
+        include!("/home/anson/gravity/src/api/rust/lib/GravityNode.h");
+        include!("/home/anson/gravity/src/api/rust/lib/GravityDataProduct.h");
+        include!("/home/anson/gravity/src/api/rust/lib/SpdLog.h");
 
+        type GravityReturnCode;
+        type GravityTransportType;
+        type GravityNode; 
+        type GravityDataProduct;
+
+        //GravityNode methods
+        #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GravityNode>;
-        fn initRust(gn: UniquePtr<GravityNode>, componentID: &CxxString) -> UniquePtr<GravityNode>;
-        // fn init(componentID: CxxString) -> GravityReturnCode;
-        // fn subscribe(dataProductID: CxxString, subscriber: GravitySubscriber) -> GravityReturnCode;
-        // fn waitForExit();
-        // fn unsubscribe(dataProductID: CxxString, subscriber: GravitySubscriber) -> GravityReturnCode;
-        // fn publish(dataProduct: GravityDataProduct) -> GravityReturnCode;
+
+        #[rust_name = "init"]
+        fn rustInit(gn: &UniquePtr<GravityNode>, componentID: &CxxString) -> GravityReturnCode;
+        
+        #[rust_name = "getComponentID"]
+        fn rustGetComponentID(gn: &UniquePtr<GravityNode>) -> UniquePtr<CxxString>;
+        
+        #[rust_name = "registerDataProduct"]
+        fn rustRegisterDataProduct(gn: &UniquePtr<GravityNode>, dataProductID: &CxxString, 
+            transportType: GravityTransportType) -> GravityReturnCode;
+        #[rust_name = "publish"]
+        fn rustPublish(gn: &UniquePtr<GravityNode>, dataProduct: &UniquePtr<GravityDataProduct>) -> GravityReturnCode;
+        
+        // GravityDataProductMethods
+        #[rust_name = "GravityDataProduct"]
+        fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GravityDataProduct>;
+        
+        #[rust_name = "setData"]
+        unsafe fn rustSetData(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
+    
+        #[rust_name = "setDataProto"]
+        unsafe fn rustSetDataProto(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
         
     }
+
 }
