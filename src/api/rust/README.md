@@ -14,6 +14,12 @@ It is also possible to use subclasses with autocxx, but generating these binding
 Another thought is use autocxx for strictly the subclass stuff, and then manually  bind the rest, in case the above does not work. 
 
 ## Overview
+### Current Functionality
+You don't care how it works, only that it does.
+I have implemented all the spdlog functions, in addition to every function you see before you in main. There really is not much else so far. Most functions are trivial to implement, I just have not gotten around to it so far. I hope to get the subscriber going soon. If I can get that moving, service providers, requestors, etc, will be very similar I imagine. 
+
+To the ~0 people reading this. hi!
+
 ### Basics
 In this section, you will learn how I set up the rust Gravity API and the motivation behind it.
 
@@ -52,11 +58,13 @@ This contains the struct and impl of the gravity types. The goal is that your ma
 
 I know there is a lot of bouncing around and wrapper functions, but to me it seems like this is the best way to make the main.rs feel like actual rust code. Any suggestions are definitely welcome.
 
+I believe this is what they call a shim
+
 
 ## Current Updates
 
 I have included a wrapper on each end (C++ and Rust). This makes the code feel like true Rust code, while not having to impact any of the source code.
 
-The provided stuff here will in fact make a gravity node publish a basic string data product successfully. Rust stuff cannot yet subscribe. Stay tuned. The next steps that I will take are either do the protobufs or work with the subscriber. Neither are easy since there is not support for a vector of shared pointers yet, nor protobuf, so some janky work-arounds are in order for sure! Exciting :/
+The provided stuff here will in fact make a gravity node publish a basic string data product or a protobuf data product successfully. Rust stuff cannot yet subscribe. Stay tuned. The next step that I will take is work with the subscriber. Neither are easy since there is not support for a vector of shared pointers yet, nor protobuf, so some janky work-arounds are in order for sure! Exciting :/
 
-June 12, 2025
+June 13, 2025
