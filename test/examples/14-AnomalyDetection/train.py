@@ -20,7 +20,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)  # quiet TensorFlow warnings
 
 import time, sys
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLogHandler
 from DataPoint_pb2 import DataPointPB
 from datetime import datetime
 from gravity_autoencoder import TrainModel
@@ -71,12 +71,14 @@ class MySubscriber(GravitySubscriber):
             TrainModel(training_data, model_file, epochs=epochs)
             self.train_state = TrainingState.TRAINED
 
-
+gravlogger = logging.getLogger()
+gravlogger.setLevel(logging.WARNING)  # let all logs pass through to Gravity logger
+gravlogger.addHandler(SpdLogHandler(True))
 mySub = MySubscriber()
 
 gn = GravityNode()
 while gn.init("AnomalyDetector") != gravity.SUCCESS:
-    Log.warning("failed to init, retrying...")
+    gravlogger.warning("failed to init, retrying...")
     time.sleep(1)
 
 epochs = gn.getIntParam("training_epochs", epochs)
@@ -86,7 +88,7 @@ model_file = gn.getStringParam("model_file", "model.json")
 gn.subscribe(channel, mySub)
 
 while mySub.train_state != TrainingState.TRAINED: time.sleep(1)
-Log.message("Training Complete " + str(mySub.train_state))
+gravlogger.warning("Training Complete " + str(mySub.train_state))
 
 gn.unsubscribe(channel, mySub)
 sys.exit(0)

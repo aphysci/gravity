@@ -1,8 +1,11 @@
 
 import time
+import logging
 
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLog
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLogHandler
 from BasicCounterDataProduct_pb2 import BasicCounterDataProductPB
+
+
 
 
 class MySubscriber(GravitySubscriber):
@@ -16,15 +19,18 @@ class MySubscriber(GravitySubscriber):
         counterPB = BasicCounterDataProductPB()
         for gdp in dataProducts:
             gdp.populateMessage(counterPB)
-            SpdLog.warn("received counter with value = "+str(counterPB.count))
+            gravlogger.warning("received counter with value = "+str(counterPB.count))
 
 
+gravlogger = logging.getLogger()
+gravlogger.setLevel(logging.WARNING)  # let all logs pass through to Gravity logger
+gravlogger.addHandler(SpdLogHandler(True))
 mySub = MySubscriber()
-
 gn = GravityNode()
 while gn.init("PyPub") != gravity.SUCCESS:
-    SpdLog.warn("failed to init, retrying...")
+    gravlogger.warning("failed to init, retrying...")
     time.sleep(1)
+
 gn.registerDataProduct("PythonGDP", gravity.TCP)
 gn.subscribe("PythonGDP", mySub)
 

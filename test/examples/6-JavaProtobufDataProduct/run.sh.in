@@ -22,7 +22,7 @@
 PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
 ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
 ZMQ_PAR_DIR=@ZeroMQ_LIBRARY_DIRECTORY@
-JAVAPROTOBUF_DIR=@JAVA_PROTOBUF_JAR@
+JAVAPROTOBUF_DIR=@PUBLIC_JAR_CACHE@
 WITHOUT_JAVA=@SKIP_JAVA@
 SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 CM_INST_PRE=@CMAKE_INSTALL_PREFIX@
@@ -32,17 +32,17 @@ SIX_BIN_DIR=@JavaProtobufDataProduct_BINARY_DIR@
 if test $WITHOUT_JAVA = OFF;
 then
 
-   export PATH=$PATH:../../../src/api/java:../../../src/components/cpp/bin
+   export PATH=$PATH:$SD_BIN_DIR
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
-   $SD_BIN_DIR/ServiceDirectory &
+   ServiceDirectory &
    SDPID=$!
-    java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SIX_BIN_DIR/JavaProtobufDataProduct.jar:$JAVAPROTOBUF_DIR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR JavaProtobufDataProductPublisher &
+    java -cp $JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SIX_BIN_DIR/JavaProtobufDataProduct.jar: -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR JavaProtobufDataProductPublisher &
 
    # sleep for a second to give the publisher a chance to register its data product
    sleep 1
 
-   java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SIX_BIN_DIR/JavaProtobufDataProduct.jar:$JAVAPROTOBUF_DIR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR JavaProtobufDataProductSubscriber
+   java -cp $JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SIX_BIN_DIR/JavaProtobufDataProduct.jar -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR JavaProtobufDataProductSubscriber
 
    kill $SDPID
    kill $JDPPID

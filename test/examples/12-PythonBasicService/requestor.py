@@ -1,7 +1,8 @@
 
 import time
+import logging
 import gravity
-from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, GravityServiceProvider, SpdLog
+from gravity import GravityNode, GravityDataProduct, gravity, GravityRequestor, GravityServiceProvider, SpdLogHandler
 from Multiplication_pb2 import MultiplicationOperandsPB, MultiplicationResultPB
 
 done = False
@@ -15,28 +16,31 @@ class MyRequestorProvider(GravityRequestor, GravityServiceProvider):
     def requestFilled(self, serviceID, requestID, response):
         multResponse = MultiplicationResultPB()
         response.populateMessage(multResponse)
-        SpdLog.warn("made it to request filled with request GDP ID = "+response.dataProductID +" and response = " + str(multResponse.result))
+        gravlogger.warning("made it to request filled with request GDP ID = "+response.dataProductID +" and response = " + str(multResponse.result))
         global done
         done = True
 
     def request(self, serviceID, dataProduct):
-        SpdLog.warn("made it to my request!")
-        SpdLog.warn("for serviceID = "+serviceID)
+        gravlogger.warning("made it to my request!")
+        gravlogger.warning("for serviceID = "+serviceID)
         operands = MultiplicationOperandsPB()
-        SpdLog.warn(str(type(operands)))
+        gravlogger.warning(str(type(operands)))
         dataProduct.populateMessage(operands)
-        SpdLog.warn("have operands = "+str([operands.multiplicand_a, operands.multiplicand_b]))
+        gravlogger.warning("have operands = "+str([operands.multiplicand_a, operands.multiplicand_b]))
 
         multResponse = MultiplicationResultPB()
         multResponse.result = operands.multiplicand_a * operands.multiplicand_b
         gdp = GravityDataProduct("MultResponse")
         gdp.data = multResponse
-        SpdLog.warn("returning response with result = "+str(multResponse.result))
+        gravlogger.warning("returning response with result = "+str(multResponse.result))
         return gdp
 
+gravlogger = logging.getLogger()
+gravlogger.setLevel(logging.WARNING)  # let all logs pass through to Gravity logger
+gravlogger.addHandler(SpdLogHandler(True))
 gn = GravityNode()
 while gn.init("PyRequest") != gravity.SUCCESS:
-    SpdLog.warn("failed to init, retrying...")
+    gravlogger.warning("failed to init, retrying...")
     time.sleep(1)
 
 requestorProvider = MyRequestorProvider()
@@ -58,10 +62,10 @@ operands.multiplicand_a = 5
 operands.multiplicand_b = 6
 gdp.data=operands
 gdpResp = gn.request("Multiplication", gdp)
-SpdLog.warn("received GDP response")
+gravlogger.warning("received GDP response")
 multResponse = MultiplicationResultPB()
 gdpResp.populateMessage(multResponse)
-SpdLog.warn("made it to request filled with request GDP ID = "+gdpResp.dataProductID +" and response = " + str(multResponse.result))
+gravlogger.warning("made it to request filled with request GDP ID = "+gdpResp.dataProductID +" and response = " + str(multResponse.result))
 
 
 

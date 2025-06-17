@@ -20,7 +20,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)  # quiet TensorFlow warnings
 
 import time, sys
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLogHandler
 from DataPoint_pb2 import DataPointPB
 from datetime import datetime
 from gravity_autoencoder import GravityModel
@@ -53,10 +53,12 @@ class MySubscriber(GravitySubscriber):
                 data.put(self.sample_data)
                 self.sample_data = {}
 
-
+gravlogger = logging.getLogger()
+gravlogger.setLevel(logging.WARNING)  # let all logs pass through to Gravity logger
+gravlogger.addHandler(SpdLogHandler(True))
 gn = GravityNode()
 while gn.init("AnomalyDetector") != gravity.SUCCESS:
-    Log.warning("failed to init, retrying...")
+    gravlogger.warning("failed to init, retrying...")
     time.sleep(1)
 
 model_filename = gn.getStringParam("model_file", "model.json")
@@ -69,7 +71,7 @@ gn.subscribe(channel, mySub)
 while True: 
     d = data.get()
     mse = model.ComputeMSE(d)
-    Log.message("MSE = %f"%(mse))
+    gravlogger.warning("MSE = %f"%(mse))
 
 # notreached
 gn.unsubscribe(channel, mySub)

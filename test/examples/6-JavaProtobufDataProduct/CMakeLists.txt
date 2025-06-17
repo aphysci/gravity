@@ -10,7 +10,7 @@ set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
     set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
-set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${LOCAL_PROTOBUF_JAR}")
+set(PUBLIC_JAR "${JAVA_PROTOBUF_JAR}" "${LOCAL_PROTOBUF_JAR}" CACHE OFF FILEPATH)
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
