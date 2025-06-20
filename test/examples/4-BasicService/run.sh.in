@@ -21,7 +21,7 @@
 # Tool-related substitution variables
 PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
 ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
-EXAMPLE_BIN_DIR=@GravityExamples_BINARY_DIR@
+FOUR_BIN_DIR=@BasicService_BINARY_DIR@
 SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 
 export PATH=$PATH:../../../src/components/cpp/bin
@@ -44,12 +44,12 @@ SDPID=$!
 # sleep for a second to give the service directory a chance to start up
 sleep 1
 
-$EXAMPLE_BIN_DIR/4-BasicService/BasicServiceProvider &
+$FOUR_BIN_DIR/BasicServiceProvider &
 BSPPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-$EXAMPLE_BIN_DIR/4-BasicService/BasicServiceRequestor
+$FOUR_BIN_DIR/BasicServiceRequestor
 
 cleanup

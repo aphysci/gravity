@@ -21,13 +21,13 @@
 # Tool-related substitution variables
 PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
 ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
-EXAMPLE_BIN_DIR=@GravityExamples_BINARY_DIR@
+TEN_BIN_DIR=@Archiving_BINARY_DIR@
 SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 ARCH_BIN_DIR=@Archiver_BINARY_DIR@
 PB_BIN_DIR=@Playback_BINARY_DIR@
 
 
-export PATH=$PATH:../../../src/components/cpp/bin
+export PATH=$PATH:$TEN_BIN_DIR:$SD_BIN_DIR:$ARCH_BIN_DIR:$PB_BIN_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
  cleanup()
@@ -54,7 +54,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-$SD_BIN_DIR/ServiceDirectory &
+ServiceDirectory &
 SDPID=$!
 
 ##
@@ -63,9 +63,9 @@ SDPID=$!
 # 5 seconds, ArchiveTest will toggle the suspend flag on the FileArchiver.  This means
 # that only about half of the published counter values will be archived.
 ##
-$ARCH_BIN_DIR/Archiver &
+Archiver &
 FAPID=$!
-$EXAMPLE_BIN_DIR/10-Archiving/ArchiveTest &
+ArchiveTest &
 ATPID=$!
 
 sleep 20
@@ -82,9 +82,9 @@ sleep 1
 # and that the messages that were archived are still published once a second - just like ArchiveTest did originally.
 ##
 echo Starting ReplayTest
-$EXAMPLE_BIN_DIR/10-Archiving/ReplayTest &
+ReplayTest &
 RTPID=$!
-$PB_BIN_DIR/Playback &
+Playback &
 FRPID=$!
 
 sleep 20
