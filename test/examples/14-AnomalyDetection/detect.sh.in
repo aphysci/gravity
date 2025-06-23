@@ -32,13 +32,13 @@ CM_LIB_DIR=@CMAKE_INSTALL_LIBDIR@
 if test $WITHOUT_PYTHON = OFF;
 then
 
-   export PATH=$PATH:$SD_BIN_DIR
+   export PATH=$PATH:$SD_BIN_DIR:$CM_INST_PRE/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:$GRAVITY_ROOT/src/api/cpp:$GRAVITY_ROOT/src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
    export PYTHONPATH=$PYTHONPATH:$CM_INST_PRE/$CM_LIB_DIR
 
    protoc --proto_path=. --python_out=. DataPoint.proto || exit
 
-   $TERM -- /bin/bash -c "echo -ne '\033]0;Service Directory \007'; $SD_BIN_DIR/ServiceDirectory ; read -p 'Press return to exit'" &
+   $TERM -- /bin/bash -c "echo -ne '\033]0;Service Directory \007'; ServiceDirectory ; read -p 'Press return to exit'" &
    $TERM -- /bin/bash -c "echo -ne '\033]0;Publisher \007'; $PYTHON pub.py 500 ; read -p 'Press return to exit'" &
    $TERM -- /bin/bash -c "echo -ne '\033]0;Anomaly Detector \007'; $PYTHON detect.py ; read -p 'Press return to exit'" &
 

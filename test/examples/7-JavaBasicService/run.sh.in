@@ -33,7 +33,7 @@ SEV_BIN_DIR=@JavaBasicService_BINARY_DIR@
 if test $WITHOUT_JAVA = OFF;
 then
 
-   export PATH=$PATH:$SD_BIN_DIR
+   export PATH=$PATH:$SD_BIN_DIR:$CM_INST_PRE/bin
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR
 
   ServiceDirectory &
