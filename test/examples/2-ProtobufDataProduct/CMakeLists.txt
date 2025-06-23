@@ -32,4 +32,6 @@ target_include_directories(ProtobufDataProductSubscriber PUBLIC ${CMAKE_CURRENT_
 add_dependencies(ProtobufDataProductSubscriber ${PROJECT_NAME}_protos)
 
 configure_file(run.sh.in ${ProtobufDataProduct_SOURCE_DIR}/run.sh)
+configure_file(RunProtobufDataProductDebug.bat.in ${ProtobufDataProduct_SOURCE_DIR}/RunProtobufDataProductDebug.bat)
+configure_file(RunProtobufDataProductRelease.bat.in ${ProtobufDataProduct_SOURCE_DIR}/RunProtobufDataProductRelease.bat)
 

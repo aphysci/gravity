@@ -32,3 +32,6 @@ target_include_directories(MultipleDataProductSubscriber PUBLIC ${CMAKE_CURRENT_
 add_dependencies(MultipleDataProductSubscriber ${PROJECT_NAME}_protos)
 
 configure_file(run.sh.in ${MultipleDataProduct_SOURCE_DIR}/run.sh)
+configure_file(RunMultipleDataProductDebug.bat.in ${MultipleDataProduct_SOURCE_DIR}/RunMultipleDataProductDebug.bat)
+configure_file(RunMultipleDataProductRelease.bat.in ${MultipleDataProduct_SOURCE_DIR}/RunMultipleDataProductRelease.bat)
+

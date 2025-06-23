@@ -32,4 +32,6 @@ target_include_directories(BasicServiceRequestor PUBLIC ${CMAKE_CURRENT_BINARY_D
 add_dependencies(BasicServiceRequestor ${PROJECT_NAME}_protos)
 
 configure_file(run.sh.in ${BasicService_SOURCE_DIR}/run.sh)
+configure_file(RunBasicServiceDebug.bat.in ${BasicService_SOURCE_DIR}/RunBasicServiceDebug.bat)
+configure_file(RunBasicServiceRelease.bat.in ${BasicService_SOURCE_DIR}/RunBasicServiceRelease.bat)
 

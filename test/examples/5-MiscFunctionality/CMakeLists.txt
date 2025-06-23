@@ -21,4 +21,6 @@ set_target_properties(MiscComponent2 PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POST
 target_link_libraries(MiscComponent2 gravity spdlog::spdlog_header_only)
 
 configure_file(run.sh.in ${MiscFunctionality_SOURCE_DIR}/run.sh)
+configure_file(RunMiscFunctionalityDebug.bat.in ${MiscFunctionality_SOURCE_DIR}/RunMiscFunctionalityDebug.bat)
+configure_file(RunMiscFunctionalityRelease.bat.in ${MiscFunctionality_SOURCE_DIR}/RunMiscFunctionalityRelease.bat)
 

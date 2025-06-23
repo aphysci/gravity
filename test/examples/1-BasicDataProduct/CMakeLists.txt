@@ -21,3 +21,5 @@ set_target_properties(BasicDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAK
 target_link_libraries(BasicDataProductSubscriber gravity spdlog::spdlog_header_only)
 
 configure_file(run.sh.in ${BasicDataProduct_SOURCE_DIR}/run.sh)
+configure_file(RunBasicDataProductDebug.bat.in ${BasicDataProduct_SOURCE_DIR}/RunBasicDataProductDebug.bat)
+configure_file(RunBasicDataProductRelease.bat.in ${BasicDataProduct_SOURCE_DIR}/RunBasicDataProductRelease.bat)
