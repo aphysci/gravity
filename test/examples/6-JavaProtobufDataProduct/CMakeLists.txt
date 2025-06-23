@@ -8,9 +8,9 @@ find_package(Gravity QUIET)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
-    set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
+    set(LOCAL_PROTOBUF_JAR )
 endif()
-set(PUBLIC_JAR "${JAVA_PROTOBUF_JAR}" "${LOCAL_PROTOBUF_JAR}" CACHE OFF FILEPATH)
+set(PUBLIC_JAR "C:/Users/jbarger/gravity/build/protobuf-java_external-prefix/src/protobuf-java_external-build/protobuf-java.jar"  CACHE OFF FILEPATH)
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
@@ -61,3 +61,5 @@ if (WIN32)
 endif()
 
 configure_file(run.sh.in ${JavaProtobufDataProduct_SOURCE_DIR}/run.sh)
+configure_file(RunJavaProtobufDataProductDebug.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductDebug.bat)
+configure_file(RunJavaProtobufDataProductRelease.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductRelease.bat)

@@ -8,9 +8,9 @@ find_package(Gravity QUIET)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
-    set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
+    set(LOCAL_PROTOBUF_JAR "C:/Users/jbarger/gravity/build/protobuf-java_external-prefix\src/:protobuf-java_external-build")
 endif()
-set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${LOCAL_PROTOBUF_JAR}")
+set(PUBLIC_JAR "C:/Users/jbarger/gravity/build/protobuf-java_external-prefix/src/protobuf-java_external-build/protobuf-java.jar" "${LOCAL_PROTOBUF_JAR}")
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
@@ -33,8 +33,8 @@ if (WIN32)
     get_target_property(Protobuf_LIBRARY_RELEASE protobuf::libprotobuf LOCATION_RELEASE)
     get_filename_component(LOCAL_PROTOBUF_RUNTIME_DIR "${Protobuf_LIBRARY_RELEASE}" DIRECTORY)
     
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductDebug.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductDebug.bat" @ONLY)
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaProtobufDataProductRelease.bat.in" "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" @ONLY)
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaBasicServiceDebug.bat.in" "${CMAKE_BINARY_DIR}/RunJavaBasicServiceDebug.bat" @ONLY)
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/RunJavaBasicServiceRelease.bat.in" "${CMAKE_BINARY_DIR}/RunJavaBasicServiceRelease.bat" @ONLY)
     
 endif()
 
@@ -61,3 +61,5 @@ install(FILES "${CMAKE_BINARY_DIR}/RunJavaProtobufDataProductRelease.bat" DESTIN
 endif()
 
 configure_file(run.sh.in ${JavaBasicService_SOURCE_DIR}/run.sh)
+configure_file(RunJavaBasicServiceDebug.bat.in ${JavaBasicService_SOURCE_DIR}/RunJavaBasicServiceDebug.bat)
+configure_file(RunJavaBasicServiceRelease.bat.in ${JavaBasicService_SOURCE_DIR}/RunJavaBasicServiceRelease.bat)
