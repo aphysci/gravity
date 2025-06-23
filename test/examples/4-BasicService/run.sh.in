@@ -24,7 +24,7 @@ ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
 FOUR_BIN_DIR=@BasicService_BINARY_DIR@
 SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 
-export PATH=$PATH:../../../src/components/cpp/bin
+export PATH=$PATH:$SD_BIN_DIR:$FOUR_BIN_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
 
  cleanup()
@@ -38,18 +38,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-$SD_BIN_DIR/ServiceDirectory &
+ServiceDirectory &
 SDPID=$!
 
 # sleep for a second to give the service directory a chance to start up
 sleep 1
 
-$FOUR_BIN_DIR/BasicServiceProvider &
+BasicServiceProvider &
 BSPPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-$FOUR_BIN_DIR/BasicServiceRequestor
+BasicServiceRequestor
 
 cleanup
