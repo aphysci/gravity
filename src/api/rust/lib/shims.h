@@ -1,12 +1,17 @@
 #pragma once
+#ifndef SHIMS_H_
+#define SHIMS_H_
+
 #include <string>
 
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include "RustSubscriber.h"
 #include "SpdLog.h"
 
 namespace gravity
 {
+    
     /**
      * Constructor wrapper callable by rust
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
@@ -33,12 +38,28 @@ namespace gravity
     std::unique_ptr<GravityNode> newGravityNode();
 
     /**
+	* Constructor that also initializes
+	* \param componentID ID of the component to initialize
+	*/
+    std::unique_ptr<GravityNode> newGravityNode(const std::string& componentId);
+     /**
+     * Initialize the Gravity infrastructure.
+	   * Reads the ComponentID from the Gravity.ini file.
+     * \return GravityReturnCode code to identify any errors that occur during initialization
+     */
+    GravityReturnCode rustInit(const std::unique_ptr<GravityNode>& gn);
+
+    /**
      * Initialize the Gravity infrastructure. Callable by Rust.
      * \copydetails GravityNode(std::string)
      * \return GravityReturnCode code to identify any errors that occur during initialization
      */
     GravityReturnCode rustInit(const std::unique_ptr<GravityNode> &gn, const std::string &componentID);
     
+    /**
+     * Wait for the GravityNode to exit.
+     */
+    void rustWaitForExit(const std::unique_ptr<GravityNode>& gn);
     /**
      * Get the ID of this gravity node (given in the init function). Callable by Rust.
      */
@@ -61,8 +82,7 @@ namespace gravity
      */
     GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp);
 
-
-
+    GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers);
 } // namespace gravity
 
 void spdlog_critical(const std::string& message) {
@@ -83,3 +103,5 @@ void spdlog_debug(const std::string& message) {
 void spdlog_trace(const std::string& message) {
     gravity::SpdLog::trace(message.c_str());
 }
+
+#endif

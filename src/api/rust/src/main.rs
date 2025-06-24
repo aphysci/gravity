@@ -10,15 +10,21 @@ mod ffi;
 mod protos;
 use std::ffi::c_char;
 use std::time;
-use crate::protos::DataPB::*;
+use autocxx::subclass::{subclass, CppSubclassDefault};
+
+use crate::{protos::DataPB::*};
 use crate::gravity::*;
-use crate::ffi::{GravityReturnCode, GravityTransportType};
+// use crate::protos::ffi2::*;
+use ffi::{GravityReturnCode, GravityTransportType};
+
+
+
 
 fn main() {
     
     spdlog::info("Beginning rust version of gravity");
 
-    let gn = Node::new();
+    let gn = GravityNode::new();
     let mut ret = gn.init("RustNode");
     if ret != GravityReturnCode::SUCCESS {
         spdlog::critical("Unable to initialize GravityNode");
@@ -35,20 +41,22 @@ fn main() {
         spdlog::critical("Unable to register data product");
         std::process::exit(1)
     }
+    
 
     let mut quit = false;
+    let mut has_subs = false;
     let mut count = 1;
     while !quit
     {   
-        std::thread::sleep(time::Duration::from_secs(1));
+        
 
-        let gdp = DataProduct::new(&dataProductID);
+        let gdp = GraDataProduct::new(&dataProductID);
 
         // let mut data = "HelloRustWorld #".to_owned();
         // data.push_str(&count.to_string());
 
 
-        
+
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
         data.set_multiplicand_b(count + 4);
@@ -62,7 +70,13 @@ fn main() {
             std::process::exit(1)
         }
 
+        gn.subscribers_exist(dataProductID, &mut has_subs);
+        if has_subs {println!("HAS SUBS!");} else {println!("Has no subs :(")}
         if count == 20 { quit = true;}
         count += 1;
+
+        std::thread::sleep(time::Duration::from_secs(1));
     }
+    gn.wait_for_exit();
+   
 }

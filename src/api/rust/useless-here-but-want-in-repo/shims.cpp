@@ -20,10 +20,23 @@ namespace gravity
 
         return std::unique_ptr<GravityNode>(new GravityNode());
     }
+    std::unique_ptr<GravityNode> newGravityNodeId(const std::string& componentId) 
+    {
+        return std::unique_ptr<GravityNode>(new GravityNode(componentId));
+    }
 
     GravityReturnCode rustInit(const std::unique_ptr<GravityNode>& gn, const std::string& componentID)
     {
         return (*gn).init(componentID);
+    }
+    GravityReturnCode rustInit(const std::unique_ptr<GravityNode>& gn) 
+    {
+        return (*gn).init();
+    }
+
+    void rustWaitForExit(const std::unique_ptr<GravityNode>& gn) 
+    {
+        (*gn).waitForExit();
     }
 
     std::unique_ptr<std::string> rustGetComponentID(const std::unique_ptr<GravityNode>& gn) {
@@ -38,6 +51,10 @@ namespace gravity
     GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp)
     {
         return (*gn).publish(*gdp);                  
+    }
+    GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers)
+    {
+        return (*gn).subscribersExist(dataProductID, hasSubscribers);
     }
 
 

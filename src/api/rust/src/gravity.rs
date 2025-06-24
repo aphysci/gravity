@@ -1,28 +1,43 @@
 use std::ffi::c_char;
-use crate::ffi;
+use crate::{ffi};
 
 use cxx::{let_cxx_string, UniquePtr};
 use protobuf::reflect::MessageDescriptor;
+use autocxx::{generate, prelude::*, safety, subclass::{self, subclass, prelude::*}};
 
 use crate::ffi::*;
 
 
 
-pub struct DataProduct {
+pub struct GraDataProduct {
     gdp: UniquePtr<GravityDataProduct>,
 }
 
-pub struct Node {
-    gn: UniquePtr<GravityNode>,
+pub struct GravityNode {
+    gn: UniquePtr<GNode>,
 }
 
-impl Node {
-    pub fn new() -> Node {
-        return Node { gn: ffi::GravityNode() }
+impl GravityNode {
+    pub fn new() -> GravityNode {
+        GravityNode { gn: ffi::GravityNode() }
     }
+    
+    pub fn new_id(componentID: impl AsRef<[u8]>) -> GravityNode {
+        let_cxx_string!(cid = componentID);
+        GravityNode { gn: ffi::GravityNodeID(&cid)}
+    }
+
     pub fn init(&self, componentID: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(cid = componentID);
         ffi::init(&self.gn, &cid)
+    }
+
+    pub fn init_default(&self) -> GravityReturnCode {
+        ffi::init_default(&self.gn)
+    }
+
+    pub fn wait_for_exit(&self) {
+        ffi::wait_for_exit(&self.gn);
     }
     pub fn getComponentID(&self) -> String  
     { (*ffi::getComponentID(&self.gn)).to_str().unwrap().to_string()} 
@@ -32,18 +47,27 @@ impl Node {
         let_cxx_string!(dpid = dataProductID);
         ffi::registerDataProduct(&self.gn, &dpid, transportType)
     }
-    pub fn publish(&self, dataProduct: DataProduct) -> GravityReturnCode
+    pub fn publish(&self, dataProduct: GraDataProduct) -> GravityReturnCode
     {
         ffi::publish(&self.gn, &(dataProduct.gdp))
     }
+    pub fn subscribers_exist(&self, dataProductID: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = dataProductID);
+        ffi::subsribers_exist(&self.gn, &dpid, has_subscribers)
+    }
     
-    
+    // pub fn subscribe(&self, dataProductID: impl AsRef<[u8]>, 
+    //     subscriber: &RustSubscriber) -> GravityReturnCode {
+    //         let_cxx_string!(dpid = dataProductID);
+    //         ffi1::subscribe(&self.gn, &dpid, subscriber)
+
+    // }
 }
 
-impl DataProduct {
-    pub fn new(dataProductId: impl AsRef<[u8]>) ->DataProduct {
+impl GraDataProduct {
+    pub fn new(dataProductId: impl AsRef<[u8]>) ->GraDataProduct {
         let_cxx_string!(dpid = dataProductId);
-        DataProduct {gdp: ffi::GravityDataProduct(&dpid)}
+        GraDataProduct {gdp: ffi::GravityDataProduct(&dpid)}
     }
 
     pub fn setDataBasic(&self, data: &str, size:i32) {
@@ -90,3 +114,8 @@ impl spdlog {
     
 
 }
+
+
+// pub struct GSubscriber {
+//     subscriber: impl GravitySubsriber_methods,
+// }
