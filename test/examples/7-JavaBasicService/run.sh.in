@@ -25,26 +25,27 @@ ZMQ_PAR_DIR=@ZeroMQ_LIBRARY_DIRECTORY@
 JAVAPROTOBUF_DIR=@PUBLIC_JAR_CACHE@
 WITHOUT_JAVA=@SKIP_JAVA@
 SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
-CM_INST_PRE=@CMAKE_INSTALL_PREFIX@
-CM_INST_LIB=@CMAKE_INSTALL_LIBDIR@
+CME_LIB_DIR=@TOPLEVEL_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+CMI_LIB_DIR=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+COMP_BIN_DIR=@TOPLEVEL_INSTALL_PREFIX@/bin #For external builds
 SEV_BIN_DIR=@JavaBasicService_BINARY_DIR@
 
 
 if test $WITHOUT_JAVA = OFF;
 then
 
-   export PATH=$PATH:$SD_BIN_DIR:$CM_INST_PRE/bin
+   export PATH=$PATH:$SD_BIN_DIR:$COMP_BIN_DIR
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR
 
   ServiceDirectory &
    SDPID=$!
-   java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar:$JAVA_PROTOBUF_JAR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR BasicServiceProvider &
+   java -cp build:$JAVAPROTOBUF_DIR:$CME_LIB_DIR/gravity.jar:$CMI_LIB_DIR/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar -Djava.library.path=$CME_LIB_DIR:$CMI_LIB_DIR:$ZMQ_PAR_DIR BasicServiceProvider &
    JDPPID=$!
 
    # sleep for a second to give the publisher a chance to register its data product
    sleep 1
 
-   java -cp build:$JAVAPROTOBUF_DIR:$CM_INST_PRE/$CM_INST_LIB/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar:$JAVA_PROTOBUF_JAR -Djava.library.path=$CM_INST_PRE/$CM_INST_LIB:$ZMQ_PAR_DIR BasicServiceRequestor
+   java -cp build:$JAVAPROTOBUF_DIR:$CME_LIB_DIR/gravity.jar:$CMI_LIB_DIR/gravity.jar:$SEV_BIN_DIR/JavaBasicService.jar:$JAVA_PROTOBUF_JAR -Djava.library.path=$CME_LIB_DIR:$CMI_LIB_DIR:$ZMQ_PAR_DIR BasicServiceRequestor
 
    kill $SDPID
    kill $JDPPID

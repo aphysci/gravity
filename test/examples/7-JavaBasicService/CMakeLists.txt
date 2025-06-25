@@ -8,9 +8,10 @@ find_package(Gravity QUIET)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
-    set(LOCAL_PROTOBUF_JAR "C:/Users/jbarger/gravity/build/protobuf-java_external-prefix\src/:protobuf-java_external-build")
+    set(LOCAL_PROTOBUF_JAR "${JAVA_PROTOBUF_JAR}" "${Protobuf_SRC_ROOT_FOLDER}/java/core/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
-set(PUBLIC_JAR "C:/Users/jbarger/gravity/build/protobuf-java_external-prefix/src/protobuf-java_external-build/protobuf-java.jar" "${LOCAL_PROTOBUF_JAR}")
+#Need prefix path here because build/install gets created at the end of the build process, and doesn't exist yet when this gets built
+set(PUBLIC_JAR "${CMAKE_PREFIX_PATH}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" "${LOCAL_PROTOBUF_JAR}" CACHE OFF FILEPATH)
 find_package(GravityJava REQUIRED)
 include(UseJava)
 
