@@ -67,4 +67,10 @@ I have included a wrapper on each end (C++ and Rust). This makes the code feel l
 
 The provided stuff here will in fact make a gravity node publish a basic string data product or a protobuf data product successfully. Rust stuff cannot yet subscribe. Stay tuned. The next step that I will take is work with the subscriber. Neither are easy since there is not support for a vector of shared pointers yet, nor protobuf, so some janky work-arounds are in order for sure! Exciting :/
 
-June 13, 2025
+
+**NEW**
+Still working on gravitysubscriber/inheritance, i have some ideas, but working through this is tricky and frustrating...  I hope to have more info by the end of the current week, but I am not super hopeful. i am thinking of trying a function pointer that is passed to a pure c++ derived class so all of the heavy lifting is outside of the rust bounds, so no heavy interop. Hardest part should be making the function compatible with both.
+
+In a test project, i was able to successfully do this callback with a vector of ints, so we will see how it works with a vector of opaqu types
+
+Last Updated June 25, 2025
