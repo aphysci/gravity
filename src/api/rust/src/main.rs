@@ -6,42 +6,44 @@
 #![allow(unused_imports)]
 
 mod gravity;
-mod ffi;
+mod ffi1;
 mod protos;
 use std::ffi::c_char;
 use std::time;
 use autocxx::subclass::{subclass, CppSubclassDefault};
+use spdlog::prelude::*;
 
 use crate::{protos::DataPB::*};
 use crate::gravity::*;
-// use crate::protos::ffi2::*;
-use ffi::{GravityReturnCode, GravityTransportType};
+use crate::protos::ffi::*;
+use ffi1::{GravityReturnCode, GravityTransportType};
 
 
 
 
 fn main() {
     
-    spdlog::info("Beginning rust version of gravity");
+    gravity_logger::info("Beginning rust version of gravity");
 
     let gn = GravityNode::new();
     let mut ret = gn.init("RustNode");
     if ret != GravityReturnCode::SUCCESS {
-        spdlog::critical("Unable to initialize GravityNode");
+        critical!("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
 
-    spdlog::info("Gravity returned code SUCCESS. Init successful");
+    info!("Gravity returned code SUCCESS. Init successful");
 
 
     let dataProductID = "RustDataProduct";
 
     ret = gn.registerDataProduct(&dataProductID, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
-        spdlog::critical("Unable to register data product");
+        critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
     
+
 
     let mut quit = false;
     let mut has_subs = false;
@@ -50,7 +52,7 @@ fn main() {
     {   
         
 
-        let gdp = GraDataProduct::new(&dataProductID);
+        let gdp = GravityDataProduct::new(&dataProductID);
 
         // let mut data = "HelloRustWorld #".to_owned();
         // data.push_str(&count.to_string());
@@ -66,12 +68,12 @@ fn main() {
     
         ret = gn.publish(gdp);
         if ret != GravityReturnCode::SUCCESS {
-            spdlog::error("Could not publish data product");
+            error!("Could not publish data product (return code {:?})", ret);
             std::process::exit(1)
         }
 
         gn.subscribers_exist(dataProductID, &mut has_subs);
-        if has_subs {println!("HAS SUBS!");} else {println!("Has no subs :(")}
+        if has_subs {info!("Has subscribers");} else {warn!("Has no subscriber :(")}
         if count == 20 { quit = true;}
         count += 1;
 

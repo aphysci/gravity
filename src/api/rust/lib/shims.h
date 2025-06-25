@@ -6,7 +6,7 @@
 
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
-#include "RustSubscriber.h"
+// #include "RustSubscriber.h"
 #include "SpdLog.h"
 
 namespace gravity
@@ -65,7 +65,16 @@ namespace gravity
      */
     std::unique_ptr<std::string> rustGetComponentID(const std::unique_ptr<GravityNode>& gn);
     
-    /**
+    GravityReturnCode rustStartHeartbeat(const std::unique_ptr<GravityNode>& gn, int64_t interval_in_microseconds);
+ 
+    GravityReturnCode rustStopHeartbeat(const std::unique_ptr<GravityNode>& gn);
+    
+    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string &key, const std::string& default_value = "");
+    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value = -1);
+    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value = 0.0);
+    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, bool default_value = false);
+ 
+ /**
      * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
      * rest of the Gravity-enabled system.
      * Callable by Rust.
@@ -75,6 +84,23 @@ namespace gravity
      */
     GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string & dataProductID, GravityTransportType transportType);
     
+     /**
+     * Register a data product with the Gravity, and optionally, the Directory Service, making it available to the
+     * rest of the Gravity-enabled system. For Rust
+     * \param dataProductID string ID used to uniquely identify this published data product
+     * \param transportType transport type (e.g. 'tcp', 'ipc')
+	 * \param cacheLastValue flag used to signify whether or not GravityNode will cache the last sent value for a published dataproduct
+     * \return success flag
+     */
+    GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string & dataProductID, GravityTransportType transportType, bool cacheLastValue);
+
+    /**
+     * For Rust.
+     * Un-register a data product, resulting in its removal from the Gravity Service Directory
+     * \param dataProductID string ID used to uniquely identify this published data product
+     */
+    GravityReturnCode rustUnregisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID);
+
     /**
      * Publish a data product to the Gravity Service Directory. Callable by Rust.
      * \param dataProduct GravityDataProduct to publish, making it available to any subscribers

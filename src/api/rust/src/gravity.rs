@@ -1,16 +1,17 @@
-use std::ffi::c_char;
-use crate::{ffi};
+use core::ffi;
+use std::{default, ffi::c_char};
+use crate::{ffi1};
 
 use cxx::{let_cxx_string, UniquePtr};
 use protobuf::reflect::MessageDescriptor;
 use autocxx::{generate, prelude::*, safety, subclass::{self, subclass, prelude::*}};
 
-use crate::ffi::*;
+use crate::ffi1::*;
 
 
 
-pub struct GraDataProduct {
-    gdp: UniquePtr<GravityDataProduct>,
+pub struct GravityDataProduct {
+    gdp: UniquePtr<GDataProduct>,
 }
 
 pub struct GravityNode {
@@ -19,101 +20,135 @@ pub struct GravityNode {
 
 impl GravityNode {
     pub fn new() -> GravityNode {
-        GravityNode { gn: ffi::GravityNode() }
+        GravityNode { gn: ffi1::GravityNode() }
     }
     
     pub fn new_id(componentID: impl AsRef<[u8]>) -> GravityNode {
         let_cxx_string!(cid = componentID);
-        GravityNode { gn: ffi::GravityNodeID(&cid)}
+        GravityNode { gn: ffi1::GravityNodeID(&cid)}
     }
 
     pub fn init(&self, componentID: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(cid = componentID);
-        ffi::init(&self.gn, &cid)
+        ffi1::init(&self.gn, &cid)
     }
 
     pub fn init_default(&self) -> GravityReturnCode {
-        ffi::init_default(&self.gn)
+        ffi1::init_default(&self.gn)
     }
 
     pub fn wait_for_exit(&self) {
-        ffi::wait_for_exit(&self.gn);
+        ffi1::wait_for_exit(&self.gn);
     }
-    pub fn getComponentID(&self) -> String  
-    { (*ffi::getComponentID(&self.gn)).to_str().unwrap().to_string()} 
-
-    pub fn registerDataProduct(&self, dataProductID: impl AsRef<[u8]>, transportType: GravityTransportType) -> GravityReturnCode
+    pub fn publish(&self, dataProduct: GravityDataProduct) -> GravityReturnCode
     {
-        let_cxx_string!(dpid = dataProductID);
-        ffi::registerDataProduct(&self.gn, &dpid, transportType)
-    }
-    pub fn publish(&self, dataProduct: GraDataProduct) -> GravityReturnCode
-    {
-        ffi::publish(&self.gn, &(dataProduct.gdp))
+        ffi1::publish(&self.gn, &(dataProduct.gdp))
     }
     pub fn subscribers_exist(&self, dataProductID: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
         let_cxx_string!(dpid = dataProductID);
-        ffi::subsribers_exist(&self.gn, &dpid, has_subscribers)
+        ffi1::subsribers_exist(&self.gn, &dpid, has_subscribers)
+    }
+    pub fn start_heartbeat(&self, interval_in_microseconds: i64) -> GravityReturnCode {
+        ffi1::start_heartbeat(&self.gn, interval_in_microseconds)
+    }
+    pub fn stop_heartbeat(&self) -> GravityReturnCode {
+        ffi1::stop_heartbeat(&self.gn)
+    }
+    pub fn get_string_param(&self, key: impl AsRef<[u8]>, default_value: impl AsRef<[u8]>) -> String {
+        let_cxx_string!(k = key);
+        let_cxx_string!(default_val = default_value);
+        ffi1::get_string_param(&self.gn, &k, &default_val).to_string()
+    }
+    pub fn get_int_param(&self, key: impl AsRef<[u8]>, default_value: i32) -> i32 {
+        let_cxx_string!(k = key);
+        ffi1::get_int_param(&self.gn, &k, default_value)
+    }
+    pub fn get_float_param(&self, key: impl AsRef<[u8]>, default_value: f64) -> f64 {
+        let_cxx_string!(k = key);
+        ffi1::get_float_param(&self.gn, &k, default_value)
+    }
+    pub fn get_bool_param(&self, key: impl AsRef<[u8]>, default_value: bool) -> bool {
+        let_cxx_string!(k = key);
+        ffi1::get_bool_param(&self.gn, &k, default_value)
+    }
+    pub fn getComponentID(&self) -> String  
+    { (*ffi1::getComponentID(&self.gn)).to_str().unwrap().to_string()} 
+
+    pub fn registerDataProduct(&self, dataProductID: impl AsRef<[u8]>,
+         transportType: GravityTransportType) -> GravityReturnCode
+    {
+        let_cxx_string!(dpid = dataProductID);
+        ffi1::register_data_product(&self.gn, &dpid, transportType)
+    }
+    pub fn register_data_product_cache(&self, dataProductID: impl AsRef<[u8]>,
+         transportType: GravityTransportType, cacheLastValue: bool) -> GravityReturnCode
+    {
+        let_cxx_string!(dpid = dataProductID);
+        ffi1::register_data_product_cache(&self.gn, &dpid, transportType, cacheLastValue)
+    }
+    pub fn unregister_data_product(&self, dataProductID: impl AsRef<[u8]>){
+        let_cxx_string!(dpid = dataProductID);
+        ffi1::unregister_data_product(&self.gn, &dpid);
     }
     
-    // pub fn subscribe(&self, dataProductID: impl AsRef<[u8]>, 
-    //     subscriber: &RustSubscriber) -> GravityReturnCode {
-    //         let_cxx_string!(dpid = dataProductID);
-    //         ffi1::subscribe(&self.gn, &dpid, subscriber)
-
-    // }
+    
 }
 
-impl GraDataProduct {
-    pub fn new(dataProductId: impl AsRef<[u8]>) ->GraDataProduct {
+
+impl GravityDataProduct {
+    pub fn new(dataProductId: impl AsRef<[u8]>) -> GravityDataProduct {
         let_cxx_string!(dpid = dataProductId);
-        GraDataProduct {gdp: ffi::GravityDataProduct(&dpid)}
+        GravityDataProduct {gdp: ffi1::GravityDataProduct(&dpid)}
     }
 
     pub fn setDataBasic(&self, data: &str, size:i32) {
         let d = data as *const _ as *const c_char;
-        unsafe { ffi::setDataBasic(&self.gdp, d, size); }
+        unsafe { ffi1::setDataBasic(&self.gdp, d, size); }
     }
     pub fn setData(&self, data: &impl protobuf::Message) {
         let v = data.write_to_bytes().unwrap();
         let bytes = v.as_ptr() as *const c_char;
 
-        unsafe {ffi::setData(&self.gdp, bytes, data.compute_size() as i32);}
+        unsafe {ffi1::setData(&self.gdp, bytes, data.compute_size() as i32);}
     }
 }
 
-pub struct spdlog {}
+pub struct gravity_logger {}
 
-impl spdlog {
+impl gravity_logger {
     
 
     pub fn critical(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_critical(&m);
+        ffi1::spdlog_critical(&m);
     }
     pub fn error(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_error(&m);
+        ffi1::spdlog_error(&m);
     }
     pub fn warn(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_warn(&m);
+        ffi1::spdlog_warn(&m);
     }
     pub fn info(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_info(&m);
+        ffi1::spdlog_info(&m);
     }
     pub fn debug(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_debug(&m);
+        ffi1::spdlog_debug(&m);
     }
     pub fn trace(message: impl AsRef<[u8]>) {
         let_cxx_string!(m = message);
-        ffi::spdlog_trace(&m);
+        ffi1::spdlog_trace(&m);
     }
     
 
 }
+
+// pub trait GravitySubscriber {
+//     fn subscriptionFilled(dataProducts: &Vec<GravityDataProduct>);
+// }
 
 
 // pub struct GSubscriber {

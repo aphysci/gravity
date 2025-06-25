@@ -6,7 +6,7 @@ pub use ffi::*;
 use cxx::{let_cxx_string, CxxString, CxxVector, UniquePtr};
 use autocxx::{prelude::*, subclass::subclass};
 
-use crate::gravity::GraDataProduct;
+use crate::gravity::GravityDataProduct;
 
 
 #[cxx::bridge]
@@ -54,6 +54,7 @@ mod ffi {
         #[rust_name = "GNode"]
         type GravityNode; 
 
+        #[rust_name = "GDataProduct"]
         type GravityDataProduct;
  
         //GravityNode methods
@@ -72,29 +73,58 @@ mod ffi {
         #[rust_name = "wait_for_exit"]
         fn rustWaitForExit(gn: &UniquePtr<GNode>);
 
+        #[rust_name = "publish"]
+        fn rustPublish(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GDataProduct>) -> GravityReturnCode;
+
+        #[rust_name = "subsribers_exist"]
+        fn rustSubscribersExist(gn: &UniquePtr<GNode>, dataProductID: &CxxString, has_subscribers: &mut bool) -> GravityReturnCode;
+
+        #[rust_name = "start_heartbeat"]
+        fn rustStartHeartbeat(gn: &UniquePtr<GNode>, interval_in_microseconds: i64) -> GravityReturnCode;
+
+        #[rust_name = "stop_heartbeat"]
+        fn rustStopHeartbeat(gn: &UniquePtr<GNode>) -> GravityReturnCode;
+
+        #[rust_name = "get_string_param"]
+        fn rustGetStringParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: &CxxString) -> UniquePtr<CxxString>;
+        
+        #[rust_name = "get_int_param"]
+        fn rustGetIntParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: i32) -> i32;
+        
+        #[rust_name = "get_float_param"]
+        fn rustGetFloatParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: f64) -> f64;
+
+        #[rust_name = "get_bool_param"]
+        fn rustGetBoolParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: bool) -> bool;
+
         #[rust_name = "getComponentID"]
         fn rustGetComponentID(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
         
-        #[rust_name = "registerDataProduct"]
+
+        #[rust_name = "register_data_product"]
         fn rustRegisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString, 
             transportType: GravityTransportType) -> GravityReturnCode;
-        #[rust_name = "publish"]
-        fn rustPublish(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GravityDataProduct>) -> GravityReturnCode;
+
+        #[rust_name = "register_data_product_cache"]
+        fn rustRegisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString, 
+            transportType: GravityTransportType, cacheLastValue: bool) -> GravityReturnCode;
+
+        #[rust_name = "unregister_data_product"]
+        fn rustUnregisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString) -> GravityReturnCode;
+
         
-        #[rust_name = "subsribers_exist"]
-        fn rustSubscribersExist(gn: &UniquePtr<GNode>, dataProductID: &CxxString, has_subscribers: &mut bool) -> GravityReturnCode;
         // #[rust_name = "subscribe"]
         // fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &RustSubscriber) -> GravityReturnCode;
 
         // GravityDataProductMethods
         #[rust_name = "GravityDataProduct"]
-        fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GravityDataProduct>;
+        fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GDataProduct>;
         
         #[rust_name = "setDataBasic"]
-        unsafe fn rustSetData(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
+        unsafe fn rustSetData(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
         #[rust_name = "setData"]
-        unsafe fn rustSetDataProto(gdp: &UniquePtr<GravityDataProduct>, data: *const c_char, size: i32);
+        unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
             
     }

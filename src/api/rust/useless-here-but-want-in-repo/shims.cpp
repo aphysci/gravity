@@ -43,9 +43,45 @@ namespace gravity
         return std::unique_ptr<std::string>(new std::string((*gn).getComponentID()));
     }
 
+    GravityReturnCode rustStartHeartbeat(const std::unique_ptr<GravityNode>& gn, int64_t interval_in_microseconds)
+    {
+       return (*gn).startHeartbeat(interval_in_microseconds);
+    }
+
+    GravityReturnCode rustStopHeartbeat(const std::unique_ptr<GravityNode>& gn)
+    {
+       return (*gn).stopHeartbeat();
+    }
+
+    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, const std::string& default_value = ""){
+        (*gn).getStringParam(key, default_value);
+    }
+    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value = -1)
+    {
+        (*gn).getIntParam(key, default_value);+
+    }
+    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value = 0.0)
+    {
+        (*gn).getFloatParam(key, default_value);
+    }
+    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string & key, bool default_value = false)
+    {
+        (*gn).getBoolParam(key, default_value);
+    }
+
     GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, GravityTransportType transportType)
     {
         return (*gn).registerDataProduct(dataProductID, transportType);
+    }
+
+    GravityReturnCode rustRegisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string & dataProductID, GravityTransportType transportType, bool cacheLastValue)
+    {
+        return (*gn).registerDataProduct(dataProductID, transportType, cacheLastValue);
+    }
+
+    GravityReturnCode rustUnregisterDataProduct(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID)
+    {
+        return (*gn).unregisterDataProduct(dataProductID);
     }
 
     GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp)
