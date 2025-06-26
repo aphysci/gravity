@@ -25,7 +25,7 @@ impl GravityNode {
     
     pub fn new_id(componentID: impl AsRef<[u8]>) -> GravityNode {
         let_cxx_string!(cid = componentID);
-        GravityNode { gn: ffi1::GravityNodeID(&cid)}
+        GravityNode { gn: ffi1::gravity_node_ID(&cid)}
     }
 
     pub fn init(&self, componentID: impl AsRef<[u8]>) -> GravityReturnCode {
@@ -71,10 +71,10 @@ impl GravityNode {
         let_cxx_string!(k = key);
         ffi1::get_bool_param(&self.gn, &k, default_value)
     }
-    pub fn getComponentID(&self) -> String  
-    { (*ffi1::getComponentID(&self.gn)).to_str().unwrap().to_string()} 
+    pub fn get_component_ID(&self) -> String  
+    { (*ffi1::get_component_ID(&self.gn)).to_str().unwrap().to_string()} 
 
-    pub fn registerDataProduct(&self, dataProductID: impl AsRef<[u8]>,
+    pub fn register_data_product(&self, dataProductID: impl AsRef<[u8]>,
          transportType: GravityTransportType) -> GravityReturnCode
     {
         let_cxx_string!(dpid = dataProductID);
@@ -90,7 +90,15 @@ impl GravityNode {
         let_cxx_string!(dpid = dataProductID);
         ffi1::unregister_data_product(&self.gn, &dpid);
     }
-    
+    pub fn get_code_string(&self, code: GravityReturnCode) -> String {
+        ffi1::get_code_string(&self.gn, code).to_str().unwrap().to_string()
+    }
+    pub fn get_IP(&self) -> String {
+        ffi1::get_IP(&self.gn).to_str().unwrap().to_string()
+    }
+    pub fn get_domain(&self) -> String {
+        ffi1::get_domain(&self.gn).to_str().unwrap().to_string()
+    }
     
 }
 

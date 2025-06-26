@@ -61,7 +61,7 @@ mod ffi {
         #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GNode>;
 
-        #[rust_name = "GravityNodeID"]
+        #[rust_name = "gravity_node_ID"]
         fn newGravityNode(componentID: &CxxString) -> UniquePtr<GNode>;
 
         #[rust_name = "init"]
@@ -97,7 +97,7 @@ mod ffi {
         #[rust_name = "get_bool_param"]
         fn rustGetBoolParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: bool) -> bool;
 
-        #[rust_name = "getComponentID"]
+        #[rust_name = "get_component_ID"]
         fn rustGetComponentID(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
         
 
@@ -112,7 +112,15 @@ mod ffi {
         #[rust_name = "unregister_data_product"]
         fn rustUnregisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString) -> GravityReturnCode;
 
+        #[rust_name = "get_code_string"]
+        fn rustGetCodeString(gn: &UniquePtr<GNode>, code: GravityReturnCode) -> UniquePtr<CxxString>;
         
+        #[rust_name = "get_IP"]
+        fn rustGetIP(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "get_domain"]
+        fn rustGetDomain(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
+
         // #[rust_name = "subscribe"]
         // fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &RustSubscriber) -> GravityReturnCode;
 

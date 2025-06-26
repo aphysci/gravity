@@ -109,6 +109,11 @@ namespace gravity
     GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp);
 
     GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers);
+
+
+    std::unique_ptr<std::string> rustGetCodeString(const std::unique_ptr<GravityNode> &gn, GravityReturnCode code);
+    std::unique_ptr<std::string> rustGetIP(const std::unique_ptr<GravityNode> &gn);
+    std::unique_ptr<std::string> rustGetDomain(const std::unique_ptr<GravityNode> &gn);
 } // namespace gravity
 
 void spdlog_critical(const std::string& message) {

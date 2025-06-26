@@ -69,7 +69,7 @@ namespace GravityReturnCodes
      * Return codes used on a Gravity system.
      * If you add to this list, also add to GravityNode::getCodeString()
      */
-    GRAVITY_API enum Codes : int8_t {
+    GRAVITY_API enum Codes  {
         SUCCESS = 0,                ///< The request was successful
         FAILURE = -1,               ///< The request failed
         NO_SERVICE_DIRECTORY = -2,  ///< Could not find Service Directory
@@ -100,7 +100,7 @@ namespace GravityTransportTypes
     /**
      * Network transport protocols available on a Gravity system.
      */
-    enum Types : uint8_t
+    enum Types 
     {
         TCP = 0,     ///< Transmission Control Protocol
         INPROC = 1,  ///< In-process (Inter-thread) Communication

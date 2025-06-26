@@ -31,13 +31,12 @@ fn main() {
         critical!("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
-
     info!("Gravity returned code SUCCESS. Init successful");
 
 
     let dataProductID = "RustDataProduct";
 
-    ret = gn.registerDataProduct(&dataProductID, GravityTransportType::TCP);
+    ret = gn.register_data_product(&dataProductID, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
         critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
