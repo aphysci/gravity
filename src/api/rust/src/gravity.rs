@@ -1,8 +1,8 @@
 use core::ffi;
-use std::{default, ffi::c_char};
+use std::{default, ffi::c_char, ops::Sub, sync::Arc};
 use crate::{ffi1};
 
-use cxx::{let_cxx_string, UniquePtr};
+use cxx::{let_cxx_string, UniquePtr, CxxString, CxxVector};
 use protobuf::reflect::MessageDescriptor;
 use autocxx::{generate, prelude::*, safety, subclass::{self, subclass, prelude::*}};
 
@@ -99,14 +99,23 @@ impl GravityNode {
     pub fn get_domain(&self) -> String {
         ffi1::get_domain(&self.gn).to_str().unwrap().to_string()
     }
+
+
+    pub fn subscribe(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+        let_cxx_string!(dpid = dataProductID);
+        ffi1::subscribe(&self.gn, &dpid, subscriber)
+    }
     
 }
-
 
 impl GravityDataProduct {
     pub fn new(dataProductId: impl AsRef<[u8]>) -> GravityDataProduct {
         let_cxx_string!(dpid = dataProductId);
         GravityDataProduct {gdp: ffi1::GravityDataProduct(&dpid)}
+    }
+
+    fn from(gdp: UniquePtr<GDataProduct>) -> GravityDataProduct {
+        GravityDataProduct {gdp: gdp}
     }
 
     pub fn setDataBasic(&self, data: &str, size:i32) {
@@ -153,6 +162,33 @@ impl gravity_logger {
     
 
 }
+
+
+fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
+    GravityDataProduct::from(ffi1::copy_gdp(gdp))
+}
+
+// trait SuperClass {
+//     fn subscriptionFilled(dataProducts: Vec<GravityDataProduct>);
+// }
+
+// trait Subclass : SuperClass {
+//      fn subscriptionFilledInternal(&self, dataProducts: &CxxVector<GDataProduct>)
+//     {
+//      let mut v = Vec::new();
+//      for item in dataProducts.iter() {
+//          let to_add = to_rust_gdp(item);
+//          v.push(to_add);
+//      }   
+//      // subscriber.
+//     subscriptionFilled(v);
+// }   
+// }
+
+
+
+
+
 
 // pub trait GravitySubscriber {
 //     fn subscriptionFilled(dataProducts: &Vec<GravityDataProduct>);

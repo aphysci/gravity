@@ -7,11 +7,24 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
 // #include "RustSubscriber.h"
+#include "/home/anson/gravity/src/api/rust/target/cxxbridge/rust/cxx.h"
 #include "SpdLog.h"
 
 namespace gravity
 {
+
+    class RustSubscriber : public GravitySubscriber {
+        private:
+            rust::Fn<void(const std::vector<GravityDataProduct >&)> func;
+        public:
+        RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func);
+        virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+    };
+
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func);
     
+    std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp);
+
     /**
      * Constructor wrapper callable by rust
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
@@ -114,6 +127,10 @@ namespace gravity
     std::unique_ptr<std::string> rustGetCodeString(const std::unique_ptr<GravityNode> &gn, GravityReturnCode code);
     std::unique_ptr<std::string> rustGetIP(const std::unique_ptr<GravityNode> &gn);
     std::unique_ptr<std::string> rustGetDomain(const std::unique_ptr<GravityNode> &gn);
+
+
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber);
+
 } // namespace gravity
 
 void spdlog_critical(const std::string& message) {

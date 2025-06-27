@@ -11,14 +11,21 @@ mod protos;
 use std::ffi::c_char;
 use std::time;
 use autocxx::subclass::{subclass, CppSubclassDefault};
+use cxx::CxxVector;
 use spdlog::prelude::*;
 
+use crate::ffi1::GDataProduct;
 use crate::{protos::DataPB::*};
 use crate::gravity::*;
 use crate::protos::ffi::*;
 use ffi1::{GravityReturnCode, GravityTransportType};
+use ffi1::newRustSubscriber;
 
-
+fn subscriptionFilled(dataProducts: &CxxVector<GDataProduct>) {
+    for _ in dataProducts {
+        println!("subscriptionFilled called");
+    }
+}
 
 
 fn main() {
@@ -41,8 +48,14 @@ fn main() {
         critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
-    
 
+
+    let func = subscriptionFilled;
+    let subscriber = newRustSubscriber(func);
+
+    gn.subscribe(dataProductID, &subscriber);
+    
+    std::thread::sleep(time::Duration::from_secs(1));
 
     let mut quit = false;
     let mut has_subs = false;

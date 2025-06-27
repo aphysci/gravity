@@ -57,6 +57,8 @@ mod ffi {
         #[rust_name = "GDataProduct"]
         type GravityDataProduct;
  
+        type RustSubscriber;
+
         //GravityNode methods
         #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GNode>;
@@ -134,8 +136,16 @@ mod ffi {
         #[rust_name = "setData"]
         unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
+        #[rust_name = "subscribe"]
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode;
+        
+        fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>)) -> UniquePtr<RustSubscriber>;
             
+        #[rust_name = "copy_gdp"]
+        fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
+    
     }
+
 
     unsafe extern "C++" {
         //spdlog

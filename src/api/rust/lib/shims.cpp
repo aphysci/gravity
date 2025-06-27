@@ -1,8 +1,35 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include "shims.h"
 
 namespace gravity
 {
+    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&)> func) 
+    {
+        this->func = func;
+    }
+
+    void RustSubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
+    {
+        std::vector<GravityDataProduct> v;
+        for (std::vector < std::shared_ptr<GravityDataProduct>>::const_iterator i = dataProducts.begin(); i != dataProducts.end(); i++)
+        {
+            GravityDataProduct to_add = **i;
+            v.push_back(to_add);
+        }
+        // std::cout << "calling member func\n";
+        this->func(v);
+    }
+
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func)
+    {
+        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func));
+    }
+
+    std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
+    {
+        return std::make_unique<GravityDataProduct>(gdp);
+    }
 
     std::unique_ptr<GravityDataProduct> newGravityDataProduct(const std::string& dataProductId)
     {
@@ -53,18 +80,18 @@ namespace gravity
        return gn->stopHeartbeat();
     }
 
-    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, const std::string& default_value = ""){
+    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, const std::string& default_value){
         return std::unique_ptr<std::string>(new std::string(gn->getStringParam(key, default_value)));
     }
-    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value = -1)
+    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value)
     {
         return gn->getIntParam(key, default_value);
     }
-    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value = 0.0)
+    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value)
     {
         return gn->getFloatParam(key, default_value);
     }
-    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string & key, bool default_value = false)
+    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string & key, bool default_value)
     {
         return gn->getBoolParam(key, default_value);
     }
@@ -109,5 +136,11 @@ namespace gravity
     }
 
 
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                    const std::unique_ptr<RustSubscriber>& subscriber)
+    {
+        GravitySubscriber *gs = &**&subscriber;
+        return gn->subscribe(dataProductID, *gs);
+    } 
 
-} // namespace gravity
+}  // namespace gravity
