@@ -60,17 +60,19 @@ I know there is a lot of bouncing around and wrapper functions, but to me it see
 
 I believe this is what they call a shim
 
-
-## Current Updates
-
 I have included a wrapper on each end (C++ and Rust). This makes the code feel like true Rust code, while not having to impact any of the source code.
 
-The provided stuff here will in fact make a gravity node publish a basic string data product or a protobuf data product successfully. Rust stuff cannot yet subscribe. Stay tuned. The next step that I will take is work with the subscriber. Neither are easy since there is not support for a vector of shared pointers yet, nor protobuf, so some janky work-arounds are in order for sure! Exciting :/
 
+## Current Updates
+***NEW*** <br>
+The subscriber works! (ish)
 
-**NEW**
-Still working on gravitysubscriber/inheritance, i have some ideas, but working through this is tricky and frustrating...  I hope to have more info by the end of the current week, but I am not super hopeful. i am thinking of trying a function pointer that is passed to a pure c++ derived class so all of the heavy lifting is outside of the rust bounds, so no heavy interop. Hardest part should be making the function compatible with both.
+The only way I have been able to get it to work (may not be the only possible solution...) is to have C++ do all the inheritance, and all rust supplies is a function pointer that points to the Rust subscriptionFilled function.
 
-In a test project, i was able to successfully do this callback with a vector of ints, so we will see how it works with a vector of opaqu types
+I think I can get this to work, but we shall see. In addition, I need to work through the populateMessage function for GravityDataProduct, since this is pretty key in subscriber functionality, and this is not trivial since you cannot pass protobufs directly to C++ (AFAIK). If my knowledge changes than this becomes way easier, but I think I can wrangle this.
 
-Last Updated June 25, 2025
+Currently for it to work properly the user has to define a subscriptionFilled function with parameter **&CxxVector<GDataProduct>**, where the goal would be the user impl the GravitySubscriber trait that has a fn subscriptionFilled(&Vec<GravityDataProduct>) on a struct and pass that to subscribe.
+
+In addition, all the non-inheritance based methods are implemented for GravityNode in rust, and I am starting to work through GravityDataProduct :)
+
+Last Updated June 27, 2025
