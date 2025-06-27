@@ -25,24 +25,48 @@ namespace gravity
     
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp);
 
+
+    /** Rust-able default constructor
+     * 
+     */
+     std::unique_ptr<GravityDataProduct> newGravityDataProduct();
+
     /**
      * Constructor wrapper callable by rust
      * \param dataProductID string descriptor for this data product. Name by which subscribers will configure subscriptions
      * \return a pointer to a GravityDataProduct
      */
     std::unique_ptr<GravityDataProduct> newGravityDataProduct(const std::string& dataProductId);
+   
+    std::unique_ptr<GravityDataProduct> newGravityDataProduct(const char *arrayPtr, int size);
+   
     /**
      * setData callable by rust
      * Set the application-specific data for this data product
      * \param data pointer to arbitrary data
      * \param size length of data
      */
+
     void rustSetData(const std::unique_ptr<GravityDataProduct> &gdp, const char *data, int size);
     /**
      * Set the application-specific data for this data product, callable by rust
      * \param data A Google Protocol Buffer Message object containing the data
      */
     void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size);
+
+
+
+    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, std::string softwareVersion);
+
+    std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp);
+
+
 
     /**
      * Constructor, callable by Rust

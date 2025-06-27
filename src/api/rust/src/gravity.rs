@@ -23,7 +23,7 @@ impl GravityNode {
         GravityNode { gn: ffi1::GravityNode() }
     }
     
-    pub fn new_id(componentID: impl AsRef<[u8]>) -> GravityNode {
+    pub fn from(componentID: impl AsRef<[u8]>) -> GravityNode {
         let_cxx_string!(cid = componentID);
         GravityNode { gn: ffi1::gravity_node_ID(&cid)}
     }
@@ -109,24 +109,50 @@ impl GravityNode {
 }
 
 impl GravityDataProduct {
-    pub fn new(dataProductId: impl AsRef<[u8]>) -> GravityDataProduct {
-        let_cxx_string!(dpid = dataProductId);
-        GravityDataProduct {gdp: ffi1::GravityDataProduct(&dpid)}
+    pub fn new() -> GravityDataProduct {
+        GravityDataProduct { gdp: ffi1::gravity_data_product_default() }
     }
 
-    fn from(gdp: UniquePtr<GDataProduct>) -> GravityDataProduct {
+    pub fn from_id(dataProductId: impl AsRef<[u8]>) -> GravityDataProduct {
+        let_cxx_string!(dpid = dataProductId);
+        GravityDataProduct {gdp: ffi1::gravity_data_product(&dpid)}
+    }
+
+    fn from_array(array: &[u8], size: i32) -> GravityDataProduct {
+        let arrayPtr = array as *const _ as * const c_char;
+        GravityDataProduct {gdp: unsafe {ffi1::gravity_data_product_bytes(arrayPtr, size)}}
+    }
+
+    fn from_gdp(gdp: UniquePtr<GDataProduct>) -> GravityDataProduct {
         GravityDataProduct {gdp: gdp}
     }
 
-    pub fn setDataBasic(&self, data: &str, size:i32) {
+    pub fn set_data_basic(&self, data: &str, size:i32) {
         let d = data as *const _ as *const c_char;
-        unsafe { ffi1::setDataBasic(&self.gdp, d, size); }
+        unsafe { ffi1::set_data_basic(&self.gdp, d, size); }
     }
-    pub fn setData(&self, data: &impl protobuf::Message) {
+    pub fn set_data(&self, data: &impl protobuf::Message) {
         let v = data.write_to_bytes().unwrap();
         let bytes = v.as_ptr() as *const c_char;
 
-        unsafe {ffi1::setData(&self.gdp, bytes, data.compute_size() as i32);}
+        unsafe {ffi1::set_data(&self.gdp, bytes, data.compute_size() as i32);}
+    }
+    pub fn get_gravity_timestamp(&self) -> u64{
+        ffi1::get_gravity_timestamp(&self.gdp)
+    }
+    pub fn get_receieved_timestamp(&self) -> u64 {
+        ffi1::get_receieved_timestamp(&self.gdp)
+    }
+    pub fn get_data_product_ID(&self) -> String {
+        ffi1::get_data_product_ID(&self.gdp).to_str().unwrap().to_string()
+    }
+    pub fn set_software_version(&self, softwareVersion: impl AsRef<[u8]>)
+    {
+        let_cxx_string!(sv = softwareVersion);
+        ffi1::set_software_version(&self.gdp, &sv);
+    }
+    pub fn get_software_version(&self) -> String {
+        ffi1::get_software_version(&self.gdp).to_str().unwrap().to_string()
     }
 }
 
@@ -165,7 +191,7 @@ impl gravity_logger {
 
 
 fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
-    GravityDataProduct::from(ffi1::copy_gdp(gdp))
+    GravityDataProduct::from_gdp(ffi1::copy_gdp(gdp))
 }
 
 // trait SuperClass {

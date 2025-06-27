@@ -64,7 +64,7 @@ fn main() {
     {   
         
 
-        let gdp = GravityDataProduct::new(&dataProductID);
+        let gdp = GravityDataProduct::from_id(&dataProductID);
 
         // let mut data = "HelloRustWorld #".to_owned();
         // data.push_str(&count.to_string());
@@ -76,7 +76,7 @@ fn main() {
         data.set_multiplicand_b(count + 4);
 
         //TODO, but that should be all
-        gdp.setData(&data);
+        gdp.set_data(&data);
     
         ret = gn.publish(gdp);
         if ret != GravityReturnCode::SUCCESS {

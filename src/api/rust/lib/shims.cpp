@@ -31,15 +31,50 @@ namespace gravity
         return std::make_unique<GravityDataProduct>(gdp);
     }
 
+    std::unique_ptr<GravityDataProduct> newGravityDataProduct() 
+    { 
+        return std::unique_ptr<GravityDataProduct>(new GravityDataProduct()); 
+    }
+
     std::unique_ptr<GravityDataProduct> newGravityDataProduct(const std::string& dataProductId)
     {
         return std::unique_ptr<GravityDataProduct>(new GravityDataProduct(dataProductId));
     }
-    void rustSetData(const std::unique_ptr<GravityDataProduct> &gdp, const char *data, int size){
+    std::unique_ptr<GravityDataProduct> newGravityDataProduct(const char* arrayPtr, int size)
+    {
+        return std::unique_ptr<GravityDataProduct>(new GravityDataProduct((const void*) arrayPtr, size));
+    }
+    void rustSetData(const std::unique_ptr<GravityDataProduct>& gdp, const char* data, int size)
+    {
         (*gdp).setData(data, size);
     }
     void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size) {
         (*gdp).setDataRustInternal(data, size);
+    }
+
+    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, std::string softwareVersion)
+    {
+        gdp->setSoftwareVersion(softwareVersion);
+    }
+
+    std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getSoftwareVersion()));
+    }
+
+    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    { 
+        return gdp->getGravityTimestamp();
+    }
+
+    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    { 
+        return gdp->getReceivedTimestamp(); 
+    }
+
+    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp) const
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getDataProductID()));
     }
 
     //function for rust to be able to call constructor

@@ -127,15 +127,36 @@ mod ffi {
         // fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &RustSubscriber) -> GravityReturnCode;
 
         // GravityDataProductMethods
-        #[rust_name = "GravityDataProduct"]
+        #[rust_name = "gravity_data_product"]
         fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GDataProduct>;
         
-        #[rust_name = "setDataBasic"]
+        #[rust_name = "gravity_data_product_default"]
+        fn newGravityDataProduct() -> UniquePtr<GDataProduct>;
+
+        #[rust_name = "gravity_data_product_bytes"]
+        unsafe fn newGravityDataProduct(arrayPtr: *const c_char, size: i32) -> UniquePtr<GDataProduct>;
+
+        #[rust_name = "set_data_basic"]
         unsafe fn rustSetData(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
-        #[rust_name = "setData"]
+        #[rust_name = "set_data"]
         unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
+        #[rust_name = "get_gravity_timestamp"]
+        fn rustGetGravityTimestamp(gdp: &UniquePtr<GDataProduct>) -> u64;
+
+        #[rust_name = "get_receieved_timestamp"]
+        fn rustGetReceivedTimestamp(gdp: &UniquePtr<GDataProduct>) -> u64;
+
+        #[rust_name = "get_data_product_ID"]
+        fn rustGetDataProductID(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "set_software_version"]
+        fn rustSetSoftwareVersion(gdp: &UniquePtr<GDataProduct>, softwareVersion: &CxxString);
+
+        #[rust_name = "get_software_version"]
+        fn rustGetSoftwareVersion(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
         #[rust_name = "subscribe"]
         fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode;
         
