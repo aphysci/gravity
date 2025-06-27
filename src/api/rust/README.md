@@ -2,6 +2,8 @@
 
 A Rust API for gravity
 
+[Recent Updates](#current-updates)
+
 ## CXX
 
 Since SWIG does not have support for rust, the current implementation uses a crate called [CXX](https://cxx.rs). CXX allows for functions to call and be called from C++ to Rust. 
@@ -41,6 +43,8 @@ autocxx-build = "0.28.0"
 
 > [!NOTE]
 > The latest version of autocxx is 0.30.0, but there a number of issues that prevented  this from working properly with this version.
+
+The autocxx is actually not being used right now since I have made everything work with cxx.
 
 ### Distribution
 In the src folder you will see 3 files: ffi.rs, gravity.rs, main.rs
