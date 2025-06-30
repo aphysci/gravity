@@ -184,8 +184,10 @@ mod ffi {
         fn spdlog_trace(message: &CxxString);
     }
 
-    extern "Rust" {
-        
-    }
+    // extern "Rust" {
+    //     #[cxx_name = "RustDataProduct"]
+    //     type GravityDataProduct;
+    // }
 } // mod ffi
+
 

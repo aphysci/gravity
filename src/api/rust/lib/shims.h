@@ -8,14 +8,17 @@
 #include "GravityNode.h"
 // #include "RustSubscriber.h"
 #include "/home/anson/gravity/src/api/rust/target/cxxbridge/rust/cxx.h"
+// #include "/home/anson/gravity/src/api/rust/target/cxxbridge/rust-gravity/src/ffi1.rs.h"
 #include "SpdLog.h"
 
+// struct RustDataProduct;
 namespace gravity
 {
 
     class RustSubscriber : public GravitySubscriber {
         private:
             rust::Fn<void(const std::vector<GravityDataProduct >&)> func;
+            // rust::Fn<void(const rust::Vec<RustDataProduct>&) rustFunc;
         public:
         RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func);
         virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);

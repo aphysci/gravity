@@ -107,10 +107,15 @@ impl GravityNode {
     }
 
     pub fn subscribe(&self, dataProductID: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
-        // let_cxx_string!(dpid = dataProductID);
-        // let func = subscriptionFilledInternal;
-        // let rust_sub = newRustSubscriber(func);
-        // ffi1::subscribe(&self.gn, &dpid, &rust_sub)
+        let_cxx_string!(dpid = dataProductID);
+
+        fn subFilledInternal(dataProducts: &CxxVector<GDataProduct>) {
+            let _v = rustify(dataProducts);
+
+        }
+        let func = subFilledInternal;
+        let rust_sub = newRustSubscriber(func);
+        ffi1::subscribe(&self.gn, &dpid, &rust_sub);
         GravityReturnCode::SUCCESS
     }
     
@@ -213,9 +218,18 @@ fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
 }
 
 pub trait GravitySubscriber {
-    fn subscriptionFilled(&self, dataProducts: &Vec<GravityDataProduct>);
-}
+    fn subscriptionFilled(dataProducts: Vec<GravityDataProduct>);
 
+    
+}
+pub fn rustify(dataProducts: &CxxVector<GDataProduct>) -> Vec<GravityDataProduct> {
+        let mut v = Vec::new();
+        for item in dataProducts.iter() {
+            let to_add = to_rust_gdp(item);
+            v.push(to_add);
+        }
+        v
+    }
 // trait SuperClass {
 //     fn subscriptionFilled(dataProducts: Vec<GravityDataProduct>);
 // }
@@ -232,17 +246,6 @@ pub trait GravitySubscriber {
 //     subscriptionFilled(v);
 // }   
 // }
-
-pub fn subscriptionFilledInternal(dataProducts: &CxxVector<GDataProduct>)-> Vec<GravityDataProduct>
-    {
-     let mut v = Vec::new();
-     for item in dataProducts.iter() {
-         let to_add = to_rust_gdp(item);
-         v.push(to_add);
-     }   
-     // subscriber.
-    v
-}   
 
 
 

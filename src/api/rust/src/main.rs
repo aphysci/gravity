@@ -28,17 +28,17 @@ use ffi1::newRustSubscriber;
 //         println!("made it!");
 //     }
 // }
+struct MySubscriber {}
 
-fn subscriptionFilled(dataProducts: &CxxVector<GDataProduct>) {
-        let dataProducts = subscriptionFilledInternal(dataProducts);
-        for i in dataProducts {
+impl GravitySubscriber for MySubscriber {
+    fn subscriptionFilled(dataProducts: Vec<GravityDataProduct>) {
+        for i in dataProducts.iter() {
            let mut pb = MultPB::new();
            i.populate_message(&mut pb);
            warn!("op1, op2: {}, {}", pb.multiplicand_a.unwrap(), pb.multiplicand_b.unwrap());
         }
     }
-
-
+}
 fn main() {
     
     gravity_logger::info("Beginning rust version of gravity");
@@ -59,10 +59,15 @@ fn main() {
         critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
-
-    let func = subscriptionFilled;
+    
+    let func = |vec: &CxxVector<GDataProduct> | 
+    { 
+        let v = rustify(vec); 
+        MySubscriber::subscriptionFilled(v);
+    };
 
     let subscriber = newRustSubscriber(func);
+
     gn.subscribe_temp(&dataProductID, &subscriber);
     
     std::thread::sleep(time::Duration::from_secs(1));
@@ -98,6 +103,6 @@ fn main() {
 
         std::thread::sleep(time::Duration::from_secs(1));
     }
-    gn.wait_for_exit();
+    // gn.wait_for_exit();  // Dont want this here because i will kill process anyway
    
 }
