@@ -26,10 +26,11 @@ SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
 ARCH_BIN_DIR=@Archiver_BINARY_DIR@
 PB_BIN_DIR=@Playback_BINARY_DIR@
 COMP_BIN_DIR=@TOPLEVEL_INSTALL_PREFIX@/bin #For external builds
-
+CME_LIB_DIR=@TOPLEVEL_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+CMI_LIB_DIR=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
 
 export PATH=$PATH:$TEN_BIN_DIR:$SD_BIN_DIR:$ARCH_BIN_DIR:$PB_BIN_DIR:$COMP_BIN_DIR
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:$CME_LIB_DIR:$CMI_LIB_DIR
 
  cleanup()
 # run if user hits control-c
