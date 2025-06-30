@@ -11,6 +11,6 @@ set path=%Path%;@ProtobufDataProduct_BINARY_DIR@/Debug
 
 start ServiceDirectory@CMAKE_DEBUG_POSTFIX@.exe
 sleep 3
-start ProtobufDataProductPublisher@CMAKE_DEBUG_POSTFIX@.exe
+start ProtobufDataProductPublisher2@CMAKE_DEBUG_POSTFIX@.exe
 sleep 3
-start ProtobufDataProductSubscriber@CMAKE_DEBUG_POSTFIX@.exe
+start ProtobufDataProductSubscriber2@CMAKE_DEBUG_POSTFIX@.exe

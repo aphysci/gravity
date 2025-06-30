@@ -12,6 +12,6 @@ set path=%Path%;@ProtobufDataProduct_BINARY_DIR@/Release
 
 start ServiceDirectory.exe
 sleep 3
-start ProtobufDataProductPublisher.exe
+start ProtobufDataProductPublisher2.exe
 sleep 3
-start ProtobufDataProductSubscriber.exe
+start ProtobufDataProductSubscriber2.exe
