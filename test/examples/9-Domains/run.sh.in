@@ -40,10 +40,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyval
 # trap keyboard interrupt (control-c)
 trap cleanup SIGINT
 
-ProtobufDataProductPublisher &
+ProtobufDataProductPublisher9 &
 PUBPID=$!
 
-ProtobufDataProductSubscriber &
+ProtobufDataProductSubscriber9 &
 SUBPID=$!
 
 sleep 20
