@@ -7,10 +7,12 @@ use cxx::{let_cxx_string, CxxString, CxxVector, UniquePtr};
 use autocxx::{prelude::*, subclass::subclass};
 
 use crate::gravity::GravityDataProduct;
-
+use crate::gravity::GravitySubscriber;
 
 #[cxx::bridge]
 mod ffi {
+   
+
 
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -165,6 +167,8 @@ mod ffi {
         #[rust_name = "copy_gdp"]
         fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
     
+        #[rust_name = "get_proto_data"]
+        fn rustGetProtoBytes(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
     }
 
 
@@ -180,5 +184,8 @@ mod ffi {
         fn spdlog_trace(message: &CxxString);
     }
 
+    extern "Rust" {
+        
+    }
 } // mod ffi
 

@@ -62,7 +62,11 @@ namespace gravity
 
     std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp);
 
-    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, std::string softwareVersion);
+    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& softwareVersion);
+
+    std::unique_ptr<std::string> rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp);
+
+
 
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp);
 

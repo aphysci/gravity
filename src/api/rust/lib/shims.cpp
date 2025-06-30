@@ -1,5 +1,6 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include <iostream>
 #include "shims.h"
 
 namespace gravity
@@ -28,7 +29,8 @@ namespace gravity
 
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
     {
-        return std::make_unique<GravityDataProduct>(gdp);
+        std::unique_ptr<GravityDataProduct> ret = std::unique_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
+        return ret;
     }
 
     std::unique_ptr<GravityDataProduct> newGravityDataProduct() 
@@ -57,22 +59,33 @@ namespace gravity
         gdp->setSoftwareVersion(softwareVersion);
     }
 
+    std::unique_ptr<std::string> rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getDataAsString()));
+        // int size = gdp->getDataSize();
+        // char * data = (char *) malloc(sizeof(char) * size + 1);
+        // gdp->getData(data, size);
+        // std::unique_ptr<std::string> ret = std::unique_ptr<std::string>(new std::string(data));
+        // free(data);
+        // return ret;
+    }
+
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp)
     {
         return std::unique_ptr<std::string>(new std::string(gdp->getSoftwareVersion()));
     }
 
-    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 
         return gdp->getGravityTimestamp();
     }
 
-    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 
         return gdp->getReceivedTimestamp(); 
     }
 
-    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp) const
+    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp)
     {
         return std::unique_ptr<std::string>(new std::string(gdp->getDataProductID()));
     }

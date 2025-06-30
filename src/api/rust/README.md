@@ -79,4 +79,4 @@ Currently for it to work properly the user has to define a subscriptionFilled fu
 
 In addition, all the non-inheritance based methods are implemented for GravityNode in rust, and I am starting to work through GravityDataProduct :)
 
-Last Updated June 27, 2025
+**Last Updated June 27, 2025**

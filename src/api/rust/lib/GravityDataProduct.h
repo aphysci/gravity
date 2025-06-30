@@ -130,6 +130,7 @@ public:
      */
     GRAVITY_API bool getData(void* data, int size) const;
 
+    GRAVITY_API bool getDataAsString() const;
     /**
      * Get the size of the data contained within this data product
      * \return size in bytes of contained data

@@ -17,15 +17,26 @@ use spdlog::prelude::*;
 use crate::ffi1::GDataProduct;
 use crate::{protos::DataPB::*};
 use crate::gravity::*;
-use crate::protos::ffi::*;
+use crate::protos::{ffi::*, DataPB};
 use ffi1::{GravityReturnCode, GravityTransportType};
 use ffi1::newRustSubscriber;
 
+// struct MySubscriber {}
+
+// impl  GravitySubscriber for MySubscriber {
+//     fn subscriptionFilled(&self, dataProducts: &CxxVector<GDataProduct>) {
+//         println!("made it!");
+//     }
+// }
+
 fn subscriptionFilled(dataProducts: &CxxVector<GDataProduct>) {
-    for _ in dataProducts {
-        println!("subscriptionFilled called");
+        let dataProducts = subscriptionFilledInternal(dataProducts);
+        for i in dataProducts {
+           let mut pb = MultPB::new();
+           i.populate_message(&mut pb);
+           warn!("op1, op2: {}, {}", pb.multiplicand_a.unwrap(), pb.multiplicand_b.unwrap());
+        }
     }
-}
 
 
 fn main() {
@@ -49,16 +60,14 @@ fn main() {
         std::process::exit(1)
     }
 
-
     let func = subscriptionFilled;
-    let subscriber = newRustSubscriber(func);
 
-    gn.subscribe(dataProductID, &subscriber);
+    let subscriber = newRustSubscriber(func);
+    gn.subscribe_temp(&dataProductID, &subscriber);
     
     std::thread::sleep(time::Duration::from_secs(1));
 
     let mut quit = false;
-    let mut has_subs = false;
     let mut count = 1;
     while !quit
     {   
@@ -73,7 +82,7 @@ fn main() {
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
-        data.set_multiplicand_b(count + 4);
+        data.set_multiplicand_b(count + 1);
 
         //TODO, but that should be all
         gdp.set_data(&data);
@@ -84,8 +93,6 @@ fn main() {
             std::process::exit(1)
         }
 
-        gn.subscribers_exist(dataProductID, &mut has_subs);
-        if has_subs {info!("Has subscribers");} else {warn!("Has no subscriber :(")}
         if count == 20 { quit = true;}
         count += 1;
 
