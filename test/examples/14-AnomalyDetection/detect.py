@@ -16,6 +16,7 @@
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
 
+import logging
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)  # quiet TensorFlow warnings
 

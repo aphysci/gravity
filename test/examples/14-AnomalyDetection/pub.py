@@ -16,8 +16,9 @@
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
 
+import logging
 import time,sys
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLogHandler
 from DataPoint_pb2 import DataPointPB
 from datetime import datetime
 import numpy as np

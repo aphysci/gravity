@@ -16,6 +16,7 @@
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
 
+import logging
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)  # quiet TensorFlow warnings
 
@@ -57,7 +58,7 @@ class MySubscriber(GravitySubscriber):
             self.subs += 1
             if self.subs == 100:
                 self.subs = 0
-                Log.message("Received %d of %d training samples. "%([len(v) for v in training_data.values()][0], training_size))
+                gravlogger.warning("Received %d of %d training samples. "%([len(v) for v in training_data.values()][0], training_size))
                 #Log.message("Training Subscriptions: " + str([(k,len(v)) for k,v in training_data.items()]))
         
         has_enough_data = True
@@ -66,7 +67,7 @@ class MySubscriber(GravitySubscriber):
                 has_enough_data = False
                 break
         if has_enough_data:
-            Log.message("Calling trainmodel")
+            gravlogger.warning("Calling trainmodel")
             self.train_state = TrainingState.TRAINING
             TrainModel(training_data, model_file, epochs=epochs)
             self.train_state = TrainingState.TRAINED
