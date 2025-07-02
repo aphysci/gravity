@@ -17,7 +17,6 @@ option(SKIP_PYTHON "Skip building Gravity Python wrapper")
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
 set(Protobuf_SRC_ROOT_FOLDER "" CACHE PATH "Path to Protobuf source build")
 set(ZMQ_HOME "" CACHE PATH "Path to your local ZeroMQ installation")
-#set(JAVA_PROTOBUF_JAR "" CACHE FILEPATH "Location of outside protobuf jar file")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 string(REPLACE "\"" "" ABS_CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
@@ -157,6 +156,7 @@ set(GRAVITY_USING_EXTERNAL_PROTOBUF)
 
 if (Protobuf_FOUND AND NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
     message(STATUS "Using local protobuf libraries")
+
 else()
     message(STATUS "Using external protobuf build")
     set(GRAVITY_USING_EXTERNAL_PROTOBUF ON)
@@ -255,9 +255,6 @@ elseif(NOT Protobuf_FOUND)
 	    -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USE_EXTERNAL_PROTOBUF}
         -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USE_EXTERNAL_ZEROMQ}
         -Dprotobuf_MODULE_COMPATIBLE=ON
-	-DPython_EXECUTABLE=${Python_EXECUTABLE}
-        -DPython_LIBRARY=${Python_LIBRARY}
-        -DPython_INCLUDE_DIR=${Python_INCLUDE_DIR}
         -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
 	      )
       list(APPEND depends py-protobufs-external)
@@ -326,9 +323,6 @@ else()
                 -DSKIP_PYTHON=${SKIP_PYTHON}
                 -DProtobuf_SRC_ROOT_FOLDER=${Protobuf_SRC_ROOT_FOLDER}
                 -Dprotobuf_MODULE_COMPATIBLE=ON
-		-DPython_EXECUTABLE=${Python_EXECUTABLE}
-       		 -DPython_LIBRARY=${Python_LIBRARY}
-       		 -DPython_INCLUDE_DIR=${Python_INCLUDE_DIR}
                 -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP}
                 -DPThreadsWin32_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
             INSTALL_COMMAND ""
