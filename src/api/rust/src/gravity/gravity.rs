@@ -1,12 +1,11 @@
-use core::ffi;
-use std::{default, ffi::c_char, ops::Sub, sync::Arc};
-use crate::{ffi1, protos::{DataPB::MultPB, GravityDataProductPB::GravityDataProductPB}};
+#![allow(dead_code)]
+use std::ffi::c_char;
+use crate::gravity::ffi1;
 
-use cxx::{let_cxx_string, UniquePtr, CxxString, CxxVector};
-use protobuf::reflect::MessageDescriptor;
-use protobuf::Message;
+use cxx::{let_cxx_string, UniquePtr, CxxVector};
 
-use crate::ffi1::*;
+
+use crate::gravity::ffi1::*;
 
 pub type GravityReturnCode = GReturnCode;
 pub type GravityTransportType = GTransportType;
@@ -30,8 +29,8 @@ impl GravityNode {
         }
     }
     
-    pub fn from(componentID: impl AsRef<[u8]>) -> GravityNode {
-        let_cxx_string!(cid = componentID);
+    pub fn from(component_id: impl AsRef<[u8]>) -> GravityNode {
+        let_cxx_string!(cid = component_id);
         GravityNode { 
             gn: ffi1::gravity_node_ID(&cid), 
             cpp_subscriber_list: Vec::new(),
@@ -39,8 +38,8 @@ impl GravityNode {
         }
     }
 
-    pub fn init(&self, componentID: impl AsRef<[u8]>) -> GravityReturnCode {
-        let_cxx_string!(cid = componentID);
+    pub fn init(&self, component_id: impl AsRef<[u8]>) -> GravityReturnCode {
+        let_cxx_string!(cid = component_id);
         ffi1::init(&self.gn, &cid)
     }
 
@@ -51,12 +50,12 @@ impl GravityNode {
     pub fn wait_for_exit(&self) {
         ffi1::wait_for_exit(&self.gn);
     }
-    pub fn publish(&self, dataProduct: GravityDataProduct) -> GravityReturnCode
+    pub fn publish(&self, data_product: GravityDataProduct) -> GravityReturnCode
     {
-        ffi1::publish(&self.gn, &(dataProduct.gdp))
+        ffi1::publish(&self.gn, &(data_product.gdp))
     }
-    pub fn subscribers_exist(&self, dataProductID: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
-        let_cxx_string!(dpid = dataProductID);
+    pub fn subscribers_exist(&self, data_product_id: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
         ffi1::subsribers_exist(&self.gn, &dpid, has_subscribers)
     }
     pub fn start_heartbeat(&self, interval_in_microseconds: i64) -> GravityReturnCode {
@@ -82,69 +81,69 @@ impl GravityNode {
         let_cxx_string!(k = key);
         ffi1::get_bool_param(&self.gn, &k, default_value)
     }
-    pub fn get_component_ID(&self) -> String  
+    pub fn get_component_id(&self) -> String  
     { (*ffi1::get_component_ID(&self.gn)).to_str().unwrap().to_string()} 
 
-    pub fn register_data_product(&self, dataProductID: impl AsRef<[u8]>,
-         transportType: GravityTransportType) -> GravityReturnCode
+    pub fn register_data_product(&self, data_product_id: impl AsRef<[u8]>,
+         transport_type: GravityTransportType) -> GravityReturnCode
     {
-        let_cxx_string!(dpid = dataProductID);
-        ffi1::register_data_product(&self.gn, &dpid, transportType)
+        let_cxx_string!(dpid = data_product_id);
+        ffi1::register_data_product(&self.gn, &dpid, transport_type)
     }
-    pub fn register_data_product_cache(&self, dataProductID: impl AsRef<[u8]>,
-         transportType: GravityTransportType, cacheLastValue: bool) -> GravityReturnCode
+    pub fn register_data_product_cache(&self, data_product_id: impl AsRef<[u8]>,
+         transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode
     {
-        let_cxx_string!(dpid = dataProductID);
-        ffi1::register_data_product_cache(&self.gn, &dpid, transportType, cacheLastValue)
+        let_cxx_string!(dpid = data_product_id);
+        ffi1::register_data_product_cache(&self.gn, &dpid, transport_type, cache_last_value)
     }
-    pub fn unregister_data_product(&self, dataProductID: impl AsRef<[u8]>){
-        let_cxx_string!(dpid = dataProductID);
+    pub fn unregister_data_product(&self, data_product_id: impl AsRef<[u8]>){
+        let_cxx_string!(dpid = data_product_id);
         ffi1::unregister_data_product(&self.gn, &dpid);
     }
     pub fn get_code_string(&self, code: GravityReturnCode) -> String {
         ffi1::get_code_string(&self.gn, code).to_str().unwrap().to_string()
     }
-    pub fn get_IP(&self) -> String {
+    pub fn get_ip(&self) -> String {
         ffi1::get_IP(&self.gn).to_str().unwrap().to_string()
     }
     pub fn get_domain(&self) -> String {
         ffi1::get_domain(&self.gn).to_str().unwrap().to_string()
     }
 
-    pub fn subscribe_temp(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
-        let_cxx_string!(dpid = dataProductID);
+    pub fn subscribe_temp(&self, data_product_id: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
         ffi1::subscribe(&self.gn, &dpid, subscriber)
     }
 
-    pub fn subscribe(&mut self, dataProductID: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+    pub fn subscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         // let _func = _subscriber.subscriptionFilled;
         let boxed = Box::new(subscriber as &dyn GravitySubscriber);
         let pointer = Box::into_raw(boxed);
         let addr = pointer as usize;
         
-        fn subFilledInternal(dataProducts: &CxxVector<GDataProduct>, addr: usize) {
-            let v = rustify(dataProducts);
+        fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, addr: usize) {
+            let v = rustify(data_products);
             let subscriber = addr as * mut &dyn GravitySubscriber;
             
             let b = unsafe {*subscriber};
-            b.subscriptionFilled(&v);
+            b.subscription_filled(&v);
             
         }
         
-        let func = subFilledInternal;
+        let func = sub_filled_internal;
         let rust_sub = newRustSubscriber(func, addr);
         
         
 
-        let ret = self.subscribe_internal(&dataProductID, &rust_sub);
+        let ret = self.subscribe_internal(&data_product_id, &rust_sub);
         // std::mem::forget(rust_sub);
         self.cpp_subscriber_list.push(rust_sub);
         
         ret
     }
 
-    fn subscribe_internal(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
-        let_cxx_string!(dpid = dataProductID);
+    fn subscribe_internal(&self, data_product_id: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
         ffi1::subscribe(&self.gn, &dpid, subscriber)
     }
     
@@ -155,14 +154,14 @@ impl GravityDataProduct {
         GravityDataProduct { gdp: ffi1::gravity_data_product_default() }
     }
 
-    pub fn from_id(dataProductId: impl AsRef<[u8]>) -> GravityDataProduct {
-        let_cxx_string!(dpid = dataProductId);
+    pub fn from_id(data_product_id: impl AsRef<[u8]>) -> GravityDataProduct {
+        let_cxx_string!(dpid = data_product_id);
         GravityDataProduct {gdp: ffi1::gravity_data_product(&dpid)}
     }
 
     fn from_array(array: &[u8], size: i32) -> GravityDataProduct {
-        let arrayPtr = array as *const _ as * const c_char;
-        GravityDataProduct {gdp: unsafe {ffi1::gravity_data_product_bytes(arrayPtr, size)}}
+        let array_ptr = array as *const _ as * const c_char;
+        GravityDataProduct {gdp: unsafe {ffi1::gravity_data_product_bytes(array_ptr, size)}}
     }
 
     fn from_gdp(gdp: UniquePtr<GDataProduct>) -> GravityDataProduct {
@@ -185,12 +184,12 @@ impl GravityDataProduct {
     pub fn get_receieved_timestamp(&self) -> u64 {
         ffi1::get_receieved_timestamp(&self.gdp)
     }
-    pub fn get_data_product_ID(&self) -> String {
+    pub fn get_data_product_id(&self) -> String {
         ffi1::get_data_product_ID(&self.gdp).to_str().unwrap().to_string()
     }
-    pub fn set_software_version(&self, softwareVersion: impl AsRef<[u8]>)
+    pub fn set_software_version(&self, software_version: impl AsRef<[u8]>)
     {
-        let_cxx_string!(sv = softwareVersion);
+        let_cxx_string!(sv = software_version);
         ffi1::set_software_version(&self.gdp, &sv);
     }
     pub fn get_software_version(&self) -> String {
@@ -215,9 +214,9 @@ impl GravityDataProduct {
 // impl GravitySubscriber {
 
 // }
-pub struct gravity_logger {}
+pub struct GravityLogger {}
 
-impl gravity_logger {
+impl GravityLogger {
     
 
     pub fn critical(message: impl AsRef<[u8]>) {
@@ -254,9 +253,9 @@ fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
 }
 
 
-fn rustify(dataProducts: &CxxVector<GDataProduct>) -> Vec<GravityDataProduct> {
+fn rustify(data_products: &CxxVector<GDataProduct>) -> Vec<GravityDataProduct> {
         let mut v = Vec::new();
-        for item in dataProducts.iter() {
+        for item in data_products.iter() {
             let to_add = to_rust_gdp(item);
             v.push(to_add);
         }
@@ -264,5 +263,5 @@ fn rustify(dataProducts: &CxxVector<GDataProduct>) -> Vec<GravityDataProduct> {
     }
 
 pub trait GravitySubscriber {
-    fn subscriptionFilled(&self, dataProducts: &Vec<GravityDataProduct>);
+    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>);
 }
