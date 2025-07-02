@@ -5,9 +5,10 @@
 
 namespace gravity
 {
-    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&)> func) 
+    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&, size_t addr)> func, size_t addr) 
     {
         this->func = func;
+        this->addr = addr;
     }
 
     void RustSubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
@@ -18,13 +19,12 @@ namespace gravity
             GravityDataProduct to_add = **i;
             v.push_back(to_add);
         }
-        // std::cout << "calling member func\n";
-        this->func(v);
+        this->func(v, this->addr);
     }
 
-    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func)
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr)
     {
-        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func));
+        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func, addr));
     }
 
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
@@ -187,7 +187,7 @@ namespace gravity
     GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
                                     const std::unique_ptr<RustSubscriber>& subscriber)
     {
-        GravitySubscriber *gs = &**&subscriber;
+        GravitySubscriber *gs = &(*subscriber);
         return gn->subscribe(dataProductID, *gs);
     } 
 
