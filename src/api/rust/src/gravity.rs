@@ -1,14 +1,15 @@
 use core::ffi;
 use std::{default, ffi::c_char, ops::Sub, sync::Arc};
-use crate::{ffi1};
+use crate::{ffi1, protos::{DataPB::MultPB, GravityDataProductPB::GravityDataProductPB}};
 
 use cxx::{let_cxx_string, UniquePtr, CxxString, CxxVector};
 use protobuf::reflect::MessageDescriptor;
-use autocxx::{generate, prelude::*, safety, subclass::{self, subclass, prelude::*}};
+use protobuf::Message;
 
 use crate::ffi1::*;
 
-
+pub type GravityReturnCode = GReturnCode;
+pub type GravityTransportType = GTransportType;
 
 pub struct GravityDataProduct {
     gdp: UniquePtr<GDataProduct>,
@@ -16,16 +17,26 @@ pub struct GravityDataProduct {
 
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
+    cpp_subscriber_list: Vec<UniquePtr<RustSubscriber>>,
+    // rust_subscriber_list: Vec<Box<dyn GravitySubscriber>>,
 }
 
 impl GravityNode {
     pub fn new() -> GravityNode {
-        GravityNode { gn: ffi1::GravityNode() }
+        GravityNode { 
+            gn: ffi1::GravityNode(), 
+            cpp_subscriber_list: Vec::new(),
+            // rust_subscriber_list: Vec::new(),
+        }
     }
     
     pub fn from(componentID: impl AsRef<[u8]>) -> GravityNode {
         let_cxx_string!(cid = componentID);
-        GravityNode { gn: ffi1::gravity_node_ID(&cid)}
+        GravityNode { 
+            gn: ffi1::gravity_node_ID(&cid), 
+            cpp_subscriber_list: Vec::new(),
+            // rust_subscriber_list: Vec::new(),
+        }
     }
 
     pub fn init(&self, componentID: impl AsRef<[u8]>) -> GravityReturnCode {
@@ -100,8 +111,39 @@ impl GravityNode {
         ffi1::get_domain(&self.gn).to_str().unwrap().to_string()
     }
 
+    pub fn subscribe_temp(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+        let_cxx_string!(dpid = dataProductID);
+        ffi1::subscribe(&self.gn, &dpid, subscriber)
+    }
 
-    pub fn subscribe(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+    pub fn subscribe(&mut self, dataProductID: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+        // let _func = _subscriber.subscriptionFilled;
+        let boxed = Box::new(subscriber as &dyn GravitySubscriber);
+        let pointer = Box::into_raw(boxed);
+        let addr = pointer as usize;
+        
+        fn subFilledInternal(dataProducts: &CxxVector<GDataProduct>, addr: usize) {
+            let v = rustify(dataProducts);
+            let subscriber = addr as * mut &dyn GravitySubscriber;
+            
+            let b = unsafe {*subscriber};
+            b.subscriptionFilled(&v);
+            
+        }
+        
+        let func = subFilledInternal;
+        let rust_sub = newRustSubscriber(func, addr);
+        
+        
+
+        let ret = self.subscribe_internal(&dataProductID, &rust_sub);
+        // std::mem::forget(rust_sub);
+        self.cpp_subscriber_list.push(rust_sub);
+        
+        ret
+    }
+
+    fn subscribe_internal(&self, dataProductID: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
         let_cxx_string!(dpid = dataProductID);
         ffi1::subscribe(&self.gn, &dpid, subscriber)
     }
@@ -154,8 +196,25 @@ impl GravityDataProduct {
     pub fn get_software_version(&self) -> String {
         ffi1::get_software_version(&self.gdp).to_str().unwrap().to_string()
     }
+    pub fn populate_message(&self, data: &mut impl protobuf::Message) -> bool{
+        let data_str = ffi1::get_proto_data(&self.gdp);
+        let bytes = data_str.as_bytes();
+        // let smth = GravityDataProductPB::parse_from_bytes(bytes).unwrap();
+        data.merge_from_bytes(bytes).unwrap();
+        true
+
+        
+
+    }
 }
 
+// pub struct GravitySubscriber {
+//     subFilled: fn(Vec<GravityDataProduct>),
+// }
+
+// impl GravitySubscriber {
+
+// }
 pub struct gravity_logger {}
 
 impl gravity_logger {
@@ -194,33 +253,16 @@ fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
     GravityDataProduct::from_gdp(ffi1::copy_gdp(gdp))
 }
 
-// trait SuperClass {
-//     fn subscriptionFilled(dataProducts: Vec<GravityDataProduct>);
-// }
 
-// trait Subclass : SuperClass {
-//      fn subscriptionFilledInternal(&self, dataProducts: &CxxVector<GDataProduct>)
-//     {
-//      let mut v = Vec::new();
-//      for item in dataProducts.iter() {
-//          let to_add = to_rust_gdp(item);
-//          v.push(to_add);
-//      }   
-//      // subscriber.
-//     subscriptionFilled(v);
-// }   
-// }
+fn rustify(dataProducts: &CxxVector<GDataProduct>) -> Vec<GravityDataProduct> {
+        let mut v = Vec::new();
+        for item in dataProducts.iter() {
+            let to_add = to_rust_gdp(item);
+            v.push(to_add);
+        }
+        v
+    }
 
-
-
-
-
-
-// pub trait GravitySubscriber {
-//     fn subscriptionFilled(dataProducts: &Vec<GravityDataProduct>);
-// }
-
-
-// pub struct GSubscriber {
-//     subscriber: impl GravitySubsriber_methods,
-// }
+pub trait GravitySubscriber {
+    fn subscriptionFilled(&self, dataProducts: &Vec<GravityDataProduct>);
+}

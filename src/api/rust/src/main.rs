@@ -8,37 +8,36 @@
 mod gravity;
 mod ffi1;
 mod protos;
-use std::ffi::c_char;
+use std::fmt::format;
 use std::time;
-use autocxx::subclass::{subclass, CppSubclassDefault};
 use cxx::CxxVector;
 use spdlog::prelude::*;
 
-use crate::ffi1::GDataProduct;
-use crate::{protos::DataPB::*};
 use crate::gravity::*;
-use crate::protos::ffi::*;
-use ffi1::{GravityReturnCode, GravityTransportType};
-use ffi1::newRustSubscriber;
+use crate::protos::DataPB::MultPB;
 
-fn subscriptionFilled(dataProducts: &CxxVector<GDataProduct>) {
-    for _ in dataProducts {
-        println!("subscriptionFilled called");
+struct MySubscriber {}
+
+impl GravitySubscriber for MySubscriber {
+    fn subscriptionFilled(&self, dataProducts: &Vec<GravityDataProduct>) {
+        for i in dataProducts.iter() {
+           let mut pb = MultPB::new();
+           i.populate_message(&mut pb);
+           warn!("op1, op2: {}, {}", pb.multiplicand_a.unwrap(), pb.multiplicand_b.unwrap());
+        }
     }
 }
-
-
 fn main() {
     
     gravity_logger::info("Beginning rust version of gravity");
 
-    let gn = GravityNode::new();
+    let mut gn = GravityNode::new();
     let mut ret = gn.init("RustNode");
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        gravity_logger::critical(format!("Unable to initialize GravityNode (return code {:?})", ret));
         std::process::exit(1);
     }
-    info!("Gravity returned code SUCCESS. Init successful");
+    // info!("Gravity returned code SUCCESS. Init successful");
 
 
     let dataProductID = "RustDataProduct";
@@ -49,16 +48,13 @@ fn main() {
         std::process::exit(1)
     }
 
+    let subscriber = MySubscriber {};
 
-    let func = subscriptionFilled;
-    let subscriber = newRustSubscriber(func);
+    ret = gn.subscribe(dataProductID, &subscriber);
 
-    gn.subscribe(dataProductID, &subscriber);
-    
     std::thread::sleep(time::Duration::from_secs(1));
 
     let mut quit = false;
-    let mut has_subs = false;
     let mut count = 1;
     while !quit
     {   
@@ -66,31 +62,26 @@ fn main() {
 
         let gdp = GravityDataProduct::from_id(&dataProductID);
 
-        // let mut data = "HelloRustWorld #".to_owned();
-        // data.push_str(&count.to_string());
-
-
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
-        data.set_multiplicand_b(count + 4);
+        data.set_multiplicand_b(count + 1);
 
-        //TODO, but that should be all
+    //     //TODO, but that should be all
         gdp.set_data(&data);
-    
+        
         ret = gn.publish(gdp);
         if ret != GravityReturnCode::SUCCESS {
-            error!("Could not publish data product (return code {:?})", ret);
+            gravity_logger::error(format!("Could not publish data product (return code {:?})", ret));
             std::process::exit(1)
         }
+    
 
-        gn.subscribers_exist(dataProductID, &mut has_subs);
-        if has_subs {info!("Has subscribers");} else {warn!("Has no subscriber :(")}
-        if count == 20 { quit = true;}
+        if count == 15 { quit = true;}
         count += 1;
 
         std::thread::sleep(time::Duration::from_secs(1));
     }
-    gn.wait_for_exit();
+    // gn.wait_for_exit();  // Dont want this here because i will kill process anyway
    
 }

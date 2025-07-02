@@ -15,13 +15,14 @@ namespace gravity
 
     class RustSubscriber : public GravitySubscriber {
         private:
-            rust::Fn<void(const std::vector<GravityDataProduct >&)> func;
+            rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func;
+            size_t addr;
         public:
-        RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func);
-        virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
+            RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr);
+            virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
     };
 
-    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func);
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr);
     
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp);
 
@@ -62,10 +63,11 @@ namespace gravity
 
     std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp);
 
-    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, std::string softwareVersion);
+    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& softwareVersion);
 
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp);
 
+     std::unique_ptr<std::string> rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp);
 
 
     /**
@@ -78,7 +80,7 @@ namespace gravity
 	* Constructor that also initializes
 	* \param componentID ID of the component to initialize
 	*/
-    std::unique_ptr<GravityNode> newGravityNode(const std::string& componentId);
+    std::unique_ptr<GravityNode> newGravityNodeId(const std::string& componentId);
      /**
      * Initialize the Gravity infrastructure.
 	   * Reads the ComponentID from the Gravity.ini file.

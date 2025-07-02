@@ -1,12 +1,14 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include <iostream>
 #include "shims.h"
 
 namespace gravity
 {
-    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&)> func) 
+    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&, size_t addr)> func, size_t addr) 
     {
         this->func = func;
+        this->addr = addr;
     }
 
     void RustSubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
@@ -17,18 +19,18 @@ namespace gravity
             GravityDataProduct to_add = **i;
             v.push_back(to_add);
         }
-        // std::cout << "calling member func\n";
-        this->func(v);
+        this->func(v, this->addr);
     }
 
-    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&)> func)
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr)
     {
-        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func));
+        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func, addr));
     }
 
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
     {
-        return std::make_unique<GravityDataProduct>(gdp);
+        std::unique_ptr<GravityDataProduct> ret = std::unique_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
+        return ret;
     }
 
     std::unique_ptr<GravityDataProduct> newGravityDataProduct() 
@@ -57,22 +59,33 @@ namespace gravity
         gdp->setSoftwareVersion(softwareVersion);
     }
 
+    std::unique_ptr<std::string> rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getDataAsString()));
+        // int size = gdp->getDataSize();
+        // char * data = (char *) malloc(sizeof(char) * size + 1);
+        // gdp->getData(data, size);
+        // std::unique_ptr<std::string> ret = std::unique_ptr<std::string>(new std::string(data));
+        // free(data);
+        // return ret;
+    }
+
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp)
     {
         return std::unique_ptr<std::string>(new std::string(gdp->getSoftwareVersion()));
     }
 
-    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    uint64_t rustGetGravityTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 
         return gdp->getGravityTimestamp();
     }
 
-    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) const 
+    uint64_t rustGetReceivedTimestamp(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 
         return gdp->getReceivedTimestamp(); 
     }
 
-    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp) const
+    std::unique_ptr<std::string> rustGetDataProductID(const std::unique_ptr<GravityDataProduct>& gdp)
     {
         return std::unique_ptr<std::string>(new std::string(gdp->getDataProductID()));
     }
@@ -174,7 +187,7 @@ namespace gravity
     GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
                                     const std::unique_ptr<RustSubscriber>& subscriber)
     {
-        GravitySubscriber *gs = &**&subscriber;
+        GravitySubscriber *gs = &(*subscriber);
         return gn->subscribe(dataProductID, *gs);
     } 
 
