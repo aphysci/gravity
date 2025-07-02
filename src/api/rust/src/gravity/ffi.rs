@@ -4,6 +4,7 @@ pub use ffi::*;
 #[cxx::bridge]
 mod ffi {
    
+   
     #[namespace = "gravity"]
     #[repr(i32)]
     #[derive(Debug)]
@@ -139,6 +140,9 @@ mod ffi {
         #[rust_name = "set_data"]
         unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
+        #[rust_name = "get_data_size"]
+        fn rustGetDataSize(gdp: &UniquePtr<GDataProduct>) -> i32;
+
         #[rust_name = "get_gravity_timestamp"]
         fn rustGetGravityTimestamp(gdp: &UniquePtr<GDataProduct>) -> u64;
 
@@ -163,7 +167,7 @@ mod ffi {
         fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
     
         #[rust_name = "get_proto_data"]
-        fn rustGetProtoBytes(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+        fn rustGetProtoBytes(gdp: &UniquePtr<GDataProduct>) -> *const c_char;
     }
 
 

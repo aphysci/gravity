@@ -18,10 +18,18 @@ impl GravitySubscriber for MySubscriber {
     }
 }
 fn main() {
+    let mut gnn = GravityNode::new();
+    gnn.init("SubNode");
+    let data_product_id = "RustDataProduct";
+
+    let subscriber = MySubscriber {};
+
+    gnn.subscribe(data_product_id, &subscriber);
+
     
     GravityLogger::info("Beginning rust version of gravity");
 
-    let mut gn = GravityNode::new();
+    let gn = GravityNode::new();
     let mut ret = gn.init("RustNode");
     if ret != GravityReturnCode::SUCCESS {
         GravityLogger::critical(format!("Unable to initialize GravityNode (return code {:?})", ret));
@@ -30,17 +38,14 @@ fn main() {
     // info!("Gravity returned code SUCCESS. Init successful");
 
 
-    let data_product_id = "RustDataProduct";
-
+    
     ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
         critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
 
-    let subscriber = MySubscriber {};
-
-    gn.subscribe(data_product_id, &subscriber);
+    
 
     std::thread::sleep(time::Duration::from_secs(1));
 
@@ -53,7 +58,7 @@ fn main() {
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
-        data.set_multiplicand_b(count + 1);
+        data.set_multiplicand_b(count + 1048576);
 
     //     //TODO, but that should be all
         gdp.set_data(&data);

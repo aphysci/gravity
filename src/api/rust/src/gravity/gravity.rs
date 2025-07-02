@@ -197,7 +197,19 @@ impl GravityDataProduct {
     }
     pub fn populate_message(&self, data: &mut impl protobuf::Message) -> bool{
         let data_str = ffi::get_proto_data(&self.gdp);
-        let bytes = data_str.as_bytes();
+        let mut pointer = data_str as * const c_char as * const u8;
+        
+        let size = ffi::get_data_size(&self.gdp);
+
+        let mut bytes_buf = Vec::new();
+        for _ in 0..size {
+            unsafe {
+                bytes_buf.push(*pointer);
+                pointer = pointer.offset(1);
+            }
+            
+        }
+        let bytes = bytes_buf.as_slice();
         // let smth = GravityDataProductPB::parse_from_bytes(bytes).unwrap();
         data.merge_from_bytes(bytes).unwrap();
         true

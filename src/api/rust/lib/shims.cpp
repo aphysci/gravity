@@ -59,15 +59,20 @@ namespace gravity
         gdp->setSoftwareVersion(softwareVersion);
     }
 
-    std::unique_ptr<std::string> rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp)
+    const char * rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp)
     {
-        return std::unique_ptr<std::string>(new std::string(gdp->getDataAsString()));
-        // int size = gdp->getDataSize();
-        // char * data = (char *) malloc(sizeof(char) * size + 1);
-        // gdp->getData(data, size);
+        int size = gdp->getDataSize();
+        char * data = (char *) malloc(sizeof(char) * size + 1);
+        gdp->getData(data, size);
+        return data;
         // std::unique_ptr<std::string> ret = std::unique_ptr<std::string>(new std::string(data));
         // free(data);
         // return ret;
+    }
+
+    int rustGetDataSize(const std::unique_ptr<GravityDataProduct>& gdp) 
+    { 
+        return gdp->getDataSize(); 
     }
 
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp)
