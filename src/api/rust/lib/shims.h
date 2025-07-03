@@ -6,13 +6,43 @@
 
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
+#include "GravityRequestor.h"
 // #include "RustSubscriber.h"
 #include "/home/anson/gravity/src/api/rust/target/cxxbridge/rust/cxx.h"
 #include "SpdLog.h"
 
 namespace gravity
 {
+    class RustServiceProvider : public GravityServiceProvider {
+        private:    
+            rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func;
+            size_t addr;
+        public:
+            RustServiceProvider(rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func, size_t addr);
+            virtual std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
+    };
 
+    std::unique_ptr<RustServiceProvider> rustRustServiceProvider(rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func, size_t addr);
+
+    GravityReturnCode rustRegisterService(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                            GravityTransportType transportType, const std::unique_ptr<RustServiceProvider>& server);
+
+    class RustRequestor : public GravityRequestor {
+        private:
+            rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func;
+            size_t addr;
+
+            public:
+                RustRequestor(rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func, size_t addr);
+                virtual void requestFilled(std::string serviceID, std::string requestID,
+                                            const GravityDataProduct& response);
+        };
+
+    std::unique_ptr<RustRequestor> rustRustRequestor(rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func, size_t addr);
+
+    GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
+                                const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID, int timeout_milliseconds, const std::string& domain);
+    
     class RustSubscriber : public GravitySubscriber {
         private:
             rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func;
@@ -26,6 +56,8 @@ namespace gravity
     
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp);
 
+    std::shared_ptr<GravityDataProduct> copyGravityDataProductShared(const GravityDataProduct& gdp);
+    
 
     /** Rust-able default constructor
      * 

@@ -25,4 +25,8 @@ message MultPB
 	required int32 multiplicand_b = 2;
 }
 
+message ResultPB
+{
+	optional int32 result = 1;
+}
 

@@ -5,6 +5,61 @@
 
 namespace gravity
 {
+    RustServiceProvider::RustServiceProvider(
+        rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func,
+        size_t addr)
+    {
+        this->func = func;
+        this->addr = addr;
+    }
+
+    std::shared_ptr<GravityDataProduct> RustServiceProvider::request(const std::string serviceID,
+                                                                     const GravityDataProduct& dataProduct)
+    {
+        return func(serviceID, dataProduct, this->addr);
+    }
+
+    RustRequestor::RustRequestor(
+        rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func, size_t addr)
+    {
+        this->func = func;
+        this->addr = addr;
+    }
+
+    void RustRequestor::requestFilled(std::string serviceID, std::string requestID, const GravityDataProduct& response)
+    {
+        func(serviceID, requestID, response, this->addr);
+    }
+
+    std::unique_ptr<RustServiceProvider> rustRustServiceProvider(
+        rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func,
+        size_t addr)
+    {
+        return std::unique_ptr<RustServiceProvider>(new RustServiceProvider(func, addr));
+    }
+
+    GravityReturnCode rustRegisterService(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                                          GravityTransportType transportType,
+                                          const std::unique_ptr<RustServiceProvider>& server)
+    {
+        return gn->registerService(serviceID, transportType, *server);
+    }
+
+    std::unique_ptr<RustRequestor> rustRustRequestor(
+        rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func, size_t addr)
+    {
+        return std::unique_ptr<RustRequestor>(new RustRequestor(func, addr));
+    }
+
+    GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct,
+                                  const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID,
+                                  int timeout_milliseconds, const std::string& domain)
+    {
+        return gn->request(serviceID, *dataProduct, *requestor, serviceID, timeout_milliseconds, domain);
+    }
+
+  
+
     RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&, size_t addr)> func, size_t addr) 
     {
         this->func = func;
@@ -29,8 +84,12 @@ namespace gravity
 
     std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
     {
-        std::unique_ptr<GravityDataProduct> ret = std::unique_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
-        return ret;
+        return std::unique_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
+    }
+
+    std::shared_ptr<GravityDataProduct> copyGravityDataProductShared(const GravityDataProduct& gdp)
+    {
+        return std::shared_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
     }
 
     std::unique_ptr<GravityDataProduct> newGravityDataProduct() 
@@ -217,4 +276,6 @@ namespace gravity
         return gn->unsubscribe(dataProductID, *subscriber);
     }
 
-}  // namespace gravity
+    
+
+    }  // namespace gravity

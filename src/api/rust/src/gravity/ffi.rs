@@ -1,9 +1,9 @@
 #![allow(non_camel_case_types)]
+#![allow(dead_code)]
 pub use ffi::*;
 
 #[cxx::bridge]
 mod ffi {
- 
    
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -56,12 +56,14 @@ mod ffi {
         type GravityDataProduct;
  
         type RustSubscriber;
+        type RustRequestor;
+        type RustServiceProvider;
 
         //GravityNode methods
         #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GNode>;
 
-        #[rust_name = "gravity_node_ID"]
+        #[rust_name = "gravity_node_id"]
         fn newGravityNodeId(componentID: &CxxString) -> UniquePtr<GNode>;
 
         #[rust_name = "init"]
@@ -138,10 +140,24 @@ mod ffi {
 
         #[rust_name = "unsubscribe"]
         fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
-        // #[rust_name = "subscribe"]
-        // fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &RustSubscriber) -> GReturnCode;
+        
+        #[rust_name = "new_rust_subscriber"]
+        fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
 
+        #[rust_name = "new_rust_requestor"]
+        fn rustRustRequestor(func: fn(&CxxString, &CxxString, &GDataProduct, usize), addr: usize) -> UniquePtr<RustRequestor>;
+        
+        #[rust_name = "new_rust_service_provider"]
+        fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;
+
+        #[rust_name = "request_async"]
+        fn rustRequest(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
+                    requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32, domain: &CxxString) -> GReturnCode;
+
+        #[rust_name = "register_service"]
+        fn rustRegisterService(gn: &UniquePtr<GNode>, service_id: &CxxString, transport_type: GTransportType, server: &UniquePtr<RustServiceProvider>) -> GReturnCode;
         // GravityDataProductMethods
+
         #[rust_name = "gravity_data_product"]
         fn newGravityDataProduct(dataProductId: &CxxString) -> UniquePtr<GDataProduct>;
         
@@ -176,10 +192,13 @@ mod ffi {
         fn rustGetSoftwareVersion(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
 
         
-        fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
+        
             
         #[rust_name = "copy_gdp"]
         fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
+
+        #[rust_name = "copy_gdp_shared"]
+        fn copyGravityDataProductShared(gdp: &GDataProduct) -> SharedPtr<GDataProduct>;
     
         #[rust_name = "get_proto_data"]
         fn rustGetProtoBytes(gdp: &UniquePtr<GDataProduct>) -> *const c_char;
