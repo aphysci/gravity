@@ -192,8 +192,29 @@ namespace gravity
     GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
                                     const std::unique_ptr<RustSubscriber>& subscriber)
     {
-        GravitySubscriber *gs = &(*subscriber);
-        return gn->subscribe(dataProductID, *gs);
-    } 
+        return gn->subscribe(dataProductID, *subscriber);
+    }
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                    const std::unique_ptr<RustSubscriber>& subscriber, const std::string& filter)
+    {
+        return gn->subscribe(dataProductID, *subscriber, filter);
+    }
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                    const std::unique_ptr<RustSubscriber>& subscriber, const std::string& filter,
+                                    const std::string& domain)
+    {
+        return gn->subscribe(dataProductID, *subscriber, filter, domain);
+    }
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                    const std::unique_ptr<RustSubscriber>& subscriber, const std::string& filter,
+                                    const std::string& domain, bool recieveLastCachedValue)
+    {
+        return gn->subscribe(dataProductID, *subscriber, filter, domain, recieveLastCachedValue);
+    }
+    GravityReturnCode rustUnsubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                      const std::unique_ptr<RustSubscriber>& subscriber)
+    {
+        return gn->unsubscribe(dataProductID, *subscriber);
+    }
 
 }  // namespace gravity

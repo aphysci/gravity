@@ -3,7 +3,7 @@ pub use ffi::*;
 
 #[cxx::bridge]
 mod ffi {
-   
+ 
    
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -121,6 +121,23 @@ mod ffi {
         #[rust_name = "get_domain"]
         fn rustGetDomain(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
 
+        #[rust_name = "subscribe"]
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
+        
+        #[rust_name = "subscribe_filter"]
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
+             filter: &CxxString) -> GReturnCode;
+
+        #[rust_name = "subscribe_domain"]
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
+             filter: &CxxString, domain: &CxxString) -> GReturnCode;
+
+        #[rust_name = "subscribe_cache"]
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
+             filter: &CxxString, domain: &CxxString, recieve_last_cached_value: bool) -> GReturnCode;
+
+        #[rust_name = "unsubscribe"]
+        fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
         // #[rust_name = "subscribe"]
         // fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &RustSubscriber) -> GReturnCode;
 
@@ -158,8 +175,6 @@ mod ffi {
         #[rust_name = "get_software_version"]
         fn rustGetSoftwareVersion(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
 
-        #[rust_name = "subscribe"]
-        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
         
         fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
             

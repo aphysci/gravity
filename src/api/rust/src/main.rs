@@ -68,7 +68,7 @@ fn main() {
             GravityLogger::error(format!("Could not publish data product (return code {:?})", ret));
             std::process::exit(1)
         }
-    
+        if count == 9 { gnn.unsubscribe(data_product_id, &subscriber); }
 
         if count == 15 { quit = true;}
         count += 1;

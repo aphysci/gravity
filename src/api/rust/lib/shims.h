@@ -158,6 +158,16 @@ namespace gravity
 
 
     GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber);
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
+                                    const std::string& filter);
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
+                                    const std::string& filter, const std::string& domain);
+    GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
+                                    const std::string& filter, const std::string& domain, bool recieveLastCachedValue);
+
+
+
+    GravityReturnCode rustUnsubscribe(const std::unique_ptr<GravityNode> & gn, const std::string& dataProductId, const std::unique_ptr<RustSubscriber>& subscriber);
 
 } // namespace gravity
 

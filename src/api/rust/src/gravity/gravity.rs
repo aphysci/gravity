@@ -1,6 +1,8 @@
 #![allow(dead_code)]
-use std::ffi::c_char;
+use std::{ffi::c_char};
+use std::collections::HashMap;
 use crate::gravity::ffi;
+
 
 use cxx::{let_cxx_string, UniquePtr, CxxVector};
 
@@ -16,7 +18,7 @@ pub struct GravityDataProduct {
 
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
-    cpp_subscriber_list: Vec<UniquePtr<RustSubscriber>>,
+    cpp_subscriber_map: HashMap<usize, UniquePtr<RustSubscriber>>,
     // rust_subscriber_list: Vec<Box<dyn GravitySubscriber>>,
 }
 
@@ -24,7 +26,7 @@ impl GravityNode {
     pub fn new() -> GravityNode {
         GravityNode { 
             gn: ffi::GravityNode(), 
-            cpp_subscriber_list: Vec::new(),
+            cpp_subscriber_map: HashMap::new(),
             // rust_subscriber_list: Vec::new(),
         }
     }
@@ -33,7 +35,7 @@ impl GravityNode {
         let_cxx_string!(cid = component_id);
         GravityNode { 
             gn: ffi::gravity_node_ID(&cid), 
-            cpp_subscriber_list: Vec::new(),
+            cpp_subscriber_map: HashMap::new(),
             // rust_subscriber_list: Vec::new(),
         }
     }
@@ -109,46 +111,82 @@ impl GravityNode {
     pub fn get_domain(&self) -> String {
         ffi::get_domain(&self.gn).to_str().unwrap().to_string()
     }
-
-    pub fn subscribe_temp(&self, data_product_id: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
-        let_cxx_string!(dpid = data_product_id);
-        ffi::subscribe(&self.gn, &dpid, subscriber)
-    }
-
-    pub fn subscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
-        // let _func = _subscriber.subscriptionFilled;
+    fn get_addr(subscriber: &impl GravitySubscriber) -> usize {
         let boxed = Box::new(subscriber as &dyn GravitySubscriber);
         let pointer = Box::into_raw(boxed);
-        let addr = pointer as usize;
-        
-        fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, addr: usize) {
-            let v = rustify(data_products);
-            let subscriber = addr as * mut &dyn GravitySubscriber;
-            
-            let b = unsafe {*subscriber};
-            b.subscription_filled(&v);
-            
-        }
-        
+        pointer as usize
+    }
+    pub fn subscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let addr   = GravityNode::get_addr(subscriber);      
+        let func = sub_filled_internal;
+        let rust_sub = newRustSubscriber(func, addr);       
+
+        let ret= ffi::subscribe(&self.gn, &dpid, &rust_sub);
+        // std::mem::forget(rust_sub);
+        let key = subscriber as * const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
+        ret
+    }
+    pub fn subscribe_filter(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let_cxx_string!(f = filter);
+        let addr = GravityNode::get_addr(subscriber);
         let func = sub_filled_internal;
         let rust_sub = newRustSubscriber(func, addr);
-        
-        
 
-        let ret = self.subscribe_internal(&data_product_id, &rust_sub);
-        // std::mem::forget(rust_sub);
-        self.cpp_subscriber_list.push(rust_sub);
-        
+        let ret = ffi::subscribe_filter(&self.gn, &dpid, &rust_sub, &f);
+        let key = subscriber as * const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
         ret
     }
 
-    fn subscribe_internal(&self, data_product_id: impl AsRef<[u8]>, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCode {
+    pub fn subscribe_domain(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
-        ffi::subscribe(&self.gn, &dpid, subscriber)
+        let_cxx_string!(f = filter);
+        let_cxx_string!(d = domain);
+        let addr = GravityNode::get_addr(subscriber);
+        let func = sub_filled_internal;
+        let rust_sub = newRustSubscriber(func, addr);
+
+        let ret = ffi::subscribe_domain(&self.gn, &dpid, &rust_sub, &f, &d);
+        let key = subscriber as * const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
+        ret
+    }
+
+    pub fn subscribe_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>, recieve_last_cache_value: bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let_cxx_string!(f = filter);
+        let_cxx_string!(d = domain);
+        let addr = GravityNode::get_addr(subscriber);
+        let func = sub_filled_internal;
+        let rust_sub = newRustSubscriber(func, addr);
+
+        let ret = ffi::subscribe_cache(&self.gn, &dpid, &rust_sub, &f, &d, recieve_last_cache_value);
+        let key = subscriber as * const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
+        ret
+    }
+
+    
+    pub fn unsubscribe(&self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let key = subscriber as * const _ as usize;
+        let rust_sub = self.cpp_subscriber_map.get(&key).unwrap();
+        ffi::unsubscribe(&self.gn, &dpid, rust_sub)
+
     }
     
 }
-
+fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, addr: usize) {
+    let v = rustify(data_products);
+    let subscriber = addr as * mut &dyn GravitySubscriber;
+    
+    let b = unsafe {*subscriber};
+    b.subscription_filled(&v);
+    
+}
 impl GravityDataProduct {
     pub fn new() -> GravityDataProduct {
         GravityDataProduct { gdp: ffi::gravity_data_product_default() }
