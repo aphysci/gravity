@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::gravity::ffi;
+use crate::ffi;
 
 
 use cxx::{let_cxx_string};

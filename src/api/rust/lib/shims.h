@@ -27,6 +27,8 @@ namespace gravity
     GravityReturnCode rustRegisterService(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
                             GravityTransportType transportType, const std::unique_ptr<RustServiceProvider>& server);
 
+    GravityReturnCode rustUnregisterService(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID);
+
     class RustRequestor : public GravityRequestor {
         private:
             rust::Fn<void(const std::string&, const std::string&, const GravityDataProduct&, size_t)> func;
@@ -43,6 +45,8 @@ namespace gravity
     GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
                                 const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID, int timeout_milliseconds, const std::string& domain);
     
+    std::shared_ptr<GravityDataProduct> rustRequestSync(const std::unique_ptr<GravityNode> &gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request, int timeout_milliseconds = -1, const std::string& domain = "");
+
     class RustSubscriber : public GravitySubscriber {
         private:
             rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func;
@@ -200,6 +204,19 @@ namespace gravity
 
 
     GravityReturnCode rustUnsubscribe(const std::unique_ptr<GravityNode> & gn, const std::string& dataProductId, const std::unique_ptr<RustSubscriber>& subscriber);
+
+    GravityReturnCode rustRegisterRelay(const std::unique_ptr<GravityNode> & gn,
+                                        const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
+                                        bool localOnly, GravityTransportType transportType);
+
+    GravityReturnCode rustRegisterRelayCache(const std::unique_ptr<GravityNode> & gn,
+                                             const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
+                                             bool localOnly, GravityTransportType transportType, bool cacheLastValue);
+
+    GravityReturnCode rustUnregisterRelay(const std::unique_ptr<GravityNode> & gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber);
+
+    /* Future response things*/
+    
 
 } // namespace gravity
 

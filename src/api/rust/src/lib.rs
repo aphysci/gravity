@@ -1,4 +1,4 @@
-pub mod gravity;
+pub mod gravity_logger;
 pub mod gravity_node;
 pub mod gravity_data_product;
 pub mod gravity_subscriber;

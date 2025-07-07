@@ -1,5 +1,5 @@
 
-use crate::gravity::gravity_data_product::GravityDataProduct;
+use crate::gravity_data_product::GravityDataProduct;
 
 
 pub trait GravityRequestor {

@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
-use std::hash::Hash;
 use cxx::{let_cxx_string, CxxString, CxxVector, SharedPtr, UniquePtr};
-use crate::gravity::ffi::*;
-use crate::gravity::{ffi, gravity_subscriber::*,
+use crate::ffi::*;
+use crate::{ffi, gravity_subscriber::*,
      gravity_data_product::*, gravity_requestor::*, gravity_service_provider::*};
 
 
@@ -168,11 +167,19 @@ impl GravityNode {
     }
 
     
-    pub fn unsubscribe(&self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+    pub fn unsubscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as * const _ as usize;
-        let rust_sub = self.cpp_subscriber_map.get(&key).unwrap();
-        ffi::unsubscribe(&self.gn, &dpid, rust_sub)
+        let rust_sub_op = self.cpp_subscriber_map.get(&key);
+        match rust_sub_op {
+            None => GravityReturnCode::SUCCESS,
+            Some(rust_sub) => {
+                let temp = ffi::unsubscribe(&self.gn, &dpid, rust_sub);
+                self.cpp_subscriber_map.remove(&key);
+                temp
+            }
+        }
+        
 
     }
 
@@ -211,6 +218,16 @@ impl GravityNode {
     
     }
 
+    pub fn request_sync(&self, service_id: impl AsRef<[u8]>, request: &GravityDataProduct) -> Option<GravityDataProduct> {
+        let_cxx_string!(sid = service_id);
+        let_cxx_string!(domain = "");
+        let gdp = ffi::request_sync(&self.gn, &sid, &request.gdp, -1, &domain);
+        if gdp.is_null() {
+            return None;
+        }
+        Some(GravityNode::to_rust_gdp(gdp.as_ref().unwrap()))
+    }
+
     pub fn register_service(&mut self, service_id:  impl AsRef<[u8]>, transport_type: GravityTransportType, server: &impl GravityServiceProvider) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         let func = GravityNode::request_internal;
@@ -224,6 +241,51 @@ impl GravityNode {
         self.cpp_service_provider_map.insert(key, rust_server);
         ret
     }
+    pub fn unregister_service(&self, service_id: impl AsRef<[u8]>) -> GravityReturnCode {
+        let_cxx_string!(sid = service_id);
+        ffi::unregister_service(&self.gn, &sid)
+    }
+
+
+    pub fn register_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
+                          local_only: bool, transport_type: GravityTransportType) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let addr = GravityNode::get_addr(subscriber);
+        let func = GravityNode::sub_filled_internal;
+        let rust_sub = new_rust_subscriber(func, addr);
+        
+        let ret = ffi::register_relay(&self.gn, &dpid, &rust_sub, local_only, transport_type);
+        let key = subscriber as * const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
+        ret
+    }
+    pub fn register_relay_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
+                                local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let addr = GravityNode::get_addr(subscriber);
+        let func = GravityNode::sub_filled_internal;
+        let rust_sub = new_rust_subscriber(func, addr);
+
+        let ret = ffi::register_relay_cache(&self.gn, &dpid, &rust_sub, local_only, transport_type, cache_last_value);
+        let key = subscriber as *const _ as usize;
+        self.cpp_subscriber_map.insert(key, rust_sub);
+        ret
+    }
+    pub fn unregister_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let key = subscriber as *const _ as usize;
+
+        let rust_sub = self.cpp_subscriber_map.get(&key);
+        match rust_sub {
+            None => GravityReturnCode::SUCCESS,
+            Some( sub) => {
+                let temp = ffi::unregister_relay(&self.gn, &dpid, sub);
+                self.cpp_subscriber_map.remove(&key);
+                temp
+            }
+        }
+    }
+
 
     fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
         GravityDataProduct::from_gdp(ffi::copy_gdp(gdp))

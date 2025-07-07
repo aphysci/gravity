@@ -4,6 +4,7 @@ pub use ffi::*;
 
 #[cxx::bridge]
 mod ffi {
+
    
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -154,8 +155,27 @@ mod ffi {
         fn rustRequest(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
                     requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32, domain: &CxxString) -> GReturnCode;
 
+        #[rust_name = "request_sync"]
+        fn rustRequestSync(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>, timeout_milliseconds: i32, domain: &CxxString) -> SharedPtr<GDataProduct>;
+
         #[rust_name = "register_service"]
         fn rustRegisterService(gn: &UniquePtr<GNode>, service_id: &CxxString, transport_type: GTransportType, server: &UniquePtr<RustServiceProvider>) -> GReturnCode;
+        
+        #[rust_name = "unregister_service"]
+        fn rustUnregisterService(gn: &UniquePtr<GNode>, service_id: &CxxString) -> GReturnCode;
+        
+        #[rust_name = "register_relay"]
+        fn rustRegisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString, subscriber: &UniquePtr<RustSubscriber>,
+                             local_only: bool, transport_type: GTransportType) -> GReturnCode;
+
+        #[rust_name = "register_relay_cache"]
+        fn rustRegisterRelayCache(gn: &UniquePtr<GNode>, data_product_id: &CxxString, subscriber: &UniquePtr<RustSubscriber>,
+                             local_only: bool, transport_type: GTransportType, cache_last_value: bool) -> GReturnCode;
+
+
+        #[rust_name = "unregister_relay"]
+        fn rustUnregisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
+
         // GravityDataProductMethods
 
         #[rust_name = "gravity_data_product"]

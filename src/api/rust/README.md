@@ -16,7 +16,7 @@ Up to an including a Gravity PubSub kind of deal. GravityNodes can do everything
 ### Basics
 In this section, you will learn how I set up the rust Gravity API and the motivation behind it.
 
-It is also important to note that regular CXX does not provide the functionality to call non-const member functions. In order to work around this I created functions that take in an object as a parameter and then call the member functions from there on the C++ side. But as you can imagine that is kind of yucky to deal with, so in order to give the *illusion* of normalcy, I created a struct on the Rust side that holds the object in a unique pointer (so it can communicate with C++ since Rust cannot directly hold C++ values), and gave it functions that call the C++ wrappers. 
+It is also important to note that regular CXX does not provide the functionality to call non-const member functions. In order to work around this I created functions that take in an object as a parameter and then call the member functions from there on the C++ side. But as you can imagine that is kind of yucky to deal with, so in order to give the *illusion* of normalcy, I created a struct on the Rust side that holds the object in a unique pointer (so it can communicate with C++ since Rust cannot directly hold opaque C++ values), and gave it functions that call the C++ wrappers. 
 
 ### Dependencies
 In the cargo.toml folder these are the dependencies:

@@ -1,7 +1,8 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
 mod protos;
 mod gravity;
 
-use std::fmt::format;
 use std::time;
 use spdlog::prelude::*;
 use crate::gravity::gravity::GravityLogger;
@@ -49,7 +50,7 @@ impl GravityServiceProvider for MyProvider {
 struct MyRequestor {}
 
 impl GravityRequestor for MyRequestor {
-    fn request_filled(&self, service_id: String, request_id: String, response: &GravityDataProduct) {
+    fn request_filled(&self, _service_id: String, request_id: String, response: &GravityDataProduct) {
         let mut result_pb = ResultPB::new();
         response.populate_message(&mut result_pb);
 
@@ -92,7 +93,25 @@ fn main() {
         spdlog::warn!("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
-        ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, Some(""));
+        ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, None as Option<&dyn AsRef<[u8]>>);
+    }
+
+    let request2 = GravityDataProduct::from_id("Multiplication");
+    let mut operands2 =  MultPB::new();
+    operands2.set_multiplicand_a(5);
+    operands2.set_multiplicand_b(7);
+
+
+    request2.set_data(&operands2);
+    let mult_sync = gn2.request_sync("Multiplication", &request2);
+
+    match mult_sync {
+        None => GravityLogger::error("Request Returned None"),
+        Some(gdp) => {
+            let mut result2 = ResultPB::new();
+            gdp.populate_message(&mut result2);
+            GravityLogger::warn(format!("Synchronous response recieved: 5 x 7 = {}", result2.result()));
+        }
     }
 
     // let mut gnn = GravityNode::new();
