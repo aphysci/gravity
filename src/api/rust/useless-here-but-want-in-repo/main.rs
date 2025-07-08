@@ -80,7 +80,8 @@ fn main() {
 
     let requestor = MyRequestor {};
 
-    let mult_request = GravityDataProduct::from_id("Multiplication");
+    let x = String::from("Mult");
+    let mult_request = GravityDataProduct::from_id(x);
     let mut operands = MultPB::new();
 
     operands.set_multiplicand_a(8);

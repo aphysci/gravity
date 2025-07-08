@@ -7,7 +7,7 @@
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
 #include "GravityRequestor.h"
-// #include "RustSubscriber.h"
+#include "FutureResponse.h"
 #include "/home/anson/gravity/src/api/rust/target/cxxbridge/rust/cxx.h"
 #include "SpdLog.h"
 
@@ -89,7 +89,7 @@ namespace gravity
      * Set the application-specific data for this data product, callable by rust
      * \param data A Google Protocol Buffer Message object containing the data
      */
-    void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size);
+    void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size, const std::string& dataType);
 
 
 
@@ -103,11 +103,45 @@ namespace gravity
 
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp);
 
-    const char * rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp);
+    const char * rustGetData(const std::unique_ptr<GravityDataProduct>& gdp);
 
     int rustGetDataSize(const std::unique_ptr<GravityDataProduct>& gdp);
 
+    int rustGetSize(const std::unique_ptr<GravityDataProduct>& gdp);
 
+    void rustParseFromArray(const std::unique_ptr<GravityDataProduct>& gdp, const char * arrayPtr, int size);
+
+    std::unique_ptr<std::vector<unsigned char>> rustSerializeToArray(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    std::unique_ptr<std::string> rustGDPGetComponentID(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    std::unique_ptr<std::string> rustGetDomain(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    bool rustIsFutureResponse(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    bool rustIsCachedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    void rustSetIsCachedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp, bool cached);
+
+    std::unique_ptr<std::string> rustGetFutureSocketURL(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    bool rustIsRelayedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    void rustSetIsRelayedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp, bool relayed);
+
+    void rustSetProtocol(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& protocol);
+
+    std::unique_ptr<std::string> rustGetProtocol(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    void rustSetTypeName(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& dataType);
+
+    std::unique_ptr<std::string> rustGetTypeName(const std::unique_ptr<GravityDataProduct>& gdp);
+
+    uint32_t rustGetRegistrationTime(const std::unique_ptr<GravityDataProduct>& gdp);
+
+
+
+    void rustFree(const char * data);
     /**
      * Constructor, callable by Rust
      * \return pointer to a GravityNode
@@ -215,8 +249,14 @@ namespace gravity
 
     GravityReturnCode rustUnregisterRelay(const std::unique_ptr<GravityNode> & gn, const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber);
 
+    std::shared_ptr<FutureResponse> rustCreateFutureResponse(const std::unique_ptr<GravityNode>& gn);
+
+    GravityReturnCode rustSendFutureResponse(const std::unique_ptr<GravityNode>& gn, const std::shared_ptr<FutureResponse>& futureResponse);
     /* Future response things*/
-    
+    std::shared_ptr<FutureResponse> rustNewFutureResponse(const char* arrayPtr, int size);
+
+    void rustSetResponse(const std::unique_ptr<FutureResponse>& fr, const std::unique_ptr<GravityDataProduct>& response);
+
 
 } // namespace gravity
 

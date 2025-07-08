@@ -11,47 +11,33 @@ Since SWIG does not have support for rust, the current implementation uses a cra
 ## Overview
 
 ### Current Functionality
-Up to an including a Gravity PubSub kind of deal. GravityNodes can do everything except unsubscriber, request. ans provide services. I imagine these features will not be super tough to implement now I have the subscriber going!
+Nearly done. I expect to have full functionality by the end of the week (by July 11) at the latest. The only 2 things I do not have are the subscriptionMonitor and HeartbeatListeners. I will also be going back to the logging thing when I finish this.
 
-### Basics
-In this section, you will learn how I set up the rust Gravity API and the motivation behind it.
+There is also now zero change to the original GravityAPI so it should integrate with it very nicely. The only thing that has to compile is the shims.h/cpp files and be linked with gravity libraries. I need to figure out how to make them compile separately (so c++ users do not accidentally call some weird rust bridge function).
 
-It is also important to note that regular CXX does not provide the functionality to call non-const member functions. In order to work around this I created functions that take in an object as a parameter and then call the member functions from there on the C++ side. But as you can imagine that is kind of yucky to deal with, so in order to give the *illusion* of normalcy, I created a struct on the Rust side that holds the object in a unique pointer (so it can communicate with C++ since Rust cannot directly hold opaque C++ values), and gave it functions that call the C++ wrappers. 
+In addition, this is now a library so you can use it outside of the crate. (im glad because some fields needed to be crate visible, but would be very bad if users could access).
 
-### Dependencies
-In the cargo.toml folder these are the dependencies:
-```Rust
+The cargo.toml for it looks like this now. The path is the path to the current cargo project. Of course this is subject to change, and hopefully the rust library is able to use environmental variables so when the gravity build eventually puts the rust library in the right place all a user would have to do is specify that it is the LD_LIBRARY_PATH. tbd
+
+```rust
+[package]
+name = "gravity_user"
+version = "0.1.0"
+edition = "2024"
+
 [dependencies]
-cxx = "1.0"
+gravity = { path = "/home/anson/gravity/src/api/rust"}
 protobuf = "3.7.2"
-
-[build-dependencies]
-cxx-build = "1.0"
-
 ```
-### Distribution
-In the src folder you will see a folder gravity with 2 files : gravity.rs and ffi.rs
 
-#### ffi.rs
-This contains all the bindings for the C++ code. The functions here all are in this format:
-```Rust
-#[rust_name = "fn_name"]
-fn cpp_name(parameter: type, ..) -> return_type;
-```
-This lets you call the C++ function cpp_name in rust with the name ***"fn_name"***. The renaming is purely for simplicity. 
+### Tests
 
-#### gravity.rs
-This contains the struct and impl of the gravity types. The goal is that your main.rs calls the functions here, which call the functions in ffi.rs, which actually call the C++.
-
-### shims.h
-There is also a file called shims.h which does the C++ handling of the rust calls. Think of gravity.rs is the platform on the  rust side, shims.h/cpp as the platform on the C++ side, and ffi.rs as the bridge between them!
+uhhhh... none yet.
+I have been doing some light testing of basic functionality as I have been moving through, but thorough testing will be done soon. Once I finish implementing all the GravityNode methods.
 
 
 ## Current Updates
 ***NEW*** <br>
-Rust Gravity works for the equivalents scenarios as described in cpp examples 1 - 4 and 8. 
-Next in line is the GravityHeartbeatListener, FutureResponse, and a bunch of miscellaneous methods. 
-
-Still thinking about how to do optional parameters. Maybe with Option type from rust?
+It is nearly time to integrate. I am (maybe) looking forward to it.
 
 **Last Updated July 2, 2025**

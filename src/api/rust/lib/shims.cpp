@@ -1,4 +1,5 @@
 #include "GravityDataProduct.h"
+#include "FutureResponse.h"
 #include "GravityNode.h"
 #include <iostream>
 #include "shims.h"
@@ -119,16 +120,18 @@ namespace gravity
     {
         (*gdp).setData(data, size);
     }
-    void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size) {
-        (*gdp).setDataRustInternal(data, size);
+    void rustSetDataProto(const std::unique_ptr<GravityDataProduct> &gdp, const char* data, int size, const std::string& dataType) {
+        gdp->setData(data, size);
+        gdp->setProtocol("protobuf2");
+        gdp->setTypeName(dataType);
     }
 
-    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, std::string softwareVersion)
+    void rustSetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& softwareVersion)
     {
         gdp->setSoftwareVersion(softwareVersion);
     }
 
-    const char * rustGetProtoBytes(const std::unique_ptr<GravityDataProduct>& gdp)
+    const char * rustGetData(const std::unique_ptr<GravityDataProduct>& gdp)
     {
         int size = gdp->getDataSize();
         char * data = (char *) malloc(sizeof(char) * size + 1);
@@ -138,10 +141,38 @@ namespace gravity
         // free(data);
         // return ret;
     }
+    void rustFree(const char * data) {
+        free((void*) data);
+    }
 
     int rustGetDataSize(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 
         return gdp->getDataSize(); 
+    }
+
+    int rustGetSize(const std::unique_ptr<GravityDataProduct>& gdp) 
+    { 
+        return gdp->getSize(); 
+    }
+
+    void rustParseFromArray(const std::unique_ptr<GravityDataProduct>& gdp, const char* arrayPtr, int size) 
+    {
+        gdp->parseFromArray(arrayPtr, size);
+    }
+
+    std::unique_ptr<std::vector<unsigned char>> rustSerializeToArray(const std::unique_ptr<GravityDataProduct>& gdp) {
+        int size = gdp->getSize();
+        void * ptr = malloc(sizeof(char) * size + 1);
+        char * it = (char *) ptr;
+        gdp->serializeToArray(ptr);
+        std::vector<unsigned char> ret;
+        for (int i = 0; i < size; i++) {
+            ret.push_back(*it);
+            it++;
+        }
+        free(ptr);
+        return std::unique_ptr<std::vector<unsigned char>>(new std::vector<unsigned char>(ret));
+
     }
 
     std::unique_ptr<std::string> rustGetSoftwareVersion(const std::unique_ptr<GravityDataProduct>& gdp)
@@ -252,11 +283,69 @@ namespace gravity
         return std::unique_ptr<std::string>(new std::string(gn->getIP()));
     }
 
-    std::unique_ptr<std::string> rustGetDomain(const std::unique_ptr<GravityNode> &gn)
+    std::unique_ptr<std::string> rustGDPGetComponentID(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getComponentId()));
+    }
+
+    std::unique_ptr<std::string> rustGetDomain(const std::unique_ptr<GravityNode>& gn)
     {
         return std::unique_ptr<std::string>(new std::string(gn->getDomain()));
     }
 
+    bool rustIsFutureResponse(const std::unique_ptr<GravityDataProduct>& gdp) {
+        return gdp->isFutureResponse(); 
+    }
+
+    bool rustIsCachedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp) 
+    { 
+        return gdp->isCachedDataproduct(); 
+    }
+
+    void rustSetIsCachedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp, bool cached) 
+    {
+        gdp->setIsCachedDataproduct(cached);
+    }
+
+    std::unique_ptr<std::string> rustGetFutureSocketURL(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getFutureSocketUrl()));
+    }
+
+    bool rustIsRelayedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp) 
+    { 
+        return gdp->isRelayedDataproduct(); 
+    }
+
+    void rustSetIsRelayedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp, bool relayed)
+    {
+        gdp->setIsRelayedDataproduct(relayed);
+    }
+
+    void rustSetProtocol(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& protocol) 
+    {
+        gdp->setProtocol(protocol);
+    }
+
+    std::unique_ptr<std::string> rustGetProtocol(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getProtocol()));
+    }
+
+    void rustSetTypeName(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& dataType) 
+    {
+        gdp->setTypeName(dataType);
+    }
+
+    std::unique_ptr<std::string> rustGetTypeName(const std::unique_ptr<GravityDataProduct>& gdp)
+    {
+        return std::unique_ptr<std::string>(new std::string(gdp->getTypeName()));
+    }
+
+    uint32_t rustGetRegistrationTime(const std::unique_ptr<GravityDataProduct>& gdp) 
+    { 
+        return gdp->getRegistrationTime(); 
+    }
 
     GravityReturnCode rustSubscribe(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
                                     const std::unique_ptr<RustSubscriber>& subscriber)
@@ -304,6 +393,27 @@ namespace gravity
                                           const std::unique_ptr<RustSubscriber>& subscriber)
     {
         return gn->unregisterRelay(dataProductID, *subscriber);
+    }
+
+    std::shared_ptr<FutureResponse> rustCreateFutureResponse(const std::unique_ptr<GravityNode>& gn)
+    {
+        return gn->createFutureResponse();
+    }
+
+    GravityReturnCode rustSendFutureResponse(const std::unique_ptr<GravityNode>& gn,
+                                             const std::unique_ptr<FutureResponse>& futureResponse)
+    {
+        return gn->sendFutureResponse(*futureResponse);
+    }
+
+    std::shared_ptr<FutureResponse> rustNewFutureResponse(const char* arrayPtr, int size)
+    {
+        return std::shared_ptr<FutureResponse>(new FutureResponse(arrayPtr, size));
+    }
+    
+    void rustSetResponse(const std::unique_ptr<FutureResponse>& fr, const std::unique_ptr<GravityDataProduct>& response)
+    {
+        fr->setResponse(*response);
     }
 
     }  // namespace gravity

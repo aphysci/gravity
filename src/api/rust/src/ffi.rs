@@ -4,7 +4,6 @@ pub use ffi::*;
 
 #[cxx::bridge]
 mod ffi {
-
    
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -56,6 +55,8 @@ mod ffi {
         #[rust_name = "GDataProduct"]
         type GravityDataProduct;
  
+        #[rust_name = "GFutureResponse"]
+        type FutureResponse; 
         type RustSubscriber;
         type RustRequestor;
         type RustServiceProvider;
@@ -176,6 +177,13 @@ mod ffi {
         #[rust_name = "unregister_relay"]
         fn rustUnregisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
 
+        #[rust_name = "create_future_response"]
+        fn rustCreateFutureResponse(gn: &UniquePtr<GNode>) -> SharedPtr<GFutureResponse>;
+
+        #[rust_name = "send_future_response"]
+        fn rustSendFutureResponse(gn: &UniquePtr<GNode>, future_response: &SharedPtr<GFutureResponse>) -> GReturnCode;
+
+
         // GravityDataProductMethods
 
         #[rust_name = "gravity_data_product"]
@@ -191,11 +199,8 @@ mod ffi {
         unsafe fn rustSetData(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
     
         #[rust_name = "set_data"]
-        unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32);
+        unsafe fn rustSetDataProto(gdp: &UniquePtr<GDataProduct>, data: *const c_char, size: i32, data_type: &CxxString);
     
-        #[rust_name = "get_data_size"]
-        fn rustGetDataSize(gdp: &UniquePtr<GDataProduct>) -> i32;
-
         #[rust_name = "get_gravity_timestamp"]
         fn rustGetGravityTimestamp(gdp: &UniquePtr<GDataProduct>) -> u64;
 
@@ -211,17 +216,77 @@ mod ffi {
         #[rust_name = "get_software_version"]
         fn rustGetSoftwareVersion(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
 
+        #[rust_name = "get_data_size"]
+        fn rustGetDataSize(gdp: &UniquePtr<GDataProduct>) -> i32;
+
+        #[rust_name = "get_data"]
+        fn rustGetData(gdp: &UniquePtr<GDataProduct>) -> * const c_char;
+
+        #[rust_name = "get_size"]
+        fn rustGetSize(gdp: &UniquePtr<GDataProduct>) -> i32;
+
+        #[rust_name = "parse_from_array"]
+        unsafe fn rustParseFromArray(gdp: &UniquePtr<GDataProduct>, array_ptr: * const c_char, size: i32);
+
+        #[rust_name = "serialize_to_array"]
+        fn rustSerializeToArray(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxVector<u8>>;
+
+        #[rust_name = "gdp_get_component_id"]
+        fn rustGDPGetComponentID(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "gdp_get_domain"]
+        fn rustGetDomain(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "is_future_response"]
+        fn rustIsFutureResponse(gdp: &UniquePtr<GDataProduct>) -> bool;
+
+        #[rust_name = "is_cached_data_product"]
+        fn rustIsCachedDataProduct(gdp: &UniquePtr<GDataProduct>) -> bool;
+
+        #[rust_name = "set_is_cached_data_product"]
+        fn rustSetIsCachedDataProduct(gdp: &UniquePtr<GDataProduct>, cached: bool);
+
+        #[rust_name = "get_future_socket_url"]
+        fn rustGetFutureSocketURL(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "is_relayed_data_product"]
+        fn rustIsRelayedDataProduct(gdp: &UniquePtr<GDataProduct>) -> bool;
+
+        #[rust_name = "set_is_relayed_data_product"]
+        fn rustSetIsRelayedDataProduct(gdp: &UniquePtr<GDataProduct>, relayed: bool);
+
+        #[rust_name = "set_protocol"]
+        fn rustSetProtocol(gdp: &UniquePtr<GDataProduct>, protocol: &CxxString);
+
+        #[rust_name = "get_protocol"]
+        fn rustGetProtocol(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "set_type_name"]
+        fn rustSetTypeName(gdp: &UniquePtr<GDataProduct>, data_type: &CxxString);
+
+        #[rust_name = "get_type_name"]
+        fn rustGetTypeName(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
+
+        #[rust_name = "get_registration_time"]
+        fn rustGetRegistrationTime(gdp: &UniquePtr<GDataProduct>) -> u32;
+
         
-        
-            
         #[rust_name = "copy_gdp"]
         fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
 
         #[rust_name = "copy_gdp_shared"]
         fn copyGravityDataProductShared(gdp: &GDataProduct) -> SharedPtr<GDataProduct>;
     
-        #[rust_name = "get_proto_data"]
-        fn rustGetProtoBytes(gdp: &UniquePtr<GDataProduct>) -> *const c_char;
+        #[rust_name ="free_data"]
+        unsafe fn rustFree(data: * const c_char);
+
+
+        // Future response
+        #[rust_name = "new_future_response"]
+        unsafe fn rustNewFutureResponse(array_ptr: * const c_char, size: i32) -> SharedPtr<GFutureResponse>;
+    
+        #[rust_name = "set_response"]
+        fn rustSetResponse(fr: &UniquePtr<GFutureResponse>, respons: &UniquePtr<GDataProduct>);
     }
 
 
