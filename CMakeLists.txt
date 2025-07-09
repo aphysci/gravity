@@ -86,6 +86,13 @@ macro(add_external_libzmq)
 endmacro()
 
 macro(add_external_spdlog)
+    set(_ext_spdlog_cmake_args "-DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR};-DSPDLOG_BUILD_EXAMPLE=OFF")
+    if (WIN32)
+       list(APPEND _ext_spdlog_cmake_args "-DSPDLOG_BUILD_SHARED=ON")
+    endif()
+    if (UNIX)
+        list(APPEND _ext_spdlog_cmake_args  "-DCMAKE_CXX_FLAGS=-fPIC;-DCMAKE_CXX_VISIBILITY_PRESET=hidden")
+	endif()
     ExternalProject_Add(
         spdlog_external
         SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/spdlog"
@@ -95,14 +102,7 @@ macro(add_external_spdlog)
         LOG_INSTALL ON
         LOG_DOWNLOAD ON
         LOG_OUTPUT_ON_FAILURE ON
-        CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-    if (WIN32)
-        -DSPDLOG_BUILD_SHARED:BOOL=ON
-    endif()
-	if (UNIX)
-		-DCMAKE_CXX_FLAGS=-fPIC
-	endif()
+        CMAKE_ARGS ${_ext_spdlog_cmake_args}
         BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
         INSTALL_COMMAND cmake --build . --target install --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
     )

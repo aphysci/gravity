@@ -125,12 +125,12 @@ target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   $<INSTALL_INTERFACE:include>
 )
-
+set_target_properties(${LIB_NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_link_libraries(${LIB_NAME} PUBLIC Ws2_32.lib)
 endif()
-target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog_header_only)
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog)
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
