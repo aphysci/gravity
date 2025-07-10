@@ -21,7 +21,7 @@ file(GLOB SRCS "tests/*.cpp")
 
 set(CMAKE_DEBUG_POSTFIX _d)
 add_executable(unit_tests ${SRCS} ${PROTO_SRCS})
-target_link_libraries(unit_tests PRIVATE gravity spdlog::spdlog)
+target_link_libraries(unit_tests PRIVATE gravity spdlog::spdlog_header_only)
 target_include_directories(unit_tests PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(unit_tests ${PROJECT_NAME}_protos)
 

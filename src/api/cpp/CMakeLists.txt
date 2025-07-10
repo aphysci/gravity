@@ -130,7 +130,7 @@ target_link_libraries(${LIB_NAME} PRIVATE ${PThreadsWin32Lib_Installed})
 if (WIN32)
     target_link_libraries(${LIB_NAME} PUBLIC Ws2_32.lib)
 endif()
-target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog)
+target_link_libraries(${LIB_NAME} PUBLIC ${PROTO_LIB_NAME} protobuf::libprotobuf libzmq PRIVATE keyvalue_parser spdlog::spdlog_header_only)
 if (WIN32)
     target_include_directories(${LIB_NAME} INTERFACE
         $<BUILD_INTERFACE:${PThreadsWin32_Include}>
