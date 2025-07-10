@@ -21,8 +21,8 @@ option optimize_for = SPEED;
 
 message MultPB
 {
-	required int32 multiplicand_a = 1;
-	required int32 multiplicand_b = 2;
+	optional int32 multiplicand_a = 1;
+	optional int32 multiplicand_b = 2;
 }
 
 message ResultPB

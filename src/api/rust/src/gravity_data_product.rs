@@ -70,7 +70,7 @@ impl GravityDataProduct {
             
         }
         unsafe { ffi::free_data(temp); }
-
+        
         bytes_buf
         
     }

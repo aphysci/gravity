@@ -48,7 +48,7 @@ impl MultPB {
         ::std::default::Default::default()
     }
 
-    // required int32 multiplicand_a = 1;
+    // optional int32 multiplicand_a = 1;
 
     pub fn multiplicand_a(&self) -> i32 {
         self.multiplicand_a.unwrap_or(0)
@@ -67,7 +67,7 @@ impl MultPB {
         self.multiplicand_a = ::std::option::Option::Some(v);
     }
 
-    // required int32 multiplicand_b = 2;
+    // optional int32 multiplicand_b = 2;
 
     pub fn multiplicand_b(&self) -> i32 {
         self.multiplicand_b.unwrap_or(0)
@@ -111,12 +111,6 @@ impl ::protobuf::Message for MultPB {
     const NAME: &'static str = "MultPB";
 
     fn is_initialized(&self) -> bool {
-        if self.multiplicand_a.is_none() {
-            return false;
-        }
-        if self.multiplicand_b.is_none() {
-            return false;
-        }
         true
     }
 
@@ -351,7 +345,7 @@ impl ::protobuf::reflect::ProtobufValue for ResultPB {
 
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x0cDataPB.proto\"V\n\x06MultPB\x12%\n\x0emultiplicand_a\x18\x01\x20\
-    \x02(\x05R\rmultiplicandA\x12%\n\x0emultiplicand_b\x18\x02\x20\x02(\x05R\
+    \x01(\x05R\rmultiplicandA\x12%\n\x0emultiplicand_b\x18\x02\x20\x01(\x05R\
     \rmultiplicandB\"\"\n\x08ResultPB\x12\x16\n\x06result\x18\x01\x20\x01(\
     \x05R\x06resultB\x02H\x01J\x8b\x08\n\x06\x12\x04\x12\0\x1e\x01\n\xec\x05\
     \n\x01\x0c\x12\x03\x12\0\x122\xe1\x05*\x20(C)\x20Copyright\x202013,\x20A\

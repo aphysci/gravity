@@ -4,6 +4,7 @@ pub use ffi::*;
 
 #[cxx::bridge]
 mod ffi {
+
    
     #[namespace = "gravity"]
     #[repr(i32)]
@@ -44,6 +45,7 @@ mod ffi {
         include!("/home/anson/gravity/src/api/rust/lib/shims.h");
         // include!("/home/anson/gravity/src/api/rust/lib/RustSubscriber.h");
 
+
         #[rust_name = "GReturnCode"]
         type GravityReturnCode;
 
@@ -60,7 +62,10 @@ mod ffi {
         type RustSubscriber;
         type RustRequestor;
         type RustServiceProvider;
-
+        type RustHeartbeatListener;
+        type RustSubscriptionMonitor;
+        #[rust_name = "GLogger"]
+        type Logger;
         //GravityNode methods
         #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GNode>;
@@ -149,6 +154,18 @@ mod ffi {
         #[rust_name = "new_rust_requestor"]
         fn rustRustRequestor(func: fn(&CxxString, &CxxString, &GDataProduct, usize), addr: usize) -> UniquePtr<RustRequestor>;
         
+        #[rust_name = "new_rust_heartbeat_listener"]
+        fn rustNewHeartbeatListener(missed: fn(&CxxString, i64, &mut i64, usize), received: fn(&CxxString, &mut i64, usize), addr: usize) -> UniquePtr<RustHeartbeatListener>;
+        
+        #[rust_name = "new_rust_subscription_monitor"]
+        fn rustNewSubscriptionMonitor(func: fn(&CxxString, i32, &CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustSubscriptionMonitor>;
+
+        #[rust_name = "register_heartbeat_listener"]
+        fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>, domain: &CxxString) -> GReturnCode;
+        
+        #[rust_name = "unregister_heartbeat_listener"]
+        fn rustUnregisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GReturnCode;
+        
         #[rust_name = "new_rust_service_provider"]
         fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;
 
@@ -173,7 +190,6 @@ mod ffi {
         fn rustRegisterRelayCache(gn: &UniquePtr<GNode>, data_product_id: &CxxString, subscriber: &UniquePtr<RustSubscriber>,
                              local_only: bool, transport_type: GTransportType, cache_last_value: bool) -> GReturnCode;
 
-
         #[rust_name = "unregister_relay"]
         fn rustUnregisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
 
@@ -183,6 +199,13 @@ mod ffi {
         #[rust_name = "send_future_response"]
         fn rustSendFutureResponse(gn: &UniquePtr<GNode>, future_response: &SharedPtr<GFutureResponse>) -> GReturnCode;
 
+        #[rust_name = "set_subscription_timeout_monitor"]
+        fn rustSetSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            milli_second_timeout: i32, filter: &CxxString, domain: &CxxString) -> GReturnCode;
+        
+        #[rust_name = "clear_subscription_timeout_monitor"]
+        fn rustClearSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            filter: &CxxString, domain: &CxxString) -> GReturnCode;
 
         // GravityDataProductMethods
 
@@ -300,6 +323,7 @@ mod ffi {
         fn spdlog_info(message: &CxxString);
         fn spdlog_debug(message: &CxxString);
         fn spdlog_trace(message: &CxxString);
+
     }
 
     // extern "Rust" {

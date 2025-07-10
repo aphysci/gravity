@@ -6,6 +6,63 @@
 
 namespace gravity
 {
+
+    void RustSubscriptionMonitor::subscriptionTimeout(std::string dataProductID, int millisecondsSinceLast,
+                                                 std::string filter, std::string domain)
+    {
+        this->func(dataProductID, millisecondsSinceLast, filter, domain, this->addr);
+    }
+
+    RustSubscriptionMonitor::RustSubscriptionMonitor(rust::Fn<void(const std::string&, int, const std::string&, const std::string&, size_t)> func, size_t addr)
+    {
+        this->func = func;
+        this-> addr = addr;
+    }
+    
+    std::unique_ptr<RustSubscriptionMonitor> rustNewSubscriptionMonitor(rust::Fn<void(const std::string&, int, const std::string&, const std::string&, size_t)> func, size_t addr)
+    {
+        return std::unique_ptr<RustSubscriptionMonitor>(new RustSubscriptionMonitor(func, addr));
+    }
+
+    void RustHeartbeatListener::MissedHeartbeat(std::string componentID,
+                int64_t microsecond_to_last_heartbeat, int64_t& interval_in_microseconds)
+    {
+        this->missed(componentID, microsecond_to_last_heartbeat, interval_in_microseconds, this->addr);
+    }
+    void RustHeartbeatListener::ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds)
+    {
+        this->received(componentID, interval_in_microseconds, this->addr);
+    }
+    RustHeartbeatListener::RustHeartbeatListener(rust::Fn<void(const std::string&, int64_t, int64_t&, size_t)> missed,
+            rust::Fn<void(const std::string&, int64_t&, size_t)> received,
+            size_t addr)
+    {
+        this->received = received;
+        this->missed = missed;
+        this-> addr = addr;
+    }
+
+    std::unique_ptr<RustHeartbeatListener> rustNewHeartbeatListener(
+            rust::Fn<void(const std::string&, int64_t, int64_t&, size_t)> missed,
+            rust::Fn<void(const std::string&, int64_t&, size_t)> received,
+            size_t addr
+        ) 
+    {
+        return std::unique_ptr<RustHeartbeatListener>(new RustHeartbeatListener(missed, received, addr));
+    }
+
+    GravityReturnCode rustRegisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, int64_t interval_in_microseconds,
+        const std::unique_ptr<RustHeartbeatListener>& listener, const std::string& domain)
+    {
+        return gn->registerHeartbeatListener(componentID, interval_in_microseconds, *listener, domain);
+    }
+
+    GravityReturnCode rustUnregisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, const std::string& domain)
+    {
+        return gn->unregisterHeartbeatListener(componentID, domain);
+    }
+
+
     RustServiceProvider::RustServiceProvider(
         rust::Fn<std::shared_ptr<GravityDataProduct>(const std::string&, const GravityDataProduct&, size_t)> func,
         size_t addr)
@@ -61,7 +118,7 @@ namespace gravity
                                   const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID,
                                   int timeout_milliseconds, const std::string& domain)
     {
-        return gn->request(serviceID, *dataProduct, *requestor, serviceID, timeout_milliseconds, domain);
+        return gn->request(serviceID, *dataProduct, *requestor, requestID, timeout_milliseconds, domain);
     }
 
     std::shared_ptr<GravityDataProduct> rustRequestSync(const std::unique_ptr<GravityNode>& gn,
@@ -88,7 +145,25 @@ namespace gravity
         this->func(v, this->addr);
     }
 
-    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr)
+    GravityReturnCode rustSetSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>& gn,
+                                                        const std::string& dataProductID,
+                                                        const std::unique_ptr<RustSubscriptionMonitor>& monitor,
+                                                        int milliSecondTimeout,
+                                                        const std::string& filter, const std::string& domain)
+    {
+        return gn->setSubscriptionTimeoutMonitor(dataProductID, *monitor, milliSecondTimeout, filter, domain);
+    }
+
+    GravityReturnCode rustClearSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>& gn,
+                                                          const std::string& dataProductID,
+                                                          const std::unique_ptr<RustSubscriptionMonitor>& monitor,
+                                                          const std::string& filter, const std::string& domain)
+    {
+        return gn->clearSubscriptionTimeoutMonitor(dataProductID, *monitor, filter, domain);
+    }
+
+    std::unique_ptr<RustSubscriber> newRustSubscriber(
+        rust::Fn<void(const std::vector<GravityDataProduct>&, size_t)> func, size_t addr)
     {
         return std::unique_ptr<RustSubscriber>(new RustSubscriber(func, addr));
     }
@@ -401,7 +476,7 @@ namespace gravity
     }
 
     GravityReturnCode rustSendFutureResponse(const std::unique_ptr<GravityNode>& gn,
-                                             const std::unique_ptr<FutureResponse>& futureResponse)
+                                             const std::shared_ptr<FutureResponse>& futureResponse)
     {
         return gn->sendFutureResponse(*futureResponse);
     }
@@ -410,10 +485,31 @@ namespace gravity
     {
         return std::shared_ptr<FutureResponse>(new FutureResponse(arrayPtr, size));
     }
-    
+
     void rustSetResponse(const std::unique_ptr<FutureResponse>& fr, const std::unique_ptr<GravityDataProduct>& response)
     {
         fr->setResponse(*response);
     }
 
-    }  // namespace gravity
+
+}  // namespace gravity
+
+
+void spdlog_critical(const std::string& message) {
+    gravity::SpdLog::critical(message.c_str());
+}
+void spdlog_error(const std::string& message) {
+    gravity::SpdLog::error(message.c_str());
+}
+void spdlog_warn(const std::string& message) {
+    gravity::SpdLog::warn(message.c_str());
+}
+void spdlog_info(const std::string& message) {
+    gravity::SpdLog::info(message.c_str());
+}
+void spdlog_debug(const std::string& message) {
+    gravity::SpdLog::debug(message.c_str());
+}
+void spdlog_trace(const std::string& message) {
+    gravity::SpdLog::trace(message.c_str());
+}

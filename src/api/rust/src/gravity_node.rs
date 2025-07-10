@@ -17,6 +17,8 @@ pub struct GravityNode {
     cpp_subscriber_map: HashMap<usize, (UniquePtr<RustSubscriber>, usize)>,
     cpp_service_provider_map: HashMap<usize, (UniquePtr<RustServiceProvider>, usize)>,
     cpp_requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
+    cpp_listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize)>,
+    cpp_monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
     // rust_subscriber_list: Vec<Box<dyn GravitySubscriber>>,
 }
 
@@ -27,6 +29,8 @@ impl GravityNode {
             cpp_subscriber_map: HashMap::new(),
             cpp_service_provider_map: HashMap::new(),
             cpp_requestor_provider_map: HashMap::new(),
+            cpp_listener_map: HashMap::new(),
+            cpp_monitor_map: HashMap::new(),
         }
     }
     
@@ -37,6 +41,8 @@ impl GravityNode {
             cpp_subscriber_map: HashMap::new(),
             cpp_service_provider_map: HashMap::new(),
             cpp_requestor_provider_map: HashMap::new(),
+            cpp_listener_map: HashMap::new(),
+            cpp_monitor_map: HashMap::new(),
         }
     }
 
@@ -52,9 +58,9 @@ impl GravityNode {
     pub fn wait_for_exit(&self) {
         ffi::wait_for_exit(&self.gn);
     }
-    pub fn publish(&self, data_product: GravityDataProduct) -> GravityReturnCode
+    pub fn publish(&self, data_product: &GravityDataProduct) -> GravityReturnCode
     {
-        ffi::publish(&self.gn, &(data_product.gdp))
+        ffi::publish(&self.gn, &data_product.gdp)
     }
     pub fn subscribers_exist(&self, data_product_id: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
@@ -118,55 +124,96 @@ impl GravityNode {
     }
     pub fn subscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
-        let addr   = GravityNode::get_addr(subscriber);      
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);       
 
-        let ret= ffi::subscribe(&self.gn, &dpid, &rust_sub);
-        // std::mem::forget((rust_sub, addr));
         let key = subscriber as * const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        let func = GravityNode::sub_filled_internal;
+        let item = self.cpp_subscriber_map.get(&key);
+
+        match item {
+            None => {
+                let addr   = GravityNode::get_addr(subscriber);      
+                let rust_sub = new_rust_subscriber(func, addr);       
+
+                let ret= ffi::subscribe(&self.gn, &dpid, &rust_sub);
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some ((rust_sub, _)) => {
+                ffi::subscribe(&self.gn, &dpid, rust_sub)
+            }
+        }
+    
+        
     }
     pub fn subscribe_filter(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
-        let addr = GravityNode::get_addr(subscriber);
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);
-
-        let ret = ffi::subscribe_filter(&self.gn, &dpid, &rust_sub, &f);
         let key = subscriber as * const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        let item = self.cpp_subscriber_map.get(&key);
+        let func = GravityNode::sub_filled_internal;
+    
+
+        match item {
+            None => {
+                let addr   = GravityNode::get_addr(subscriber);      
+                let rust_sub = new_rust_subscriber(func, addr);       
+
+                let ret= ffi::subscribe_filter(&self.gn, &dpid, &rust_sub, &f);
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some ((rust_sub, _)) => {
+                ffi::subscribe_filter(&self.gn, &dpid, rust_sub, &f)
+            }
+        }
     }
 
     pub fn subscribe_domain(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
-        let addr = GravityNode::get_addr(subscriber);
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);
-
-        let ret = ffi::subscribe_domain(&self.gn, &dpid, &rust_sub, &f, &d);
         let key = subscriber as * const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        let item = self.cpp_subscriber_map.get(&key);
+        let func = GravityNode::sub_filled_internal;
+    
+
+        match item {
+            None => {
+                let addr   = GravityNode::get_addr(subscriber);      
+                let rust_sub = new_rust_subscriber(func, addr);       
+
+                let ret= ffi::subscribe_domain(&self.gn, &dpid, &rust_sub, &f, &d);
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some ((rust_sub, _)) => {
+                ffi::subscribe_domain(&self.gn, &dpid, rust_sub, &f, &d)
+            }
+        }
     }
 
     pub fn subscribe_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>, recieve_last_cache_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
-        let addr = GravityNode::get_addr(subscriber);
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);
-
-        let ret = ffi::subscribe_cache(&self.gn, &dpid, &rust_sub, &f, &d, recieve_last_cache_value);
         let key = subscriber as * const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        let item = self.cpp_subscriber_map.get(&key);
+        let func = GravityNode::sub_filled_internal;
+    
+
+        match item {
+            None => {
+                let addr   = GravityNode::get_addr(subscriber);      
+                let rust_sub = new_rust_subscriber(func, addr);       
+
+                let ret= ffi::subscribe_cache(&self.gn, &dpid, &rust_sub, &f, &d, recieve_last_cache_value);
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some ((rust_sub, _)) => {
+                ffi::subscribe_cache(&self.gn, &dpid, rust_sub, &f, &d, recieve_last_cache_value)
+            }
+        }
     }
 
     
@@ -209,18 +256,29 @@ impl GravityNode {
             None => "".to_string()
         };
         let_cxx_string!(dom = d);
-        let boxed = Box::new(requestor as &dyn GravityRequestor);
-        let pointer = Box::into_raw(boxed);
 
-        let addr = pointer as usize;
-        let func = GravityNode::request_filled_internal;
-
-        let rust_req = ffi::new_rust_requestor(func, addr);
-        let ret = ffi::request_async(&self.gn, &sid, &data_product.gdp, &rust_req, &req, timeout, &dom);
-        
         let key = requestor as * const _ as usize;
-        self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
-        ret
+        let item = self.cpp_requestor_provider_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(requestor as &dyn GravityRequestor);
+                let pointer = Box::into_raw(boxed);
+
+                let addr = pointer as usize;
+                let func = GravityNode::request_filled_internal;
+
+                let rust_req = ffi::new_rust_requestor(func, addr);
+                let ret = ffi::request_async(&self.gn, &sid, &data_product.gdp, &rust_req, &req, timeout, &dom);
+
+
+                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
+                ret
+            }
+            Some((rust_req, _)) => {
+                ffi::request_async(&self.gn, &sid, &data_product.gdp, rust_req, &req, timeout, &dom)
+            }
+        }
     
     }
 
@@ -237,15 +295,26 @@ impl GravityNode {
     pub fn register_service(&mut self, service_id:  impl AsRef<[u8]>, transport_type: GravityTransportType, server: &impl GravityServiceProvider) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         let func = GravityNode::request_internal;
-        let boxed = Box::new(server as &dyn GravityServiceProvider);
-        let pointer = Box::into_raw(boxed);
-        let addr = pointer as usize;
-
-        let rust_server = ffi::new_rust_service_provider(func, addr);
-        let ret = ffi::register_service(&self.gn, &sid, transport_type, &rust_server);
         let key = server as * const _ as usize;
-        self.cpp_service_provider_map.insert(key, (rust_server, addr));
-        ret
+        let item = self.cpp_service_provider_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(server as &dyn GravityServiceProvider);
+                let pointer = Box::into_raw(boxed);
+                let addr = pointer as usize;
+
+                let rust_server = ffi::new_rust_service_provider(func, addr);
+                let ret = ffi::register_service(&self.gn, &sid, transport_type, &rust_server);
+
+                self.cpp_service_provider_map.insert(key, (rust_server, addr));
+                ret
+            },
+            Some((rust_server, _)) => {
+                ffi::register_service(&self.gn, &sid, transport_type, rust_server)
+            }
+        }
+        
     }
     pub fn unregister_service(&self, service_id: impl AsRef<[u8]>) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
@@ -256,26 +325,47 @@ impl GravityNode {
     pub fn register_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
                           local_only: bool, transport_type: GravityTransportType) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
-        let addr = GravityNode::get_addr(subscriber);
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);
-        
-        let ret = ffi::register_relay(&self.gn, &dpid, &rust_sub, local_only, transport_type);
         let key = subscriber as * const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        let item = self.cpp_subscriber_map.get(&key);
+
+        match item {
+            None => {
+                let addr = GravityNode::get_addr(subscriber);
+                let func = GravityNode::sub_filled_internal;
+                let rust_sub = new_rust_subscriber(func, addr);
+
+                let ret = ffi::register_relay(&self.gn, &dpid, &rust_sub, local_only, transport_type);
+
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some((rust_sub, _)) => {
+                ffi::register_relay(&self.gn, &dpid, rust_sub, local_only, transport_type)
+            }
+        }
+
     }
     pub fn register_relay_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
                                 local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
-        let addr = GravityNode::get_addr(subscriber);
-        let func = GravityNode::sub_filled_internal;
-        let rust_sub = new_rust_subscriber(func, addr);
+        let key = subscriber as * const _ as usize;
+        let item = self.cpp_subscriber_map.get(&key);
 
-        let ret = ffi::register_relay_cache(&self.gn, &dpid, &rust_sub, local_only, transport_type, cache_last_value);
-        let key = subscriber as *const _ as usize;
-        self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-        ret
+        match item {
+            None => {
+                let addr = GravityNode::get_addr(subscriber);
+                let func = GravityNode::sub_filled_internal;
+                let rust_sub = new_rust_subscriber(func, addr);
+
+                let ret = ffi::register_relay_cache(&self.gn, &dpid, &rust_sub, local_only, transport_type, cache_last_value);
+
+                self.cpp_subscriber_map.insert(key, (rust_sub, addr));
+                ret
+            },
+            Some((rust_sub, _)) => {
+                ffi::register_relay_cache(&self.gn, &dpid, rust_sub, local_only, transport_type, cache_last_value)
+            }
+        }
     }
     pub fn unregister_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
@@ -300,20 +390,72 @@ impl GravityNode {
     pub fn send_future_response(&self, future_response: FutureResponse) -> GravityReturnCode {
         ffi::send_future_response(&self.gn, &future_response.fr)
     }
+    pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64,
+                                        listener: &impl GravityHeartbeatListener, domain: &str) -> GravityReturnCode
+    {
+        let_cxx_string!(cid = component_id);
+        let_cxx_string!(d = domain);
+
+        let key = listener as * const _ as usize;
+        let item = self.cpp_listener_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(listener as &dyn GravityHeartbeatListener);
+                let pointer = Box::into_raw(boxed);
+                let addr = pointer as usize;
+
+                let missed = GravityNode::missed_heartbeat_internal;
+                let received = GravityNode::received_heartbeat_internal;
+
+                let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
+                let ret = ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, &rust_listener, &d);
+
+                self.cpp_listener_map.insert(key, (rust_listener, addr));
+
+                ret  
+            },
+            Some((rust_listener, _)) => {
+                ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, rust_listener, &d)
+            }
+        }
+         
+    }
+    pub fn unregister_heartbeat_listener(&self, component_id: &str, domain: &str) {
+        let_cxx_string!(cid = component_id);
+        let_cxx_string!(d = domain);
+        ffi::unregister_heartbeat_listener(&self.gn, &cid, &d);
+    }
     // TODO create c++ classes  ||
     // TODO these two functions \/
-    pub fn set_subscription_timout_monitor(&self, data_product_id: &str, 
+    pub fn set_subscription_timout_monitor(&mut self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32, filter: &str, domain: &str) -> GravityReturnCode {
         
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
-        let func = GravityNode::request_internal;
-        let boxed = Box::new(monitor as &dyn GravitySubscriptionMonitor);
-        let pointer = Box::into_raw(boxed);
-        let addr = pointer as usize;
+        let key = monitor as * const _ as usize;
+        let item = self.cpp_monitor_map.get(&key);
 
-        GravityReturnCode::SUCCESS
+        match item {
+            None => {
+                let func = GravityNode::subscription_timeout_internal;
+                let boxed = Box::new(monitor as &dyn GravitySubscriptionMonitor);
+                let pointer = Box::into_raw(boxed);
+                let addr = pointer as usize;
+
+                let rust_monitor = ffi::new_rust_subscription_monitor(func, addr);
+                let ret = ffi::set_subscription_timeout_monitor(&self.gn, &dpid, &rust_monitor,  milli_second_timeout, &f, &d);
+
+
+                self.cpp_monitor_map.insert(key, (rust_monitor, addr));
+                ret
+            },
+            Some((rust_monitor, _)) => {
+                ffi::set_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor,  milli_second_timeout, &f, &d)
+            }
+        }
+        
     }
     pub fn clear_subscription_timout_monitor(&self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, filter: &str, domain: &str) -> GravityReturnCode {
@@ -321,8 +463,16 @@ impl GravityNode {
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
         
+        let key = monitor as * const _ as usize;
+        let rust_monitor_op = self.cpp_monitor_map.get(&key);
         
-        GravityReturnCode::SUCCESS
+        match rust_monitor_op {
+            None => GravityReturnCode::SUCCESS,
+            Some((rust_monitor, _)) => {
+                ffi::clear_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor, &f, &d)
+            }
+        }
+
     }
 
     
@@ -346,8 +496,11 @@ impl GravityNode {
         let v = GravityNode::rustify(data_products);
         let subscriber = addr as * mut &dyn GravitySubscriber;
         
+        
         let b = unsafe {*subscriber};
+  
         b.subscription_filled(&v);
+        
         
     }
 
@@ -380,12 +533,12 @@ impl GravityNode {
         listener.missed_heartbeat(cid, microsecond_to_last_heartbeat, interval_in_microseconds);
     }
 
-    fn recieved_heartbeat_internal(component_id: &CxxString, interval_in_microseconds: &mut i64, addr: usize) {
+    fn received_heartbeat_internal(component_id: &CxxString, interval_in_microseconds: &mut i64, addr: usize) {
         let cid = component_id.to_str().unwrap();
         let p = addr as * mut &dyn GravityHeartbeatListener;
         let listener = unsafe { *p };
 
-        listener.recieved_heartbeat(cid, interval_in_microseconds);
+        listener.received_heartbeat(cid, interval_in_microseconds);
     }
     fn subscription_timeout_internal (data_product_id: &CxxString, milli_seconds_since_last: i32,
             filter: &CxxString, domain: &CxxString, addr: usize) {
@@ -413,6 +566,14 @@ impl Drop for GravityNode {
         }
         for (_ , (_, item)) in self.cpp_service_provider_map.iter() {
             let pointer = *item as * mut &dyn GravityServiceProvider;
+            let _= unsafe {Box::from_raw(pointer)};
+        }
+        for (_ , (_, item)) in self.cpp_monitor_map.iter() {
+            let pointer = *item as * mut &dyn GravitySubscriptionMonitor;
+            let _= unsafe {Box::from_raw(pointer)};
+        }
+        for (_ , (_, item)) in self.cpp_listener_map.iter() {
+            let pointer = *item as * mut &dyn GravityHeartbeatListener;
             let _= unsafe {Box::from_raw(pointer)};
         }
         
