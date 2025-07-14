@@ -14,7 +14,7 @@ use crate::protos::BigComplexPB::{self, BigGuyPB, BigResultPB, SmallGuyPB};
 struct MyProvider {}
 
 impl GravityServiceProvider for MyProvider {
-    fn request(&self, service_id: String, data_product: &GravityDataProduct) -> GravityDataProduct {
+    fn request(&self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
         if data_product.get_data_product_id() != String::from("Multiplication") {
             SpdLog::error("Request is not for multiplication");
         }
