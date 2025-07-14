@@ -43,6 +43,8 @@ mod ffi {
     #[namespace = "gravity"]
     unsafe extern "C++" {
         include!("/home/anson/gravity/src/api/rust/lib/shims.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravityNode.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravityDataProduct.h");
         // include!("/home/anson/gravity/src/api/rust/lib/RustSubscriber.h");
 
 
@@ -64,8 +66,7 @@ mod ffi {
         type RustServiceProvider;
         type RustHeartbeatListener;
         type RustSubscriptionMonitor;
-        #[rust_name = "GLogger"]
-        type Logger;
+        
         //GravityNode methods
         #[rust_name = "GravityNode"]
         fn newGravityNode() -> UniquePtr<GNode>;
@@ -152,7 +153,7 @@ mod ffi {
         fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
 
         #[rust_name = "new_rust_requestor"]
-        fn rustRustRequestor(func: fn(&CxxString, &CxxString, &GDataProduct, usize), addr: usize) -> UniquePtr<RustRequestor>;
+        fn rustRustRequestor(filled: fn(&CxxString, &CxxString, &GDataProduct, usize), timeout: fn(&CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustRequestor>;
         
         #[rust_name = "new_rust_heartbeat_listener"]
         fn rustNewHeartbeatListener(missed: fn(&CxxString, i64, &mut i64, usize), received: fn(&CxxString, &mut i64, usize), addr: usize) -> UniquePtr<RustHeartbeatListener>;
@@ -272,6 +273,18 @@ mod ffi {
         #[rust_name = "get_future_socket_url"]
         fn rustGetFutureSocketURL(gdp: &UniquePtr<GDataProduct>) -> UniquePtr<CxxString>;
 
+        #[rust_name = "set_timestamp"]
+        fn rustSetTimestamp(gdp: &UniquePtr<GDataProduct>, ts: u32);
+
+        #[rust_name = "set_recieved_timestamp"]
+        fn rustSetReceivedTimestamp(gdp: &UniquePtr<GDataProduct>, ts: u32);
+
+        // #[rust_name = "set_component_id"]
+        // fn rustSetComponentId(gdp: &UniquePtr<GDataProduct>, component_id: &CxxString);
+
+        // #[rust_name = "set_domain"]
+        // fn rustSetDomain(gdp: &UniquePtr<GDataProduct>, domain: &CxxString);
+
         #[rust_name = "is_relayed_data_product"]
         fn rustIsRelayedDataProduct(gdp: &UniquePtr<GDataProduct>) -> bool;
 
@@ -293,6 +306,8 @@ mod ffi {
         #[rust_name = "get_registration_time"]
         fn rustGetRegistrationTime(gdp: &UniquePtr<GDataProduct>) -> u32;
 
+        #[rust_name = "set_registration_time"]
+        fn rustSetRegistrationTime(gdp: &UniquePtr<GDataProduct>, ts: u32);
         
         #[rust_name = "copy_gdp"]
         fn copyGravityDataProduct(gdp: &GDataProduct) -> UniquePtr<GDataProduct>;
@@ -310,6 +325,8 @@ mod ffi {
     
         #[rust_name = "set_response"]
         fn rustSetResponse(fr: &UniquePtr<GFutureResponse>, respons: &UniquePtr<GDataProduct>);
+    
+    
     }
 
 

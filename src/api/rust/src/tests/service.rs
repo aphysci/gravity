@@ -44,6 +44,10 @@ impl GravityRequestor for MyRequestor {
         assert_eq!(result_pb.result(), 16);
    
     }
+    
+    fn request_timeout(&self, service_id: String, request_id: String) {
+        
+    }
 }
 
 #[test]
@@ -166,6 +170,10 @@ impl GravityRequestor for BetterRequestor {
             }
             
         }
+    }
+    
+    fn request_timeout(&self, service_id: String, request_id: String) {
+        
     }
 }
 

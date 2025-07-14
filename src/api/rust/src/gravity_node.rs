@@ -266,9 +266,9 @@ impl GravityNode {
                 let pointer = Box::into_raw(boxed);
 
                 let addr = pointer as usize;
-                let func = GravityNode::request_filled_internal;
-
-                let rust_req = ffi::new_rust_requestor(func, addr);
+                let filled = GravityNode::request_filled_internal;
+                let tfunc = GravityNode::request_timeout_internal;
+                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
                 let ret = ffi::request_async(&self.gn, &sid, &data_product.gdp, &rust_req, &req, timeout, &dom);
 
 
@@ -512,6 +512,15 @@ impl GravityNode {
         let requestor = addr as * const &dyn GravityRequestor;
         let b = unsafe {*requestor};
         b.request_filled(sid, rid, &gdp);
+    }
+
+    fn request_timeout_internal(service_id: &CxxString, request_id: &CxxString, addr: usize) {
+        let sid = service_id.to_str().unwrap().to_string();
+        let rid = request_id.to_str().unwrap().to_string();
+
+        let requestor = addr as * const &dyn GravityRequestor;
+        let b = unsafe {*requestor};
+        b.request_timeout(sid, rid);
     }
 
     fn request_internal(service_id: &CxxString, data_product: &GDataProduct, addr: usize) -> SharedPtr<GDataProduct>{

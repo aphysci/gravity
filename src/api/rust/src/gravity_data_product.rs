@@ -122,6 +122,20 @@ impl GravityDataProduct {
         let temp = ffi::get_future_socket_url(&self.gdp);
         temp.to_str().unwrap().to_string()
     }
+    pub fn set_timestamp(&self, ts: u32) {
+        ffi::set_timestamp(&self.gdp, ts);
+    }
+    pub fn set_recieved_timestamp(&self, ts: u32) {
+        ffi::set_recieved_timestamp(&self.gdp, ts);
+    }
+    // pub fn set_component_id(&self, component_id: &str) {
+    //     let_cxx_string!(cid = component_id);
+    //     ffi::set_component_id(&self.gdp, &cid);
+    // }
+    // pub fn set_domain(&self, domain: &str) {
+    //     let_cxx_string!(d = domain);
+    //     ffi::set_domain(&self.gdp, &d);
+    // }
     pub fn is_relayed_data_product(&self) -> bool {
         ffi::is_relayed_data_product(&self.gdp)
     }
@@ -146,5 +160,8 @@ impl GravityDataProduct {
     }
     pub fn get_registration_time(&self) -> u32 {
         ffi::get_registration_time(&self.gdp)
+    }
+    pub fn set_registration_time(&self, ts: u32) {
+        ffi::set_registration_time(&self.gdp, ts);
     }
 }

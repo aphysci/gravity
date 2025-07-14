@@ -2,7 +2,7 @@
 
 
 fn main() {
-    let src = ["lib/shims.cpp"];
+    let src = ["lib/shims.cpp", "lib/RustGravityNode.cpp", "lib/RustGravityDataProduct.cpp"];
     // println!("cargo:rustc-link-lib=add");   "libs/mult.cpp",
     cxx_build::bridge("src/ffi.rs").files(src.iter()).compile("rust_gravity");
 
@@ -11,6 +11,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/main.rs");
     println!("cargo:rerun-if-changed=src/gravity.rs");
     println!("cargo:rerun-if-changed=src/ffi.rs");
+    println!("cargo:rerun-if-changed=lib/shims.h");
     println!("cargo::rustc-link-search=/home/anson/git/gravity/build/install/lib/");
     println!("cargo:rustc-link-lib=gravity_protobufs");
     println!("cargo:rustc-link-lib=gravity");
