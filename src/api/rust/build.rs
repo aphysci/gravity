@@ -2,7 +2,12 @@
 
 
 fn main() {
-    let src = ["lib/shims.cpp", "lib/RustGravityNode.cpp", "lib/RustGravityDataProduct.cpp"];
+    let src = ["lib/RustSpdLog.cpp", "lib/RustGravityNode.cpp", 
+        "lib/RustGravityDataProduct.cpp", "lib/RustFutureResponse.cpp",
+         "lib/RustGravitySubscriber.cpp", "lib/RustGravityRequestor.cpp",
+         "lib/RustGravityHeartbeatListener.cpp", "lib/RustGravitySubscriptionMonitor.cpp",
+         "lib/RustGravityServiceProvider.cpp"
+         ];
     // println!("cargo:rustc-link-lib=add");   "libs/mult.cpp",
     cxx_build::bridge("src/ffi.rs").files(src.iter()).compile("rust_gravity");
 

@@ -1,16 +1,13 @@
 #ifndef RUSTGRAVTITYNODE_H_
 #define RUSTGRAVITYNODE_H_
 
-#include <string>
-
 #include "GravityDataProduct.h"
 #include "GravityNode.h"
-#include "GravityRequestor.h"
-#include "FutureResponse.h"
-#include "GravityHeartbeatListener.h"
-#include "rust/cxx.h"
-#include "SpdLog.h"
-#include "shims.h"
+#include "RustGravitySubscriber.h"
+#include "RustGravityRequestor.h"
+#include "RustGravityHeartbeatListener.h"
+#include "RustGravitySubscriptionMonitor.h"
+#include "RustGravityServiceProvider.h"
 
 namespace gravity {
 

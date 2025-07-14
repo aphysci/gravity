@@ -42,10 +42,14 @@ mod ffi {
     }
     #[namespace = "gravity"]
     unsafe extern "C++" {
-        include!("/home/anson/gravity/src/api/rust/lib/shims.h");
         include!("/home/anson/gravity/src/api/rust/lib/RustGravityNode.h");
         include!("/home/anson/gravity/src/api/rust/lib/RustGravityDataProduct.h");
-        // include!("/home/anson/gravity/src/api/rust/lib/RustSubscriber.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustFutureResponse.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravitySubscriber.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravityHeartbeatListener.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravitySubscriptionMonitor.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustGravityServiceProvider.h");
+
 
 
         #[rust_name = "GReturnCode"]
@@ -332,7 +336,7 @@ mod ffi {
 
     unsafe extern "C++" {
         //spdlog
-        include!("/home/anson/gravity/src/api/rust/lib/shims.h");
+        include!("/home/anson/gravity/src/api/rust/lib/RustSpdLog.h");
         
         fn spdlog_critical(message: &CxxString);
         fn spdlog_error(message: &CxxString);

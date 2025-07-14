@@ -177,4 +177,19 @@ namespace gravity {
         gdp->setRegistrationTime(ts);
     }
 
+
+    std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp)
+    {
+        return std::unique_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
+    }
+
+    std::shared_ptr<GravityDataProduct> copyGravityDataProductShared(const GravityDataProduct& gdp)
+    {
+        return std::shared_ptr<GravityDataProduct>(new GravityDataProduct(gdp));
+    }
+
+
+    void rustFree(const char * data) {
+        free((void*) data);
+    }
 } // namespace gravity

@@ -2,12 +2,12 @@ use core::time;
 // pub mod protos;
 
 use crate::ffi::new_future_response;
-use crate::gravity_logger::GravityLogger;
+use crate::spdlog::SpdLog;
 use crate::gravity_service_provider::GravityServiceProvider;
 use crate::gravity_data_product::GravityDataProduct;
 use crate::gravity_requestor::GravityRequestor;
 use crate::gravity_node::{GravityNode, GravityReturnCode, GravityTransportType};
-// use gravity::gravity_logger::GravityLogger;
+// use gravity::gravity_logger::SpdLog;
 use crate::protos::DataPB::{MultPB, ResultPB};
 use crate::protos::BigComplexPB::{self, BigGuyPB, BigResultPB, SmallGuyPB};
 
@@ -16,12 +16,12 @@ struct MyProvider {}
 impl GravityServiceProvider for MyProvider {
     fn request(&self, service_id: String, data_product: &GravityDataProduct) -> GravityDataProduct {
         if data_product.get_data_product_id() != String::from("Multiplication") {
-            GravityLogger::error("Request is not for multiplication");
+            SpdLog::error("Request is not for multiplication");
         }
         let mut mult_ops = MultPB::new();
         data_product.populate_message(&mut mult_ops);
 
-        // GravityLogger::warn(format!("Request recieved {} x {}", mult_ops.multiplicand_a.unwrap(), mult_ops.multiplicand_b.unwrap()));
+        // SpdLog::warn(format!("Request recieved {} x {}", mult_ops.multiplicand_a.unwrap(), mult_ops.multiplicand_b.unwrap()));
         
 
         let result = mult_ops.multiplicand_a.unwrap() * mult_ops.multiplicand_b.unwrap();
@@ -67,7 +67,7 @@ fn service() {
      let mut ret = gn2.init("MultiplicationRequestor");
 
      while ret != GravityReturnCode::SUCCESS {
-        GravityLogger::warn("Unable to init component, retrying...");
+        SpdLog::warn("Unable to init component, retrying...");
         ret = gn2.init("MultiplicationRequestor");
      }
 
@@ -82,7 +82,7 @@ fn service() {
     
     ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, Some(""));
     while ret != GravityReturnCode::SUCCESS {
-        GravityLogger::warn("request to Multiplication service failed, retrying...");
+        SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
         ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, None as Option<&str>);
@@ -103,7 +103,7 @@ fn service() {
             let mut result2 = ResultPB::new();
             gdp.populate_message(&mut result2);
             assert_eq!(35, result2.result());
-            // GravityLogger::warn(format!("Synchronous response recieved: 5 x 7 = {}", result2.result()));
+            // SpdLog::warn(format!("Synchronous response recieved: 5 x 7 = {}", result2.result()));
         }
     }
 }
@@ -113,7 +113,7 @@ impl GravityServiceProvider for BetterProvider {
     fn request(&self, service_id: String, data_product: &GravityDataProduct) -> GravityDataProduct {
         let mut bigops = BigGuyPB::new();
         data_product.populate_message(&mut bigops);
-        // GravityLogger::warn(format!("Request recieved for Big Complex"));
+        // SpdLog::warn(format!("Request recieved for Big Complex"));
         
         
         let mut bigresult = BigResultPB::new();
@@ -191,7 +191,7 @@ fn service2 () {
      let mut ret = gn2.init("BigComplexRequestor");
 
      while ret != GravityReturnCode::SUCCESS {
-        GravityLogger::warn("Unable to init component, retrying...");
+        SpdLog::warn("Unable to init component, retrying...");
         ret = gn2.init("BigComplexRequestor");
      }
 
@@ -223,7 +223,7 @@ fn service2 () {
     
     ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, Some(""));
     while ret != GravityReturnCode::SUCCESS {
-        GravityLogger::warn("request to Multiplication service failed, retrying...");
+        SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
         ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, None as Option<&str>);

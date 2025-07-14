@@ -5,13 +5,6 @@
 #include <string>
 
 #include "GravityDataProduct.h"
-#include "GravityNode.h"
-#include "GravityRequestor.h"
-#include "FutureResponse.h"
-#include "GravityHeartbeatListener.h"
-#include "rust/cxx.h"
-#include "SpdLog.h"
-#include "shims.h"
 
 namespace gravity
 {
@@ -80,6 +73,15 @@ namespace gravity
     uint32_t rustGetRegistrationTime(const std::unique_ptr<GravityDataProduct>& gdp);
 
     void rustSetRegistrationTime(const std::unique_ptr<GravityDataProduct>& gdp, uint32_t ts);
+
+
+
+    std::unique_ptr<GravityDataProduct> copyGravityDataProduct(const GravityDataProduct& gdp);
+
+    std::shared_ptr<GravityDataProduct> copyGravityDataProductShared(const GravityDataProduct& gdp);
+    
+
+    void rustFree(const char * data);
 
 } // namespace gravity
 

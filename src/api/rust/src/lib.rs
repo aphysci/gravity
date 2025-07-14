@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-pub mod gravity_logger;
+pub mod spdlog;
 pub mod gravity_node;
 pub mod gravity_data_product;
 pub mod gravity_subscriber;
