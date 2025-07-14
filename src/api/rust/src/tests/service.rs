@@ -37,7 +37,7 @@ impl GravityServiceProvider for MyProvider {
 struct MyRequestor {}
 
 impl GravityRequestor for MyRequestor {
-    fn request_filled(&self, _service_id: String, request_id: String, response: &GravityDataProduct) {
+    fn request_filled(&self, _service_id: &str, request_id: &str, response: &GravityDataProduct) {
         let mut result_pb = ResultPB::new();
         response.populate_message(&mut result_pb);
 
@@ -45,8 +45,8 @@ impl GravityRequestor for MyRequestor {
    
     }
     
-    fn request_timeout(&self, service_id: String, request_id: String) {
-        
+    fn request_timeout(&self, service_id: &str, request_id: &str) {
+        assert!(true);
     }
 }
 
@@ -85,7 +85,7 @@ fn service() {
         GravityLogger::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
-        ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, None as Option<&dyn AsRef<[u8]>>);
+        ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, None as Option<&str>);
     }
 
     let request2 = GravityDataProduct::from_id("Multiplication");
@@ -143,7 +143,7 @@ impl GravityServiceProvider for BetterProvider {
 struct BetterRequestor {}
 
 impl GravityRequestor for BetterRequestor {
-    fn request_filled(&self, service_id: String, request_id: String, response: &GravityDataProduct) {
+    fn request_filled(&self, service_id: &str, request_id: &str, response: &GravityDataProduct) {
         let mut bigresult = BigResultPB::new();
         response.populate_message(&mut bigresult);
 
@@ -172,8 +172,8 @@ impl GravityRequestor for BetterRequestor {
         }
     }
     
-    fn request_timeout(&self, service_id: String, request_id: String) {
-        
+    fn request_timeout(&self, service_id: &str, request_id: &str) {
+        assert!(true)
     }
 }
 
@@ -226,7 +226,7 @@ fn service2 () {
         GravityLogger::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
-        ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, None as Option<&dyn AsRef<[u8]>>);
+        ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, None as Option<&str>);
     }
 
     let request2 = GravityDataProduct::from_id("BigComplex");

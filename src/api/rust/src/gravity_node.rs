@@ -505,8 +505,8 @@ impl GravityNode {
     }
 
     fn request_filled_internal(service_id: &CxxString, request_id: &CxxString, response: &GDataProduct, addr: usize) {
-        let sid = service_id.to_str().unwrap().to_string();
-        let rid = request_id.to_str().unwrap().to_string();
+        let sid = service_id.to_str().unwrap();
+        let rid = request_id.to_str().unwrap();
         let gdp = GravityNode::to_rust_gdp(response);
 
         let requestor = addr as * const &dyn GravityRequestor;
@@ -515,8 +515,8 @@ impl GravityNode {
     }
 
     fn request_timeout_internal(service_id: &CxxString, request_id: &CxxString, addr: usize) {
-        let sid = service_id.to_str().unwrap().to_string();
-        let rid = request_id.to_str().unwrap().to_string();
+        let sid = service_id.to_str().unwrap();
+        let rid = request_id.to_str().unwrap();
 
         let requestor = addr as * const &dyn GravityRequestor;
         let b = unsafe {*requestor};

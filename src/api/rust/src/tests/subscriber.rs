@@ -21,6 +21,7 @@ impl GravitySubscriber for MySubscriber {
         for i in data_products.iter() {
            let mut pb = MultPB::new();
            i.populate_message(&mut pb);
+        //    warn!("got {}, {}", pb.multiplicand_a(), pb.multiplicand_b());
            assert!(pb.multiplicand_b() == (pb.multiplicand_a() + 1024));
         }
     }
@@ -93,7 +94,6 @@ fn basic_subscriber () {
 }
 
 
-
 struct CounterSubscriber {
     count_totals: Cell<i32>,
 }
@@ -115,6 +115,7 @@ impl GravitySubscriber for CounterSubscriber {
 
 struct HelloSubscriber {}
 
+
 impl GravitySubscriber for HelloSubscriber {
     fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
@@ -125,6 +126,7 @@ impl GravitySubscriber for HelloSubscriber {
         }
     }
 }
+
 struct SimpleSubscriber {}
 
 impl GravitySubscriber for SimpleSubscriber {
@@ -200,4 +202,166 @@ fn multiple_subscribers () {
 
     
 
+}
+
+fn external_subscribe(gn: &mut GravityNode, subscriber: MySubscriber) -> MySubscriber {
+    gn.subscribe("SimpleRustDataProduct", &subscriber);
+    subscriber
+}
+
+
+fn consume(data: impl GravitySubscriber) {
+    let x= data;
+    // warn!("All gone!");
+}
+#[test]
+fn outside_function () {
+
+    let mut gnn = GravityNode::new();
+    gnn.init("SimpleGravityComponent");
+
+    let mut sub = MySubscriber {};
+
+    sub = external_subscribe(&mut gnn, sub);
+    gnn.subscribe("SimpleRustDataProduct", &sub);
+    
+    consume(sub);
+    //testing a dropped subscriber struct. Still works
+    {
+        let sub = MySubscriber {};
+        gnn.subscribe("SimpleRustDataProduct", &sub);
+    }
+
+    let data_product_id = "SimpleRustDataProduct";
+    let gn = GravityNode::new();
+    let mut ret = gn.init("RustExample");
+    let fs = gn.get_int_param("Fs", 0);
+   
+    if ret != GravityReturnCode::SUCCESS {
+        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        std::process::exit(1);
+    }
+    // info!("Gravity returned code SUCCESS. Init successful");
+
+
+    
+    ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
+    if ret != GravityReturnCode::SUCCESS {
+        critical!("Unable to register data product (return code {:?})", ret);
+        std::process::exit(1)
+    }
+
+    
+
+    std::thread::sleep(time::Duration::from_secs(1));
+
+    let mut quit = false;
+    let mut count = 1;
+    while !quit
+    {   
+        let gdp = GravityDataProduct::from_id(&data_product_id);
+
+        let mut data = MultPB::new();
+        data.set_multiplicand_a(count);
+        data.set_multiplicand_b(count + 1024);
+
+    //     //TODO, but that should be all
+        gdp.set_data(&data);
+        
+        
+        ret = gn.publish(&gdp);
+        if ret != GravityReturnCode::SUCCESS {
+            error!("Could not publish data product (return code {:?})", ret);
+            std::process::exit(1)
+        }
+        // if count == 9 { gnn.unsubscribe(data_product_id, &sub); 
+        //     std::thread::sleep(time::Duration::from_millis(300));}
+
+        if count == 15 { quit = true;}
+        count += 1;
+
+        std::thread::sleep(time::Duration::from_millis(100));
+    }
+
+    // gn.wait_for_exit();  
+}
+
+
+struct MyDropSubscriber {}
+
+impl GravitySubscriber for MyDropSubscriber {
+    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+        for i in data_products.iter() {
+            let mut pb = MultPB::new();
+            i.populate_message(&mut pb);
+        //    warn!("got {}, {}", pb.multiplicand_a(), pb.multiplicand_b());
+            panic!(); //shhould never get here!
+            // assert!(pb.multiplicand_b() == (pb.multiplicand_a() + 1024));
+        }
+    }
+}
+#[test]
+fn dropped_node() {
+    let mut gnn = GravityNode::new();
+    gnn.init("SimpleGravityComponent");
+
+    let sub = MyDropSubscriber {};
+
+    gnn.subscribe("SimpleRustDataProduct", &sub);
+    {
+        let to_drop = gnn;
+    }
+    
+
+    let data_product_id = "SimpleRustDataProduct";
+    let gn = GravityNode::new();
+    let mut ret = gn.init("RustExample");
+    let fs = gn.get_int_param("Fs", 0);
+   
+    if ret != GravityReturnCode::SUCCESS {
+        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        std::process::exit(1);
+    }
+    // info!("Gravity returned code SUCCESS. Init successful");
+
+
+    
+    ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
+    if ret != GravityReturnCode::SUCCESS {
+        critical!("Unable to register data product (return code {:?})", ret);
+        std::process::exit(1)
+    }
+
+    
+
+    std::thread::sleep(time::Duration::from_secs(1));
+
+    let mut quit = false;
+    let mut count = 1;
+    while !quit
+    {   
+        let gdp = GravityDataProduct::from_id(&data_product_id);
+
+        let mut data = MultPB::new();
+        data.set_multiplicand_a(count);
+        data.set_multiplicand_b(count + 1024);
+
+    //     //TODO, but that should be all
+        gdp.set_data(&data);
+        
+        
+        ret = gn.publish(&gdp);
+        if ret != GravityReturnCode::SUCCESS {
+            error!("Could not publish data product (return code {:?})", ret);
+            std::process::exit(1)
+        }
+        // if count == 9 { gnn.unsubscribe(data_product_id, &sub); 
+        //     std::thread::sleep(time::Duration::from_millis(300));}
+
+        if count == 15 { quit = true;}
+        count += 1;
+
+        std::thread::sleep(time::Duration::from_millis(100));
+    }
+    
 }
