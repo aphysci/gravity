@@ -525,7 +525,7 @@ impl GravityNode {
 
     fn request_internal(service_id: &CxxString, data_product: &GDataProduct, addr: usize) -> SharedPtr<GDataProduct>{
         let gdp = GravityNode::to_rust_gdp(data_product);
-        let sid = service_id.to_str().unwrap().to_string();
+        let sid = service_id.to_str().unwrap();
 
         let p = addr as * mut &dyn GravityServiceProvider;
         let service_provider = unsafe {*p};

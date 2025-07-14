@@ -110,7 +110,7 @@ fn service() {
 struct BetterProvider {}
 
 impl GravityServiceProvider for BetterProvider {
-    fn request(&self, service_id: String, data_product: &GravityDataProduct) -> GravityDataProduct {
+    fn request(&self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
         let mut bigops = BigGuyPB::new();
         data_product.populate_message(&mut bigops);
         // SpdLog::warn(format!("Request recieved for Big Complex"));
