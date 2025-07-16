@@ -74,8 +74,8 @@ impl GravityDataProduct {
         bytes_buf
         
     }
-    pub fn get_data_size() -> i32 {
-        0
+    pub fn get_data_size(&self) -> i32 {
+        ffi::get_data_size(&self.gdp)
     }
     pub fn populate_message(&self, data: &mut impl protobuf::Message) -> bool{
         let temp = self.get_data();
