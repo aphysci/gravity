@@ -34,7 +34,7 @@ impl GravityNode {
         }
     }
     
-    pub fn from(component_id: impl AsRef<[u8]>) -> GravityNode {
+    pub fn from(component_id: &str) -> GravityNode {
         let_cxx_string!(cid = component_id);
         GravityNode { 
             gn: ffi::gravity_node_id(&cid), 
@@ -46,7 +46,7 @@ impl GravityNode {
         }
     }
 
-    pub fn init(&self, component_id: impl AsRef<[u8]>) -> GravityReturnCode {
+    pub fn init(&self, component_id: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         ffi::init(&self.gn, &cid)
     }
@@ -62,7 +62,7 @@ impl GravityNode {
     {
         ffi::publish(&self.gn, &data_product.gdp)
     }
-    pub fn subscribers_exist(&self, data_product_id: impl AsRef<[u8]>, has_subscribers: &mut bool) -> GravityReturnCode {
+    pub fn subscribers_exist(&self, data_product_id: &str, has_subscribers: &mut bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         ffi::subsribers_exist(&self.gn, &dpid, has_subscribers)
     }
@@ -72,39 +72,39 @@ impl GravityNode {
     pub fn stop_heartbeat(&self) -> GravityReturnCode {
         ffi::stop_heartbeat(&self.gn)
     }
-    pub fn get_string_param(&self, key: impl AsRef<[u8]>, default_value: impl AsRef<[u8]>) -> String {
+    pub fn get_string_param(&self, key: &str, default_value: &str) -> String {
         let_cxx_string!(k = key);
         let_cxx_string!(default_val = default_value);
         ffi::get_string_param(&self.gn, &k, &default_val).to_string()
     }
-    pub fn get_int_param(&self, key: impl AsRef<[u8]>, default_value: i32) -> i32 {
+    pub fn get_int_param(&self, key: &str, default_value: i32) -> i32 {
         let_cxx_string!(k = key);
         ffi::get_int_param(&self.gn, &k, default_value)
     }
-    pub fn get_float_param(&self, key: impl AsRef<[u8]>, default_value: f64) -> f64 {
+    pub fn get_float_param(&self, key: &str, default_value: f64) -> f64 {
         let_cxx_string!(k = key);
         ffi::get_float_param(&self.gn, &k, default_value)
     }
-    pub fn get_bool_param(&self, key: impl AsRef<[u8]>, default_value: bool) -> bool {
+    pub fn get_bool_param(&self, key: &str, default_value: bool) -> bool {
         let_cxx_string!(k = key);
         ffi::get_bool_param(&self.gn, &k, default_value)
     }
     pub fn get_component_id(&self) -> String  
     { (*ffi::get_component_ID(&self.gn)).to_str().unwrap().to_string()} 
 
-    pub fn register_data_product(&self, data_product_id: impl AsRef<[u8]>,
+    pub fn register_data_product(&self, data_product_id: &str,
          transport_type: GravityTransportType) -> GravityReturnCode
     {
         let_cxx_string!(dpid = data_product_id);
         ffi::register_data_product(&self.gn, &dpid, transport_type)
     }
-    pub fn register_data_product_cache(&self, data_product_id: impl AsRef<[u8]>,
+    pub fn register_data_product_cache(&self, data_product_id: &str,
          transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode
     {
         let_cxx_string!(dpid = data_product_id);
         ffi::register_data_product_cache(&self.gn, &dpid, transport_type, cache_last_value)
     }
-    pub fn unregister_data_product(&self, data_product_id: impl AsRef<[u8]>){
+    pub fn unregister_data_product(&self, data_product_id: &str){
         let_cxx_string!(dpid = data_product_id);
         ffi::unregister_data_product(&self.gn, &dpid);
     }
@@ -122,7 +122,7 @@ impl GravityNode {
         let pointer = Box::into_raw(boxed);
         pointer as usize
     }
-    pub fn subscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+    pub fn subscribe(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
 
         let key = subscriber as * const _ as usize;
@@ -145,7 +145,7 @@ impl GravityNode {
     
         
     }
-    pub fn subscribe_filter(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>) -> GravityReturnCode {
+    pub fn subscribe_filter(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let key = subscriber as * const _ as usize;
@@ -168,7 +168,7 @@ impl GravityNode {
         }
     }
 
-    pub fn subscribe_domain(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>) -> GravityReturnCode {
+    pub fn subscribe_domain(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
@@ -192,7 +192,7 @@ impl GravityNode {
         }
     }
 
-    pub fn subscribe_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber, filter: impl AsRef<[u8]>, domain: impl AsRef<[u8]>, recieve_last_cache_value: bool) -> GravityReturnCode {
+    pub fn subscribe_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
@@ -217,7 +217,7 @@ impl GravityNode {
     }
 
     
-    pub fn unsubscribe(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+    pub fn unsubscribe(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as * const _ as usize;
         let rust_sub_op = self.cpp_subscriber_map.get(&key);
@@ -235,9 +235,9 @@ impl GravityNode {
 
     }
 
-    pub fn request_async(&mut self, service_id:  impl AsRef<[u8]>, data_product: &GravityDataProduct, 
-        requestor: &impl GravityRequestor, request_id: Option< impl AsRef<[u8]>>, timeout_milliseconds: Option<i32>,
-        domain: Option< impl AsRef<[u8]>>) -> GravityReturnCode
+    pub fn request_async(&mut self, service_id:  &str, data_product: &GravityDataProduct, 
+        requestor: &impl GravityRequestor, request_id: Option< &str>, timeout_milliseconds: Option<i32>,
+        domain: Option< &str>) -> GravityReturnCode
     {
         let_cxx_string!(sid = service_id);
         
@@ -282,7 +282,7 @@ impl GravityNode {
     
     }
 
-    pub fn request_sync(&self, service_id: impl AsRef<[u8]>, request: &GravityDataProduct) -> Option<GravityDataProduct> {
+    pub fn request_sync(&self, service_id: &str, request: &GravityDataProduct) -> Option<GravityDataProduct> {
         let_cxx_string!(sid = service_id);
         let_cxx_string!(domain = "");
         let gdp = ffi::request_sync(&self.gn, &sid, &request.gdp, -1, &domain);
@@ -292,7 +292,7 @@ impl GravityNode {
         Some(GravityNode::to_rust_gdp(gdp.as_ref().unwrap()))
     }
 
-    pub fn register_service(&mut self, service_id:  impl AsRef<[u8]>, transport_type: GravityTransportType, server: &impl GravityServiceProvider) -> GravityReturnCode {
+    pub fn register_service(&mut self, service_id:  &str, transport_type: GravityTransportType, server: &impl GravityServiceProvider) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         let func = GravityNode::request_internal;
         let key = server as * const _ as usize;
@@ -316,13 +316,13 @@ impl GravityNode {
         }
         
     }
-    pub fn unregister_service(&self, service_id: impl AsRef<[u8]>) -> GravityReturnCode {
+    pub fn unregister_service(&self, service_id: &str) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         ffi::unregister_service(&self.gn, &sid)
     }
 
 
-    pub fn register_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
+    pub fn register_relay(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
                           local_only: bool, transport_type: GravityTransportType) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as * const _ as usize;
@@ -345,7 +345,7 @@ impl GravityNode {
         }
 
     }
-    pub fn register_relay_cache(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber,
+    pub fn register_relay_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
                                 local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as * const _ as usize;
@@ -367,7 +367,7 @@ impl GravityNode {
             }
         }
     }
-    pub fn unregister_relay(&mut self, data_product_id: impl AsRef<[u8]>, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
+    pub fn unregister_relay(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as *const _ as usize;
 
