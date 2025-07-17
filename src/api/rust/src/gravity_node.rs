@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use core::time;
 use std::collections::HashMap;
 use cxx::{let_cxx_string, CxxString, CxxVector, SharedPtr, UniquePtr};
 use crate::ffi::*;
@@ -17,7 +18,7 @@ pub struct GravityNode {
     cpp_subscriber_map: HashMap<usize, (UniquePtr<RustSubscriber>, usize)>,
     cpp_service_provider_map: HashMap<usize, (UniquePtr<RustServiceProvider>, usize)>,
     cpp_requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
-    cpp_listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize)>,
+    cpp_listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize, String, String)>,
     cpp_monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
     // rust_subscriber_list: Vec<Box<dyn GravitySubscriber>>,
 }
@@ -411,11 +412,11 @@ impl GravityNode {
                 let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
                 let ret = ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, &rust_listener, &d);
 
-                self.cpp_listener_map.insert(key, (rust_listener, addr));
+                self.cpp_listener_map.insert(key, (rust_listener, addr, String::from(component_id), String::from(domain)));
 
                 ret  
             },
-            Some((rust_listener, _)) => {
+            Some((rust_listener, _,_,_)) => {
                 ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, rust_listener, &d)
             }
         }
@@ -565,6 +566,7 @@ impl GravityNode {
 
 impl Drop for GravityNode {
     fn drop(&mut self) {
+
         for (_ , (_, item)) in self.cpp_requestor_provider_map.iter() {
             let pointer = *item as * mut &dyn GravityRequestor;
             let _ = unsafe {Box::from_raw(pointer)};
@@ -581,11 +583,12 @@ impl Drop for GravityNode {
             let pointer = *item as * mut &dyn GravitySubscriptionMonitor;
             let _= unsafe {Box::from_raw(pointer)};
         }
-        for (_ , (_, item)) in self.cpp_listener_map.iter() {
+        for (_ , (_, item,id, domain)) in self.cpp_listener_map.iter() {
+            self.unregister_heartbeat_listener(id, domain);
             let pointer = *item as * mut &dyn GravityHeartbeatListener;
             let _= unsafe {Box::from_raw(pointer)};
         }
-        
+        // std::thread::sleep(time::Duration::from_secs(2));
 
     }
 }

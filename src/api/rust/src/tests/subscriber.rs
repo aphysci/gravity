@@ -190,7 +190,7 @@ fn multiple_subscribers () {
 
         let hello_data_product = GravityDataProduct::from_id("HelloWorldDataProduct");
         let data = "Hello World";
-        hello_data_product.set_data_basic(data, data.len() as i32);
+        hello_data_product.set_data_basic(data.as_bytes());
 
         gnpub.publish(&hello_data_product);
 

@@ -43,7 +43,8 @@ impl GravityDataProduct {
     pub fn get_gravity_timestamp(&self) -> u64{
         ffi::get_gravity_timestamp(&self.gdp)
     }
-    pub fn set_data_basic(&self, data: &str, size:i32) {
+    pub fn set_data_basic(&self, data: &[u8]) {
+        let size = data.len() as i32;
         let d = data as *const _ as *const c_char;
         unsafe { ffi::set_data_basic(&self.gdp, d, size); }
     }

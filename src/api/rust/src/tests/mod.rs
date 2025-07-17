@@ -5,6 +5,6 @@
 mod service;
 mod subscriber;
 mod heartbeat;
-mod relay;
+// mod relay;
 mod misc_func;
 mod data_product_test;
