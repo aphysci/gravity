@@ -14,7 +14,7 @@ use crate::protos::BigComplexPB::{self, BigGuyPB, BigResultPB, SmallGuyPB};
 struct MyProvider {}
 
 impl GravityServiceProvider for MyProvider {
-    fn request(&self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
+    fn request(&mut self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
         if data_product.get_data_product_id() != String::from("Multiplication") {
             SpdLog::error("Request is not for multiplication");
         }
@@ -37,7 +37,7 @@ impl GravityServiceProvider for MyProvider {
 struct MyRequestor {}
 
 impl GravityRequestor for MyRequestor {
-    fn request_filled(&self, _service_id: &str, request_id: &str, response: &GravityDataProduct) {
+    fn request_filled(&mut self, _service_id: &str, request_id: &str, response: &GravityDataProduct) {
         let mut result_pb = ResultPB::new();
         response.populate_message(&mut result_pb);
 
@@ -45,7 +45,7 @@ impl GravityRequestor for MyRequestor {
    
     }
     
-    fn request_timeout(&self, service_id: &str, request_id: &str) {
+    fn request_timeout(&mut self, service_id: &str, request_id: &str) {
         assert!(true);
     }
 }
@@ -110,7 +110,7 @@ fn service() {
 struct BetterProvider {}
 
 impl GravityServiceProvider for BetterProvider {
-    fn request(&self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
+    fn request(&mut self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
         let mut bigops = BigGuyPB::new();
         data_product.populate_message(&mut bigops);
         // SpdLog::warn(format!("Request recieved for Big Complex"));
@@ -143,7 +143,7 @@ impl GravityServiceProvider for BetterProvider {
 struct BetterRequestor {}
 
 impl GravityRequestor for BetterRequestor {
-    fn request_filled(&self, service_id: &str, request_id: &str, response: &GravityDataProduct) {
+    fn request_filled(&mut self, service_id: &str, request_id: &str, response: &GravityDataProduct) {
         let mut bigresult = BigResultPB::new();
         response.populate_message(&mut bigresult);
 
@@ -172,7 +172,7 @@ impl GravityRequestor for BetterRequestor {
         }
     }
     
-    fn request_timeout(&self, service_id: &str, request_id: &str) {
+    fn request_timeout(&mut self, service_id: &str, request_id: &str) {
         assert!(true)
     }
 }

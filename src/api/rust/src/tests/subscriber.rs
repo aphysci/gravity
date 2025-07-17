@@ -17,7 +17,7 @@ use crate::protos::DataPB::*;
 struct MySubscriber {}
 
 impl GravitySubscriber for MySubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
            let mut pb = MultPB::new();
            i.populate_message(&mut pb);
@@ -95,16 +95,16 @@ fn basic_subscriber () {
 
 
 struct CounterSubscriber {
-    count_totals: Cell<i32>,
+    count_totals: i32,
 }
 
 impl GravitySubscriber for CounterSubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         // warn!("Subscriber 1 got message");
         for i in data_products.iter() {
             let mut counter_data_pb = BasicCounterDataProductPB::new();
             i.populate_message(&mut counter_data_pb);
-            self.count_totals.set(self.count_totals.get() + counter_data_pb.count());
+            self.count_totals = self.count_totals + counter_data_pb.count();
             
             // warn!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals.get())
             
@@ -117,7 +117,7 @@ struct HelloSubscriber {}
 
 
 impl GravitySubscriber for HelloSubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let message = String::from_utf8(i.get_data()).unwrap();
             // warn!("Subscriber 2: Got message: {}", message);
@@ -130,7 +130,7 @@ impl GravitySubscriber for HelloSubscriber {
 struct SimpleSubscriber {}
 
 impl GravitySubscriber for SimpleSubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             // warn!("Subscriber 3 got a {} data product", i.get_data_product_id());
 
@@ -153,7 +153,7 @@ fn multiple_subscribers () {
     gn.init("SimpleGravityComponentSub");
 
     // subscribe counter
-    let counter = CounterSubscriber { count_totals: Cell::new(0)};
+    let counter = CounterSubscriber { count_totals: 0};
     gn.subscribe("BasicCounterDataProduct", &counter);
 
     // subscribe message
@@ -290,7 +290,7 @@ fn outside_function () {
 struct MyDropSubscriber {}
 
 impl GravitySubscriber for MyDropSubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let mut pb = MultPB::new();
             i.populate_message(&mut pb);

@@ -37,12 +37,12 @@ fn misc_component_1 () -> GravityNode {
 struct MiscHBListener {}
 
 impl GravityHeartbeatListener for MiscHBListener {
-    fn missed_heartbeat(&self, component_id: &str, microsecond_to_last_heartbeat: i64, 
+    fn missed_heartbeat(&mut self, component_id: &str, microsecond_to_last_heartbeat: i64, 
         interval_in_microseconds: &mut i64) {
         // SpdLog::warn(format!("Missed Heartbeat. Last one {}  microseconds agpo", microsecond_to_last_heartbeat));
     }
 
-    fn received_heartbeat(&self, component_id: &str, interval_in_microseconds: &mut i64) {
+    fn received_heartbeat(&mut self, component_id: &str, interval_in_microseconds: &mut i64) {
         // SpdLog::warn("Received heartbeat");
     }
 }
@@ -50,7 +50,7 @@ impl GravityHeartbeatListener for MiscHBListener {
 struct MiscGravitySubscriber {}
 
 impl GravitySubscriber for MiscGravitySubscriber {
-    fn subscription_filled(&self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for data_product in data_products {
             let data = data_product.get_data();
             let message = String::from_utf8(data).unwrap();

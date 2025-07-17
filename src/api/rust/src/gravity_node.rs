@@ -514,10 +514,10 @@ impl GravityNode {
 
     fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, addr: usize) {
         let v = GravityNode::rustify(data_products);
-        let subscriber = addr as * mut &dyn GravitySubscriber;
+        let subscriber = addr as * mut &mut dyn GravitySubscriber;
         
         
-        let b = unsafe {*subscriber};
+        let b = unsafe {subscriber.read()};
   
         b.subscription_filled(&v);
         
@@ -529,8 +529,8 @@ impl GravityNode {
         let rid = request_id.to_str().unwrap();
         let gdp = GravityNode::to_rust_gdp(response);
 
-        let requestor = addr as * const &dyn GravityRequestor;
-        let b = unsafe {*requestor};
+        let requestor = addr as * const &mut dyn GravityRequestor;
+        let b = unsafe {requestor.read()};
         b.request_filled(sid, rid, &gdp);
     }
 
@@ -538,8 +538,8 @@ impl GravityNode {
         let sid = service_id.to_str().unwrap();
         let rid = request_id.to_str().unwrap();
 
-        let requestor = addr as * const &dyn GravityRequestor;
-        let b = unsafe {*requestor};
+        let requestor = addr as * const &mut dyn GravityRequestor;
+        let b = unsafe {requestor.read()};
         b.request_timeout(sid, rid);
     }
 
@@ -547,8 +547,8 @@ impl GravityNode {
         let gdp = GravityNode::to_rust_gdp(data_product);
         let sid = service_id.to_str().unwrap();
 
-        let p = addr as * mut &dyn GravityServiceProvider;
-        let service_provider = unsafe {*p};
+        let p = addr as * mut &mut dyn GravityServiceProvider;
+        let service_provider = unsafe {p.read()};
         let g = service_provider.request(sid, &gdp);
         ffi::copy_gdp_shared(&g.gdp)
     }
@@ -557,15 +557,15 @@ impl GravityNode {
         interval_in_microseconds: &mut i64, addr: usize){
 
         let cid = component_id.to_str().unwrap();
-        let p = addr as * mut &dyn GravityHeartbeatListener;
-        let listener = unsafe {*p};
+        let p = addr as * mut &mut dyn GravityHeartbeatListener;
+        let listener = unsafe {p.read()};
         listener.missed_heartbeat(cid, microsecond_to_last_heartbeat, interval_in_microseconds);
     }
 
     fn received_heartbeat_internal(component_id: &CxxString, interval_in_microseconds: &mut i64, addr: usize) {
         let cid = component_id.to_str().unwrap();
-        let p = addr as * mut &dyn GravityHeartbeatListener;
-        let listener = unsafe { *p };
+        let p = addr as * mut &mut dyn GravityHeartbeatListener;
+        let listener = unsafe { p.read() };
 
         listener.received_heartbeat(cid, interval_in_microseconds);
     }
@@ -575,8 +575,8 @@ impl GravityNode {
         let f = filter.to_str().unwrap();
         let d = domain.to_str().unwrap();
 
-        let p = addr as * mut &dyn GravitySubscriptionMonitor;
-        let monitor = unsafe { *p };
+        let p = addr as * mut &mut dyn GravitySubscriptionMonitor;
+        let monitor = unsafe { p.read() };
 
         monitor.subscription_timeout(dpid, milli_seconds_since_last, f, d);
     }

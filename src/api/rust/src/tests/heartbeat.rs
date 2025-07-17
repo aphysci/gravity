@@ -14,13 +14,13 @@ use crate::gravity_heartbeat_listener::GravityHeartbeatListener;
 struct MyListener {}
 
 impl GravityHeartbeatListener for MyListener {
-    fn missed_heartbeat(&self, component_id: &str, microsecond_to_last_heartbeat: i64, 
+    fn missed_heartbeat(&mut self, component_id: &str, microsecond_to_last_heartbeat: i64, 
         interval_in_microseconds: &mut i64) {
             // GravityLogger::warn(format!("Missed Heartbeat. Last heartbeat {} microseconds ago", microsecond_to_last_heartbeat));
 
     }
 
-    fn received_heartbeat(&self, component_id: &str, interval_in_microseconds: &mut i64) {
+    fn received_heartbeat(&mut self, component_id: &str, interval_in_microseconds: &mut i64) {
         // GravityLogger::warn("Receieved Heartbeat");
     }
 
