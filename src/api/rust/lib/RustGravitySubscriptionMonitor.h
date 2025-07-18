@@ -2,7 +2,7 @@
 #define RUSTGRAVITYSUBSCRIPTIONMONITOR_H_
 
 #include <memory>
-#include "GravitySubscriptionMonitor.h"
+#include <GravitySubscriptionMonitor.h>
 #include "rust/cxx.h"
 
 

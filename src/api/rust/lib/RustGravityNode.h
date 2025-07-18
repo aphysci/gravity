@@ -1,8 +1,9 @@
 #ifndef RUSTGRAVTITYNODE_H_
 #define RUSTGRAVITYNODE_H_
 
+
 #include "GravityDataProduct.h"
-#include "GravityNode.h"
+#include <GravityNode.h>
 #include "RustGravitySubscriber.h"
 #include "RustGravityRequestor.h"
 #include "RustGravityHeartbeatListener.h"

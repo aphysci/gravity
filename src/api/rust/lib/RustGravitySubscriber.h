@@ -1,7 +1,7 @@
 #ifndef RUSTSUBSCRIBER_H_
 #define RUSTSUBSCRIBER_H_
 
-#include "GravitySubscriber.h"
+#include <GravitySubscriber.h>
 #include "rust/cxx.h"
 
 

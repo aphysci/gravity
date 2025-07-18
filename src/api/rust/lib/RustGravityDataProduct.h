@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "GravityDataProduct.h"
+#include <GravityDataProduct.h>
 
 namespace gravity
 {

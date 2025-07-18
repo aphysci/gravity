@@ -1,7 +1,7 @@
 #ifndef RUSTGRAVITYSERVICEPROVIDER_H_
 #define RUSTGRAVITYSERVICEPROVIDER_H_
 
-#include "GravityServiceProvider.h"
+#include <GravityServiceProvider.h>
 #include "rust/cxx.h"
 
 
