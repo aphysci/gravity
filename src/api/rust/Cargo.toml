@@ -16,3 +16,5 @@ spdlog-rs = "0.4.3"
 
 [build-dependencies]
 cxx-build = "1.0.158"
+cmake = "0.1"
+
