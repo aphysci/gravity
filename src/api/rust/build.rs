@@ -11,23 +11,27 @@ fn main() {
          "lib/RustGravityHeartbeatListener.cpp", "lib/RustGravitySubscriptionMonitor.cpp",
          "lib/RustGravityServiceProvider.cpp"
          ];
+    let mut srcs = Vec::with_capacity(9);
+    for s in src.iter() {
+        let mut to_add = "src/api/rust/".to_string();
+        to_add.push_str(s);
+        srcs.push(to_add);
+    }
 
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let cwd = Path::new(&dir);
-    let lib_path = cwd.join("build/install/lib/");
-    let include_path = cwd.join("build/install/include");
+    let root = Path::new(&dir);
+    let lib_path = root.join("src/api/rust/build/install/lib/");
+    let include_path = root.join("src/api/rust/build/install/include");
 
     // cmake the gravity libraries
-    let out_dir = cwd.join("build");
-    let prefix = cwd.join("build/install");
-    let prefix = prefix.as_os_str();
-    let root = cwd.parent().unwrap().parent().unwrap().parent().unwrap();
+    let out_dir = root.join("build");
+    let prefix = root.join("build/install");
     
     let _install_dir = cmake::Config::new(root.as_os_str())
         .define("SKIP_PYTHON", "ON")
         .define("SKIP_JAVA", "ON")
-        .define("CMAKE_INSTALL_PREFIX", prefix)
+        .define("CMAKE_INSTALL_PREFIX", prefix.as_os_str())
         // .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "TRUE")
         // .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "FALSE")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
@@ -35,8 +39,8 @@ fn main() {
         .build();
 
     //compile the bridge
-    cxx_build::bridge("src/ffi.rs")
-        .files(src.iter())
+    cxx_build::bridge("src/api/rust/src/ffi.rs")
+        .files(srcs.iter())
         .include(include_path)
         .compile("rust_gravity");
     

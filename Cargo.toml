@@ -1,0 +1,29 @@
+[package]
+name = "gravity"
+version = "0.1.0"
+edition = "2024"
+description = "Rust bindings for the Gravity software framework"
+readme = "README.md"
+license-file = "../../../LICENSE"
+repository = "https://github.com/astrauc/gravity.git"
+keywords = ["FFI", "C++"]
+exclude = ["src/api/rust/target"]
+build = "src/api/rust/build.rs"
+
+[lib]
+path = "src/api/rust/src/lib.rs"
+
+[profile.gravity]
+inherits="release"
+
+[dependencies]
+cxx = "1.0.158"
+dyn-clone = "1.0.19"
+protobuf = "3.7.2"
+spdlog-rs = "0.4.3"
+
+
+[build-dependencies]
+cxx-build = "1.0.158"
+cmake = "0.1"
+
