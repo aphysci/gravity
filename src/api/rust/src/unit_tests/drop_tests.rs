@@ -30,7 +30,7 @@ fn subscriber_drop() {
         let mut count = 1;
         loop {
 
-            let data_product = GravityDataProduct::from_id("DropDataProduct");
+            let data_product = GravityDataProduct::with_id("DropDataProduct");
             
             let mut data = BasicCounterDataProductPB::new();
             data.set_count(count);

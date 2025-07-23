@@ -12,8 +12,9 @@ pub struct FutureResponse {
 }
 
 impl FutureResponse {
-    pub fn from(array: &[u8], size: i32) -> FutureResponse {
+    pub fn with_array(array: &[u8]) -> FutureResponse {
         let ptr = array.as_ptr() as * const c_char;
+        let size = array.len() as i32;
         FutureResponse { fr: unsafe { new_future_response(ptr, size) } }
     }
 

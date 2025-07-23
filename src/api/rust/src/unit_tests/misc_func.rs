@@ -20,7 +20,7 @@ fn misc_component_1 () -> GravityNode {
         count -= 1;
 
 
-        let ipc_data_product = GravityDataProduct::from_id("IPCDataProduct");
+        let ipc_data_product = GravityDataProduct::with_id("IPCDataProduct");
 
         let data = "hey!";
 
@@ -52,7 +52,7 @@ struct MiscGravitySubscriber {}
 impl GravitySubscriber for MiscGravitySubscriber {
     fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for data_product in data_products {
-            let data = data_product.get_data();
+            let data = data_product.data();
             let message = String::from_utf8(data).unwrap();
             assert_eq!(String::from("hey!"), message);
             // SpdLog::warn(format!("Got message {}", message));

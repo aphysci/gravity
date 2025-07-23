@@ -5,17 +5,6 @@ use crate::ffi;
 use cxx::{let_cxx_string};
 
 
-
-
-
-
-// pub struct GravitySubscriber {
-//     subFilled: fn(Vec<GravityDataProduct>),
-// }
-
-// impl GravitySubscriber {
-
-// }
 pub struct SpdLog {}
 
 impl SpdLog {

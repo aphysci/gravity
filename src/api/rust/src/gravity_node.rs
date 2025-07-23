@@ -34,7 +34,7 @@ impl GravityNode {
         }
     }
     
-    pub fn from(component_id: &str) -> GravityNode {
+    pub fn with_id(component_id: &str) -> GravityNode {
         let_cxx_string!(cid = component_id);
         GravityNode { 
             gn: ffi::gravity_node_id(&cid), 
@@ -89,7 +89,7 @@ impl GravityNode {
         let_cxx_string!(k = key);
         ffi::get_bool_param(&self.gn, &k, default_value)
     }
-    pub fn get_component_id(&self) -> String  
+    pub fn component_id(&self) -> String  
     { (*ffi::get_component_ID(&self.gn)).to_str().unwrap().to_string()} 
 
     pub fn register_data_product(&self, data_product_id: &str,
@@ -108,13 +108,13 @@ impl GravityNode {
         let_cxx_string!(dpid = data_product_id);
         ffi::unregister_data_product(&self.gn, &dpid);
     }
-    pub fn get_code_string(&self, code: GravityReturnCode) -> String {
+    pub fn code_string(&self, code: GravityReturnCode) -> String {
         ffi::get_code_string(&self.gn, code).to_str().unwrap().to_string()
     }
-    pub fn get_ip(&self) -> String {
+    pub fn ip(&self) -> String {
         ffi::get_IP(&self.gn).to_str().unwrap().to_string()
     }
-    pub fn get_domain(&self) -> String {
+    pub fn domain(&self) -> String {
         ffi::get_domain(&self.gn).to_str().unwrap().to_string()
     }
     fn get_addr(subscriber: &impl GravitySubscriber) -> usize {
@@ -145,7 +145,7 @@ impl GravityNode {
     
         
     }
-    pub fn subscribe_filter(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str) -> GravityReturnCode {
+    pub fn subscribe_with_filter(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let key = subscriber as * const _ as usize;
@@ -168,7 +168,7 @@ impl GravityNode {
         }
     }
 
-    pub fn subscribe_domain(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str) -> GravityReturnCode {
+    pub fn subscribe_with_domain(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
@@ -192,7 +192,7 @@ impl GravityNode {
         }
     }
 
-    pub fn subscribe_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
+    pub fn subscribe_with_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
@@ -345,7 +345,7 @@ impl GravityNode {
         }
 
     }
-    pub fn register_relay_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
+    pub fn register_relay_with_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
                                 local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let key = subscriber as * const _ as usize;
@@ -391,9 +391,9 @@ impl GravityNode {
         ffi::send_future_response(&self.gn, &future_response.fr)
     }
     pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: &impl GravityHeartbeatListener) -> GravityReturnCode{
-        self.register_heartbeat_listener_domain(component_id, interval_in_microseconds, listener, "")
+        self.register_heartbeat_listener_with_domain(component_id, interval_in_microseconds, listener, "")
     }
-    pub fn register_heartbeat_listener_domain(&mut self, component_id: &str, interval_in_microseconds: i64,
+    pub fn register_heartbeat_listener_with_domain(&mut self, component_id: &str, interval_in_microseconds: i64,
                                         listener: &impl GravityHeartbeatListener, domain: &str) -> GravityReturnCode
     {
         let_cxx_string!(cid = component_id);
@@ -425,22 +425,22 @@ impl GravityNode {
          
     }
     pub fn unregister_heartbeat_listener(&self, component_id: &str) {
-        self.unregister_heartbeat_listener_domain(component_id, "");
+        self.unregister_heartbeat_listener_with_domain(component_id, "");
     }
-    pub fn unregister_heartbeat_listener_domain(&self, component_id: &str, domain: &str) {
+    pub fn unregister_heartbeat_listener_with_domain(&self, component_id: &str, domain: &str) {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
         ffi::unregister_heartbeat_listener(&self.gn, &cid, &d);
     }
     pub fn set_subscription_timout_monitor(&mut self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32) -> GravityReturnCode {
-                self.set_subscription_timout_monitor_domain(data_product_id, monitor, milli_second_timeout, "", "")
+                self.set_subscription_timout_monitor_with_domain(data_product_id, monitor, milli_second_timeout, "", "")
             }
-    pub fn set_subscription_timout_monitor_filter(&mut self, data_product_id: &str, 
+    pub fn set_subscription_timout_monitor_with_filter(&mut self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32, filter: &str) -> GravityReturnCode {
-                self.set_subscription_timout_monitor_domain(data_product_id, monitor, milli_second_timeout, filter, "")
+                self.set_subscription_timout_monitor_with_domain(data_product_id, monitor, milli_second_timeout, filter, "")
             }
-    pub fn set_subscription_timout_monitor_domain(&mut self, data_product_id: &str, 
+    pub fn set_subscription_timout_monitor_with_domain(&mut self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32, filter: &str, domain: &str) -> GravityReturnCode {
         
         let_cxx_string!(dpid = data_product_id);
@@ -471,13 +471,13 @@ impl GravityNode {
     }
      pub fn clear_subscription_timeout_monitor(&self, data_product_id: &str, 
         monitor: &impl GravitySubscriptionMonitor) -> GravityReturnCode {
-            self.clear_subscription_timeout_monitor_domain(data_product_id, monitor, "", "")
+            self.clear_subscription_timeout_monitor_with_domain(data_product_id, monitor, "", "")
     }
-    pub fn clear_subscription_timeout_monitor_filter(&self, data_product_id: &str, 
+    pub fn clear_subscription_timeout_monitor_with_filter(&self, data_product_id: &str, 
         monitor: &impl GravitySubscriptionMonitor, filter: &str) -> GravityReturnCode {
-            self.clear_subscription_timeout_monitor_domain(data_product_id, monitor, filter, "")
+            self.clear_subscription_timeout_monitor_with_domain(data_product_id, monitor, filter, "")
     }
-    pub fn clear_subscription_timeout_monitor_domain(&self, data_product_id: &str, 
+    pub fn clear_subscription_timeout_monitor_with_domain(&self, data_product_id: &str, 
             monitor: &impl GravitySubscriptionMonitor, filter: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
@@ -603,7 +603,7 @@ impl Drop for GravityNode {
             let _= unsafe {Box::from_raw(pointer)};
         }
         for (_ , (_, item,id, domain)) in self.cpp_listener_map.iter() {
-            self.unregister_heartbeat_listener_domain(id, domain);
+            self.unregister_heartbeat_listener_with_domain(id, domain);
             let pointer = *item as * mut &dyn GravityHeartbeatListener;
             let _= unsafe {Box::from_raw(pointer)};
         }

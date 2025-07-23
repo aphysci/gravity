@@ -64,7 +64,7 @@ fn basic_subscriber () {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::from_id(&data_product_id);
+        let gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
@@ -119,7 +119,7 @@ struct HelloSubscriber {}
 impl GravitySubscriber for HelloSubscriber {
     fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
         for i in data_products.iter() {
-            let message = String::from_utf8(i.get_data()).unwrap();
+            let message = String::from_utf8(i.data()).unwrap();
             // warn!("Subscriber 2: Got message: {}", message);
 
 
@@ -134,13 +134,13 @@ impl GravitySubscriber for SimpleSubscriber {
         for i in data_products.iter() {
             // warn!("Subscriber 3 got a {} data product", i.get_data_product_id());
 
-            if i.get_data_product_id() == "BasicCounterDataProduct" {
+            if i.data_product_id() == "BasicCounterDataProduct" {
                 let mut counter_data_pb = BasicCounterDataProductPB::new();
                 i.populate_message(&mut counter_data_pb);
                 // warn!("Subscriber3 : Current Count: {}", counter_data_pb.count());
 
-            } else if i.get_data_product_id() == "HelloWorldDataProduct" {
-                let message = String::from_utf8(i.get_data()).unwrap();
+            } else if i.data_product_id() == "HelloWorldDataProduct" {
+                let message = String::from_utf8(i.data()).unwrap();
                 // warn!("Subscriber 3: Got message: {}", message);
             }
         }
@@ -176,7 +176,7 @@ fn multiple_subscribers () {
 
     while !quit 
     {
-        let counter_data_product = GravityDataProduct::from_id("BasicCounterDataProduct");
+        let counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
         let mut counter_data_pb = BasicCounterDataProductPB::new();
         counter_data_pb.set_count(count);
 
@@ -188,7 +188,7 @@ fn multiple_subscribers () {
         if count > 4 { quit = true};
 
 
-        let hello_data_product = GravityDataProduct::from_id("HelloWorldDataProduct");
+        let hello_data_product = GravityDataProduct::with_id("HelloWorldDataProduct");
         let data = "Hello World";
         hello_data_product.set_data_basic(data.as_bytes());
 
@@ -259,7 +259,7 @@ fn outside_function () {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::from_id(&data_product_id);
+        let gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
@@ -340,7 +340,7 @@ fn dropped_node() {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::from_id(&data_product_id);
+        let gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
