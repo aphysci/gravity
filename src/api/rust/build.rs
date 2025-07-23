@@ -21,8 +21,8 @@ fn main() {
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let root = Path::new(&dir);
-    let lib_path = root.join("src/api/rust/build/install/lib/");
-    let include_path = root.join("src/api/rust/build/install/include");
+    let lib_path = root.join("build/install/lib/");
+    let include_path = root.join("build/install/include");
 
     // cmake the gravity libraries
     let out_dir = root.join("build");
