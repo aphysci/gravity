@@ -53,7 +53,7 @@ macro(add_external_protobuf)
         LOG_OUTPUT_ON_FAILURE ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=ON
+            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=OFF
             -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
             -Dprotobuf_BUILD_TESTS:BOOL=OFF
             -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF
@@ -77,8 +77,8 @@ macro(add_external_libzmq)
         LOG_OUTPUT_ON_FAILURE ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-            -DBUILD_SHARED:BOOL=ON
-            -DBUILD_STATIC:BOOL=OFF
+            -DBUILD_SHARED:BOOL=OFF
+            -DBUILD_STATIC:BOOL=ON
             -DZMQ_BUILD_TESTS:BOOL=OFF
             -DBUILD_TESTS:BOOL=OFF
         BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
