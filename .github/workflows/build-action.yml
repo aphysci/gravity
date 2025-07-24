@@ -173,6 +173,13 @@ jobs:
         with:
           fetch-depth: 0
       
+      # Use a set working python version compatible with the older version of protobuf pulled in
+      - 
+        name: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7.9'
+
       # The pthreads-win32 build depends on the VS2010 runtime - which isn't on the latest runners
       -
         name: install-VS2010-redistributable
