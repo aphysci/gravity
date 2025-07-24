@@ -178,7 +178,7 @@ jobs:
         name: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.7.9'
+          python-version: '3.11'
 
       # The pthreads-win32 build depends on the VS2010 runtime - which isn't on the latest runners
       -
