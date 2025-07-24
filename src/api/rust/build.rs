@@ -34,6 +34,7 @@ fn main() {
         .define("CMAKE_INSTALL_PREFIX", prefix.as_os_str())
         // .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "TRUE")
         // .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "FALSE")
+        .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
         .out_dir(out_dir.as_os_str())
         .build();

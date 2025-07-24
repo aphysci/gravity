@@ -12,6 +12,7 @@ option(GRAVITY_USE_EXTERNAL_PROTOBUF "Download, Build and Use an externally down
 option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downloaded ZeroMQ build")
 option(GRAVITY_USE_EXTERNAL_SPDLOG "Download, build and use an externally downloaded Spdlog build")
 option(BUILD_EXAMPLES_TESTS "Build Gravity examples and tests" ON)
+option(BUILD_LIBRARY_ONLY "Only build the libraries, without components or tests")
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
@@ -264,11 +265,13 @@ if (NOT depends)
     set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
     
-    include(CTest)
-    add_subdirectory(test)
+    if (NOT BUILD_LIBRARY_ONLY)
+        include(CTest)
+        add_subdirectory(test)
 
-    set(CPACK_GENERATOR "TGZ")
-    include(CPack)
+        set(CPACK_GENERATOR "TGZ")
+        include(CPack)
+    endif()
 
     message(STATUS "No external libraries - doing a toplevel build")
 else()
@@ -284,6 +287,7 @@ else()
             -DSKIP_JAVA=${SKIP_JAVA}
             -DSKIP_PYTHON=${SKIP_PYTHON}
             -DZMQ_HOME=${ZMQ_HOME}
+            -DBUILD_LIBRARY_ONLY=${BUILD_LIBRARY_ONLY}
             -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USING_EXTERNAL_PROTOBUF}
             -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USING_EXTERNAL_ZEROMQ}
             -DGRAVITY_USE_EXTERNAL_SPDLOG=${GRAVITY_USING_EXTERNAL_SPDLOG}
@@ -304,7 +308,7 @@ else()
 
 
 
-    if (BUILD_EXAMPLES_TESTS)
+    if (BUILD_EXAMPLES_TESTS AND NOT BUILD_LIBRARY_ONLY)
         ExternalProject_Add(
             gravity_external_examples_tests
             DEPENDS gravity_external
