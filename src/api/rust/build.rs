@@ -1,6 +1,6 @@
 // use std::env;
 use cmake;
-use std::{env, path::Path};
+use std::{env, path::{Path, PathBuf}, str::FromStr};
 
 
 fn main() {
@@ -23,6 +23,7 @@ fn main() {
     let root = Path::new(&dir);
     let lib_path = root.join("build/install/lib/");
     let include_path = root.join("build/install/include");
+    let path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
     let out_dir = root.join("build");
@@ -34,7 +35,7 @@ fn main() {
         .define("CMAKE_INSTALL_PREFIX", prefix.as_os_str())
         // .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "TRUE")
         // .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "FALSE")
-        .define("BUILD_LIBRARY_ONLY", "ON")
+        // .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
         .out_dir(out_dir.as_os_str())
         .build();
@@ -48,10 +49,16 @@ fn main() {
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name
     println!("cargo:rustc-link-search={}", lib_path.display());
-    println!("cargo:rustc-link-lib=gravity_protobufs_d");
-    println!("cargo:rustc-link-lib=gravity_d");
+    println!("cargo:rustc-link-search={}", path.display());
+    println!("cargo:rustc-link-lib=static=gravity_d");
+    println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
+    println!("cargo:rustc-link-lib=static=keyvalue_parser_d");
+    // println!("cargo:rustc-link-lib=static=zmq");\
     println!("cargo:rustc-link-lib=protobuf");
     println!("cargo:rustc-link-lib=zmq");
+    println!("cargo:rustc-link-lib=fmt");
+    
+    // println!("cargo:rustc-link-lib=spdlog");
 
 
     // cargo run will add this to the library path. 
