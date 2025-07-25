@@ -17,7 +17,7 @@ fn main() {
         to_add.push_str(s);
         srcs.push(to_add);
     }
-
+    
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let root = Path::new(&dir);
@@ -31,6 +31,7 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let mut prefix = out_dir.clone();
     prefix.push_str("/install");
+    println!("cargo:warning=OUT_DIR: {}", out_dir);
     
     let _install_dir = cmake::Config::new(root.as_os_str())
         .define("SKIP_PYTHON", "ON")
