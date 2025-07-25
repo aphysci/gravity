@@ -6,7 +6,7 @@ description = "Rust bindings for the Gravity software framework"
 readme = "README.md"
 license-file = "LICENSE"
 repository = "https://github.com/astrauc/gravity.git"
-keywords = ["FFI", "C++"]
+keywords = ["FFI", "C++", "Gravity"]
 exclude = ["src/api/rust/target"]
 build = "src/api/rust/build.rs"
 
