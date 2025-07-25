@@ -51,7 +51,7 @@ fn main() {
     
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name
-    println!("cargo:rustc-link-search={}", lib_path.display());
+    println!("cargo:rustc-link-search={}", lib_path);
     println!("cargo:rustc-link-search={}", path.display());
     println!("cargo:rustc-link-lib=static=gravity_d");
     println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
