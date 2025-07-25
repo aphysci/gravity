@@ -21,8 +21,10 @@ fn main() {
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let root = Path::new(&dir);
-    let lib_path = root.join("build/install/lib/");
-    let include_path = root.join("build/install/include");
+    let mut lib_path = root.to_str().unwrap().to_string();
+    lib_path.push_str("/install/lib");
+    let mut include_path = root.to_str().unwrap().to_string(); 
+    include_path.push_str("install/include");
     let path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
