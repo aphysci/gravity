@@ -20,18 +20,18 @@ fn main() {
     
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let out_dir = env::var("OUT_DIR").unwrap();
     let root = Path::new(&dir);
-    let mut lib_path = root.to_str().unwrap().to_string();
+    let mut lib_path = out_dir.clone();
     lib_path.push_str("/install/lib");
-    let mut include_path = root.to_str().unwrap().to_string(); 
-    include_path.push_str("install/include");
-    let path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
+    let mut include_path = out_dir.clone(); 
+    include_path.push_str("/install/include");
+    let _path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
-    let out_dir = env::var("OUT_DIR").unwrap();
+    
     let mut prefix = out_dir.clone();
     prefix.push_str("/install");
-    println!("cargo:warning=OUT_DIR: {}", out_dir);
     
     let _install_dir = cmake::Config::new(root.as_os_str())
         .define("SKIP_PYTHON", "ON")
@@ -53,7 +53,7 @@ fn main() {
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name
     println!("cargo:rustc-link-search={}", lib_path);
-    println!("cargo:rustc-link-search={}", path.display());
+    // println!("cargo:rustc-link-search={}", path.display());
     println!("cargo:rustc-link-lib=static=gravity_d");
     println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
     println!("cargo:rustc-link-lib=static=keyvalue_parser_d");
