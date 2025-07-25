@@ -12,6 +12,7 @@ use crate::{ffi, gravity_subscriber::*,
 pub type GravityReturnCode = GReturnCode;
 pub type GravityTransportType = GTransportType;
 
+
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
     cpp_subscriber_map: HashMap<usize, (UniquePtr<RustSubscriber>, usize)>,
