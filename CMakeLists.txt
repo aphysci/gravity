@@ -77,8 +77,8 @@ macro(add_external_libzmq)
         LOG_OUTPUT_ON_FAILURE ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-            -DBUILD_SHARED:BOOL=OFF
-            -DBUILD_STATIC:BOOL=ON
+            -DBUILD_SHARED:BOOL=ON
+            -DBUILD_STATIC:BOOL=${BUILD_LIBRARY_ONLY}
             -DZMQ_BUILD_TESTS:BOOL=OFF
             -DBUILD_TESTS:BOOL=OFF
         BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>

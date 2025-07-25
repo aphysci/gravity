@@ -34,8 +34,8 @@ fn main() {
         .define("SKIP_JAVA", "ON")
         .define("CMAKE_INSTALL_PREFIX", prefix.as_os_str())
         .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "ON")
-        // .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
-        // .define("BUILD_LIBRARY_ONLY", "ON")
+        .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
+        .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
         .out_dir(out_dir.as_os_str())
         .build();
@@ -55,7 +55,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=keyvalue_parser_d");
     // println!("cargo:rustc-link-lib=static=zmq");\
     println!("cargo:rustc-link-lib=static=protobuf");
-    println!("cargo:rustc-link-lib=zmq");
+    println!("cargo:rustc-link-lib=static=zmq");
     println!("cargo:rustc-link-lib=fmt");
     
     // println!("cargo:rustc-link-lib=spdlog");
