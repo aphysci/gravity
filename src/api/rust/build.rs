@@ -60,7 +60,6 @@ fn main() {
     
     // println!("cargo:rustc-link-lib=spdlog");
 
-
     // cargo run will add this to the library path. 
     // If you cargo build then run your binary it might not work
     println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_path.display()); 
