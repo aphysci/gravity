@@ -26,18 +26,19 @@ fn main() {
     let path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
-    let out_dir = root.join("build");
-    let prefix = root.join("build/install");
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let mut prefix = out_dir.clone();
+    prefix.push_str("/install");
     
     let _install_dir = cmake::Config::new(root.as_os_str())
         .define("SKIP_PYTHON", "ON")
         .define("SKIP_JAVA", "ON")
-        .define("CMAKE_INSTALL_PREFIX", prefix.as_os_str())
+        .define("CMAKE_INSTALL_PREFIX", prefix)
         .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "ON")
         .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
         .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
-        .out_dir(out_dir.as_os_str())
+        .out_dir(out_dir)
         .build();
 
     //compile the bridge
