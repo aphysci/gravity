@@ -69,6 +69,6 @@ fn main() {
     // cargo run will add this to the library path. 
     // Only useful for running tests
     // Does nothing otherwise...
-    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_path.display()); 
+    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_path); 
    
 }
