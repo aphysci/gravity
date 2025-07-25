@@ -42,6 +42,11 @@ endif()
 set(PUBLIC_STAGING_DIR ${CMAKE_BINARY_DIR}/staging)
 
 macro(add_external_protobuf)
+    if (NOT BUILD_LIBRARY_ONLY)
+        set(BUILD_SHARED_LIBS_PROTO ON)
+    else() 
+        set(BUILD_SHARED_LIBS_PROTO OFF)
+    endif()
     ExternalProject_Add(    
         protobuf_external
         SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf"
@@ -53,7 +58,7 @@ macro(add_external_protobuf)
         LOG_OUTPUT_ON_FAILURE ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=OFF
+            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS_PROTO}
             -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
             -Dprotobuf_BUILD_TESTS:BOOL=OFF
             -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF

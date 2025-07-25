@@ -53,16 +53,19 @@ fn main() {
     println!("cargo:rustc-link-lib=static=gravity_d");
     println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
     println!("cargo:rustc-link-lib=static=keyvalue_parser_d");
-    // println!("cargo:rustc-link-lib=static=zmq");\
     println!("cargo:rustc-link-lib=static=protobuf");
     println!("cargo:rustc-link-lib=static=zmq");
-    // println!("cargo:rustc-link-lib=fmt");
     
-    // println!("cargo:rustc-link-lib=spdlog");
+    // If you want to run the tests...
+    // run: sudo apt install libfmt-dev
+    // uncomment out the following line
+    // println!("cargo:rustc-link-lib=fmt");
 
+
+    
     // cargo run will add this to the library path. 
-    // If you cargo build then run your binary it might not work
+    // Only useful for running tests
+    // Does nothing otherwise...
     println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_path.display()); 
-    // println!("cargo:rustc-flags='-L{}'", lib_path.display());
    
 }
