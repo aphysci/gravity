@@ -56,7 +56,7 @@ fn main() {
     // println!("cargo:rustc-link-lib=static=zmq");\
     println!("cargo:rustc-link-lib=static=protobuf");
     println!("cargo:rustc-link-lib=static=zmq");
-    println!("cargo:rustc-link-lib=fmt");
+    // println!("cargo:rustc-link-lib=fmt");
     
     // println!("cargo:rustc-link-lib=spdlog");
 
