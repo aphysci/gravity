@@ -172,13 +172,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
-      # Use a set working python version as newer versions can't seem to load _gravity.pyd on Windows
       - 
         name: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.7.9'
+          python-version: '3.11'
 
       # The pthreads-win32 build depends on the VS2010 runtime - which isn't on the latest runners
       -
