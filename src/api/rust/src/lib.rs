@@ -1,4 +1,8 @@
+//! [![github]](https://github.com/astrauc/gravity)&ensp;[![crates-io]](https://github.com/astrauc/gravity)&ensp;[![docs-rs]](https://github.com/astrauc/gravity)
 //! 
+//! [github]: https://img.shields.io/badge/github-8da0cb?style=for-the-badge&labelColor=555555&logo=github
+//! [crates-io]: https://img.shields.io/badge/crates.io-fc8d62?style=for-the-badge&labelColor=555555&logo=rust
+//! [docs-rs]: https://img.shields.io/badge/docs.rs-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs
 //! 
 //! The goal of this crate is to provide Rust bindings to Gravity 
 //! it relies on the crate [CXX](https://crates.io/crates/cxx).
@@ -6,18 +10,19 @@
 //! This crate compiles the Gravity C++ library and links it with Rust code to give a 
 //! seamless appearance of idiomatic Rust.
 //! 
-//!  <br>
+//! Note that adding Gravity as a dependency to a cargo project only means that it will bridge your Rust code
+//! to work with Gravity. It will not create any of the Gravity components. To get the components, follow the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup)
+//!  
+//! <br>
 //! 
 //! 
-//!  Dependencies for using this crate are cmake, a C++ compiler (e.g. g++), bison, flex 
+//!  Dependencies for using this crate are cmake, a C++ compiler (e.g. g++), bison, and flex. 
 //!  Make sure these 4 items are installed before adding this crate as a dependency.
-//! ```sh
-//!     sudo apt install cmake g++ bison flex
-//! ``` 
 //! 
-//! *Compiler support: requires rustc 1.73+ and c++11 or newer*<br>
 //! 
-//!    <br>
+//! *Compiler support: requires rustc 1.73+ and c++11 or newer* 
+//! 
+//! 
 //! # Overview
 //!
 //! The idea is to call directly into the libraries compiled by [Gravity](https://github.com/aphysci/gravity)
@@ -130,8 +135,16 @@
 //! 
 //! # Cargo based setup
 //! 
+//! Fist, make sure you install the necessary C++ dependencies.
+//! For example, on linux:
+//! 
+//! ```sh
+//!     sudo apt install cmake g++ bison flex
+//! ``` 
+//! 
 //! Assuming you have the necessary dependencies installed, all you need is to add
 //! Gravity to your Cargo.toml
+//! 
 //! ```toml
 //! # Cargo.toml
 //! 

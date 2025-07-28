@@ -1,23 +1,22 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-
-use std::cell::Cell;
-use std::sync::WaitTimeoutResult;
 use std::time;
-use crate::gravity_data_product::GravityDataProduct;
-use crate::gravity_node::*;
-use crate::gravity_subscriber::GravitySubscriber;
+use crate::GravityNode;
+use crate::GravityDataProduct;
+use crate::GravityReturnCode;
+use crate::GravityTransportType;
+use crate::GravitySubscriber;
 use crate::protos::BasicCounterDataProduct::BasicCounterDataProductPB;
 use protobuf::well_known_types::duration;
-use spdlog::*;
+
 
 use crate::protos::DataPB::*;
 
 struct MySubscriber {}
 
 impl GravitySubscriber for MySubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
            let mut pb = MultPB::new();
            i.populate_message(&mut pb);
@@ -43,7 +42,7 @@ fn basic_subscriber () {
     let fs = gn.get_int_param("Fs", 0);
    
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        // critical!("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
     // info!("Gravity returned code SUCCESS. Init successful");
@@ -52,7 +51,7 @@ fn basic_subscriber () {
     
     ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to register data product (return code {:?})", ret);
+        // SpdLog::critical(format!("Unable to register data product (return code {:?})", ret));
         std::process::exit(1)
     }
 
@@ -76,7 +75,7 @@ fn basic_subscriber () {
         
         ret = gn.publish(&gdp);
         if ret != GravityReturnCode::SUCCESS {
-            error!("Could not publish data product (return code {:?})", ret);
+            // error("Could not publish data product (return code {:?})", ret);
             std::process::exit(1)
         }
         if count == 9 { gnn.unsubscribe(data_product_id, &subscriber); }
@@ -99,12 +98,12 @@ struct CounterSubscriber {
 }
 
 impl GravitySubscriber for CounterSubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         // warn!("Subscriber 1 got message");
         for i in data_products.iter() {
             let mut counter_data_pb = BasicCounterDataProductPB::new();
             i.populate_message(&mut counter_data_pb);
-            self.count_totals = self.count_totals + counter_data_pb.count();
+            self.count_totals += counter_data_pb.count();
             
             // warn!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals.get())
             
@@ -117,7 +116,7 @@ struct HelloSubscriber {}
 
 
 impl GravitySubscriber for HelloSubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let message = String::from_utf8(i.data()).unwrap();
             // warn!("Subscriber 2: Got message: {}", message);
@@ -130,7 +129,7 @@ impl GravitySubscriber for HelloSubscriber {
 struct SimpleSubscriber {}
 
 impl GravitySubscriber for SimpleSubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             // warn!("Subscriber 3 got a {} data product", i.get_data_product_id());
 
@@ -238,7 +237,7 @@ fn outside_function () {
     let fs = gn.get_int_param("Fs", 0);
    
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        // critical!("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
     // info!("Gravity returned code SUCCESS. Init successful");
@@ -247,7 +246,7 @@ fn outside_function () {
     
     ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to register data product (return code {:?})", ret);
+        // critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
 
@@ -271,7 +270,7 @@ fn outside_function () {
         
         ret = gn.publish(&gdp);
         if ret != GravityReturnCode::SUCCESS {
-            error!("Could not publish data product (return code {:?})", ret);
+            // error!("Could not publish data product (return code {:?})", ret);
             std::process::exit(1)
         }
         // if count == 9 { gnn.unsubscribe(data_product_id, &sub); 
@@ -290,7 +289,7 @@ fn outside_function () {
 struct MyDropSubscriber {}
 
 impl GravitySubscriber for MyDropSubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let mut pb = MultPB::new();
             i.populate_message(&mut pb);
@@ -319,7 +318,7 @@ fn dropped_node() {
     let fs = gn.get_int_param("Fs", 0);
    
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        // critical!("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
     // info!("Gravity returned code SUCCESS. Init successful");
@@ -328,7 +327,7 @@ fn dropped_node() {
     
     ret = gn.register_data_product(&data_product_id, GravityTransportType::TCP);
     if ret != GravityReturnCode::SUCCESS {
-        critical!("Unable to register data product (return code {:?})", ret);
+        // critical!("Unable to register data product (return code {:?})", ret);
         std::process::exit(1)
     }
 
@@ -352,7 +351,7 @@ fn dropped_node() {
         
         ret = gn.publish(&gdp);
         if ret != GravityReturnCode::SUCCESS {
-            error!("Could not publish data product (return code {:?})", ret);
+            // error!("Could not publish data product (return code {:?})", ret);
             std::process::exit(1)
         }
         // if count == 9 { gnn.unsubscribe(data_product_id, &sub); 

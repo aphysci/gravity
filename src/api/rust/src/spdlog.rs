@@ -4,7 +4,7 @@ use crate::ffi;
 
 use cxx::{let_cxx_string};
 
-
+/// struct with provided methods used for logging.
 pub struct SpdLog {}
 
 impl SpdLog {

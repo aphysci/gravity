@@ -10,7 +10,7 @@ mod ffi {
     #[repr(i32)]
     #[derive(Debug)]
     #[cxx_name = "GravityReturnCode"]
-    pub enum GReturnCode {
+    pub enum GravityReturnCodes {
         SUCCESS = 0,                ///< The request was successful
         FAILURE = -1,               ///< The request failed
         NO_SERVICE_DIRECTORY = -2,  ///< Could not find Service Directory
@@ -33,7 +33,7 @@ mod ffi {
     #[namespace = "gravity"]
     #[repr(i32)]
     #[cxx_name = "GravityTransportType"]
-    pub enum GTransportType {
+    pub enum GravityTransportTypes {
         TCP = 0,     ///< Transmission Control Protocol
         INPROC = 1,  ///< In-process (Inter-thread) Communication
         PGM = 2,     ///< Pragmatic General Multicast Protocol
@@ -52,10 +52,10 @@ mod ffi {
 
 
 
-        #[rust_name = "GReturnCode"]
+        #[rust_name = "GravityReturnCodes"]
         type GravityReturnCode;
 
-        #[rust_name = "GTransportType"]
+        #[rust_name = "GravityTransportTypes"]
         type GravityTransportType;
         #[rust_name = "GNode"]
         type GravityNode; 
@@ -79,25 +79,31 @@ mod ffi {
         fn newGravityNodeId(componentID: &CxxString) -> UniquePtr<GNode>;
 
         #[rust_name = "init"]
-        fn rustInit(gn: &UniquePtr<GNode>, componentID: &CxxString) -> GReturnCode;
+        fn rustInit(gn: &UniquePtr<GNode>, componentID: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "init_default"]
-        fn rustInit(gn: &UniquePtr<GNode>) -> GReturnCode;
+        fn rustInit(gn: &UniquePtr<GNode>) -> GravityReturnCodes;
 
         #[rust_name = "wait_for_exit"]
         fn rustWaitForExit(gn: &UniquePtr<GNode>);
 
         #[rust_name = "publish"]
-        fn rustPublish(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GDataProduct>) -> GReturnCode;
+        fn rustPublish(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GDataProduct>) -> GravityReturnCodes;
+
+        #[rust_name = "publish_filter"]
+        fn rustPublishFilter(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GDataProduct>, filterText: &CxxString) -> GravityReturnCodes;
+
+        #[rust_name = "publish_timestamp"]
+        fn rustPublishTimestamp(gn: &UniquePtr<GNode>, dataProduct: &UniquePtr<GDataProduct>, filterText: &CxxString, timestamp: u64) -> GravityReturnCodes;
 
         #[rust_name = "subsribers_exist"]
-        fn rustSubscribersExist(gn: &UniquePtr<GNode>, dataProductID: &CxxString, has_subscribers: &mut bool) -> GReturnCode;
+        fn rustSubscribersExist(gn: &UniquePtr<GNode>, dataProductID: &CxxString, has_subscribers: &mut bool) -> GravityReturnCodes;
 
         #[rust_name = "start_heartbeat"]
-        fn rustStartHeartbeat(gn: &UniquePtr<GNode>, interval_in_microseconds: i64) -> GReturnCode;
+        fn rustStartHeartbeat(gn: &UniquePtr<GNode>, interval_in_microseconds: i64) -> GravityReturnCodes;
 
         #[rust_name = "stop_heartbeat"]
-        fn rustStopHeartbeat(gn: &UniquePtr<GNode>) -> GReturnCode;
+        fn rustStopHeartbeat(gn: &UniquePtr<GNode>) -> GravityReturnCodes;
 
         #[rust_name = "get_string_param"]
         fn rustGetStringParam(gn: &UniquePtr<GNode>, key: &CxxString, default_value: &CxxString) -> UniquePtr<CxxString>;
@@ -117,17 +123,17 @@ mod ffi {
 
         #[rust_name = "register_data_product"]
         fn rustRegisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString, 
-            transportType: GTransportType) -> GReturnCode;
+            transportType: GravityTransportTypes) -> GravityReturnCodes;
 
         #[rust_name = "register_data_product_cache"]
         fn rustRegisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString, 
-            transportType: GTransportType, cacheLastValue: bool) -> GReturnCode;
+            transportType: GravityTransportTypes, cacheLastValue: bool) -> GravityReturnCodes;
 
         #[rust_name = "unregister_data_product"]
-        fn rustUnregisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString) -> GReturnCode;
+        fn rustUnregisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "get_code_string"]
-        fn rustGetCodeString(gn: &UniquePtr<GNode>, code: GReturnCode) -> UniquePtr<CxxString>;
+        fn rustGetCodeString(gn: &UniquePtr<GNode>, code: GravityReturnCodes) -> UniquePtr<CxxString>;
         
         #[rust_name = "get_IP"]
         fn rustGetIP(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
@@ -136,22 +142,22 @@ mod ffi {
         fn rustGetDomain(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
 
         #[rust_name = "subscribe"]
-        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
+        fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCodes;
         
         #[rust_name = "subscribe_filter"]
         fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
-             filter: &CxxString) -> GReturnCode;
+             filter: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "subscribe_domain"]
         fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
-             filter: &CxxString, domain: &CxxString) -> GReturnCode;
+             filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "subscribe_cache"]
         fn rustSubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString,  subscriber: &UniquePtr<RustSubscriber>,
-             filter: &CxxString, domain: &CxxString, recieve_last_cached_value: bool) -> GReturnCode;
+             filter: &CxxString, domain: &CxxString, recieve_last_cached_value: bool) -> GravityReturnCodes;
 
         #[rust_name = "unsubscribe"]
-        fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
+        fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCodes;
         
         #[rust_name = "new_rust_subscriber"]
         fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
@@ -166,51 +172,51 @@ mod ffi {
         fn rustNewSubscriptionMonitor(func: fn(&CxxString, i32, &CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustSubscriptionMonitor>;
 
         #[rust_name = "register_heartbeat_listener"]
-        fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>, domain: &CxxString) -> GReturnCode;
+        fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "unregister_heartbeat_listener"]
-        fn rustUnregisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GReturnCode;
+        fn rustUnregisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "new_rust_service_provider"]
         fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;
 
         #[rust_name = "request_async"]
         fn rustRequest(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
-                    requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32, domain: &CxxString) -> GReturnCode;
+                    requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32, domain: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "request_sync"]
         fn rustRequestSync(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>, timeout_milliseconds: i32, domain: &CxxString) -> SharedPtr<GDataProduct>;
 
         #[rust_name = "register_service"]
-        fn rustRegisterService(gn: &UniquePtr<GNode>, service_id: &CxxString, transport_type: GTransportType, server: &UniquePtr<RustServiceProvider>) -> GReturnCode;
+        fn rustRegisterService(gn: &UniquePtr<GNode>, service_id: &CxxString, transport_type: GravityTransportTypes, server: &UniquePtr<RustServiceProvider>) -> GravityReturnCodes;
         
         #[rust_name = "unregister_service"]
-        fn rustUnregisterService(gn: &UniquePtr<GNode>, service_id: &CxxString) -> GReturnCode;
+        fn rustUnregisterService(gn: &UniquePtr<GNode>, service_id: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "register_relay"]
         fn rustRegisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString, subscriber: &UniquePtr<RustSubscriber>,
-                             local_only: bool, transport_type: GTransportType) -> GReturnCode;
+                             local_only: bool, transport_type: GravityTransportTypes) -> GravityReturnCodes;
 
         #[rust_name = "register_relay_cache"]
         fn rustRegisterRelayCache(gn: &UniquePtr<GNode>, data_product_id: &CxxString, subscriber: &UniquePtr<RustSubscriber>,
-                             local_only: bool, transport_type: GTransportType, cache_last_value: bool) -> GReturnCode;
+                             local_only: bool, transport_type: GravityTransportTypes, cache_last_value: bool) -> GravityReturnCodes;
 
         #[rust_name = "unregister_relay"]
-        fn rustUnregisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GReturnCode;
+        fn rustUnregisterRelay(gn: &UniquePtr<GNode>, data_product_id: &CxxString,  subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCodes;
 
         #[rust_name = "create_future_response"]
         fn rustCreateFutureResponse(gn: &UniquePtr<GNode>) -> SharedPtr<GFutureResponse>;
 
         #[rust_name = "send_future_response"]
-        fn rustSendFutureResponse(gn: &UniquePtr<GNode>, future_response: &SharedPtr<GFutureResponse>) -> GReturnCode;
+        fn rustSendFutureResponse(gn: &UniquePtr<GNode>, future_response: &SharedPtr<GFutureResponse>) -> GravityReturnCodes;
 
         #[rust_name = "set_subscription_timeout_monitor"]
         fn rustSetSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
-            milli_second_timeout: i32, filter: &CxxString, domain: &CxxString) -> GReturnCode;
+            milli_second_timeout: i32, filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "clear_subscription_timeout_monitor"]
         fn rustClearSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
-            filter: &CxxString, domain: &CxxString) -> GReturnCode;
+            filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
 
         // GravityDataProductMethods
 

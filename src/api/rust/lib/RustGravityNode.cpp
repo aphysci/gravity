@@ -57,7 +57,19 @@ namespace gravity {
     {
         return gn->publish(*gdp);                  
     }
-    GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers)
+    GravityReturnCode rustPublishFilter(const std::unique_ptr<GravityNode>& gn,
+                                        const std::unique_ptr<GravityDataProduct>& gdp, const std::string& filterText)
+    {
+        return gn->publish(*gdp, filterText);
+    }
+    GravityReturnCode rustPublishTimestamp(const std::unique_ptr<GravityNode>& gn,
+                                           const std::unique_ptr<GravityDataProduct>& gdp,
+                                           const std::string& filterText, uint64_t timestamp)
+    {
+        return gn->publish(*gdp, filterText, timestamp);
+    }
+    GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+                                           bool& hasSubscribers)
     {
         return gn->subscribersExist(dataProductID, hasSubscribers);
     }

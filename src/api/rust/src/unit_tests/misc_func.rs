@@ -50,7 +50,7 @@ impl GravityHeartbeatListener for MiscHBListener {
 struct MiscGravitySubscriber {}
 
 impl GravitySubscriber for MiscGravitySubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for data_product in data_products {
             let data = data_product.data();
             let message = String::from_utf8(data).unwrap();

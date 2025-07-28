@@ -4,7 +4,7 @@ use std::ffi::c_char;
 use cxx::{let_cxx_string, UniquePtr};
 use crate::ffi::{self, *};
 
-/// Wrapper for a GravityDataProduct
+/// Generic Data Product for the Gravity Infrastructure.
 pub struct GravityDataProduct {
     pub(crate) gdp: UniquePtr<GDataProduct>,
 }
@@ -34,7 +34,7 @@ impl GravityDataProduct {
 
 
     pub(crate) fn from_gdp(gdp: UniquePtr<GDataProduct>) -> GravityDataProduct {
-        GravityDataProduct {gdp: gdp}
+        GravityDataProduct {gdp}
     }
     /// Returns the data product ID of this data product.
     pub fn data_product_id(&self) -> String {

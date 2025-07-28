@@ -35,6 +35,10 @@ namespace gravity {
 
     GravityReturnCode rustPublish(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp);
 
+    GravityReturnCode rustPublishFilter(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp, const std::string &filterText);
+
+    GravityReturnCode rustPublishTimestamp(const std::unique_ptr<GravityNode> &gn, const std::unique_ptr<GravityDataProduct> &gdp, const std::string &filterText, uint64_t timestamp);
+
     GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers);
 
     GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 

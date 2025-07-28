@@ -52,7 +52,7 @@ fn main() {
     
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name
-    println!("cargo:rustc-link-search={}", lib_path);
+    println!("cargo:rustc-link-search={lib_path}");
     // println!("cargo:rustc-link-search={}", path.display());
     println!("cargo:rustc-link-lib=static=gravity_d");
     println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
@@ -70,6 +70,6 @@ fn main() {
     // cargo run will add this to the library path. 
     // Only useful for running tests
     // Does nothing otherwise...
-    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_path); 
+    println!("cargo:rustc-env=LD_LIBRARY_PATH={lib_path}"); 
    
 }

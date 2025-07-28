@@ -2,7 +2,7 @@ use core::time;
 // pub mod protos;
 
 use crate::ffi::new_future_response;
-use crate::spdlog::SpdLog;
+use crate::SpdLog;
 use crate::gravity_service_provider::GravityServiceProvider;
 use crate::gravity_data_product::GravityDataProduct;
 use crate::gravity_requestor::GravityRequestor;
@@ -15,7 +15,7 @@ struct MyProvider {}
 
 impl GravityServiceProvider for MyProvider {
     fn request(&mut self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
-        if data_product.data_product_id() != String::from("Multiplication") {
+        if data_product.data_product_id() != "Multiplication" {
             SpdLog::error("Request is not for multiplication");
         }
         let mut mult_ops = MultPB::new();
@@ -46,7 +46,7 @@ impl GravityRequestor for MyRequestor {
     }
     
     fn request_timeout(&mut self, service_id: &str, request_id: &str) {
-        assert!(true);
+        // assert!(true);
     }
 }
 
@@ -80,12 +80,12 @@ fn service() {
     operands.set_multiplicand_b(2);
     mult_request.set_data(&operands);
     
-    ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, Some(""));
+    ret = gn2.request_async("Multiplication", &mult_request, &requestor);
     while ret != GravityReturnCode::SUCCESS {
         SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
-        ret = gn2.request_async("Multiplication", &mult_request, &requestor, Some("8 x 2"), None, None as Option<&str>);
+        ret = gn2.request_async("Multiplication", &mult_request, &requestor);
     }
 
     let request2 = GravityDataProduct::with_id("Multiplication");
@@ -119,9 +119,9 @@ impl GravityServiceProvider for BetterProvider {
         let mut bigresult = BigResultPB::new();
         bigresult.set_didIt(bigops.shouldI());
         bigresult.set_length(bigops.littles.len() as i32);
-        assert_eq!(true, bigops.has_helloworld());
+        assert!(bigops.has_helloworld());
         assert_eq!("HelloWorld", bigops.helloworld());
-        assert_eq!(true, bigops.has_bigNumber());
+        assert!(bigops.has_bigNumber());
         assert_eq!(1785, bigops.bigNumber());
         
         for small in bigops.littles.iter() {
@@ -147,7 +147,7 @@ impl GravityRequestor for BetterRequestor {
         let mut bigresult = BigResultPB::new();
         response.populate_message(&mut bigresult);
 
-        assert_eq!(true, bigresult.didIt());
+        assert!(bigresult.didIt());
         assert_eq!(3, bigresult.length());
         let mut count = 0;
         for num in bigresult.littleNums.iter() {
@@ -221,12 +221,12 @@ fn service2 () {
     }
     mult_request.set_data(&operands);
     
-    ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, Some(""));
+    ret = gn2.request_async("BigComplex", &mult_request, &requestor);
     while ret != GravityReturnCode::SUCCESS {
         SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
-        ret = gn2.request_async("BigComplex", &mult_request, &requestor, Some(""), None, None as Option<&str>);
+        ret = gn2.request_async("BigComplex", &mult_request, &requestor);
     }
 
     let request2 = GravityDataProduct::with_id("BigComplex");

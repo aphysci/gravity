@@ -5,7 +5,7 @@ use crate::{gravity_data_product::GravityDataProduct, gravity_node::{GravityNode
 struct MySubscriber {}
 
 impl GravitySubscriber for MySubscriber {
-    fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
            let mut pb = BasicCounterDataProductPB::new();
            i.populate_message(&mut pb);
