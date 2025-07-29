@@ -63,7 +63,7 @@ fn main() {
     // If you want to run the tests...
     // run: sudo apt install libfmt-dev
     // uncomment out the following line
-    println!("cargo:rustc-link-lib=fmt");
+    // println!("cargo:rustc-link-lib=fmt");
 
 
     
