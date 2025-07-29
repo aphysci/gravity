@@ -59,9 +59,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/aphysci/gravity_base:focal
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.PAT }}
     steps:
       -
         name: clone
@@ -99,9 +96,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/aphysci/gravity_base:jammy
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.PAT }}
     steps:
       -
         name: clone
@@ -139,9 +133,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/aphysci/gravity_base:alma
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.PAT }}
     steps:
       -
         name: clone
