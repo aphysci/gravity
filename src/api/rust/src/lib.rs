@@ -156,7 +156,7 @@
 
 
 
-
+#![allow(deprecated)]
 #![allow(dead_code)]
 
 mod spdlog;

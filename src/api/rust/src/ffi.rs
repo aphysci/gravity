@@ -42,13 +42,13 @@ mod ffi {
     }
     #[namespace = "gravity"]
     unsafe extern "C++" {
-        include!("gravity/src/api/rust/lib/RustGravityNode.h");
-        include!("gravity/src/api/rust/lib/RustGravityDataProduct.h");
-        include!("gravity/src/api/rust/lib/RustFutureResponse.h");
-        include!("gravity/src/api/rust/lib/RustGravitySubscriber.h");
-        include!("gravity/src/api/rust/lib/RustGravityHeartbeatListener.h");
-        include!("gravity/src/api/rust/lib/RustGravitySubscriptionMonitor.h");
-        include!("gravity/src/api/rust/lib/RustGravityServiceProvider.h");
+        include!("gravity/src/api/rust/bridge/RustGravityNode.h");
+        include!("gravity/src/api/rust/bridge/RustGravityDataProduct.h");
+        include!("gravity/src/api/rust/bridge/RustFutureResponse.h");
+        include!("gravity/src/api/rust/bridge/RustGravitySubscriber.h");
+        include!("gravity/src/api/rust/bridge/RustGravityHeartbeatListener.h");
+        include!("gravity/src/api/rust/bridge/RustGravitySubscriptionMonitor.h");
+        include!("gravity/src/api/rust/bridge/RustGravityServiceProvider.h");
 
 
 
@@ -342,7 +342,7 @@ mod ffi {
 
     unsafe extern "C++" {
         //spdlog
-        include!("gravity/src/api/rust/lib/RustSpdLog.h");
+        include!("gravity/src/api/rust/bridge/RustSpdLog.h");
         
         fn spdlog_critical(message: &CxxString);
         fn spdlog_error(message: &CxxString);

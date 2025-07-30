@@ -126,16 +126,16 @@ namespace gravity {
         gdp->setReceivedTimestamp(ts);
     }
 
-    // void rustSetComponentId(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& componentId) 
-    // {
-    //     std::string cid(componentId);
-    //     gdp->setComponentId(cid);
-    // }
+    void rustSetComponentId(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& componentId) 
+    {
+        std::string cid(componentId);
+        gdp->setComponentId(cid);
+    }
 
-    // void rustSetDomain(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& domain) 
-    // {
-    //     gdp->setDomain(domain);
-    // }
+    void rustSetDomain(const std::unique_ptr<GravityDataProduct>& gdp, const std::string& domain) 
+    {
+        gdp->setDomain(domain);
+    }
 
     bool rustIsRelayedDataProduct(const std::unique_ptr<GravityDataProduct>& gdp) 
     { 

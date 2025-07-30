@@ -5,11 +5,11 @@ use std::{env, path::{Path, PathBuf}, str::FromStr};
 
 fn main() {
     //bridge sources
-    let src = ["lib/RustSpdLog.cpp", "lib/RustGravityNode.cpp", 
-        "lib/RustGravityDataProduct.cpp", "lib/RustFutureResponse.cpp",
-         "lib/RustGravitySubscriber.cpp", "lib/RustGravityRequestor.cpp",
-         "lib/RustGravityHeartbeatListener.cpp", "lib/RustGravitySubscriptionMonitor.cpp",
-         "lib/RustGravityServiceProvider.cpp"
+    let src = ["bridge/RustSpdLog.cpp", "bridge/RustGravityNode.cpp", 
+        "bridge/RustGravityDataProduct.cpp", "bridge/RustFutureResponse.cpp",
+         "bridge/RustGravitySubscriber.cpp", "bridge/RustGravityRequestor.cpp",
+         "bridge/RustGravityHeartbeatListener.cpp", "bridge/RustGravitySubscriptionMonitor.cpp",
+         "bridge/RustGravityServiceProvider.cpp"
          ];
     let mut srcs = Vec::with_capacity(9);
     for s in src.iter() {
@@ -41,6 +41,8 @@ fn main() {
         .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
         .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
+        .cflag("-Wall")
+        .cxxflag("-Wall")
         .out_dir(out_dir)
         .build();
 
@@ -48,6 +50,8 @@ fn main() {
     cxx_build::bridge("src/api/rust/src/ffi.rs")
         .files(srcs.iter())
         .include(include_path)
+        .warnings(true)
+        .cargo_warnings(false)
         .compile("rust_gravity");
     
     // search and link the libraries created
