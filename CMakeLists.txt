@@ -12,6 +12,7 @@ option(GRAVITY_USE_EXTERNAL_PROTOBUF "Download, Build and Use an externally down
 option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downloaded ZeroMQ build")
 option(GRAVITY_USE_EXTERNAL_SPDLOG "Download, build and use an externally downloaded Spdlog build")
 option(BUILD_EXAMPLES_TESTS "Build Gravity examples and tests" ON)
+option(BUILD_LIBRARY_ONLY "Only build the libraries, without components or tests")
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
@@ -41,6 +42,11 @@ endif()
 set(PUBLIC_STAGING_DIR ${CMAKE_BINARY_DIR}/staging)
 
 macro(add_external_protobuf)
+    if (NOT BUILD_LIBRARY_ONLY)
+        set(BUILD_SHARED_LIBS_PROTO ON)
+    else() 
+        set(BUILD_SHARED_LIBS_PROTO OFF)
+    endif()
     ExternalProject_Add(    
         protobuf_external
         SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/protobuf"
@@ -52,7 +58,7 @@ macro(add_external_protobuf)
         LOG_OUTPUT_ON_FAILURE ON
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
-            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=ON
+            -Dprotobuf_BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS_PROTO}
             -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=OFF
             -Dprotobuf_BUILD_TESTS:BOOL=OFF
             -Dprotobuf_BUILD_EXAMPLES:BOOL=OFF
@@ -77,7 +83,7 @@ macro(add_external_libzmq)
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
             -DBUILD_SHARED:BOOL=ON
-            -DBUILD_STATIC:BOOL=OFF
+            -DBUILD_STATIC:BOOL=${BUILD_LIBRARY_ONLY}
             -DZMQ_BUILD_TESTS:BOOL=OFF
             -DBUILD_TESTS:BOOL=OFF
         BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
@@ -264,11 +270,13 @@ if (NOT depends)
     set(GRAVITY_ROOT "${CMAKE_INSTALL_PREFIX}")
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_ALT_SEP})
     
-    include(CTest)
-    add_subdirectory(test)
+    if (NOT BUILD_LIBRARY_ONLY)
+        include(CTest)
+        add_subdirectory(test)
 
-    set(CPACK_GENERATOR "TGZ")
-    include(CPack)
+        set(CPACK_GENERATOR "TGZ")
+        include(CPack)
+    endif()
 
     message(STATUS "No external libraries - doing a toplevel build")
 else()
@@ -284,6 +292,7 @@ else()
             -DSKIP_JAVA=${SKIP_JAVA}
             -DSKIP_PYTHON=${SKIP_PYTHON}
             -DZMQ_HOME=${ZMQ_HOME}
+            -DBUILD_LIBRARY_ONLY=${BUILD_LIBRARY_ONLY}
             -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USING_EXTERNAL_PROTOBUF}
             -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USING_EXTERNAL_ZEROMQ}
             -DGRAVITY_USE_EXTERNAL_SPDLOG=${GRAVITY_USING_EXTERNAL_SPDLOG}
@@ -304,7 +313,7 @@ else()
 
 
 
-    if (BUILD_EXAMPLES_TESTS)
+    if (BUILD_EXAMPLES_TESTS AND NOT BUILD_LIBRARY_ONLY)
         ExternalProject_Add(
             gravity_external_examples_tests
             DEPENDS gravity_external

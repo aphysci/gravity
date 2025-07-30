@@ -104,8 +104,11 @@ set(SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/Utility.cpp")
         
 
-        
-add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+if (NOT BUILD_LIBRARY_ONLY)
+	add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+else()
+	add_library(${PROTO_LIB_NAME} STATIC ${PROTO_SRCS} ${PROTO_HDRS})
+endif()
 target_link_libraries(${PROTO_LIB_NAME} PUBLIC protobuf::libprotobuf)
 add_dependencies(${PROTO_LIB_NAME} ${LIB_NAME}_protos)
 install(TARGETS ${PROTO_LIB_NAME} EXPORT ${PROJECT_NAME}-targets ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
@@ -118,7 +121,12 @@ endif()
 
 add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
 include_directories("${CMAKE_BINARY_DIR}")
-add_library(${LIB_NAME} SHARED ${SRCS})
+if (NOT BUILD_LIBRARY_ONLY)
+	add_library(${LIB_NAME} SHARED ${SRCS})
+else()
+	add_library(${LIB_NAME} STATIC ${SRCS})
+endif()
+
 add_dependencies(${LIB_NAME} ${PROTO_LIB_NAME})
 gravity_add_dependency(${LIB_NAME})
 target_include_directories(${LIB_NAME} INTERFACE
