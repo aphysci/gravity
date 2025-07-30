@@ -200,5 +200,4 @@ pub use crate::gravity_heartbeat_listener::GravityHeartbeatListener;
 pub use crate::gravity_subscription_monitor::GravitySubscriptionMonitor;
 pub use crate::future_response::FutureResponse;
 pub use crate::spdlog::SpdLog;
-use crate::protos::*;
 
