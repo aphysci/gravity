@@ -1,4 +1,5 @@
 include
+target
 *.tgz
 *.tar.gz
 *.o
