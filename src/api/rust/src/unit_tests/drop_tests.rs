@@ -1,6 +1,6 @@
 use core::time;
 
-use crate::{gravity_data_product::GravityDataProduct, gravity_node::{GravityNode, GravityTransportType}, gravity_subscriber::GravitySubscriber, protos::BasicCounterDataProduct::BasicCounterDataProductPB, spdlog::SpdLog};
+use crate::{GravityNode, GravityTransportType, GravitySubscriber, GravityDataProduct, protos::BasicCounterDataProduct::BasicCounterDataProductPB, SpdLog};
 
 struct MySubscriber {}
 

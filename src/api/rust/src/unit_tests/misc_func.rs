@@ -1,6 +1,6 @@
 use core::time;
 
-use crate::{gravity_data_product::GravityDataProduct, gravity_heartbeat_listener::GravityHeartbeatListener, gravity_node::{GravityNode, GravityTransportType}, gravity_subscriber::GravitySubscriber, spdlog::SpdLog};
+use crate::{GravityDataProduct, GravityHeartbeatListener, GravityNode, GravityTransportType, GravitySubscriber, SpdLog};
 
 
 

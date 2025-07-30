@@ -3,10 +3,10 @@ use core::time;
 
 use crate::ffi::new_future_response;
 use crate::SpdLog;
-use crate::gravity_service_provider::GravityServiceProvider;
-use crate::gravity_data_product::GravityDataProduct;
-use crate::gravity_requestor::GravityRequestor;
-use crate::gravity_node::{GravityNode, GravityReturnCode, GravityTransportType};
+use crate::GravityServiceProvider;
+use crate::GravityDataProduct;
+use crate::GravityRequestor;
+use crate::{GravityNode, GravityReturnCode, GravityTransportType};
 // use gravity::gravity_logger::SpdLog;
 use crate::protos::DataPB::{MultPB, ResultPB};
 use crate::protos::BigComplexPB::{self, BigGuyPB, BigResultPB, SmallGuyPB};

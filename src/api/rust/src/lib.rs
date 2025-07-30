@@ -44,6 +44,10 @@
 //!
 //! ## Publisher
 //! ```rust
+//! use gravity::{GravityNode, GravityDataProduct, GravityTransportType};
+//! use std::time;
+//! use crate::protobufs::BasicCounterDataProductPB;
+//! 
 //! fn main () {
 //!   
 //!    let gn = GravityNode::new();
@@ -64,17 +68,17 @@
 //!    while !quit
 //!    {   
 //!        //create a data product to send across the network of type "BasicCounterDataProduct"
-//!        let counter_data_product = GravityDataProduct::from_id("BasicCounterDataProduct");
+//!        let counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
 //!
 //!        //Initialize our message
-//!        let mut data = BasicCounterDataProductPB::new();
-//!        data.set_count(count);
+//!        let mut counter_data_pb = BasicCounterDataProductPB::new();
+//!        counter_data_pb.set_count(count);
 //!        
 //!        //Put message into data product
-//!        counter_data_product.set_data(&data);
+//!        counter_data_product.set_data(&counter_data_pb);
 //!        
 //!        //Publish the data product
-//!        gn.publish(&gdp);
+//!        gn.publish(&counter_data_product);
 //!
 //!        //Increment count
 //!        count += 1;
@@ -94,19 +98,25 @@
 //! ## Subscriber
 //! 
 //! ```rust
+//!    use gravity::GravityNode;
+//!    use gravity::GravitySubscriber;
+//!    use gravity::GravityDataProduct;
+//!    use gravity::SpdLog;
+//!    use crate::protobufs::BasicCounterDataProductPB::new();
+//! 
 //!    struct MySubscriber {}
 //!
 //!    impl GravitySubscriber for MySubscriber {
 //!        
-//!        fn subscription_filled(&mut self, data_products: &Vec<GravityDataProduct>) {
+//!        fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
 //!            
 //!            for data_product in data_products.iter() {
 //!                //Get the protobuf object from the message
 //!                let mut counter_data_pb = BasicCounterDataProductPB::new();
-//!                data_product.populate_message(&mut counter_data_pb)
+//!                data_product.populate_message(&mut counter_data_pb);
 //!
 //!                //Process the message
-//!                warn!("Current Count: {}", counter_data_pb.count());
+//!                SpdLog::warn(format!("Current Count: {}", counter_data_pb.count()));
 //!            
 //!
 //!    
@@ -114,21 +124,30 @@
 //!        }
 //!    }
 //!
-//!```
+//!   // And now to use the subscriber
 //!
-//!And then to use the subscriber:
-//!
-//!```rust
-//!    let mut gn = GravityNode::new();
-//!    gn.init("ProtobufDataProductSubscriber");
-//!
-//!    //This is just an example, you can have any other way to 
-//!    //instantiate your own GravitySubscriber, as long as it impl GravitySubscriber trait
-//!    let subscriber = MySubscriber {}
-//!
-//!    //subscribe to the data product
-//!    //this function takes in any struct that impl GravitySubscriber
-//!    gn.subscribe("BasicCounterDataProduct", &subscriber);
+//!    fn main() {
+//!        let mut gn = GravityNode::new();
+//!        gn.init("ProtobufDataProductSubscriber");
+//!    
+//!        //This is just an example, you can have any other way to 
+//!        //instantiate your own GravitySubscriber, as long as it impl GravitySubscriber trait
+//!        let subscriber = MySubscriber {};
+//!    
+//!        //subscribe to the data product
+//!        //this function takes in any struct that impl GravitySubscriber
+//!        gn.subscribe("BasicCounterDataProduct", &subscriber);
+//!     
+//!        gn.wait_for_exit()
+//!    }
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//! 
+//!     
 //!```
 //! Note that if a GravityNode is to subscribe, it must be declared as mut
 //! since GravityNodes hold a reference to the subscriber object it creates.
@@ -181,4 +200,5 @@ pub use crate::gravity_heartbeat_listener::GravityHeartbeatListener;
 pub use crate::gravity_subscription_monitor::GravitySubscriptionMonitor;
 pub use crate::future_response::FutureResponse;
 pub use crate::spdlog::SpdLog;
+use crate::protos::*;
 

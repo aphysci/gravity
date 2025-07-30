@@ -1,4 +1,5 @@
-use crate::{gravity_data_product::GravityDataProduct, protos::DataPB::MultPB};
+use crate::GravityDataProduct;
+use crate::protos::DataPB::*;
 
 
 #[test]
@@ -24,6 +25,9 @@ fn data_product_functions() {
     assert!(gdp.is_relayed_data_product());
     gdp.set_is_relayed_data_product(false);
     assert!(!gdp.is_relayed_data_product());
+
+    gdp.set_component_id("newCompId");
+    assert_eq!("newCompId", gdp.component_id());
 
     gdp.set_timestamp(18);
     

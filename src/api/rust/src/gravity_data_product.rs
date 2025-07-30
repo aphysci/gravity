@@ -160,14 +160,18 @@ impl GravityDataProduct {
     pub fn set_recieved_timestamp(&self, ts: u32) {
         ffi::set_recieved_timestamp(&self.gdp, ts);
     }
-    // pub fn set_component_id(&self, component_id: &str) {
-    //     let_cxx_string!(cid = component_id);
-    //     ffi::set_component_id(&self.gdp, &cid);
-    // }
-    // pub fn set_domain(&self, domain: &str) {
-    //     let_cxx_string!(d = domain);
-    //     ffi::set_domain(&self.gdp, &d);
-    // }
+
+    /// Sets the component id of this GravityDataProduct (typically set by infrastructure at publish)
+    pub fn set_component_id(&self, component_id: &str) {
+        let_cxx_string!(cid = component_id);
+        ffi::set_component_id(&self.gdp, &cid);
+    }
+
+    /// Sets the domain on this GravityDataProduct (typically set by infrastructure at publish)
+    pub fn set_domain(&self, domain: &str) {
+        let_cxx_string!(d = domain);
+        ffi::set_domain(&self.gdp, &d);
+    }
     /// Returns the flag indicating whether this message has been relayed or has come from the original source
     pub fn is_relayed_data_product(&self) -> bool {
         ffi::is_relayed_data_product(&self.gdp)

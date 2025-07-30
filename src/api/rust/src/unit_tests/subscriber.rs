@@ -11,6 +11,7 @@ use crate::protos::BasicCounterDataProduct::BasicCounterDataProductPB;
 use protobuf::well_known_types::duration;
 
 
+
 use crate::protos::DataPB::*;
 
 struct MySubscriber {}
@@ -36,6 +37,7 @@ fn basic_subscriber () {
     let subscriber = MySubscriber {};
 
     gnn.subscribe(data_product_id, &subscriber);
+
 
     let gn = GravityNode::new();
     let mut ret = gn.init("RustExample");

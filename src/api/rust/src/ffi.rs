@@ -289,11 +289,11 @@ mod ffi {
         #[rust_name = "set_recieved_timestamp"]
         fn rustSetReceivedTimestamp(gdp: &UniquePtr<GDataProduct>, ts: u32);
 
-        // #[rust_name = "set_component_id"]
-        // fn rustSetComponentId(gdp: &UniquePtr<GDataProduct>, component_id: &CxxString);
+        #[rust_name = "set_component_id"]
+        fn rustSetComponentId(gdp: &UniquePtr<GDataProduct>, component_id: &CxxString);
 
-        // #[rust_name = "set_domain"]
-        // fn rustSetDomain(gdp: &UniquePtr<GDataProduct>, domain: &CxxString);
+        #[rust_name = "set_domain"]
+        fn rustSetDomain(gdp: &UniquePtr<GDataProduct>, domain: &CxxString);
 
         #[rust_name = "is_relayed_data_product"]
         fn rustIsRelayedDataProduct(gdp: &UniquePtr<GDataProduct>) -> bool;
