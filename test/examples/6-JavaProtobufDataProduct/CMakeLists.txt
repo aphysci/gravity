@@ -10,7 +10,7 @@ if (Protobuf_SRC_ROOT_FOLDER)
 	set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
 #Need prefix path here because build/install gets created at the end of the build process, and doesn't exist yet when this gets built
-set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${LOCAL_PROTOBUF_JAR}")
+set(PUBLIC_JAR "${JAVA_PROTOBUF_JAR}" "${LOCAL_PROTOBUF_JAR}")
 #list(JOIN PUBLIC_JAR ":" PUBLIC_JAR_CACHE)
 #set(PUBLIC_JAR_CACHE ${PUBLIC_JAR_CACHE} CACHE ON STRING)
 find_package(GravityJava REQUIRED)
@@ -23,9 +23,9 @@ gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURR
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
 #if(WIN32)
-#set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR}) #Takes semicolons as dividers
+set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR}) #Takes semicolons as dividers
 #else()
- set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR_CACHE}) #Linux takes colons as dividers
+#set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR_CACHE}) #Linux takes colons as dividers
  #endif()
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
