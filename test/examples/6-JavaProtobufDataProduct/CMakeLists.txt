@@ -8,7 +8,7 @@ find_package(Gravity QUIET)
 
 set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
-	set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/core/target/protobuf-java-${Protobuf_VERSION}.jar")
+	set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
 #Need prefix path here because build/install gets created at the end of the build process, and doesn't exist yet when this gets built
 set(PUBLIC_JAR "${CMAKE_PREFIX_PATH}/lib/protobuf-java.jar" "${JAVA_PROTOBUF_JAR}" "${LOCAL_PROTOBUF_JAR}" CACHE ON STRING)
