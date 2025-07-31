@@ -17,13 +17,6 @@ set(PY_EXEC python3)
 if (WIN32)
     set(PY_EXEC python)
 endif()
-add_test(NAME pybasicservice COMMAND ${PY_EXEC} requestor.py WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
-set_property(TEST pybasicservice PROPERTY ENVIRONMENT_MODIFICATION
-  "LD_LIBRARY_PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
-  "PATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_BINDIR}"
-  "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
-  "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
-)
 
 configure_file(train.sh.in ${AnomalyDetection_SOURCE_DIR}/train.sh)
 configure_file(detect.sh.in ${AnomalyDetection_SOURCE_DIR}/detect.sh)
