@@ -6,6 +6,7 @@ include(GravitySupport)
 
 find_package(Gravity QUIET)
 
+set(LOCAL_PROTOBUF_JAR)
 if (Protobuf_SRC_ROOT_FOLDER)
 	set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
@@ -22,8 +23,9 @@ gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURR
 
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
+set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
 #if(WIN32)
-set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR}) #Takes semicolons as dividers
+#set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR}) #Takes semicolons as dividers
 #else()
 #set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR_CACHE}) #Linux takes colons as dividers
  #endif()
