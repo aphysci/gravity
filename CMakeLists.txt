@@ -17,7 +17,7 @@ option(SKIP_PYTHON "Skip building Gravity Python wrapper")
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
 set(Protobuf_SRC_ROOT_FOLDER "" CACHE PATH "Path to Protobuf source build")
 set(ZMQ_HOME "" CACHE PATH "Path to your local ZeroMQ installation")
-set(JAVA_PROTOBUF_JAR "/usr/share/java/protobuf.jar" CACHE PATH "Location of protobuf jar file")
+#set(JAVA_PROTOBUF_JAR "/usr/share/java/protobuf.jar" CACHE PATH "Location of protobuf jar file")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 string(REPLACE "\"" "" ABS_CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
