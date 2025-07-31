@@ -10,7 +10,7 @@ if (Protobuf_SRC_ROOT_FOLDER)
 	set(LOCAL_PROTOBUF_JAR "${Protobuf_SRC_ROOT_FOLDER}/java/target/protobuf-java-${Protobuf_VERSION}.jar")
 endif()
 #Need prefix path here because build/install gets created at the end of the build process, and doesn't exist yet when this gets built
-set(PUBLIC_JAR "${JAVA_PROTOBUF_JAR}" "${LOCAL_PROTOBUF_JAR}")
+set(PUBLIC_JAR "/usr/share/java/protobuf.jar" "${LOCAL_PROTOBUF_JAR}")
 #list(JOIN PUBLIC_JAR ":" PUBLIC_JAR_CACHE)
 #set(PUBLIC_JAR_CACHE ${PUBLIC_JAR_CACHE} CACHE ON STRING)
 find_package(GravityJava REQUIRED)
