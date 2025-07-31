@@ -27,3 +27,4 @@ install
 build
 .vscode
 .vs
+Cargo.lock
