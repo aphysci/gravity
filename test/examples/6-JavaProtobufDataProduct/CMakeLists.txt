@@ -23,11 +23,11 @@ gravity_protobuf_generate(APPEND_PATH LANGUAGE java PROTOC_OUT_DIR "${CMAKE_CURR
 
 add_custom_target(${PROJECT_NAME}_protos ALL DEPENDS ${PROTO_SRCS})
 
-set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
+#set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR})
 if(WIN32)
-set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR}) #Takes semicolons as dividers
+set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR}) #Takes semicolons as dividers
 else()
-set(CMAKE_JAVA_INCLUDE_PATH ${PUBLIC_JAR_CACHE}) #Linux takes colons as dividers
+set(CMAKE_JAVA_INCLUDE_PATH "${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/protobuf-java.jar" ${PUBLIC_JAR_CACHE}) #Linux takes colons as dividers
 endif()
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_RELEASE "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity.jar")
 string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL_DEBUG "${_UseJava_PATH_SEP}${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}/gravity${CMAKE_DEBUG_POSTFIX}.jar${_UseJava_PATH_SEP}${CMAKE_BINARY_DIR}/src/api/java/gravity${CMAKE_DEBUG_POSTFIX}.jar")
@@ -69,5 +69,5 @@ if (WIN32)
 endif()
 
 configure_file(run.sh.in ${JavaProtobufDataProduct_SOURCE_DIR}/run.sh)
-configure_file(RunJavaProtobufDataProductDebug.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductDebug.bat)
-configure_file(RunJavaProtobufDataProductRelease.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductRelease.bat)
+#configure_file(RunJavaProtobufDataProductDebug.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductDebug.bat)
+#configure_file(RunJavaProtobufDataProductRelease.bat.in ${JavaProtobufDataProduct_SOURCE_DIR}/RunJavaProtobufDataProductRelease.bat)
