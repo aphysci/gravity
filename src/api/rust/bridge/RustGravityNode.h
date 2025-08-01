@@ -84,12 +84,17 @@ namespace gravity {
     GravityReturnCode rustRegisterRelay(const std::unique_ptr<GravityNode> & gn,
                                         const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,
                                         bool localOnly, GravityTransportType transportType);
-
     
     GravityReturnCode rustRegisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, int64_t interval_in_microseconds,
-        const std::unique_ptr<RustHeartbeatListener>& listener, const std::string& domain = "");
+                                                    const std::unique_ptr<RustHeartbeatListener>& listener);
+    
+    GravityReturnCode rustRegisterHeartbeatListenerDomain(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, int64_t interval_in_microseconds,
+                                                          const std::unique_ptr<RustHeartbeatListener>& listener, const std::string& domain);
 
-    GravityReturnCode rustUnregisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, const std::string& domain = "");
+    GravityReturnCode rustUnregisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID);
+    
+
+    GravityReturnCode rustUnregisterHeartbeatListenerDomain(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, const std::string& domain);
 
     GravityReturnCode rustRegisterRelayCache(const std::unique_ptr<GravityNode> & gn,
                                              const std::string& dataProductID, const std::unique_ptr<RustSubscriber>& subscriber,

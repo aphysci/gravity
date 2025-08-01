@@ -171,10 +171,16 @@ mod ffi {
         fn rustNewSubscriptionMonitor(func: fn(&CxxString, i32, &CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustSubscriptionMonitor>;
 
         #[rust_name = "register_heartbeat_listener"]
-        fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>, domain: &CxxString) -> GravityReturnCodes;
+        fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>) -> GravityReturnCodes;
         
+        #[rust_name = "register_heartbeat_listener_domain"]
+        fn rustRegisterHeartbeatListenerDomain(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>, domain: &CxxString) -> GravityReturnCodes;
+
         #[rust_name = "unregister_heartbeat_listener"]
-        fn rustUnregisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GravityReturnCodes;
+        fn rustUnregisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString) -> GravityReturnCodes;
+
+        #[rust_name = "unregister_heartbeat_listener_domain"]
+        fn rustUnregisterHeartbeatListenerDomain(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "new_rust_service_provider"]
         fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;

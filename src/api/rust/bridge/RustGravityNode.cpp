@@ -185,13 +185,29 @@ namespace gravity {
         return gn->unregisterService(serviceID);
     }
 
-    GravityReturnCode rustRegisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, int64_t interval_in_microseconds,
-        const std::unique_ptr<RustHeartbeatListener>& listener, const std::string& domain)
+    GravityReturnCode rustRegisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn,
+                                                    const std::string& componentID, int64_t interval_in_microseconds,
+                                                    const std::unique_ptr<RustHeartbeatListener>& listener)
+    {
+        return gn->registerHeartbeatListener(componentID, interval_in_microseconds, *listener);
+    }
+
+    GravityReturnCode rustRegisterHeartbeatListenerDomain(const std::unique_ptr<GravityNode>& gn,
+                                                          const std::string& componentID,
+                                                          int64_t interval_in_microseconds,
+                                                          const std::unique_ptr<RustHeartbeatListener>& listener,
+                                                          const std::string& domain)
     {
         return gn->registerHeartbeatListener(componentID, interval_in_microseconds, *listener, domain);
     }
 
-    GravityReturnCode rustUnregisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, const std::string& domain)
+    GravityReturnCode rustUnregisterHeartbeatListener(const std::unique_ptr<GravityNode>& gn,
+                                                      const std::string& componentID)
+    {
+        return gn->unregisterHeartbeatListener(componentID);
+    }
+
+    GravityReturnCode rustUnregisterHeartbeatListenerDomain(const std::unique_ptr<GravityNode>& gn, const std::string& componentID, const std::string& domain)
     {
         return gn->unregisterHeartbeatListener(componentID, domain);
     }

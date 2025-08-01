@@ -519,7 +519,31 @@ impl GravityNode {
     /// Registers a callback to be called when we don't get a heartbeat from another component.
     /// Returns success flag.
     pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: &impl GravityHeartbeatListener) -> GravityReturnCode{
-        self.register_heartbeat_listener_with_domain(component_id, interval_in_microseconds, listener, "")
+        let_cxx_string!(cid = component_id);
+
+        let key = listener as * const _ as usize;
+        let item = self.cpp_listener_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(listener as &dyn GravityHeartbeatListener);
+                let pointer = Box::into_raw(boxed);
+                let addr = pointer as usize;
+
+                let missed = GravityNode::missed_heartbeat_internal;
+                let received = GravityNode::received_heartbeat_internal;
+
+                let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
+                let ret = ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, &rust_listener);
+
+                self.cpp_listener_map.insert(key, (rust_listener, addr, String::from(component_id), String::from("")));
+
+                ret  
+            },
+            Some((rust_listener, _,_,_)) => {
+                ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, rust_listener)
+            }
+        }    
     }
 
     /// Registers a callback to be called when we don't get a heartbeat from another component.
@@ -544,14 +568,14 @@ impl GravityNode {
                 let received = GravityNode::received_heartbeat_internal;
 
                 let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
-                let ret = ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, &rust_listener, &d);
+                let ret = ffi::register_heartbeat_listener_domain(&self.gn, &cid, interval_in_microseconds, &rust_listener, &d);
 
                 self.cpp_listener_map.insert(key, (rust_listener, addr, String::from(component_id), String::from(domain)));
 
                 ret  
             },
             Some((rust_listener, _,_,_)) => {
-                ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, rust_listener, &d)
+                ffi::register_heartbeat_listener_domain(&self.gn, &cid, interval_in_microseconds, rust_listener, &d)
             }
         }
          
@@ -559,17 +583,18 @@ impl GravityNode {
 
     /// Unregisters a callback for when we get a heartbeat from another component.
     /// Returns success flag.
-    pub fn unregister_heartbeat_listener(&self, component_id: &str) {
-        self.unregister_heartbeat_listener_with_domain(component_id, "");
+    pub fn unregister_heartbeat_listener(&self, component_id: &str) -> GravityReturnCode {
+        let_cxx_string!(cid = component_id);
+        ffi::unregister_heartbeat_listener(&self.gn, &cid)
     }
 
     /// Unregisters a callback for when we get a heartbeat from another component.
     /// With paramter domain, the name of the domain for the component_id.
     /// Returns success flag.
-    pub fn unregister_heartbeat_listener_with_domain(&self, component_id: &str, domain: &str) {
+    pub fn unregister_heartbeat_listener_with_domain(&self, component_id: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
-        ffi::unregister_heartbeat_listener(&self.gn, &cid, &d);
+        ffi::unregister_heartbeat_listener_domain(&self.gn, &cid, &d)
     }
 
     /// Register a relay that will act as a pass-through for the given data_product_id. It will be 
