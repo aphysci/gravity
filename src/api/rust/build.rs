@@ -41,6 +41,7 @@ fn main() {
         .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
         .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
+        .define("CMAKE_BUILD_TYPE", "Release")
         .cflag("-Wall")
         .cxxflag("-Wall")
         .out_dir(out_dir)
@@ -58,9 +59,9 @@ fn main() {
     // note the *_d. This is what the cmake crate does, but it should not matter the name
     println!("cargo:rustc-link-search={lib_path}");
     // println!("cargo:rustc-link-search={}", path.display());
-    println!("cargo:rustc-link-lib=static=gravity_d");
-    println!("cargo:rustc-link-lib=static=gravity_protobufs_d");
-    println!("cargo:rustc-link-lib=static=keyvalue_parser_d");
+    println!("cargo:rustc-link-lib=static=gravity");
+    println!("cargo:rustc-link-lib=static=gravity_protobufs");
+    println!("cargo:rustc-link-lib=static=keyvalue_parser");
     println!("cargo:rustc-link-lib=static=protobuf");
     println!("cargo:rustc-link-lib=static=zmq");
     
