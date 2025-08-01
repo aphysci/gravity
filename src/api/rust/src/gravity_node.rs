@@ -751,14 +751,14 @@ impl GravityNode {
                 let addr = pointer as usize;
 
                 let rust_monitor = ffi::new_rust_subscription_monitor(func, addr);
-                let ret = ffi::set_subscription_timeout_monitor(&self.gn, &dpid, &rust_monitor,  milli_second_timeout, &f, &d);
+                let ret = ffi::set_subscription_timeout_monitor_domain(&self.gn, &dpid, &rust_monitor,  milli_second_timeout, &f, &d);
 
 
                 self.cpp_monitor_map.insert(key, (rust_monitor, addr));
                 ret
             },
             Some((rust_monitor, _)) => {
-                ffi::set_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor,  milli_second_timeout, &f, &d)
+                ffi::set_subscription_timeout_monitor_domain(&self.gn, &dpid, rust_monitor,  milli_second_timeout, &f, &d)
             }
         }
         
@@ -768,7 +768,18 @@ impl GravityNode {
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor(&self, data_product_id: &str, 
         monitor: &impl GravitySubscriptionMonitor) -> GravityReturnCode {
-            self.clear_subscription_timeout_monitor_with_domain(data_product_id, monitor, "", "")
+            let_cxx_string!(dpid = data_product_id);
+        
+        
+            let key = monitor as * const _ as usize;
+            let rust_monitor_op = self.cpp_monitor_map.get(&key);
+            
+            match rust_monitor_op {
+                None => GravityReturnCode::SUCCESS,
+                Some((rust_monitor, _)) => {
+                    ffi::clear_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor)
+                }
+            }   
     }
 
     /// Remove the given data_product_id from the given GravitySubscriptionMonitor.
@@ -776,8 +787,19 @@ impl GravityNode {
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor_with_filter(&self, data_product_id: &str, 
         monitor: &impl GravitySubscriptionMonitor, filter: &str) -> GravityReturnCode {
-            self.clear_subscription_timeout_monitor_with_domain(data_product_id, monitor, filter, "")
-    }
+            let_cxx_string!(dpid = data_product_id);
+            let_cxx_string!(f = filter);
+            
+            let key = monitor as * const _ as usize;
+            let rust_monitor_op = self.cpp_monitor_map.get(&key);
+            
+            match rust_monitor_op {
+                None => GravityReturnCode::SUCCESS,
+                Some((rust_monitor, _)) => {
+                    ffi::clear_subscription_timeout_monitor_filter(&self.gn, &dpid, rust_monitor, &f)
+                }
+            }
+        }
 
     /// Remove the given data_product_id from the given GravitySubscriptionMonitor.
     /// With parameter filter.
@@ -795,14 +817,11 @@ impl GravityNode {
         match rust_monitor_op {
             None => GravityReturnCode::SUCCESS,
             Some((rust_monitor, _)) => {
-                ffi::clear_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor, &f, &d)
+                ffi::clear_subscription_timeout_monitor_domain(&self.gn, &dpid, rust_monitor, &f, &d)
             }
         }
 
     }
-
-    
-
 
     fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
         GravityDataProduct::from_gdp(ffi::copy_gdp(gdp))

@@ -235,10 +235,26 @@ mod ffi {
 
         #[rust_name = "set_subscription_timeout_monitor"]
         fn rustSetSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            milli_second_timeout: i32) -> GravityReturnCodes;
+        
+        #[rust_name = "set_subscription_timeout_monitor_filter"]
+        fn rustSetSubscriptionTimeoutMonitorFilter(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            milli_second_timeout: i32, filter: &CxxString) -> GravityReturnCodes;
+        
+        #[rust_name = "set_subscription_timeout_monitor_domain"]
+        fn rustSetSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
             milli_second_timeout: i32, filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "clear_subscription_timeout_monitor"]
-        fn rustClearSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+        fn rustClearSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            ) -> GravityReturnCodes;
+        
+        #[rust_name = "clear_subscription_timeout_monitor_filter"]
+        fn rustClearSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+            filter: &CxxString) -> GravityReturnCodes;
+
+        #[rust_name = "clear_subscription_timeout_monitor_domain"]
+        fn rustClearSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
             filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
 
         // GravityDataProductMethods

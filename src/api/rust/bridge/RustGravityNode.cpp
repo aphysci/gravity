@@ -261,6 +261,22 @@ namespace gravity {
     GravityReturnCode rustSetSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>& gn,
                                                         const std::string& dataProductID,
                                                         const std::unique_ptr<RustSubscriptionMonitor>& monitor,
+                                                        int milliSecondTimeout)
+    {
+        return gn->setSubscriptionTimeoutMonitor(dataProductID, *monitor, milliSecondTimeout);
+    }
+
+    GravityReturnCode rustSetSubscriptionTimeoutMonitorFilter(const std::unique_ptr<GravityNode>& gn,
+                                                              const std::string& dataProductID,
+                                                              const std::unique_ptr<RustSubscriptionMonitor>& monitor,
+                                                              int milliSecondTimeout, const std::string& filter)
+    {
+        return gn->setSubscriptionTimeoutMonitor(dataProductID, *monitor, milliSecondTimeout, filter);
+    }
+
+    GravityReturnCode rustSetSubscriptionTimeoutMonitorDomain(const std::unique_ptr<GravityNode>& gn,
+                                                        const std::string& dataProductID,
+                                                        const std::unique_ptr<RustSubscriptionMonitor>& monitor,
                                                         int milliSecondTimeout,
                                                         const std::string& filter, const std::string& domain)
     {
@@ -269,9 +285,25 @@ namespace gravity {
 
     GravityReturnCode rustClearSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>& gn,
                                                           const std::string& dataProductID,
+                                                          const std::unique_ptr<RustSubscriptionMonitor>& monitor)
+    {
+        return gn->clearSubscriptionTimeoutMonitor(dataProductID, *monitor);
+    }
+
+    GravityReturnCode rustClearSubscriptionTimeoutMonitorFilter(const std::unique_ptr<GravityNode>& gn,
+                                                                const std::string& dataProductID,
+                                                                const std::unique_ptr<RustSubscriptionMonitor>& monitor,
+                                                                const std::string& filter)
+    {
+        return gn->clearSubscriptionTimeoutMonitor(dataProductID, *monitor, filter);
+    }
+
+    GravityReturnCode rustClearSubscriptionTimeoutMonitorDomain(const std::unique_ptr<GravityNode>& gn,
+                                                          const std::string& dataProductID,
                                                           const std::unique_ptr<RustSubscriptionMonitor>& monitor,
                                                           const std::string& filter, const std::string& domain)
     {
         return gn->clearSubscriptionTimeoutMonitor(dataProductID, *monitor, filter, domain);
     }
-} // namespace gravity
+    
+    }  // namespace gravity

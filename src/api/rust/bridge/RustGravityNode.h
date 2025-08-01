@@ -111,10 +111,22 @@ namespace gravity {
     GravityReturnCode rustSendFutureResponse(const std::unique_ptr<GravityNode>& gn, const std::shared_ptr<FutureResponse>& futureResponse);
     
     GravityReturnCode rustSetSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
-        const std::unique_ptr<RustSubscriptionMonitor>& monitor, int milliSecondTimeout, const std::string& filter = "", const std::string& domain = "");
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor, int milliSecondTimeout);
+
+    GravityReturnCode rustSetSubscriptionTimeoutMonitorFilter(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor, int milliSecondTimeout, const std::string& filter);
+
+    GravityReturnCode rustSetSubscriptionTimeoutMonitorDomain(const std::unique_ptr<GravityNode>& gn, const std::string& dataProductID,
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor, int milliSecondTimeout, const std::string& filter, const std::string& domain);
 
     GravityReturnCode rustClearSubscriptionTimeoutMonitor(const std::unique_ptr<GravityNode>&gn, const std::string& dataProductID,
-        const std::unique_ptr<RustSubscriptionMonitor>& monitor, const std::string& filter = "", const std::string& domain = "");
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor);
+
+    GravityReturnCode rustClearSubscriptionTimeoutMonitorFilter(const std::unique_ptr<GravityNode>&gn, const std::string& dataProductID,
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor, const std::string& filter);
+
+    GravityReturnCode rustClearSubscriptionTimeoutMonitorDomain(const std::unique_ptr<GravityNode>&gn, const std::string& dataProductID,
+        const std::unique_ptr<RustSubscriptionMonitor>& monitor, const std::string& filter, const std::string& domain);
     
 } //namespace gravity
 
