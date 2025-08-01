@@ -24,18 +24,18 @@
 /**
  * Mark functions that are part of the public API.
  */
-#ifdef _WIN32
-#if _WIN32 != __MINGW32__
-#ifdef GRAVITY_EXPORTS
-#define GRAVITY_API __declspec(dllexport)
-#else
-#define GRAVITY_API __declspec(dllimport)
-#endif
-#else
-#define GRAVITY_API
-#endif
-#else
-#define GRAVITY_API
+#if defined(_WIN32) && _WIN32 != __MINGW32__
+#   if defined(GRAVITY_EXPORTS)
+#       define GRAVITY_API __declspec(dllexport)
+#   else
+#       define GRAVITY_API __declspec(dllimport)
+#   endif
+#else // unix
+#   if defined(GRAVITY_EXPORTS)
+#       define GRAVITY_API __attribute__ ((visibility ("default")))
+#   else
+#       define GRAVITY_API
+#   endif
 #endif
 
 namespace gravity

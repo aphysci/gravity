@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include "spdlog/spdlog.h"
 
 #include "protobuf/FileArchiverControlRequestPB.pb.h"
 #include "protobuf/FileArchiverControlResponsePB.pb.h"

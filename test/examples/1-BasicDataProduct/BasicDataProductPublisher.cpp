@@ -34,7 +34,7 @@ int main()
     GravityReturnCode ret = gn.init("SimpleGravityComponentID");
     if (ret != GravityReturnCodes::SUCCESS)
     {
-        spdlog::critical("Could not initialize GravityNode, return code was {}", ret);
+        spdlog::critical("Could not initialize GravityNode, return code was {}", static_cast<int>(ret));
         exit(1);
     }
 
@@ -48,7 +48,7 @@ int main()
         GravityTransportTypes::TCP);
     if (ret != GravityReturnCodes::SUCCESS)
     {
-        spdlog::critical("Could not register data product with id {}, return code was {}", dataProductID, ret);
+        spdlog::critical("Could not register data product with id {}, return code was {}", dataProductID, static_cast<int>(ret));
         exit(1);
     }
 
@@ -67,7 +67,7 @@ int main()
         ret = gn.publish(helloWorldDataProduct);
         if (ret != GravityReturnCodes::SUCCESS)
         {
-            spdlog::error("Could not publish data product with id {}, return code was {}", dataProductID, ret);
+            spdlog::error("Could not publish data product with id {}, return code was {}", dataProductID, static_cast<int>(ret));
         }
 
         //Sleep for 1 second.

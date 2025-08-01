@@ -44,7 +44,7 @@ namespace gravity
 /**
  * Interface for a log writer.
  */
-class Logger
+class GRAVITY_API Logger
 {
 public:
     /** 
@@ -52,16 +52,16 @@ public:
      * \param level log level 
      * \param messagestr log message
      */
-    GRAVITY_API virtual void Log(int level, const char* messagestr) = 0;
+    virtual void Log(int level, const char* messagestr) = 0;
 
     /** Default Destructor */
-    GRAVITY_API virtual ~Logger() {}
+    virtual ~Logger() {}
 };
 
 /**
  * Manages logging and stores information about the logging state.  
  */
-class Log
+class GRAVITY_API Log
 {
 public:
     /**
@@ -83,12 +83,12 @@ public:
      *  Functions to switch between LogLevel and const char*.
      */
     /** Returns a string representing the log level or NULL if it is an invalid log level */
-    GRAVITY_API static const char* LogLevelToString(LogLevel level);
+    static const char* LogLevelToString(LogLevel level);
     /** Parses the string into one of the log levels.  Use "FATAL", CRITICAL", "WARNING",
      * "MESSAGE", "DEBUG" and "TRACE" for the strings.  Defaults to LogLevel::NONE on error.
      * This function is not case sensitive.
      */
-    GRAVITY_API static LogLevel LogStringToLevel(const char* string);
+    static LogLevel LogStringToLevel(const char* string);
     /** @} */  //Helper functions
 
     /**
@@ -100,7 +100,7 @@ public:
      * \param local_log_level          The initial local logging level.
      * \param close_file_after_write   Boolean that indicates whether the log file should be kept open between writes.  Defaults to false.
      */
-    GRAVITY_API static void initAndAddFileLogger(const char* directory, const char* comp_id, LogLevel local_log_level,
+    static void initAndAddFileLogger(const char* directory, const char* comp_id, LogLevel local_log_level,
                                                  bool close_file_after_write = false);
 
     /**
@@ -109,7 +109,7 @@ public:
      * \param comp_id          ID of the component being logged.
      * \param local_log_level  The initial local logging level.
      */
-    GRAVITY_API static void initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level);
+    static void initAndAddConsoleLogger(const char* comp_id, LogLevel local_log_level);
 
     /**
      * Initialize a Logger.  
@@ -118,13 +118,13 @@ public:
      * \param logger           A valid Logger to initialize.
      * \param log_level        The logging level to initialize this logger with.
      */
-    GRAVITY_API static void initAndAddLogger(Logger* logger, LogLevel log_level);
+    static void initAndAddLogger(Logger* logger, LogLevel log_level);
 
     /**
      * Close all open Loggers.
      * Deallocates memory used for Loggers.
      */
-    GRAVITY_API static void CloseLoggers();
+    static void CloseLoggers();
 
     /**
      * @name Logging functions
@@ -133,12 +133,12 @@ public:
      *  \param message  The log message format string.  Use printf style.
      *  \param ...      Addition printf style parameters
      */
-    GRAVITY_API static void fatal(const char* message, ...);
-    GRAVITY_API static void critical(const char* message, ...);
-    GRAVITY_API static void warning(const char* message, ...);
-    GRAVITY_API static void message(const char* message, ...);
-    GRAVITY_API static void debug(const char* message, ...);
-    GRAVITY_API static void trace(const char* message, ...);
+    static void fatal(const char* message, ...);
+    static void critical(const char* message, ...);
+    static void warning(const char* message, ...);
+    static void message(const char* message, ...);
+    static void debug(const char* message, ...);
+    static void trace(const char* message, ...);
 
     /** @} */  //Logging Functions
 
@@ -146,12 +146,12 @@ public:
      * Removes the specified Logger.
      * Deallocates memory used for Logger.
      */
-    GRAVITY_API static void RemoveLogger(Logger* logger);
+    static void RemoveLogger(Logger* logger);
 
     /**
      * Return the number of open loggers.
      */
-    GRAVITY_API static int NumberOfLoggers();
+    static int NumberOfLoggers();
 
 private:
     /**

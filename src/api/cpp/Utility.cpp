@@ -42,26 +42,26 @@ namespace gravity
 {
 
 // String Conversions
-GRAVITY_API std::string StringToLowerCase(std::string str)
+std::string StringToLowerCase(std::string str)
 {
     std::use_facet<std::ctype<char> >(std::locale(""))
         .tolower(&str[0], &str[0] + str.length());  //Convert to lowercase.
     return str;
 }
-GRAVITY_API char* StringToLowerCase(char* str, int leng)
+char* StringToLowerCase(char* str, int leng)
 {
     std::use_facet<std::ctype<char> >(std::locale("")).tolower(&str[0], &str[0] + leng);  //Convert to lowercase.
 
     return str;
 }
 
-GRAVITY_API std::string StringCopyToLowerCase(const std::string& str)
+std::string StringCopyToLowerCase(const std::string& str)
 {
     std::string copy = str;
     return StringToLowerCase(copy);
 }
 
-GRAVITY_API int StringToInt(std::string str, int default_value)
+int StringToInt(std::string str, int default_value)
 {
     int ret_val;
     std::stringstream ss(str);
@@ -70,7 +70,7 @@ GRAVITY_API int StringToInt(std::string str, int default_value)
     return ret_val;
 }
 
-GRAVITY_API double StringToDouble(std::string str, double default_value)
+double StringToDouble(std::string str, double default_value)
 {
     double ret_val;
     std::stringstream ss(str);
@@ -80,24 +80,24 @@ GRAVITY_API double StringToDouble(std::string str, double default_value)
 }
 
 //Trimming
-std::string& trim_right_inplace(  //TODO confirm removal from GRAVITY_API
+std::string& trim_right_inplace(
     std::string& s, const std::string& delimiters = " \f\n\r\t\v")
 {
     return s.erase(s.find_last_not_of(delimiters) + 1);
 }
 
-std::string& trim_left_inplace(  //TODO confirm removal from GRAVITY_API
+std::string& trim_left_inplace(
     std::string& s, const std::string& delimiters = " \f\n\r\t\v")
 {
     return s.erase(0, s.find_first_not_of(delimiters));
 }
 
-GRAVITY_API std::string& trim(std::string& s, const std::string& delimiters)
+std::string& trim(std::string& s, const std::string& delimiters)
 {
     return trim_left_inplace(trim_right_inplace(s, delimiters), delimiters);
 }
 
-GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
+void replaceAll(std::string& target, const std::string& oldValue, const std::string& newValue)
 {
     //necessary check - otherwise program crashes
     if (oldValue.empty()) return;
@@ -110,7 +110,7 @@ GRAVITY_API void replaceAll(std::string& target, const std::string& oldValue, co
 }
 
 // OS
-GRAVITY_API bool IsValidFilename(const std::string filename)
+bool IsValidFilename(const std::string filename)
 {
     char restrictedChars[] = "/\\?%*:|\"<>";
     const size_t numRChars = 10;
@@ -216,14 +216,14 @@ int clock_gettime(int X, struct timespec* tv)
 }
 #endif
 
-GRAVITY_API uint64_t getCurrentTime()
+uint64_t getCurrentTime()
 {
     timespec ts;
     clock_gettime(0, &ts);
     return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;  //in microseconds
 }
 
-GRAVITY_API unsigned int sleep(int milliseconds)
+unsigned int sleep(int milliseconds)
 {
     // If sleep time < 0, set it to 0
     milliseconds = std::max(0, milliseconds);
