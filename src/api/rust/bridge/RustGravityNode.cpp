@@ -74,16 +74,57 @@ namespace gravity {
         return gn->subscribersExist(dataProductID, hasSubscribers);
     }
 
-    GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct,
-                                  const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID,
-                                  int timeout_milliseconds, const std::string& domain)
+    GravityReturnCode rustRequestAsync(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                                       const std::unique_ptr<GravityDataProduct>& dataProduct,
+                                       const std::unique_ptr<RustRequestor>& requestor)
+    {
+        return gn->request(serviceID, *dataProduct, *requestor);
+    }
+
+    GravityReturnCode rustRequestAsyncRequestID(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                                                const std::unique_ptr<GravityDataProduct>& dataProduct,
+                                                const std::unique_ptr<RustRequestor>& requestor,
+                                                const std::string& requestID)
+    {
+        return gn->request(serviceID, *dataProduct, *requestor, requestID);
+    }
+
+    GravityReturnCode rustRequestAsyncTimeout(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                                              const std::unique_ptr<GravityDataProduct>& dataProduct,
+                                              const std::unique_ptr<RustRequestor>& requestor,
+                                              const std::string& requestID, int timeout_milliseconds)
+    {
+        return gn->request(serviceID, *dataProduct, *requestor, requestID, timeout_milliseconds);
+    }
+
+    GravityReturnCode rustRequestAsyncDomain(const std::unique_ptr<GravityNode>& gn, const std::string& serviceID,
+                                             const std::unique_ptr<GravityDataProduct>& dataProduct,
+                                             const std::unique_ptr<RustRequestor>& requestor,
+                                             const std::string& requestID, int timeout_milliseconds,
+                                             const std::string& domain)
     {
         return gn->request(serviceID, *dataProduct, *requestor, requestID, timeout_milliseconds, domain);
     }
 
     std::shared_ptr<GravityDataProduct> rustRequestSync(const std::unique_ptr<GravityNode>& gn,
-                                                    const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request, 
-                                                    int timeout_milliseconds, const std::string& domain)
+                                                        const std::string& serviceID,
+                                                        const std::unique_ptr<GravityDataProduct>& request)
+    {
+        return gn->request(serviceID, *request);
+    }
+
+    std::shared_ptr<GravityDataProduct> rustRequestSyncTimeout(const std::unique_ptr<GravityNode>& gn,
+                                                               const std::string& serviceID,
+                                                               const std::unique_ptr<GravityDataProduct>& request,
+                                                               int timeout_milliseconds)
+    {
+        return gn->request(serviceID, *request, timeout_milliseconds);
+    }
+
+    std::shared_ptr<GravityDataProduct> rustRequestSyncDomain(const std::unique_ptr<GravityNode>& gn,
+                                                              const std::string& serviceID,
+                                                              const std::unique_ptr<GravityDataProduct>& request,
+                                                              int timeout_milliseconds, const std::string& domain)
     {
         return gn->request(serviceID, *request, timeout_milliseconds, domain);
     }

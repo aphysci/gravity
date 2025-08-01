@@ -120,7 +120,6 @@ mod ffi {
         #[rust_name = "get_component_ID"]
         fn rustGetComponentID(gn: &UniquePtr<GNode>) -> UniquePtr<CxxString>;
         
-
         #[rust_name = "register_data_product"]
         fn rustRegisterDataProduct(gn: &UniquePtr<GNode>, dataProductID: &CxxString, 
             transportType: GravityTransportTypes) -> GravityReturnCodes;
@@ -181,11 +180,29 @@ mod ffi {
         fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;
 
         #[rust_name = "request_async"]
-        fn rustRequest(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
+        fn rustRequestAsync(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
+                    requestor: &UniquePtr<RustRequestor>) -> GravityReturnCodes;
+
+        #[rust_name = "request_async_request_id"]
+        fn rustRequestAsyncRequestID(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
+                    requestor: &UniquePtr<RustRequestor>, request_id: &CxxString) -> GravityReturnCodes;
+
+        #[rust_name = "request_async_timeout"]
+        fn rustRequestAsyncTimeout(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
+                    requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32) -> GravityReturnCodes;
+
+        #[rust_name = "request_async_domain"]
+        fn rustRequestAsyncDomain(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
                     requestor: &UniquePtr<RustRequestor>, request_id: &CxxString, timeout_milliseconds: i32, domain: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "request_sync"]
-        fn rustRequestSync(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>, timeout_milliseconds: i32, domain: &CxxString) -> SharedPtr<GDataProduct>;
+        fn rustRequestSync(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>) -> SharedPtr<GDataProduct>;
+
+        #[rust_name = "request_sync_timeout"]
+        fn rustRequestSyncTimeout(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>, timeout_milliseconds: i32) -> SharedPtr<GDataProduct>;
+
+        #[rust_name = "request_sync_domain"]
+        fn rustRequestSyncDomain(gn: &UniquePtr<GNode>, service_id: &CxxString, request: &UniquePtr<GDataProduct>, timeout_milliseconds: i32, domain: &CxxString) -> SharedPtr<GDataProduct>;
 
         #[rust_name = "register_service"]
         fn rustRegisterService(gn: &UniquePtr<GNode>, service_id: &CxxString, transport_type: GravityTransportTypes, server: &UniquePtr<RustServiceProvider>) -> GravityReturnCodes;

@@ -41,10 +41,23 @@ namespace gravity {
 
     GravityReturnCode rustSubscribersExist(const std::unique_ptr<GravityNode> &gn, const std::string& dataProductID, bool& hasSubscribers);
 
-    GravityReturnCode rustRequest(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
-                                const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID, int timeout_milliseconds, const std::string& domain);
+    GravityReturnCode rustRequestAsync(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
+                                const std::unique_ptr<RustRequestor>& requestor);
     
-    std::shared_ptr<GravityDataProduct> rustRequestSync(const std::unique_ptr<GravityNode> &gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request, int timeout_milliseconds = -1, const std::string& domain = "");
+    GravityReturnCode rustRequestAsyncRequestID(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
+                                const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID);
+
+    GravityReturnCode rustRequestAsyncTimeout(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
+                                const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID, int timeout_milliseconds);
+
+    GravityReturnCode rustRequestAsyncDomain(const std::unique_ptr<GravityNode>&gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& dataProduct, 
+                                const std::unique_ptr<RustRequestor>& requestor, const std::string& requestID, int timeout_milliseconds, const std::string& domain);
+
+    std::shared_ptr<GravityDataProduct> rustRequestSync(const std::unique_ptr<GravityNode> &gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request);
+
+    std::shared_ptr<GravityDataProduct> rustRequestSyncTimeout(const std::unique_ptr<GravityNode> &gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request, int timeout_milliseconds);
+
+    std::shared_ptr<GravityDataProduct> rustRequestSyncDomain(const std::unique_ptr<GravityNode> &gn, const std::string& serviceID, const std::unique_ptr<GravityDataProduct>& request, int timeout_milliseconds, const std::string &domain);
 
     GravityReturnCode rustStartHeartbeat(const std::unique_ptr<GravityNode>& gn, int64_t interval_in_microseconds);
  

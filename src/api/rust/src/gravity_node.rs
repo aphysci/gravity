@@ -232,7 +232,31 @@ impl GravityNode {
     /// Returns success flag
     pub fn request_async(&mut self, service_id:  &str, request: &GravityDataProduct, 
         requestor: &impl GravityRequestor) -> GravityReturnCode {
-                self.request_async_with_domain(service_id, request, requestor, "", -1, "")
+        
+        let_cxx_string!(sid = service_id);
+
+        let key = requestor as * const _ as usize;
+        let item = self.cpp_requestor_provider_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(requestor as &dyn GravityRequestor);
+                let pointer = Box::into_raw(boxed);
+
+                let addr = pointer as usize;
+                let filled = GravityNode::request_filled_internal;
+                let tfunc = GravityNode::request_timeout_internal;
+                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
+                let ret = ffi::request_async(&self.gn, &sid, &request.gdp, &rust_req);
+
+
+                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
+                ret
+            }
+            Some((rust_req, _)) => {
+                ffi::request_async(&self.gn, &sid, &request.gdp, rust_req)
+            }
+        }
     }
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
     /// requestor must be a type that implements GravityRequestor
@@ -240,7 +264,31 @@ impl GravityNode {
     /// Returns success flag.
     pub fn request_async_with_request_id(&mut self, service_id:  &str, request: &GravityDataProduct, 
         requestor: &impl GravityRequestor, request_id: &str) -> GravityReturnCode {
-                self.request_async_with_domain(service_id, request, requestor, request_id, -1, "")
+        let_cxx_string!(sid = service_id);
+        let_cxx_string!(req = request_id);
+
+        let key = requestor as * const _ as usize;
+        let item = self.cpp_requestor_provider_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(requestor as &dyn GravityRequestor);
+                let pointer = Box::into_raw(boxed);
+
+                let addr = pointer as usize;
+                let filled = GravityNode::request_filled_internal;
+                let tfunc = GravityNode::request_timeout_internal;
+                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
+                let ret = ffi::request_async_request_id(&self.gn, &sid, &request.gdp, &rust_req, &req);
+
+
+                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
+                ret
+            }
+            Some((rust_req, _)) => {
+                ffi::request_async_request_id(&self.gn, &sid, &request.gdp, rust_req, &req)
+            }
+        }
     }
 
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
@@ -250,7 +298,32 @@ impl GravityNode {
     /// Returns success flag.
     pub fn request_async_with_timeout(&mut self, service_id:  &str, request: &GravityDataProduct, 
         requestor: &impl GravityRequestor, request_id: &str, timeout_milliseconds: i32) -> GravityReturnCode {
-                self.request_async_with_domain(service_id, request, requestor, request_id, timeout_milliseconds, "")
+            
+        let_cxx_string!(sid = service_id);
+        let_cxx_string!(req = request_id);
+
+        let key = requestor as * const _ as usize;
+        let item = self.cpp_requestor_provider_map.get(&key);
+
+        match item {
+            None => {
+                let boxed = Box::new(requestor as &dyn GravityRequestor);
+                let pointer = Box::into_raw(boxed);
+
+                let addr = pointer as usize;
+                let filled = GravityNode::request_filled_internal;
+                let tfunc = GravityNode::request_timeout_internal;
+                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
+                let ret = ffi::request_async_timeout(&self.gn, &sid, &request.gdp, &rust_req, &req, timeout_milliseconds);
+
+
+                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
+                ret
+            }
+            Some((rust_req, _)) => {
+                ffi::request_async_timeout(&self.gn, &sid, &request.gdp, rust_req, &req, timeout_milliseconds)
+            }
+        }
     }
 
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
@@ -278,14 +351,14 @@ impl GravityNode {
                 let filled = GravityNode::request_filled_internal;
                 let tfunc = GravityNode::request_timeout_internal;
                 let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
-                let ret = ffi::request_async(&self.gn, &sid, &request.gdp, &rust_req, &req, timeout_milliseconds, &dom);
+                let ret = ffi::request_async_domain(&self.gn, &sid, &request.gdp, &rust_req, &req, timeout_milliseconds, &dom);
 
 
                 self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
                 ret
             }
             Some((rust_req, _)) => {
-                ffi::request_async(&self.gn, &sid, &request.gdp, rust_req, &req, timeout_milliseconds, &dom)
+                ffi::request_async_domain(&self.gn, &sid, &request.gdp, rust_req, &req, timeout_milliseconds, &dom)
             }
         }
     
@@ -295,7 +368,12 @@ impl GravityNode {
     /// Returns None upon failure, Some(GravityDataProduct), where the GravityDataProduct is the data product
     /// representation of the response.
     pub fn request_sync(&self, service_id: &str, request: &GravityDataProduct) -> Option<GravityDataProduct> {
-        self.request_sync_with_domain(service_id, request, -1, "")
+        let_cxx_string!(sid = service_id);
+        let gdp = ffi::request_sync(&self.gn, &sid, &request.gdp);
+        if gdp.is_null() {
+            return None;
+        }
+        Some(GravityNode::to_rust_gdp(gdp.as_ref().unwrap()))
     }
 
     /// Makes a synchronous request against a service provider.
@@ -303,7 +381,12 @@ impl GravityNode {
     /// Returns None upon failure, Some(GravityDataProduct), where the GravityDataProduct is the data product
     /// representation of the response.
     pub fn request_sync_with_timeout(&self, service_id: &str, request: &GravityDataProduct, timeout_milliseconds: i32) -> Option<GravityDataProduct> {
-        self.request_sync_with_domain(service_id, request, timeout_milliseconds, "")
+        let_cxx_string!(sid = service_id);
+        let gdp = ffi::request_sync_timeout(&self.gn, &sid, &request.gdp, timeout_milliseconds);
+        if gdp.is_null() {
+            return None;
+        }
+        Some(GravityNode::to_rust_gdp(gdp.as_ref().unwrap()))
     }
    
     /// Makes a synchronous request against a service provider.
@@ -314,7 +397,7 @@ impl GravityNode {
     pub fn request_sync_with_domain(&self, service_id: &str, request: &GravityDataProduct, timeout_milliseconds: i32, domain: &str) -> Option<GravityDataProduct> {
         let_cxx_string!(sid = service_id);
         let_cxx_string!(d = domain);
-        let gdp = ffi::request_sync(&self.gn, &sid, &request.gdp, timeout_milliseconds, &d);
+        let gdp = ffi::request_sync_domain(&self.gn, &sid, &request.gdp, timeout_milliseconds, &d);
         if gdp.is_null() {
             return None;
         }
