@@ -27,14 +27,14 @@ namespace gravity
 /**
  * Used to process synchronization in this multi-processing environment.
  */
-class Semaphore
+class GRAVITY_API Semaphore
 {
 public:
-    GRAVITY_API Semaphore();
-    GRAVITY_API Semaphore(int count);
-    GRAVITY_API void Lock();
-    GRAVITY_API void Unlock();
-    GRAVITY_API ~Semaphore();
+    Semaphore();
+    Semaphore(int count);
+    void Lock();
+    void Unlock();
+    ~Semaphore();
 
 private:
     sem_t semaphore;

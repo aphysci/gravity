@@ -37,7 +37,7 @@ namespace gravity
 /**
  * Manages logging and stores information about the logging state.  
  */
-class SpdLog
+class GRAVITY_API SpdLog
 {
 public:
     /**
@@ -61,12 +61,12 @@ public:
      *  \param message  The log message format string.  Use printf style.
      *  \param ...      Addition printf style parameters
      */
-    GRAVITY_API static void critical(const char* message);
-    GRAVITY_API static void error(const char* message);
-    GRAVITY_API static void warn(const char* message);
-    GRAVITY_API static void info(const char* message);
-    GRAVITY_API static void debug(const char* message);
-    GRAVITY_API static void trace(const char* message);
+    static void critical(const char* message);
+    static void error(const char* message);
+    static void warn(const char* message);
+    static void info(const char* message);
+    static void debug(const char* message);
+    static void trace(const char* message);
 };
 
 }  // namespace gravity

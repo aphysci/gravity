@@ -36,7 +36,7 @@ namespace gravity
 /**
  * Representative of a future response to a gravity request
  */
-class FutureResponse : public GravityDataProduct
+class GRAVITY_API FutureResponse : public GravityDataProduct
 {
 private:
     friend class GravityNode;
@@ -58,17 +58,17 @@ public:
      * \param size size of serialized data
      * \return a FutureResponse
      */
-    GRAVITY_API FutureResponse(const void* arrayPtr, int size);
+    FutureResponse(const void* arrayPtr, int size);
 
     /**
      * Default Destructor
      */
-    GRAVITY_API virtual ~FutureResponse();
+    virtual ~FutureResponse();
 
     /**
 	 * Method for setting the GravityDataProduct response object to be returned to requestor
 	 */
-    GRAVITY_API void setResponse(const GravityDataProduct& response);
+    void setResponse(const GravityDataProduct& response);
 };
 
 } /* namespace gravity */

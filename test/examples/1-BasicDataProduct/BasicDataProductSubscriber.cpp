@@ -41,7 +41,7 @@ int main()
     GravityReturnCode ret = gn.init("SimpleGravityComponentID2");
     if (ret != GravityReturnCodes::SUCCESS)
     {
-        spdlog::critical("Could not initialize GravityNode, return code is {}", ret);
+        spdlog::critical("Could not initialize GravityNode, return code is {}", static_cast<int>(ret));
         exit(1);
     }
 
@@ -50,7 +50,7 @@ int main()
     ret = gn.subscribe(dataProductID, hwSubscriber);
     if (ret != GravityReturnCodes::SUCCESS)
     {
-        spdlog::error("Could not subscribe to data product with id {}, return code was {}", dataProductID, ret);
+        spdlog::error("Could not subscribe to data product with id {}, return code was {}", dataProductID, static_cast<int>(ret));
         exit(1);
     }
 
