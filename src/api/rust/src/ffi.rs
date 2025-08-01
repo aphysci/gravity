@@ -246,11 +246,11 @@ mod ffi {
             milli_second_timeout: i32, filter: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
         #[rust_name = "clear_subscription_timeout_monitor"]
-        fn rustClearSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+        fn rustClearSubscriptionTimeoutMonitor(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
             ) -> GravityReturnCodes;
         
         #[rust_name = "clear_subscription_timeout_monitor_filter"]
-        fn rustClearSubscriptionTimeoutMonitorDomain(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
+        fn rustClearSubscriptionTimeoutMonitorFilter(gn: &UniquePtr<GNode>, data_product_id: &CxxString, monitor: &UniquePtr<RustSubscriptionMonitor>,
             filter: &CxxString) -> GravityReturnCodes;
 
         #[rust_name = "clear_subscription_timeout_monitor_domain"]
