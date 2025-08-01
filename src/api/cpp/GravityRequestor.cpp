@@ -32,9 +32,9 @@ namespace gravity
 
 using namespace std;
 
-GRAVITY_API GravityRequestor::~GravityRequestor() {}
+GravityRequestor::~GravityRequestor() {}
 
-GRAVITY_API void GravityRequestor::requestTimeout(std::string serviceID, std::string requestID)
+void GravityRequestor::requestTimeout(std::string serviceID, std::string requestID)
 {
     spdlog::get("GravityLogger")->warn("Request timed out: service id = {}, request id = {}", serviceID, requestID);
 }

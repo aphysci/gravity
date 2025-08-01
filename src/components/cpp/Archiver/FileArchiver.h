@@ -23,7 +23,11 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include "spdlog/spdlog.h"
+#include <memory>
+
+namespace spdlog {
+    class logger;
+}
 
 namespace gravity
 {
