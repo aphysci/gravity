@@ -13,12 +13,12 @@ find_package(spdlog REQUIRED)
 set(CMAKE_DEBUG_POSTFIX _d)
 add_executable(BasicDataProductPublisher BasicDataProductPublisher.cpp)
 set_target_properties(BasicDataProductPublisher PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(BasicDataProductPublisher gravity spdlog::spdlog_header_only)
+target_link_libraries(BasicDataProductPublisher PRIVATE gravity spdlog::spdlog_header_only)
 
 
 add_executable(BasicDataProductSubscriber BasicDataProductSubscriber.cpp)
 set_target_properties(BasicDataProductSubscriber PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(BasicDataProductSubscriber gravity spdlog::spdlog_header_only)
+target_link_libraries(BasicDataProductSubscriber PRIVATE gravity spdlog::spdlog_header_only)
 
 configure_file(run.sh.in ${BasicDataProduct_SOURCE_DIR}/run.sh)
 configure_file(RunBasicDataProductDebug.bat.in ${BasicDataProduct_SOURCE_DIR}/RunBasicDataProductDebug.bat)

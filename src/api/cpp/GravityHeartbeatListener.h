@@ -36,7 +36,7 @@ namespace gravity
 /**
  * Interface specification for an object that will respond to connection outages of gravity products.
  */
-class GravityHeartbeatListener
+class GRAVITY_API GravityHeartbeatListener
 {
 public:
     /**
@@ -48,7 +48,7 @@ public:
 	 * will change the interval used in subsequent iterations.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
 	 */
-    GRAVITY_API virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat,
+    virtual void MissedHeartbeat(std::string componentID, int64_t microsecond_to_last_heartbeat,
                                              int64_t& interval_in_microseconds) = 0;
 
     /**
@@ -58,12 +58,12 @@ public:
      * will change the interval used in subsequent iterations.  Typed as a signed 64 bit integer to
      * make passing to Java via Swig cleaner.
 	 */
-    GRAVITY_API virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) = 0;
+    virtual void ReceivedHeartbeat(std::string componentID, int64_t& interval_in_microseconds) = 0;
 
     /**
      * Default destructor
      */
-    GRAVITY_API virtual ~GravityHeartbeatListener(){};
+    virtual ~GravityHeartbeatListener(){};
 };
 
 } /* namespace gravity */

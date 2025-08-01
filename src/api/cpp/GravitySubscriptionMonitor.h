@@ -34,13 +34,13 @@ namespace gravity
 /**
  * Interface specification for an object that will respond to subscription timeouts
  */
-class GravitySubscriptionMonitor
+class GRAVITY_API GravitySubscriptionMonitor
 {
 public:
     /**
      * Default destructor
      */
-    GRAVITY_API virtual ~GravitySubscriptionMonitor();
+    virtual ~GravitySubscriptionMonitor();
 
     /**
      * Called on implementing object when a subscription is not received within the registered time constraints
@@ -49,7 +49,7 @@ public:
 	 * \param filter the name of the filter registered for this data product
 	 * \param domain the name of the domain for this data product
      */
-    GRAVITY_API virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
+    virtual void subscriptionTimeout(std::string dataProductID, int milliSecondsSinceLast,
                                                  std::string filter, std::string domain) = 0;
 };
 

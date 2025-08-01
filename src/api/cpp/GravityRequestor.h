@@ -34,13 +34,13 @@ namespace gravity
 /**
  * Interface specification for an object that will function as the "client" side of a request-response interaction
  */
-class GravityRequestor
+class GRAVITY_API GravityRequestor
 {
 public:
     /**
      * Default destructor
      */
-    GRAVITY_API virtual ~GravityRequestor();
+    virtual ~GravityRequestor();
 
     /**
      * Called when a response to a request is received through the Gravity infrastructure
@@ -48,7 +48,7 @@ public:
      * \param requestID ID of the request that was made
      * \param response GravityDataProduct containing the data of the response
      */
-    GRAVITY_API virtual void requestFilled(std::string serviceID, std::string requestID,
+    virtual void requestFilled(std::string serviceID, std::string requestID,
                                            const GravityDataProduct& response) = 0;
 
     /**
@@ -56,7 +56,7 @@ public:
      * \param serviceID ID of the service request is being filled through
      * \param requestID ID of the request that was made
      */
-    GRAVITY_API virtual void requestTimeout(std::string serviceID, std::string requestID);
+    virtual void requestTimeout(std::string serviceID, std::string requestID);
 };
 
 } /* namespace gravity */

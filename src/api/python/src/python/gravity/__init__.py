@@ -14,7 +14,11 @@
 # License along with this program;
 # If not, see <http://www.gnu.org/licenses/>.
 #
-
+import os
+if hasattr(os, "add_dll_directory"): # Python >=3.8 on Windows does not search using PATH
+    bin_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "bin")
+    os.add_dll_directory(bin_dir)
+    
 from .gravity import GravityNode, GravitySubscriber, GravityRequestor, GravityServiceProvider, GravityHeartbeatListener, Log, Logger, SpdLog
 from .GravityDataProduct import GravityDataProduct 
 from .GravityLogHandler import GravityLogHandler

@@ -34,13 +34,13 @@ namespace gravity
 /**
  * Interface specification for an object that will function as the "server" side of a request-response interaction
  */
-class GravityServiceProvider
+class GRAVITY_API GravityServiceProvider
 {
 public:
     /**
      * Default destructor
      */
-    GRAVITY_API virtual ~GravityServiceProvider();
+    virtual ~GravityServiceProvider();
 
     /**
      * Called when a request is made through the Gravity infrastructure

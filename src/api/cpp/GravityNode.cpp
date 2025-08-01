@@ -566,7 +566,7 @@ GravityNode::~GravityNode()
 
 void GravityNode::configSpdLoggers()
 {
-    if (logger = spdlog::get("GravityLogger"))
+    if ((logger = spdlog::get("GravityLogger")))
     {
         return;
     }

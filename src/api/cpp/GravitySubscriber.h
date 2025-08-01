@@ -34,19 +34,19 @@ namespace gravity
 /**
  * Interface specification for an object that will respond to subscriptions
  */
-class GravitySubscriber
+class GRAVITY_API GravitySubscriber
 {
 public:
     /**
      * Default destructor
      */
-    GRAVITY_API virtual ~GravitySubscriber();
+    virtual ~GravitySubscriber();
 
     /**
      * Called on implementing object when a registered subscription is filled with 1 or more GravityDataProducts
      * \param dataProducts the data products that fill the registered subscription
      */
-    GRAVITY_API virtual void subscriptionFilled(
+    virtual void subscriptionFilled(
         const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts) = 0;
 };
 
