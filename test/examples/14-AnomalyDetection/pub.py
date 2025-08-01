@@ -16,12 +16,17 @@
 #** If not, see <http://www.gnu.org/licenses/>.
 #**
 
+import logging
 import time,sys
-from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, Log
+from gravity import GravityNode, GravityDataProduct, gravity, GravitySubscriber, SpdLogHandler
 from DataPoint_pb2 import DataPointPB
 from datetime import datetime
 import numpy as np
 
+
+gravlogger = logging.getLogger()
+gravlogger.setLevel(logging.WARNING)  # let all logs pass through to Gravity logger
+gravlogger.addHandler(SpdLogHandler(True))
 name = 'Pub'
 anomaly_point = None
 if len(sys.argv) > 1:
@@ -63,7 +68,7 @@ while True:
     time.sleep(0.1)
     sample_num += 1
     if anomaly_point and sample_num == anomaly_point:
-        Log.message("Anomaly point reached")
+        gravlogger.warning("Anomaly point reached")
         inc2 *= 2
 
 

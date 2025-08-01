@@ -21,7 +21,7 @@
 #include <GravityLogger.h>
 #include <Utility.h>
 
-#include "../protobuf/BasicCounterDataProduct.pb.h"
+#include "BasicCounterDataProduct.pb.h"
 
 int main()
 {

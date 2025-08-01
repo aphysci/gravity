@@ -1,0 +1,17 @@
+setlocal
+
+
+cd @CMAKE_INSTALL_PREFIX@/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/deps/libzmq/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/deps/protobuf/bin
+set Path=%Path%;@ABS_GRAVITY_ROOT@/bin
+set Path=%Path%;@LOCAL_ZEROMQ_RUNTIME_DIR@
+set path=%Path%;@LOCAL_PROTOBUF_RUNTIME_DIR@
+set path=%Path%;@ProtobufDataProduct_BINARY_DIR@/Release
+
+start ServiceDirectory.exe
+sleep 3
+start ProtobufDataProductPublisher2.exe
+sleep 3
+start ProtobufDataProductSubscriber2.exe

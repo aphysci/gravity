@@ -20,7 +20,7 @@ import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravityRequestor;
 import com.aphysci.gravity.swig.GravityNode;
 import com.aphysci.gravity.swig.GravityReturnCode;
-import com.aphysci.gravity.swig.Log;
+import com.aphysci.gravity.swig.SpdLog;
 
 
 //After multiplication is requested, this class may be called with the result.
@@ -33,7 +33,7 @@ class MultiplicationRequestor implements GravityRequestor
 		response.populateMessage(result);
 
 		//Write the answer
-		Log.warning(String.format("%s: %d", requestID, result.getResult()));
+		SpdLog.warn(String.format("%s: %d", requestID, result.getResult()));
 
 		gotAsyncMessage = true;
 	}
@@ -56,7 +56,7 @@ public class BasicServiceRequestor {
 		//Initialize gravity, giving this node a componentID.
 		GravityReturnCode ret = gn.init("MultiplicationRequestor");
 		while (ret != GravityReturnCode.SUCCESS) {
-			Log.warning("Unable to initialize component, retrying...");
+			SpdLog.warn("Unable to initialize component, retrying...");
 			ret = gn.init("MultiplicationRequestor");
 		}
 
@@ -79,7 +79,7 @@ public class BasicServiceRequestor {
 			// Service may not be registered yet
 			if (ret != GravityReturnCode.SUCCESS)
 			{
-				Log.warning("Failed request to Multiplication, retrying...");
+				SpdLog.warn("Failed request to Multiplication, retrying...");
 				Thread.sleep(1000);
 			}
 		} while (ret != GravityReturnCode.SUCCESS);
@@ -98,14 +98,14 @@ public class BasicServiceRequestor {
 															1000); //Timeout in milliseconds
 		if(multSync == null)
 		{
-			Log.critical("Request Returned NULL!");
+			SpdLog.critical("Request Returned NULL!");
 		}
 		else
 		{
 			Multiplication.MultiplicationResultPB.Builder result = Multiplication.MultiplicationResultPB.newBuilder();
 			multSync.populateMessage(result);
 
-			Log.warning(String.format("5 x 7 = %d", result.getResult()));
+			SpdLog.warn(String.format("5 x 7 = %d", result.getResult()));
 		}
 
 		/////////////////////////////////////////

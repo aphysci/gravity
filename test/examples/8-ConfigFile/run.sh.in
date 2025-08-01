@@ -19,11 +19,17 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+EIGHT_BIN_DIR=@ConfigFile_BINARY_DIR@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@
+CS_BIN_DIR=@ConfigServer_BINARY_DIR@
+COMP_BIN_DIR=@TOPLEVEL_INSTALL_PREFIX@/bin #For external builds
+CME_LIB_DIR=@TOPLEVEL_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+CMI_LIB_DIR=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
 
-export PATH=$PATH:../../../src/components/cpp/ConfigServer:../../../src/components/cpp/ServiceDirectory
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
+export PATH=$PATH:$CS_BIN_DIR:$SD_BIN_DIR:$EIGHT_BIN_DIR:$COMP_BIN_DIR
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:$CME_LIB_DIR:$CMI_LIB_DIR
 
  cleanup()
 # run if user hits control-c
@@ -48,6 +54,6 @@ CSPID=$!
 # ConfigServer needs to be up and registered before client code calls init
 sleep 20
 
-./ConfigFileExample
+ConfigFileExample
 
 cleanup

@@ -19,8 +19,8 @@
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravityServiceProvider;
 import com.aphysci.gravity.swig.GravityNode;
-import com.aphysci.gravity.swig.Log;
-import com.aphysci.gravity.swig.Log.LogLevel;
+import com.aphysci.gravity.swig.SpdLog;
+import com.aphysci.gravity.swig.SpdLog.LogLevel;
 import com.aphysci.gravity.swig.GravityTransportType;
 
 class MultiplicationServiceProvider implements GravityServiceProvider
@@ -34,7 +34,7 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 	{
 		//Just to be safe.  In theory this can never happen unless this class is registered with more than one serviceID types.
 		if(!dataProduct.getDataProductID().equals("Multiplication")) {
-			Log.critical(String.format("Request is not for %s, not Multiplication!", dataProduct.getDataProductID()));
+			SpdLog.critical(String.format("Request is not for %s, not Multiplication!", dataProduct.getDataProductID()));
 			return new GravityDataProduct("BadRequest");
 		}
 
@@ -42,7 +42,7 @@ class MultiplicationServiceProvider implements GravityServiceProvider
 		Multiplication.MultiplicationOperandsPB.Builder params = Multiplication.MultiplicationOperandsPB.newBuilder();
 		dataProduct.populateMessage(params);
 
-		Log.warning(String.format("%d x %d", params.getMultiplicandA(), params.getMultiplicandB()));
+		SpdLog.warn(String.format("%d x %d", params.getMultiplicandA(), params.getMultiplicandB()));
 
 		//Do the calculation
 		int result = params.getMultiplicandA() * params.getMultiplicandB();
