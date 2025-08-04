@@ -1,3 +1,5 @@
 run.sh
 cmake_build
 bin
+*Debug.bat
+*Release.bat

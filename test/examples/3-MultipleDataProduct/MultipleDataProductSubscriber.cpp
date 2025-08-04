@@ -19,9 +19,9 @@
 #include <iostream>
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <spdlog/spdlog.h>
 #include <Utility.h>
-
-#include "../protobuf/BasicCounterDataProduct.pb.h"
+#include "BasicCounterDataProduct.pb.h"
 
 using namespace gravity;
 using namespace std;
