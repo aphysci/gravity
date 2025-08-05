@@ -26,6 +26,7 @@ fn main() {
     lib_path.push_str("/install/lib");
     let mut include_path = out_dir.clone(); 
     include_path.push_str("/install/include");
+    let header_path = root.parent().unwrap();
     let _path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
@@ -51,8 +52,9 @@ fn main() {
     cxx_build::bridge("src/api/rust/src/ffi.rs")
         .files(srcs.iter())
         .include(include_path)
+        .include(header_path)
         .warnings(true)
-        .cargo_warnings(false)
+        .cargo_warnings(true)
         .compile("rust_gravity");
     
     // search and link the libraries created
@@ -68,7 +70,7 @@ fn main() {
     // If you want to run the tests...
     // run: sudo apt install libfmt-dev
     // uncomment out the following line
-    // println!("cargo:rustc-link-lib=fmt");
+    println!("cargo:rustc-link-lib=fmt");
 
 
     

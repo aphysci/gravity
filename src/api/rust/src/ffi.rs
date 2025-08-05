@@ -1,9 +1,10 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 pub use ffi::*;
-
+use crate::gravity_subscriber::SubscriberWrap;
 #[cxx::bridge]
 mod ffi {
+
 
    
     #[namespace = "gravity"]
@@ -159,7 +160,7 @@ mod ffi {
         fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCodes;
         
         #[rust_name = "new_rust_subscriber"]
-        fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
+        unsafe fn newRustSubscriber(func: unsafe fn(&CxxVector<GDataProduct>, * const SubscriberWrap), addr: usize, boxed: * const SubscriberWrap) -> UniquePtr<RustSubscriber>;
 
         #[rust_name = "new_rust_requestor"]
         fn rustRustRequestor(filled: fn(&CxxString, &CxxString, &GDataProduct, usize), timeout: fn(&CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustRequestor>;
@@ -392,10 +393,9 @@ mod ffi {
 
     }
 
-    // extern "Rust" {
-    //     #[cxx_name = "RustDataProduct"]
-    //     type GravityDataProduct;
-    // }
+    extern "Rust" {
+        type SubscriberWrap;
+    }
 } // mod ffi
 
 

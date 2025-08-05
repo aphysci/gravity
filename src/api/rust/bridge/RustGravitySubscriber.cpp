@@ -1,11 +1,19 @@
 #include "RustGravitySubscriber.h"
 
+#include "gravity/src/api/rust/src/ffi.rs.h"
+
 namespace gravity
 {
-    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&, size_t addr)> func, size_t addr) 
+
+    RustSubscriber::RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct>&, const SubscriberWrap*)> func, size_t addr, const SubscriberWrap* box) : box(box)
     {
         this->func = func;
         this->addr = addr;
+        // this->wrap = wrap;
+        // this->box = box;
+        std::cout << "calling in consturvtro\n";
+        std::vector<GravityDataProduct> v;
+        this->func(v, this->box);
     }
 
     void RustSubscriber::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts)
@@ -16,16 +24,22 @@ namespace gravity
             GravityDataProduct to_add = **i;
             v.push_back(to_add);
         }
-        this->func(v, this->addr);
+        std::cout << "calling the func...\n";
+        // auto x = this->wrap;
+        // std::cout << "acessed m,emmeber\n";
+        this->func(v, this->box);
     }
 
     
 
     std::unique_ptr<RustSubscriber> newRustSubscriber(
-        rust::Fn<void(const std::vector<GravityDataProduct>&, size_t)> func, size_t addr)
+        rust::Fn<void(const std::vector<GravityDataProduct>&, const SubscriberWrap*)> func, size_t addr, const SubscriberWrap* box)
     {
-        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func, addr));
+        
+        // wrap.box = std::move(box);
+        return std::unique_ptr<RustSubscriber>(new RustSubscriber(func, addr, box));
     }
 
+    
     
 } // namespace gravity

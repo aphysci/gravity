@@ -4,20 +4,26 @@
 #include <GravitySubscriber.h>
 #include "rust/cxx.h"
 
+struct SubscriberWrap;
 
 namespace gravity
 {
+    struct CppWrap{
+        const SubscriberWrap & box;
+    };
+
     class RustSubscriber : public GravitySubscriber {
         private:
-            rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func;
+            rust::Fn<void(const std::vector<GravityDataProduct >&, const SubscriberWrap *)> func;
             size_t addr;
+            const SubscriberWrap * box;
         public:
-            RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr);
+            RustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, const SubscriberWrap*)> func, size_t addr, const SubscriberWrap*);
             virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
     };
 
     
-    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, size_t)> func, size_t addr);
+    std::unique_ptr<RustSubscriber> newRustSubscriber(rust::Fn<void(const std::vector<GravityDataProduct >&, const SubscriberWrap*)> func, size_t addr, const SubscriberWrap* box);
     
 } // namespace gravity
 
