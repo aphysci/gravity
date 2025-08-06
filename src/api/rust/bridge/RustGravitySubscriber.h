@@ -8,9 +8,7 @@ struct SubscriberWrap;
 
 namespace gravity
 {
-    struct CppWrap{
-        const SubscriberWrap & box;
-    };
+   
 
     class RustSubscriber : public GravitySubscriber {
         private:

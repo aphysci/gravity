@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::rc::Rc;
 use std::sync::Arc;
 use cxx::{let_cxx_string, CxxString, CxxVector, SharedPtr, UniquePtr};
@@ -21,12 +22,12 @@ pub type GravityTransportType = GravityTransportTypes;
 /// A component that provides a simple interface point to a Gravity-enabled application.
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
-    subscribers_list: Vec<(Arc<SubscriberWrap>, UniquePtr<RustSubscriber>, String)>,
+    subscribers_map: HashMap<i32, (Arc<SubscriberWrap>, UniquePtr<RustSubscriber>)>,
     cpp_service_provider_map: HashMap<usize, (UniquePtr<RustServiceProvider>, usize)>,
     cpp_requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
     cpp_listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize, String, String)>,
     cpp_monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
-    // rust_subscriber_list: Vec<Box<dyn GravitySubscriber>>,
+    token_count: i32,
 }
 
 impl GravityNode {
@@ -34,11 +35,12 @@ impl GravityNode {
     pub fn new() -> GravityNode {
         GravityNode { 
             gn: ffi::GravityNode(), 
-            subscribers_list: Vec::new(),
+            subscribers_map: HashMap::new(),
             cpp_service_provider_map: HashMap::new(),
             cpp_requestor_provider_map: HashMap::new(),
             cpp_listener_map: HashMap::new(),
             cpp_monitor_map: HashMap::new(),
+            token_count: 0,
         }
     }
     
@@ -48,13 +50,15 @@ impl GravityNode {
         let_cxx_string!(cid = component_id);
         GravityNode { 
             gn: ffi::gravity_node_id(&cid), 
-            subscribers_list: Vec::new(),
+            subscribers_map: HashMap::new(),
             cpp_service_provider_map: HashMap::new(),
             cpp_requestor_provider_map: HashMap::new(),
             cpp_listener_map: HashMap::new(),
             cpp_monitor_map: HashMap::new(),
+            token_count: 0,
         }
     }
+
 
     /// Initialize the Gravity infrastructure.
     pub fn init(&self, component_id: &str) -> GravityReturnCode {
@@ -73,149 +77,98 @@ impl GravityNode {
         ffi::wait_for_exit(&self.gn);
     }
 
+    pub fn tokenize_subscriber(&mut self, subscriber: Box<dyn GravitySubscriber>) -> SubscriberToken {
+        let wrap = Arc::new(SubscriberWrap { subscriber: subscriber });
+        let cpp_sub = unsafe {
+            ffi::new_rust_subscriber(GravityNode::sub_filled_internal, 0, Arc::as_ptr(&wrap))
+        };
+        let tok = SubscriberToken { key: self.token_count };
+        self.subscribers_map.insert(tok.key, (wrap, cpp_sub));
+        self.token_count += 1;
+        tok
+    }
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
-    /// The Subscriper is a type that implements the GravitySubscriber trait.
-    pub fn subscribe(&mut self, data_product_id: &str, subscriber: Arc<dyn GravitySubscriber>) -> GravityReturnCode {
+    /// The Subscriper is a token that has been tokenize with the GravityNode
+    /// If the token has not been registered with this GravityNode, returns NOT_REGISTERED return code
+    pub fn subscribe(&mut self, data_product_id: &str, subscriber: &SubscriberToken) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
 
-        
-
-        let mut item = None;
-        for (rust_sub, cpp_sub, id) in self.subscribers_list.iter() {
-            if Arc::ptr_eq(&rust_sub.subscriber, &subscriber) && id == data_product_id {
-                item = Some(cpp_sub);
-            }
-        }
-        let func = GravityNode::sub_filled_internal;
-    
+        let item = self.subscribers_map.get(&subscriber.key);
         match item {
-            None => {     
-                let wrapper = Arc::new(SubscriberWrap { subscriber: subscriber } );
-                let ptr = Arc::as_ptr(&wrapper);
-                let rust_sub = unsafe { new_rust_subscriber(func, 0, ptr) };       
-                
-                
-                let ret= ffi::subscribe(&self.gn, &dpid, &rust_sub);
-                self.subscribers_list.push((wrapper, rust_sub, data_product_id.to_string()));
-                
-                ret
-            },
-            Some (rust_sub) => {
-                ffi::subscribe(&self.gn, &dpid, rust_sub)
-            }
-        }
-    
-        
+            Some( (_, cpp_sub)) => ffi::subscribe(&self.gn, &dpid, cpp_sub),
+            None => GravityReturnCodes::NOT_REGISTERED,
+        } 
     }
 
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
     /// The Subscriper is a type that implements the GravitySubscriber trait.
     /// Adds optional parameter filter, a text filter to apply to subscription.
-    // pub fn subscribe_with_filter(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let_cxx_string!(f = filter);
-    //     let key = subscriber as * const _ as usize;
-    //     let item = self.cpp_subscriber_map.get(&key);
-    //     let func = GravityNode::sub_filled_internal;
-    
+    pub fn subscribe_with_filter(&mut self, data_product_id: &str, subscriber: &SubscriberToken, filter: &str) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let_cxx_string!(f = filter);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
 
-    //     match item {
-    //         None => {
-    //             let addr   = GravityNode::get_addr(subscriber);      
-    //             let rust_sub = new_rust_subscriber(func, addr);       
+        match item {
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_sub)) => {
+                ffi::subscribe_filter(&self.gn, &dpid, cpp_sub, &f)
+            }
+        }
+    }
 
-    //             let ret= ffi::subscribe_filter(&self.gn, &dpid, &rust_sub, &f);
-    //             self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-    //             ret
-    //         },
-    //         Some ((rust_sub, _)) => {
-    //             ffi::subscribe_filter(&self.gn, &dpid, rust_sub, &f)
-    //         }
-    //     }
-    // }
+    /// Setup a subscription to a data product throguh the Gravity Service Directory.
+    /// The data_product_id param is the ID of the data product of interest.
+    /// The Subscriper is a type that implements the GravitySubscriber trait.
+    /// Adds optional parameter filter, a text filter to apply to subscription.
+    /// Adds optional parameter domain, the domain of the network components.
+    pub fn subscribe_with_domain(&mut self, data_product_id: &str, subscriber: SubscriberToken, filter: &str, domain: &str) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let_cxx_string!(f = filter);
+        let_cxx_string!(d = domain);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
 
-    // /// Setup a subscription to a data product throguh the Gravity Service Directory.
-    // /// The data_product_id param is the ID of the data product of interest.
-    // /// The Subscriper is a type that implements the GravitySubscriber trait.
-    // /// Adds optional parameter filter, a text filter to apply to subscription.
-    // /// Adds optional parameter domain, the domain of the network components.
-    // pub fn subscribe_with_domain(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let_cxx_string!(f = filter);
-    //     let_cxx_string!(d = domain);
-    //     let key = subscriber as * const _ as usize;
-    //     let item = self.cpp_subscriber_map.get(&key);
-    //     let func = GravityNode::sub_filled_internal;
-    
+        match item {
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_sub)) => {
+                ffi::subscribe_domain(&self.gn, &dpid, cpp_sub, &f, &d)
+            }
+        }
+    }
 
-    //     match item {
-    //         None => {
-    //             let addr   = GravityNode::get_addr(subscriber);      
-    //             let rust_sub = new_rust_subscriber(func, addr);       
+    /// Setup a subscription to a data product throguh the Gravity Service Directory.
+    /// The data_product_id param is the ID of the data product of interest.
+    /// The Subscriper is a type that implements the GravitySubscriber trait.
+    /// Adds optional parameter filter, a text filter to apply to subscription.
+    /// Adds optional parameter domain, the domain of the network components.
+    /// Adds optional paramter receive_last_cache_value.
+    pub fn subscribe_with_cache(&mut self, data_product_id: &str, subscriber: &SubscriberToken, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        let_cxx_string!(f = filter);
+        let_cxx_string!(d = domain);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
 
-    //             let ret= ffi::subscribe_domain(&self.gn, &dpid, &rust_sub, &f, &d);
-    //             self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-    //             ret
-    //         },
-    //         Some ((rust_sub, _)) => {
-    //             ffi::subscribe_domain(&self.gn, &dpid, rust_sub, &f, &d)
-    //         }
-    //     }
-    // }
-
-    // /// Setup a subscription to a data product throguh the Gravity Service Directory.
-    // /// The data_product_id param is the ID of the data product of interest.
-    // /// The Subscriper is a type that implements the GravitySubscriber trait.
-    // /// Adds optional parameter filter, a text filter to apply to subscription.
-    // /// Adds optional parameter domain, the domain of the network components.
-    // /// Adds optional paramter receive_last_cache_value.
-    // pub fn subscribe_with_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let_cxx_string!(f = filter);
-    //     let_cxx_string!(d = domain);
-    //     let key = subscriber as * const _ as usize;
-    //     let item = self.cpp_subscriber_map.get(&key);
-    //     let func = GravityNode::sub_filled_internal;
-    
-
-    //     match item {
-    //         None => {
-    //             let addr   = GravityNode::get_addr(subscriber);      
-    //             let rust_sub = new_rust_subscriber(func, addr);       
-
-    //             let ret= ffi::subscribe_cache(&self.gn, &dpid, &rust_sub, &f, &d, recieve_last_cache_value);
-    //             self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-    //             ret
-    //         },
-    //         Some ((rust_sub, _)) => {
-    //             ffi::subscribe_cache(&self.gn, &dpid, rust_sub, &f, &d, recieve_last_cache_value)
-    //         }
-    //     }
-    // }
+        match item {
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_sub)) => {
+                ffi::subscribe_cache(&self.gn, &dpid, cpp_sub, &f, &d, recieve_last_cache_value)
+            }
+        }
+    }
     
     /// Un-subscribe from a data product.
-    pub fn unsubscribe(&mut self, data_product_id: &str, subscriber: &Arc<dyn GravitySubscriber>) -> GravityReturnCode {
+    pub fn unsubscribe(&mut self, data_product_id: &str, subscriber: &SubscriberToken) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
-
-        let mut item = None;
-        let mut index = 0;
-        for (i, (rust_sub, cpp_sub, id)) in self.subscribers_list.iter().enumerate() {
-            if Arc::ptr_eq(&rust_sub.subscriber, subscriber) && id == data_product_id {
-                item = Some(cpp_sub);
-                index = i;
-            }
+        let item  = self.subscribers_map.get(&subscriber.key);
+        match item {
+            Some( (_, cpp_sub)) => ffi::unsubscribe(&self.gn, &dpid, cpp_sub),
+            None => GravityReturnCodes::SUCCESS,
         }
         
-        match item {
-            None => GravityReturnCode::SUCCESS,
-            Some(rust_sub) => {
-                let temp = ffi::unsubscribe(&self.gn, &dpid, rust_sub);
-                self.subscribers_list.remove(index);
-                temp
-            }
-        }
     }
 
     /// Publish a data product to the Gravity Service Directory.
@@ -841,15 +794,15 @@ impl GravityNode {
 
     }
 
-    pub fn check_validity(&self, subscriber: Arc<dyn GravitySubscriber>) -> bool {
-        for (wrap, _, _) in self.subscribers_list.iter() {
-            if Arc::ptr_eq(&wrap.subscriber, &subscriber) {
-                return true;
-            }
-        }
-        false
+    // pub fn check_validity(&self, subscriber: Arc<dyn GravitySubscriber>) -> bool {
+    //     for (wrap, _, _) in self.subscribers_list.iter() {
+    //         if Arc::ptr_eq(&wrap.subscriber, &subscriber) {
+    //             return true;
+    //         }
+    //     }
+    //     false
 
-    }
+    // }
     fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
         GravityDataProduct::from_gdp(ffi::copy_gdp(gdp))
     }
@@ -963,4 +916,8 @@ impl Drop for GravityNode {
         // std::thread::sleep(time::Duration::from_secs(2));
 
     }
+}
+
+pub struct SubscriberToken {
+    pub(crate) key: i32,
 }

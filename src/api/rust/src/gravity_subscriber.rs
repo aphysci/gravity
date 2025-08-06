@@ -10,5 +10,5 @@ pub trait GravitySubscriber {
 }
 
 pub(crate) struct SubscriberWrap {
-    pub(crate) subscriber: Arc<dyn GravitySubscriber>,
+    pub(crate) subscriber: Box<dyn GravitySubscriber>,
 }

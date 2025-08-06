@@ -38,9 +38,10 @@ fn basic_subscriber () {
     gnn.init("SubNode");
     let data_product_id = "RustDataProduct";
 
-    let subscriber = Arc::new(MySubscriber {});
+    let boxed = Box::new(MySubscriber {});
+    let subscriber = gnn.tokenize_subscriber(boxed);
 
-    gnn.subscribe(data_product_id, subscriber.clone());
+    gnn.subscribe(data_product_id, &subscriber);
 
 
     let gn = GravityNode::new();
@@ -65,7 +66,7 @@ fn basic_subscriber () {
 
     std::thread::sleep(time::Duration::from_secs(1));
 
-    SpdLog::warn(format!("{}", gnn.check_validity(subscriber.clone())));
+    // SpdLog::warn(format!("{}", gnn.check_validity(subscriber.clone())));
 
     let mut quit = false;
     let mut count = 1;
@@ -87,8 +88,8 @@ fn basic_subscriber () {
             std::process::exit(1)
         }
 
-    SpdLog::warn(format!("{}", gnn.check_validity(subscriber.clone())));
-        // if count == 9 { gnn.unsubscribe(data_product_id, subscriber); }
+    // SpdLog::warn(format!("{}", gnn.check_validity(subscriber.clone())));
+        if count == 9 { gnn.unsubscribe(data_product_id, &subscriber); }
 
         if count == 18 { quit = true;}
         count += 1;
@@ -98,7 +99,7 @@ fn basic_subscriber () {
 
     SpdLog::warn("done");
     // gn.wait_for_exit();  
-    gnn.wait_for_exit();
+    // gnn.wait_for_exit();
 
 
    
