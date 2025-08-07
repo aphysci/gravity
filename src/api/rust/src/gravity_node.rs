@@ -2,6 +2,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
+use std::sync::atomic::AtomicI32;
 use std::sync::Arc;
 use cxx::{let_cxx_string, CxxString, CxxVector, SharedPtr, UniquePtr};
 use protobuf::well_known_types;
@@ -18,16 +19,16 @@ pub type GravityReturnCode = GravityReturnCodes;
 /// Network transport protocols available on a Gravity system.
 pub type GravityTransportType = GravityTransportTypes;
 
+static COUNTER: AtomicI32 = AtomicI32::new(0);
 
 /// A component that provides a simple interface point to a Gravity-enabled application.
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
     subscribers_map: HashMap<i32, (Arc<SubscriberWrap>, UniquePtr<RustSubscriber>)>,
-    cpp_service_provider_map: HashMap<usize, (UniquePtr<RustServiceProvider>, usize)>,
-    cpp_requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
-    cpp_listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize, String, String)>,
-    cpp_monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
-    token_count: i32,
+    service_provider_map: HashMap<i32, (Arc<ServiceWrap>, UniquePtr<RustServiceProvider>)>,
+    requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
+    listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize, String, String)>,
+    monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
 }
 
 impl GravityNode {
@@ -36,11 +37,10 @@ impl GravityNode {
         GravityNode { 
             gn: ffi::GravityNode(), 
             subscribers_map: HashMap::new(),
-            cpp_service_provider_map: HashMap::new(),
-            cpp_requestor_provider_map: HashMap::new(),
-            cpp_listener_map: HashMap::new(),
-            cpp_monitor_map: HashMap::new(),
-            token_count: 0,
+            service_provider_map: HashMap::new(),
+            requestor_provider_map: HashMap::new(),
+            listener_map: HashMap::new(),
+            monitor_map: HashMap::new(),
         }
     }
     
@@ -51,11 +51,10 @@ impl GravityNode {
         GravityNode { 
             gn: ffi::gravity_node_id(&cid), 
             subscribers_map: HashMap::new(),
-            cpp_service_provider_map: HashMap::new(),
-            cpp_requestor_provider_map: HashMap::new(),
-            cpp_listener_map: HashMap::new(),
-            cpp_monitor_map: HashMap::new(),
-            token_count: 0,
+            service_provider_map: HashMap::new(),
+            requestor_provider_map: HashMap::new(),
+            listener_map: HashMap::new(),
+            monitor_map: HashMap::new(),
         }
     }
 
@@ -82,9 +81,9 @@ impl GravityNode {
         let cpp_sub = unsafe {
             ffi::new_rust_subscriber(GravityNode::sub_filled_internal, 0, Arc::as_ptr(&wrap))
         };
-        let tok = SubscriberToken { key: self.token_count };
-        self.subscribers_map.insert(tok.key, (wrap, cpp_sub));
-        self.token_count += 1;
+        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let tok = SubscriberToken { key: key };
+        self.subscribers_map.insert(key, (wrap, cpp_sub));
         tok
     }
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
@@ -198,6 +197,17 @@ impl GravityNode {
         ffi::subsribers_exist(&self.gn, &dpid, has_subscribers)
     }
 
+    pub fn tokenize_requestor (&mut self, requestor: Box<dyn GravityRequestor>) {
+        let wrap = Arc::new(RequestorWrap { subscriber: subscriber });
+        let cpp_sub = unsafe {
+            ffi::new_rust_subscriber(GravityNode::sub_filled_internal, 0, Arc::as_ptr(&wrap))
+        };
+        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let tok = SubscriberToken { key: key };
+        self.subscribers_map.insert(key, (wrap, cpp_sub));
+        tok
+
+    }
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
     /// requestor must be a type that implements GravityRequestor
     /// Returns success flag
@@ -207,7 +217,7 @@ impl GravityNode {
         let_cxx_string!(sid = service_id);
 
         let key = requestor as * const _ as usize;
-        let item = self.cpp_requestor_provider_map.get(&key);
+        let item = self.requestor_provider_map.get(&key);
 
         match item {
             None => {
@@ -918,6 +928,7 @@ impl Drop for GravityNode {
     }
 }
 
+#[derive(Hash)]
 pub struct SubscriberToken {
     pub(crate) key: i32,
 }

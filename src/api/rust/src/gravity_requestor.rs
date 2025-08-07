@@ -9,3 +9,8 @@ pub trait GravityRequestor {
     /// Called when the response to a request has timed out.
     fn request_timeout(&mut self, service_id: &str, request_id: &str);
 }
+
+
+pub(crate) struct  RequestorWrap {
+    pub(crate) requestor: Box<dyn GravityRequestor>,
+}

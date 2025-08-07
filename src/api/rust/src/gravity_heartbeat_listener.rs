@@ -8,3 +8,7 @@ pub trait GravityHeartbeatListener {
     /// Called when another component's heartbeat is received.
     fn received_heartbeat(&mut self, component_id: &str, interval_in_microseconds: &mut i64);
 } 
+
+pub(crate) struct ListenerWrap {
+    pub(crate) listener: Box<dyn GravityHeartbeatListener>,
+}
