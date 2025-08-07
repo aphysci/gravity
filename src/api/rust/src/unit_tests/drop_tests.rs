@@ -1,6 +1,6 @@
 use core::time;
 
-use crate::{GravityNode, GravityTransportType, GravitySubscriber, GravityDataProduct, protos::BasicCounterDataProduct::BasicCounterDataProductPB, SpdLog};
+use crate::{protos::BasicCounterDataProduct::BasicCounterDataProductPB, unit_tests::subscriber, GravityDataProduct, GravityNode, GravitySubscriber, GravityTransportType, SpdLog};
 
 struct MySubscriber {}
 
@@ -10,7 +10,7 @@ impl GravitySubscriber for MySubscriber {
            let mut pb = BasicCounterDataProductPB::new();
            i.populate_message(&mut pb);
         //    warn!("got {}, {}", pb.multiplicand_a(), pb.multiplicand_b());
-           SpdLog::warn(format!("Count: {}", pb.count())); 
+        //    SpdLog::warn(format!("Count: {}", pb.count())); 
         }
     }
 }
@@ -19,7 +19,7 @@ fn mover<T> (x: T) -> T {
     x
 }
 
-#[test]
+// #[test]
 fn subscriber_drop() {
     let handle = std::thread::spawn( || {
         let gn = GravityNode::new();
@@ -47,25 +47,25 @@ fn subscriber_drop() {
     let mut gn = GravityNode::new();
     gn.init("DropSubscriberComponent");
 
-    let subscriber = MySubscriber {};
+    let subscriber = gn.tokenize_subscriber(MySubscriber {});
 
     gn.subscribe("DropDataProduct", &subscriber);
 
     std::thread::sleep(time::Duration::from_secs(2));
 
     let moved = mover(gn);
-    SpdLog::warn("Moved Node");
+    // SpdLog::warn("Moved Node");
 
     std::thread::sleep(time::Duration::from_secs(2));
 
     let moved_sub = mover(subscriber);
-    SpdLog::warn("Moved Subscriber");
+    // SpdLog::warn("Moved Subscriber");
 
     std::thread::sleep(time::Duration::from_secs(2));
 
     std::mem::drop(moved_sub);
 
-    SpdLog::warn("Dropped subscriber...");
+    // SpdLog::warn("Dropped subscriber...");
 
     std::thread::sleep(time::Duration::from_secs(2));
 

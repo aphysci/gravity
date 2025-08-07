@@ -37,7 +37,7 @@ fn simple_heartbeat_test () {
     
     gn.start_heartbeat(interval);
 
-    let listener = MyListener {};
+    let listener = gn.tokenize_heartbeat_listener(MyListener {});
 
     if listen_for_heartbeat {
         gn.register_heartbeat_listener("HeartbeatExample", interval, &listener);

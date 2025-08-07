@@ -1,14 +1,11 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::rc::Rc;
 use std::sync::atomic::AtomicI32;
 use std::sync::Arc;
 use cxx::{let_cxx_string, CxxString, CxxVector, SharedPtr, UniquePtr};
-use protobuf::well_known_types;
 use crate::ffi::*;
-use crate::gravity_heartbeat_listener::GravityHeartbeatListener;
-use crate::gravity_subscription_monitor::GravitySubscriptionMonitor;
+use crate::gravity_heartbeat_listener::{GravityHeartbeatListener, ListenerWrap};
+use crate::gravity_subscription_monitor::{GravitySubscriptionMonitor, MonitorWrap};
 use crate::{ffi, gravity_subscriber::*,
      gravity_data_product::*, gravity_requestor::*, gravity_service_provider::*
     , future_response::*};
@@ -26,9 +23,9 @@ pub struct GravityNode {
     gn: UniquePtr<GNode>,
     subscribers_map: HashMap<i32, (Arc<SubscriberWrap>, UniquePtr<RustSubscriber>)>,
     service_provider_map: HashMap<i32, (Arc<ServiceWrap>, UniquePtr<RustServiceProvider>)>,
-    requestor_provider_map: HashMap<usize, (UniquePtr<RustRequestor>, usize)>,
-    listener_map: HashMap<usize, (UniquePtr<RustHeartbeatListener>, usize, String, String)>,
-    monitor_map: HashMap<usize, (UniquePtr<RustSubscriptionMonitor>, usize)>,
+    requestor_provider_map: HashMap<i32, (Arc<RequestorWrap>, UniquePtr<RustRequestor>)>,
+    listener_map: HashMap<i32, (Arc<ListenerWrap>, UniquePtr<RustHeartbeatListener>)>,
+    monitor_map: HashMap<i32, (Arc<MonitorWrap>, UniquePtr<RustSubscriptionMonitor>)>,
 }
 
 impl GravityNode {
@@ -76,10 +73,17 @@ impl GravityNode {
         ffi::wait_for_exit(&self.gn);
     }
 
-    pub fn tokenize_subscriber(&mut self, subscriber: Box<dyn GravitySubscriber>) -> SubscriberToken {
-        let wrap = Arc::new(SubscriberWrap { subscriber: subscriber });
+    /// Gets a token for use in subscribing, unsubscribing, and registering and unregistering relays.
+    /// Dropping a token does not modify the GravityNode (including subscriptions)
+    /// Dropping a token will not cause a subscription to cancel, only unsubscribing and dropping the GravityNode will
+    /// Once a token is dropped, it and it's information cannot be recovered, so make sure to keep it in scope if you would
+    /// like to subscribe or unsubscribe with it.
+    pub fn tokenize_subscriber(&mut self, subscriber: impl GravitySubscriber + 'static) -> SubscriberToken {
+        let boxed = Box::new(subscriber) as Box<dyn GravitySubscriber>;
+        let mut wrap = Arc::new(SubscriberWrap { subscriber: boxed });
         let cpp_sub = unsafe {
-            ffi::new_rust_subscriber(GravityNode::sub_filled_internal, 0, Arc::as_ptr(&wrap))
+            ffi::new_rust_subscriber(GravityNode::sub_filled_internal,
+                 Arc::get_mut(&mut wrap).unwrap() as * mut SubscriberWrap)
         };
         let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let tok = SubscriberToken { key: key };
@@ -88,7 +92,7 @@ impl GravityNode {
     }
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
-    /// The Subscriper is a token that has been tokenize with the GravityNode
+    /// The Subscriber is a token that has been tokenized with the GravityNode.
     /// If the token has not been registered with this GravityNode, returns NOT_REGISTERED return code
     pub fn subscribe(&mut self, data_product_id: &str, subscriber: &SubscriberToken) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
@@ -102,8 +106,9 @@ impl GravityNode {
 
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
-    /// The Subscriper is a type that implements the GravitySubscriber trait.
+    /// The Subscriber is a token that has been tokenized with the GravityNode.
     /// Adds optional parameter filter, a text filter to apply to subscription.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn subscribe_with_filter(&mut self, data_product_id: &str, subscriber: &SubscriberToken, filter: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
@@ -120,9 +125,10 @@ impl GravityNode {
 
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
-    /// The Subscriper is a type that implements the GravitySubscriber trait.
+    /// The Subscriber is a token that has been tokenized with the GravityNode.
     /// Adds optional parameter filter, a text filter to apply to subscription.
     /// Adds optional parameter domain, the domain of the network components.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn subscribe_with_domain(&mut self, data_product_id: &str, subscriber: SubscriberToken, filter: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
@@ -140,10 +146,11 @@ impl GravityNode {
 
     /// Setup a subscription to a data product throguh the Gravity Service Directory.
     /// The data_product_id param is the ID of the data product of interest.
-    /// The Subscriper is a type that implements the GravitySubscriber trait.
+    /// The Subscriber is a token that has been tokenized with the GravityNode.
     /// Adds optional parameter filter, a text filter to apply to subscription.
     /// Adds optional parameter domain, the domain of the network components.
     /// Adds optional paramter receive_last_cache_value.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn subscribe_with_cache(&mut self, data_product_id: &str, subscriber: &SubscriberToken, filter: &str, domain: &str, recieve_last_cache_value: bool) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
@@ -197,149 +204,101 @@ impl GravityNode {
         ffi::subsribers_exist(&self.gn, &dpid, has_subscribers)
     }
 
-    pub fn tokenize_requestor (&mut self, requestor: Box<dyn GravityRequestor>) {
-        let wrap = Arc::new(RequestorWrap { subscriber: subscriber });
+    /// Get a token to use to request services asynchronously
+    /// Dropping a token does not change the GravityNode in any way.
+    /// Once a token is dropped, the information it and the information it contains is not recoverable
+    pub fn tokenize_requestor (&mut self, requestor: impl GravityRequestor + 'static) -> RequestorToken{
+        let boxed = Box::new(requestor) as Box<dyn GravityRequestor>;
+        let mut wrap = Arc::new(RequestorWrap { requestor: boxed });
         let cpp_sub = unsafe {
-            ffi::new_rust_subscriber(GravityNode::sub_filled_internal, 0, Arc::as_ptr(&wrap))
+            ffi::new_rust_requestor(
+                GravityNode::request_filled_internal,
+                GravityNode::request_timeout_internal,
+                Arc::get_mut(&mut wrap).unwrap() as * mut RequestorWrap)
         };
         let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        let tok = SubscriberToken { key: key };
-        self.subscribers_map.insert(key, (wrap, cpp_sub));
+        let tok = RequestorToken { key: key };
+        self.requestor_provider_map.insert(key, (wrap, cpp_sub));
         tok
 
     }
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
-    /// requestor must be a type that implements GravityRequestor
-    /// Returns success flag
+    /// requestor is a token that has been tokenizedd with the GravityNode.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn request_async(&mut self, service_id:  &str, request: &GravityDataProduct, 
-        requestor: &impl GravityRequestor) -> GravityReturnCode {
+        requestor: &RequestorToken) -> GravityReturnCode {
         
         let_cxx_string!(sid = service_id);
-
-        let key = requestor as * const _ as usize;
-        let item = self.requestor_provider_map.get(&key);
+        
+        let item = self.requestor_provider_map.get(&requestor.key);
 
         match item {
-            None => {
-                let boxed = Box::new(requestor as &dyn GravityRequestor);
-                let pointer = Box::into_raw(boxed);
-
-                let addr = pointer as usize;
-                let filled = GravityNode::request_filled_internal;
-                let tfunc = GravityNode::request_timeout_internal;
-                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
-                let ret = ffi::request_async(&self.gn, &sid, &request.gdp, &rust_req);
-
-
-                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
-                ret
-            }
-            Some((rust_req, _)) => {
-                ffi::request_async(&self.gn, &sid, &request.gdp, rust_req)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some((_, cpp_req)) => {
+                ffi::request_async(&self.gn, &sid, &request.gdp, cpp_req)
             }
         }
+       
     }
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
-    /// requestor must be a type that implements GravityRequestor
+    /// requestor is a token that has been tokenize with the GravityNode.
     /// With parameter request_id, the identifier for this request.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn request_async_with_request_id(&mut self, service_id:  &str, request: &GravityDataProduct, 
-        requestor: &impl GravityRequestor, request_id: &str) -> GravityReturnCode {
+        requestor: &RequestorToken, request_id: &str) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         let_cxx_string!(req = request_id);
 
-        let key = requestor as * const _ as usize;
-        let item = self.cpp_requestor_provider_map.get(&key);
+        let item = self.requestor_provider_map.get(&requestor.key);
 
         match item {
-            None => {
-                let boxed = Box::new(requestor as &dyn GravityRequestor);
-                let pointer = Box::into_raw(boxed);
-
-                let addr = pointer as usize;
-                let filled = GravityNode::request_filled_internal;
-                let tfunc = GravityNode::request_timeout_internal;
-                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
-                let ret = ffi::request_async_request_id(&self.gn, &sid, &request.gdp, &rust_req, &req);
-
-
-                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
-                ret
-            }
-            Some((rust_req, _)) => {
-                ffi::request_async_request_id(&self.gn, &sid, &request.gdp, rust_req, &req)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some((_, cpp_req)) => {
+                ffi::request_async_request_id(&self.gn, &sid, &request.gdp, cpp_req, &req)
             }
         }
     }
 
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
-    /// requestor must be a type that implements GravityRequestor
+    /// requestor is a token that has been tokenize with the GravityNode.
     /// With parameter request_id, the identifier for this request.
     /// With parameter timeout_milliseconds, the timeout in Milliseconds (-1 for no timeout).
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn request_async_with_timeout(&mut self, service_id:  &str, request: &GravityDataProduct, 
-        requestor: &impl GravityRequestor, request_id: &str, timeout_milliseconds: i32) -> GravityReturnCode {
+        requestor: &RequestorToken, request_id: &str, timeout_milliseconds: i32) -> GravityReturnCode {
             
         let_cxx_string!(sid = service_id);
         let_cxx_string!(req = request_id);
 
-        let key = requestor as * const _ as usize;
-        let item = self.cpp_requestor_provider_map.get(&key);
+        let item = self.requestor_provider_map.get(&requestor.key);
 
         match item {
-            None => {
-                let boxed = Box::new(requestor as &dyn GravityRequestor);
-                let pointer = Box::into_raw(boxed);
-
-                let addr = pointer as usize;
-                let filled = GravityNode::request_filled_internal;
-                let tfunc = GravityNode::request_timeout_internal;
-                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
-                let ret = ffi::request_async_timeout(&self.gn, &sid, &request.gdp, &rust_req, &req, timeout_milliseconds);
-
-
-                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
-                ret
-            }
-            Some((rust_req, _)) => {
-                ffi::request_async_timeout(&self.gn, &sid, &request.gdp, rust_req, &req, timeout_milliseconds)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some((_, cpp_req)) => {
+                ffi::request_async_timeout(&self.gn, &sid, &request.gdp, cpp_req, &req, timeout_milliseconds)
             }
         }
     }
 
     /// Make an asynchronous request against a service provider through the Gravity Service Directory.
-    /// requestor must be a type that implements GravityRequestor
+    /// requestor is a token that has been tokenize with the GravityNode.
     /// With parameter request_id, the identifier for this request.
     /// With parameter timeout_milliseconds, the timeout in Milliseconds (-1 for no timeout).
     /// With parameter domain, the domain of the network components.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn request_async_with_domain(&mut self, service_id:  &str, request: &GravityDataProduct, 
-        requestor: &impl GravityRequestor, request_id: &str, timeout_milliseconds: i32, domain: &str) -> GravityReturnCode
+        requestor: &RequestorToken, request_id: &str, timeout_milliseconds: i32, domain: &str) -> GravityReturnCode
     {
         let_cxx_string!(sid = service_id);
         let_cxx_string!(req = request_id);
         let_cxx_string!(dom = domain);
 
-        let key = requestor as * const _ as usize;
-        let item = self.cpp_requestor_provider_map.get(&key);
+        let item = self.requestor_provider_map.get(&requestor.key);
 
         match item {
-            None => {
-                let boxed = Box::new(requestor as &dyn GravityRequestor);
-                let pointer = Box::into_raw(boxed);
-
-                let addr = pointer as usize;
-                let filled = GravityNode::request_filled_internal;
-                let tfunc = GravityNode::request_timeout_internal;
-                let rust_req = ffi::new_rust_requestor(filled, tfunc, addr);
-                let ret = ffi::request_async_domain(&self.gn, &sid, &request.gdp, &rust_req, &req, timeout_milliseconds, &dom);
-
-
-                self.cpp_requestor_provider_map.insert(key, (rust_req, addr));
-                ret
-            }
-            Some((rust_req, _)) => {
-                ffi::request_async_domain(&self.gn, &sid, &request.gdp, rust_req, &req, timeout_milliseconds, &dom)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some((_, cpp_req)) => {
+                ffi::request_async_domain(&self.gn, &sid, &request.gdp, cpp_req, &req, timeout_milliseconds, &dom)
             }
         }
     
@@ -463,107 +422,111 @@ impl GravityNode {
         ffi::unregister_data_product(&self.gn, &dpid)
     }
 
+    /// Get a token to register services
+    /// Gives GravityNode ownership of the GravityServiceProvider so it controls its scope
+    /// Dropping a token will not affect the GravityNode in any way (including its registered services)
+    /// Use caution since once a token its dropped, it is not recoverable.
+    pub fn tokenize_service(&mut self, server: impl GravityServiceProvider + 'static) -> ServiceToken {
+        let boxed = Box::new(server) as Box<dyn GravityServiceProvider>;
+        let mut wrap = Arc::new(ServiceWrap { service: boxed });
+        let cpp_sub = unsafe {
+            ffi::new_rust_service_provider(
+                GravityNode::request_internal,
+                 Arc::get_mut(&mut wrap).unwrap() as * mut ServiceWrap)
+        };
+        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let tok = ServiceToken { key: key };
+        self.service_provider_map.insert(key, (wrap, cpp_sub));
+        tok
+    }
+
     /// Registers as a service provider with Gravity.
-    /// Returns success flag.
-    pub fn register_service(&mut self, service_id:  &str, transport_type: GravityTransportType, server: &impl GravityServiceProvider) -> GravityReturnCode {
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_service(&mut self, service_id:  &str, transport_type: GravityTransportType, server: &ServiceToken) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
-        let func = GravityNode::request_internal;
-        let key = server as * const _ as usize;
-        let item = self.cpp_service_provider_map.get(&key);
+        
+        let item = self.service_provider_map.get(&server.key);
 
         match item {
-            None => {
-                let boxed = Box::new(server as &dyn GravityServiceProvider);
-                let pointer = Box::into_raw(boxed);
-                let addr = pointer as usize;
-
-                let rust_server = ffi::new_rust_service_provider(func, addr);
-                let ret = ffi::register_service(&self.gn, &sid, transport_type, &rust_server);
-
-                self.cpp_service_provider_map.insert(key, (rust_server, addr));
-                ret
-            },
-            Some((rust_server, _)) => {
-                ffi::register_service(&self.gn, &sid, transport_type, rust_server)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_service)) => {
+                ffi::register_service(&self.gn, &sid, transport_type, cpp_service)
             }
         }
         
     }
 
     // Unregister as a service provider with the Gravity Service Directory.
-    // Returns success flag.
+    // Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
     pub fn unregister_service(&self, service_id: &str) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         ffi::unregister_service(&self.gn, &sid)
     }
 
+
+    /// Gets a token to use to register a heartbeat listener corresponding to the GravityHeartbeatListener provided.
+    /// Dropping a token does not affect the GravityNode and it and its information are irrecoverable
+    pub fn tokenize_heartbeat_listener(&mut self, listener: impl GravityHeartbeatListener + 'static) -> HeartbeatListenerToken {
+        let boxed = Box::new(listener);
+
+        let mut wrap = Arc::new(ListenerWrap { listener: boxed });
+        let cpp_listener = unsafe {
+            ffi::new_rust_heartbeat_listener(
+                GravityNode::missed_heartbeat_internal,
+                GravityNode::received_heartbeat_internal,
+                Arc::get_mut(&mut wrap).unwrap() as * mut ListenerWrap)
+        };
+        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let tok = HeartbeatListenerToken { key: key };
+        self.listener_map.insert(key, (wrap, cpp_listener));
+        tok
+    }
     /// Registers a callback to be called when we don't get a heartbeat from another component.
-    /// Returns success flag.
-    pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: &impl GravityHeartbeatListener) -> GravityReturnCode{
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: &HeartbeatListenerToken) -> GravityReturnCode{
         let_cxx_string!(cid = component_id);
 
-        let key = listener as * const _ as usize;
-        let item = self.cpp_listener_map.get(&key);
+        let item = self.listener_map.get(&listener.key);
 
         match item {
-            None => {
-                let boxed = Box::new(listener as &dyn GravityHeartbeatListener);
-                let pointer = Box::into_raw(boxed);
-                let addr = pointer as usize;
-
-                let missed = GravityNode::missed_heartbeat_internal;
-                let received = GravityNode::received_heartbeat_internal;
-
-                let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
-                let ret = ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, &rust_listener);
-
-                self.cpp_listener_map.insert(key, (rust_listener, addr, String::from(component_id), String::from("")));
-
-                ret  
-            },
-            Some((rust_listener, _,_,_)) => {
-                ffi::register_heartbeat_listener(&self.gn, &cid, interval_in_microseconds, rust_listener)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_listener)) => {
+                ffi::register_heartbeat_listener(
+                    &self.gn,
+                    &cid, 
+                    interval_in_microseconds, 
+                    cpp_listener)
             }
-        }    
+        }
     }
 
     /// Registers a callback to be called when we don't get a heartbeat from another component.
     /// With paramter domain, the name of the domain for the component_id.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
     pub fn register_heartbeat_listener_with_domain(&mut self, component_id: &str, interval_in_microseconds: i64,
-                                        listener: &impl GravityHeartbeatListener, domain: &str) -> GravityReturnCode
+                                        listener: &HeartbeatListenerToken, domain: &str) -> GravityReturnCode
     {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
 
-        let key = listener as * const _ as usize;
-        let item = self.cpp_listener_map.get(&key);
+        let item = self.listener_map.get(&listener.key);
 
         match item {
-            None => {
-                let boxed = Box::new(listener as &dyn GravityHeartbeatListener);
-                let pointer = Box::into_raw(boxed);
-                let addr = pointer as usize;
-
-                let missed = GravityNode::missed_heartbeat_internal;
-                let received = GravityNode::received_heartbeat_internal;
-
-                let rust_listener = ffi::new_rust_heartbeat_listener(missed, received, addr);
-                let ret = ffi::register_heartbeat_listener_domain(&self.gn, &cid, interval_in_microseconds, &rust_listener, &d);
-
-                self.cpp_listener_map.insert(key, (rust_listener, addr, String::from(component_id), String::from(domain)));
-
-                ret  
-            },
-            Some((rust_listener, _,_,_)) => {
-                ffi::register_heartbeat_listener_domain(&self.gn, &cid, interval_in_microseconds, rust_listener, &d)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_listener)) => {
+                ffi::register_heartbeat_listener_domain(
+                    &self.gn,
+                    &cid, 
+                    interval_in_microseconds, 
+                    cpp_listener,
+                    &d)
             }
         }
          
     }
 
     /// Unregisters a callback for when we get a heartbeat from another component.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
     pub fn unregister_heartbeat_listener(&self, component_id: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         ffi::unregister_heartbeat_listener(&self.gn, &cid)
@@ -571,7 +534,7 @@ impl GravityNode {
 
     /// Unregisters a callback for when we get a heartbeat from another component.
     /// With paramter domain, the name of the domain for the component_id.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
     pub fn unregister_heartbeat_listener_with_domain(&self, component_id: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
@@ -583,80 +546,69 @@ impl GravityNode {
     /// to this data if they are on the same host (local__only == true), or it it is acting as a global relay (local_only == false).
     /// The Gravity infrastructure automatically handles which components should receive relayed or non-relayed data.
     /// 
-    /// Returns success flag.
-    // pub fn register_relay(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
-    //                       local_only: bool, transport_type: GravityTransportType) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let key = subscriber as * const _ as usize;
-    //     let item = self.cpp_subscriber_map.get(&key);
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_relay(&mut self, data_product_id: &str, subscriber: &SubscriberToken,
+                          local_only: bool, transport_type: GravityTransportType) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
 
-    //     match item {
-    //         None => {
-    //             let addr = GravityNode::get_addr(subscriber);
-    //             let func = GravityNode::sub_filled_internal;
-    //             let rust_sub = new_rust_subscriber(func, addr);
+        match item {
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_sub) ) => {
+                ffi::register_relay(
+                    &self.gn,
+                    &dpid,
+                    cpp_sub,
+                    local_only,
+                    transport_type)
+            }
+        }
+    }
 
-    //             let ret = ffi::register_relay(&self.gn, &dpid, &rust_sub, local_only, transport_type);
+    /// Register a relay that will act as a pass-through for the given data_product_id. It will be 
+    /// a publisher and subscriber for the given data_product_id, but other components will only subscribe 
+    /// to this data if they are on the same host (local_only == true), or it it is acting as a global relay (local_only == false).
+    /// The Gravity infrastructure automatically handles which components should receive relayed or non-relayed data.
+    /// 
+    /// With parameter cache_last_value, flag used to signifgy whether or not GravityNode will cache the last setn value for a published
+    /// data product. Note that using a Relay with cached_last_value = true is atypical and may result in duplicate messages received
+    /// by subscribers during the relay start/stop transition.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_relay_with_cache(&mut self, data_product_id: &str, subscriber: &SubscriberToken,
+                                local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
 
-    //             self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-    //             ret
-    //         },
-    //         Some((rust_sub, _)) => {
-    //             ffi::register_relay(&self.gn, &dpid, rust_sub, local_only, transport_type)
-    //         }
-    //     }
+        match item {
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_sub) ) => {
+                ffi::register_relay_cache(
+                    &self.gn,
+                    &dpid,
+                    cpp_sub,
+                    local_only,
+                    transport_type,
+                    cache_last_value)
+            }
+        }
+    }
 
-    // }
-
-    // /// Register a relay that will act as a pass-through for the given data_product_id. It will be 
-    // /// a publisher and subscriber for the given data_product_id, but other components will only subscribe 
-    // /// to this data if they are on the same host (local_only == true), or it it is acting as a global relay (local_only == false).
-    // /// The Gravity infrastructure automatically handles which components should receive relayed or non-relayed data.
-    // /// 
-    // /// With parameter cache_last_value, flag used to signifgy whether or not GravityNode will cache the last setn value for a published
-    // /// data product. Note that using a Relay with cached_last_value = true is atypical and may result in duplicate messages received
-    // /// by subscribers during the relay start/stop transition.
-    // /// Returns success flag.
-    // pub fn register_relay_with_cache(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber,
-    //                             local_only: bool, transport_type: GravityTransportType, cache_last_value: bool) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let key = subscriber as * const _ as usize;
-    //     let item = self.cpp_subscriber_map.get(&key);
-
-    //     match item {
-    //         None => {
-    //             let addr = GravityNode::get_addr(subscriber);
-    //             let func = GravityNode::sub_filled_internal;
-    //             let rust_sub = new_rust_subscriber(func, addr);
-
-    //             let ret = ffi::register_relay_cache(&self.gn, &dpid, &rust_sub, local_only, transport_type, cache_last_value);
-
-    //             self.cpp_subscriber_map.insert(key, (rust_sub, addr));
-    //             ret
-    //         },
-    //         Some((rust_sub, _)) => {
-    //             ffi::register_relay_cache(&self.gn, &dpid, rust_sub, local_only, transport_type, cache_last_value)
-    //         }
-    //     }
-    // }
-
-    // /// Unregister a relay for the given data_product_id. Handles unregistering as a publisher and subscriber.
-    // pub fn unregister_relay(&mut self, data_product_id: &str, subscriber: &impl GravitySubscriber) -> GravityReturnCode {
-    //     let_cxx_string!(dpid = data_product_id);
-    //     let key = subscriber as *const _ as usize;
-
-    //     let rust_sub = self.cpp_subscriber_map.get(&key);
-    //     match rust_sub {
-    //         None => GravityReturnCode::SUCCESS,
-    //         Some( (sub, addr)) => {
-    //             let temp = ffi::unregister_relay(&self.gn, &dpid, sub);
-    //             let pointer = *addr as * mut &dyn GravitySubscriber;
-    //             let _ = unsafe {Box::from_raw(pointer)};
-    //             self.cpp_subscriber_map.remove(&key);
-    //             temp
-    //         }
-    //     }
-    // }
+    /// Unregister a relay for the given data_product_id. Handles unregistering as a publisher and subscriber.
+    pub fn unregister_relay(&mut self, data_product_id: &str, subscriber: &SubscriberToken) -> GravityReturnCode {
+        let_cxx_string!(dpid = data_product_id);
+        
+        let item = self.subscribers_map.get(&subscriber.key);
+        
+        match item {
+            None => GravityReturnCodes::SUCCESS,
+            Some( (_,cpp_sub) ) => {
+                ffi::unregister_relay(&self.gn, &dpid, cpp_sub)
+            }
+            
+        }
+    }
     
     /// Returns a String representation of the provided error code.
     pub fn code_string(&self, code: GravityReturnCode) -> String {
@@ -673,12 +625,6 @@ impl GravityNode {
         ffi::get_domain(&self.gn).to_str().unwrap().to_string()
     }
     
-    fn get_addr(subscriber: &impl GravitySubscriber) -> usize {
-        let boxed = Box::new(subscriber as &dyn GravitySubscriber);
-        let pointer = Box::into_raw(boxed);
-        pointer as usize
-    }
-    
     /// Creates and reuturns a FutureResponse for a delayed response to requests.
     pub fn create_future_response(&self) -> FutureResponse {
         let temp = ffi::create_future_response(&self.gn);
@@ -691,22 +637,72 @@ impl GravityNode {
         ffi::send_future_response(&self.gn, &future_response.fr)
     }
     
+    /// Use a GravitySubscriptionMonitor to get a token
+    /// Stores the trait object within the GravityNode so the GravityNode has ownership
+    /// Use the token for setting and clearing subscription monitor.
+    /// Droppping the token will NOT have any effect on the GravityNode, so use caution when tokens go out of scope. 
+    /// They are not recoverable
+    pub fn tokenize_subscription_monitor(&mut self, monitor: impl GravitySubscriptionMonitor + 'static) -> SubscriptionMonitorToken {
+
+        let boxed = Box::new(monitor) as Box<dyn GravitySubscriptionMonitor>;
+        let mut wrap = Arc::new(MonitorWrap { monitor: boxed });
+
+        let cpp_monitor = unsafe {
+            ffi::new_rust_subscription_monitor(GravityNode::subscription_timeout_internal, Arc::get_mut(&mut wrap).unwrap() as * mut MonitorWrap)
+        }; 
+
+        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let tok = SubscriptionMonitorToken { key: key };
+        self.monitor_map.insert(key, (wrap, cpp_monitor));
+        tok
+    }
     /// Setup a GravitySubscriptionMonitor to receive subscription timeout information through
     /// the Gravity Service Directory.
-    /// Returns success flag.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn set_subscription_timout_monitor(&mut self, data_product_id: &str, 
-            monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32) -> GravityReturnCode {
-                self.set_subscription_timout_monitor_with_domain(data_product_id, monitor, milli_second_timeout, "", "")
+            monitor: &SubscriptionMonitorToken, milli_second_timeout: i32) -> GravityReturnCode {
+                
+            let_cxx_string!(dpid = data_product_id);
+            
+            let item = self.monitor_map.get(&monitor.key);
+            match item {
+                None => GravityReturnCodes::NOT_REGISTERED,
+                Some( (_, cpp_monitor)) => {
+                    ffi::set_subscription_timeout_monitor(
+                        &self.gn,
+                        &dpid,
+                        cpp_monitor,
+                        milli_second_timeout)
+                }
             }
+    }
 
     /// Setup a GravitySubscriptionMonitor to receive subscription timeout information through
     /// the Gravity Service Directory.
     /// 
     /// With parameter filter.
-    /// Returns success flag.            
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.     
     pub fn set_subscription_timout_monitor_with_filter(&mut self, data_product_id: &str, 
-            monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32, filter: &str) -> GravityReturnCode {
-                self.set_subscription_timout_monitor_with_domain(data_product_id, monitor, milli_second_timeout, filter, "")
+            monitor: &SubscriptionMonitorToken, milli_second_timeout: i32, filter: &str) -> GravityReturnCode {
+                
+                let_cxx_string!(dpid = data_product_id);
+                let_cxx_string!(f = filter);
+
+                let item = self.monitor_map.get(&monitor.key);
+
+                match item {
+                    None => GravityReturnCodes::NOT_REGISTERED,
+                    Some( (_, cpp_monitor)) => {
+                        ffi::set_subscription_timeout_monitor_filter(
+                            &self.gn,
+                            &dpid,
+                            cpp_monitor,
+                            milli_second_timeout,
+                            &f)
+                    }
+
+                }
+            
             }
     
     /// Setup a GravitySubscriptionMonitor to receive subscription timeout information through
@@ -714,33 +710,28 @@ impl GravityNode {
     /// 
     /// With parameter filter.
     /// With parameter domain.
-    /// Returns success flag.  
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode.
     pub fn set_subscription_timout_monitor_with_domain(&mut self, data_product_id: &str, 
-            monitor: &impl GravitySubscriptionMonitor, milli_second_timeout: i32, filter: &str, domain: &str) -> GravityReturnCode {
+            monitor: &SubscriptionMonitorToken, milli_second_timeout: i32, filter: &str, domain: &str) -> GravityReturnCode {
         
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
-        let key = monitor as * const _ as usize;
-        let item = self.cpp_monitor_map.get(&key);
+        
+        let item = self.monitor_map.get(&monitor.key);
 
         match item {
-            None => {
-                let func = GravityNode::subscription_timeout_internal;
-                let boxed = Box::new(monitor as &dyn GravitySubscriptionMonitor);
-                let pointer = Box::into_raw(boxed);
-                let addr = pointer as usize;
-
-                let rust_monitor = ffi::new_rust_subscription_monitor(func, addr);
-                let ret = ffi::set_subscription_timeout_monitor_domain(&self.gn, &dpid, &rust_monitor,  milli_second_timeout, &f, &d);
-
-
-                self.cpp_monitor_map.insert(key, (rust_monitor, addr));
-                ret
-            },
-            Some((rust_monitor, _)) => {
-                ffi::set_subscription_timeout_monitor_domain(&self.gn, &dpid, rust_monitor,  milli_second_timeout, &f, &d)
+            None => GravityReturnCodes::NOT_REGISTERED,
+            Some( (_, cpp_monitor)) => {
+                ffi::set_subscription_timeout_monitor_domain(
+                    &self.gn,
+                    &dpid,
+                    cpp_monitor,
+                    milli_second_timeout,
+                    &f,
+                &d)
             }
+            
         }
         
     }
@@ -748,17 +739,18 @@ impl GravityNode {
     /// Remove the given data_product_id from the given GravitySubscriptionMonitor.
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor(&self, data_product_id: &str, 
-        monitor: &impl GravitySubscriptionMonitor) -> GravityReturnCode {
+        monitor: &SubscriptionMonitorToken) -> GravityReturnCode {
             let_cxx_string!(dpid = data_product_id);
         
-        
-            let key = monitor as * const _ as usize;
-            let rust_monitor_op = self.cpp_monitor_map.get(&key);
+            let item = self.monitor_map.get(&monitor.key);
             
-            match rust_monitor_op {
+            match item {
                 None => GravityReturnCode::SUCCESS,
-                Some((rust_monitor, _)) => {
-                    ffi::clear_subscription_timeout_monitor(&self.gn, &dpid, rust_monitor)
+                Some((_, cpp_monitor)) => {
+                    ffi::clear_subscription_timeout_monitor(
+                        &self.gn,
+                        &dpid,
+                        cpp_monitor)
                 }
             }   
     }
@@ -767,17 +759,21 @@ impl GravityNode {
     /// With parameter filter.
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor_with_filter(&self, data_product_id: &str, 
-        monitor: &impl GravitySubscriptionMonitor, filter: &str) -> GravityReturnCode {
+        monitor: &SubscriptionMonitorToken, filter: &str) -> GravityReturnCode {
             let_cxx_string!(dpid = data_product_id);
             let_cxx_string!(f = filter);
             
-            let key = monitor as * const _ as usize;
-            let rust_monitor_op = self.cpp_monitor_map.get(&key);
+           
+            let item = self.monitor_map.get(&monitor.key);
             
-            match rust_monitor_op {
+            match item {
                 None => GravityReturnCode::SUCCESS,
-                Some((rust_monitor, _)) => {
-                    ffi::clear_subscription_timeout_monitor_filter(&self.gn, &dpid, rust_monitor, &f)
+                Some((_, cpp_monitor)) => {
+                    ffi::clear_subscription_timeout_monitor_filter(
+                        &self.gn,
+                        &dpid,
+                        cpp_monitor,
+                        &f)
                 }
             }
         }
@@ -787,32 +783,28 @@ impl GravityNode {
     /// With parameter domain.
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor_with_domain(&self, data_product_id: &str, 
-            monitor: &impl GravitySubscriptionMonitor, filter: &str, domain: &str) -> GravityReturnCode {
+            monitor: &SubscriptionMonitorToken, filter: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(dpid = data_product_id);
         let_cxx_string!(f = filter);
         let_cxx_string!(d = domain);
         
-        let key = monitor as * const _ as usize;
-        let rust_monitor_op = self.cpp_monitor_map.get(&key);
+        let item = self.monitor_map.get(&monitor.key);
         
-        match rust_monitor_op {
+        match item {
             None => GravityReturnCode::SUCCESS,
-            Some((rust_monitor, _)) => {
-                ffi::clear_subscription_timeout_monitor_domain(&self.gn, &dpid, rust_monitor, &f, &d)
+            Some((_, cpp_monitor)) => {
+                ffi::clear_subscription_timeout_monitor_domain(
+                    &self.gn,
+                    &dpid,
+                    cpp_monitor,
+                    &f,
+                    &d)
             }
         }
 
     }
 
-    // pub fn check_validity(&self, subscriber: Arc<dyn GravitySubscriber>) -> bool {
-    //     for (wrap, _, _) in self.subscribers_list.iter() {
-    //         if Arc::ptr_eq(&wrap.subscriber, &subscriber) {
-    //             return true;
-    //         }
-    //     }
-    //     false
 
-    // }
     fn to_rust_gdp(gdp: &GDataProduct) -> GravityDataProduct{
         GravityDataProduct::from_gdp(ffi::copy_gdp(gdp))
     }
@@ -827,108 +819,116 @@ impl GravityNode {
         v
     }
 
-    fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, wrap: * const SubscriberWrap) {
+    fn sub_filled_internal(data_products: &CxxVector<GDataProduct>, ptr: * mut SubscriberWrap) {
        
         let v = GravityNode::rustify(data_products);
         let next = unsafe {
-            wrap.read()
+            &mut (*ptr)
         };
-        let subscriber = next.subscriber;
+        let subscriber = &mut next.subscriber;
         subscriber.subscription_filled(v);
         
         
         
     }
 
-    fn request_filled_internal(service_id: &CxxString, request_id: &CxxString, response: &GDataProduct, addr: usize) {
+    fn request_filled_internal(service_id: &CxxString, request_id: &CxxString, response: &GDataProduct, ptr: * mut RequestorWrap) {
         let sid = service_id.to_str().unwrap();
         let rid = request_id.to_str().unwrap();
         let gdp = GravityNode::to_rust_gdp(response);
 
-        let requestor = addr as * const &mut dyn GravityRequestor;
-        let b = unsafe {requestor.read()};
-        b.request_filled(sid, rid, &gdp);
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let requestor = &mut next.requestor;
+        requestor.request_filled(sid, rid, &gdp);
     }
 
-    fn request_timeout_internal(service_id: &CxxString, request_id: &CxxString, addr: usize) {
+    fn request_timeout_internal(service_id: &CxxString, request_id: &CxxString, ptr: * mut RequestorWrap) {
         let sid = service_id.to_str().unwrap();
         let rid = request_id.to_str().unwrap();
 
-        let requestor = addr as * const &mut dyn GravityRequestor;
-        let b = unsafe {requestor.read()};
-        b.request_timeout(sid, rid);
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let requestor = &mut next.requestor;
+        requestor.request_timeout(sid, rid);
     }
 
-    fn request_internal(service_id: &CxxString, data_product: &GDataProduct, addr: usize) -> SharedPtr<GDataProduct>{
+    fn request_internal(service_id: &CxxString, data_product: &GDataProduct, ptr: * mut ServiceWrap) -> SharedPtr<GDataProduct>{
         let gdp = GravityNode::to_rust_gdp(data_product);
         let sid = service_id.to_str().unwrap();
 
-        let p = addr as * mut &mut dyn GravityServiceProvider;
-        let service_provider = unsafe {p.read()};
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let service_provider = &mut next.service;
         let g = service_provider.request(sid, &gdp);
         ffi::copy_gdp_shared(&g.gdp)
     }
     
     fn missed_heartbeat_internal(component_id: &CxxString, microsecond_to_last_heartbeat: i64,
-        interval_in_microseconds: &mut i64, addr: usize){
+        interval_in_microseconds: &mut i64, ptr: * mut ListenerWrap){
 
         let cid = component_id.to_str().unwrap();
-        let p = addr as * mut &mut dyn GravityHeartbeatListener;
-        let listener = unsafe {p.read()};
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let listener = &mut next.listener;
         listener.missed_heartbeat(cid, microsecond_to_last_heartbeat, interval_in_microseconds);
     }
 
-    fn received_heartbeat_internal(component_id: &CxxString, interval_in_microseconds: &mut i64, addr: usize) {
+    fn received_heartbeat_internal(component_id: &CxxString, interval_in_microseconds: &mut i64, ptr: * mut ListenerWrap) {
         let cid = component_id.to_str().unwrap();
-        let p = addr as * mut &mut dyn GravityHeartbeatListener;
-        let listener = unsafe { p.read() };
-
+        
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let listener = &mut next.listener;
         listener.received_heartbeat(cid, interval_in_microseconds);
     }
+
     fn subscription_timeout_internal (data_product_id: &CxxString, milli_seconds_since_last: i32,
-            filter: &CxxString, domain: &CxxString, addr: usize) {
+            filter: &CxxString, domain: &CxxString, ptr: * mut MonitorWrap) {
         let dpid = data_product_id.to_str().unwrap();
         let f = filter.to_str().unwrap();
         let d = domain.to_str().unwrap();
 
-        let p = addr as * mut &mut dyn GravitySubscriptionMonitor;
-        let monitor = unsafe { p.read() };
-
+        let next = unsafe {
+            &mut (*ptr)
+        };
+        let monitor = &mut next.monitor;
         monitor.subscription_timeout(dpid, milli_seconds_since_last, f, d);
     }
     
 }
 
-impl Drop for GravityNode {
-    fn drop(&mut self) {
-
-        for (_ , (_, item)) in self.cpp_requestor_provider_map.iter() {
-            let pointer = *item as * mut &dyn GravityRequestor;
-            let _ = unsafe {Box::from_raw(pointer)};
-        }
-        // for () in self.subscribers_list.iter() {
-        //     let pointer = *item as * mut &dyn GravitySubscriber;
-        //     let _= unsafe {Box::from_raw(pointer)};
-        // }
-        for (_ , (_, item)) in self.cpp_service_provider_map.iter() {
-            let pointer = *item as * mut &dyn GravityServiceProvider;
-            let _= unsafe {Box::from_raw(pointer)};
-        }
-        for (_ , (_, item)) in self.cpp_monitor_map.iter() {
-            let pointer = *item as * mut &dyn GravitySubscriptionMonitor;
-            let _= unsafe {Box::from_raw(pointer)};
-        }
-        for (_ , (_, item,id, domain)) in self.cpp_listener_map.iter() {
-            self.unregister_heartbeat_listener_with_domain(id, domain);
-            let pointer = *item as * mut &dyn GravityHeartbeatListener;
-            let _= unsafe {Box::from_raw(pointer)};
-        }
-        // std::thread::sleep(time::Duration::from_secs(2));
-
-    }
+/// Token used to subscribe and unsubscribe. As well as register and unregister relays.
+/// Must use the token on the GravityNode that you tokenized with.
+pub struct SubscriberToken {
+    pub(crate) key: i32,
 }
 
-#[derive(Hash)]
-pub struct SubscriberToken {
+/// Token used to request against a service provider
+/// Must use the token on the GravityNode that you tokenized with.
+pub struct RequestorToken {
+    pub(crate) key: i32,
+}
+
+/// Token to register as a service provider the GravityServiceProvider used to create this token.
+/// Must use the token on the GravityNode that you tokenized with.
+pub struct ServiceToken {
+    pub(crate) key: i32,
+}
+
+/// Token to register as a Heartbeat listener.
+/// Must use the token on the GravityNode that you tokenized with.
+pub struct HeartbeatListenerToken {
+    pub(crate) key: i32,
+}
+
+/// Token used to set and clear a subscription monitor
+/// Must use the token on the GravityNode that you tokenized with.
+pub struct SubscriptionMonitorToken {
     pub(crate) key: i32,
 }

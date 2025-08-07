@@ -58,7 +58,7 @@ fn service() {
     gn.init("MultiplicationComponent");
 
    
-    let msp = MyProvider {};
+    let msp = gn.tokenize_service(MyProvider {});
     gn.register_service("Multiplication",
      GravityTransportType::TCP, &msp);
 
@@ -71,7 +71,7 @@ fn service() {
         ret = gn2.init("MultiplicationRequestor");
      }
 
-    let requestor = MyRequestor {};
+    let requestor = gn2.tokenize_requestor(MyRequestor {});
 
     let mult_request = GravityDataProduct::with_id("Multiplication");
     let mut operands = MultPB::new();
@@ -182,7 +182,7 @@ fn service2 () {
     let mut gn = GravityNode::new();
     gn.init("BigComplexComponentq");
 
-    let msp = BetterProvider {};
+    let msp = gn.tokenize_service(BetterProvider {});
     gn.register_service("BigComplex",
      GravityTransportType::TCP, &msp);
 
@@ -195,7 +195,7 @@ fn service2 () {
         ret = gn2.init("BigComplexRequestor");
      }
 
-    let requestor = BetterRequestor {};
+    let requestor = gn2.tokenize_requestor(BetterRequestor {});
 
     let mult_request = GravityDataProduct::with_id("BigComplex");
     let mut operands = BigGuyPB::new();

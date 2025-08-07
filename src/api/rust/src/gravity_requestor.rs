@@ -11,6 +11,6 @@ pub trait GravityRequestor {
 }
 
 
-pub(crate) struct  RequestorWrap {
+pub(crate) struct RequestorWrap {
     pub(crate) requestor: Box<dyn GravityRequestor>,
 }

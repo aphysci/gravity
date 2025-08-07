@@ -53,8 +53,8 @@ fn main() {
         .files(srcs.iter())
         .include(include_path)
         .include(header_path)
-        .warnings(true)
-        .cargo_warnings(true)
+        .warnings(false)
+        .cargo_warnings(false)
         .compile("rust_gravity");
     
     // search and link the libraries created
@@ -70,7 +70,7 @@ fn main() {
     // If you want to run the tests...
     // run: sudo apt install libfmt-dev
     // uncomment out the following line
-    println!("cargo:rustc-link-lib=fmt");
+    // println!("cargo:rustc-link-lib=fmt");
 
 
     
