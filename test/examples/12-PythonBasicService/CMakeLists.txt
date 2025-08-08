@@ -10,7 +10,7 @@ file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../protobuf/*.proto")
 
 
 
-gravity_protobuf_generate(APPEND_PATH LANGUAGE python PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}" GENERATE_EXTENSIONS .py OUT_VAR SRCS PROTOS ${PROTO_FILES})
+gravity_protobuf_generate(APPEND_PATH LANGUAGE python PROTOC_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" GENERATE_EXTENSIONS .py OUT_VAR SRCS PROTOS ${PROTO_FILES})
 add_custom_target(${PROJECT_NAME} ALL DEPENDS "${SRCS}")
 
 set(PY_EXEC python3)
@@ -24,3 +24,5 @@ set_property(TEST pybasicservice PROPERTY ENVIRONMENT_MODIFICATION
   "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}"
   "PYTHONPATH=path_list_prepend:${ABS_GRAVITY_ROOT}/${CMAKE_INSTALL_LIBDIR}"
 )
+
+configure_file(run.sh.in ${PythonBasicService_SOURCE_DIR}/run.sh)

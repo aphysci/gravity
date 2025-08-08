@@ -19,6 +19,7 @@
 #include <iostream>
 #include <GravityNode.h>
 #include <GravityLogger.h>
+#include <spdlog/spdlog.h>
 #include <Utility.h>
 
 using namespace gravity;

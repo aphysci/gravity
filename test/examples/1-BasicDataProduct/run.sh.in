@@ -19,11 +19,17 @@
 # @configure_input@
 
 # Tool-related substitution variables
-PROTOBUF_LIB_DIR=@PROTOBUF_LIBDIR@
-ZMQ_LIB_DIR=@ZEROMQ_LIBDIR@
+PROTOBUF_LIB_DIR=@Protobuf_LIBRARY_RELEASE@
+ZMQ_LIB_DIR=@ZeroMQ_LIBRARY_RELEASE@
+ONE_BIN_DIR=@BasicDataProduct_BINARY_DIR@
+SD_BIN_DIR=@ServiceDirectory_BINARY_DIR@ #For internal builds
+COMP_BIN_DIR=@TOPLEVEL_INSTALL_PREFIX@/bin #For external builds
+CME_LIB_DIR=@TOPLEVEL_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+CMI_LIB_DIR=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
 
-export PATH=$PATH:../../../src/components/cpp/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR
+
+export PATH=$PATH:$ONE_BIN_DIR:$SD_BIN_DIR:$COMP_BIN_DIR
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../src/api/cpp:../../../src/keyvalue_parser:$ZMQ_LIB_DIR:$PROTOBUF_LIB_DIR:$CME_LIB_DIR:$CMI_LIB_DIR
 
  control_c()
 # run if user hits control-c
@@ -42,10 +48,10 @@ SDPID=$!
 # sleep for a second to give the service directory a chance to start up
 sleep 1
 
-./BasicDataProductPublisher &
+BasicDataProductPublisher &
 PUBPID=$!
 
 # sleep for a second to give the publisher a chance to register its data product
 sleep 1
 
-./BasicDataProductSubscriber
+BasicDataProductSubscriber

@@ -20,8 +20,8 @@ import java.util.List;
 import com.aphysci.gravity.GravityDataProduct;
 import com.aphysci.gravity.GravitySubscriber;
 import com.aphysci.gravity.swig.GravityNode;
-import com.aphysci.gravity.swig.Log;
-import com.aphysci.gravity.swig.Log.LogLevel;
+import com.aphysci.gravity.swig.SpdLog;
+import com.aphysci.gravity.swig.SpdLog.LogLevel;
 
 
 class SimpleGravityCounterSubscriber implements GravitySubscriber
@@ -33,10 +33,10 @@ class SimpleGravityCounterSubscriber implements GravitySubscriber
 			//Get the protobuf object from the message
 			BasicCounterDataProduct.BasicCounterDataProductPB.Builder counterDataPB = BasicCounterDataProduct.BasicCounterDataProductPB.newBuilder();
 			if(!dataProduct.populateMessage(counterDataPB))
-				Log.warning("Error Parsing Message");
+				SpdLog.warn("Error Parsing Message");
 
 			//Process the message
-			Log.warning(String.format("Current Count: %d", counterDataPB.getCount()));
+			SpdLog.warn(String.format("Current Count: %d", counterDataPB.getCount()));
 		}
 	}
 }

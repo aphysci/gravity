@@ -18,6 +18,7 @@ option(SKIP_PYTHON "Skip building Gravity Python wrapper")
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
 set(Protobuf_SRC_ROOT_FOLDER "" CACHE PATH "Path to Protobuf source build")
 set(ZMQ_HOME "" CACHE PATH "Path to your local ZeroMQ installation")
+set(JAVA_PROTOBUF_JAR "/usr/share/java/protobuf.jar" CACHE PATH "Location of protobuf jar file")
 
 get_filename_component(ABS_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 string(REPLACE "\"" "" ABS_CMAKE_INSTALL_PREFIX "${ABS_CMAKE_INSTALL_PREFIX}")
@@ -162,6 +163,7 @@ set(GRAVITY_USING_EXTERNAL_PROTOBUF)
 
 if (Protobuf_FOUND AND NOT GRAVITY_USE_EXTERNAL_PROTOBUF)
     message(STATUS "Using local protobuf libraries")
+
 else()
     message(STATUS "Using external protobuf build")
     set(GRAVITY_USING_EXTERNAL_PROTOBUF ON)
@@ -321,7 +323,9 @@ else()
             LIST_SEPARATOR |
             CMAKE_ARGS
                 -DGRAVITY_ROOT=${PUBLIC_STAGING_DIR}
-                -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/test/examples
+		-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/test/examples
+		-DTOPLEVEL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+		-DEXTERNAL_JAVA_JAR=${protobufs-java_BINARY_DIR}
                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                 -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
                 -DSKIP_JAVA=${SKIP_JAVA}
