@@ -54,18 +54,10 @@ impl GravityRequestor for MultiplicationRequestor {
         ));
         
         let mut data = GOT_ASYNC.lock().expect("Something already has this");
-        *data = true;
-        
-        
-        
-        
-
-        
+        *data = true;        
     }
 
-    fn request_timeout(&mut self, _: &str, _: &str) {
-        
-    }
+    fn request_timeout(&mut self, _: &str, _: &str) {}
 }
 
 fn main() {
