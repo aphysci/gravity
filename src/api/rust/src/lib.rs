@@ -192,7 +192,7 @@ mod ffi;
 mod unit_tests;
 
 pub use crate::gravity_data_product::GravityDataProduct;
-pub use crate::gravity_node::{GravityNode, GravityReturnCode, GravityTransportType};
+pub use crate::gravity_node::*;
 pub use crate::gravity_requestor::GravityRequestor;
 pub use crate::gravity_service_provider::GravityServiceProvider;
 pub use crate::gravity_subscriber::GravitySubscriber;

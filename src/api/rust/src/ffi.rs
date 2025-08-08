@@ -1,7 +1,11 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 pub use ffi::*;
-
+use crate::gravity_heartbeat_listener::ListenerWrap;
+use crate::gravity_subscriber::SubscriberWrap;
+use crate::gravity_service_provider::ServiceWrap;
+use crate::gravity_subscription_monitor::MonitorWrap;
+use crate::gravity_requestor::RequestorWrap;
 #[cxx::bridge]
 mod ffi {
 
@@ -159,16 +163,19 @@ mod ffi {
         fn rustUnsubscribe(gn: &UniquePtr<GNode>, dataProductID: &CxxString, subscriber: &UniquePtr<RustSubscriber>) -> GravityReturnCodes;
         
         #[rust_name = "new_rust_subscriber"]
-        fn newRustSubscriber(func: fn(&CxxVector<GDataProduct>, usize), addr: usize) -> UniquePtr<RustSubscriber>;
+        unsafe fn newRustSubscriber(func: unsafe fn(&CxxVector<GDataProduct>, * mut SubscriberWrap), ptr: * mut SubscriberWrap) -> UniquePtr<RustSubscriber>;
 
         #[rust_name = "new_rust_requestor"]
-        fn rustRustRequestor(filled: fn(&CxxString, &CxxString, &GDataProduct, usize), timeout: fn(&CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustRequestor>;
+        unsafe fn rustRustRequestor(filled: unsafe fn(&CxxString, &CxxString, &GDataProduct, * mut RequestorWrap), timeout: unsafe fn(&CxxString, &CxxString, * mut RequestorWrap), ptr: * mut RequestorWrap) -> UniquePtr<RustRequestor>;
         
         #[rust_name = "new_rust_heartbeat_listener"]
-        fn rustNewHeartbeatListener(missed: fn(&CxxString, i64, &mut i64, usize), received: fn(&CxxString, &mut i64, usize), addr: usize) -> UniquePtr<RustHeartbeatListener>;
+        unsafe fn rustNewHeartbeatListener(missed: unsafe fn(&CxxString, i64, &mut i64, * mut ListenerWrap), received: unsafe fn(&CxxString, &mut i64, * mut ListenerWrap), ptr: * mut ListenerWrap) -> UniquePtr<RustHeartbeatListener>;
         
         #[rust_name = "new_rust_subscription_monitor"]
-        fn rustNewSubscriptionMonitor(func: fn(&CxxString, i32, &CxxString, &CxxString, usize), addr: usize) -> UniquePtr<RustSubscriptionMonitor>;
+        unsafe fn rustNewSubscriptionMonitor(func: unsafe fn(&CxxString, i32, &CxxString, &CxxString, * mut MonitorWrap), ptr: * mut MonitorWrap) -> UniquePtr<RustSubscriptionMonitor>;
+
+        #[rust_name = "new_rust_service_provider"]
+        unsafe fn rustRustServiceProvider(func: unsafe fn(&CxxString, &GDataProduct, * mut ServiceWrap) -> SharedPtr<GDataProduct>, ptr: * mut ServiceWrap) -> UniquePtr<RustServiceProvider>;
 
         #[rust_name = "register_heartbeat_listener"]
         fn rustRegisterHeartbeatListener(gn: &UniquePtr<GNode>, component_id: &CxxString, interval_in_microseconds: i64, listener: &UniquePtr<RustHeartbeatListener>) -> GravityReturnCodes;
@@ -182,9 +189,6 @@ mod ffi {
         #[rust_name = "unregister_heartbeat_listener_domain"]
         fn rustUnregisterHeartbeatListenerDomain(gn: &UniquePtr<GNode>, component_id: &CxxString, domain: &CxxString) -> GravityReturnCodes;
         
-        #[rust_name = "new_rust_service_provider"]
-        fn rustRustServiceProvider(func: fn(&CxxString, &GDataProduct, usize) -> SharedPtr<GDataProduct>, addr: usize) -> UniquePtr<RustServiceProvider>;
-
         #[rust_name = "request_async"]
         fn rustRequestAsync(gn: &UniquePtr<GNode>, service_id: &CxxString, dataProduct: &UniquePtr<GDataProduct>, 
                     requestor: &UniquePtr<RustRequestor>) -> GravityReturnCodes;
@@ -392,10 +396,13 @@ mod ffi {
 
     }
 
-    // extern "Rust" {
-    //     #[cxx_name = "RustDataProduct"]
-    //     type GravityDataProduct;
-    // }
+    extern "Rust" {
+        type SubscriberWrap;
+        type RequestorWrap;
+        type ListenerWrap;
+        type ServiceWrap;
+        type MonitorWrap;
+    }
 } // mod ffi
 
 

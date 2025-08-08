@@ -19,6 +19,7 @@ inherits="release"
 [dependencies]
 cxx = "1.0.158"
 protobuf = "3.7.2"
+protobuf-codegen = "3.7.2"
 
 [build-dependencies]
 cxx-build = "1.0.158"

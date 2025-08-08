@@ -1,4 +1,4 @@
-#ifndef RUSTGRAVTITYNODE_H_
+#ifndef RUSTGRAVITYNODE_H_
 #define RUSTGRAVITYNODE_H_
 
 
@@ -63,10 +63,10 @@ namespace gravity {
  
     GravityReturnCode rustStopHeartbeat(const std::unique_ptr<GravityNode>& gn);
     
-    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string &key, const std::string& default_value = "");
-    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value = -1);
-    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value = 0.0);
-    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, bool default_value = false);
+    std::unique_ptr<std::string> rustGetStringParam(const std::unique_ptr<GravityNode>& gn, const std::string &key, const std::string& default_value);
+    int rustGetIntParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, int default_value);
+    double rustGetFloatParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, double default_value);
+    bool rustGetBoolParam(const std::unique_ptr<GravityNode>& gn, const std::string& key, bool default_value);
     
     std::unique_ptr<std::string> rustGetComponentID(const std::unique_ptr<GravityNode>& gn);
     

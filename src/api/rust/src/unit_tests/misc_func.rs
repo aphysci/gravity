@@ -68,10 +68,10 @@ fn misc_component_2 () -> GravityNode {
 
     let hb1 = MiscHBListener {};
 
-    gn.register_heartbeat_listener("MiscGravityComponentID1", interval, &hb1);
+    gn.register_heartbeat_listener("MiscGravityComponentID1", interval, hb1);
 
 
-    let ipc_subscriber = MiscGravitySubscriber {};
+    let ipc_subscriber = gn.tokenize_subscriber(MiscGravitySubscriber {});
 
     gn.subscribe("IPCDataProduct", &ipc_subscriber);
 

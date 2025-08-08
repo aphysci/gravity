@@ -6,3 +6,7 @@ pub trait GravitySubscriber {
     /// with 1 or more GravityDataProducts.
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>);
 }
+
+pub(crate) struct SubscriberWrap {
+    pub(crate) subscriber: Box<dyn GravitySubscriber>,
+}

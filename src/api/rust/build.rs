@@ -2,7 +2,6 @@
 use cmake;
 use std::{env, path::{Path, PathBuf}, str::FromStr};
 
-
 fn main() {
     //bridge sources
     let src = ["bridge/RustSpdLog.cpp", "bridge/RustGravityNode.cpp", 
@@ -17,7 +16,7 @@ fn main() {
         to_add.push_str(s);
         srcs.push(to_add);
     }
-    
+
     // get the necessary library and include paths, relative to the Cargo.toml
     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -26,10 +25,10 @@ fn main() {
     lib_path.push_str("/install/lib");
     let mut include_path = out_dir.clone(); 
     include_path.push_str("/install/include");
+    let header_path = root.parent().unwrap();
     let _path = PathBuf::from_str("/usr/lib/x86_64-linux-gnu/").unwrap();
 
     // cmake the gravity libraries
-    
     let mut prefix = out_dir.clone();
     prefix.push_str("/install");
     
@@ -51,9 +50,12 @@ fn main() {
     cxx_build::bridge("src/api/rust/src/ffi.rs")
         .files(srcs.iter())
         .include(include_path)
-        .warnings(true)
+        .include(header_path)
+        .warnings(false)
         .cargo_warnings(false)
         .compile("rust_gravity");
+
+    // generate the protobufs for the unit tests
     
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name

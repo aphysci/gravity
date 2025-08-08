@@ -6,3 +6,6 @@ pub trait GravitySubscriptionMonitor {
 
 }
 
+pub(crate) struct MonitorWrap {
+    pub(crate) monitor: Box<dyn GravitySubscriptionMonitor>,
+}

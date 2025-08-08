@@ -1,13 +1,18 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use std::rc::Rc;
+use std::sync::Arc;
 use std::time;
+use crate::gravity_node::SubscriberToken;
+use crate::unit_tests::subscriber;
 use crate::GravityNode;
 use crate::GravityDataProduct;
 use crate::GravityReturnCode;
 use crate::GravityTransportType;
 use crate::GravitySubscriber;
 use crate::protos::BasicCounterDataProduct::BasicCounterDataProductPB;
+use crate::SpdLog;
 use protobuf::well_known_types::duration;
 
 
@@ -18,10 +23,11 @@ struct MySubscriber {}
 
 impl GravitySubscriber for MySubscriber {
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
+        // SpdLog::warn("filled subscription");
         for i in data_products.iter() {
            let mut pb = MultPB::new();
            i.populate_message(&mut pb);
-        //    warn!("got {}, {}", pb.multiplicand_a(), pb.multiplicand_b());
+        //    SpdLog::warn(format!("got {}, {}", pb.multiplicand_a(), pb.multiplicand_b()));
            assert!(pb.multiplicand_b() == (pb.multiplicand_a() + 1024));
         }
     }
@@ -34,7 +40,8 @@ fn basic_subscriber () {
     gnn.init("SubNode");
     let data_product_id = "RustDataProduct";
 
-    let subscriber = MySubscriber {};
+    let s = MySubscriber {};
+    let subscriber = gnn.tokenize_subscriber(s);
 
     gnn.subscribe(data_product_id, &subscriber);
 
@@ -44,10 +51,10 @@ fn basic_subscriber () {
     let fs = gn.get_int_param("Fs", 0);
    
     if ret != GravityReturnCode::SUCCESS {
-        // critical!("Unable to initialize GravityNode (return code {:?})", ret);
+        // SpdLog::critical("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
-    // info!("Gravity returned code SUCCESS. Init successful");
+    SpdLog::info("Gravity returned code SUCCESS. Init successful");
 
 
     
@@ -80,15 +87,18 @@ fn basic_subscriber () {
             // error("Could not publish data product (return code {:?})", ret);
             std::process::exit(1)
         }
+
         if count == 9 { gnn.unsubscribe(data_product_id, &subscriber); }
 
-        if count == 15 { quit = true;}
+        if count == 18 { quit = true;}
         count += 1;
 
-        std::thread::sleep(time::Duration::from_millis(100));
+        std::thread::sleep(time::Duration::from_millis(1000));
     }
 
+    
     // gn.wait_for_exit();  
+    // gnn.wait_for_exit();
 
 
    
@@ -105,9 +115,11 @@ impl GravitySubscriber for CounterSubscriber {
         for i in data_products.iter() {
             let mut counter_data_pb = BasicCounterDataProductPB::new();
             i.populate_message(&mut counter_data_pb);
+            SpdLog::warn(format!("cuurent count = {}", self.count_totals));
+            SpdLog::warn(format!("Adding {}", counter_data_pb.count()));
             self.count_totals += counter_data_pb.count();
             
-            // warn!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals.get())
+            SpdLog::warn(format!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals))
             
         }
         
@@ -121,7 +133,7 @@ impl GravitySubscriber for HelloSubscriber {
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let message = String::from_utf8(i.data()).unwrap();
-            // warn!("Subscriber 2: Got message: {}", message);
+            SpdLog::warn(format!("Subscriber 2: Got message: {}", message));
 
 
         }
@@ -133,16 +145,16 @@ struct SimpleSubscriber {}
 impl GravitySubscriber for SimpleSubscriber {
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
-            // warn!("Subscriber 3 got a {} data product", i.get_data_product_id());
+            SpdLog::warn(format!("Subscriber 3 got a {} data product", i.data_product_id()));
 
             if i.data_product_id() == "BasicCounterDataProduct" {
                 let mut counter_data_pb = BasicCounterDataProductPB::new();
                 i.populate_message(&mut counter_data_pb);
-                // warn!("Subscriber3 : Current Count: {}", counter_data_pb.count());
+                SpdLog::warn(format!("Subscriber3 : Current Count: {}", counter_data_pb.count()));
 
             } else if i.data_product_id() == "HelloWorldDataProduct" {
                 let message = String::from_utf8(i.data()).unwrap();
-                // warn!("Subscriber 3: Got message: {}", message);
+                SpdLog::warn(format!("Subscriber 3: Got message: {}", message));
             }
         }
     }
@@ -154,17 +166,17 @@ fn multiple_subscribers () {
     gn.init("SimpleGravityComponentSub");
 
     // subscribe counter
-    let counter = CounterSubscriber { count_totals: 0};
+    let counter = gn.tokenize_subscriber(CounterSubscriber { count_totals: 0} );
     gn.subscribe("BasicCounterDataProduct", &counter);
 
     // subscribe message
-    let hello = HelloSubscriber {};
+    let hello = gn.tokenize_subscriber(HelloSubscriber {});
     gn.subscribe("HelloWorldDataProduct", &hello);
 
-    // subscribe to both
-    let simple = SimpleSubscriber {};
-    gn.subscribe("BasicCounterDataProduct", &simple);
-    gn.subscribe("HelloWorldDataProduct", &simple);
+    // // subscribe to both
+    // let simple = gn.tokenize_subscriber(SimpleSubscriber {});
+    // gn.subscribe("BasicCounterDataProduct", &simple);
+    // gn.subscribe("HelloWorldDataProduct", &simple);
 
     let gnpub = GravityNode::new();
     gnpub.init("SimpleGravityComponentPub");
@@ -205,31 +217,26 @@ fn multiple_subscribers () {
 
 }
 
-fn external_subscribe(gn: &mut GravityNode, subscriber: MySubscriber) -> MySubscriber {
+fn external_subscribe(gn: &mut GravityNode, subscriber: SubscriberToken) -> SubscriberToken {
     gn.subscribe("SimpleRustDataProduct", &subscriber);
     subscriber
 }
 
 
-fn consume(data: impl GravitySubscriber) {
-    let x= data;
-    // warn!("All gone!");
-}
 #[test]
 fn outside_function () {
 
     let mut gnn = GravityNode::new();
     gnn.init("SimpleGravityComponent");
 
-    let mut sub = MySubscriber {};
+    let mut sub = gnn.tokenize_subscriber(MySubscriber {});
 
     sub = external_subscribe(&mut gnn, sub);
     gnn.subscribe("SimpleRustDataProduct", &sub);
     
-    consume(sub);
     //testing a dropped subscriber struct. Still works
     {
-        let sub = MySubscriber {};
+        let sub = gnn.tokenize_subscriber(MySubscriber {});
         gnn.subscribe("SimpleRustDataProduct", &sub);
     }
 
@@ -306,7 +313,7 @@ fn dropped_node() {
     let mut gnn = GravityNode::new();
     gnn.init("SimpleGravityComponent");
 
-    let sub = MyDropSubscriber {};
+    let sub = gnn.tokenize_subscriber( MyDropSubscriber {} );
 
     gnn.subscribe("SimpleRustDataProduct", &sub);
     {

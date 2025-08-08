@@ -60,7 +60,7 @@ fn service() {
    
     let msp = MyProvider {};
     gn.register_service("Multiplication",
-     GravityTransportType::TCP, &msp);
+     GravityTransportType::TCP, msp);
 
      let mut gn2 = GravityNode::new();
 
@@ -71,7 +71,7 @@ fn service() {
         ret = gn2.init("MultiplicationRequestor");
      }
 
-    let requestor = MyRequestor {};
+    let requestor = gn2.tokenize_requestor(MyRequestor {});
 
     let mult_request = GravityDataProduct::with_id("Multiplication");
     let mut operands = MultPB::new();
@@ -184,18 +184,22 @@ fn service2 () {
 
     let msp = BetterProvider {};
     gn.register_service("BigComplex",
-     GravityTransportType::TCP, &msp);
+     GravityTransportType::TCP, msp);
 
      let mut gn2 = GravityNode::new();
 
      let mut ret = gn2.init("BigComplexRequestor");
+
+    gn.register_service("BigComplex",
+     GravityTransportType::TCP, BetterProvider {});
+
 
      while ret != GravityReturnCode::SUCCESS {
         SpdLog::warn("Unable to init component, retrying...");
         ret = gn2.init("BigComplexRequestor");
      }
 
-    let requestor = BetterRequestor {};
+    let requestor = gn2.tokenize_requestor(BetterRequestor {});
 
     let mult_request = GravityDataProduct::with_id("BigComplex");
     let mut operands = BigGuyPB::new();
