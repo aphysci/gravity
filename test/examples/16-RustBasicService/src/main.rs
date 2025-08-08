@@ -4,7 +4,7 @@ use core::time;
 use std::sync::Mutex;
 
 use gravity::{GravityDataProduct, GravityNode, GravityRequestor, GravityReturnCode, GravityServiceProvider, GravityTransportType, SpdLog};
-use Multiplication::*;
+use Multiplication::{MultiplicationOperandsPB, MultiplicationResultPB};
 
 static GOT_ASYNC: Mutex<bool> = Mutex::new(false);
 struct MultiplicationServiceProvider {}
