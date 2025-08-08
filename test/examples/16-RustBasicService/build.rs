@@ -1,6 +1,6 @@
 use std::path::Path;
 
-// build script to auto generate protobufs
+// build script to auto generate the protobufs
 fn main() {
 
     let dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -10,7 +10,7 @@ fn main() {
     let mut path = path.to_str().unwrap().to_string();
     path.push_str("/protobuf");
     let mut file = path.clone();
-    file.push_str("/BasicCounterDataProduct.proto");
+    file.push_str("/Multiplication.proto");
 
     protobuf_codegen::Codegen::new()
         // .protoc_path(&protoc_bin_vendored::protoc_bin_path().unwrap())
