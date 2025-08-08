@@ -66,9 +66,9 @@ fn misc_component_2 () -> GravityNode {
 
     let interval = 500000;
 
-    let hb1 = gn.tokenize_heartbeat_listener(MiscHBListener {});
+    let hb1 = MiscHBListener {};
 
-    gn.register_heartbeat_listener("MiscGravityComponentID1", interval, &hb1);
+    gn.register_heartbeat_listener("MiscGravityComponentID1", interval, hb1);
 
 
     let ipc_subscriber = gn.tokenize_subscriber(MiscGravitySubscriber {});

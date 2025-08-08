@@ -22,9 +22,9 @@ static COUNTER: AtomicI32 = AtomicI32::new(0);
 pub struct GravityNode {
     gn: UniquePtr<GNode>,
     subscribers_map: HashMap<i32, (Arc<SubscriberWrap>, UniquePtr<RustSubscriber>)>,
-    service_provider_map: HashMap<i32, (Arc<ServiceWrap>, UniquePtr<RustServiceProvider>)>,
+    service_provider_map: HashMap<String, (Arc<ServiceWrap>, UniquePtr<RustServiceProvider>)>,
     requestor_provider_map: HashMap<i32, (Arc<RequestorWrap>, UniquePtr<RustRequestor>)>,
-    listener_map: HashMap<i32, (Arc<ListenerWrap>, UniquePtr<RustHeartbeatListener>)>,
+    listener_map: HashMap<(String, String), (Arc<ListenerWrap>, UniquePtr<RustHeartbeatListener>)>,
     monitor_map: HashMap<i32, (Arc<MonitorWrap>, UniquePtr<RustSubscriptionMonitor>)>,
 }
 
@@ -426,7 +426,25 @@ impl GravityNode {
     /// Gives GravityNode ownership of the GravityServiceProvider so it controls its scope
     /// Dropping a token will not affect the GravityNode in any way (including its registered services)
     /// Use caution since once a token its dropped, it is not recoverable.
-    pub fn tokenize_service(&mut self, server: impl GravityServiceProvider + 'static) -> ServiceToken {
+    // pub fn tokenize_service(&mut self, server: impl GravityServiceProvider + 'static) -> ServiceToken {
+    //     let boxed = Box::new(server) as Box<dyn GravityServiceProvider>;
+    //     let mut wrap = Arc::new(ServiceWrap { service: boxed });
+    //     let cpp_sub = unsafe {
+    //         ffi::new_rust_service_provider(
+    //             GravityNode::request_internal,
+    //              Arc::get_mut(&mut wrap).unwrap() as * mut ServiceWrap)
+    //     };
+    //     let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    //     let tok = ServiceToken { key: key };
+    //     self.service_provider_map.insert(key, (wrap, cpp_sub));
+    //     tok
+    // }
+
+    /// Registers as a service provider with Gravity.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_service(&mut self, service_id:  &str, transport_type: GravityTransportType, server: impl GravityServiceProvider + 'static) -> GravityReturnCode {
+        let_cxx_string!(sid = service_id);
+        
         let boxed = Box::new(server) as Box<dyn GravityServiceProvider>;
         let mut wrap = Arc::new(ServiceWrap { service: boxed });
         let cpp_sub = unsafe {
@@ -434,26 +452,17 @@ impl GravityNode {
                 GravityNode::request_internal,
                  Arc::get_mut(&mut wrap).unwrap() as * mut ServiceWrap)
         };
-        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        let tok = ServiceToken { key: key };
-        self.service_provider_map.insert(key, (wrap, cpp_sub));
-        tok
-    }
-
-    /// Registers as a service provider with Gravity.
-    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
-    pub fn register_service(&mut self, service_id:  &str, transport_type: GravityTransportType, server: &ServiceToken) -> GravityReturnCode {
-        let_cxx_string!(sid = service_id);
+        let key = service_id.to_string();
+        let exists = self.service_provider_map.insert(key.clone(), (wrap, cpp_sub));
         
-        let item = self.service_provider_map.get(&server.key);
-
-        match item {
-            None => GravityReturnCodes::NOT_REGISTERED,
-            Some( (_, cpp_service)) => {
-                ffi::register_service(&self.gn, &sid, transport_type, cpp_service)
-            }
+        match exists {
+            Some( _ )  => {ffi::unregister_service(&self.gn, &sid);},
+            None => (),
         }
         
+
+        let (_, cpp_sub) = self.service_provider_map.get(&key).unwrap();
+        ffi::register_service(&self.gn, &sid, transport_type, cpp_sub)
     }
 
     // Unregister as a service provider with the Gravity Service Directory.
@@ -466,7 +475,26 @@ impl GravityNode {
 
     /// Gets a token to use to register a heartbeat listener corresponding to the GravityHeartbeatListener provided.
     /// Dropping a token does not affect the GravityNode and it and its information are irrecoverable
-    pub fn tokenize_heartbeat_listener(&mut self, listener: impl GravityHeartbeatListener + 'static) -> HeartbeatListenerToken {
+    // pub fn tokenize_heartbeat_listener(&mut self, listener: impl GravityHeartbeatListener + 'static) -> HeartbeatListenerToken {
+    //     let boxed = Box::new(listener);
+
+    //     let mut wrap = Arc::new(ListenerWrap { listener: boxed });
+    //     let cpp_listener = unsafe {
+    //         ffi::new_rust_heartbeat_listener(
+    //             GravityNode::missed_heartbeat_internal,
+    //             GravityNode::received_heartbeat_internal,
+    //             Arc::get_mut(&mut wrap).unwrap() as * mut ListenerWrap)
+    //     };
+    //     let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    //     let tok = HeartbeatListenerToken { key: key };
+    //     self.listener_map.insert(key, (wrap, cpp_listener));
+    //     tok
+    // }
+    /// Registers a callback to be called when we don't get a heartbeat from another component.
+    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
+    pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: impl GravityHeartbeatListener + 'static) -> GravityReturnCode{
+        let_cxx_string!(cid = component_id);
+
         let boxed = Box::new(listener);
 
         let mut wrap = Arc::new(ListenerWrap { listener: boxed });
@@ -476,69 +504,67 @@ impl GravityNode {
                 GravityNode::received_heartbeat_internal,
                 Arc::get_mut(&mut wrap).unwrap() as * mut ListenerWrap)
         };
-        let key = COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        let tok = HeartbeatListenerToken { key: key };
-        self.listener_map.insert(key, (wrap, cpp_listener));
-        tok
-    }
-    /// Registers a callback to be called when we don't get a heartbeat from another component.
-    /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
-    pub fn register_heartbeat_listener(&mut self, component_id: &str, interval_in_microseconds: i64, listener: &HeartbeatListenerToken) -> GravityReturnCode{
-        let_cxx_string!(cid = component_id);
+            
+        let ret = ffi::register_heartbeat_listener(
+            &self.gn,
+            &cid, 
+            interval_in_microseconds, 
+            &cpp_listener);
+           
+        self.listener_map.insert((component_id.to_string(), "".to_string()), (wrap, cpp_listener));
+        ret
 
-        let item = self.listener_map.get(&listener.key);
-
-        match item {
-            None => GravityReturnCodes::NOT_REGISTERED,
-            Some( (_, cpp_listener)) => {
-                ffi::register_heartbeat_listener(
-                    &self.gn,
-                    &cid, 
-                    interval_in_microseconds, 
-                    cpp_listener)
-            }
-        }
     }
 
     /// Registers a callback to be called when we don't get a heartbeat from another component.
     /// With paramter domain, the name of the domain for the component_id.
     /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
     pub fn register_heartbeat_listener_with_domain(&mut self, component_id: &str, interval_in_microseconds: i64,
-                                        listener: &HeartbeatListenerToken, domain: &str) -> GravityReturnCode
+                                        listener: impl GravityHeartbeatListener + 'static, domain: &str) -> GravityReturnCode
     {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
 
-        let item = self.listener_map.get(&listener.key);
+        let boxed = Box::new(listener);
 
-        match item {
-            None => GravityReturnCodes::NOT_REGISTERED,
-            Some( (_, cpp_listener)) => {
-                ffi::register_heartbeat_listener_domain(
-                    &self.gn,
-                    &cid, 
-                    interval_in_microseconds, 
-                    cpp_listener,
-                    &d)
-            }
-        }
+        let mut wrap = Arc::new(ListenerWrap { listener: boxed });
+        let cpp_listener = unsafe {
+            ffi::new_rust_heartbeat_listener(
+                GravityNode::missed_heartbeat_internal,
+                GravityNode::received_heartbeat_internal,
+                Arc::get_mut(&mut wrap).unwrap() as * mut ListenerWrap)
+        };
+            
+        let ret = ffi::register_heartbeat_listener_domain(
+            &self.gn,
+            &cid, 
+            interval_in_microseconds, 
+            &cpp_listener,
+            &d);
+           
+        self.listener_map.insert((component_id.to_string(), domain.to_string()), (wrap, cpp_listener));
+        ret
          
     }
 
     /// Unregisters a callback for when we get a heartbeat from another component.
     /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
-    pub fn unregister_heartbeat_listener(&self, component_id: &str) -> GravityReturnCode {
+    pub fn unregister_heartbeat_listener(&mut self, component_id: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
-        ffi::unregister_heartbeat_listener(&self.gn, &cid)
+        let ret = ffi::unregister_heartbeat_listener(&self.gn, &cid);
+        self.listener_map.remove(&(component_id.to_string(), "".to_string()));
+        ret
     }
 
     /// Unregisters a callback for when we get a heartbeat from another component.
     /// With paramter domain, the name of the domain for the component_id.
     /// Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
-    pub fn unregister_heartbeat_listener_with_domain(&self, component_id: &str, domain: &str) -> GravityReturnCode {
+    pub fn unregister_heartbeat_listener_with_domain(&mut self, component_id: &str, domain: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         let_cxx_string!(d = domain);
-        ffi::unregister_heartbeat_listener_domain(&self.gn, &cid, &d)
+        let ret = ffi::unregister_heartbeat_listener_domain(&self.gn, &cid, &d);
+        self.listener_map.remove(&(component_id.to_string(), domain.to_string()));
+        ret
     }
 
     /// Register a relay that will act as a pass-through for the given data_product_id. It will be 

@@ -37,10 +37,10 @@ fn simple_heartbeat_test () {
     
     gn.start_heartbeat(interval);
 
-    let listener = gn.tokenize_heartbeat_listener(MyListener {});
+    let listener = MyListener {};
 
     if listen_for_heartbeat {
-        gn.register_heartbeat_listener("HeartbeatExample", interval, &listener);
+        gn.register_heartbeat_listener("HeartbeatExample", interval, listener);
     }
 
     let gn2 = GravityNode::new();
@@ -60,7 +60,7 @@ fn simple_heartbeat_test () {
             gn.start_heartbeat(interval);
         }
         if count == 6 {
-            gn.register_heartbeat_listener("HeartbeatExample2", interval, &listener);
+            gn.register_heartbeat_listener("HeartbeatExample2", interval, MyListener {});
         }
         if count == 8 {
             gn.unregister_heartbeat_listener("HeartbeatExample");
