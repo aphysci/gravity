@@ -8,5 +8,5 @@ protobuf-codegen = "3.7.2"
 protoc-bin-vendored = "3.2.0"
 
 [dependencies]
-gravity = { git = "https://github.com/astrauc/gravity.git", branch = "arcs"}
+gravity = { git = "https://github.com/astrauc/gravity.git" }
 protobuf = "3.7.2"

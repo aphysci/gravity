@@ -27,8 +27,11 @@ fn main() {
 
     let counter_subscriber = gn.tokenize_subscriber(SimpleGravityCounterSubscriber {});
 
-    gn.register_data_product("BasicCounterDataProduct", GravityTransportType::TCP);
     gn.subscribe("BasicCounterDataProduct", &counter_subscriber);
+
+    gn.wait_for_exit();
+
+    gn.unsubscribe("BasicCounterDataProduct", &counter_subscriber);
     
     //setup the publisher
     let mut count = 1;
