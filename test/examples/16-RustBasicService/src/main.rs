@@ -64,14 +64,14 @@ fn main() {
     let mut service_gn = GravityNode::new();
     service_gn.init("MultiplicationComponent");
 
-    let msp = service_gn.tokenize_service(MultiplicationServiceProvider {});
+    let msp = MultiplicationServiceProvider {};
     service_gn.register_service(
         // Identifies the service to the service directory so others can make a request to it
         "Multiplication",
         // Almost always going to be TCP
         GravityTransportType::TCP,
-        // Give the token for the service provider to register the service.
-        &msp);
+        // Give the service provider to register the service.
+        msp);
 
     // Setup the requests
     let mut gn = GravityNode::new();

@@ -2,14 +2,14 @@ include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
 
 use core::time;
 
-use gravity::{GravityDataProduct, GravityNode, GravitySubscriber, GravityTransportType, SpdLog};
+use gravity::{GravityReturnCode, GravityDataProduct, GravityNode, GravitySubscriber, GravityTransportType, SpdLog};
 use BasicCounterDataProduct::*;
 
 
 struct SimpleGravityCounterSubscriber {}
 
 impl GravitySubscriber for SimpleGravityCounterSubscriber {
-    fn subscription_filled(&mut self, data_products: Vec<gravity::GravityDataProduct>) {
+    fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         
         for data_product in data_products.iter() {
             let mut counter_data_pb = BasicCounterDataProductPB::new();
@@ -21,17 +21,17 @@ impl GravitySubscriber for SimpleGravityCounterSubscriber {
     }
 }
 fn main() {
-
+    // SpdLog::warn("Starting...");
     let mut gn = GravityNode::new();
-    gn.init("BasicCounterSubscriberID");
+    while gn.init("BasicCounterSubscriberID") != GravityReturnCode::SUCCESS {
+	    SpdLog::warn("retrying init");
+    }
 
+    gn.register_data_product("BasicCounterDataProduct", GravityTransportType::TCP);
     let counter_subscriber = gn.tokenize_subscriber(SimpleGravityCounterSubscriber {});
 
     gn.subscribe("BasicCounterDataProduct", &counter_subscriber);
 
-    gn.wait_for_exit();
-
-    gn.unsubscribe("BasicCounterDataProduct", &counter_subscriber);
     
     //setup the publisher
     let mut count = 1;
