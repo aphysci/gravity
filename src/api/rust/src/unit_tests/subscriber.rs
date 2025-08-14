@@ -217,7 +217,7 @@ fn multiple_subscribers () {
 
 }
 
-fn external_subscribe(gn: &mut GravityNode, subscriber: Arc<SubscriberToken>) -> Arc<SubscriberToken> {
+fn external_subscribe(gn: &mut GravityNode, subscriber: SubscriberToken) -> SubscriberToken {
     gn.subscribe("SimpleRustDataProduct", &subscriber);
     subscriber
 }
