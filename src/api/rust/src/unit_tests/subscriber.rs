@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time;
@@ -11,13 +13,11 @@ use crate::GravityDataProduct;
 use crate::GravityReturnCode;
 use crate::GravityTransportType;
 use crate::GravitySubscriber;
-use crate::protos::BasicCounterDataProduct::BasicCounterDataProductPB;
+use BasicCounterDataProduct::BasicCounterDataProductPB;
 use crate::SpdLog;
-use protobuf::well_known_types::duration;
 
 
-
-use crate::protos::DataPB::*;
+use DataPB::*;
 
 struct MySubscriber {}
 
@@ -54,7 +54,7 @@ fn basic_subscriber () {
         // SpdLog::critical("Unable to initialize GravityNode (return code {:?})", ret);
         std::process::exit(1);
     }
-    SpdLog::info("Gravity returned code SUCCESS. Init successful");
+    // SpdLog::info("Gravity returned code SUCCESS. Init successful");
 
 
     
@@ -115,11 +115,11 @@ impl GravitySubscriber for CounterSubscriber {
         for i in data_products.iter() {
             let mut counter_data_pb = BasicCounterDataProductPB::new();
             i.populate_message(&mut counter_data_pb);
-            SpdLog::warn(format!("cuurent count = {}", self.count_totals));
-            SpdLog::warn(format!("Adding {}", counter_data_pb.count()));
+            // SpdLog::warn(format!("cuurent count = {}", self.count_totals));
+            // SpdLog::warn(format!("Adding {}", counter_data_pb.count()));
             self.count_totals += counter_data_pb.count();
             
-            SpdLog::warn(format!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals))
+            // SpdLog::warn(format!("Subscriber 1: Sum of All Counts Receieved: {}", self.count_totals))
             
         }
         
@@ -133,7 +133,7 @@ impl GravitySubscriber for HelloSubscriber {
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
             let message = String::from_utf8(i.data()).unwrap();
-            SpdLog::warn(format!("Subscriber 2: Got message: {}", message));
+            // SpdLog::warn(format!("Subscriber 2: Got message: {}", message));
 
 
         }
@@ -145,16 +145,16 @@ struct SimpleSubscriber {}
 impl GravitySubscriber for SimpleSubscriber {
     fn subscription_filled(&mut self, data_products: Vec<GravityDataProduct>) {
         for i in data_products.iter() {
-            SpdLog::warn(format!("Subscriber 3 got a {} data product", i.data_product_id()));
+            // SpdLog::warn(format!("Subscriber 3 got a {} data product", i.data_product_id()));
 
             if i.data_product_id() == "BasicCounterDataProduct" {
                 let mut counter_data_pb = BasicCounterDataProductPB::new();
                 i.populate_message(&mut counter_data_pb);
-                SpdLog::warn(format!("Subscriber3 : Current Count: {}", counter_data_pb.count()));
+                // SpdLog::warn(format!("Subscriber3 : Current Count: {}", counter_data_pb.count()));
 
             } else if i.data_product_id() == "HelloWorldDataProduct" {
                 let message = String::from_utf8(i.data()).unwrap();
-                SpdLog::warn(format!("Subscriber 3: Got message: {}", message));
+                // SpdLog::warn(format!("Subscriber 3: Got message: {}", message));
             }
         }
     }
@@ -217,7 +217,7 @@ fn multiple_subscribers () {
 
 }
 
-fn external_subscribe(gn: &mut GravityNode, subscriber: SubscriberToken) -> SubscriberToken {
+fn external_subscribe(gn: &mut GravityNode, subscriber: Arc<SubscriberToken>) -> Arc<SubscriberToken> {
     gn.subscribe("SimpleRustDataProduct", &subscriber);
     subscriber
 }

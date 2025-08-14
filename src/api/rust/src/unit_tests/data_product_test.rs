@@ -1,5 +1,7 @@
+include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+
 use crate::GravityDataProduct;
-use crate::protos::DataPB::*;
+use DataPB::*;
 
 
 #[test]

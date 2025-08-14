@@ -1,6 +1,9 @@
+include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+
 use core::time;
 
-use crate::{protos::BasicCounterDataProduct::BasicCounterDataProductPB, unit_tests::subscriber, GravityDataProduct, GravityNode, GravitySubscriber, GravityTransportType, SpdLog};
+use crate::{unit_tests::subscriber, GravityDataProduct, GravityNode, GravitySubscriber, GravityTransportType, SpdLog};
+use BasicCounterDataProduct::*;
 
 struct MySubscriber {}
 

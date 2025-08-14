@@ -1,3 +1,5 @@
+include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+
 use std::{process::Command, time};
 
 use spdlog::{critical, error, warn};

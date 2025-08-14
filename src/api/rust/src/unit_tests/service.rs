@@ -1,6 +1,8 @@
-use core::time;
-// pub mod protos;
 
+include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+
+
+use core::time;
 use crate::ffi::new_future_response;
 use crate::SpdLog;
 use crate::GravityServiceProvider;
@@ -8,15 +10,15 @@ use crate::GravityDataProduct;
 use crate::GravityRequestor;
 use crate::{GravityNode, GravityReturnCode, GravityTransportType};
 // use gravity::gravity_logger::SpdLog;
-use crate::protos::DataPB::{MultPB, ResultPB};
-use crate::protos::BigComplexPB::{self, BigGuyPB, BigResultPB, SmallGuyPB};
+use DataPB::{MultPB, ResultPB};
+use BigComplexPB::{BigGuyPB, BigResultPB, SmallGuyPB};
 
 struct MyProvider {}
 
 impl GravityServiceProvider for MyProvider {
     fn request(&mut self, service_id: &str, data_product: &GravityDataProduct) -> GravityDataProduct {
         if data_product.data_product_id() != "Multiplication" {
-            SpdLog::error("Request is not for multiplication");
+            // SpdLog::error("Request is not for multiplication");
         }
         let mut mult_ops = MultPB::new();
         data_product.populate_message(&mut mult_ops);
@@ -67,7 +69,7 @@ fn service() {
      let mut ret = gn2.init("MultiplicationRequestor");
 
      while ret != GravityReturnCode::SUCCESS {
-        SpdLog::warn("Unable to init component, retrying...");
+        // SpdLog::warn("Unable to init component, retrying...");
         ret = gn2.init("MultiplicationRequestor");
      }
 
@@ -82,7 +84,7 @@ fn service() {
     
     ret = gn2.request_async("Multiplication", &mult_request, &requestor);
     while ret != GravityReturnCode::SUCCESS {
-        SpdLog::warn("request to Multiplication service failed, retrying...");
+        // SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
         ret = gn2.request_async("Multiplication", &mult_request, &requestor);
@@ -195,7 +197,7 @@ fn service2 () {
 
 
      while ret != GravityReturnCode::SUCCESS {
-        SpdLog::warn("Unable to init component, retrying...");
+        // SpdLog::warn("Unable to init component, retrying...");
         ret = gn2.init("BigComplexRequestor");
      }
 
@@ -227,7 +229,7 @@ fn service2 () {
     
     ret = gn2.request_async("BigComplex", &mult_request, &requestor);
     while ret != GravityReturnCode::SUCCESS {
-        SpdLog::warn("request to Multiplication service failed, retrying...");
+        // SpdLog::warn("request to Multiplication service failed, retrying...");
         std::thread::sleep(time::Duration::from_secs(1));
 
         ret = gn2.request_async("BigComplex", &mult_request, &requestor);

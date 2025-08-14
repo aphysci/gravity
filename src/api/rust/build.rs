@@ -56,7 +56,27 @@ fn main() {
         .compile("rust_gravity");
 
     // generate the protobufs for the unit tests
-    
+    let mut proto_include = dir.clone();
+    proto_include.push_str("/src/api/rust/src/protobuf/");
+
+    let filenames = ["BasicCounterDataProduct.proto",
+        "BigComplexPB.proto", "DataPB.proto"];
+    let mut proto_files = Vec::new();
+
+    for item in filenames {
+        let mut to_add = proto_include.clone();
+        to_add.push_str(item);
+        proto_files.push(to_add);
+    }    
+
+    protobuf_codegen::Codegen::new()
+        .pure()
+        .include(proto_include)
+        .inputs(proto_files)
+        .cargo_out_dir("protobuf")
+        .run_from_script();
+
+
     // search and link the libraries created
     // note the *_d. This is what the cmake crate does, but it should not matter the name
     println!("cargo:rustc-link-search={lib_path}");
