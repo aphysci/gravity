@@ -25,7 +25,6 @@ endif()
 add_subdirectory(keyvalue_parser)
 add_subdirectory(api/protobufs)
 add_subdirectory(api/cpp)
-add_subdirectory(api/rust)
 
 if (NOT SKIP_JAVA)
     add_subdirectory(api/java/src/swig)
