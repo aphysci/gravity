@@ -187,7 +187,6 @@ mod gravity_service_provider;
 mod future_response;
 mod gravity_heartbeat_listener;
 mod gravity_subscription_monitor;
-mod protos;
 mod ffi;
 mod unit_tests;
 
