@@ -5,7 +5,7 @@ use crate::{GravityDataProduct, GravityHeartbeatListener, GravityNode, GravityTr
 
 
 fn misc_component_1 () -> GravityNode {
-    let gn = GravityNode::new();
+    let mut gn = GravityNode::new();
 
     gn.init("MiscGravityComponentID1");
 
@@ -20,7 +20,7 @@ fn misc_component_1 () -> GravityNode {
         count -= 1;
 
 
-        let ipc_data_product = GravityDataProduct::with_id("IPCDataProduct");
+        let mut ipc_data_product = GravityDataProduct::with_id("IPCDataProduct");
 
         let data = "hey!";
 
@@ -98,7 +98,7 @@ fn misc_func () {
 #[test] 
 fn listener_drops_second () {
     // test if the listener drops second (good)
-    let listener = misc_component_2();
+    let mut listener = misc_component_2();
 
     let beater = misc_component_1();
 

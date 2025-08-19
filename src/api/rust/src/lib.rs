@@ -102,7 +102,7 @@
 //!    use gravity::GravitySubscriber;
 //!    use gravity::GravityDataProduct;
 //!    use gravity::SpdLog;
-//!    use crate::protobufs::BasicCounterDataProductPB::new();
+//!    use crate::protobufs::BasicCounterDataProductPB;
 //! 
 //!    struct MySubscriber {}
 //!

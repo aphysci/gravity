@@ -41,7 +41,7 @@ impl GravityDataProduct {
         ffi::get_data_product_ID(&self.gdp).to_str().unwrap().to_string()
     }
     /// Sets the software version of this data product.
-    pub fn set_software_version(&self, software_version: &str)
+    pub fn set_software_version(&mut self, software_version: &str)
     {
         let_cxx_string!(sv = software_version);
         ffi::set_software_version(&self.gdp, &sv);
@@ -59,13 +59,13 @@ impl GravityDataProduct {
         ffi::get_gravity_timestamp(&self.gdp)
     }
     /// Sets the application-specific data for this data product from an array of bytes.
-    pub fn set_data_basic(&self, data: &[u8]) {
+    pub fn set_data_basic(&mut self, data: &[u8]) {
         let size = data.len() as i32;
         let d = data as *const _ as *const c_char;
         unsafe { ffi::set_data_basic(&self.gdp, d, size); }
     }
     /// Sets the applicatio-specific data for this data product from a protocol buffer.
-    pub fn set_data<A: protobuf::Message>(&self, data: &A) {
+    pub fn set_data<A: protobuf::Message>(&mut self, data: &A) {
         let v = data.write_to_bytes().unwrap();
         let bytes = v.as_ptr() as *const c_char;
         let type_name = <A as protobuf::Message>::NAME;
@@ -110,7 +110,7 @@ impl GravityDataProduct {
         ffi::get_size(&self.gdp)
     }
     /// Deserialize this GravityDataProduct from an array of bytes.
-    pub fn parse_from_array(&self, array: &[u8]) {
+    pub fn parse_from_array(&mut self, array: &[u8]) {
         let len = array.len();
         let p = array.as_ptr() as * const c_char;
         unsafe { ffi::parse_from_array(&self.gdp, p, len as i32);}
@@ -144,7 +144,7 @@ impl GravityDataProduct {
         ffi::is_cached_data_product(&self.gdp)
     }
     /// Sets the flag indicating this data product is cached
-    pub fn set_is_cached_data_product(&self, cached: bool) {
+    pub fn set_is_cached_data_product(&mut self, cached: bool) {
         ffi::set_is_cached_data_product(&self.gdp, cached);
     } 
     /// Returns the url for the REP socket of a future response
@@ -153,22 +153,22 @@ impl GravityDataProduct {
         temp.to_str().unwrap().to_string()
     }
     /// Sets the timestamp on this GravityDataProduct (typically set by infrastructure at publish)
-    pub fn set_timestamp(&self, ts: u32) {
+    pub fn set_timestamp(&mut self, ts: u32) {
         ffi::set_timestamp(&self.gdp, ts);
     }
     /// Sets the received timestamp on this GravityDataProduct (typically set by infrastructure at publish)
-    pub fn set_recieved_timestamp(&self, ts: u32) {
+    pub fn set_recieved_timestamp(&mut self, ts: u32) {
         ffi::set_recieved_timestamp(&self.gdp, ts);
     }
 
     /// Sets the component id of this GravityDataProduct (typically set by infrastructure at publish)
-    pub fn set_component_id(&self, component_id: &str) {
+    pub fn set_component_id(&mut self, component_id: &str) {
         let_cxx_string!(cid = component_id);
         ffi::set_component_id(&self.gdp, &cid);
     }
 
     /// Sets the domain on this GravityDataProduct (typically set by infrastructure at publish)
-    pub fn set_domain(&self, domain: &str) {
+    pub fn set_domain(&mut self, domain: &str) {
         let_cxx_string!(d = domain);
         ffi::set_domain(&self.gdp, &d);
     }
@@ -177,11 +177,11 @@ impl GravityDataProduct {
         ffi::is_relayed_data_product(&self.gdp)
     }
     // Sets the flag indicating whether this messsage has been relayed or has come from the original source.
-    pub fn set_is_relayed_data_product(&self, relayed: bool) {
+    pub fn set_is_relayed_data_product(&mut self, relayed: bool) {
         ffi::set_is_relayed_data_product(&self.gdp, relayed);
     }
     /// Sets the data protocol in this data product (for instance, protobuf2).
-    pub fn set_protocol(&self, protocol: &str) {
+    pub fn set_protocol(&mut self, protocol: &str) {
         let_cxx_string!(p = protocol);
         ffi::set_protocol(&self.gdp, &p);
     }
@@ -191,7 +191,7 @@ impl GravityDataProduct {
         temp.to_str().unwrap().to_string()
     }
     /// Sets the type of data in this data product (for instance, the full protobuf type name)
-    pub fn set_type_name(&self, data_type: &str) {
+    pub fn set_type_name(&mut self, data_type: &str) {
         let_cxx_string!(dt = data_type);
         ffi::set_type_name(&self.gdp, &dt);
     }
@@ -205,7 +205,7 @@ impl GravityDataProduct {
         ffi::get_registration_time(&self.gdp)
     }
     /// Sets the registration time on this GravityDataProduct (typically set by infrastructure when created).
-    pub fn set_registration_time(&self, ts: u32) {
+    pub fn set_registration_time(&mut self, ts: u32) {
         ffi::set_registration_time(&self.gdp, ts);
     }
 }

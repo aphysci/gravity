@@ -43,7 +43,7 @@ fn simple_heartbeat_test () {
         gn.register_heartbeat_listener("HeartbeatExample", interval, listener);
     }
 
-    let gn2 = GravityNode::new();
+    let mut gn2 = GravityNode::new();
     gn2.init("HeartbeatExample2");
 
     let mut quit = false;

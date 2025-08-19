@@ -25,7 +25,7 @@ fn mover<T> (x: T) -> T {
 // #[test]
 fn subscriber_drop() {
     let handle = std::thread::spawn( || {
-        let gn = GravityNode::new();
+        let mut gn = GravityNode::new();
         gn.init("DropPublisherComponent");
 
         gn.register_data_product("DropDataProduct", GravityTransportType::TCP);
@@ -33,7 +33,7 @@ fn subscriber_drop() {
         let mut count = 1;
         loop {
 
-            let data_product = GravityDataProduct::with_id("DropDataProduct");
+            let mut data_product = GravityDataProduct::with_id("DropDataProduct");
             
             let mut data = BasicCounterDataProductPB::new();
             data.set_count(count);

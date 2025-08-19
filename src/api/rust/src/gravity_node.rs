@@ -57,14 +57,14 @@ impl GravityNode {
 
 
     /// Initialize the Gravity infrastructure.
-    pub fn init(&self, component_id: &str) -> GravityReturnCode {
+    pub fn init(&mut self, component_id: &str) -> GravityReturnCode {
         let_cxx_string!(cid = component_id);
         ffi::init(&self.gn, &cid)
     }
 
     /// Initialize the Gravity infrastructure.
     /// Reads the component_id from the Gravity.ini file.
-    pub fn init_default(&self) -> GravityReturnCode {
+    pub fn init_default(&mut self) -> GravityReturnCode {
         ffi::init_default(&self.gn)
     }
 
@@ -346,13 +346,13 @@ impl GravityNode {
 
     /// Starts a heart beat for this GravityNode.
     /// Returns success flag.
-    pub fn start_heartbeat(&self, interval_in_microseconds: i64) -> GravityReturnCode {
+    pub fn start_heartbeat(&mut self, interval_in_microseconds: i64) -> GravityReturnCode {
         ffi::start_heartbeat(&self.gn, interval_in_microseconds)
     }
 
     /// Stops the heart beat for this GravityNode
     /// Returns success flag.
-    pub fn stop_heartbeat(&self) -> GravityReturnCode {
+    pub fn stop_heartbeat(&mut self) -> GravityReturnCode {
         ffi::stop_heartbeat(&self.gn)
     }
 
@@ -467,7 +467,7 @@ impl GravityNode {
 
     // Unregister as a service provider with the Gravity Service Directory.
     // Returns success flag or not_registered flag if the token is not tokenized with the current GravityNode
-    pub fn unregister_service(&self, service_id: &str) -> GravityReturnCode {
+    pub fn unregister_service(&mut self, service_id: &str) -> GravityReturnCode {
         let_cxx_string!(sid = service_id);
         ffi::unregister_service(&self.gn, &sid)
     }

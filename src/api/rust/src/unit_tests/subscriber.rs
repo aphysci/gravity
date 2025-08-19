@@ -46,7 +46,7 @@ fn basic_subscriber () {
     gnn.subscribe(data_product_id, &subscriber);
 
 
-    let gn = GravityNode::new();
+    let mut gn = GravityNode::new();
     let mut ret = gn.init("RustExample");
     let fs = gn.get_int_param("Fs", 0);
    
@@ -72,7 +72,7 @@ fn basic_subscriber () {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::with_id(&data_product_id);
+        let mut gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
@@ -178,7 +178,7 @@ fn multiple_subscribers () {
     // gn.subscribe("BasicCounterDataProduct", &simple);
     // gn.subscribe("HelloWorldDataProduct", &simple);
 
-    let gnpub = GravityNode::new();
+    let mut gnpub = GravityNode::new();
     gnpub.init("SimpleGravityComponentPub");
 
     gnpub.register_data_product("BasicCounterDataProduct", GravityTransportType::TCP);
@@ -189,7 +189,7 @@ fn multiple_subscribers () {
 
     while !quit 
     {
-        let counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
+        let mut counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
         let mut counter_data_pb = BasicCounterDataProductPB::new();
         counter_data_pb.set_count(count);
 
@@ -201,7 +201,7 @@ fn multiple_subscribers () {
         if count > 4 { quit = true};
 
 
-        let hello_data_product = GravityDataProduct::with_id("HelloWorldDataProduct");
+        let mut hello_data_product = GravityDataProduct::with_id("HelloWorldDataProduct");
         let data = "Hello World";
         hello_data_product.set_data_basic(data.as_bytes());
 
@@ -241,7 +241,7 @@ fn outside_function () {
     }
 
     let data_product_id = "SimpleRustDataProduct";
-    let gn = GravityNode::new();
+    let mut gn = GravityNode::new();
     let mut ret = gn.init("RustExample");
     let fs = gn.get_int_param("Fs", 0);
    
@@ -267,7 +267,7 @@ fn outside_function () {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::with_id(&data_product_id);
+        let mut gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);
@@ -322,7 +322,7 @@ fn dropped_node() {
     
 
     let data_product_id = "SimpleRustDataProduct";
-    let gn = GravityNode::new();
+    let mut gn = GravityNode::new();
     let mut ret = gn.init("RustExample");
     let fs = gn.get_int_param("Fs", 0);
    
@@ -348,7 +348,7 @@ fn dropped_node() {
     let mut count = 1;
     while !quit
     {   
-        let gdp = GravityDataProduct::with_id(&data_product_id);
+        let mut gdp = GravityDataProduct::with_id(&data_product_id);
 
         let mut data = MultPB::new();
         data.set_multiplicand_a(count);

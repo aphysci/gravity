@@ -6,7 +6,7 @@ use DataPB::*;
 
 #[test]
 fn data_product_functions() {
-    let gdp = GravityDataProduct::with_id("TestDataProduct");
+    let mut gdp = GravityDataProduct::with_id("TestDataProduct");
 
     let mut pb = MultPB::new();
     pb.set_multiplicand_a(5);
@@ -40,7 +40,7 @@ fn data_product_functions() {
     assert_eq!("multiply", gdp.type_name());
 
     let array = gdp.serialize_to_array();
-    let gdp2 = GravityDataProduct::with_id("ParseSerializeTest");
+    let mut gdp2 = GravityDataProduct::with_id("ParseSerializeTest");
 
     gdp2.parse_from_array(&array);
     assert_eq!(gdp.size(), gdp2.size());

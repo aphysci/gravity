@@ -31,7 +31,7 @@ impl GravityServiceProvider for MyProvider {
         let mut result_pb = ResultPB::new();
         result_pb.set_result(result);
 
-        let ret = GravityDataProduct::with_id("MultiplicationResult");
+        let mut ret = GravityDataProduct::with_id("MultiplicationResult");
         ret.set_data(&result_pb);
         ret
     }
@@ -75,7 +75,7 @@ fn service() {
 
     let requestor = gn2.tokenize_requestor(MyRequestor {});
 
-    let mult_request = GravityDataProduct::with_id("Multiplication");
+    let mut mult_request = GravityDataProduct::with_id("Multiplication");
     let mut operands = MultPB::new();
 
     operands.set_multiplicand_a(8);
@@ -90,7 +90,7 @@ fn service() {
         ret = gn2.request_async("Multiplication", &mult_request, &requestor);
     }
 
-    let request2 = GravityDataProduct::with_id("Multiplication");
+    let mut request2 = GravityDataProduct::with_id("Multiplication");
     let mut operands2 =  MultPB::new();
     operands2.set_multiplicand_a(5);
     operands2.set_multiplicand_b(7);
@@ -134,7 +134,7 @@ impl GravityServiceProvider for BetterProvider {
             }
         }
 
-        let result_gdp = GravityDataProduct::with_id("BigComplex");
+        let mut result_gdp = GravityDataProduct::with_id("BigComplex");
         result_gdp.set_data(&bigresult);
         
         result_gdp
@@ -203,7 +203,7 @@ fn service2 () {
 
     let requestor = gn2.tokenize_requestor(BetterRequestor {});
 
-    let mult_request = GravityDataProduct::with_id("BigComplex");
+    let mut mult_request = GravityDataProduct::with_id("BigComplex");
     let mut operands = BigGuyPB::new();
 
     operands.set_bigNumber(1785);
@@ -235,7 +235,7 @@ fn service2 () {
         ret = gn2.request_async("BigComplex", &mult_request, &requestor);
     }
 
-    let request2 = GravityDataProduct::with_id("BigComplex");
+    let mut request2 = GravityDataProduct::with_id("BigComplex");
     let mut operands2 =  BigGuyPB::new();
     operands2.set_bigNumber(1785);
     operands2.set_helloworld("HelloWorld".to_string());
