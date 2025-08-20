@@ -3,7 +3,14 @@
 A Rust API for gravity
 
 ## Usage
-If you want to use, ensure that you have all the Gravity dependencies installed, specified in the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup).
+If you want to include it in your Rust project, ensure that you have all the Gravity dependencies installed, specified in the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup).
+
+Not all are necessary, just g++, cmake, bison, flex.
+
+In linux:
+```sh
+sudo apt install cmake g++ bison flex
+```
 
 Then add the crate to your Cargo.toml:
 ```toml
