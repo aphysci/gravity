@@ -33,7 +33,7 @@ impl GravityServiceProvider for MultiplicationServiceProvider {
         let mut result_pb = MultiplicationResultPB::new();
         result_pb.set_result(result);
 
-        let result_gdp = GravityDataProduct::with_id("MultiplicationResult");
+        let mut result_gdp = GravityDataProduct::with_id("MultiplicationResult");
         result_gdp.set_data(&result_pb);
 
         result_gdp
@@ -79,7 +79,7 @@ fn main() {
 
     // Set up the first multiplication request
     let requestor = gn.tokenize_requestor(MultiplicationRequestor {});
-    let mult_request1 = GravityDataProduct::with_id("Multiplication");
+    let mut mult_request1 = GravityDataProduct::with_id("Multiplication");
     let mut params1 = MultiplicationOperandsPB::new();
     params1.set_multiplicand_a(8);
     params1.set_multiplicand_b(2);
@@ -96,7 +96,7 @@ fn main() {
     }
 
     // Set up the second multiplication request
-    let mult_request2 = GravityDataProduct::with_id("Multiplication");
+    let mut mult_request2 = GravityDataProduct::with_id("Multiplication");
     let mut params2 = MultiplicationOperandsPB::new();
     params2.set_multiplicand_a(5);
     params2.set_multiplicand_b(7);

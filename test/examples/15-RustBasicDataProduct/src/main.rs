@@ -26,6 +26,7 @@ fn main() {
     while gn.init("BasicCounterSubscriberID") != GravityReturnCode::SUCCESS {
 	    SpdLog::warn("retrying init");
     }
+    assert_eq!(1234, gn.get_int_param("test_number", 0));
 
     gn.register_data_product("BasicCounterDataProduct", GravityTransportType::TCP);
     let counter_subscriber = gn.tokenize_subscriber(SimpleGravityCounterSubscriber {});
@@ -39,7 +40,7 @@ fn main() {
         let mut counter_pb = BasicCounterDataProductPB::new();
         counter_pb.set_count(count);
 
-        let gdp = GravityDataProduct::with_id("BasicCounterDataProduct");
+        let mut gdp = GravityDataProduct::with_id("BasicCounterDataProduct");
         gdp.set_data(&counter_pb);
         gn.publish(&gdp);
 
