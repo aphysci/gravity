@@ -104,7 +104,7 @@ set(SRCS
 	"${CMAKE_CURRENT_LIST_DIR}/Utility.cpp")
         
 
-if (NOT BUILD_LIBRARY_ONLY)
+if (NOT BUILD_STATIC_LIBRARIES)
 	add_library(${PROTO_LIB_NAME} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
 else()
 	add_library(${PROTO_LIB_NAME} STATIC ${PROTO_SRCS} ${PROTO_HDRS})
@@ -121,7 +121,7 @@ endif()
 
 add_definitions(-DGRAVITY_EXPORTS -D_USRDLL)
 include_directories("${CMAKE_BINARY_DIR}")
-if (NOT BUILD_LIBRARY_ONLY)
+if (NOT BUILD_STATIC_LIBRARIES)
 	add_library(${LIB_NAME} SHARED ${SRCS})
 else()
 	add_library(${LIB_NAME} STATIC ${SRCS})

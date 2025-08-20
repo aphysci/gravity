@@ -13,6 +13,7 @@ option(GRAVITY_USE_EXTERNAL_ZEROMQ "Download, build and use and externally downl
 option(GRAVITY_USE_EXTERNAL_SPDLOG "Download, build and use an externally downloaded Spdlog build")
 option(BUILD_EXAMPLES_TESTS "Build Gravity examples and tests" ON)
 option(BUILD_LIBRARY_ONLY "Only build the libraries, without components or tests")
+option(BUILD_STATIC_LIBRARIES "Build libraries to link statically (useful for linking with Rust)")
 option(SKIP_JAVA "Skip building Gravity Java wrapper")
 option(SKIP_PYTHON "Skip building Gravity Python wrapper") 
 set(JAVA_HOME "" CACHE PATH "Path to JDK to use")
@@ -43,7 +44,7 @@ endif()
 set(PUBLIC_STAGING_DIR ${CMAKE_BINARY_DIR}/staging)
 
 macro(add_external_protobuf)
-    if (NOT BUILD_LIBRARY_ONLY)
+    if (NOT BUILD_STATIC_LIBRARIES)
         set(BUILD_SHARED_LIBS_PROTO ON)
     else() 
         set(BUILD_SHARED_LIBS_PROTO OFF)
@@ -84,7 +85,7 @@ macro(add_external_libzmq)
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${PUBLIC_STAGING_DIR}
             -DBUILD_SHARED:BOOL=ON
-            -DBUILD_STATIC:BOOL=${BUILD_LIBRARY_ONLY}
+            -DBUILD_STATIC:BOOL=${BUILD_STATIC_LIBRARIES}
             -DZMQ_BUILD_TESTS:BOOL=OFF
             -DBUILD_TESTS:BOOL=OFF
         BUILD_COMMAND cmake --build .  --config $<$<CONFIG:Debug>:debug>$<$<CONFIG:Release>:release>
@@ -295,6 +296,7 @@ else()
             -DSKIP_PYTHON=${SKIP_PYTHON}
             -DZMQ_HOME=${ZMQ_HOME}
             -DBUILD_LIBRARY_ONLY=${BUILD_LIBRARY_ONLY}
+            -DBUILD_STATIC_LIBRARIES=${BUILD_STATIC_LIBRARIES}
             -DGRAVITY_USE_EXTERNAL_PROTOBUF=${GRAVITY_USING_EXTERNAL_PROTOBUF}
             -DGRAVITY_USE_EXTERNAL_ZEROMQ=${GRAVITY_USING_EXTERNAL_ZEROMQ}
             -DGRAVITY_USE_EXTERNAL_SPDLOG=${GRAVITY_USING_EXTERNAL_SPDLOG}
