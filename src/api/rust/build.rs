@@ -38,6 +38,7 @@ fn main() {
         .define("CMAKE_INSTALL_PREFIX", prefix)
         .define("GRAVITY_USE_EXTERNAL_PROTOBUF", "ON")
         .define("GRAVITY_USE_EXTERNAL_ZEROMQ", "ON")
+        .define("GRAVITY_USE_EXTERNAL_SPDLOG", "ON")
         .define("BUILD_LIBRARY_ONLY", "ON")
         .define("BUILD_STATIC_LIBRARIES", "ON")
         .define("BUILD_EXAMPLES_TESTS", "OFF")
@@ -86,6 +87,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=keyvalue_parser");
     println!("cargo:rustc-link-lib=static=protobuf");
     println!("cargo:rustc-link-lib=static=zmq");
+    println!("cargo:rustc-link-lib=static=spdlog");
   
    
 }
