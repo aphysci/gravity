@@ -44,13 +44,15 @@
 //!
 //! ## Publisher
 //! ```rust
+//! include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+//! 
 //! use gravity::{GravityNode, GravityDataProduct, GravityTransportType};
 //! use std::time;
-//! use crate::protobufs::BasicCounterDataProductPB;
+//! use BasicCounterDataProduct::*;
 //! 
 //! fn main () {
 //!   
-//!    let gn = GravityNode::new();
+//!    let mut gn = GravityNode::new();
 //!    gn.init("RustProtobufExample");
 //!  
 //!    gn.register_data_product(
@@ -68,7 +70,7 @@
 //!    while !quit
 //!    {   
 //!        //create a data product to send across the network of type "BasicCounterDataProduct"
-//!        let counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
+//!        let mut counter_data_product = GravityDataProduct::with_id("BasicCounterDataProduct");
 //!
 //!        //Initialize our message
 //!        let mut counter_data_pb = BasicCounterDataProductPB::new();
@@ -82,15 +84,15 @@
 //!
 //!        //Increment count
 //!        count += 1;
-//!        if count > 50 {
-//!            count = 1;
+//!        if count > 5 {
+//!            quit = true;
 //!        }
 //!
 //!        //Sleep for 1 second.
 //!        std::thread::sleep(time::Duration::from_secs(1));
 //!    }
 //!
-//!    gn.wait_for_exit();  
+//!    // gn.wait_for_exit();  
 //!}
 //!
 //!```
@@ -98,11 +100,13 @@
 //! ## Subscriber
 //! 
 //! ```rust
+//!    include!(concat!(env!("OUT_DIR"), "/protobuf/mod.rs"));
+//! 
 //!    use gravity::GravityNode;
 //!    use gravity::GravitySubscriber;
 //!    use gravity::GravityDataProduct;
 //!    use gravity::SpdLog;
-//!    use crate::protobufs::BasicCounterDataProductPB;
+//!    use BasicCounterDataProduct::*;
 //! 
 //!    struct MySubscriber {}
 //!
@@ -132,13 +136,13 @@
 //!    
 //!        //This is just an example, you can have any other way to 
 //!        //instantiate your own GravitySubscriber, as long as it impl GravitySubscriber trait
-//!        let subscriber = MySubscriber {};
+//!        let subscriber = gn.tokenize_subscriber( MySubscriber {} );
 //!    
 //!        //subscribe to the data product
 //!        //this function takes in any struct that impl GravitySubscriber
 //!        gn.subscribe("BasicCounterDataProduct", &subscriber);
 //!     
-//!        gn.wait_for_exit()
+//!        //gn.wait_for_exit()
 //!    }
 //! 
 //! 
