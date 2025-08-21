@@ -3,6 +3,17 @@
 A Rust API for gravity
 
 ## Usage
+
+**Requires cargo 1.85 or later**
+On linux, this can be easily installed through the following:
+```sh
+sudo apt install rustup
+rustup update stable
+```
+
+Rustup will automatically install the latest stable release of rust compiler.
+
+
 If you want to include it in your Rust project, ensure that you have all the Gravity dependencies installed, specified in the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup).
 
 Not all are necessary, just g++, cmake, bison, flex.

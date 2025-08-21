@@ -13,9 +13,6 @@ build = "src/api/rust/build.rs"
 [lib]
 path = "src/api/rust/src/lib.rs"
 
-[profile.gravity]
-inherits="release"
-
 [dependencies]
 cxx = "1.0.158"
 protobuf = "3.7.2"
