@@ -24,6 +24,7 @@ In linux:
 ```sh
 sudo apt install cmake g++ bison flex
 ```
+Using cmake version 4.x.x or later does not work with Gravity. apt installs version 3.28 which has been tested with Gravity and the Cargo build.
 
 Then, add the crate to your Cargo.toml:
 ```toml
