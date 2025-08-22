@@ -74,8 +74,8 @@ impl GravityNode {
     }
 
     /// Gets a token for use in subscribing, unsubscribing, and registering and unregistering relays.
-    /// Dropping a token does not modify the GravityNode (including subscriptions)
-    /// Dropping a token will not cause a subscription to cancel, only unsubscribing and dropping the GravityNode will
+    /// Dropping a token does not modify the GravityNode (including subscriptions).
+    /// Dropping a token will not cause a subscription to cancel, only unsubscribing and dropping the GravityNode will.
     /// Once a token is dropped, it and it's information cannot be recovered, so make sure to keep it in scope if you would
     /// like to subscribe or unsubscribe with it.
     pub fn tokenize_subscriber(&mut self, subscriber: impl GravitySubscriber + 'static) -> SubscriberToken {
@@ -805,8 +805,7 @@ impl GravityNode {
         }
 
     /// Remove the given data_product_id from the given GravitySubscriptionMonitor.
-    /// With parameter filter.
-    /// With parameter domain.
+    /// With parameter filter and parameter domain.
     /// Returns success flag.
     pub fn clear_subscription_timeout_monitor_with_domain(&self, data_product_id: &str, 
             monitor: &SubscriptionMonitorToken, filter: &str, domain: &str) -> GravityReturnCode {

@@ -12,13 +12,11 @@ pub struct GravityDataProduct {
 
 impl GravityDataProduct {
     /// Constructs a GravityDataProduct using the default constructor
-    /// As of right now, you cannot later set a data product ID for a GravityDataProduct
-    /// so use of this function is not recommended
     pub fn new() -> GravityDataProduct {
         GravityDataProduct { gdp: ffi::gravity_data_product_default() }
     }
 
-    /// Constructs a GravityDataProduct with a string as a parameter
+    /// Constructs a GravityDataProduct with a string as a parameter. <br>
     /// Recommended constructor.
     pub fn with_id(data_product_id: &str) -> GravityDataProduct {
         let_cxx_string!(dpid = data_product_id);

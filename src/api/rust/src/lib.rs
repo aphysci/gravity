@@ -20,7 +20,7 @@
 //!  Make sure these 4 items are installed before adding this crate as a dependency.
 //! 
 //! 
-//! *Compiler support: requires rustc 1.73+ and c++11 or newer* 
+//! *Compiler support: requires rustc 1.85+ and c++11 or newer* 
 //! 
 //! 
 //! # Overview
@@ -139,7 +139,7 @@
 //!        let subscriber = gn.tokenize_subscriber( MySubscriber {} );
 //!    
 //!        //subscribe to the data product
-//!        //this function takes in any struct that impl GravitySubscriber
+//!        //takes in a borrowed subscriber token
 //!        gn.subscribe("BasicCounterDataProduct", &subscriber);
 //!     
 //!        //gn.wait_for_exit()
