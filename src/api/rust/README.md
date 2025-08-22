@@ -4,6 +4,8 @@ A Rust API for gravity
 
 ## Usage
 
+### Dependencies 
+
 **Requires cargo 1.85 or later**
 On linux, this can be easily installed through the following:
 ```sh
@@ -14,7 +16,7 @@ rustup update stable
 Rustup will automatically install the latest stable release of rust compiler.
 
 
-If you want to include it in your Rust project, ensure that you have all the Gravity dependencies installed, specified in the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup).
+Before you add it to your ```Cargo.toml```, ensure that you have all the Gravity dependencies installed, specified in the [Gravity Build Guide](https://github.com/aphysci/gravity/wiki/GravitySetup).
 
 Not all are necessary, just g++, cmake, bison, flex.
 
@@ -23,10 +25,10 @@ In linux:
 sudo apt install cmake g++ bison flex
 ```
 
-Then add the crate to your Cargo.toml:
+Then, add the crate to your Cargo.toml:
 ```toml
 [dependencies]
-gravity = { git = "https://github.com/astrauc/gravity.git" }
+gravity = { git = "REPOSITORY_URL" }
 ```
 
 You are done! Now you can use Gravity from your Rust application!
