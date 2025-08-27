@@ -2380,8 +2380,12 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
         sendStringMessage(serviceManagerSWL.socket, "unregister", ZMQ_SNDMORE);
         sendStringMessage(serviceManagerSWL.socket, serviceID, ZMQ_DONTWAIT);
         string url = serviceMap[serviceID];
+        if (urlInstanceMap.count(url) == 0)
+        {
+            return GravityReturnCodes::REGISTRATION_CONFLICT;
+        }
+
         serviceMap.erase(serviceID);
-        urlInstanceMap.erase(url);
 
         string status = readStringMessage(serviceManagerSWL.socket);
 
@@ -2391,6 +2395,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
             unregistration.set_id(serviceID);
             unregistration.set_url(url);
             unregistration.set_type(ServiceDirectoryUnregistrationPB::SERVICE);
+            unregistration.set_registration_time(static_cast<uint32_t>(urlInstanceMap[url] / 1e6));
 
             GravityDataProduct request("UnregistrationRequest");
             request.setData(unregistration);
@@ -2433,6 +2438,7 @@ GravityReturnCode GravityNode::unregisterService(string serviceID)
                 }
             }
         }
+        urlInstanceMap.erase(url);
     }
     serviceManagerSWL.lock.Unlock();
 
