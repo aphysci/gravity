@@ -20,6 +20,6 @@ set(swigwin_url "http://prdownloads.sourceforge.net/swig/swigwin-4.3.1.zip")
 
 set(lexyacc_win_url "https://master.dl.sourceforge.net/project/winflexbison/old_versions/win_flex_bison-2.5.22.zip")
 
-set(pthreads_w32_url "https://cytranet.dl.sourceforge.net/project/pthreads4w/pthreads-w32-2-9-1-release.zip")
+set(pthreads_w32_url "https://mirror.cs.vt.edu/pub/cygwin/pthreads-win32/pthreads-w32-2-9-1-release.zip")
 
 
