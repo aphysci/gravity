@@ -1,0 +1,12 @@
+[package]
+name = "rust_basic_data_product"
+version = "0.1.0"
+edition = "2024"
+
+[build-dependencies]
+protobuf-codegen = "3.7.2"
+protoc-bin-vendored = "3.2.0"
+
+[dependencies]
+gravity = { git = "https://github.com/astrauc/gravity.git" }
+protobuf = "3.7.2"
