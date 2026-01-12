@@ -37,9 +37,13 @@ int GravityConfigParser::CONFIG_REQUEST_TIMEOUT = 4000;
 
 bool GravityConfigParser::hasKey(std::string key) { return key_value_map.count(StringCopyToLowerCase(key)) > 0; }
 
+void GravityConfigParser::setDirectory(std::string dir) { config_dir = dir; }
+
+void GravityConfigParser::setComponentID(std::string componentID) { this->componentID = componentID; }
+
 GravityConfigParser::GravityConfigParser(std::string componentID) { this->componentID = componentID; }
 
-void GravityConfigParser::ParseConfigFile(const char *config_filename)
+void GravityConfigParser::parseConfigFile(std::string config_filename)
 {
     std::vector<const char *> sections;
 
@@ -47,7 +51,14 @@ void GravityConfigParser::ParseConfigFile(const char *config_filename)
     sections.push_back("general");
     sections.push_back(NULL);
 
-    KeyValueConfigParser parser(config_filename, sections);
+    std::string path = config_dir;
+    if (path.rfind('/') != std::string::npos)
+    {
+        path += "/";
+    }
+    path += config_filename;
+
+    KeyValueConfigParser parser(path.c_str(), sections);
 
     std::vector<std::string> keys = parser.GetKeys();
 
@@ -57,10 +68,17 @@ void GravityConfigParser::ParseConfigFile(const char *config_filename)
         std::string key_lower = StringCopyToLowerCase(*i);
         key_value_map[key_lower] = value;
     }
-    return;
 }
 
-void GravityConfigParser::ParseConfigService(GravityNode &gn)
+void GravityConfigParser::parseComponentConfigFile()
+{
+    if (this->componentID != "")
+    {
+        parseConfigFile(this->componentID + ".ini");
+    }
+}
+
+void GravityConfigParser::parseConfigService(GravityNode &gn)
 {
     //Prepare request
     GravityDataProduct dataproduct("ConfigRequestPB");
