@@ -171,7 +171,7 @@ namespace gravity {
 	    GravityNode();
 		GravityNode(std::string);
 	    ~GravityNode();
-	    GravityReturnCode init(std::string="");
+	    GravityReturnCode init(std::string="", std::string="");
 		GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType);
 	    GravityReturnCode registerDataProduct(const std::string& dataProductID, const GravityTransportType& transportType, bool cacheLastValue);    
 		GravityReturnCode unregisterDataProduct(const std::string& dataProductID);
