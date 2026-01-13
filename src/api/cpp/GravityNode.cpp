@@ -654,13 +654,18 @@ void GravityNode::configSpdLoggers()
     }
 }
 
-GravityReturnCode GravityNode::init(std::string componentID)
+GravityReturnCode GravityNode::init(std::string componentID, std::string config_dir)
 {
     static const std::string fallback_component_id = "GravityNode";
     parser = std::unique_ptr<GravityConfigParser>(new GravityConfigParser(componentID));
 
     auto* config_dir_env = getenv("GRAVITY_CONFIG_DIR");
-    if (config_dir_env)
+
+    if (!config_dir.empty()) // file path is not the default, somebody set it
+    {
+        parser->setDirectory(config_dir.c_str());
+    }
+    else if (config_dir_env)
     {
         parser->setDirectory(config_dir_env);
     }
