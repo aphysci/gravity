@@ -293,7 +293,7 @@ public:
     * \note Setting the GRAVITY_CONFIG_DIR environment variable will cause GravityNode to look in
     * a different directory for configuration files than the current directory.
     */
-    GRAVITY_API GravityNode(std::string componentID);
+    GravityNode(std::string componentID);
 
     /**
      * Default Destructor
@@ -309,7 +309,7 @@ public:
      * \note Setting the GRAVITY_CONFIG_DIR environment variable will cause GravityNode to look in
      * a different directory for configuration files than the current directory.
      */
-    GRAVITY_API GravityReturnCode init(std::string componentID = "", std::string config_dir = "");
+    GravityReturnCode init(std::string componentID = "", std::string config_dir = "");
 
     /**
      * Wait for the GravityNode to exit.
