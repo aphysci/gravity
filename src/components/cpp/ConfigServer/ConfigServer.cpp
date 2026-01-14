@@ -28,6 +28,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/fmt.h"
 
+
 using namespace gravity;
 using namespace std;
 
@@ -43,6 +44,8 @@ struct ConfigEntry
     std::string key;
     std::string value;
 };
+
+std::string arg_path = "";
 
 class ConfigServer : public GravityServiceProvider
 {
@@ -72,7 +75,23 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 
     sections.push_back(NULL);
 
-    KeyValueConfigParser parser("config_file.ini", sections);
+    std::string config_dir = "";
+    auto * env_dir = getenv("GRAVITY_CONFIG_DIR");
+    if (!arg_path.empty()) {
+        config_dir = arg_path;
+    }
+    else if (env_dir != nullptr && std::string(env_dir).length() > 0)
+    {
+        config_dir = std::string(env_dir);
+    }
+
+    if (config_dir.rfind('/') != std::string::npos)
+    {
+        config_dir += "/";
+    }
+    config_dir += "config_file.ini";
+
+    KeyValueConfigParser parser(config_dir.c_str(), sections);
 
     keys = parser.GetKeys();
 
@@ -114,6 +133,11 @@ int main(int argc, const char** argv)
     {
         cerr << "Failed to initialize ConfigServer, retrying..." << endl;
         ret = gn.init("ConfigServer");
+    }
+
+    if (argc > 1) 
+    {
+        arg_path = argv[1];
     }
 
     gn.registerService("ConfigService", GravityTransportTypes::TCP, server);
