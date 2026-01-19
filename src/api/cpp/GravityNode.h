@@ -194,6 +194,7 @@ private:
     static Semaphore initLock;
 
     bool settingsPubEnabled;
+    bool collectSettings;
     bool metricsEnabled;
     bool initialized;
     bool logInitialized;
@@ -241,6 +242,7 @@ private:
     GravityConfigParser* parser;
 
     GravityConfigParamPB configParamPB;
+    std::vector<GravityConfigParamPB> settings_to_publish;
     GravityDataProduct settingsGDP = GravityDataProduct(gravity::constants::GRAVITY_SETTINGS_DPID);
 
     GravityReturnCode ServiceDirectoryServiceLookup(std::string serviceOrDPID, std::string& url, std::string& domain,

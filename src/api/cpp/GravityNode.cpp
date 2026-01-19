@@ -427,6 +427,7 @@ GravityNode::GravityNode()
     // Default to no metrics
     metricsEnabled = false;
     settingsPubEnabled = false;
+    collectSettings = false;
     initialized = false;
     logInitialized = false;
     listenerEnabled = false;
@@ -450,6 +451,7 @@ GravityNode::GravityNode(std::string componentID)
     // Default to no metrics
     metricsEnabled = false;
     settingsPubEnabled = false;
+    collectSettings = false;
     initialized = false;
     logInitialized = false;
     heartbeatStarted = false;
@@ -714,6 +716,7 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
     initLock.Lock();
 
+    
     // Setup zmq context
     if (!initialized)
     {
@@ -728,6 +731,9 @@ GravityReturnCode GravityNode::init(std::string componentID)
             parser->ParseConfigFile(config_file_name.c_str());
         }
 
+        
+        collectSettings = getBoolParam("GravitySettingsPublishEnabled", false);
+        
         // Setup Logging as soon as config parser is available.
         if (!logInitialized)
         {
@@ -987,9 +993,10 @@ GravityReturnCode GravityNode::init(std::string componentID)
                 if (settingsPubEnabled)
                 {
                     registerDataProductInternal(gravity::constants::GRAVITY_SETTINGS_DPID, GravityTransportTypes::TCP,
-                                                false, false, false, true);
+                                             false, false, false, true);
+                    collectSettings = false;
                 }
-
+                
                 // Enable metrics (if configured)
                 metricsEnabled = getBoolParam("GravityMetricsEnabled", false);
                 if (metricsEnabled)
@@ -1046,6 +1053,20 @@ GravityReturnCode GravityNode::init(std::string componentID)
     if (iniWarning)
     {
         logger->warn("Gravity.ini specifies both Domain and URL. Using URL.");
+    }
+    if (settingsPubEnabled) {
+        for (const GravityConfigParamPB& configParamPB : settings_to_publish)
+        {
+            
+            if (!(publishedSettings.count(configParamPB.key()) == 1 &&
+                  publishedSettings.at(configParamPB.key()) == configParamPB.value()))
+            {
+                settingsGDP.setData(configParamPB);
+                publish(settingsGDP, componentID);
+                publishedSettings[configParamPB.key()] = configParamPB.value();
+            }
+        }
+        settings_to_publish.clear();
     }
 
     initLock.Unlock();
@@ -2835,15 +2856,21 @@ std::string GravityNode::getStringParam(std::string key, std::string default_val
         configParamPB.set_is_default(false);
     }
 
-    if (settingsPubEnabled && initialized &&
+    if (settingsPubEnabled &&
         !(publishedSettings.count(configParamPB.key()) == 1 &&
-          publishedSettings.at(configParamPB.key()) == configParamPB.value()))
+          publishedSettings.at(configParamPB.key()) == configParamPB.value())) 
     {
-        settingsGDP.setData(configParamPB);
-        publish(settingsGDP, componentID);
-        publishedSettings[configParamPB.key()] = configParamPB.value();
+        // setting good to be published at some point
+        if (collectSettings) {
+            settings_to_publish.push_back(configParamPB); // store for publish after initialization
+        }
+        else if (initialized) { // initialized, so go ahead and publish right now
+            settingsGDP.setData(configParamPB);
+            publish(settingsGDP, componentID);
+            publishedSettings[configParamPB.key()] = configParamPB.value();  
+        }     
     }
-
+ 
     return configParamPB.value();
 }
 
