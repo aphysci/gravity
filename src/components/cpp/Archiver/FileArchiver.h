@@ -45,7 +45,7 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 
 public:
-    FileArchiver();
+    FileArchiver(std::string configDir = "");
     virtual ~FileArchiver();
 
     virtual void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);

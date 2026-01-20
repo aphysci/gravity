@@ -126,18 +126,20 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 int main(int argc, const char** argv)
 {
     ConfigServer server;
-
+    const char * filepath = "";
+    if (argc > 1)
+    {
+        filepath = argv[1];
+        arg_path = std::string(argv[1]);
+    }
+    
     GravityNode gn;
-    GravityReturnCode ret = gn.init("ConfigServer");
+    GravityReturnCode ret = gn.init("ConfigServer", filepath);
+    
     while (ret != GravityReturnCodes::SUCCESS)
     {
         cerr << "Failed to initialize ConfigServer, retrying..." << endl;
-        ret = gn.init("ConfigServer");
-    }
-
-    if (argc > 1) 
-    {
-        arg_path = argv[1];
+        ret = gn.init("ConfigServer", filepath);
     }
 
     gn.registerService("ConfigService", GravityTransportTypes::TCP, server);

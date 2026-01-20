@@ -54,6 +54,7 @@ enum ChangeType
 class ServiceDirectory : GravityServiceProvider
 {
 private:
+    static const char* ComponentName;
     // domain name for this service directory
     std::string domain;
 
@@ -102,7 +103,7 @@ private:
 
 public:
     virtual ~ServiceDirectory();
-    void start();
+    void start(std::string configDir = "");
     std::shared_ptr<GravityDataProduct> request(const GravityDataProduct& dataProduct);
     std::shared_ptr<GravityDataProduct> request(const std::string serviceID, const GravityDataProduct& dataProduct);
 

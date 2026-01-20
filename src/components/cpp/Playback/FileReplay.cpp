@@ -33,7 +33,8 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    gravity::FileReplay replay;
+    std::string configDir = argc > 1 ? argv[1] : "";
+    gravity::FileReplay replay(configDir);
     replay.waitForExit();
 }
 
@@ -42,10 +43,18 @@ namespace gravity
 
 const char* FileReplay::ComponentName = "FileReplay";
 
-FileReplay::FileReplay()
+FileReplay::FileReplay(std::string configDir)
 {
     // Initialize Gravity Node
-    gravityNode.init(FileReplay::ComponentName);
+    if (configDir.empty())
+    {
+        gravityNode.init(FileReplay::ComponentName);
+    }
+    else
+    {
+        gravityNode.init(FileReplay::ComponentName, configDir);
+    }
+    
 
     // Get Gravity logger
     logger = gravityNode.getGravityLogger();

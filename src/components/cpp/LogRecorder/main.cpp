@@ -20,11 +20,18 @@
 #include <GravityNode.h>
 #include "GravityLogRecorder.h"
 
-int main()
+int main(int argc, const char** argv)
 {
     using namespace gravity;
     GravityNode gn;
-    gn.init("GravityLogRecorder");
+    if (argc > 1) 
+    {
+        gn.init("GravityLogRecorder", std::string(argv[1]));
+    }
+    else 
+    {
+        gn.init("GravityLogRecorder");
+    }
 
     LogRecorder lr(&gn, "MyBase");
 

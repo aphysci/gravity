@@ -60,10 +60,17 @@ struct RegistrationData
     gravity::GravityServiceProvider* provider;
 };
 
-int main(void)
+int main(int argc, const char** argv)
 {
+    
     gravity::ServiceDirectory serviceDirectory;
-    serviceDirectory.start();
+    if (argc > 1) {
+        serviceDirectory.start(argv[1]); 
+    } else {
+        serviceDirectory.start();
+    }
+    
+    
 }
 
 static void* registration(void* regData)
@@ -158,10 +165,11 @@ static int parseDomainCSV(string& csv)
 
 namespace gravity
 {
+const char* ServiceDirectory::ComponentName = "ServiceDirectory";
 
 ServiceDirectory::~ServiceDirectory() {}
 
-void ServiceDirectory::start()
+void ServiceDirectory::start(std::string configDir)
 {
     //Declare threads to be spawned
     std::thread udpBroadcasterThread;
@@ -179,7 +187,13 @@ void ServiceDirectory::start()
     }
 
     registeredPublishersReady = registeredPublishersProcessed = false;
-    gn.init("ServiceDirectory");
+    if (configDir.empty())
+    {
+        gn.init(ServiceDirectory::ComponentName);
+    }
+    else {
+        gn.init(ServiceDirectory::ComponentName, configDir);
+    }
 
     // Get Gravity logger
     logger = gn.getGravityLogger();

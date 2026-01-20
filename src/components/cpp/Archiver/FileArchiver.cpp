@@ -31,7 +31,7 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    gravity::FileArchiver archiver;
+    gravity::FileArchiver archiver(argc > 1 ? argv[1] : "");
     archiver.waitForExit();
 }
 
@@ -40,11 +40,18 @@ namespace gravity
 
 const char* FileArchiver::ComponentName = "FileArchiver";
 
-FileArchiver::FileArchiver()
+FileArchiver::FileArchiver(std::string configDir)
 {
     // Initialize Gravity Node
-    gravityNode.init(FileArchiver::ComponentName);
-
+    if (configDir.empty()) 
+    {
+        gravityNode.init(FileArchiver::ComponentName);
+    }
+    else 
+    {
+        gravityNode.init(FileArchiver::ComponentName, configDir);
+    }
+    
     // Get Gravity logger
     logger = gravityNode.getGravityLogger();
     if (!logger)
