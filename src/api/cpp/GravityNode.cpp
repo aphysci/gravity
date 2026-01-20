@@ -674,6 +674,11 @@ GravityReturnCode GravityNode::init(std::string componentID, std::string config_
 
     // we always parse the default config file first (Gravity.ini)
     parser->parseConfigFile("Gravity.ini");
+    std::string config_file_name = componentID + ".ini";
+    if (gravity::IsValidFilename(config_file_name))
+    {
+        parser->parseConfigFile(config_file_name.c_str());
+    }
 
     // empty componentID: discover from config file
     if (componentID == "")
