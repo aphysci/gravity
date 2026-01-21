@@ -1001,7 +1001,6 @@ GravityReturnCode GravityNode::init(std::string componentID, std::string configF
 
             // Auto start heartbeats if specified in INI
             double heartbeatPeriodSecs = getFloatParam("GravityHeartbeatPeriodSecs", -1);
-            std::cout << "heartbeat period = " << heartbeatPeriodSecs << endl;
             if (heartbeatPeriodSecs > 0)
             {
                 logger->debug("Starting heartbeats ({} secs)", heartbeatPeriodSecs);
