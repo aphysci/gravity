@@ -163,7 +163,14 @@ int main(int argc, const char** argv)
 {
     Relay relay;
     if (argc > 1) 
-    {
+    {   
+        std::string configFilepath = std::string(argv[1]);
+
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+            exit(relay.run());
+        }
         exit(relay.run(std::string(argv[1])));
     }
     else 

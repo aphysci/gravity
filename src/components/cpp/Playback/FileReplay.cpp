@@ -33,9 +33,19 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    std::string configDir = argc > 1 ? argv[1] : "";
-    gravity::FileReplay replay(configDir);
-    replay.waitForExit();
+    std::string configFilepath = argc > 1 ? argv[1] : "";
+    if (!configFilepath.empty() && configFilepath.substr(configFilepath.size() - 4) != ".ini")
+    {
+        std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+        gravity::FileReplay replay;
+        replay.waitForExit();
+    }
+    else
+    {
+        gravity::FileReplay replay(configFilepath);
+        replay.waitForExit();
+    }
+    
 }
 
 namespace gravity

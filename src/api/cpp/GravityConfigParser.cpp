@@ -37,12 +37,14 @@ int GravityConfigParser::CONFIG_REQUEST_TIMEOUT = 4000;
 
 bool GravityConfigParser::hasKey(std::string key) { return key_value_map.count(StringCopyToLowerCase(key)) > 0; }
 
-void GravityConfigParser::setDirectory(std::string dir) { config_dir = dir; }
+// may be useless...
+void GravityConfigParser::setDirectory(std::string dir) { config_dir = dir; } 
 
 void GravityConfigParser::setComponentID(std::string componentID) { this->componentID = componentID; }
 
 GravityConfigParser::GravityConfigParser(std::string componentID) { this->componentID = componentID; }
 
+// filename includes full file path
 void GravityConfigParser::parseConfigFile(std::string config_filename)
 {
     std::vector<const char *> sections;
@@ -51,14 +53,7 @@ void GravityConfigParser::parseConfigFile(std::string config_filename)
     sections.push_back("general");
     sections.push_back(NULL);
 
-    std::string path = config_dir;
-    if (path.rfind('/') != std::string::npos)
-    {
-        path += "/";
-    }
-    path += config_filename;
-
-    KeyValueConfigParser parser(path.c_str(), sections);
+    KeyValueConfigParser parser(config_filename.c_str(), sections);
 
     std::vector<std::string> keys = parser.GetKeys();
 

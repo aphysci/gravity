@@ -65,7 +65,14 @@ int main(int argc, const char** argv)
     
     gravity::ServiceDirectory serviceDirectory;
     if (argc > 1) {
-        serviceDirectory.start(argv[1]); 
+        std::string configFilepath = std::string(argv[1]);
+
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+            serviceDirectory.start();
+        }
+        serviceDirectory.start(configFilepath); 
     } else {
         serviceDirectory.start();
     }

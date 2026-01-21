@@ -75,22 +75,11 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 
     sections.push_back(NULL);
 
-    std::string config_dir = "";
-    auto * env_dir = getenv("GRAVITY_CONFIG_DIR");
+    std::string config_dir = "config_file.ini";
     if (!arg_path.empty()) {
         config_dir = arg_path;
-    }
-    else if (env_dir != nullptr && std::string(env_dir).length() > 0)
-    {
-        config_dir = std::string(env_dir);
-    }
-
-    if (config_dir.rfind('/') != std::string::npos)
-    {
-        config_dir += "/";
-    }
-    config_dir += "config_file.ini";
-
+    } 
+    
     KeyValueConfigParser parser(config_dir.c_str(), sections);
 
     keys = parser.GetKeys();
@@ -103,7 +92,7 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 
     if (!key_value_map.size())
     {
-        cout << "Critical Error: Could not open config file: config_file.ini" << endl;
+        cout << "Critical Error: Could not open config file: " << config_dir << endl;
         return std::shared_ptr<GravityDataProduct>();
     }
 
@@ -126,22 +115,46 @@ std::shared_ptr<GravityDataProduct> ConfigServer::request(const std::string serv
 int main(int argc, const char** argv)
 {
     ConfigServer server;
-    const char * filepath = "";
+    GravityNode gn;
     if (argc > 1)
     {
-        filepath = argv[1];
-        arg_path = std::string(argv[1]);
-    }
-    
-    GravityNode gn;
-    GravityReturnCode ret = gn.init("ConfigServer", filepath);
-    
-    while (ret != GravityReturnCodes::SUCCESS)
-    {
-        cerr << "Failed to initialize ConfigServer, retrying..." << endl;
-        ret = gn.init("ConfigServer", filepath);
-    }
+        std::string configFilepath = std::string(argv[1]);
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
 
+            GravityReturnCode ret = gn.init("ConfigServer");
+            while (ret != GravityReturnCodes::SUCCESS)
+            {
+                cerr << "Failed to initialize ConfigServer, retrying..." << endl;
+                ret = gn.init("ConfigServer");
+            }
+        }
+        else 
+        {
+            arg_path = std::string(argv[1]);
+            GravityReturnCode ret = gn.init("ConfigServer", configFilepath);
+    
+            while (ret != GravityReturnCodes::SUCCESS)
+            {
+            cerr << "Failed to initialize ConfigServer, retrying..." << endl;
+            ret = gn.init("ConfigServer", configFilepath);
+            }
+        }
+        
+    }
+    else 
+    {
+        GravityReturnCode ret = gn.init("ConfigServer");
+    
+        while (ret != GravityReturnCodes::SUCCESS)
+        {   
+            cerr << "Failed to initialize ConfigServer, retrying..." << endl;
+            ret = gn.init("ConfigServer");
+        }
+    }
+    
+    
     gn.registerService("ConfigService", GravityTransportTypes::TCP, server);
 
     gn.waitForExit();

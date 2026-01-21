@@ -654,31 +654,28 @@ void GravityNode::configSpdLoggers()
     }
 }
 
-GravityReturnCode GravityNode::init(std::string componentID, std::string config_dir)
+GravityReturnCode GravityNode::init(std::string componentID, std::string configFilepath)
 {
     static const std::string fallback_component_id = "GravityNode";
     parser = std::unique_ptr<GravityConfigParser>(new GravityConfigParser(componentID));
 
-    auto* config_dir_env = getenv("GRAVITY_CONFIG_DIR");
-
-    if (!config_dir.empty()) // file path is not the default, somebody set it
-    {
-        parser->setDirectory(config_dir.c_str());
-    }
-    else if (config_dir_env)
-    {
-        parser->setDirectory(config_dir_env);
-    }
-
     this->componentID = componentID;  // this may change further down if it's an empty string
 
     // we always parse the default config file first (Gravity.ini)
-    parser->parseConfigFile("Gravity.ini");
-    std::string config_file_name = componentID + ".ini";
-    if (gravity::IsValidFilename(config_file_name))
+    if (configFilepath.empty()) // default configurations
     {
+        parser->parseConfigFile("Gravity.ini");
+        std::string config_file_name = componentID + ".ini";
+        if (gravity::IsValidFilename(config_file_name))
+        {
         parser->parseConfigFile(config_file_name.c_str());
+        }
     }
+    else // user specified a specific file to parse
+    {
+        parser->parseConfigFile(configFilepath);
+    }
+    
 
     // empty componentID: discover from config file
     if (componentID == "")
@@ -1004,6 +1001,7 @@ GravityReturnCode GravityNode::init(std::string componentID, std::string config_
 
             // Auto start heartbeats if specified in INI
             double heartbeatPeriodSecs = getFloatParam("GravityHeartbeatPeriodSecs", -1);
+            std::cout << "heartbeat period = " << heartbeatPeriodSecs << endl;
             if (heartbeatPeriodSecs > 0)
             {
                 logger->debug("Starting heartbeats ({} secs)", heartbeatPeriodSecs);

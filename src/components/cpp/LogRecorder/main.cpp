@@ -26,7 +26,17 @@ int main(int argc, const char** argv)
     GravityNode gn;
     if (argc > 1) 
     {
-        gn.init("GravityLogRecorder", std::string(argv[1]));
+        std::string configFilepath = std::string(argv[1]);
+
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+            gn.init("GravityLogRecorder");
+        }
+        else 
+        {
+            gn.init("GravityLogRecorder", std::string(argv[1]));
+        }
     }
     else 
     {
