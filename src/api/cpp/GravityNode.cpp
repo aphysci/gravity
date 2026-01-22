@@ -1646,19 +1646,31 @@ GravityReturnCode GravityNode::ServiceDirectoryDataProductLookup(std::string dat
 }
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber){
-	subscriptionManagerSWL.lock.Lock();
+	if (serviceDirectory_ReservedDataProductIDs.count(dataproductID) > 0) 
+    {
+        return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
+    }
+    subscriptionManagerSWL.lock.Lock();
 	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, "", "", defaultReceiveLastSentDataproduct);
     subscriptionManagerSWL.lock.Unlock();
 	return ret;
 }
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter){
-	subscriptionManagerSWL.lock.Lock();
+	if (serviceDirectory_ReservedDataProductIDs.count(DataproductID) > 0) 
+    {
+        return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
+    }
+    subscriptionManagerSWL.lock.Lock();
 	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, "", defaultReceiveLastSentDataproduct);
     subscriptionManagerSWL.lock.Unlock();
 	return ret;
 }
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain){
-	subscriptionManagerSWL.lock.Lock();
+	if (serviceDirectory_ReservedDataProductIDs.count(DataproductID) > 0) 
+    {
+        return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
+    }
+    subscriptionManagerSWL.lock.Lock();
 	GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain, defaultReceiveLastSentDataproduct);
     subscriptionManagerSWL.lock.Unlock();
 	return ret;
@@ -1666,6 +1678,10 @@ GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubs
 
 GravityReturnCode GravityNode::subscribe(string dataProductID, const GravitySubscriber& subscriber, string filter, string domain, bool receiveLastCachedValue)
 {
+    if (serviceDirectory_ReservedDataProductIDs.count(DataproductID) > 0) 
+    {
+        return GravityReturnCodes::RESERVED_DATA_PRODUCT_ID;
+    }
     subscriptionManagerSWL.lock.Lock();
     GravityReturnCode ret = subscribeInternal(dataProductID, subscriber, filter, domain, receiveLastCachedValue);
     subscriptionManagerSWL.lock.Unlock();
