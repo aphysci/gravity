@@ -133,11 +133,9 @@ void ServiceDirectoryUDPBroadcaster::start()
                 SpdLog::critical("Broadcast: sendto() Error");
                 break;
             }
-#ifdef _WIN32
-            Sleep(broadcastRate * 1000);
-#else
-            usleep(broadcastRate * 1000000);  //Maybe replace this guy with clock_nanosleep???
-#endif
+
+            gravity::sleep(broadcastRate * 1000);
+
         }
     }
 

@@ -35,9 +35,9 @@ struct timespec
 #endif
 #else
 #include <stdint.h>
-#include <unistd.h>
 #endif
-
+#include <thread>
+#include <chrono>
 namespace gravity
 {
 
@@ -135,104 +135,24 @@ bool IsValidFilename(const std::string filename)
     return true;
 }
 
-//Replace the clock_gettime for Windows.
-#ifdef WIN32
-//From http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
-#include <Windows.h>
-LARGE_INTEGER
-getFILETIMEoffset()
-{
-    SYSTEMTIME s;
-    FILETIME f;
-    LARGE_INTEGER t;
-
-    s.wYear = 1970;
-    s.wMonth = 1;
-    s.wDay = 1;
-    s.wHour = 0;
-    s.wMinute = 0;
-    s.wSecond = 0;
-    s.wMilliseconds = 0;
-    SystemTimeToFileTime(&s, &f);
-    t.QuadPart = f.dwHighDateTime;
-    t.QuadPart <<= 32;
-    t.QuadPart |= f.dwLowDateTime;
-    return (t);
-}
-
-//T. Ludwinski: changed timeval to timespec and microseconds to nanoseconds
-int clock_gettime(int X, struct timespec* tv)
-{
-    LARGE_INTEGER t;
-    FILETIME f;
-    double nanoseconds;
-    static LARGE_INTEGER offset;
-    static double frequencyToNanoseconds;
-    static int initialized = 0;
-    static BOOL usePerformanceCounter = 0;
-    static LARGE_INTEGER startTime;
-
-    if (!initialized)
-    {
-        LARGE_INTEGER performanceFrequency;
-        initialized = 1;
-        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
-        if (usePerformanceCounter)
-        {
-            QueryPerformanceCounter(&offset);
-            frequencyToNanoseconds = (double)performanceFrequency.QuadPart / 1000000000.;
-        }
-        else
-        {
-            offset = getFILETIMEoffset();
-            frequencyToNanoseconds = .01;
-        }
-
-        GetSystemTimeAsFileTime(&f);
-        startTime.QuadPart = f.dwHighDateTime;
-        startTime.QuadPart <<= 32;
-        startTime.QuadPart |= f.dwLowDateTime;
-
-        startTime.QuadPart -= 116444736000000000ULL;    //Convert from Window time to UTC (100ns)
-        startTime.QuadPart = startTime.QuadPart * 100;  //To nanoseconds
-    }
-    if (usePerformanceCounter)
-        QueryPerformanceCounter(&t);
-    else
-    {
-        GetSystemTimeAsFileTime(&f);
-        t.QuadPart = f.dwHighDateTime;
-        t.QuadPart <<= 32;
-        t.QuadPart |= f.dwLowDateTime;
-    }
-
-    t.QuadPart -= offset.QuadPart;
-    nanoseconds = (double)t.QuadPart / frequencyToNanoseconds;
-    nanoseconds += startTime.QuadPart;
-    t.QuadPart = (LONGLONG)nanoseconds;
-    tv->tv_sec = t.QuadPart / 1000000000LL;
-    tv->tv_nsec = t.QuadPart % 1000000000LL;
-    return (0);
-}
-#endif
 
 uint64_t getCurrentTime()
 {
-    timespec ts;
-    clock_gettime(0, &ts);
-    return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;  //in microseconds
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+    return (uint64_t) microseconds;
+    // timespec ts;
+    // clock_gettime(0, &ts);
+    // return (uint64_t)ts.tv_sec * 1000000LL + (uint64_t)ts.tv_nsec / 1000LL;  //in microseconds
 }
 
 unsigned int sleep(int milliseconds)
 {
     // If sleep time < 0, set it to 0
     milliseconds = std::max(0, milliseconds);
-#ifdef WIN32
-    Sleep(milliseconds);
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));  //Maybe replace this guy with clock_nanosleep???
     return 0;
-#else
-    return usleep(milliseconds * 1000);  //Maybe replace this guy with clock_nanosleep???
-#endif
 }
 
 }  // namespace gravity

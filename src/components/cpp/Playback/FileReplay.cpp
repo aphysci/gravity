@@ -25,9 +25,6 @@
 #include <algorithm>
 #include <string>
 #include <thread>
-#ifndef WIN32
-#include <unistd.h>
-#endif
 
 using namespace std;
 
@@ -110,11 +107,9 @@ void FileReplay::processArchive()
             if (elapsedTime < timeToWait)
             {
                 logger->debug("waiting {}", timeToWait - elapsedTime);
-#ifdef WIN32
+
                 gravity::sleep((timeToWait - elapsedTime) / 1000);
-#else
-                usleep(timeToWait - elapsedTime);
-#endif
+
             }
         }
 

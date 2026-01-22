@@ -42,7 +42,6 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #endif
 #include "spdlog/fmt/fmt.h"
 #include "protobuf/ServiceDirectoryBroadcastPB.pb.h"

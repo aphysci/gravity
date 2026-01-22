@@ -22,9 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <mutex>
-#ifndef WIN32
-#include <unistd.h>
-#endif
+
 
 using namespace std;
 
@@ -72,11 +70,8 @@ void FileReader::processArchive()
 
         while (condition)
         {
-#ifdef WIN32
+
             gravity::sleep(10);
-#else
-            usleep(10000);
-#endif
             {
                 std::lock_guard<std::mutex> guard(mtx);
                 condition = archiveFile && dataProducts.size() > 100;
