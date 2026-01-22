@@ -23,7 +23,6 @@
 #include <iostream>
 #include <mutex>
 
-
 using namespace std;
 
 namespace
@@ -70,8 +69,13 @@ void FileReader::processArchive()
 
         while (condition)
         {
+<<<<<<< HEAD
 
             gravity::sleep(10);
+=======
+            gravity::sleep(10);
+
+>>>>>>> 4deef039fa9df77529dbc2edb9ca68777335e1db
             {
                 std::lock_guard<std::mutex> guard(mtx);
                 condition = archiveFile && dataProducts.size() > 100;

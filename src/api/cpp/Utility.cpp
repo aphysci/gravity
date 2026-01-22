@@ -21,23 +21,9 @@
 
 #include "Utility.h"
 
-#ifdef WIN32
-#define NOMINMAX
-#include <Windows.h>
-#include <time.h>
-#include <algorithm>
-#if _MSC_VER < 1910 && !defined(_CRT_NO_TIME_T)
-struct timespec
-{
-    time_t tv_sec;   // Seconds - >= 0
-    time_t tv_nsec;  // Nanoseconds - [0, 999999999]
-};
-#endif
-#else
-#include <stdint.h>
-#endif
-#include <thread>
 #include <chrono>
+#include <thread>
+
 namespace gravity
 {
 
@@ -151,7 +137,7 @@ unsigned int sleep(int milliseconds)
 {
     // If sleep time < 0, set it to 0
     milliseconds = std::max(0, milliseconds);
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));  //Maybe replace this guy with clock_nanosleep???
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     return 0;
 }
 

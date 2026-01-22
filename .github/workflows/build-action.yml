@@ -3,6 +3,7 @@ on:
     push:
       branches:
         - master
+        - 96-replace-unistd-with-stdchrono
       tags:
         - "v*.*.*"
     pull_request:
