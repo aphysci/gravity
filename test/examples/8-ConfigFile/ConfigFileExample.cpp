@@ -33,7 +33,7 @@ int main()
     GravityReturnCode ret = gn.init("ConfigFileExample");
     while (ret != GravityReturnCodes::SUCCESS)
     {
-        spdlog::warn("Could not initialize GravityNode, return code was {} retrying...", ret);
+        spdlog::warn("Could not initialize GravityNode, return code was {} retrying...", static_cast<int>(ret));
         ret = gn.init("ConfigFileExample");
     }
 
