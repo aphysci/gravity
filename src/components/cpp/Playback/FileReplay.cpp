@@ -33,8 +33,19 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    gravity::FileReplay replay;
-    replay.waitForExit();
+    std::string configFilepath = argc > 1 ? argv[1] : "";
+    if (!configFilepath.empty() && configFilepath.substr(configFilepath.size() - 4) != ".ini")
+    {
+        std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+        gravity::FileReplay replay;
+        replay.waitForExit();
+    }
+    else
+    {
+        gravity::FileReplay replay(configFilepath);
+        replay.waitForExit();
+    }
+    
 }
 
 namespace gravity
@@ -42,10 +53,18 @@ namespace gravity
 
 const char* FileReplay::ComponentName = "FileReplay";
 
-FileReplay::FileReplay()
+FileReplay::FileReplay(std::string configDir)
 {
     // Initialize Gravity Node
-    gravityNode.init(FileReplay::ComponentName);
+    if (configDir.empty())
+    {
+        gravityNode.init(FileReplay::ComponentName);
+    }
+    else
+    {
+        gravityNode.init(FileReplay::ComponentName, configDir);
+    }
+    
 
     // Get Gravity logger
     logger = gravityNode.getGravityLogger();

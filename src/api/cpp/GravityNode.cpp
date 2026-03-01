@@ -431,8 +431,6 @@ GravityNode::GravityNode()
     logInitialized = false;
     listenerEnabled = false;
     heartbeatStarted = false;
-
-    parser = NULL;
 }
 
 GravityNode::GravityNode(std::string componentID)
@@ -453,8 +451,6 @@ GravityNode::GravityNode(std::string componentID)
     initialized = false;
     logInitialized = false;
     heartbeatStarted = false;
-
-    parser = NULL;
 
     init(componentID);
 }
@@ -550,11 +546,6 @@ GravityNode::~GravityNode()
     if (context)
     {
         zmq_term(context);
-    }
-
-    if (parser)
-    {
-        delete parser;
     }
 
     //Do not destroy object until sub manager thread is joined
@@ -663,48 +654,57 @@ void GravityNode::configSpdLoggers()
     }
 }
 
-GravityReturnCode GravityNode::init()
+GravityReturnCode GravityNode::init(std::string componentID, std::string configFilepath)
 {
-    ////////////////////////////////////////////////////////
-    //get gravity configuration.
-    parser = new GravityConfigParser("");
+    static const std::string fallback_component_id = "GravityNode";
+    parser = std::unique_ptr<GravityConfigParser>(new GravityConfigParser(componentID));
 
-    parser->ParseConfigFile("Gravity.ini");
+    this->componentID = componentID;  // this may change further down if it's an empty string
 
-    std::string id = parser->getString("GravityComponentID", "");
-
-    if (id != "")
+    // we always parse the default config file first (Gravity.ini)
+    if (configFilepath.empty()) // default configurations
     {
-        return init(id);
-    }
-    else
-    {
-        componentID = "GravityNode";
-        //Setup Logging if enabled.
-        if (!logInitialized)
+        parser->parseConfigFile("Gravity.ini");
+        std::string config_file_name = componentID + ".ini";
+        if (gravity::IsValidFilename(config_file_name))
         {
-            Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "none").c_str());
-            if (local_log_level != Log::NONE)
-                Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-                                          local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-
-            Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "none").c_str());
-            if (console_log_level != Log::NONE) Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-
-            //log an error indicating the componentID was missing
-            logger->error(
-                "Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='GravityNode'");
-
-            logInitialized = true;
+        parser->parseConfigFile(config_file_name.c_str());
         }
-        return init(componentID);
     }
-}
+    else // user specified a specific file to parse
+    {
+        parser->parseConfigFile(configFilepath);
+    }
+    
 
-GravityReturnCode GravityNode::init(std::string componentID)
-{
+    // empty componentID: discover from config file
+    if (componentID == "")
+    {
+        std::string id = parser->getString("GravityComponentID", "");
+        if (id != "")
+        {
+            // we found a non-empty component ID
+            this->componentID = id;
+        }
+        else
+        {
+            this->componentID = fallback_component_id;
+        }
+        // update the parser's componentID
+        parser->setComponentID(this->componentID);
+    }
+
+    parser->parseComponentConfigFile();
+
+    configSpdLoggers();
+
+    if (this->componentID == fallback_component_id)
+    {
+        logger->error("Field 'GravityComponentID' missing from Gravity.ini, using GravityComponentID='{}'",
+                      fallback_component_id);
+    }
+
     GravityReturnCode ret = GravityReturnCodes::SUCCESS;
-    this->componentID = componentID;
 
     std::string serviceDirectoryUrl = "";
     bool domainTimeout = false;
@@ -717,34 +717,6 @@ GravityReturnCode GravityNode::init(std::string componentID)
     // Setup zmq context
     if (!initialized)
     {
-        ////////////////////////////////////////////////////////
-        //Now that Gravity is set up, get gravity configuration.
-        parser = new GravityConfigParser(componentID);
-
-        parser->ParseConfigFile("Gravity.ini");
-        std::string config_file_name = componentID + ".ini";
-        if (gravity::IsValidFilename(config_file_name))
-        {
-            parser->ParseConfigFile(config_file_name.c_str());
-        }
-
-        // Setup Logging as soon as config parser is available.
-        if (!logInitialized)
-        {
-            Log::LogLevel local_log_level = Log::LogStringToLevel(getStringParam("LocalLogLevel", "none").c_str());
-            if (local_log_level != Log::NONE)
-                Log::initAndAddFileLogger(getStringParam("LogDirectory", "").c_str(), componentID.c_str(),
-                                          local_log_level, getBoolParam("CloseLogFileAfterWrite", false));
-
-            Log::LogLevel console_log_level = Log::LogStringToLevel(getStringParam("ConsoleLogLevel", "none").c_str());
-            if (console_log_level != Log::NONE) Log::initAndAddConsoleLogger(componentID.c_str(), console_log_level);
-
-            // Configure spdlog loggers
-            configSpdLoggers();
-
-            logInitialized = true;
-        }
-
         context = zmq_init(1);
         if (!context)
         {
@@ -1020,10 +992,9 @@ GravityReturnCode GravityNode::init(std::string componentID)
 
             if (componentID != "ConfigServer" && getBoolParam("NoConfigServer", false) != true)
             {
-                parser->ParseConfigService(
+                parser->parseConfigService(
                     *this);  //Although this is done last, this has the least priority.  We just need to do it last so we know where the service directory is located.
             }
-            //parser->ParseCmdLine
 
             configureServiceManager();
             configureSubscriptionManager();

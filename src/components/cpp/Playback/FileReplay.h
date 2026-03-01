@@ -47,7 +47,7 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 
 public:
-    FileReplay();
+    FileReplay(std::string configDir = "");
     virtual ~FileReplay();
     void waitForExit();
 };

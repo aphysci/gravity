@@ -20,11 +20,28 @@
 #include <GravityNode.h>
 #include "GravityLogRecorder.h"
 
-int main()
+int main(int argc, const char** argv)
 {
     using namespace gravity;
     GravityNode gn;
-    gn.init("GravityLogRecorder");
+    if (argc > 1) 
+    {
+        std::string configFilepath = std::string(argv[1]);
+
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+            gn.init("GravityLogRecorder");
+        }
+        else 
+        {
+            gn.init("GravityLogRecorder", std::string(argv[1]));
+        }
+    }
+    else 
+    {
+        gn.init("GravityLogRecorder");
+    }
 
     LogRecorder lr(&gn, "MyBase");
 

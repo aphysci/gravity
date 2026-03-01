@@ -31,8 +31,29 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    gravity::FileArchiver archiver;
-    archiver.waitForExit();
+    
+    if (argc > 1) 
+    {
+        std::string configFilepath = std::string(argv[1]);
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+
+            gravity::FileArchiver archiver;
+            archiver.waitForExit();
+        }
+        else 
+        {
+            gravity::FileArchiver archiver(configFilepath);
+            archiver.waitForExit();
+        }
+    }
+    else
+    {
+        gravity::FileArchiver archiver;
+        archiver.waitForExit();
+    }
+    
 }
 
 namespace gravity
@@ -40,11 +61,18 @@ namespace gravity
 
 const char* FileArchiver::ComponentName = "FileArchiver";
 
-FileArchiver::FileArchiver()
+FileArchiver::FileArchiver(std::string configDir)
 {
     // Initialize Gravity Node
-    gravityNode.init(FileArchiver::ComponentName);
-
+    if (configDir.empty()) 
+    {
+        gravityNode.init(FileArchiver::ComponentName);
+    }
+    else 
+    {
+        gravityNode.init(FileArchiver::ComponentName, configDir);
+    }
+    
     // Get Gravity logger
     logger = gravityNode.getGravityLogger();
     if (!logger)

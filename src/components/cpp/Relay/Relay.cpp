@@ -69,13 +69,13 @@ public:
     Relay(){};
     virtual ~Relay(){};
 
-    int run();
+    int run(std::string configDir = "");
     void subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProduct> >& dataProducts);
 };
 
-int Relay::run()
+int Relay::run(std::string configDir)
 {
-    GravityReturnCode ret = gravityNode.init(COMPONENT_ID);
+    GravityReturnCode ret = gravityNode.init(COMPONENT_ID, configDir);
     while (ret != GravityReturnCodes::SUCCESS)
     {
         cerr << "Failed to initialize " << COMPONENT_ID << ", retrying..." << endl;
@@ -162,8 +162,23 @@ void Relay::subscriptionFilled(const std::vector<std::shared_ptr<GravityDataProd
 int main(int argc, const char** argv)
 {
     Relay relay;
+    if (argc > 1) 
+    {   
+        std::string configFilepath = std::string(argv[1]);
+
+        if (configFilepath.substr(configFilepath.size() - 4) != ".ini")
+        {
+            std::cerr << "Usage: invalid filename. Must be .ini. Using default config path.\n";
+            exit(relay.run());
+        }
+        exit(relay.run(std::string(argv[1])));
+    }
+    else 
+    {
+        exit(relay.run());
+    }
 
     // Need to explicitly call exit here since we're capturing SIGINT and SIGTERM.  Otherwise, if the SD
     // goes away while we're trying to unregister, this could hang indefinitely.
-    exit(relay.run());
+    
 }
